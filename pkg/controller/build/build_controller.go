@@ -73,7 +73,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		Named("build-controller").
 		// Watch for changes to primary resource Build
 		For(&v1.Build{}, builder.WithPredicates(
-			platform.FilteringFuncs{
+			platform.FilteringFuncs[ctrl.Object]{
 				UpdateFunc: func(e event.UpdateEvent) bool {
 					oldBuild, ok := e.ObjectOld.(*v1.Build)
 					if !ok {

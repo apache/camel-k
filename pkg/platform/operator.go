@@ -227,21 +227,21 @@ func IsOperatorHandlerConsideringLock(ctx context.Context, c ctrl.Reader, namesp
 // FilteringFuncs do preliminary checks to determine if certain events should be handled by the controller
 // based on labels on the resources (e.g. camel.apache.org/operator.id) and the operator configuration,
 // before handing the computation over to the user code.
-type FilteringFuncs struct {
+type FilteringFuncs[T ctrl.Object] struct {
 	// Create returns true if the Create event should be processed
-	CreateFunc func(event.CreateEvent) bool
+	CreateFunc func(event.TypedCreateEvent[T]) bool
 
 	// Delete returns true if the Delete event should be processed
-	DeleteFunc func(event.DeleteEvent) bool
+	DeleteFunc func(event.TypedDeleteEvent[T]) bool
 
 	// Update returns true if the Update event should be processed
-	UpdateFunc func(event.UpdateEvent) bool
+	UpdateFunc func(event.TypedUpdateEvent[T]) bool
 
 	// Generic returns true if the Generic event should be processed
-	GenericFunc func(event.GenericEvent) bool
+	GenericFunc func(event.TypedGenericEvent[T]) bool
 }
 
-func (f FilteringFuncs) Create(e event.CreateEvent) bool {
+func (f FilteringFuncs[T]) Create(e event.TypedCreateEvent[T]) bool {
 	if !IsOperatorHandler(e.Object) {
 		return false
 	}
@@ -251,7 +251,7 @@ func (f FilteringFuncs) Create(e event.CreateEvent) bool {
 	return true
 }
 
-func (f FilteringFuncs) Delete(e event.DeleteEvent) bool {
+func (f FilteringFuncs[T]) Delete(e event.TypedDeleteEvent[T]) bool {
 	if !IsOperatorHandler(e.Object) {
 		return false
 	}
@@ -261,25 +261,21 @@ func (f FilteringFuncs) Delete(e event.DeleteEvent) bool {
 	return true
 }
 
-func (f FilteringFuncs) Update(e event.UpdateEvent) bool {
+func (f FilteringFuncs[T]) Update(e event.TypedUpdateEvent[T]) bool {
 	if !IsOperatorHandler(e.ObjectNew) {
 		return false
 	}
-	if e.ObjectOld != nil && e.ObjectNew != nil {
-		if camelv1.GetOperatorIDAnnotation(e.ObjectOld) != camelv1.GetOperatorIDAnnotation(e.ObjectNew) {
-			// Always force reconciliation when the object becomes managed by the current operator
-			return true
-		}
-
-		if camelv1.GetIntegrationProfileAnnotation(e.ObjectOld) != camelv1.GetIntegrationProfileAnnotation(e.ObjectNew) {
-			// Always force reconciliation when the object gets attached to a new integration profile
-			return true
-		}
-
-		if camelv1.GetIntegrationProfileNamespaceAnnotation(e.ObjectOld) != camelv1.GetIntegrationProfileNamespaceAnnotation(e.ObjectNew) {
-			// Always force reconciliation when the object gets attached to a new integration profile
-			return true
-		}
+	if camelv1.GetOperatorIDAnnotation(e.ObjectOld) != camelv1.GetOperatorIDAnnotation(e.ObjectNew) {
+		// Always force reconciliation when the object becomes managed by the current operator
+		return true
+	}
+	if camelv1.GetIntegrationProfileAnnotation(e.ObjectOld) != camelv1.GetIntegrationProfileAnnotation(e.ObjectNew) {
+		// Always force reconciliation when the object gets attached to a new integration profile
+		return true
+	}
+	if camelv1.GetIntegrationProfileNamespaceAnnotation(e.ObjectOld) != camelv1.GetIntegrationProfileNamespaceAnnotation(e.ObjectNew) {
+		// Always force reconciliation when the object gets attached to a new integration profile
+		return true
 	}
 	if f.UpdateFunc != nil {
 		return f.UpdateFunc(e)
@@ -287,7 +283,7 @@ func (f FilteringFuncs) Update(e event.UpdateEvent) bool {
 	return true
 }
 
-func (f FilteringFuncs) Generic(e event.GenericEvent) bool {
+func (f FilteringFuncs[T]) Generic(e event.TypedGenericEvent[T]) bool {
 	if !IsOperatorHandler(e.Object) {
 		return false
 	}
@@ -297,4 +293,4 @@ func (f FilteringFuncs) Generic(e event.GenericEvent) bool {
 	return true
 }
 
-var _ predicate.Predicate = FilteringFuncs{}
+var _ predicate.Predicate = FilteringFuncs[ctrl.Object]{}

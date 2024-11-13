@@ -315,7 +315,7 @@ func add(ctx context.Context, mgr manager.Manager, c client.Client, r reconcile.
 		Named("integration-controller").
 		// Watch for changes to primary resource Integration
 		For(&v1.Integration{}, builder.WithPredicates(
-			platform.FilteringFuncs{
+			platform.FilteringFuncs[ctrl.Object]{
 				UpdateFunc: func(e event.UpdateEvent) bool {
 					old, ok := e.ObjectOld.(*v1.Integration)
 					if !ok {

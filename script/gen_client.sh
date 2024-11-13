@@ -25,45 +25,37 @@ cd $location/../pkg/client/camel
 echo "Generating Go client code..."
 
 $(go env GOPATH)/bin/applyconfiguration-gen \
-	--input-dirs=github.com/apache/camel-k/v2/pkg/apis/camel/v1 \
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1" \
 	--go-header-file=../../../script/headers/default.txt \
-	--output-base=. \
-	--output-package=github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration
+	--output-dir=./applyconfiguration/ \
+	--output-pkg=github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration
 
 $(go env GOPATH)/bin/client-gen \
-	--input=camel/v1 \
+	--input camel/v1 \
 	--go-header-file=../../../script/headers/default.txt \
 	--clientset-name "versioned"  \
 	--input-base=github.com/apache/camel-k/v2/pkg/apis \
 	--apply-configuration-package=github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration \
-	--output-base=. \
-	--output-package=github.com/apache/camel-k/v2/pkg/client/camel/clientset
+	--output-dir=./clientset/ \
+	--output-pkg=github.com/apache/camel-k/v2/pkg/client/camel/clientset
 
 $(go env GOPATH)/bin/client-gen \
   --input strimzi/v1beta2 \
   --go-header-file=../../../script/headers/default.txt \
   --input-base=github.com/apache/camel-k/v2/pkg/apis/duck \
-  --output-base=. \
-  --output-package=github.com/apache/camel-k/v2/pkg/client/duck/strimzi/clientset
+  --output-dir=../clientset/ \
+  --output-pkg=github.com/apache/camel-k/v2/pkg/client/duck/strimzi/clientset
 
 $(go env GOPATH)/bin/lister-gen \
-	--input-dirs=github.com/apache/camel-k/v2/pkg/apis/camel/v1 \
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1" \
 	--go-header-file=../../../script/headers/default.txt \
-	--output-base=. \
-	--output-package=github.com/apache/camel-k/v2/pkg/client/camel/listers
+	--output-dir=./listers/ \
+	--output-pkg=github.com/apache/camel-k/v2/pkg/client/camel/listers
 
 $(go env GOPATH)/bin/informer-gen \
-    --versioned-clientset-package=github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned \
+    "github.com/apache/camel-k/v2/pkg/apis/camel/v1" \
+	--versioned-clientset-package=github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned \
 	--listers-package=github.com/apache/camel-k/v2/pkg/client/camel/listers \
-	--input-dirs=github.com/apache/camel-k/v2/pkg/apis/camel/v1 \
 	--go-header-file=../../../script/headers/default.txt \
-	--output-base=. \
-	--output-package=github.com/apache/camel-k/v2/pkg/client/camel/informers
-
-# hack to fix non go-module compliance
-rm -rf ./clientset
-rm -rf ./informers
-rm -rf ./listers
-cp -R ./github.com/apache/camel-k/v2/pkg/client/camel/* .
-cp -R ./github.com/apache/camel-k/v2/pkg/client/* ..
-rm -rf ./github.com
+	--output-dir=./informers/ \
+	--output-pkg=github.com/apache/camel-k/v2/pkg/client/camel/informers

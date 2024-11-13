@@ -28,20 +28,26 @@ VERSION ?= 2.6.0-SNAPSHOT
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
 LAST_RELEASED_VERSION ?= 2.5.0
 DEFAULT_RUNTIME_VERSION := 3.15.0
+# Kubernetes tooling
 CONTROLLER_GEN_VERSION := v0.15.0
-CODEGEN_VERSION := v0.29.7
+CODEGEN_VERSION := v0.30.6
 OPERATOR_SDK_VERSION := v1.30.0
 KUSTOMIZE_VERSION := v4.5.4
 OPM_VERSION := v1.24.0
-LINTER_VERSION ?= v1.61.0
-GOVULNCHECK_VERSION ?= latest
-
+# Golang tooling
 LINTER ?= $(LOCALBIN)/golangci-lint
 GOVULNCHECK ?= $(LOCALBIN)/govulncheck
 GOIMPORT ?= $(LOCALBIN)/goimports
+LINTER_VERSION ?= v1.61.0
+GOVULNCHECK_VERSION ?= latest
+LINT_GOGC ?= 20
+LINT_DEADLINE ?= 10m
+DEBUG_MODE ?= false
 
+# Operator building configuration
 BASE_IMAGE := eclipse-temurin:17
 LOCAL_REPOSITORY := /etc/maven/m2
+OPENSHIFT_REGISTRY := image-registry.openshift-image-registry.svc:5000
 IMAGE_NAME ?= docker.io/apache/camel-k
 # Test for arm64, fall back to amd64
 IMAGE_ARCH ?= $(if $(filter arm64 aarch64,$(shell uname -m)),arm64,amd64)
@@ -60,10 +66,6 @@ METADATA_IMAGE_NAME := $(CUSTOM_IMAGE)-metadata
 BUNDLE_IMAGE_NAME ?= $(CUSTOM_IMAGE)-bundle
 RELEASE_GIT_REMOTE := origin
 GIT_COMMIT := $(shell if [ -d .git ]; then git rev-list -1 HEAD; else echo "$(CUSTOM_VERSION)"; fi)
-LINT_GOGC ?= 20
-LINT_DEADLINE ?= 10m
-DEBUG_MODE ?= false
-OPENSHIFT_REGISTRY := image-registry.openshift-image-registry.svc:5000
 
 # olm bundle vars
 MANAGER := pkg/resources/config/manager
