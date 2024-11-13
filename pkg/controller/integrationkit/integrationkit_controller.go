@@ -19,7 +19,6 @@ package integrationkit
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -77,58 +76,49 @@ func add(_ context.Context, mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource IntegrationKit
-	err = c.Watch(source.Kind(mgr.GetCache(), &v1.IntegrationKit{}),
-		&handler.EnqueueRequestForObject{},
-		platform.FilteringFuncs{
-			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldIntegrationKit, ok := e.ObjectOld.(*v1.IntegrationKit)
-				if !ok {
-					return false
-				}
-				newIntegrationKit, ok := e.ObjectNew.(*v1.IntegrationKit)
-				if !ok {
-					return false
-				}
-				// Ignore updates to the integration kit status in which case metadata.Generation
-				// does not change, or except when the integration kit phase changes as it's used
-				// to transition from one phase to another
-				return oldIntegrationKit.Generation != newIntegrationKit.Generation ||
-					oldIntegrationKit.Status.Phase != newIntegrationKit.Status.Phase
+	err = c.Watch(
+		source.Kind(
+			mgr.GetCache(),
+			&v1.IntegrationKit{},
+			&handler.TypedEnqueueRequestForObject[*v1.IntegrationKit]{},
+			platform.FilteringFuncs[*v1.IntegrationKit]{
+				UpdateFunc: func(e event.TypedUpdateEvent[*v1.IntegrationKit]) bool {
+					// Ignore updates to the integration kit status in which case metadata.Generation
+					// does not change, or except when the integration kit phase changes as it's used
+					// to transition from one phase to another
+					return e.ObjectOld.Generation != e.ObjectNew.Generation ||
+						e.ObjectOld.Status.Phase != e.ObjectNew.Status.Phase
+				},
+				DeleteFunc: func(e event.TypedDeleteEvent[*v1.IntegrationKit]) bool {
+					// Evaluates to false if the object has been confirmed deleted
+					return !e.DeleteStateUnknown
+				},
 			},
-			DeleteFunc: func(e event.DeleteEvent) bool {
-				// Evaluates to false if the object has been confirmed deleted
-				return !e.DeleteStateUnknown
-			},
-		},
+		),
 	)
 	if err != nil {
 		return err
 	}
 
 	// Watch for changes to secondary resource Builds and requeue the owner IntegrationKit
-	err = c.Watch(source.Kind(mgr.GetCache(), &v1.Build{}),
-		handler.EnqueueRequestForOwner(
-			mgr.GetScheme(),
-			mgr.GetRESTMapper(),
-			&v1.IntegrationKit{},
-			handler.OnlyControllerOwner(),
-		),
-		platform.FilteringFuncs{
-			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldBuild, ok := e.ObjectOld.(*v1.Build)
-				if !ok {
-					return false
-				}
-				newBuild, ok := e.ObjectNew.(*v1.Build)
-				if !ok {
-					return false
-				}
-				// Ignore updates to the build CR except when the build phase changes
-				// as it's used to transition the integration kit from one phase
-				// to another during the image build
-				return oldBuild.Status.Phase != newBuild.Status.Phase
+	err = c.Watch(
+		source.Kind(mgr.GetCache(),
+			&v1.Build{},
+			handler.TypedEnqueueRequestForOwner[*v1.Build](
+				mgr.GetScheme(),
+				mgr.GetRESTMapper(),
+				&v1.IntegrationKit{},
+				handler.OnlyControllerOwner(),
+			),
+			platform.FilteringFuncs[*v1.Build]{
+				UpdateFunc: func(e event.TypedUpdateEvent[*v1.Build]) bool {
+					// Ignore updates to the build CR except when the build phase changes
+					// as it's used to transition the integration kit from one phase
+					// to another during the image build
+					return e.ObjectOld.Status.Phase != e.ObjectNew.Status.Phase
+				},
 			},
-		},
+		),
 	)
 	if err != nil {
 		return err
@@ -136,49 +126,43 @@ func add(_ context.Context, mgr manager.Manager, r reconcile.Reconciler) error {
 
 	// Watch for IntegrationPlatform phase transitioning to ready and enqueue
 	// requests for any integration kits that are in phase waiting for platform
-	err = c.Watch(source.Kind(mgr.GetCache(), &v1.IntegrationPlatform{}),
-		handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
-			var requests []reconcile.Request
-			p, ok := a.(*v1.IntegrationPlatform)
-			if !ok {
-				log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to list integration kits")
+	err = c.Watch(
+		source.Kind(
+			mgr.GetCache(),
+			&v1.IntegrationPlatform{},
+			handler.TypedEnqueueRequestsFromMapFunc(func(ctx context.Context, itp *v1.IntegrationPlatform) []reconcile.Request {
+				var requests []reconcile.Request
+				if itp.Status.Phase == v1.IntegrationPlatformPhaseReady {
+					list := &v1.IntegrationKitList{}
+					if err := mgr.GetClient().List(ctx, list, ctrl.InNamespace(itp.Namespace)); err != nil {
+						log.Error(err, "Failed to list integration kits")
+						return requests
+					}
+					for _, kit := range list.Items {
+						if v, ok := kit.Annotations[v1.PlatformSelectorAnnotation]; ok && v != itp.Name {
+							log.Infof("Integration kit %s is waiting for selected integration platform '%s' - skip it now", kit.Name, v)
+							continue
+						}
+						if v, ok := kit.Annotations[v1.OperatorIDAnnotation]; ok && v != itp.Name {
+							// kit waiting for another platform to become ready - skip here
+							log.Debugf("Integration kit %s is waiting for another integration platform '%s' - skip it now", kit.Name, v)
+							continue
+						}
+						if kit.Status.Phase == v1.IntegrationKitPhaseWaitingForPlatform {
+							log.Infof("Platform %s ready, wake-up integration kit: %s", itp.Name, kit.Name)
+							requests = append(requests, reconcile.Request{
+								NamespacedName: types.NamespacedName{
+									Namespace: kit.Namespace,
+									Name:      kit.Name,
+								},
+							})
+						}
+					}
+				}
+
 				return requests
-			}
-
-			if p.Status.Phase == v1.IntegrationPlatformPhaseReady {
-				list := &v1.IntegrationKitList{}
-
-				if err := mgr.GetClient().List(ctx, list, ctrl.InNamespace(p.Namespace)); err != nil {
-					log.Error(err, "Failed to list integration kits")
-					return requests
-				}
-
-				for _, kit := range list.Items {
-					if v, ok := kit.Annotations[v1.PlatformSelectorAnnotation]; ok && v != p.Name {
-						log.Infof("Integration kit %s is waiting for selected integration platform '%s' - skip it now", kit.Name, v)
-						continue
-					}
-
-					if v, ok := kit.Annotations[v1.OperatorIDAnnotation]; ok && v != p.Name {
-						// kit waiting for another platform to become ready - skip here
-						log.Debugf("Integration kit %s is waiting for another integration platform '%s' - skip it now", kit.Name, v)
-						continue
-					}
-
-					if kit.Status.Phase == v1.IntegrationKitPhaseWaitingForPlatform {
-						log.Infof("Platform %s ready, wake-up integration kit: %s", p.Name, kit.Name)
-						requests = append(requests, reconcile.Request{
-							NamespacedName: types.NamespacedName{
-								Namespace: kit.Namespace,
-								Name:      kit.Name,
-							},
-						})
-					}
-				}
-			}
-
-			return requests
-		}),
+			}),
+		),
 	)
 	if err != nil {
 		return err

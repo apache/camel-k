@@ -71,7 +71,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		Named("catalog-controller").
 		// Watch for changes to primary resource catalog
 		For(&v1.CamelCatalog{}, builder.WithPredicates(
-			platform.FilteringFuncs{
+			platform.FilteringFuncs[ctrl.Object]{
 				UpdateFunc: func(e event.UpdateEvent) bool {
 					oldcatalog, ok := e.ObjectOld.(*v1.CamelCatalog)
 					if !ok {

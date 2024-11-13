@@ -72,54 +72,51 @@ func add(mgr manager.Manager, r reconcile.Reconciler, c client.Client) error {
 	}
 
 	// Watch for changes to primary resource Pipe
-	err = ctrl.Watch(source.Kind(mgr.GetCache(), &v1.Pipe{}),
-		&handler.EnqueueRequestForObject{},
-		platform.FilteringFuncs{
-			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldPipe, ok := e.ObjectOld.(*v1.Pipe)
-				if !ok {
-					return false
-				}
-				newPipe, ok := e.ObjectNew.(*v1.Pipe)
-				if !ok {
-					return false
-				}
-
-				// If traits have changed, the reconciliation loop must kick in as
-				// traits may have impact
-				sameTraits, err := trait.PipesHaveSameTraits(c, oldPipe, newPipe)
-				if err != nil {
-					Log.ForPipe(newPipe).Error(
-						err,
-						"unable to determine if old and new resource have the same traits")
-				}
-				if !sameTraits {
-					return true
-				}
-
-				// Ignore updates to the binding status in which case metadata.Generation
-				// does not change, or except when the binding phase changes as it's used
-				// to transition from one phase to another
-				return oldPipe.Generation != newPipe.Generation ||
-					oldPipe.Status.Phase != newPipe.Status.Phase
+	err = ctrl.Watch(
+		source.Kind(
+			mgr.GetCache(),
+			&v1.Pipe{},
+			&handler.TypedEnqueueRequestForObject[*v1.Pipe]{},
+			platform.FilteringFuncs[*v1.Pipe]{
+				UpdateFunc: func(e event.TypedUpdateEvent[*v1.Pipe]) bool {
+					// If traits have changed, the reconciliation loop must kick in as
+					// traits may have impact
+					sameTraits, err := trait.PipesHaveSameTraits(c, e.ObjectOld, e.ObjectNew)
+					if err != nil {
+						Log.ForPipe(e.ObjectNew).Error(
+							err,
+							"unable to determine if old and new resource have the same traits")
+					}
+					if !sameTraits {
+						return true
+					}
+					// Ignore updates to the binding status in which case metadata.Generation
+					// does not change, or except when the binding phase changes as it's used
+					// to transition from one phase to another
+					return e.ObjectOld.Generation != e.ObjectNew.Generation ||
+						e.ObjectOld.Status.Phase != e.ObjectNew.Status.Phase
+				},
+				DeleteFunc: func(e event.TypedDeleteEvent[*v1.Pipe]) bool {
+					// Evaluates to false if the object has been confirmed deleted
+					return !e.DeleteStateUnknown
+				},
 			},
-			DeleteFunc: func(e event.DeleteEvent) bool {
-				// Evaluates to false if the object has been confirmed deleted
-				return !e.DeleteStateUnknown
-			},
-		},
+		),
 	)
 	if err != nil {
 		return err
 	}
 
 	// Watch Integration to propagate changes downstream
-	err = ctrl.Watch(source.Kind(mgr.GetCache(), &v1.Integration{}),
-		handler.EnqueueRequestForOwner(
-			mgr.GetScheme(),
-			mgr.GetRESTMapper(),
-			&v1.Pipe{},
-			handler.OnlyControllerOwner(),
+	err = ctrl.Watch(
+		source.Kind(mgr.GetCache(),
+			&v1.Integration{},
+			handler.TypedEnqueueRequestForOwner[*v1.Integration](
+				mgr.GetScheme(),
+				mgr.GetRESTMapper(),
+				&v1.Pipe{},
+				handler.OnlyControllerOwner(),
+			),
 		),
 	)
 	if err != nil {

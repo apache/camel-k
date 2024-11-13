@@ -69,29 +69,25 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource IntegrationPlatform
-	err = c.Watch(source.Kind(mgr.GetCache(), &v1.IntegrationPlatform{}),
-		&handler.EnqueueRequestForObject{},
-		platform.FilteringFuncs{
-			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldIntegrationPlatform, ok := e.ObjectOld.(*v1.IntegrationPlatform)
-				if !ok {
-					return false
-				}
-				newIntegrationPlatform, ok := e.ObjectNew.(*v1.IntegrationPlatform)
-				if !ok {
-					return false
-				}
-				// Ignore updates to the integration platform status in which case metadata.Generation
-				// does not change, or except when the integration platform phase changes as it's used
-				// to transition from one phase to another
-				return oldIntegrationPlatform.Generation != newIntegrationPlatform.Generation ||
-					oldIntegrationPlatform.Status.Phase != newIntegrationPlatform.Status.Phase
+	err = c.Watch(
+		source.Kind(
+			mgr.GetCache(),
+			&v1.IntegrationPlatform{},
+			&handler.TypedEnqueueRequestForObject[*v1.IntegrationPlatform]{},
+			platform.FilteringFuncs[*v1.IntegrationPlatform]{
+				UpdateFunc: func(e event.TypedUpdateEvent[*v1.IntegrationPlatform]) bool {
+					// Ignore updates to the integration platform status in which case metadata.Generation
+					// does not change, or except when the integration platform phase changes as it's used
+					// to transition from one phase to another
+					return e.ObjectOld.Generation != e.ObjectNew.Generation ||
+						e.ObjectOld.Status.Phase != e.ObjectNew.Status.Phase
+				},
+				DeleteFunc: func(e event.TypedDeleteEvent[*v1.IntegrationPlatform]) bool {
+					// Evaluates to false if the object has been confirmed deleted
+					return !e.DeleteStateUnknown
+				},
 			},
-			DeleteFunc: func(e event.DeleteEvent) bool {
-				// Evaluates to false if the object has been confirmed deleted
-				return !e.DeleteStateUnknown
-			},
-		},
+		),
 	)
 	if err != nil {
 		return err
