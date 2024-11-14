@@ -57,3 +57,18 @@ Finally, after checking the status and conditions of all the custom resources, y
 If you're running the build with `pod` strategy, then, it may be interesting for you looking at the execution of the builder pod: `kubectl logs camel-k-kit-ckbddjd5rv6c73cr99fg`. Make sure to look at all pipeline containers pods to have a complete view of where the error could be.
 
 NOTE: use `--log-level` parameter to change the level of operator log, if needed.
+
+[[troubleshoot-maven-build]]
+== Get verbose Maven traces
+
+Camel K uses Maven behind the scenes for building the Camel application. By default, we're setting the log level to minimum in order to avoid polluting Operator or builder Pods logs. Whether you're running the build from the operator (default build strategy `routine`) or from a builder Pod ( build strategy `pod`), you can turn the Maven log to be more verbose and be able to get some reason why the Maven build is failing. In order to do that you need to change the configuration of your IntegrationPlatform and set the following Maven configuration:
+```
+...
+  spec:
+    build:
+      maven:
+        cliOptions:
+        - -eX
+...
+```
+With this configuration you will tell Maven to execute verbosely and provide some low level detail of any building error (ie, a missing dependency or the like). Accessing the operator or builder Pod logs will give you a better diagnose why some Camel application can't build.
