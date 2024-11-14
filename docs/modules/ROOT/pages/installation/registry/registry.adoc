@@ -30,9 +30,9 @@ metadata:
 spec:
   build:
     registry:
-      address: <my-registry-address> (1)
-      organization: <my-organization> (2)
-      secret: <my-secret-credentials> (3)
+      address: <my-registry-address>
+      organization: <my-organization>
+      secret: <my-secret-credentials>
 ----
 
 The changes will be immediately reconciled and the operator will be able to push and pull resources in a secure manner.
@@ -51,12 +51,12 @@ NOTE: you can configure Camel K to use an insecure private registry. However, yo
 === Special container registry requirements
 We have some hints that can help you configuring on the most common platforms:
 
-- xref:installation/registry/special/docker-desktop.adoc[Docker Hub]
+- xref:installation/registry/special/docker-desktop.adoc[Docker Desktop]
 - xref:installation/registry/special/gcr.adoc[Gcr.io]
 - xref:installation/registry/special/github.adoc[Github Packages]
 - xref:installation/registry/special/icr.adoc[IBM Container Registry]
-- xref:installation/registry/special/kind.adoc[K3s]
-- xref:installation/registry/special/minikube.adoc[K3s]
+- xref:installation/registry/special/kind.adoc[Kind]
+- xref:installation/registry/special/minikube.adoc[Minikube]
 
 [[configuring-registry-run-it-yours]]
 == Run your own container registry
