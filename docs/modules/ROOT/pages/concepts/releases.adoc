@@ -1,0 +1,51 @@
+[[releases]]
+= Releases
+
+Camel K is a software that is constantly evolving. We attempts to make a minor release every quarter and a patch release whenever we discover any important regression or CVE. Major upgrades are happening ad-hoc, only in presence of design and breaking compatibility changes required for the project to evolve (ie, when moving default Camel 3.x to Camel 4.x). There are 3 main drivers to understand the Camel K software release cycle:
+
+* Camel core (and any of the supported runtimes, ie, Camel Quarkus)
+* Kubernetes API
+* Golang
+
+The main driver we need to align is the https://endoflife.date/apache-camel[Camel core project release cycle]. The project has adopted an LTS based support lifecycle, and cut an LTS release more or less twice per year. Each LTS is supported for one year.
+
+Camel K uses https://kubernetes.io/releases/[Kubernetes API] and requires to be aligned accordingly to provide the needed level of patching support. Kubernetes supports actively the last 3 minor versions, giving patching support for one year. When we cut a Camel K version, we align to one of the latest version in order to be able to patch accordingly for the time we support the project as well.
+
+Camel K is built using https://go.dev/doc/devel/release[Golang] and requires to consider its release lifecycle as well. Golang follow a similar practice of Kubernetes, supporting the latest 3 minor releases (although they call them major). They cut off 2 major releases per year.
+
+The release cycle of Camel K is the overlap of the three release cycles. The main driver is always Camel core, so we support the LTS version until that is supported by the core project. Given the overlap of different release cycles, however, we may be in the window where we are still under support for Camel core, but already out of support for Kubernetes or Golang. In that situation we'll be only able to provide support for Camel core but won't be able to fix any Kubernetes or Golang issue (which will be fixed in following minor versions).
+
+[[lts]]
+== LTS
+
+Camel K always uses a Camel LTS core version for their releases. The first Camel K release defaulting to a new Camel core LTS release must be considered as LTS as well. Each LTS is supported for at least one year as inherited by the support release cycle for Camel core project.
+
+[[deprecation]]
+== Deprecation policy
+
+During the normal evolution of the project we may need to remove the support for certain features which we consider no longer in line with the scope of the project in order to provide an easier software maintenance.
+
+However, before removing any working feature, we declare a deprecation notice which last as minimum 2 LTS version. If, for example, a feature was deprecated in version 2.0 (LTS), it will be working until 2.4 and may be removed starting from version 2.5 (LTS + 2, being 2.3 the other LTS release). The features marked as deprecated are marked in the source code and generally announced in the release announcement blog posts. They are also logged by the operator or set as CRD condition when this option is available.
+
+The level of support to deprecated features will be limited to bugs introduced by regression, severe CVEs and in any case won't receive any enhancement or minor fixes. No deprecated features will be removed in a patch releases (ie, 2.5.1, 2.5.2, ...).
+
+NOTE: features marked as experimental (or alpha) may be removed at any time without prior deprecation notice.
+
+The deprecation rules described in this chapter may be broken in case of discovering features that are introducing security problems or where the feature cannot be any longer supported due to the impossibility of support in the dependencies required by Camel K (Camel core, the core runtime, Kubernetes or Golang): in that case, we will need to remove the deprecated feature as soon as we cannot support it any longer.
+
+[[api]]
+== Kubernetes CRDs
+
+Any feature defined as Kubernetes Custom Resource Definition, will follow the same general guidelines, being discontinued after at least 2 LTS release versions. However, in order to maintain compatibility with the clients which are using some older version of the specification, the API definition won't be removing the specification until a CRD major upgrade. This is particularly valid for traits configuration which definition is captured into Integration CRD. When we deprecate and later stop supporting some feature provided by trait, the specification will remain as part of the API, although the operator won't be able to support the given feature.
+
+NOTE: GA API specification can be removed only within a new major versions.
+
+[[cli]]
+== Command Line Interface
+
+The CLI (`kamel`) is meant to be a development tool. However, also in this case, we'll follow the general guidelines and drop features at least after 2 LTS releases.
+
+[[core]]
+== Camel core and runtimes
+
+For the core and the runtimes (Quarkus, Spring Boot or Camel Main) there may be changes required when moving from a minor version to another (ie, moving Camel version from 4.4.0 to 4.8.0). Any configuration change on this components may follow different policies. Whenever a new core release is provided and you're changing the Camel core version of Integrations run by Camel K, you may need to check the upgrade policies required which is published beside the core release.
