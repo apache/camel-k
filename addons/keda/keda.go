@@ -61,6 +61,8 @@ const (
 	kameletAnnotationAuthenticationPrefix = "camel.apache.org/keda.authentication."
 )
 
+// WARNING: The KEDA trait is experimental and may not be suitable for production grade use cases.
+//
 // The KEDA trait can be used for automatic integration with KEDA autoscalers.
 // The trait can be either manually configured using the `triggers` option or automatically configured
 // via markers in the Kamelets.

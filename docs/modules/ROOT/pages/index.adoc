@@ -33,4 +33,3 @@ kubectl -f helloworld.yaml
 ----
 
 The integration code will immediately run in the cloud. Continue reading the documentation to xref:installation/installation.adoc[install and get started with Camel K].
-
