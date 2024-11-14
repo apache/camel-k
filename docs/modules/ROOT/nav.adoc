@@ -1,4 +1,7 @@
-* xref:concepts/overview.adoc[Concepts overview]
+* Concepts
+** xref:concepts/overview.adoc[Overview]
+** xref:concepts/dependencies.adoc[Dependencies]
+** xref:concepts/releases.adoc[Release policy]
 * xref:installation/installation.adoc[Installation]
 ** xref:installation/integrationplatform.adoc[Configure IntegrationPlatform]
 ** xref:installation/registry/registry.adoc[Configure Registry]

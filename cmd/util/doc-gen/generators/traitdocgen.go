@@ -172,7 +172,7 @@ func writeTitle(traitID string, content *[]string) {
 	*content = res
 }
 
-// Write badges
+// write badges.
 func writeBadges(t *types.Type, content *[]string) {
 	pre, post := split(*content, adocBadgesMarkerStart, adocBadgesMarkerEnd)
 	// When there are no badges in the generated output already
