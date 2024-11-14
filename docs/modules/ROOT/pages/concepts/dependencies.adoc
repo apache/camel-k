@@ -1,6 +1,6 @@
 = Camel dependencies matrix
 
-From Camel K version 2 onward you will be able to use any Camel K Runtime. Each runtime depends on a Camel Quarkus, Camel and Quarkus Platform version. Every Camel K has a default runtime used, but you can xref:running/runtime-version.adoc[pick any Camel K Runtime available] (backward and forward compatible).
+From Camel K version 2 onward you will be able to use any Camel K Runtime. Each runtime depends on a Camel Quarkus, Camel and Quarkus Platform version. Every Camel K has a default runtime used, but you can xref:configuration/runtime-version.adoc[pick any Camel K Runtime available] (backward and forward compatible).
 
 [caption=]
 .Camel dependencies matrix
