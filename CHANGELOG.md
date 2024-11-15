@@ -2,7 +2,19 @@
 
 ## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...HEAD)
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...HEAD)
+
+**Closed issues:**
+
+- Traits review [\#5936](https://github.com/apache/camel-k/issues/5936)
+- Add a note to clarify about deprecation policy [\#5923](https://github.com/apache/camel-k/issues/5923)
+- How to troubleshoot Maven configuration [\#5894](https://github.com/apache/camel-k/issues/5894)
+- Fix doc failure on compatibility matrix [\#5890](https://github.com/apache/camel-k/issues/5890)
+- Kubernetes API 1.30 [\#5455](https://github.com/apache/camel-k/issues/5455)
+
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2024-11-14)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...v2.5.1-nightly)
 
 **Closed issues:**
 
@@ -10,11 +22,7 @@
 
 ## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2024-11-13)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
-
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2024-11-13)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.5.1-nightly)
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.6.0-nightly)
 
 **Closed issues:**
 
