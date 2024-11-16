@@ -24,9 +24,9 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	appsv1 "k8s.io/api/apps/v1"
@@ -592,7 +592,7 @@ func TestApplyJvmTraitHttpProxyArgs(t *testing.T) {
 
 func createNominalJvmTest(kitType string) (*jvmTrait, *Environment) {
 	catalog, _ := camel.DefaultCatalog()
-	client, _ := test.NewFakeClient()
+	client, _ := internal.NewFakeClient()
 	trait, _ := newJvmTrait().(*jvmTrait)
 	trait.PrintCommand = ptr.To(false)
 	trait.Client = client

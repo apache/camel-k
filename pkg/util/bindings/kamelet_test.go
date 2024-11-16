@@ -25,8 +25,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/internal"
 
-	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -81,7 +81,7 @@ func TestBindingConverter(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
-			client, err := test.NewFakeClient()
+			client, err := internal.NewFakeClient()
 			require.NoError(t, err)
 
 			endpoint := v1.Endpoint{
@@ -243,7 +243,7 @@ func TestBindingConverterWithDataTypes(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
-			client, err := test.NewFakeClient()
+			client, err := internal.NewFakeClient()
 			require.NoError(t, err)
 
 			endpoint := v1.Endpoint{
@@ -336,7 +336,7 @@ func TestBindingConverterWithDataTypesOverridden(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
-			client, err := test.NewFakeClient()
+			client, err := internal.NewFakeClient()
 			require.NoError(t, err)
 
 			endpoint := v1.Endpoint{

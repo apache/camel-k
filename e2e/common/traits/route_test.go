@@ -33,6 +33,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"math/big"
+	math_rand "math/rand"
 	"net/http"
 	"testing"
 	"time"
@@ -43,7 +44,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
-	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
@@ -262,7 +262,7 @@ func createSecret(t *testing.T, ctx context.Context, ns string) (corev1.Secret, 
 }
 
 func generateSampleKeyAndCertificate(t *testing.T, ctx context.Context, ns string) keyCertificatePair {
-	serialNumber := big.NewInt(util.RandomInt63())
+	serialNumber := big.NewInt(math_rand.NewSource(time.Now().UTC().UnixNano()).Int63())
 	domainName, err := ClusterDomainName(t, ctx)
 	if err != nil {
 		fmt.Printf("Error retrieving cluster domain object, then the http client request will skip TLS validation: %s\n", err)

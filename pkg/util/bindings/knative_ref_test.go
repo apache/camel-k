@@ -28,7 +28,7 @@ import (
 	"k8s.io/utils/ptr"
 
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/util/test"
+	"github.com/apache/camel-k/v2/pkg/internal"
 )
 
 func TestKnativeRefAsSource(t *testing.T) {
@@ -147,7 +147,7 @@ func TestKnativeRefAsSource(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
-			client, err := test.NewFakeClient()
+			client, err := internal.NewFakeClient()
 			require.NoError(t, err)
 
 			bindingContext := BindingContext{
@@ -248,7 +248,7 @@ func TestKnativeRefAsSink(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
-			client, err := test.NewFakeClient()
+			client, err := internal.NewFakeClient()
 			require.NoError(t, err)
 
 			bindingContext := BindingContext{
@@ -273,7 +273,7 @@ func TestUnsupportedKnativeResource(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	client, err := test.NewFakeClient()
+	client, err := internal.NewFakeClient()
 	require.NoError(t, err)
 
 	bindingContext := BindingContext{
@@ -302,11 +302,11 @@ func TestKnativeNotInstalled(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	client, err := test.NewFakeClient()
+	client, err := internal.NewFakeClient()
 	require.NoError(t, err)
 
 	// disable the knative eventing api
-	fakeClient := client.(*test.FakeClient) //nolint
+	fakeClient := client.(*internal.FakeClient) //nolint
 	fakeClient.DisableAPIGroupDiscovery("eventing.knative.dev/v1")
 
 	bindingContext := BindingContext{

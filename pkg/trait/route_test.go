@@ -33,10 +33,10 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 const (
@@ -111,7 +111,7 @@ func createTestRouteEnvironment(t *testing.T, name string) *Environment {
 
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
-	client, _ := test.NewFakeClient(
+	client, _ := internal.NewFakeClient(
 		&corev1.Secret{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: "v1",

@@ -24,12 +24,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/maven"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -40,7 +40,7 @@ func TestCreateCatalog(t *testing.T) {
 	ip.Status.Build.Timeout = &metav1.Duration{
 		Duration: 5 * time.Minute,
 	}
-	c, err := test.NewFakeClient()
+	c, err := internal.NewFakeClient()
 	require.NoError(t, err)
 	// use local Maven executable in tests
 	t.Setenv("MAVEN_WRAPPER", boolean.FalseString)

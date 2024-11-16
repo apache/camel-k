@@ -37,6 +37,7 @@ LINTER_VERSION ?= v1.61.0
 GOVULNCHECK_VERSION ?= latest
 
 LINTER ?= $(LOCALBIN)/golangci-lint
+DEADCODE ?= $(LOCALBIN)/deadcode
 GOVULNCHECK ?= $(LOCALBIN)/govulncheck
 GOIMPORT ?= $(LOCALBIN)/goimports
 
@@ -408,6 +409,11 @@ vuln: govulncheck
 fmt: goimport
 	$(GOIMPORT) -l -w .
 	go fmt ./...
+
+dead-code:
+	GOBIN=$(LOCALBIN) go install golang.org/x/tools/cmd/deadcode@latest
+	GOGC=$(LINT_GOGC) $(DEADCODE) ./...
+
 
 dir-licenses:
 	./script/vendor-license-directory.sh

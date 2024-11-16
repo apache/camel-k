@@ -22,7 +22,7 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/util/test"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,7 +31,7 @@ import (
 func TestNewBuildPodConfiguration(t *testing.T) {
 
 	ctx := context.TODO()
-	c, err := test.NewFakeClient()
+	c, err := internal.NewFakeClient()
 	require.NoError(t, err)
 
 	build := v1.Build{

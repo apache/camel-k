@@ -29,7 +29,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -449,7 +448,7 @@ func getSecret(e *trait.Environment) *corev1.Secret {
 }
 
 func createBasicTestEnvironment(resources ...runtime.Object) *trait.Environment {
-	fakeClient, err := test.NewFakeClient(resources...)
+	fakeClient, err := newFakeClient(resources...)
 	if err != nil {
 		panic(fmt.Errorf("could not create fake client: %w", err))
 	}

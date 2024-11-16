@@ -28,7 +28,7 @@ import (
 
 func TestDefaultBaseImage(t *testing.T) {
 	assert.NotEmpty(t, BaseImage())
-	assert.True(t, IsBaseImageDefault())
+	assert.True(t, isBaseImageDefault())
 }
 
 func TestOverriddenBaseImage(t *testing.T) {
@@ -37,7 +37,7 @@ func TestOverriddenBaseImage(t *testing.T) {
 	overriddenImage := "xxx"
 	require.NoError(t, os.Setenv(env, overriddenImage))
 	assert.Equal(t, overriddenImage, BaseImage())
-	assert.False(t, IsBaseImageDefault())
+	assert.False(t, isBaseImageDefault())
 	require.NoError(t, os.Setenv(env, oldEnvVal))
 }
 
@@ -60,4 +60,8 @@ func TestOverriddenOperatorID(t *testing.T) {
 	require.NoError(t, os.Setenv(env, overriddenID))
 	assert.Equal(t, overriddenID, OperatorID())
 	require.NoError(t, os.Setenv(env, oldEnvVal))
+}
+
+func isBaseImageDefault() bool {
+	return baseImage == BaseImage()
 }

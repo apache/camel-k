@@ -15,49 +15,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package base
+package cmd
 
 import (
-	"os"
-	"path/filepath"
+	"bytes"
+
+	"github.com/spf13/cobra"
 )
 
-var GoModDirectory string
+func EmptyRun(*cobra.Command, []string) {}
 
-func FileExists(name string) bool {
-	stat, err := os.Stat(name)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return false
-		}
-	}
-
-	return !stat.IsDir()
+func ArbitraryArgs(cmd *cobra.Command, args []string) error {
+	return nil
 }
 
-func init() {
-	// Save the original directory the process started in.
-	wd, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-	initialDir, err := filepath.Abs(wd)
-	if err != nil {
-		panic(err)
-	}
+func ExecuteCommand(root *cobra.Command, args ...string) (string, error) {
+	_, output, err := ExecuteCommandC(root, args...)
+	return output, err
+}
 
-	// Find the module dir..
-	current := ""
-	for next := initialDir; current != next; next = filepath.Dir(current) {
-		current = next
-		if FileExists(filepath.Join(current, "go.mod")) && FileExists(filepath.Join(current, "go.sum")) {
-			GoModDirectory = current
+func ExecuteCommandC(root *cobra.Command, args ...string) (*cobra.Command, string, error) {
+	buf := new(bytes.Buffer)
+	root.SetOut(buf)
+	root.SetErr(buf)
+	root.SetArgs(args)
 
-			break
-		}
-	}
+	c, err := root.ExecuteC()
 
-	if GoModDirectory == "" {
-		panic("could not find the root module directory")
-	}
+	return c, buf.String(), err
 }

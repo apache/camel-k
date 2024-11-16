@@ -24,7 +24,7 @@ import (
 	"testing"
 
 	"github.com/apache/camel-k/v2/pkg/client"
-	"github.com/apache/camel-k/v2/pkg/util/test"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -45,12 +45,12 @@ func kamelTestPreAddCommandInitWithClient(client client.Client) (*RootCmdOptions
 		_client: client,
 	}
 	rootCmd := kamelPreAddCommandInit(&options)
-	rootCmd.Run = test.EmptyRun
+	rootCmd.Run = EmptyRun
 	return &options, rootCmd
 }
 
 func kamelTestPreAddCommandInit() (*RootCmdOptions, *cobra.Command) {
-	fakeClient, _ := test.NewFakeClient()
+	fakeClient, _ := internal.NewFakeClient()
 	return kamelTestPreAddCommandInitWithClient(fakeClient)
 }
 
@@ -63,7 +63,7 @@ func TestLoadFromEnvVar(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	defer teardown(t, runCmdOptions.Flags)
 
-	_, err := test.ExecuteCommand(rootCmd, "run", "route.java")
+	_, err := ExecuteCommand(rootCmd, "run", "route.java")
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -83,7 +83,7 @@ func TestLoadFromFile(t *testing.T) {
 	runCmdOptions.Flags.SetConfigType("properties")
 	readViperConfigFromBytes(t, runCmdOptions.Flags, propertiesFile)
 
-	_, err := test.ExecuteCommand(rootCmd, "run", "route.java")
+	_, err := ExecuteCommand(rootCmd, "run", "route.java")
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -107,7 +107,7 @@ func TestPrecedenceEnvVarOverFile(t *testing.T) {
 	viper.SetConfigType("properties")
 	readViperConfigFromBytes(t, runCmdOptions.Flags, propertiesFile)
 
-	_, err := test.ExecuteCommand(rootCmd, "run", "route.java")
+	_, err := ExecuteCommand(rootCmd, "run", "route.java")
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -131,7 +131,7 @@ func TestPrecedenceCommandLineOverEverythingElse(t *testing.T) {
 	viper.SetConfigType("properties")
 	readViperConfigFromBytes(t, runCmdOptions.Flags, propertiesFile)
 
-	_, err := test.ExecuteCommand(rootCmd, "run", "route.java", "--env", "VAR3=commandLine")
+	_, err := ExecuteCommand(rootCmd, "run", "route.java", "--env", "VAR3=commandLine")
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}

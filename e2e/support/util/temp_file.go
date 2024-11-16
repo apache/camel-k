@@ -21,6 +21,7 @@ limitations under the License.
 package util
 
 import (
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -49,7 +50,7 @@ func MakeTempCopyDir(t *testing.T, dirName string) string {
 	_, simpleName := filepath.Split(dirName)
 	tmpDir := MakeTempDir(t)
 	tmpDirName := filepath.Join(tmpDir, simpleName)
-	if err := util.CopyDir(dirName, tmpDirName); err != nil {
+	if err := copyDir(dirName, tmpDirName); err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
@@ -82,4 +83,76 @@ func MakeTempDir(t *testing.T) string {
 		return ""
 	}
 	return tmpDir
+}
+
+func copyDir(src, dst string) error {
+	entries, err := os.ReadDir(src)
+	if err != nil {
+		return err
+	}
+
+	for _, entry := range entries {
+		srcEntry := filepath.Join(src, entry.Name())
+		dstEntry := filepath.Join(dst, entry.Name())
+		realEntry := entry
+		if entry.Type() == os.ModeSymlink {
+			realPath, err := filepath.EvalSymlinks(srcEntry)
+			if err != nil {
+				return err
+			}
+			realInfo, err := os.Stat(realPath)
+			if err != nil {
+				return err
+			}
+			srcEntry = realPath
+			realEntry = fs.FileInfoToDirEntry(realInfo)
+		}
+		if realEntry.IsDir() {
+			if err := CopyDir(srcEntry, dstEntry); err != nil {
+				return err
+			}
+		} else {
+			if _, err := util.CopyFile(srcEntry, dstEntry); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func CopyDir(src, dst string) error {
+	entries, err := os.ReadDir(src)
+	if err != nil {
+		return err
+	}
+
+	for _, entry := range entries {
+		srcEntry := filepath.Join(src, entry.Name())
+		dstEntry := filepath.Join(dst, entry.Name())
+		realEntry := entry
+		if entry.Type() == os.ModeSymlink {
+			realPath, err := filepath.EvalSymlinks(srcEntry)
+			if err != nil {
+				return err
+			}
+			realInfo, err := os.Stat(realPath)
+			if err != nil {
+				return err
+			}
+			srcEntry = realPath
+			realEntry = fs.FileInfoToDirEntry(realInfo)
+		}
+		if realEntry.IsDir() {
+			if err := CopyDir(srcEntry, dstEntry); err != nil {
+				return err
+			}
+		} else {
+			if _, err := util.CopyFile(srcEntry, dstEntry); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }

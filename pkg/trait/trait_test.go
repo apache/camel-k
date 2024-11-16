@@ -35,11 +35,11 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/resources"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 const (
@@ -252,7 +252,7 @@ func processTestEnv(t *testing.T, env *Environment) *kubernetes.Collection {
 func createTestEnv(t *testing.T, cluster v1.IntegrationPlatformCluster, script string) *Environment {
 	t.Helper()
 
-	client, _ := test.NewFakeClient()
+	client, _ := internal.NewFakeClient()
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
@@ -375,7 +375,7 @@ func testDefaultIntegrationPhaseTraitsSetting(t *testing.T, phase v1.Integration
 	cat.SetAnnotations(platform.Annotations)
 	cat.SetNamespace(platform.Namespace)
 
-	client, err := test.NewFakeClient(platform, &cat)
+	client, err := internal.NewFakeClient(platform, &cat)
 	require.NoError(t, err)
 	env, err := Apply(context.Background(), client, it, nil)
 	require.NoError(t, err)
@@ -446,7 +446,7 @@ func TestIntegrationTraitsSetting(t *testing.T) {
 					Name: "my-container-name",
 				},
 				Addons: map[string]v1.AddonTrait{
-					"master": ToAddonTrait(t, map[string]interface{}{
+					"master": toAddonTrait(t, map[string]interface{}{
 						"resourceName": "test-lock",
 					}),
 				},
@@ -486,7 +486,7 @@ func TestIntegrationTraitsSetting(t *testing.T) {
 	cat.SetAnnotations(platform.Annotations)
 	cat.SetNamespace(platform.Namespace)
 
-	client, err := test.NewFakeClient(platform, &cat)
+	client, err := internal.NewFakeClient(platform, &cat)
 	require.NoError(t, err)
 	env, err := Apply(context.Background(), client, it, nil)
 	require.NoError(t, err)
@@ -506,7 +506,7 @@ func TestIntegrationTraitsSetting(t *testing.T) {
 			Name: "my-container-name",
 		},
 		Addons: map[string]v1.AddonTrait{
-			"master": ToAddonTrait(t, map[string]interface{}{
+			"master": toAddonTrait(t, map[string]interface{}{
 				"resourceName": "test-lock",
 			}),
 		},

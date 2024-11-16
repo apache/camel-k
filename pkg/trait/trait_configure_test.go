@@ -213,21 +213,3 @@ func TestTraitSplitConfiguration(t *testing.T) {
 	ot, _ := c.GetTrait("owner").(*ownerTrait)
 	assert.Equal(t, []string{"opt1", "opt2"}, ot.TargetLabels)
 }
-
-func TestTraitDecode(t *testing.T) {
-	trait := traitToMap(t, traitv1.ContainerTrait{
-		PlatformBaseTrait: traitv1.PlatformBaseTrait{},
-		Name:              "test-container",
-		Port:              int32(7071),
-		Auto:              ptr.To(false),
-	})
-
-	target, ok := newContainerTrait().(*containerTrait)
-	require.True(t, ok)
-	err := decodeTrait(trait, target)
-	require.NoError(t, err)
-
-	assert.Equal(t, "test-container", target.Name)
-	assert.Equal(t, int32(7071), target.Port)
-	assert.False(t, ptr.Deref(target.Auto, true))
-}

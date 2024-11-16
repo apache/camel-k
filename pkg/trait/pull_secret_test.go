@@ -23,7 +23,6 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -32,6 +31,7 @@ import (
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -127,7 +127,7 @@ func getEnvironmentAndDeployment(t *testing.T) (*Environment, *appsv1.Deployment
 
 	var err error
 	e.Ctx = context.TODO()
-	e.Client, err = test.NewFakeClient(e.Integration, &deployment)
+	e.Client, err = internal.NewFakeClient(e.Integration, &deployment)
 	require.NoError(t, err)
 
 	return e, &deployment

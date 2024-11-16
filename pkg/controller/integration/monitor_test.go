@@ -34,14 +34,14 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/digest"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGetIntegrationSecretAndConfigmapResourceVersions(t *testing.T) {
-	cm := kubernetes.NewConfigMap("default", "cm-test", "test.txt", "test.txt", "xyz", nil)
+	cm := newConfigMap("default", "cm-test", "test.txt", "test.txt", "xyz", nil)
 	sec := &corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Secret",
@@ -74,7 +74,7 @@ func TestGetIntegrationSecretAndConfigmapResourceVersions(t *testing.T) {
 			},
 		},
 	}
-	c, err := test.NewFakeClient(cm, sec)
+	c, err := internal.NewFakeClient(cm, sec)
 	assert.Nil(t, err)
 	// Default hot reload (false)
 	configmaps, secrets := getIntegrationSecretAndConfigmapResourceVersions(context.TODO(), c, it)
@@ -233,7 +233,7 @@ func TestMonitorIntegrationWhilePlatformRecreating(t *testing.T) {
 			},
 		},
 	}
-	c, err := test.NewFakeClient(catalog, platform, it, kit, pod)
+	c, err := internal.NewFakeClient(catalog, platform, it, kit, pod)
 	require.NoError(t, err)
 
 	a := monitorAction{}
@@ -343,7 +343,7 @@ func TestMonitorIntegrationPlatformNil(t *testing.T) {
 			},
 		},
 	}
-	c, err := test.NewFakeClient(catalog, it, kit, pod)
+	c, err := internal.NewFakeClient(catalog, it, kit, pod)
 	require.NoError(t, err)
 
 	a := monitorAction{}
@@ -486,6 +486,38 @@ func nominalEnvironment() (client.Client, *v1.Integration, error) {
 			},
 		},
 	}
-	c, err := test.NewFakeClient(catalog, platform, it, kit, pod)
+	c, err := internal.NewFakeClient(catalog, platform, it, kit, pod)
 	return c, it, err
+}
+
+// newConfigMap will create a ConfigMap.
+func newConfigMap(namespace, cmName, originalFilename string, generatedKey string,
+	textData string, binaryData []byte) *corev1.ConfigMap {
+	immutable := true
+	cm := corev1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      cmName,
+			Namespace: namespace,
+			Labels: map[string]string{
+				kubernetes.ConfigMapOriginalFileNameLabel: originalFilename,
+				kubernetes.ConfigMapAutogenLabel:          "true",
+			},
+		},
+		Immutable: &immutable,
+	}
+	if textData != "" {
+		cm.Data = map[string]string{
+			generatedKey: textData,
+		}
+	}
+	if binaryData != nil {
+		cm.BinaryData = map[string][]byte{
+			generatedKey: binaryData,
+		}
+	}
+	return &cm
 }

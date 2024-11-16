@@ -33,18 +33,6 @@ func Get(vars []corev1.EnvVar, name string) *corev1.EnvVar {
 	return nil
 }
 
-// Remove --.
-func Remove(vars *[]corev1.EnvVar, name string) {
-	v := *vars
-	for i := 0; i < len(v); i++ {
-		if v[i].Name == name {
-			v = append(v[:i], v[i+1:]...)
-			*vars = v
-			return
-		}
-	}
-}
-
 // SetVal --.
 func SetVal(vars *[]corev1.EnvVar, name string, value string) {
 	if envVar := Get(*vars, name); envVar != nil {

@@ -28,8 +28,8 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 func TestIntegrationPlatformDefaults(t *testing.T) {
@@ -40,7 +40,7 @@ func TestIntegrationPlatformDefaults(t *testing.T) {
 		},
 	}
 
-	c, err := test.NewFakeClient(&ip)
+	c, err := internal.NewFakeClient(&ip)
 	require.NoError(t, err)
 
 	err = ConfigureDefaults(context.TODO(), c, &ip, false)
@@ -90,7 +90,7 @@ func TestApplyGlobalPlatformSpec(t *testing.T) {
 		},
 	}
 
-	c, err := test.NewFakeClient(&global)
+	c, err := internal.NewFakeClient(&global)
 	require.NoError(t, err)
 
 	err = ConfigureDefaults(context.TODO(), c, &global, false)
@@ -137,7 +137,7 @@ func TestPlatformS2IhUpdateOverrideLocalPlatformSpec(t *testing.T) {
 		},
 	}
 
-	c, err := test.NewFakeClient(&global)
+	c, err := internal.NewFakeClient(&global)
 	require.NoError(t, err)
 
 	err = ConfigureDefaults(context.TODO(), c, &global, false)
@@ -177,7 +177,7 @@ func TestPlatformS2IUpdateDefaultLocalPlatformSpec(t *testing.T) {
 		},
 	}
 
-	c, err := test.NewFakeClient(&global)
+	c, err := internal.NewFakeClient(&global)
 	require.NoError(t, err)
 
 	err = ConfigureDefaults(context.TODO(), c, &global, false)
@@ -236,7 +236,7 @@ func TestRetainLocalPlatformSpec(t *testing.T) {
 		},
 	}
 
-	c, err := test.NewFakeClient(&global)
+	c, err := internal.NewFakeClient(&global)
 	require.NoError(t, err)
 
 	err = ConfigureDefaults(context.TODO(), c, &global, false)

@@ -22,8 +22,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
@@ -99,7 +99,7 @@ func TestMountSecretRegistryConfig(t *testing.T) {
 		},
 	}
 
-	c, err := test.NewFakeClient(&namespace, &secret)
+	c, err := internal.NewFakeClient(&namespace, &secret)
 	require.NoError(t, err)
 	assert.NotNil(t, c)
 	registryConfigDir, err := MountSecretRegistryConfig(ctx, c, "test", "prefix-", "my-secret1")

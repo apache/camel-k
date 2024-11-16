@@ -25,8 +25,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/util/cancellable"
-	"github.com/apache/camel-k/v2/pkg/util/test"
+	"github.com/apache/camel-k/v2/pkg/internal"
 )
 
 type errorTestSteps struct {
@@ -35,7 +34,7 @@ type errorTestSteps struct {
 }
 
 func TestBuilderFailure(t *testing.T) {
-	c, err := test.NewFakeClient()
+	c, err := internal.NewFakeClient()
 	require.NoError(t, err)
 
 	b := New(c)
@@ -69,14 +68,14 @@ func TestBuilderFailure(t *testing.T) {
 		},
 	}
 
-	ctx := cancellable.NewContext()
+	ctx := newContext()
 	status := b.Build(build).TaskByName("builder").Do(ctx)
 	assert.Equal(t, v1.BuildPhaseFailed, status.Phase)
 	assert.Equal(t, "an error", status.Error)
 }
 
 func TestS2IPublishingFailure(t *testing.T) {
-	c, err := test.NewFakeClient()
+	c, err := internal.NewFakeClient()
 	require.NoError(t, err)
 	b := New(c)
 	build := &v1.Build{
@@ -99,7 +98,7 @@ func TestS2IPublishingFailure(t *testing.T) {
 		},
 	}
 
-	ctx := cancellable.NewContext()
+	ctx := newContext()
 	status := b.Build(build).TaskByName("s2i").Do(ctx)
 	assert.Equal(t, v1.BuildPhaseFailed, status.Phase)
 	assert.NotEmpty(t, status.Error)
@@ -108,7 +107,7 @@ func TestS2IPublishingFailure(t *testing.T) {
 }
 
 func TestJibPublishingFailure(t *testing.T) {
-	c, err := test.NewFakeClient()
+	c, err := internal.NewFakeClient()
 	require.NoError(t, err)
 	b := New(c)
 	build := &v1.Build{
@@ -131,7 +130,7 @@ func TestJibPublishingFailure(t *testing.T) {
 		},
 	}
 
-	ctx := cancellable.NewContext()
+	ctx := newContext()
 	status := b.Build(build).TaskByName("jib").Do(ctx)
 	assert.Equal(t, v1.BuildPhaseFailed, status.Phase)
 	assert.NotEmpty(t, status.Error)
@@ -140,7 +139,7 @@ func TestJibPublishingFailure(t *testing.T) {
 }
 
 func TestSpectrumPublishingFailure(t *testing.T) {
-	c, err := test.NewFakeClient()
+	c, err := internal.NewFakeClient()
 	require.NoError(t, err)
 	b := New(c)
 	build := &v1.Build{
@@ -163,7 +162,7 @@ func TestSpectrumPublishingFailure(t *testing.T) {
 		},
 	}
 
-	ctx := cancellable.NewContext()
+	ctx := newContext()
 	status := b.Build(build).TaskByName("spectrum").Do(ctx)
 	assert.Equal(t, v1.BuildPhaseFailed, status.Phase)
 	assert.NotEmpty(t, status.Error)

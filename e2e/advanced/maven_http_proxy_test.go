@@ -31,11 +31,11 @@ import (
 	"encoding/pem"
 	"fmt"
 	"math/big"
+	math_rand "math/rand"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/envvar"
 
 	. "github.com/onsi/gomega"
@@ -60,7 +60,7 @@ func TestMavenProxy(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		hostname := fmt.Sprintf("%s.%s.svc", "proxy", ns)
 		// Generate the TLS certificate
-		serialNumber := big.NewInt(util.RandomInt63())
+		serialNumber := big.NewInt(math_rand.NewSource(time.Now().UTC().UnixNano()).Int63())
 		cert := &x509.Certificate{
 			SerialNumber: serialNumber,
 			Subject: pkix.Name{

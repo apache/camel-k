@@ -30,8 +30,8 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/builder"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 func TestConfigureQuarkusTraitBuildSubmitted(t *testing.T) {
@@ -106,7 +106,7 @@ func TestQuarkusTraitBuildModeOrder(t *testing.T) {
 
 func createNominalQuarkusTest() (*quarkusTrait, *Environment) {
 	trait, _ := newQuarkusTrait().(*quarkusTrait)
-	client, _ := test.NewFakeClient()
+	client, _ := internal.NewFakeClient()
 
 	environment := &Environment{
 		Catalog:      NewCatalog(client),

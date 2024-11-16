@@ -22,7 +22,7 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/util/test"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
@@ -30,7 +30,7 @@ import (
 )
 
 func TestCreateIntegrationForPipe(t *testing.T) {
-	client, err := test.NewFakeClient()
+	client, err := internal.NewFakeClient()
 	require.NoError(t, err)
 
 	pipe := nominalPipe("my-pipe")
@@ -55,7 +55,7 @@ func TestCreateIntegrationForPipe(t *testing.T) {
 }
 
 func TestCreateIntegrationForPipeWithSinkErrorHandler(t *testing.T) {
-	client, err := test.NewFakeClient()
+	client, err := internal.NewFakeClient()
 	require.NoError(t, err)
 
 	pipe := nominalPipe("my-error-handler-pipe")
@@ -80,7 +80,7 @@ func TestCreateIntegrationForPipeWithSinkErrorHandler(t *testing.T) {
 }
 
 func TestCreateIntegrationForPipeWithLogErrorHandler(t *testing.T) {
-	client, err := test.NewFakeClient()
+	client, err := internal.NewFakeClient()
 	require.NoError(t, err)
 
 	pipe := nominalPipe("my-error-handler-pipe")
@@ -105,7 +105,7 @@ func TestCreateIntegrationForPipeWithLogErrorHandler(t *testing.T) {
 }
 
 func TestCreateIntegrationForPipeDataType(t *testing.T) {
-	client, err := test.NewFakeClient()
+	client, err := internal.NewFakeClient()
 	require.NoError(t, err)
 
 	pipe := nominalPipe("my-pipe-data-type")
@@ -122,7 +122,7 @@ func TestCreateIntegrationForPipeDataType(t *testing.T) {
 }
 
 func TestCreateIntegrationForPipeDataTypeOverridden(t *testing.T) {
-	client, err := test.NewFakeClient()
+	client, err := internal.NewFakeClient()
 	require.NoError(t, err)
 
 	pipe := nominalPipe("my-pipe-data-type")
@@ -189,7 +189,7 @@ func expectedNominalRouteWithDataType(name string) string {
 }
 
 func TestExtractTraitAnnotations(t *testing.T) {
-	client, err := test.NewFakeClient()
+	client, err := internal.NewFakeClient()
 	require.NoError(t, err)
 	annotations := map[string]string{
 		"my-personal-annotation":                                 "hello",
@@ -216,7 +216,7 @@ func TestExtractTraitAnnotations(t *testing.T) {
 }
 
 func TestExtractTraitAnnotationsError(t *testing.T) {
-	client, err := test.NewFakeClient()
+	client, err := internal.NewFakeClient()
 	require.NoError(t, err)
 	annotations := map[string]string{
 		"my-personal-annotation":                       "hello",
@@ -230,7 +230,7 @@ func TestExtractTraitAnnotationsError(t *testing.T) {
 }
 
 func TestExtractTraitAnnotationsEmpty(t *testing.T) {
-	client, err := test.NewFakeClient()
+	client, err := internal.NewFakeClient()
 	require.NoError(t, err)
 	annotations := map[string]string{
 		"my-personal-annotation": "hello",
@@ -242,7 +242,7 @@ func TestExtractTraitAnnotationsEmpty(t *testing.T) {
 }
 
 func TestCreateIntegrationTraitsForPipeWithTraitAnnotations(t *testing.T) {
-	client, err := test.NewFakeClient()
+	client, err := internal.NewFakeClient()
 	require.NoError(t, err)
 
 	pipe := nominalPipe("my-pipe")

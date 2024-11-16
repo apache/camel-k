@@ -24,7 +24,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/fs"
 	"math"
 	"math/rand"
 	"os"
@@ -97,10 +96,6 @@ var QuarkusDependenciesBaseDirectory = "/quarkus-app"
 // are evaluated at the time of the integration invocation.
 var ListOfLazyEvaluatedEnvVars []string
 
-// CLIEnvVars -- List of CLI provided environment variables. They take precedence over
-// any environment variables with the same name.
-var CLIEnvVars = make([]string, 0)
-
 func StringSliceJoin(slices ...[]string) []string {
 	size := 0
 
@@ -130,16 +125,6 @@ func StringSliceContains(slice []string, items []string) bool {
 func StringSliceExists(slice []string, item string) bool {
 	for i := range slice {
 		if slice[i] == item {
-			return true
-		}
-	}
-
-	return false
-}
-
-func StringContainsPrefix(slice []string, prefix string) bool {
-	for i := range slice {
-		if strings.HasPrefix(slice[i], prefix) {
 			return true
 		}
 	}
@@ -188,15 +173,6 @@ func StringSliceUniqueConcat(slice *[]string, items []string) bool {
 	return changed
 }
 
-func SubstringFrom(s string, substr string) string {
-	index := strings.Index(s, substr)
-	if index != -1 {
-		return s[index:]
-	}
-
-	return ""
-}
-
 func SubstringBefore(s string, substr string) string {
 	index := strings.LastIndex(s, substr)
 	if index != -1 {
@@ -215,7 +191,6 @@ const (
 )
 
 var randomSource = rand.NewSource(time.Now().UnixNano())
-var randomSourceUTC = rand.NewSource(time.Now().UTC().UnixNano())
 
 func RandomString(n int) string {
 	sb := strings.Builder{}
@@ -233,10 +208,6 @@ func RandomString(n int) string {
 	}
 
 	return sb.String()
-}
-
-func RandomInt63() int64 {
-	return randomSourceUTC.Int63()
 }
 
 func EncodeXMLWithoutHeader(content interface{}) ([]byte, error) {
@@ -302,42 +273,6 @@ func CopyFile(src, dst string) (int64, error) {
 	nBytes, err := io.Copy(destination, source)
 
 	return nBytes, err
-}
-
-func CopyDir(src, dst string) error {
-	entries, err := os.ReadDir(src)
-	if err != nil {
-		return err
-	}
-
-	for _, entry := range entries {
-		srcEntry := filepath.Join(src, entry.Name())
-		dstEntry := filepath.Join(dst, entry.Name())
-		realEntry := entry
-		if entry.Type() == os.ModeSymlink {
-			realPath, err := filepath.EvalSymlinks(srcEntry)
-			if err != nil {
-				return err
-			}
-			realInfo, err := os.Stat(realPath)
-			if err != nil {
-				return err
-			}
-			srcEntry = realPath
-			realEntry = fs.FileInfoToDirEntry(realInfo)
-		}
-		if realEntry.IsDir() {
-			if err := CopyDir(srcEntry, dstEntry); err != nil {
-				return err
-			}
-		} else {
-			if _, err := CopyFile(srcEntry, dstEntry); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
 }
 
 func WriteFileWithBytesMarshallerContent(basePath string, filePath string, content BytesMarshaller) error {
@@ -414,27 +349,6 @@ func DirectoryEmpty(directory string) (bool, error) {
 	}
 
 	return ok, err
-}
-
-// CreateDirectory creates a directory if it does not exist.
-func CreateDirectory(directory string) error {
-	if directory == "" {
-		return errors.New("directory name must not be empty")
-	}
-
-	directoryExists, err := DirectoryExists(directory)
-	if err != nil {
-		return err
-	}
-
-	if !directoryExists {
-		// #nosec G301
-		if err := os.MkdirAll(directory, io2.FilePerm755); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 type BytesMarshaller interface {
@@ -523,45 +437,6 @@ func GetEnvironmentVariable(variable string) (string, error) {
 	}
 
 	return value, nil
-}
-
-// EvaluateCLIAndLazyEnvVars creates a list of environment
-// variables with entries VAR=value that can be passed when running the integration.
-func EvaluateCLIAndLazyEnvVars() ([]string, error) {
-	evaluatedEnvVars := []string{}
-
-	// Add CLI environment variables
-	setEnvVars := []string{}
-	for _, cliEnvVar := range CLIEnvVars {
-		// Mark variable name as set.
-		varAndValue := strings.Split(cliEnvVar, "=")
-		setEnvVars = append(setEnvVars, varAndValue[0])
-
-		evaluatedEnvVars = append(evaluatedEnvVars, cliEnvVar)
-	}
-
-	// Add lazily evaluated environment variables if they have not
-	// already been set via the CLI --env option.
-	for _, lazyEnvVar := range ListOfLazyEvaluatedEnvVars {
-		alreadySet := false
-		for _, setEnvVar := range setEnvVars {
-			if setEnvVar == lazyEnvVar {
-				alreadySet = true
-
-				break
-			}
-		}
-
-		if !alreadySet {
-			value, err := GetEnvironmentVariable(lazyEnvVar)
-			if err != nil {
-				return nil, err
-			}
-			evaluatedEnvVars = append(evaluatedEnvVars, lazyEnvVar+"="+value)
-		}
-	}
-
-	return evaluatedEnvVars, nil
 }
 
 // Open a safe wrapper of os.Open.

@@ -25,9 +25,9 @@ import (
 	"github.com/stretchr/testify/require"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 func TestServiceBinding(t *testing.T) {
@@ -55,7 +55,7 @@ func TestServiceBinding(t *testing.T) {
 
 func createNominalServiceBindingTest() (*serviceBindingTrait, *Environment) {
 	trait, _ := newServiceBindingTrait().(*serviceBindingTrait)
-	client, _ := test.NewFakeClient()
+	client, _ := internal.NewFakeClient()
 	catalog := NewCatalog(client)
 	c, err := camel.DefaultCatalog()
 	if err != nil {

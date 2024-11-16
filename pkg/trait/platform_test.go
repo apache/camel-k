@@ -24,11 +24,11 @@ import (
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/apache/camel-k/v2/pkg/internal"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 )
@@ -64,7 +64,7 @@ func TestPlatformTraitChangeStatus(t *testing.T) {
 			trait.CreateDefault = ptr.To(false)
 
 			var err error
-			trait.Client, err = test.NewFakeClient()
+			trait.Client, err = internal.NewFakeClient()
 			require.NoError(t, err)
 
 			enabled, condition, err := trait.Configure(&e)
@@ -99,7 +99,7 @@ func TestPlatformTraitCreatesDefaultPlatform(t *testing.T) {
 	trait.CreateDefault = ptr.To(true)
 
 	var err error
-	trait.Client, err = test.NewFakeClient()
+	trait.Client, err = internal.NewFakeClient()
 	require.NoError(t, err)
 
 	enabled, condition, err := trait.Configure(&e)
@@ -157,7 +157,7 @@ func TestPlatformTraitExisting(t *testing.T) {
 			var err error
 			existingPlatform := v1.NewIntegrationPlatform("ns1", "existing")
 			existingPlatform.Status.Phase = input.platformPhase
-			trait.Client, err = test.NewFakeClient(&existingPlatform)
+			trait.Client, err = internal.NewFakeClient(&existingPlatform)
 			require.NoError(t, err)
 
 			enabled, condition, err := trait.Configure(&e)

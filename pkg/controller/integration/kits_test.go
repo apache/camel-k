@@ -28,14 +28,14 @@ import (
 	"github.com/apache/camel-k/v2/pkg/client"
 
 	"github.com/apache/camel-k/v2/pkg/trait"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
-	c, err := test.NewFakeClient(
+	c, err := internal.NewFakeClient(
 		&v1.IntegrationPlatform{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1.SchemeGroupVersion.String(),
@@ -118,7 +118,7 @@ func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
 }
 
 func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T) {
-	c, err := test.NewFakeClient(
+	c, err := internal.NewFakeClient(
 		&v1.IntegrationPlatform{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1.SchemeGroupVersion.String(),
@@ -280,7 +280,7 @@ func TestHasMatchingTraits_KitNoTraitShouldNotBePicked(t *testing.T) {
 		},
 	}
 
-	c, err := test.NewFakeClient(integration, kit)
+	c, err := internal.NewFakeClient(integration, kit)
 	require.NoError(t, err)
 
 	ok, err := integrationAndKitHaveSameTraits(c, integration, kit)
@@ -330,7 +330,7 @@ func TestHasMatchingTraits_KitSameTraitShouldBePicked(t *testing.T) {
 			},
 		},
 	}
-	c, err := test.NewFakeClient(integration, kit)
+	c, err := internal.NewFakeClient(integration, kit)
 	require.NoError(t, err)
 	ok, err := integrationAndKitHaveSameTraits(c, integration, kit)
 	require.NoError(t, err)

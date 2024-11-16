@@ -28,8 +28,8 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 
 	"github.com/apache/camel-k/v2/pkg/util/log"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -69,7 +69,7 @@ func TestPipeIntegrationSpecChanged(t *testing.T) {
 			Phase: v1.IntegrationPhaseRunning,
 		},
 	}
-	c, err := test.NewFakeClient(pipe, it)
+	c, err := internal.NewFakeClient(pipe, it)
 	require.NoError(t, err)
 
 	a := NewMonitorAction()
@@ -106,7 +106,7 @@ func TestPipeIntegrationReady(t *testing.T) {
 		},
 	}
 
-	c, err := test.NewFakeClient(pipe)
+	c, err := internal.NewFakeClient(pipe)
 	require.NoError(t, err)
 	// We calculate the integration the same way it does the operator
 	// as we don't expect it to change in this test.
@@ -114,7 +114,7 @@ func TestPipeIntegrationReady(t *testing.T) {
 	it.Status.Phase = v1.IntegrationPhaseRunning
 	it.Status.SetCondition(v1.IntegrationConditionReady, corev1.ConditionTrue, "Running", "Running")
 	require.NoError(t, err)
-	c, err = test.NewFakeClient(pipe, it)
+	c, err = internal.NewFakeClient(pipe, it)
 	require.NoError(t, err)
 
 	a := NewMonitorAction()
@@ -151,14 +151,14 @@ func TestPipeIntegrationUnknown(t *testing.T) {
 		},
 	}
 
-	c, err := test.NewFakeClient(pipe)
+	c, err := internal.NewFakeClient(pipe)
 	require.NoError(t, err)
 	// We calculate the integration the same way it does the operator
 	// as we don't expect it to change in this test.
 	it, err := CreateIntegrationFor(context.TODO(), c, pipe)
 	it.Status.Phase = v1.IntegrationPhaseRunning
 	require.NoError(t, err)
-	c, err = test.NewFakeClient(pipe, it)
+	c, err = internal.NewFakeClient(pipe, it)
 	require.NoError(t, err)
 
 	a := NewMonitorAction()
@@ -195,7 +195,7 @@ func TestPipeIntegrationError(t *testing.T) {
 		},
 	}
 
-	c, err := test.NewFakeClient(pipe)
+	c, err := internal.NewFakeClient(pipe)
 	require.NoError(t, err)
 	// We calculate the integration the same way it does the operator
 	// as we don't expect it to change in this test.
@@ -203,7 +203,7 @@ func TestPipeIntegrationError(t *testing.T) {
 	it.Status.Phase = v1.IntegrationPhaseError
 	it.Status.SetCondition(v1.IntegrationConditionReady, corev1.ConditionFalse, "ErrorReason", "Error message")
 	require.NoError(t, err)
-	c, err = test.NewFakeClient(pipe, it)
+	c, err = internal.NewFakeClient(pipe, it)
 	require.NoError(t, err)
 
 	a := NewMonitorAction()
@@ -233,7 +233,7 @@ func TestPipeIntegrationErrorFromPipeErrorPhase(t *testing.T) {
 		},
 	}
 
-	c, err := test.NewFakeClient(pipe)
+	c, err := internal.NewFakeClient(pipe)
 	require.NoError(t, err)
 
 	a := NewMonitorAction()
@@ -271,7 +271,7 @@ func TestPipeIntegrationCreatingFromPipeErrorPhase(t *testing.T) {
 		},
 	}
 
-	c, err := test.NewFakeClient(pipe)
+	c, err := internal.NewFakeClient(pipe)
 	require.NoError(t, err)
 
 	a := NewMonitorAction()
@@ -307,14 +307,14 @@ func TestPipeIntegrationCreatingFromPipeCreatingPhase(t *testing.T) {
 		},
 	}
 
-	c, err := test.NewFakeClient(pipe)
+	c, err := internal.NewFakeClient(pipe)
 	require.NoError(t, err)
 	// We calculate the integration the same way it does the operator
 	// as we don't expect it to change in this test.
 	it, err := CreateIntegrationFor(context.TODO(), c, pipe)
 	require.NoError(t, err)
 	it.Status.Phase = v1.IntegrationPhaseBuildingKit
-	c, err = test.NewFakeClient(pipe, it)
+	c, err = internal.NewFakeClient(pipe, it)
 	require.NoError(t, err)
 
 	a := NewMonitorAction()
@@ -355,14 +355,14 @@ func TestPipeIntegrationPipeTraitAnnotations(t *testing.T) {
 		},
 	}
 
-	c, err := test.NewFakeClient(pipe)
+	c, err := internal.NewFakeClient(pipe)
 	require.NoError(t, err)
 	// We calculate the integration the same way it does the operator
 	// as we don't expect it to change in this test.
 	it, err := CreateIntegrationFor(context.TODO(), c, pipe)
 	require.NoError(t, err)
 	it.Status.Phase = v1.IntegrationPhaseBuildingKit
-	c, err = test.NewFakeClient(pipe, it)
+	c, err = internal.NewFakeClient(pipe, it)
 	require.NoError(t, err)
 
 	a := NewMonitorAction()

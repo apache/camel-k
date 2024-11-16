@@ -22,7 +22,6 @@ import (
 
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 
-	"github.com/apache/camel-k/v2/pkg/util/test"
 	corev1 "k8s.io/api/core/v1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -168,7 +167,7 @@ func createEnvironment(t *testing.T, catalogGen func() (*camel.RuntimeCatalog, e
 	t.Helper()
 
 	catalog, err := catalogGen()
-	client, _ := test.NewFakeClient(objects...)
+	client, _ := newFakeClient(objects...)
 	require.NoError(t, err)
 
 	e := trait.Environment{

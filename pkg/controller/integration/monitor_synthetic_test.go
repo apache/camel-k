@@ -31,8 +31,8 @@ import (
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 
 	"github.com/apache/camel-k/v2/pkg/util/log"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"knative.dev/pkg/apis"
@@ -58,7 +58,7 @@ func TestMonitorSyntheticIntegrationImportingKindUnavailable(t *testing.T) {
 			Phase: v1.IntegrationPhaseRunning,
 		},
 	}
-	c, err := test.NewFakeClient(importedIt)
+	c, err := internal.NewFakeClient(importedIt)
 	require.NoError(t, err)
 
 	a := monitorSyntheticAction{}
@@ -116,7 +116,7 @@ func TestMonitorSyntheticIntegrationCannotMonitorPods(t *testing.T) {
 			},
 		},
 	}
-	c, err := test.NewFakeClient(importedIt, deploy)
+	c, err := internal.NewFakeClient(importedIt, deploy)
 	require.NoError(t, err)
 
 	a := monitorSyntheticAction{}
@@ -228,7 +228,7 @@ func TestMonitorSyntheticIntegrationDeployment(t *testing.T) {
 			},
 		},
 	}
-	c, err := test.NewFakeClient(importedIt, deploy, pod)
+	c, err := internal.NewFakeClient(importedIt, deploy, pod)
 	require.NoError(t, err)
 
 	a := monitorSyntheticAction{}
@@ -247,7 +247,7 @@ func TestMonitorSyntheticIntegrationDeployment(t *testing.T) {
 
 	// Remove label from deployment
 	deploy.Labels = nil
-	c, err = test.NewFakeClient(importedIt, deploy)
+	c, err = internal.NewFakeClient(importedIt, deploy)
 	require.NoError(t, err)
 	a.InjectClient(c)
 	handledIt, err = a.Handle(context.TODO(), importedIt)
@@ -348,7 +348,7 @@ func TestMonitorSyntheticIntegrationCronJob(t *testing.T) {
 			},
 		},
 	}
-	c, err := test.NewFakeClient(importedIt, cron, pod)
+	c, err := internal.NewFakeClient(importedIt, cron, pod)
 	require.NoError(t, err)
 
 	a := monitorSyntheticAction{}
@@ -469,7 +469,7 @@ func TestMonitorSyntheticIntegrationKnativeService(t *testing.T) {
 			},
 		},
 	}
-	c, err := test.NewFakeClient(importedIt, ksvc, pod)
+	c, err := internal.NewFakeClient(importedIt, ksvc, pod)
 	require.NoError(t, err)
 
 	a := monitorSyntheticAction{}

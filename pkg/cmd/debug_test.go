@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/util/test"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -35,7 +35,7 @@ const cmdDebug = "debug"
 // nolint: unparam
 func initializeDebugCmdOptions(t *testing.T, initObjs ...runtime.Object) (*cobra.Command, *debugCmdOptions) {
 	t.Helper()
-	fakeClient, err := test.NewFakeClient(initObjs...)
+	fakeClient, err := internal.NewFakeClient(initObjs...)
 	require.NoError(t, err)
 	options, rootCmd := kamelTestPreAddCommandInitWithClient(fakeClient)
 	options.Namespace = "default"
@@ -47,7 +47,7 @@ func initializeDebugCmdOptions(t *testing.T, initObjs ...runtime.Object) (*cobra
 
 func addTestDebugCmd(options RootCmdOptions, rootCmd *cobra.Command) *debugCmdOptions {
 	debugCmd, debugOptions := newCmdDebug(&options)
-	debugCmd.Args = test.ArbitraryArgs
+	debugCmd.Args = ArbitraryArgs
 	rootCmd.AddCommand(debugCmd)
 	return debugOptions
 }

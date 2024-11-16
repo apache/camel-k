@@ -27,10 +27,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 func TestIntegrationExecutedTrait(t *testing.T) {
@@ -46,7 +46,7 @@ func TestIntegrationExecutedTrait(t *testing.T) {
 		},
 		Phase: v1.IntegrationPlatformPhaseReady,
 	}
-	c, err := test.NewFakeClient(&ip)
+	c, err := internal.NewFakeClient(&ip)
 	require.NoError(t, err)
 	catalog := NewCatalog(c)
 	env := Environment{

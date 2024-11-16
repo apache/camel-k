@@ -28,9 +28,9 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -53,7 +53,7 @@ func TestGenerateQuarkusProjectCommon(t *testing.T) {
 }
 
 func TestLoadCamelQuarkusCatalogMissing(t *testing.T) {
-	c, err := test.NewFakeClient()
+	c, err := internal.NewFakeClient()
 	require.NoError(t, err)
 	builderContext := builderContext{
 		Client:    c,
@@ -77,7 +77,7 @@ func TestLoadCamelQuarkusCatalogOk(t *testing.T) {
 		Provider:     "Quarkus",
 		Dependencies: make([]v1.MavenArtifact, 0),
 	}
-	c, err := test.NewFakeClient(&v1.CamelCatalog{
+	c, err := internal.NewFakeClient(&v1.CamelCatalog{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "default",
 			Name:      "my-fake-catalog",
@@ -231,7 +231,7 @@ func TestBuildQuarkusRunner(t *testing.T) {
 	require.NoError(t, err)
 	defaultCatalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
-	c, err := test.NewFakeClient(&v1.CamelCatalog{
+	c, err := internal.NewFakeClient(&v1.CamelCatalog{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "default",
 			Name:      "camel-catalog-" + defaults.DefaultRuntimeVersion,

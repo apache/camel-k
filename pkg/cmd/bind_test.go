@@ -22,8 +22,8 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/platform"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -36,7 +36,7 @@ func initializeBindCmdOptions(t *testing.T) (*bindCmdOptions, *cobra.Command, Ro
 	t.Helper()
 
 	defaultIntegrationPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
-	fakeClient, _ := test.NewFakeClient(&defaultIntegrationPlatform)
+	fakeClient, _ := internal.NewFakeClient(&defaultIntegrationPlatform)
 
 	options, rootCmd := kamelTestPreAddCommandInitWithClient(fakeClient)
 	bindCmdOptions := addTestBindCmd(*options, rootCmd)
@@ -48,14 +48,14 @@ func initializeBindCmdOptions(t *testing.T) (*bindCmdOptions, *cobra.Command, Ro
 func addTestBindCmd(options RootCmdOptions, rootCmd *cobra.Command) *bindCmdOptions {
 	// add a testing version of bind Command
 	bindCmd, bindOptions := newCmdBind(&options)
-	bindCmd.Args = test.ArbitraryArgs
+	bindCmd.Args = ArbitraryArgs
 	rootCmd.AddCommand(bindCmd)
 	return bindOptions
 }
 
 func TestBindOutputJSON(t *testing.T) {
 	buildCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
-	output, err := test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "json")
+	output, err := ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "json")
 	assert.Equal(t, "json", buildCmdOptions.OutputFormat)
 
 	require.NoError(t, err)
@@ -64,7 +64,7 @@ func TestBindOutputJSON(t *testing.T) {
 
 func TestBindOutputYAML(t *testing.T) {
 	buildCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
-	output, err := test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml")
+	output, err := ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml")
 	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
 
 	require.NoError(t, err)
@@ -86,7 +86,7 @@ status: {}
 
 func TestBindOutputUnknownFormat(t *testing.T) {
 	buildCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
-	output, _ := test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "fail")
+	output, _ := ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "fail")
 	assert.Equal(t, "fail", buildCmdOptions.OutputFormat)
 
 	assert.Equal(t, "invalid output format option 'fail', should be one of: yaml|json\n", output)
@@ -94,7 +94,7 @@ func TestBindOutputUnknownFormat(t *testing.T) {
 
 func TestBindErrorHandlerDLCKamelet(t *testing.T) {
 	buildCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
-	output, err := test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml",
+	output, err := ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml",
 		"--error-handler", "sink:my-kamelet", "-p", "error-handler.my-prop=value")
 	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
 
@@ -126,7 +126,7 @@ status: {}
 
 func TestBindErrorHandlerNone(t *testing.T) {
 	buildCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
-	output, err := test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml",
+	output, err := ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml",
 		"--error-handler", "none")
 	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
 
@@ -151,7 +151,7 @@ status: {}
 
 func TestBindErrorHandlerLog(t *testing.T) {
 	buildCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
-	output, err := test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml",
+	output, err := ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml",
 		"--error-handler", "log")
 	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
 
@@ -176,7 +176,7 @@ status: {}
 
 func TestBindTraits(t *testing.T) {
 	buildCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
-	output, err := test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml",
+	output, err := ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml",
 		"-t", "mount.configs=configmap:my-cm", "-c", "my-service-binding")
 	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
 
@@ -201,7 +201,7 @@ status: {}
 
 func TestBindTraitsArray(t *testing.T) {
 	buildCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
-	output, err := test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml",
+	output, err := ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml",
 		"-t", "camel.properties=a=1", "-t", "camel.properties=b=2")
 	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
 
@@ -225,7 +225,7 @@ status: {}
 
 func TestBindSteps(t *testing.T) {
 	buildCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
-	output, err := test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml",
+	output, err := ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml",
 		"--step", "dst:step1", "--step", "src:step2",
 		"-p", "step-1.var1=my-step1-var1", "-p", "step-1.var2=my-step1-var2",
 		"-p", "step-2.var1=my-step2-var1", "-p", "step-2.var2=my-step2-var2")
@@ -259,7 +259,7 @@ status: {}
 
 func TestBindServiceAccountName(t *testing.T) {
 	_, bindCmd, _ := initializeBindCmdOptions(t)
-	output, err := test.ExecuteCommand(bindCmd, cmdBind, "timer:foo", "log:bar",
+	output, err := ExecuteCommand(bindCmd, cmdBind, "timer:foo", "log:bar",
 		"-o", "yaml",
 		"--service-account", "my-service-account")
 
@@ -274,6 +274,6 @@ func TestBindOutputWithoutKubernetesCluster(t *testing.T) {
 	bindCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
 	bindCmdOptions._client = nil // remove the default fake client which can bypass this test
 	bindCmdOptions.KubeConfig = tmpFile.Name()
-	_, err = test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml")
+	_, err = ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml")
 	require.NoError(t, err)
 }

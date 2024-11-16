@@ -135,7 +135,7 @@ func traitToMap(t *testing.T, trait interface{}) map[string]interface{} {
 	return traitMap
 }
 
-func ToAddonTrait(t *testing.T, config map[string]interface{}) v1.AddonTrait {
+func toAddonTrait(t *testing.T, config map[string]interface{}) v1.AddonTrait {
 	t.Helper()
 
 	data, err := json.Marshal(config)

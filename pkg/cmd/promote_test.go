@@ -23,9 +23,9 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -39,7 +39,7 @@ const cmdPromote = "promote"
 // nolint: unparam
 func initializePromoteCmdOptions(t *testing.T, initObjs ...runtime.Object) (*promoteCmdOptions, *cobra.Command, RootCmdOptions) {
 	t.Helper()
-	fakeClient, err := test.NewFakeClient(initObjs...)
+	fakeClient, err := internal.NewFakeClient(initObjs...)
 	require.NoError(t, err)
 	options, rootCmd := kamelTestPreAddCommandInitWithClient(fakeClient)
 	options.Namespace = "default"
@@ -51,7 +51,7 @@ func initializePromoteCmdOptions(t *testing.T, initObjs ...runtime.Object) (*pro
 
 func addTestPromoteCmd(options RootCmdOptions, rootCmd *cobra.Command) *promoteCmdOptions {
 	promoteCmd, promoteOptions := newCmdPromote(&options)
-	promoteCmd.Args = test.ArbitraryArgs
+	promoteCmd.Args = ArbitraryArgs
 	rootCmd.AddCommand(promoteCmd)
 	return promoteOptions
 }
@@ -70,7 +70,7 @@ func TestIntegrationNotCompatible(t *testing.T) {
 	dstCatalog := createTestCamelCatalog(dstPlatform)
 
 	_, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
-	_, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-n", "default")
+	_, err := ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-n", "default")
 	require.Error(t, err)
 	assert.Equal(t,
 		fmt.Sprintf("could not verify operators compatibility: source (%s) and destination (0.0.1) Camel K operator versions are not compatible", defaults.Version),
@@ -92,7 +92,7 @@ func TestIntegrationDryRun(t *testing.T) {
 	dstCatalog := createTestCamelCatalog(dstPlatform)
 
 	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
-	output, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
+	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
 	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
 	require.NoError(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
@@ -148,7 +148,7 @@ func TestPipeDryRun(t *testing.T) {
 	dstCatalog := createTestCamelCatalog(dstPlatform)
 
 	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultKB, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
-	output, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-kb-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
+	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-kb-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
 	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
 	require.NoError(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
@@ -201,7 +201,7 @@ func TestIntegrationWithMetadataDryRun(t *testing.T) {
 	dstCatalog := createTestCamelCatalog(dstPlatform)
 
 	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
-	output, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
+	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
 	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
 	require.NoError(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
@@ -248,7 +248,7 @@ func TestPipeWithMetadataDryRun(t *testing.T) {
 	dstCatalog := createTestCamelCatalog(dstPlatform)
 
 	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultKB, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
-	output, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-kb-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
+	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-kb-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
 	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
 	require.NoError(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
@@ -285,7 +285,7 @@ func TestItImageOnly(t *testing.T) {
 	dstCatalog := createTestCamelCatalog(dstPlatform)
 
 	_, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
-	output, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-i", "-n", "default")
+	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-i", "-n", "default")
 	require.NoError(t, err)
 	assert.Equal(t, "my-special-image\n", output)
 }
@@ -305,7 +305,7 @@ func TestPipeImageOnly(t *testing.T) {
 	dstCatalog := createTestCamelCatalog(dstPlatform)
 
 	_, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultKB, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
-	output, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-kb-test", "--to", "prod-namespace", "-i", "-n", "default")
+	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-kb-test", "--to", "prod-namespace", "-i", "-n", "default")
 	require.NoError(t, err)
 	assert.Equal(t, "my-special-image\n", output)
 }
@@ -325,7 +325,7 @@ func TestIntegrationToOperatorId(t *testing.T) {
 
 	// Verify default (missing) operator Id
 	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
-	output, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "-x", "my-prod-operator", "-o", "yaml", "--to", "prod")
+	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "-x", "my-prod-operator", "-o", "yaml", "--to", "prod")
 	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
 	require.NoError(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
@@ -351,7 +351,7 @@ status: {}
 		"camel.apache.org/operator.id": "camel-k",
 	}
 	promoteCmdOptions, promoteCmd, _ = initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
-	output, err = test.ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "-x", "my-prod-operator", "-o", "yaml", "--to", "prod")
+	output, err = ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "-x", "my-prod-operator", "-o", "yaml", "--to", "prod")
 	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
 	require.NoError(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
@@ -395,7 +395,7 @@ func TestIntegrationWithSavedTraitsDryRun(t *testing.T) {
 	dstCatalog := createTestCamelCatalog(dstPlatform)
 
 	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
-	output, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
+	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
 	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
 	require.NoError(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
@@ -440,7 +440,7 @@ func TestPipeWithSavedTraitsDryRun(t *testing.T) {
 	dstCatalog := createTestCamelCatalog(dstPlatform)
 
 	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultKB, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
-	output, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-kb-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
+	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-kb-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
 	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
 	require.NoError(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1

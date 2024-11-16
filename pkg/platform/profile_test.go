@@ -28,7 +28,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/v2/pkg/util/test"
+	"github.com/apache/camel-k/v2/pkg/internal"
 )
 
 func TestFindIntegrationProfile(t *testing.T) {
@@ -41,7 +41,7 @@ func TestFindIntegrationProfile(t *testing.T) {
 
 	profile.ResyncStatusFullConfig()
 
-	c, err := test.NewFakeClient(&profile)
+	c, err := internal.NewFakeClient(&profile)
 	require.NoError(t, err)
 
 	integration := v1.Integration{
@@ -72,7 +72,7 @@ func TestFindIntegrationProfileWithNamespace(t *testing.T) {
 
 	profile.ResyncStatusFullConfig()
 
-	c, err := test.NewFakeClient(&profile)
+	c, err := internal.NewFakeClient(&profile)
 	require.NoError(t, err)
 
 	integration := v1.Integration{
@@ -104,7 +104,7 @@ func TestFindIntegrationProfileInOperatorNamespace(t *testing.T) {
 
 	profile.ResyncStatusFullConfig()
 
-	c, err := test.NewFakeClient(&profile)
+	c, err := internal.NewFakeClient(&profile)
 	require.NoError(t, err)
 
 	t.Setenv(operatorNamespaceEnvVariable, "operator-namespace")
@@ -163,7 +163,7 @@ func TestApplyIntegrationProfile(t *testing.T) {
 
 	profile.ResyncStatusFullConfig()
 
-	c, err := test.NewFakeClient(&profile)
+	c, err := internal.NewFakeClient(&profile)
 	require.NoError(t, err)
 
 	ip := v1.IntegrationPlatform{
@@ -251,7 +251,7 @@ func TestApplyIntegrationProfileAndRetainPlatformSpec(t *testing.T) {
 
 	profile.ResyncStatusFullConfig()
 
-	c, err := test.NewFakeClient(&profile)
+	c, err := internal.NewFakeClient(&profile)
 	require.NoError(t, err)
 
 	ip := v1.IntegrationPlatform{

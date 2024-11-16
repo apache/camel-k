@@ -55,10 +55,6 @@ func (c *deploymentController) checkReadyCondition(ctx context.Context) (bool, e
 	return false, nil
 }
 
-func (c *deploymentController) getPodSpec() corev1.PodSpec {
-	return c.obj.Spec.Template.Spec
-}
-
 func (c *deploymentController) updateReadyCondition(readyPods int32) bool {
 	replicas := int32(1)
 	if r := c.integration.Spec.Replicas; r != nil {

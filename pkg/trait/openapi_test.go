@@ -28,12 +28,12 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/maven"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -83,7 +83,7 @@ func TestRestDslTraitApplicability(t *testing.T) {
 func TestRestDslTraitApplyError(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
-	fakeClient, _ := test.NewFakeClient()
+	fakeClient, _ := internal.NewFakeClient()
 
 	e := &Environment{
 		CamelCatalog: catalog,
@@ -236,10 +236,10 @@ func TestRestDslTraitApplyWorks(t *testing.T) {
 	require.NoError(t, err)
 	content, err := util.EncodeXML(settings)
 	require.NoError(t, err)
-	cm := kubernetes.NewConfigMap("default", "maven-settings", "settings.xml", "settings.xml", string(content), nil)
+	cm := newConfigMap("default", "maven-settings", "settings.xml", "settings.xml", string(content), nil)
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
-	fakeClient, _ := test.NewFakeClient(&corev1.ConfigMap{
+	fakeClient, _ := internal.NewFakeClient(&corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "my-configmap",
 			Namespace: "default",
@@ -324,4 +324,36 @@ func TestRestDslTraitApplyWorks(t *testing.T) {
 	})
 	assert.NotNil(t, sourceCm)
 	assert.Contains(t, sourceCm.Data["content"], "get id=\"showPetById\" path=\"/pets/{petId}\"")
+}
+
+// newConfigMap will create a ConfigMap.
+func newConfigMap(namespace, cmName, originalFilename string, generatedKey string,
+	textData string, binaryData []byte) *corev1.ConfigMap {
+	immutable := true
+	cm := corev1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      cmName,
+			Namespace: namespace,
+			Labels: map[string]string{
+				kubernetes.ConfigMapOriginalFileNameLabel: originalFilename,
+				kubernetes.ConfigMapAutogenLabel:          "true",
+			},
+		},
+		Immutable: &immutable,
+	}
+	if textData != "" {
+		cm.Data = map[string]string{
+			generatedKey: textData,
+		}
+	}
+	if binaryData != nil {
+		cm.BinaryData = map[string][]byte{
+			generatedKey: binaryData,
+		}
+	}
+	return &cm
 }

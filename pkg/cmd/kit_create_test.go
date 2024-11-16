@@ -20,7 +20,6 @@ package cmd
 import (
 	"testing"
 
-	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -48,20 +47,20 @@ func addTestKitCreateCmd(options RootCmdOptions, rootCmd *cobra.Command) *kitCre
 	kitCreateCmd.PostRunE = func(c *cobra.Command, args []string) error {
 		return nil
 	}
-	kitCreateCmd.Args = test.ArbitraryArgs
+	kitCreateCmd.Args = ArbitraryArgs
 	rootCmd.AddCommand(kitCreateCmd)
 	return kitCreateOptions
 }
 
 func TestKitCreateNonExistingFlag(t *testing.T) {
 	_, rootCmd, _ := initializeKitCreateCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, subCmdKit, "--nonExistingFlag")
+	_, err := ExecuteCommand(rootCmd, subCmdKit, "--nonExistingFlag")
 	require.Error(t, err)
 }
 
 func TestKitCreateConfigMapFlag(t *testing.T) {
 	kitCreateCmdOptions, rootCmd, _ := initializeKitCreateCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, subCmdKit,
+	_, err := ExecuteCommand(rootCmd, subCmdKit,
 		"--configmap", "someString1",
 		"--configmap", "someString2")
 	require.NoError(t, err)
@@ -72,7 +71,7 @@ func TestKitCreateConfigMapFlag(t *testing.T) {
 
 func TestKitCreateDependencyFlag(t *testing.T) {
 	kitCreateCmdOptions, rootCmd, _ := initializeKitCreateCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, subCmdKit,
+	_, err := ExecuteCommand(rootCmd, subCmdKit,
 		"--dependency", "someString1",
 		"--dependency", "someString2")
 	require.NoError(t, err)
@@ -83,14 +82,14 @@ func TestKitCreateDependencyFlag(t *testing.T) {
 
 func TestKitCreateImageFlag(t *testing.T) {
 	kitCreateCmdOptions, rootCmd, _ := initializeKitCreateCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, subCmdKit, "--image", "someString")
+	_, err := ExecuteCommand(rootCmd, subCmdKit, "--image", "someString")
 	require.NoError(t, err)
 	assert.Equal(t, "someString", kitCreateCmdOptions.Image)
 }
 
 func TestKitCreatePropertyFlag(t *testing.T) {
 	kitCreateCmdOptions, rootCmd, _ := initializeKitCreateCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, subCmdKit,
+	_, err := ExecuteCommand(rootCmd, subCmdKit,
 		"--property", "someString1",
 		"--property", "someString2")
 	require.NoError(t, err)
@@ -101,7 +100,7 @@ func TestKitCreatePropertyFlag(t *testing.T) {
 
 func TestKitCreateRepositoryFlag(t *testing.T) {
 	kitCreateCmdOptions, rootCmd, _ := initializeKitCreateCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, subCmdKit,
+	_, err := ExecuteCommand(rootCmd, subCmdKit,
 		"--repository", "someString1",
 		"--repository", "someString2")
 	require.NoError(t, err)
@@ -112,7 +111,7 @@ func TestKitCreateRepositoryFlag(t *testing.T) {
 
 func TestKitCreateSecretFlag(t *testing.T) {
 	kitCreateCmdOptions, rootCmd, _ := initializeKitCreateCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, subCmdKit,
+	_, err := ExecuteCommand(rootCmd, subCmdKit,
 		"--secret", "someString1",
 		"--secret", "someString2")
 	require.NoError(t, err)
@@ -123,7 +122,7 @@ func TestKitCreateSecretFlag(t *testing.T) {
 
 func TestKitCreateTraitFlag(t *testing.T) {
 	kitCreateCmdOptions, rootCmd, _ := initializeKitCreateCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, subCmdKit,
+	_, err := ExecuteCommand(rootCmd, subCmdKit,
 		"--trait", "someString1",
 		"--trait", "someString2")
 	require.NoError(t, err)

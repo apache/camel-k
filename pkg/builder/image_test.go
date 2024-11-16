@@ -26,17 +26,16 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
-	"github.com/apache/camel-k/v2/pkg/util/cancellable"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 func TestListPublishedImages(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	c, err := test.NewFakeClient(
+	c, err := internal.NewFakeClient(
 		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1.SchemeGroupVersion.String(),
@@ -87,7 +86,7 @@ func TestListPublishedImages(t *testing.T) {
 	i, err := listPublishedImages(&builderContext{
 		Client:  c,
 		Catalog: catalog,
-		C:       cancellable.NewContext(),
+		C:       newContext(),
 	})
 
 	require.NoError(t, err)

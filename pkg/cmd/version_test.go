@@ -22,11 +22,11 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -38,7 +38,7 @@ const cmdVersion = "version"
 func initializeVersionCmdOptions(t *testing.T, initObjs ...runtime.Object) (*versionCmdOptions, *cobra.Command, RootCmdOptions) {
 	t.Helper()
 
-	fakeClient, err := test.NewFakeClient(initObjs...)
+	fakeClient, err := internal.NewFakeClient(initObjs...)
 	require.NoError(t, err)
 	options, rootCmd := kamelTestPreAddCommandInitWithClient(fakeClient)
 	versionCmdOptions := addTestVersionCmd(*options, rootCmd)
@@ -50,34 +50,34 @@ func initializeVersionCmdOptions(t *testing.T, initObjs ...runtime.Object) (*ver
 func addTestVersionCmd(options RootCmdOptions, rootCmd *cobra.Command) *versionCmdOptions {
 	// add a testing version of version Command
 	versionCmd, versionOptions := newCmdVersion(&options)
-	versionCmd.Args = test.ArbitraryArgs
+	versionCmd.Args = ArbitraryArgs
 	rootCmd.AddCommand(versionCmd)
 	return versionOptions
 }
 
 func TestVersionNonExistingFlag(t *testing.T) {
 	_, rootCmd, _ := initializeVersionCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdVersion, "--nonExistingFlag")
+	_, err := ExecuteCommand(rootCmd, cmdVersion, "--nonExistingFlag")
 	require.Error(t, err)
 }
 
 func TestVersionClient(t *testing.T) {
 	_, rootCmd, _ := initializeVersionCmdOptions(t)
-	output, err := test.ExecuteCommand(rootCmd, cmdVersion)
+	output, err := ExecuteCommand(rootCmd, cmdVersion)
 	require.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf("Camel K Client %s\n", defaults.Version), output)
 }
 
 func TestVersionOperatorFlag(t *testing.T) {
 	versionCmdOptions, rootCmd, _ := initializeVersionCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdVersion, "--operator")
+	_, err := ExecuteCommand(rootCmd, cmdVersion, "--operator")
 	require.NoError(t, err)
 	assert.True(t, versionCmdOptions.Operator)
 }
 
 func TestVersionClientVerbose(t *testing.T) {
 	versionCmdOptions, rootCmd, _ := initializeVersionCmdOptions(t)
-	output, err := test.ExecuteCommand(rootCmd, cmdVersion, "-v")
+	output, err := ExecuteCommand(rootCmd, cmdVersion, "-v")
 	require.NoError(t, err)
 	assert.True(t, versionCmdOptions.Verbose)
 	assert.Equal(t, fmt.Sprintf("Camel K Client %s\nGit Commit: %s\n", defaults.Version, defaults.GitCommit), output)
@@ -98,7 +98,7 @@ func TestOperatorVersionVerbose(t *testing.T) {
 	}
 
 	versionCmdOptions, rootCmd, _ := initializeVersionCmdOptions(t, &platform, &catalog)
-	output, err := test.ExecuteCommand(rootCmd, cmdVersion, "-v", "--operator")
+	output, err := ExecuteCommand(rootCmd, cmdVersion, "-v", "--operator")
 	require.NoError(t, err)
 	assert.True(t, versionCmdOptions.Verbose)
 	assert.Contains(t, output, fmt.Sprintf("Camel K Operator %s\n", defaults.Version))

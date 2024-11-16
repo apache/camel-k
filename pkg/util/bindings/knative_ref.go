@@ -167,17 +167,6 @@ func (k KnativeRefBindingProvider) Order() int {
 	return OrderLast
 }
 
-// V1alpha1KnativeRefBindingProvider converts a reference to a Kubernetes object into a Camel URI.
-// It's used as fallback if no other providers can decode the object reference.
-// Deprecated.
-type V1alpha1KnativeRefBindingProvider struct{}
-
-// ID --.
-// Deprecated.
-func (k V1alpha1KnativeRefBindingProvider) ID() string {
-	return "knative-ref"
-}
-
 func init() {
 	RegisterBindingProvider(KnativeRefBindingProvider{})
 }

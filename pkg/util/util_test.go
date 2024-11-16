@@ -18,10 +18,8 @@ limitations under the License.
 package util
 
 import (
-	"fmt"
 	"math"
-	"os"
-	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
@@ -31,8 +29,8 @@ import (
 
 func TestStringContainsPrefix(t *testing.T) {
 	args := []string{"install", "--operator-image=xxx/yyy:zzz", "--registry", defaults.OpenShiftRegistryAddress}
-	assert.True(t, StringContainsPrefix(args, "--operator-image="))
-	assert.False(t, StringContainsPrefix(args, "--olm"))
+	assert.True(t, stringContainsPrefix(args, "--operator-image="))
+	assert.False(t, stringContainsPrefix(args, "--olm"))
 }
 
 func TestRandomString(t *testing.T) {
@@ -40,27 +38,10 @@ func TestRandomString(t *testing.T) {
 	assert.NotEqual(t, RandomString(10), RandomString(10))
 }
 
-func TestSubstringFrom(t *testing.T) {
-	assert.Equal(t, "/bbb/ccc", SubstringFrom("aaa/bbb/ccc", "/"))
-	assert.Empty(t, SubstringFrom("aaa/bbb/ccc", "?"))
-}
-
 func TestSubstringBefore(t *testing.T) {
 	assert.Equal(t, "aaa/bbb", SubstringBefore("aaa/bbb/ccc", "/"))
 	assert.Equal(t, "aaa/bbb", SubstringBefore("aaa/bbb?ccc=ddd", "?"))
 	assert.Empty(t, SubstringBefore("aaa/bbb/ccc", "?"))
-}
-
-func TestCopyDir(t *testing.T) {
-	srcDir := "../../install"
-	tmpDir, err := os.MkdirTemp("", "TestCopyDir-*")
-	defer os.RemoveAll(tmpDir)
-	destDir := filepath.Join(tmpDir, "install")
-
-	require.NoError(t, err)
-	fmt.Println(destDir)
-	err = CopyDir(srcDir, destDir)
-	require.NoError(t, err)
 }
 
 func TestIToInt32(t *testing.T) {
@@ -91,4 +72,14 @@ func TestIToInt8(t *testing.T) {
 	converted, err = IToInt8(x)
 	require.Error(t, err)
 	assert.Equal(t, "integer overflow casting to int8 type", err.Error())
+}
+
+func stringContainsPrefix(slice []string, prefix string) bool {
+	for i := range slice {
+		if strings.HasPrefix(slice[i], prefix) {
+			return true
+		}
+	}
+
+	return false
 }

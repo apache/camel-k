@@ -23,7 +23,7 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/util/test"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
@@ -56,7 +56,7 @@ func TestJibMavenProfileDefaultValues(t *testing.T) {
 
 func TestJibConfigMap(t *testing.T) {
 	ctx := context.TODO()
-	c, _ := test.NewFakeClient()
+	c, _ := internal.NewFakeClient()
 	kit := &v1.IntegrationKit{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1.SchemeGroupVersion.String(),

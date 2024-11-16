@@ -20,7 +20,9 @@ package camel
 import (
 	"testing"
 
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCamelTraitGenerateMavenProjectSucceeds(t *testing.T) {
@@ -41,4 +43,20 @@ func TestCamelTraitGenerateMavenProjectSucceeds(t *testing.T) {
 	assert.Len(t, mvnProject.Build.Plugins[0].Executions[0].Goals, 1)
 	assert.Equal(t, "generate-catalog", mvnProject.Build.Plugins[0].Executions[0].Goals[0])
 	assert.Nil(t, mvnProject.Build.Plugins[0].Dependencies)
+}
+
+func TestRuntimeContainsEmbeddedArtifacts(t *testing.T) {
+	catalog, err := DefaultCatalog()
+	require.NoError(t, err)
+
+	assert.Equal(t, defaults.DefaultRuntimeVersion, catalog.Runtime.Version)
+
+	artifact := catalog.GetArtifactByScheme("knative")
+	assert.Equal(t, 1, len(artifact.Schemes))
+	assert.Equal(t, "org.apache.camel.quarkus", artifact.GroupID)
+	assert.Equal(t, "camel-quarkus-knative", artifact.ArtifactID)
+
+	scheme, found := catalog.GetScheme("knative")
+	assert.True(t, found)
+	assert.True(t, scheme.HTTP)
 }

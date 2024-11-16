@@ -24,9 +24,9 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
@@ -574,7 +574,7 @@ func TestKameletConditionTrue(t *testing.T) {
 func createKameletsTestEnvironment(flow string, objects ...runtime.Object) (*kameletsTrait, *Environment) {
 	catalog, _ := camel.DefaultCatalog()
 
-	client, _ := test.NewFakeClient(objects...)
+	client, _ := internal.NewFakeClient(objects...)
 	trait, _ := newKameletsTrait().(*kameletsTrait)
 	trait.Client = client
 

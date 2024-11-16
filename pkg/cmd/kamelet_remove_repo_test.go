@@ -25,7 +25,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 const cmdKameletRemoveRepo = "remove-repo"
@@ -50,20 +49,20 @@ func addTestKameletRemoveRepoCmd(options RootCmdOptions, rootCmd *cobra.Command)
 	kameletRemoveRepoCmd.PostRunE = func(c *cobra.Command, args []string) error {
 		return nil
 	}
-	kameletRemoveRepoCmd.Args = test.ArbitraryArgs
+	kameletRemoveRepoCmd.Args = ArbitraryArgs
 	rootCmd.AddCommand(kameletRemoveRepoCmd)
 	return kameletRemoveRepoOptions
 }
 
 func TestKameletRemoveRepoNoFlag(t *testing.T) {
 	_, rootCmd, _ := initializeKameletRemoveRepoCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdKameletRemoveRepo, "foo")
+	_, err := ExecuteCommand(rootCmd, cmdKameletRemoveRepo, "foo")
 	require.NoError(t, err)
 }
 
 func TestKameletRemoveRepoNonExistingFlag(t *testing.T) {
 	_, rootCmd, _ := initializeKameletRemoveRepoCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdKameletRemoveRepo, "--nonExistingFlag", "foo")
+	_, err := ExecuteCommand(rootCmd, cmdKameletRemoveRepo, "--nonExistingFlag", "foo")
 	require.Error(t, err)
 }
 
