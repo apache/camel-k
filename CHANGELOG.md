@@ -1,38 +1,28 @@
 # Changelog
 
-## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2024-11-15)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...HEAD)
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
+
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2024-11-15)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.5.1-nightly)
 
 **Closed issues:**
 
 - Traits review [\#5936](https://github.com/apache/camel-k/issues/5936)
+- Do not fail if sources are exclusively passed via configuration file. [\#5933](https://github.com/apache/camel-k/issues/5933)
 - Add a note to clarify about deprecation policy [\#5923](https://github.com/apache/camel-k/issues/5923)
+- Integration build pushes image successfully using credentials but fails on pulling built image [\#5898](https://github.com/apache/camel-k/issues/5898)
 - How to troubleshoot Maven configuration [\#5894](https://github.com/apache/camel-k/issues/5894)
 - Fix doc failure on compatibility matrix [\#5890](https://github.com/apache/camel-k/issues/5890)
-- Kubernetes API 1.30 [\#5455](https://github.com/apache/camel-k/issues/5455)
-
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2024-11-14)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...v2.5.1-nightly)
-
-**Closed issues:**
-
-- Do not fail if sources are exclusively passed via configuration file. [\#5933](https://github.com/apache/camel-k/issues/5933)
-
-## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2024-11-13)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.6.0-nightly)
-
-**Closed issues:**
-
-- Integration build pushes image successfully using credentials but fails on pulling built image [\#5898](https://github.com/apache/camel-k/issues/5898)
 - Creating camel-k with helm cannot publish integrations [\#5888](https://github.com/apache/camel-k/issues/5888)
 - Release 2.5.0 [\#5887](https://github.com/apache/camel-k/issues/5887)
 - Bump Golang version to 1.23 [\#5877](https://github.com/apache/camel-k/issues/5877)
 - \[features request\] add the hability to set Jib registryMirrors [\#5691](https://github.com/apache/camel-k/issues/5691)
 - Pipe is waiting forever on Revision to become available [\#5623](https://github.com/apache/camel-k/issues/5623)
 - Align the Hashicorp Vault Add-on to CAMEL-20775 [\#5527](https://github.com/apache/camel-k/issues/5527)
+- Kubernetes API 1.30 [\#5455](https://github.com/apache/camel-k/issues/5455)
 - Simplify Vaults addons [\#5258](https://github.com/apache/camel-k/issues/5258)
 - The Yaml Parser diverges for Kamelets and Integration Resources [\#5135](https://github.com/apache/camel-k/issues/5135)
 - Error occurred when deploying Route file containing Camel Soap using Camel [\#4850](https://github.com/apache/camel-k/issues/4850)
