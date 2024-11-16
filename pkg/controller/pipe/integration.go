@@ -81,12 +81,6 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Pipe
 	it.GetLabels()[kubernetes.CamelCreatorLabelKind] = binding.Kind
 	it.GetLabels()[kubernetes.CamelCreatorLabelName] = binding.Name
 
-	// Deprecated
-	// start from the integration spec defined in the binding
-	if binding.Spec.Integration != nil {
-		it.Spec = *binding.Spec.Integration.DeepCopy()
-	}
-
 	if traits != nil {
 		it.Spec.Traits = *traits
 	}
@@ -247,9 +241,6 @@ func configureBinding(integration *v1.Integration, bindings ...*bindings.Binding
 }
 
 func determineTraitProfile(ctx context.Context, c client.Client, binding *v1.Pipe) (v1.TraitProfile, error) {
-	if binding.Spec.Integration != nil && binding.Spec.Integration.Profile != "" {
-		return binding.Spec.Integration.Profile, nil
-	}
 	pl, err := platform.GetForResource(ctx, c, binding)
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return "", fmt.Errorf("error while retrieving the integration platform: %w", err)

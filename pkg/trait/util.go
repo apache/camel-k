@@ -457,17 +457,6 @@ func NewSpecTraitsOptionsForIntegrationKit(c client.Client, i *v1.IntegrationKit
 func NewTraitsOptionsForPipe(c client.Client, pipe *v1.Pipe) (Options, error) {
 	options := Options{}
 
-	if pipe.Spec.Integration != nil {
-		m1, err := ToTraitMap(pipe.Spec.Integration.Traits)
-		if err != nil {
-			return nil, err
-		}
-
-		for k, v := range m1 {
-			options[k] = v
-		}
-	}
-
 	return newTraitsOptions(c, options, pipe.ObjectMeta.Annotations)
 }
 

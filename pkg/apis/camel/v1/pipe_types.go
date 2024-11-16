@@ -134,7 +134,8 @@ const (
 	// PipeIntegrationConditionError -- .
 	// Deprecated: no longer in use.
 	PipeIntegrationConditionError PipeConditionType = "IntegrationError"
-	// PipeIntegrationDeprecationNotice is used to report the usage of a deprecated resource.
+	// PipeIntegrationDeprecationNotice -- .
+	// Deprecated: no longer in use.
 	PipeIntegrationDeprecationNotice PipeConditionType = "DeprecationNotice"
 )
 
