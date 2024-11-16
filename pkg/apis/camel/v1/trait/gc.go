@@ -20,18 +20,13 @@ package trait
 // The GC Trait garbage-collects all resources that are no longer necessary upon integration updates.
 //
 // +camel-k:trait=gc.
+// +camel-k:internal.
 type GCTrait struct {
 	Trait `property:",squash" json:",inline"`
 	// Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`).
-	// Deprecated: to be removed from trait configuration.
+	// Deprecated: no longer in use.
 	DiscoveryCache *DiscoveryCacheType `property:"discovery-cache" json:"discoveryCache,omitempty"`
 }
 
 // +kubebuilder:validation:Enum=disabled;disk;memory
 type DiscoveryCacheType string
-
-const (
-	DisabledDiscoveryCache DiscoveryCacheType = "disabled"
-	DiskDiscoveryCache     DiscoveryCacheType = "disk"
-	MemoryDiscoveryCache   DiscoveryCacheType = "memory"
-)

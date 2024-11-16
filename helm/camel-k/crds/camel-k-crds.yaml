@@ -4298,7 +4298,7 @@ spec:
                       discoveryCache:
                         description: |-
                           Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`).
-                          Deprecated: to be removed from trait configuration.
+                          Deprecated: no longer in use.
                         enum:
                         - disabled
                         - disk
@@ -6487,7 +6487,7 @@ spec:
                       discoveryCache:
                         description: |-
                           Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`).
-                          Deprecated: to be removed from trait configuration.
+                          Deprecated: no longer in use.
                         enum:
                         - disabled
                         - disk
@@ -8579,7 +8579,7 @@ spec:
                       discoveryCache:
                         description: |-
                           Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`).
-                          Deprecated: to be removed from trait configuration.
+                          Deprecated: no longer in use.
                         enum:
                         - disabled
                         - disk
@@ -10647,7 +10647,7 @@ spec:
                       discoveryCache:
                         description: |-
                           Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`).
-                          Deprecated: to be removed from trait configuration.
+                          Deprecated: no longer in use.
                         enum:
                         - disabled
                         - disk
@@ -19096,7 +19096,7 @@ spec:
                       discoveryCache:
                         description: |-
                           Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`).
-                          Deprecated: to be removed from trait configuration.
+                          Deprecated: no longer in use.
                         enum:
                         - disabled
                         - disk
@@ -21091,7 +21091,7 @@ spec:
                       discoveryCache:
                         description: |-
                           Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`).
-                          Deprecated: to be removed from trait configuration.
+                          Deprecated: no longer in use.
                         enum:
                         - disabled
                         - disk
@@ -30917,7 +30917,7 @@ spec:
                           discoveryCache:
                             description: |-
                               Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`).
-                              Deprecated: to be removed from trait configuration.
+                              Deprecated: no longer in use.
                             enum:
                             - disabled
                             - disk
