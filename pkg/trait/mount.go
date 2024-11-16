@@ -180,15 +180,17 @@ func (t *mountTrait) configureVolumesAndMounts(e *Environment, vols *[]corev1.Vo
 // configureCamelVolumesAndMounts is in charge to mount volumes and mounts coming from Camel configuration
 // (ie, sources, properties, kamelets, etcetera).
 func (t *mountTrait) configureCamelVolumesAndMounts(e *Environment, vols *[]corev1.Volume, mnts *[]corev1.VolumeMount) {
-	// Sources
+	// Sources index
 	idx := 0
+	// Configmap index (may differ as generated sources can have a different name)
+	cmx := 0
 	for _, s := range e.Integration.AllSources() {
 		// We don't process routes embedded (native) or Kamelets
 		if e.isEmbedded(s) || s.IsGeneratedFromKamelet() {
 			continue
 		}
 		// Routes are copied under /etc/camel/sources and discovered by the runtime accordingly
-		cmName := fmt.Sprintf("%s-source-%03d", e.Integration.Name, idx)
+		cmName := fmt.Sprintf("%s-source-%03d", e.Integration.Name, cmx)
 		if s.ContentRef != "" {
 			cmName = s.ContentRef
 		}
@@ -205,6 +207,9 @@ func (t *mountTrait) configureCamelVolumesAndMounts(e *Environment, vols *[]core
 		*vols = append(*vols, *vol)
 		*mnts = append(*mnts, *mnt)
 		idx++
+		if s.ContentRef == "" {
+			cmx++
+		}
 	}
 	// Resources (likely application properties or kamelets)
 	if e.Resources != nil {
