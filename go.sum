@@ -338,8 +338,8 @@ github.com/opencontainers/image-spec v1.1.0-rc3 h1:fzg1mXZFj8YdPeNkRXMg+zb88BFV0
 github.com/opencontainers/image-spec v1.1.0-rc3/go.mod h1:X4pATf0uXsnn3g5aiGIsVnJBR4mxhKzfwmvK/B2NTm8=
 github.com/openshift/api v0.0.0-20240228005710-4511c790cc60 h1:BfN2JThYjmpXhULHahY1heyfct+fsj4fhkUo3tVIGH4=
 github.com/openshift/api v0.0.0-20240228005710-4511c790cc60/go.mod h1:qNtV0315F+f8ld52TLtPvrfivZpdimOzTi3kn9IVbtU=
-github.com/operator-framework/api v0.23.0 h1:kHymOwcHBpBVujT49SKOCd4EVG7Odwj4wl3NbOR2LLA=
-github.com/operator-framework/api v0.23.0/go.mod h1:oKcFOz+Xc1UhMi2Pzcp6qsO7wjS4r+yP7EQprQBXrfM=
+github.com/operator-framework/api v0.26.0 h1:YVntU2NkVl5zSLLwK5kFcH6P3oSvN9QDgTsY9mb4yUM=
+github.com/operator-framework/api v0.26.0/go.mod h1:3IxOwzVUeGxYlzfwKCcfCyS+q3EEhWA/4kv7UehbeyM=
 github.com/pelletier/go-toml/v2 v2.2.2 h1:aYUidT7k73Pcl9nb2gScu7NSrKCSHIDE89b3+6Wq+LM=
 github.com/pelletier/go-toml/v2 v2.2.2/go.mod h1:1t835xjRzz80PqgE6HHgN2JOsmgYu/h4qDAS4n929Rs=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
