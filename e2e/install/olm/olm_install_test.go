@@ -73,7 +73,7 @@ func TestOLMInstallation(t *testing.T) {
 			Should(Equal(olm.CSVPhaseSucceeded))
 		// Check the operator pod is running
 		g.Eventually(OperatorPodPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-		g.Eventually(OperatorImage(t, ctx, ns), TestTimeoutShort).Should(Equal(defaults.OperatorImage()))
+		g.Eventually(OperatorImage(t, ctx, ns), TestTimeoutShort).Should(Equal(operatorImage()))
 
 		integrationPlatform := v1.NewIntegrationPlatform(ns, "camel-k")
 		integrationPlatform.Spec.Build.Registry = v1.RegistrySpec{
@@ -111,4 +111,18 @@ func TestOLMInstallation(t *testing.T) {
 		UninstallCRDs(t, ctx, g, "../../../")
 		g.Eventually(CRDs(t)).Should(BeNil())
 	})
+}
+
+func operatorImage() string {
+	return envOrDefault(fmt.Sprintf("%s:%s", defaults.ImageName, defaults.Version), "KAMEL_OPERATOR_IMAGE", "KAMEL_K_TEST_OPERATOR_CURRENT_IMAGE")
+}
+
+func envOrDefault(def string, envs ...string) string {
+	for i := range envs {
+		if val := os.Getenv(envs[i]); val != "" {
+			return val
+		}
+	}
+
+	return def
 }

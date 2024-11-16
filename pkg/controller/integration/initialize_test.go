@@ -27,8 +27,8 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 
 	"github.com/apache/camel-k/v2/pkg/util/log"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -52,7 +52,7 @@ func TestCamelImportDeployment(t *testing.T) {
 			Phase: v1.IntegrationPhaseInitialization,
 		},
 	}
-	c, err := test.NewFakeClient(importedIt)
+	c, err := internal.NewFakeClient(importedIt)
 	require.NoError(t, err)
 
 	a := initializeAction{}
@@ -92,7 +92,7 @@ func TestCamelImportCronJob(t *testing.T) {
 			Phase: v1.IntegrationPhaseInitialization,
 		},
 	}
-	c, err := test.NewFakeClient(importedIt)
+	c, err := internal.NewFakeClient(importedIt)
 	require.NoError(t, err)
 
 	a := initializeAction{}
@@ -132,7 +132,7 @@ func TestCamelImportKnativeService(t *testing.T) {
 			Phase: v1.IntegrationPhaseInitialization,
 		},
 	}
-	c, err := test.NewFakeClient(importedIt)
+	c, err := internal.NewFakeClient(importedIt)
 	require.NoError(t, err)
 
 	a := initializeAction{}
@@ -172,7 +172,7 @@ func TestCamelImportUnsupportedKind(t *testing.T) {
 			Phase: v1.IntegrationPhaseInitialization,
 		},
 	}
-	c, err := test.NewFakeClient(importedIt)
+	c, err := internal.NewFakeClient(importedIt)
 	require.NoError(t, err)
 
 	a := initializeAction{}

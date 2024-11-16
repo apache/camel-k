@@ -22,16 +22,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// NewIntegrationProfileList --.
-func NewIntegrationProfileList() IntegrationProfileList {
-	return IntegrationProfileList{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: SchemeGroupVersion.String(),
-			Kind:       IntegrationProfileKind,
-		},
-	}
-}
-
 // NewIntegrationProfile --.
 func NewIntegrationProfile(namespace string, name string) IntegrationProfile {
 	return IntegrationProfile{

@@ -29,10 +29,10 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 func TestBuilderTraitNotAppliedBecauseOfNilKit(t *testing.T) {
@@ -129,7 +129,7 @@ func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.Int
 			Name:      "my-kit",
 		},
 	}
-	client, _ := test.NewFakeClient(itk)
+	client, _ := internal.NewFakeClient(itk)
 	res := &Environment{
 		Ctx:          context.TODO(),
 		CamelCatalog: c,

@@ -18,7 +18,6 @@ limitations under the License.
 package kubernetes
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -51,21 +50,6 @@ func LoadResourceFromYaml(scheme *runtime.Scheme, data string) (ctrl.Object, err
 	}
 
 	return o, nil
-}
-
-// LoadUnstructuredFromYaml returns an unstructured resource from its serialized YAML definition.
-func LoadUnstructuredFromYaml(data string) (ctrl.Object, error) {
-	source, err := yaml.ToJSON([]byte(data))
-	if err != nil {
-		return nil, err
-	}
-	var obj map[string]interface{}
-	if err = json.Unmarshal(source, &obj); err != nil {
-		return nil, err
-	}
-	return &unstructured.Unstructured{
-		Object: obj,
-	}, nil
 }
 
 func runtimeObjectFromUnstructured(scheme *runtime.Scheme, u *unstructured.Unstructured) (runtime.Object, error) {

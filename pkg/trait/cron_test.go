@@ -34,10 +34,10 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 func TestCronFromURI(t *testing.T) {
@@ -229,7 +229,7 @@ func TestCronDeps(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	client, _ := test.NewFakeClient()
+	client, _ := internal.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
@@ -283,7 +283,7 @@ func TestCronDeps(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	c, err := NewFakeClient("ns")
+	c, err := newFakeClient("ns")
 	require.NoError(t, err)
 
 	tc := NewCatalog(c)
@@ -305,7 +305,7 @@ func TestCronMultipleScheduleFallback(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
-	client, _ := test.NewFakeClient()
+	client, _ := internal.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
@@ -366,7 +366,7 @@ func TestCronMultipleScheduleFallback(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	c, err := NewFakeClient("ns")
+	c, err := newFakeClient("ns")
 	assert.Nil(t, err)
 
 	tc := NewCatalog(c)
@@ -386,7 +386,7 @@ func TestCronDepsFallback(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	client, _ := test.NewFakeClient()
+	client, _ := internal.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
@@ -444,7 +444,7 @@ func TestCronDepsFallback(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	c, err := NewFakeClient("ns")
+	c, err := newFakeClient("ns")
 	require.NoError(t, err)
 
 	tc := NewCatalog(c)
@@ -468,7 +468,7 @@ func TestCronWithActiveDeadline(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	client, _ := test.NewFakeClient()
+	client, _ := internal.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
@@ -521,7 +521,7 @@ func TestCronWithActiveDeadline(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	c, err := NewFakeClient("ns")
+	c, err := newFakeClient("ns")
 	require.NoError(t, err)
 
 	tc := NewCatalog(c)
@@ -557,7 +557,7 @@ func TestCronWithBackoffLimit(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	client, _ := test.NewFakeClient()
+	client, _ := internal.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
@@ -610,7 +610,7 @@ func TestCronWithBackoffLimit(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	c, err := NewFakeClient("ns")
+	c, err := newFakeClient("ns")
 	require.NoError(t, err)
 
 	tc := NewCatalog(c)
@@ -648,7 +648,7 @@ func TestCronWithTimeZone(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	client, _ := test.NewFakeClient()
+	client, _ := internal.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	timeZone := "America/Sao_Paulo"
@@ -703,7 +703,7 @@ func TestCronWithTimeZone(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	c, err := NewFakeClient("ns")
+	c, err := newFakeClient("ns")
 	require.NoError(t, err)
 
 	tc := NewCatalog(c)
@@ -736,7 +736,7 @@ func TestCronAuto(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	client, _ := test.NewFakeClient()
+	client, _ := internal.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
@@ -784,7 +784,7 @@ func TestCronAuto(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	c, err := NewFakeClient("ns")
+	c, err := newFakeClient("ns")
 	require.NoError(t, err)
 
 	tc := NewCatalog(c)
@@ -805,7 +805,7 @@ func TestCronRuntimeTriggerReplacement(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
-	client, _ := test.NewFakeClient()
+	client, _ := internal.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
@@ -857,7 +857,7 @@ func TestCronRuntimeTriggerReplacement(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	c, err := NewFakeClient("ns")
+	c, err := newFakeClient("ns")
 	assert.Nil(t, err)
 
 	tc := NewCatalog(c)

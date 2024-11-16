@@ -24,9 +24,9 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/log"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -38,7 +38,7 @@ func TestCanHandlePhaseReadyOrError(t *testing.T) {
 	ip.Namespace = "ns"
 	ip.Name = "ck"
 	ip.Status.Phase = v1.IntegrationPlatformPhaseReady
-	c, err := test.NewFakeClient(&ip)
+	c, err := internal.NewFakeClient(&ip)
 	require.NoError(t, err)
 
 	action := NewMonitorAction()
@@ -74,7 +74,7 @@ func TestMonitorReady(t *testing.T) {
 	ip.Status.Build.RuntimeProvider = v1.RuntimeProviderQuarkus
 	ip.Status.Build.Registry.Address = "1.2.3.4"
 	ip.Status.Phase = v1.IntegrationPlatformPhaseReady
-	c, err := test.NewFakeClient(&ip, &catalog)
+	c, err := internal.NewFakeClient(&ip, &catalog)
 	require.NoError(t, err)
 
 	action := NewMonitorAction()
@@ -100,7 +100,7 @@ func TestMonitorDriftRuntime(t *testing.T) {
 	ip.Status.Build.RuntimeProvider = v1.RuntimeProviderQuarkus
 	ip.Status.Build.Registry.Address = "1.2.3.4"
 	ip.Status.Phase = v1.IntegrationPlatformPhaseReady
-	c, err := test.NewFakeClient(&ip)
+	c, err := internal.NewFakeClient(&ip)
 	require.NoError(t, err)
 
 	action := NewMonitorAction()
@@ -129,7 +129,7 @@ func TestMonitorDriftDefault(t *testing.T) {
 	ip.Status.Build.RuntimeProvider = v1.RuntimeProviderQuarkus
 	ip.Status.Build.Registry.Address = "1.2.3.4"
 	ip.Status.Phase = v1.IntegrationPlatformPhaseReady
-	c, err := test.NewFakeClient(&ip, &catalog)
+	c, err := internal.NewFakeClient(&ip, &catalog)
 	require.NoError(t, err)
 
 	action := NewMonitorAction()
@@ -181,7 +181,7 @@ func TestMonitorDriftConfiguration(t *testing.T) {
 	}
 	ip.Namespace = "ns"
 	ip.Name = "ck"
-	c, err := test.NewFakeClient(&ip, &catalog)
+	c, err := internal.NewFakeClient(&ip, &catalog)
 	require.NoError(t, err)
 
 	action := NewMonitorAction()
@@ -213,7 +213,7 @@ func TestMonitorMissingRegistryError(t *testing.T) {
 	ip.Spec.Build.RuntimeProvider = v1.RuntimeProviderQuarkus
 	ip.Status.Build.RuntimeVersion = "1.2.3"
 	ip.Status.Build.RuntimeProvider = v1.RuntimeProviderQuarkus
-	c, err := test.NewFakeClient(&ip, &catalog)
+	c, err := internal.NewFakeClient(&ip, &catalog)
 	require.NoError(t, err)
 
 	action := NewMonitorAction()
@@ -236,7 +236,7 @@ func TestMonitorMissingCatalogError(t *testing.T) {
 	ip.Name = "ck"
 	ip.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
 	ip.Status.Build.RuntimeProvider = v1.RuntimeProviderQuarkus
-	c, err := test.NewFakeClient(&ip)
+	c, err := internal.NewFakeClient(&ip)
 	require.NoError(t, err)
 
 	action := NewMonitorAction()

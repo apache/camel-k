@@ -205,11 +205,6 @@ func ForIntegrationKit(target *v1.IntegrationKit) Logger {
 	return Log.ForIntegrationKit(target)
 }
 
-// ForIntegrationPlatform --.
-func ForIntegrationPlatform(target *v1.IntegrationPlatform) Logger {
-	return Log.ForIntegrationPlatform(target)
-}
-
 // ***********************************
 //
 //

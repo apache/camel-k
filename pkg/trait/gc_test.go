@@ -23,10 +23,10 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/apache/camel-k/v2/pkg/internal"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -101,7 +101,7 @@ func TestGetDefaultMinimalGarbageCollectableTypes(t *testing.T) {
 	gcTrait, environment := createNominalGCTest()
 	environment.Integration.Generation = 2
 
-	gcTrait.Client, _ = test.NewFakeClient()
+	gcTrait.Client, _ = internal.NewFakeClient()
 	environment.Client = gcTrait.Client
 
 	deletableTypes, err := gcTrait.getDeletableTypes(environment)
@@ -116,12 +116,12 @@ func TestGarbageCollectResources(t *testing.T) {
 
 	deployment := getIntegrationDeployment(environment.Integration)
 	deployment.Labels[v1.IntegrationGenerationLabel] = "1"
-	gcTrait.Client, _ = test.NewFakeClient(deployment)
+	gcTrait.Client, _ = internal.NewFakeClient(deployment)
 
 	environment.Client = gcTrait.Client
 
 	resourceDeleted := false
-	fakeClient := gcTrait.Client.(*test.FakeClient) //nolint
+	fakeClient := gcTrait.Client.(*internal.FakeClient) //nolint
 	fakeClient.Intercept(&interceptor.Funcs{
 		Delete: func(ctx context.Context, client ctrl.WithWatch, obj ctrl.Object, opts ...ctrl.DeleteOption) error {
 			assert.Equal(t, environment.Integration.Name, obj.GetName())
@@ -141,12 +141,12 @@ func TestGarbageCollectPreserveResourcesWithSameGeneration(t *testing.T) {
 	environment.Integration.Generation = 2
 
 	deployment := getIntegrationDeployment(environment.Integration)
-	gcTrait.Client, _ = test.NewFakeClient(deployment)
+	gcTrait.Client, _ = internal.NewFakeClient(deployment)
 
 	environment.Client = gcTrait.Client
 
 	resourceDeleted := false
-	fakeClient := gcTrait.Client.(*test.FakeClient) //nolint
+	fakeClient := gcTrait.Client.(*internal.FakeClient) //nolint
 	fakeClient.Intercept(&interceptor.Funcs{
 		Delete: func(ctx context.Context, client ctrl.WithWatch, obj ctrl.Object, opts ...ctrl.DeleteOption) error {
 			resourceDeleted = true
@@ -172,12 +172,12 @@ func TestGarbageCollectPreserveResourcesOwnerReferenceMismatch(t *testing.T) {
 			Name:       "other-integration-owner",
 		},
 	}
-	gcTrait.Client, _ = test.NewFakeClient(deployment)
+	gcTrait.Client, _ = internal.NewFakeClient(deployment)
 
 	environment.Client = gcTrait.Client
 
 	resourceDeleted := false
-	fakeClient := gcTrait.Client.(*test.FakeClient) //nolint
+	fakeClient := gcTrait.Client.(*internal.FakeClient) //nolint
 	fakeClient.Intercept(&interceptor.Funcs{
 		Delete: func(ctx context.Context, client ctrl.WithWatch, obj ctrl.Object, opts ...ctrl.DeleteOption) error {
 			resourceDeleted = true
@@ -195,7 +195,7 @@ func TestGarbageCollectKnativeServiceResources(t *testing.T) {
 	environment.Integration.Generation = 2
 	environment.Integration.Spec.Profile = v1.TraitProfileKnative
 
-	gcTrait.Client, _ = test.NewFakeClient(&servingv1.Service{
+	gcTrait.Client, _ = internal.NewFakeClient(&servingv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      environment.Integration.Name,
 			Namespace: environment.Integration.Namespace,
@@ -216,7 +216,7 @@ func TestGarbageCollectKnativeServiceResources(t *testing.T) {
 	environment.Client = gcTrait.Client
 
 	resourceDeleted := false
-	fakeClient := gcTrait.Client.(*test.FakeClient) //nolint
+	fakeClient := gcTrait.Client.(*internal.FakeClient) //nolint
 	fakeClient.Intercept(&interceptor.Funcs{
 		Delete: func(ctx context.Context, client ctrl.WithWatch, obj ctrl.Object, opts ...ctrl.DeleteOption) error {
 			assert.Equal(t, environment.Integration.Name, obj.GetName())
@@ -237,7 +237,7 @@ func TestGarbageCollectKnativeTriggerResources(t *testing.T) {
 	environment.Integration.Generation = 2
 	environment.Integration.Spec.Profile = v1.TraitProfileKnative
 
-	gcTrait.Client, _ = test.NewFakeClient(&eventingv1.Trigger{
+	gcTrait.Client, _ = internal.NewFakeClient(&eventingv1.Trigger{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      environment.Integration.Name,
 			Namespace: environment.Integration.Namespace,
@@ -258,7 +258,7 @@ func TestGarbageCollectKnativeTriggerResources(t *testing.T) {
 	environment.Client = gcTrait.Client
 
 	resourceDeleted := false
-	fakeClient := gcTrait.Client.(*test.FakeClient) //nolint
+	fakeClient := gcTrait.Client.(*internal.FakeClient) //nolint
 	fakeClient.Intercept(&interceptor.Funcs{
 		Delete: func(ctx context.Context, client ctrl.WithWatch, obj ctrl.Object, opts ...ctrl.DeleteOption) error {
 			assert.Equal(t, environment.Integration.Name, obj.GetName())

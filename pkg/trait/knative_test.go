@@ -41,16 +41,16 @@ import (
 	knativeapi "github.com/apache/camel-k/v2/pkg/apis/camel/v1/knative"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/knative"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	k8sutils "github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
-	client, err := test.NewFakeClient()
+	client, err := internal.NewFakeClient()
 	require.NoError(t, err)
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
@@ -109,7 +109,7 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	c, err := NewFakeClient("ns")
+	c, err := newFakeClient("ns")
 	require.NoError(t, err)
 
 	tc := NewCatalog(c)
@@ -164,7 +164,7 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 }
 
 func TestKnativeEnvConfigurationFromSource(t *testing.T) {
-	client, err := test.NewFakeClient()
+	client, err := internal.NewFakeClient()
 	require.NoError(t, err)
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
@@ -237,7 +237,7 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	c, err := NewFakeClient("ns")
+	c, err := newFakeClient("ns")
 	require.NoError(t, err)
 
 	tc := NewCatalog(c)
@@ -284,7 +284,7 @@ func TestKnativeTriggerExplicitFilterConfig(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	c, err := NewFakeClient("ns")
+	c, err := newFakeClient("ns")
 	require.NoError(t, err)
 
 	traitCatalog := NewCatalog(c)
@@ -383,7 +383,7 @@ func TestKnativeTriggerExplicitFilterConfigNoEventTypeFilter(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	c, err := NewFakeClient("ns")
+	c, err := newFakeClient("ns")
 	require.NoError(t, err)
 
 	traitCatalog := NewCatalog(c)
@@ -482,7 +482,7 @@ func TestKnativeTriggerDefaultEventTypeFilter(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	c, err := NewFakeClient("ns")
+	c, err := newFakeClient("ns")
 	require.NoError(t, err)
 
 	traitCatalog := NewCatalog(c)
@@ -578,7 +578,7 @@ func TestKnativeTriggerDefaultEventTypeFilterDisabled(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	c, err := NewFakeClient("ns")
+	c, err := newFakeClient("ns")
 	require.NoError(t, err)
 
 	traitCatalog := NewCatalog(c)
@@ -673,7 +673,7 @@ func TestKnativeMultipleTrigger(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	c, err := NewFakeClient("ns")
+	c, err := newFakeClient("ns")
 	require.NoError(t, err)
 
 	traitCatalog := NewCatalog(c)
@@ -810,7 +810,7 @@ func TestKnativeMultipleTriggerAdditionalFilterConfig(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	c, err := NewFakeClient("ns")
+	c, err := newFakeClient("ns")
 	require.NoError(t, err)
 
 	traitCatalog := NewCatalog(c)
@@ -952,7 +952,7 @@ func TestKnativeTriggerNoEventType(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	c, err := NewFakeClient("ns")
+	c, err := newFakeClient("ns")
 	require.NoError(t, err)
 
 	traitCatalog := NewCatalog(c)
@@ -1046,10 +1046,10 @@ func TestKnativeTriggerNoServingAvailable(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	c, err := NewFakeClient("ns")
+	c, err := newFakeClient("ns")
 	require.NoError(t, err)
 
-	fakeClient := c.(*test.FakeClient) //nolint
+	fakeClient := c.(*internal.FakeClient) //nolint
 	fakeClient.DisableKnativeServing()
 
 	traitCatalog := NewCatalog(c)
@@ -1172,7 +1172,7 @@ func TestKnativePlatformHttpConfig(t *testing.T) {
 		t.Run(source.Name, func(t *testing.T) {
 			environment := NewFakeEnvironment(t, source)
 
-			c, err := NewFakeClient("ns")
+			c, err := newFakeClient("ns")
 			require.NoError(t, err)
 
 			tc := NewCatalog(c)
@@ -1218,7 +1218,7 @@ func TestKnativePlatformHttpDependencies(t *testing.T) {
 			environment := NewFakeEnvironment(t, source)
 			environment.Integration.Status.Phase = v1.IntegrationPhaseInitialization
 
-			c, err := NewFakeClient("ns")
+			c, err := newFakeClient("ns")
 			require.NoError(t, err)
 
 			tc := NewCatalog(c)
@@ -1237,7 +1237,7 @@ func TestKnativePlatformHttpDependencies(t *testing.T) {
 }
 
 func TestKnativeEnabled(t *testing.T) {
-	client, err := test.NewFakeClient()
+	client, err := internal.NewFakeClient()
 	require.NoError(t, err)
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
@@ -1308,7 +1308,7 @@ func TestKnativeEnabled(t *testing.T) {
 }
 
 func TestKnativeNotEnabled(t *testing.T) {
-	client, err := test.NewFakeClient()
+	client, err := internal.NewFakeClient()
 	require.NoError(t, err)
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
@@ -1379,7 +1379,7 @@ func TestKnativeNotEnabled(t *testing.T) {
 func NewFakeEnvironment(t *testing.T, source v1.SourceSpec) Environment {
 	t.Helper()
 
-	client, _ := NewFakeClient("ns")
+	client, _ := newFakeClient("ns")
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
@@ -1441,7 +1441,7 @@ func NewFakeEnvironment(t *testing.T, source v1.SourceSpec) Environment {
 
 func NewFakeEnvironmentForSyntheticKit(t *testing.T) Environment {
 	t.Helper()
-	client, _ := NewFakeClient("ns")
+	client, _ := newFakeClient("ns")
 	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
@@ -1493,7 +1493,7 @@ func NewFakeEnvironmentForSyntheticKit(t *testing.T) Environment {
 	return environment
 }
 
-func NewFakeClient(namespace string) (client.Client, error) {
+func newFakeClient(namespace string) (client.Client, error) {
 	channelSourceURL, err := apis.ParseURL("http://channel-source-1.host/")
 	if err != nil {
 		return nil, err
@@ -1515,7 +1515,7 @@ func NewFakeClient(namespace string) (client.Client, error) {
 		return nil, err
 	}
 
-	return test.NewFakeClient(
+	return internal.NewFakeClient(
 		&messaging.Channel{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "Channel",
@@ -1646,7 +1646,7 @@ func TestKnativeSinkBinding(t *testing.T) {
 	environment := NewFakeEnvironment(t, source)
 	environment.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 
-	c, err := NewFakeClient("ns")
+	c, err := newFakeClient("ns")
 	require.NoError(t, err)
 
 	tc := NewCatalog(c)
@@ -1767,9 +1767,9 @@ func TestRunNonKnativeEndpointWithKnativeNotInstalled(t *testing.T) {
 }
 
 func createEnvironmentMissingEventingCRDs() *Environment {
-	client, _ := test.NewFakeClient()
+	client, _ := internal.NewFakeClient()
 	// disable the knative eventing api
-	fakeClient := client.(*test.FakeClient) //nolint
+	fakeClient := client.(*internal.FakeClient) //nolint
 	fakeClient.DisableAPIGroupDiscovery("eventing.knative.dev/v1")
 
 	replicas := int32(3)
@@ -1809,7 +1809,7 @@ func createEnvironmentMissingEventingCRDs() *Environment {
 }
 
 func TestKnativeAutoConfiguration(t *testing.T) {
-	client, _ := test.NewFakeClient()
+	client, _ := internal.NewFakeClient()
 	replicas := int32(3)
 	catalog, _ := camel.QuarkusCatalog()
 	environment := &Environment{

@@ -15,7 +15,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package test
+// IMPORTANT: this is a clone of pkg/internal. As the addons will be moved into pkg, we are using this utility here temporarily only!
+
+package master
 
 import (
 	"context"
@@ -48,8 +50,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 )
 
-// NewFakeClient ---.
-func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
+// newFakeClient ---.
+func newFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 	scheme := clientscheme.Scheme
 
 	// Setup Scheme for all resources

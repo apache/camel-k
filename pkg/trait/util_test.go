@@ -25,8 +25,8 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -49,7 +49,7 @@ func TestToTraitMap(t *testing.T) {
 			},
 		},
 		Addons: map[string]v1.AddonTrait{
-			"telemetry": ToAddonTrait(t, map[string]interface{}{
+			"telemetry": toAddonTrait(t, map[string]interface{}{
 				"enabled": true,
 			}),
 		},
@@ -78,33 +78,6 @@ func TestToTraitMap(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.Equal(t, expected, traitMap)
-}
-
-func TestToPropertyMap(t *testing.T) {
-	trait := traitv1.ContainerTrait{
-		PlatformBaseTrait: traitv1.PlatformBaseTrait{},
-		Name:              "test-container",
-		Auto:              ptr.To(false),
-		Expose:            ptr.To(true),
-		Port:              8081,
-		PortName:          "http-8081",
-		ServicePort:       81,
-		ServicePortName:   "http-81",
-	}
-	expected := map[string]interface{}{
-		"auto":            false,
-		"expose":          true,
-		"port":            float64(8081),
-		"portName":        "http-8081",
-		"servicePort":     float64(81),
-		"servicePortName": "http-81",
-		"name":            "test-container",
-	}
-
-	propMap, err := ToPropertyMap(trait)
-
-	require.NoError(t, err)
-	assert.Equal(t, expected, propMap)
 }
 
 func TestMigrateLegacyConfiguration(t *testing.T) {
@@ -175,7 +148,7 @@ func TestToTrait(t *testing.T) {
 }
 
 func TestSameTraits(t *testing.T) {
-	c, err := test.NewFakeClient()
+	c, err := internal.NewFakeClient()
 	require.NoError(t, err)
 	t.Run("empty traits", func(t *testing.T) {
 		oldKlb := &v1.Pipe{
@@ -413,7 +386,7 @@ func TestIntegrationAndPipeSameTraits(t *testing.T) {
 			},
 		},
 	}
-	c, err := test.NewFakeClient(pipe, integration)
+	c, err := internal.NewFakeClient(pipe, integration)
 	require.NoError(t, err)
 
 	result, err := IntegrationAndPipeSameTraits(c, integration, pipe)

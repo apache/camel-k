@@ -20,7 +20,6 @@ package cmd
 import (
 	"testing"
 
-	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/spf13/cobra"
 
 	"github.com/stretchr/testify/assert"
@@ -50,14 +49,14 @@ func addTestOperatorCmd(options RootCmdOptions, rootCmd *cobra.Command) *operato
 	operatorCmd.PostRunE = func(c *cobra.Command, args []string) error {
 		return nil
 	}
-	operatorCmd.Args = test.ArbitraryArgs
+	operatorCmd.Args = ArbitraryArgs
 	rootCmd.AddCommand(operatorCmd)
 	return operatorOptions
 }
 
 func TestOperatorNoFlag(t *testing.T) {
 	operatorCmdOptions, rootCmd, _ := initializeOperatorCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdOperator)
+	_, err := ExecuteCommand(rootCmd, cmdOperator)
 	require.NoError(t, err)
 	// Check default expected values
 	assert.Equal(t, int32(8081), operatorCmdOptions.HealthPort)
@@ -66,20 +65,20 @@ func TestOperatorNoFlag(t *testing.T) {
 
 func TestOperatorNonExistingFlag(t *testing.T) {
 	_, rootCmd, _ := initializeOperatorCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdOperator, "--nonExistingFlag")
+	_, err := ExecuteCommand(rootCmd, cmdOperator, "--nonExistingFlag")
 	require.Error(t, err)
 }
 
 func TestOperatorHealthPortFlag(t *testing.T) {
 	operatorCmdOptions, rootCmd, _ := initializeOperatorCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdOperator, "--health-port", "7171")
+	_, err := ExecuteCommand(rootCmd, cmdOperator, "--health-port", "7171")
 	require.NoError(t, err)
 	assert.Equal(t, int32(7171), operatorCmdOptions.HealthPort)
 }
 
 func TestOperatorMonitoringPortFlag(t *testing.T) {
 	operatorCmdOptions, rootCmd, _ := initializeOperatorCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdOperator, "--monitoring-port", "7172")
+	_, err := ExecuteCommand(rootCmd, cmdOperator, "--monitoring-port", "7172")
 	require.NoError(t, err)
 	assert.Equal(t, int32(7172), operatorCmdOptions.MonitoringPort)
 }

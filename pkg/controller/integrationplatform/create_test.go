@@ -26,12 +26,12 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 	"github.com/apache/camel-k/v2/pkg/util/maven"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
@@ -52,7 +52,7 @@ func TestCreate(t *testing.T) {
 			},
 		},
 	}
-	c, err := test.NewFakeClient(&ip)
+	c, err := internal.NewFakeClient(&ip)
 	require.NoError(t, err)
 
 	h := NewCreateAction()
@@ -96,7 +96,7 @@ func TestCatalogAlreadyPresent(t *testing.T) {
 		"camel.version": "4.4.0",
 	}
 
-	c, err := test.NewFakeClient(&ip, &catalog)
+	c, err := internal.NewFakeClient(&ip, &catalog)
 	require.NoError(t, err)
 
 	action := NewCreateAction()
@@ -131,7 +131,7 @@ func TestCreateNewCatalog(t *testing.T) {
 		maven.DefaultMavenRepositories += ",https://repository.apache.org/content/repositories/snapshots-group@snapshots@id=apache-snapshots"
 	}
 
-	c, err := test.NewFakeClient(&ip)
+	c, err := internal.NewFakeClient(&ip)
 	require.NoError(t, err)
 
 	// use local Maven executable in tests
@@ -141,7 +141,7 @@ func TestCreateNewCatalog(t *testing.T) {
 		t.Setenv("MAVEN_CMD", "mvn")
 	}
 
-	fakeClient := c.(*test.FakeClient) //nolint
+	fakeClient := c.(*internal.FakeClient) //nolint
 	fakeClient.AddReactor("create", "*", func(action k8stesting.Action) (bool, runtime.Object, error) {
 		createAction := action.(k8stesting.CreateAction) //nolint
 
@@ -191,7 +191,7 @@ func TestCreateNewCatalog(t *testing.T) {
 		},
 	}
 	// Refresh client with changed IP
-	c, err = test.NewFakeClient(&ip)
+	c, err = internal.NewFakeClient(&ip)
 	require.NoError(t, err)
 	action.InjectClient(c)
 	answer, err = action.Handle(context.TODO(), &ip)
@@ -208,7 +208,7 @@ func TestCreateCatalogError(t *testing.T) {
 	ip.Namespace = "ns"
 	ip.Name = "ck"
 	ip.Spec.Build.RuntimeVersion = "0.0.0"
-	c, err := test.NewFakeClient(&ip)
+	c, err := internal.NewFakeClient(&ip)
 	require.NoError(t, err)
 
 	// use local Maven executable in tests
@@ -218,7 +218,7 @@ func TestCreateCatalogError(t *testing.T) {
 		t.Setenv("MAVEN_CMD", "mvn")
 	}
 
-	fakeClient := c.(*test.FakeClient) //nolint
+	fakeClient := c.(*internal.FakeClient) //nolint
 	fakeClient.AddReactor("create", "*", func(action k8stesting.Action) (bool, runtime.Object, error) {
 		createAction := action.(k8stesting.CreateAction) //nolint
 

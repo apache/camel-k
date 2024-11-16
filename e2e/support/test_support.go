@@ -1942,7 +1942,7 @@ func PlatformByName(t *testing.T, ctx context.Context, ns string, name string) f
 
 func IntegrationProfileByName(t *testing.T, ctx context.Context, ns string, name string) func() *v1.IntegrationProfile {
 	return func() *v1.IntegrationProfile {
-		lst := v1.NewIntegrationProfileList()
+		lst := newIntegrationProfileList()
 		if err := TestClient(t).List(ctx, &lst, ctrl.InNamespace(ns)); err != nil {
 			failTest(t, err)
 		}
@@ -1952,6 +1952,16 @@ func IntegrationProfileByName(t *testing.T, ctx context.Context, ns string, name
 			}
 		}
 		return nil
+	}
+}
+
+// newIntegrationProfileList --.
+func newIntegrationProfileList() v1.IntegrationProfileList {
+	return v1.IntegrationProfileList{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       v1.IntegrationProfileKind,
+		},
 	}
 }
 
@@ -1973,7 +1983,7 @@ func CamelCatalog(t *testing.T, ctx context.Context, ns, name string) func() *v1
 
 func IntegrationProfile(t *testing.T, ctx context.Context, ns string) func() *v1.IntegrationProfile {
 	return func() *v1.IntegrationProfile {
-		lst := v1.NewIntegrationProfileList()
+		lst := newIntegrationProfileList()
 		if err := TestClient(t).List(ctx, &lst, ctrl.InNamespace(ns)); err != nil {
 			failTest(t, err)
 		}

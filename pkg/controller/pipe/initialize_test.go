@@ -30,8 +30,8 @@ import (
 
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -48,7 +48,7 @@ func TestNewPipeError(t *testing.T) {
 			Name:      "my-pipe",
 		},
 	}
-	c, err := test.NewFakeClient(pipe)
+	c, err := internal.NewFakeClient(pipe)
 	require.NoError(t, err)
 
 	a := NewInitializeAction()
@@ -86,7 +86,7 @@ func TestNewPipeCamelURIBinding(t *testing.T) {
 			},
 		},
 	}
-	c, err := test.NewFakeClient(pipe)
+	c, err := internal.NewFakeClient(pipe)
 	require.NoError(t, err)
 
 	a := NewInitializeAction()
@@ -187,7 +187,7 @@ func TestNewPipe(t *testing.T) {
 			},
 		},
 	}
-	c, err := test.NewFakeClient(pipe, &source, &sink)
+	c, err := internal.NewFakeClient(pipe, &source, &sink)
 	require.NoError(t, err)
 
 	a := NewInitializeAction()
@@ -264,7 +264,7 @@ func TestNewPipeUnsupportedRef(t *testing.T) {
 			},
 		},
 	}
-	c, err := test.NewFakeClient(pipe)
+	c, err := internal.NewFakeClient(pipe)
 	require.NoError(t, err)
 
 	a := NewInitializeAction()
@@ -304,7 +304,7 @@ func TestNewPipeKnativeURIBinding(t *testing.T) {
 			},
 		},
 	}
-	c, err := test.NewFakeClient(pipe)
+	c, err := internal.NewFakeClient(pipe)
 	require.NoError(t, err)
 
 	a := NewInitializeAction()
@@ -357,7 +357,7 @@ func TestNewPipeKnativeRefBinding(t *testing.T) {
 			},
 		},
 	}
-	c, err := test.NewFakeClient(pipe)
+	c, err := internal.NewFakeClient(pipe)
 	require.NoError(t, err)
 
 	a := NewInitializeAction()
@@ -408,7 +408,7 @@ func TestNewPipeStrimziKafkaTopicBinding(t *testing.T) {
 			},
 		},
 	}
-	c, err := test.NewFakeClient(pipe)
+	c, err := internal.NewFakeClient(pipe)
 	require.NoError(t, err)
 
 	a := NewInitializeAction()
@@ -460,7 +460,7 @@ func TestNewPipeStrimziKafkaBinding(t *testing.T) {
 			},
 		},
 	}
-	c, err := test.NewFakeClient(pipe)
+	c, err := internal.NewFakeClient(pipe)
 	require.NoError(t, err)
 
 	a := NewInitializeAction()

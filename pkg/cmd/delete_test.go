@@ -20,7 +20,6 @@ package cmd
 import (
 	"testing"
 
-	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -48,20 +47,20 @@ func addTestDeleteCmd(options RootCmdOptions, rootCmd *cobra.Command) *deleteCmd
 	deleteCmd.PostRunE = func(c *cobra.Command, args []string) error {
 		return nil
 	}
-	deleteCmd.Args = test.ArbitraryArgs
+	deleteCmd.Args = ArbitraryArgs
 	rootCmd.AddCommand(deleteCmd)
 	return deleteOptions
 }
 
 func TestDeleteNonExistingFlag(t *testing.T) {
 	_, rootCmd, _ := initializeDeleteCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdDelete, "--nonExistingFlag")
+	_, err := ExecuteCommand(rootCmd, cmdDelete, "--nonExistingFlag")
 	require.Error(t, err)
 }
 
 func TestDeleteAllFlag(t *testing.T) {
 	deleteCmdOptions, rootCmd, _ := initializeDeleteCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdDelete, "--all")
+	_, err := ExecuteCommand(rootCmd, cmdDelete, "--all")
 	require.NoError(t, err)
 	assert.True(t, deleteCmdOptions.DeleteAll)
 }

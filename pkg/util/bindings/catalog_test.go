@@ -23,10 +23,10 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	corev1 "k8s.io/api/core/v1"
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1"
 
-	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/require"
 )
 
@@ -107,7 +107,7 @@ func TestValidateEndpoint(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
-			client, err := test.NewFakeClient()
+			client, err := internal.NewFakeClient()
 			require.NoError(t, err)
 
 			bindingContext := BindingContext{
@@ -180,7 +180,7 @@ func TestValidateEndpointError(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
-			client, err := test.NewFakeClient()
+			client, err := internal.NewFakeClient()
 			require.NoError(t, err)
 
 			bindingContext := BindingContext{

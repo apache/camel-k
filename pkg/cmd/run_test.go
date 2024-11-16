@@ -27,10 +27,10 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 	"k8s.io/utils/ptr"
 
 	"github.com/spf13/cobra"
@@ -71,7 +71,7 @@ func initializeRunCmdOptionsWithOutput(t *testing.T) (*runCmdOptions, *cobra.Com
 	defaultIntegrationPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
 	c := v1.NewCamelCatalog(defaultIntegrationPlatform.Namespace, defaults.DefaultRuntimeVersion)
 	c.Spec = v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Provider: defaultIntegrationPlatform.Status.Build.RuntimeProvider, Version: defaultIntegrationPlatform.Status.Build.RuntimeVersion}}
-	fakeClient, _ := test.NewFakeClient(&defaultIntegrationPlatform, &c)
+	fakeClient, _ := internal.NewFakeClient(&defaultIntegrationPlatform, &c)
 
 	options, rootCmd := kamelTestPreAddCommandInitWithClient(fakeClient)
 	runCmdOptions := addTestRunCmdWithOutput(*options, rootCmd)
@@ -89,7 +89,7 @@ func addTestRunCmd(options RootCmdOptions, rootCmd *cobra.Command) *runCmdOption
 	runCmd.PostRunE = func(c *cobra.Command, args []string) error {
 		return nil
 	}
-	runCmd.Args = test.ArbitraryArgs
+	runCmd.Args = ArbitraryArgs
 	rootCmd.AddCommand(runCmd)
 	return runOptions
 }
@@ -97,14 +97,14 @@ func addTestRunCmd(options RootCmdOptions, rootCmd *cobra.Command) *runCmdOption
 func addTestRunCmdWithOutput(options RootCmdOptions, rootCmd *cobra.Command) *runCmdOptions {
 	// add a testing version of run Command with output
 	runCmd, runOptions := newCmdRun(&options)
-	runCmd.Args = test.ArbitraryArgs
+	runCmd.Args = ArbitraryArgs
 	rootCmd.AddCommand(runCmd)
 	return runOptions
 }
 
 func TestRunNoFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun, integrationSource)
+	_, err := ExecuteCommand(rootCmd, cmdRun, integrationSource)
 	require.NoError(t, err)
 	// Check default expected values
 	assert.False(t, runCmdOptions.Wait)
@@ -118,20 +118,20 @@ func TestRunNoFlag(t *testing.T) {
 
 func TestRunNonExistingFlag(t *testing.T) {
 	_, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--nonExistingFlag", integrationSource)
+	_, err := ExecuteCommand(rootCmd, cmdRun, "--nonExistingFlag", integrationSource)
 	require.Error(t, err)
 }
 
 func TestRunCompressionFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--compression", integrationSource)
+	_, err := ExecuteCommand(rootCmd, cmdRun, "--compression", integrationSource)
 	require.NoError(t, err)
 	assert.True(t, runCmdOptions.Compression)
 }
 
 func TestRunDependencyFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun,
+	_, err := ExecuteCommand(rootCmd, cmdRun,
 		"--dependency", "dependency1",
 		"--dependency", "dependency2",
 		"--dependency", "dependency3",
@@ -145,14 +145,14 @@ func TestRunDependencyFlag(t *testing.T) {
 
 func TestRunDevFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--dev", integrationSource)
+	_, err := ExecuteCommand(rootCmd, cmdRun, "--dev", integrationSource)
 	require.NoError(t, err)
 	assert.True(t, runCmdOptions.Dev)
 }
 
 func TestRunDevModeOutputFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--dev", "-o", "yaml", integrationSource)
+	_, err := ExecuteCommand(rootCmd, cmdRun, "--dev", "-o", "yaml", integrationSource)
 	assert.True(t, runCmdOptions.Dev)
 	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
 	require.Error(t, err)
@@ -162,7 +162,7 @@ func TestRunDevModeOutputFlag(t *testing.T) {
 
 func TestRunEnvFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun,
+	_, err := ExecuteCommand(rootCmd, cmdRun,
 		"--env", "env1",
 		"--env", "env2",
 		integrationSource)
@@ -174,14 +174,14 @@ func TestRunEnvFlag(t *testing.T) {
 
 func TestRunKitFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--kit", "myKit", integrationSource)
+	_, err := ExecuteCommand(rootCmd, cmdRun, "--kit", "myKit", integrationSource)
 	require.NoError(t, err)
 	assert.Equal(t, "myKit", runCmdOptions.IntegrationKit)
 }
 
 func TestRunLabelFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun,
+	_, err := ExecuteCommand(rootCmd, cmdRun,
 		"--label", "label1=l1",
 		"--label", "label2=l2",
 		"--label", "label3=l3",
@@ -195,20 +195,20 @@ func TestRunLabelFlag(t *testing.T) {
 
 func TestRunLabelWrongFormatFlag(t *testing.T) {
 	_, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--label", "label1", integrationSource)
+	_, err := ExecuteCommand(rootCmd, cmdRun, "--label", "label1", integrationSource)
 	require.Error(t, err)
 }
 
 func TestRunLogsFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--logs", integrationSource)
+	_, err := ExecuteCommand(rootCmd, cmdRun, "--logs", integrationSource)
 	require.NoError(t, err)
 	assert.True(t, runCmdOptions.Logs)
 }
 
 func TestRunMavenRepositoryFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun,
+	_, err := ExecuteCommand(rootCmd, cmdRun,
 		"--maven-repository", "repo1",
 		"--maven-repository", "repo2",
 		"--maven-repository", "repo3",
@@ -222,14 +222,14 @@ func TestRunMavenRepositoryFlag(t *testing.T) {
 
 func TestRunNameFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--name", "myIntegration", integrationSource)
+	_, err := ExecuteCommand(rootCmd, cmdRun, "--name", "myIntegration", integrationSource)
 	require.NoError(t, err)
 	assert.Equal(t, "myIntegration", runCmdOptions.IntegrationName)
 }
 
 func TestRunOpenApiFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun,
+	_, err := ExecuteCommand(rootCmd, cmdRun,
 		"--open-api", "configmap:oapi2",
 		integrationSource)
 	require.NoError(t, err)
@@ -239,7 +239,7 @@ func TestRunOpenApiFlag(t *testing.T) {
 
 func TestRunOpenApiInvalidFlag(t *testing.T) {
 	_, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun,
+	_, err := ExecuteCommand(rootCmd, cmdRun,
 		"--open-api", "secret:oapi1",
 		"--open-api", "oapi2",
 		integrationSource)
@@ -248,21 +248,21 @@ func TestRunOpenApiInvalidFlag(t *testing.T) {
 
 func TestRunOutputFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun, "-o", "yaml", integrationSource)
+	_, err := ExecuteCommand(rootCmd, cmdRun, "-o", "yaml", integrationSource)
 	require.NoError(t, err)
 	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
 }
 
 func TestRunProfileFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--profile", "myProfile", integrationSource)
+	_, err := ExecuteCommand(rootCmd, cmdRun, "--profile", "myProfile", integrationSource)
 	require.NoError(t, err)
 	assert.Equal(t, "myProfile", runCmdOptions.Profile)
 }
 
 func TestRunPropertyFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun,
+	_, err := ExecuteCommand(rootCmd, cmdRun,
 		"--property", "property1",
 		"--property", "property2",
 		"--property", "property3",
@@ -377,7 +377,7 @@ func TestRunProperty(t *testing.T) {
 
 func TestRunResourceFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun,
+	_, err := ExecuteCommand(rootCmd, cmdRun,
 		"--resource", "res1",
 		"--resource", "res2",
 		integrationSource)
@@ -389,14 +389,14 @@ func TestRunResourceFlag(t *testing.T) {
 
 func TestRunSaveFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--save", integrationSource)
+	_, err := ExecuteCommand(rootCmd, cmdRun, "--save", integrationSource)
 	require.NoError(t, err)
 	assert.True(t, runCmdOptions.Save)
 }
 
 func TestRunSourceFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--source", "source1", integrationSource)
+	_, err := ExecuteCommand(rootCmd, cmdRun, "--source", "source1", integrationSource)
 	require.NoError(t, err)
 	assert.Len(t, runCmdOptions.Sources, 1)
 	assert.Equal(t, "source1", runCmdOptions.Sources[0])
@@ -404,14 +404,14 @@ func TestRunSourceFlag(t *testing.T) {
 
 func TestRunSyncFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--sync", integrationSource)
+	_, err := ExecuteCommand(rootCmd, cmdRun, "--sync", integrationSource)
 	require.NoError(t, err)
 	assert.True(t, runCmdOptions.Sync)
 }
 
 func TestRunExistingTraitFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun,
+	_, err := ExecuteCommand(rootCmd, cmdRun,
 		"--trait", "jvm.enabled",
 		"--trait", "logging.enabled",
 		integrationSource)
@@ -423,7 +423,7 @@ func TestRunExistingTraitFlag(t *testing.T) {
 
 func TestRunMissingTraitFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun,
+	_, err := ExecuteCommand(rootCmd, cmdRun,
 		"--trait", "bogus.missing",
 		integrationSource)
 	require.Error(t, err)
@@ -434,7 +434,7 @@ func TestRunMissingTraitFlag(t *testing.T) {
 
 func TestConfigureTraits(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, "run",
+	_, err := ExecuteCommand(rootCmd, "run",
 		"--trait", "affinity.pod-affinity=false",
 		"--trait", "environment.container-meta=false",
 		"--trait", "prometheus.pod-monitor=false",
@@ -472,14 +472,14 @@ func assertTraitConfiguration(t *testing.T, trait interface{}, expected interfac
 
 func TestRunUseFlowsFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--use-flows=false", integrationSource)
+	_, err := ExecuteCommand(rootCmd, cmdRun, "--use-flows=false", integrationSource)
 	require.NoError(t, err)
 	assert.False(t, runCmdOptions.UseFlows)
 }
 
 func TestRunVolumeFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun,
+	_, err := ExecuteCommand(rootCmd, cmdRun,
 		"-v", "pvcname:/container1/path",
 		"-v", "pvcname:/container2/path",
 		integrationSource)
@@ -491,7 +491,7 @@ func TestRunVolumeFlag(t *testing.T) {
 
 func TestRunVolumeFlagWrongPVCFormat(t *testing.T) {
 	_, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun,
+	_, err := ExecuteCommand(rootCmd, cmdRun,
 		"-v", "pvcname",
 		"-v", "pvcname/container2/path",
 		integrationSource)
@@ -500,7 +500,7 @@ func TestRunVolumeFlagWrongPVCFormat(t *testing.T) {
 
 func TestRunBuildPropertyFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdRun,
+	_, err := ExecuteCommand(rootCmd, cmdRun,
 		"--build-property", "build-prop1=val1",
 		"--build-property", "build-prop2=val2",
 		integrationSource)
@@ -591,7 +591,7 @@ func TestOutputYaml(t *testing.T) {
 	fileName := filepath.Base(tmpFile.Name())
 
 	runCmdOptions, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
-	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(), "-o", "yaml")
+	output, err := ExecuteCommand(runCmd, cmdRun, tmpFile.Name(), "-o", "yaml")
 	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
 
 	require.NoError(t, err)
@@ -625,7 +625,7 @@ func TestTrait(t *testing.T) {
 	fileName := filepath.Base(tmpFile.Name())
 
 	runCmdOptions, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
-	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(), "-o", "yaml", "-t", "mount.configs=configmap:my-cm")
+	output, err := ExecuteCommand(runCmd, cmdRun, tmpFile.Name(), "-o", "yaml", "-t", "mount.configs=configmap:my-cm")
 	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
 
 	require.NoError(t, err)
@@ -661,7 +661,7 @@ func TestMissingTrait(t *testing.T) {
 	require.NoError(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
 
 	runCmdOptions, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
-	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(), "-o", "yaml", "-t", "bogus.fail=i-must-fail")
+	output, err := ExecuteCommand(runCmd, cmdRun, tmpFile.Name(), "-o", "yaml", "-t", "bogus.fail=i-must-fail")
 	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
 	assert.Equal(t, "Error: trait bogus does not exist in catalog\n", output)
 	require.Error(t, err)
@@ -711,7 +711,7 @@ func TestIntegrationServiceAccountName(t *testing.T) {
 	require.NoError(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
 
 	_, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
-	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(), "-o", "yaml", "--service-account", "my-service-account")
+	output, err := ExecuteCommand(runCmd, cmdRun, tmpFile.Name(), "-o", "yaml", "--service-account", "my-service-account")
 
 	require.NoError(t, err)
 	assert.Contains(t, output, "serviceAccountName: my-service-account")
@@ -739,7 +739,7 @@ func TestFileProperties(t *testing.T) {
 	assert.Nil(t, tmpFile.Close())
 	require.NoError(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
 	_, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
-	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(),
+	output, err := ExecuteCommand(runCmd, cmdRun, tmpFile.Name(),
 		"-p", "file:"+tmpFile1.Name(),
 		"-o", "yaml",
 	)
@@ -769,7 +769,7 @@ func TestPropertyShouldNotExpand(t *testing.T) {
 	assert.Nil(t, tmpFile.Close())
 	require.NoError(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
 	_, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
-	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(),
+	output, err := ExecuteCommand(runCmd, cmdRun, tmpFile.Name(),
 		"-o", "yaml",
 		"-p", "runtimeProp=${value}",
 		"--build-property", "buildProp=${value}",
@@ -793,19 +793,19 @@ func TestRunOutput(t *testing.T) {
 	require.NoError(t, os.WriteFile(tmpFile1.Name(), []byte(yamlIntegration), 0o400))
 
 	_, rootCmd, _ := initializeRunCmdOptionsWithOutput(t)
-	output, err := test.ExecuteCommand(rootCmd, cmdRun, tmpFile1.Name())
+	output, err := ExecuteCommand(rootCmd, cmdRun, tmpFile1.Name())
 	_, fileName := filepath.Split(tmpFile1.Name())
 	integrationName := strings.TrimSuffix(fileName, filepath.Ext(fileName))
 	require.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf("Integration \"%s\" created\n", integrationName), output)
 
-	output, err = test.ExecuteCommand(rootCmd, cmdRun, tmpFile1.Name())
+	output, err = ExecuteCommand(rootCmd, cmdRun, tmpFile1.Name())
 	require.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf("Integration \"%s\" unchanged\n", integrationName), output)
 
 	require.NoError(t, os.WriteFile(tmpFile1.Name(), []byte(strings.Replace(yamlIntegration, "Hello", "Hi", 1)), 0o400))
 	assert.Nil(t, tmpFile1.Sync())
-	output, err = test.ExecuteCommand(rootCmd, cmdRun, tmpFile1.Name())
+	output, err = ExecuteCommand(rootCmd, cmdRun, tmpFile1.Name())
 	require.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf("Integration \"%s\" updated\n", integrationName), output)
 }
@@ -840,7 +840,7 @@ func TestRunGlob(t *testing.T) {
 
 	file := fmt.Sprintf("%s%c%s*", dir, os.PathSeparator, "camel-k-*") // = dir/camel-k-*
 
-	output, err := test.ExecuteCommand(rootCmd, cmdRun, "--name", integrationName, file)
+	output, err := ExecuteCommand(rootCmd, cmdRun, "--name", integrationName, file)
 	require.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf("Integration \"%s\" created\n", integrationName), output)
 }
@@ -875,7 +875,7 @@ func TestRunGlobAllFiles(t *testing.T) {
 
 	file := fmt.Sprintf("%s%c*", dir, os.PathSeparator) // = dir/*
 
-	output, err := test.ExecuteCommand(rootCmd, cmdRun, "--name", integrationName, file)
+	output, err := ExecuteCommand(rootCmd, cmdRun, "--name", integrationName, file)
 	require.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf("Integration \"%s\" created\n", integrationName), output)
 }
@@ -902,11 +902,11 @@ func TestRunGlobChange(t *testing.T) {
 
 	file := fmt.Sprintf("%s%c%s", dir, os.PathSeparator, "camel-k-*")
 
-	output, err := test.ExecuteCommand(rootCmd, cmdRun, "--name", integrationName, file)
+	output, err := ExecuteCommand(rootCmd, cmdRun, "--name", integrationName, file)
 	require.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf("Integration \"%s\" created\n", integrationName), output)
 
-	output, err = test.ExecuteCommand(rootCmd, cmdRun, "--name", integrationName, file)
+	output, err = ExecuteCommand(rootCmd, cmdRun, "--name", integrationName, file)
 	require.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf("Integration \"%s\" unchanged\n", integrationName), output)
 
@@ -918,7 +918,7 @@ func TestRunGlobChange(t *testing.T) {
 	assert.Nil(t, tmpFile2.Sync())
 	require.NoError(t, os.WriteFile(tmpFile2.Name(), []byte(yamlIntegration), 0o400))
 
-	output, err = test.ExecuteCommand(rootCmd, cmdRun, "--name", integrationName, file)
+	output, err = ExecuteCommand(rootCmd, cmdRun, "--name", integrationName, file)
 	require.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf("Integration \"%s\" updated\n", integrationName), output)
 }
@@ -930,13 +930,13 @@ func TestRunOutputWithoutKubernetesCluster(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	runCmdOptions._client = nil // remove the default fake client which can bypass this test
 	runCmdOptions.KubeConfig = tmpFile.Name()
-	_, err = test.ExecuteCommand(rootCmd, cmdRun, "-o", "yaml", integrationSource)
+	_, err = ExecuteCommand(rootCmd, cmdRun, "-o", "yaml", integrationSource)
 	require.NoError(t, err)
 }
 
 func TestSelfManagedBuildIntegration(t *testing.T) {
 	runCmdOptions, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
-	output, err := test.ExecuteCommand(runCmd, cmdRun, "--image", "docker.io/my-org/my-app:1.0.0", "-o", "yaml", "-t", "mount.configs=configmap:my-cm")
+	output, err := ExecuteCommand(runCmd, cmdRun, "--image", "docker.io/my-org/my-app:1.0.0", "-o", "yaml", "-t", "mount.configs=configmap:my-cm")
 	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
 
 	require.NoError(t, err)

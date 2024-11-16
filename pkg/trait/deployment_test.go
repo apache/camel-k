@@ -29,9 +29,9 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 func TestConfigureDeploymentTraitWhileIntegrationIsRunningDoesSucceed(t *testing.T) {
@@ -252,7 +252,7 @@ func TestApplyDeploymentTraitWitRollingUpdateStrategy(t *testing.T) {
 
 func createNominalDeploymentTest() (*deploymentTrait, *Environment) {
 	trait, _ := newDeploymentTrait().(*deploymentTrait)
-	trait.Client, _ = test.NewFakeClient(&appsv1.Deployment{
+	trait.Client, _ = internal.NewFakeClient(&appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "integration-name",
 			Namespace: "namespace",
@@ -280,7 +280,7 @@ func createNominalDeploymentTest() (*deploymentTrait, *Environment) {
 	})
 
 	// disable the knative service api
-	fakeClient := trait.Client.(*test.FakeClient) //nolint
+	fakeClient := trait.Client.(*internal.FakeClient) //nolint
 	fakeClient.DisableAPIGroupDiscovery("serving.knative.dev/v1")
 
 	replicas := int32(3)

@@ -83,14 +83,6 @@ func TemplateResource(name string, params interface{}) (string, error) {
 	return buf.String(), nil
 }
 
-// DirExists tells if a directory exists and can be listed for files.
-func DirExists(dirName string) bool {
-	if _, err := resources.Open(dirName); err != nil {
-		return false
-	}
-	return true
-}
-
 // WithPrefix lists all file names that begins with the give path prefix
 // If pathPrefix is a path of directories then be sure to end it with a '/'.
 func WithPrefix(pathPrefix string) ([]string, error) {

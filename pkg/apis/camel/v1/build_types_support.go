@@ -37,15 +37,6 @@ func NewBuild(namespace string, name string) *Build {
 	}
 }
 
-func NewBuildList() BuildList {
-	return BuildList{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: SchemeGroupVersion.String(),
-			Kind:       BuildKind,
-		},
-	}
-}
-
 // BuilderPodNamespace returns the namespace of the operator in charge to reconcile this Build.
 func (build *Build) BuilderPodNamespace() string {
 	for _, t := range build.Spec.Tasks {

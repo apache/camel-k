@@ -30,10 +30,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/maven"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 const customSettings = `<?xml version="1.0" encoding="UTF-8"?>
@@ -197,7 +197,7 @@ func TestMavenSettingsFromConfigMap(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	c, err := test.NewFakeClient(
+	c, err := internal.NewFakeClient(
 		&corev1.ConfigMap{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: "v1",
@@ -246,7 +246,7 @@ func TestMavenSettingsWithSettingsSecurityFromConfigMap(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	c, err := test.NewFakeClient(
+	c, err := internal.NewFakeClient(
 		&corev1.ConfigMap{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: "v1",
@@ -317,7 +317,7 @@ func TestMavenSettingsFromSecret(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	c, err := test.NewFakeClient(
+	c, err := internal.NewFakeClient(
 		&corev1.Secret{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: "v1",
@@ -366,7 +366,7 @@ func TestMavenSettingsWithSettingsSecurityFromSecret(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	c, err := test.NewFakeClient(
+	c, err := internal.NewFakeClient(
 		&corev1.Secret{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: "v1",

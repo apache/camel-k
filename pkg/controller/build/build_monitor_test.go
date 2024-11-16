@@ -23,8 +23,8 @@ import (
 	"time"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
@@ -154,7 +154,7 @@ func TestMonitorSequentialBuilds(t *testing.T) {
 				initObjs = append(initObjs, build)
 			}
 
-			c, err := test.NewFakeClient(initObjs...)
+			c, err := internal.NewFakeClient(initObjs...)
 
 			require.NoError(t, err)
 
@@ -182,7 +182,7 @@ func TestMonitorSequentialBuilds(t *testing.T) {
 }
 
 func TestAllowBuildRequeue(t *testing.T) {
-	c, err := test.NewFakeClient()
+	c, err := internal.NewFakeClient()
 
 	require.NoError(t, err)
 
@@ -366,7 +366,7 @@ func TestMonitorFIFOBuilds(t *testing.T) {
 				initObjs = append(initObjs, build)
 			}
 
-			c, err := test.NewFakeClient(initObjs...)
+			c, err := internal.NewFakeClient(initObjs...)
 
 			require.NoError(t, err)
 
@@ -606,7 +606,7 @@ func TestMonitorDependencyMatchingBuilds(t *testing.T) {
 				initObjs = append(initObjs, build)
 			}
 
-			c, err := test.NewFakeClient(initObjs...)
+			c, err := internal.NewFakeClient(initObjs...)
 
 			require.NoError(t, err)
 

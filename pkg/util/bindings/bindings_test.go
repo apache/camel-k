@@ -27,8 +27,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-
-	"github.com/apache/camel-k/v2/pkg/util/test"
+	"github.com/apache/camel-k/v2/pkg/internal"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -236,7 +235,7 @@ func TestBindings(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
-			client, err := test.NewFakeClient()
+			client, err := internal.NewFakeClient()
 			require.NoError(t, err)
 
 			profile := tc.profile

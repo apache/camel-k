@@ -77,10 +77,6 @@ func (c *cronJobController) checkReadyCondition(ctx context.Context) (bool, erro
 	return false, nil
 }
 
-func (c *cronJobController) getPodSpec() corev1.PodSpec {
-	return c.obj.Spec.JobTemplate.Spec.Template.Spec
-}
-
 func (c *cronJobController) updateReadyCondition(readyPods int32) bool {
 	switch {
 	case c.obj.Status.LastScheduleTime == nil:

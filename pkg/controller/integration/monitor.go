@@ -21,7 +21,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math"
 	"reflect"
 	"strconv"
 	"strings"
@@ -41,6 +40,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/trait"
+	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/digest"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	utilResource "github.com/apache/camel-k/v2/pkg/util/resource"
@@ -235,7 +235,7 @@ func (action *monitorAction) monitorPods(ctx context.Context, environment *trait
 		nonTerminatingPods++
 	}
 	podCount := len(pendingPods.Items) + nonTerminatingPods
-	replicas, err := IToInt32(podCount)
+	replicas, err := util.IToInt32(podCount)
 	if err != nil {
 		return nil, err
 	}
@@ -252,15 +252,6 @@ func (action *monitorAction) monitorPods(ctx context.Context, environment *trait
 	}
 
 	return integration, nil
-}
-
-func IToInt32(x int) (*int32, error) {
-	if x < math.MinInt32 || x > math.MaxInt32 {
-		return nil, fmt.Errorf("integer overflow casting to int32 type")
-	}
-	casted := int32(x)
-
-	return &casted, nil
 }
 
 func isInInitializationFailed(status v1.IntegrationStatus) bool {
@@ -381,7 +372,6 @@ func getIntegrationSecretAndConfigmapResourceVersions(ctx context.Context, clien
 
 type controller interface {
 	checkReadyCondition(ctx context.Context) (bool, error)
-	getPodSpec() corev1.PodSpec
 	updateReadyCondition(readyPods int32) bool
 	hasTemplateIntegrationLabel() bool
 	getControllerName() string

@@ -28,9 +28,9 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -99,7 +99,7 @@ spec:
 }
 
 func TestPrepareKameletsPermissions(t *testing.T) {
-	c, err := test.NewFakeClient()
+	c, err := internal.NewFakeClient()
 	assert.NoError(t, err)
 	err = prepareKameletsPermissions(context.TODO(), c, "camel-k")
 	assert.NoError(t, err)

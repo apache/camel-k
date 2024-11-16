@@ -20,7 +20,6 @@ package hashicorp
 import (
 	"testing"
 
-	"github.com/apache/camel-k/v2/pkg/util/test"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/ptr"
 
@@ -133,7 +132,7 @@ func createEnvironment(t *testing.T, catalogGen func() (*camel.RuntimeCatalog, e
 	t.Helper()
 
 	catalog, err := catalogGen()
-	client, _ := test.NewFakeClient(objects...)
+	client, _ := newFakeClient(objects...)
 	require.NoError(t, err)
 
 	e := trait.Environment{

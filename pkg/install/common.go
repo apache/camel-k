@@ -61,11 +61,6 @@ var RemoveIngressRoleCustomizer = func(object ctrl.Object) ctrl.Object {
 	return object
 }
 
-// Resources installs named resources from the project resource directory.
-func Resources(ctx context.Context, c client.Client, namespace string, force bool, customizer ResourceCustomizer, names ...string) error {
-	return ResourcesOrCollect(ctx, c, namespace, nil, force, customizer, names...)
-}
-
 func ResourcesOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection,
 	force bool, customizer ResourceCustomizer, names ...string) error {
 	for _, name := range names {

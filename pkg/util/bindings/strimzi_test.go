@@ -24,8 +24,8 @@ import (
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/duck/strimzi/v1beta2"
 	"github.com/apache/camel-k/v2/pkg/client/duck/strimzi/clientset/internalclientset/fake"
+	"github.com/apache/camel-k/v2/pkg/internal"
 
-	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
@@ -36,7 +36,7 @@ func TestStrimziDirect(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	client, err := test.NewFakeClient()
+	client, err := internal.NewFakeClient()
 	require.NoError(t, err)
 
 	bindingContext := BindingContext{

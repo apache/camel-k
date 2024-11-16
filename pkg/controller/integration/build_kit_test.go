@@ -22,11 +22,11 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/digest"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
@@ -49,7 +49,7 @@ func TestCamelBuildKitDigestChanged(t *testing.T) {
 			Digest: "NonMatchingDigest",
 		},
 	}
-	c, err := test.NewFakeClient(it)
+	c, err := internal.NewFakeClient(it)
 	require.NoError(t, err)
 
 	a := buildKitAction{}
@@ -104,7 +104,7 @@ func TestCamelBuildKitKitSetOnIntegration(t *testing.T) {
 	hash, err := digest.ComputeForIntegration(it, nil, nil)
 	require.NoError(t, err)
 	it.Status.Digest = hash
-	c, err := test.NewFakeClient(it, ik)
+	c, err := internal.NewFakeClient(it, ik)
 	require.NoError(t, err)
 
 	a := buildKitAction{}
@@ -120,7 +120,7 @@ func TestCamelBuildKitKitSetOnIntegration(t *testing.T) {
 	// Move IntegrationKit phase to ready status
 	it.Status.Phase = v1.IntegrationPhaseBuildingKit
 	ik.Status.Phase = v1.IntegrationKitPhaseReady
-	c, err = test.NewFakeClient(it, ik)
+	c, err = internal.NewFakeClient(it, ik)
 	require.NoError(t, err)
 	a.InjectClient(c)
 	handledIt, err = a.Handle(context.TODO(), it)
@@ -130,7 +130,7 @@ func TestCamelBuildKitKitSetOnIntegration(t *testing.T) {
 	// Move IntegrationKit phase to ready status
 	it.Status.Phase = v1.IntegrationPhaseBuildingKit
 	ik.Status.Phase = v1.IntegrationKitPhaseError
-	c, err = test.NewFakeClient(it, ik)
+	c, err = internal.NewFakeClient(it, ik)
 	require.NoError(t, err)
 	a.InjectClient(c)
 	handledIt, err = a.Handle(context.TODO(), it)
@@ -139,7 +139,7 @@ func TestCamelBuildKitKitSetOnIntegration(t *testing.T) {
 
 	// Remove IntegrationKit
 	it.Status.Phase = v1.IntegrationPhaseBuildingKit
-	c, err = test.NewFakeClient(it)
+	c, err = internal.NewFakeClient(it)
 	require.NoError(t, err)
 	a.InjectClient(c)
 	handledIt, err = a.Handle(context.TODO(), it)
@@ -220,7 +220,7 @@ func TestCamelBuildKitKitLookupExistingKit(t *testing.T) {
 	hash, err := digest.ComputeForIntegration(it, nil, nil)
 	require.NoError(t, err)
 	it.Status.Digest = hash
-	c, err := test.NewFakeClient(it, ik, ip, catalog)
+	c, err := internal.NewFakeClient(it, ik, ip, catalog)
 	require.NoError(t, err)
 
 	a := buildKitAction{}
@@ -237,7 +237,7 @@ func TestCamelBuildKitKitLookupExistingKit(t *testing.T) {
 	// Found a matching kit (ready)
 	it.Status.Phase = v1.IntegrationPhaseBuildingKit
 	ik.Status.Phase = v1.IntegrationKitPhaseReady
-	c, err = test.NewFakeClient(it, ik, ip, catalog)
+	c, err = internal.NewFakeClient(it, ik, ip, catalog)
 	require.NoError(t, err)
 	a.InjectClient(c)
 	handledIt, err = a.Handle(context.TODO(), it)
@@ -249,7 +249,7 @@ func TestCamelBuildKitKitLookupExistingKit(t *testing.T) {
 	// Found a matching kit (error)
 	it.Status.Phase = v1.IntegrationPhaseBuildingKit
 	ik.Status.Phase = v1.IntegrationKitPhaseError
-	c, err = test.NewFakeClient(it, ik, ip, catalog)
+	c, err = internal.NewFakeClient(it, ik, ip, catalog)
 	require.NoError(t, err)
 	a.InjectClient(c)
 	handledIt, err = a.Handle(context.TODO(), it)
@@ -333,7 +333,7 @@ func TestCamelBuildKitKitLookupNoMatchingKits(t *testing.T) {
 	hash, err := digest.ComputeForIntegration(it, nil, nil)
 	require.NoError(t, err)
 	it.Status.Digest = hash
-	c, err := test.NewFakeClient(it, ik, ip, catalog)
+	c, err := internal.NewFakeClient(it, ik, ip, catalog)
 	require.NoError(t, err)
 
 	a := buildKitAction{}

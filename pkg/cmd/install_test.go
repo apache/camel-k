@@ -25,7 +25,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 const cmdInstall = "install"
@@ -50,14 +49,14 @@ func addTestInstallCmd(options RootCmdOptions, rootCmd *cobra.Command) *installC
 	installCmd.PostRunE = func(c *cobra.Command, args []string) error {
 		return nil
 	}
-	installCmd.Args = test.ArbitraryArgs
+	installCmd.Args = ArbitraryArgs
 	rootCmd.AddCommand(installCmd)
 	return installOptions
 }
 
 func TestInstallNoFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall)
+	_, err := ExecuteCommand(rootCmd, cmdInstall)
 	require.NoError(t, err)
 	// Check default expected values
 	assert.False(t, installCmdOptions.Wait)
@@ -83,97 +82,97 @@ func TestInstallNoFlag(t *testing.T) {
 
 func TestInstallNonExistingFlag(t *testing.T) {
 	_, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--nonExistingFlag")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--nonExistingFlag")
 	require.Error(t, err)
 }
 
 func TestInstallBaseImageFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--base-image", "someString")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--base-image", "someString")
 	require.NoError(t, err)
 	assert.Equal(t, "someString", installCmdOptions.BaseImage)
 }
 
 func TestInstallBuildPublishStrategyFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--build-publish-strategy", "someString")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--build-publish-strategy", "someString")
 	require.NoError(t, err)
 	assert.Equal(t, "someString", installCmdOptions.BuildPublishStrategy)
 }
 
 func TestInstallBuildStrategyFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--build-strategy", "someString")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--build-strategy", "someString")
 	require.NoError(t, err)
 	assert.Equal(t, "someString", installCmdOptions.BuildStrategy)
 }
 
 func TestInstallBuildOrderStrategyFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--build-order-strategy", "someString")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--build-order-strategy", "someString")
 	require.NoError(t, err)
 	assert.Equal(t, "someString", installCmdOptions.BuildOrderStrategy)
 }
 
 func TestInstallBuildTimeoutFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--build-timeout", "10")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--build-timeout", "10")
 	require.NoError(t, err)
 	assert.Equal(t, "10", installCmdOptions.BuildTimeout)
 }
 
 func TestInstallClusterSetupFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--cluster-setup")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--cluster-setup")
 	require.NoError(t, err)
 	assert.True(t, installCmdOptions.ClusterSetupOnly)
 }
 
 func TestInstallClusterTypeFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--cluster-type", "Kubernetes")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--cluster-type", "Kubernetes")
 	require.NoError(t, err)
 	assert.Equal(t, "Kubernetes", installCmdOptions.ClusterType)
 }
 
 func TestInstallExampleFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--example")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--example")
 	require.NoError(t, err)
 	assert.True(t, installCmdOptions.ExampleSetup)
 }
 
 func TestInstallForceFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--force")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--force")
 	require.NoError(t, err)
 	assert.True(t, installCmdOptions.Force)
 }
 
 func TestInstallGlobalFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--global")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--global")
 	require.NoError(t, err)
 	assert.True(t, installCmdOptions.Global)
 }
 
 func TestInstallHealthFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--health-port", "7777")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--health-port", "7777")
 	require.NoError(t, err)
 	assert.Equal(t, int32(7777), installCmdOptions.HealthPort)
 }
 
 func TestInstallLocalRepositoryFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--maven-local-repository", "someString")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--maven-local-repository", "someString")
 	require.NoError(t, err)
 	assert.Equal(t, "someString", installCmdOptions.MavenLocalRepository)
 }
 
 func TestInstallMavenRepositoryFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall,
+	_, err := ExecuteCommand(rootCmd, cmdInstall,
 		"--maven-repository", "someString1",
 		"--maven-repository", "someString2")
 	require.NoError(t, err)
@@ -183,14 +182,14 @@ func TestInstallMavenRepositoryFlag(t *testing.T) {
 
 func TestInstallMavenSettingsFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--maven-settings", "someString")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--maven-settings", "someString")
 	require.NoError(t, err)
 	assert.Equal(t, "someString", installCmdOptions.MavenSettings)
 }
 
 func TestInstallMonitoringFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall,
+	_, err := ExecuteCommand(rootCmd, cmdInstall,
 		"--monitoring",
 		"--monitoring-port", "7777")
 	require.NoError(t, err)
@@ -200,14 +199,14 @@ func TestInstallMonitoringFlag(t *testing.T) {
 
 func TestInstallOlmFalseFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--olm=false")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--olm=false")
 	require.NoError(t, err)
 	assert.False(t, installCmdOptions.Olm)
 }
 
 func TestInstallOlmTrueNonDefaultFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--olm",
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--olm",
 		"--olm-channel", "olmChannel",
 		"--olm-global-namespace", "olmGlobalNamespace",
 		"--olm-operator-name", "olmOperatorName",
@@ -228,28 +227,28 @@ func TestInstallOlmTrueNonDefaultFlag(t *testing.T) {
 
 func TestInstallOperatorImageFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--operator-image", "someString")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--operator-image", "someString")
 	require.NoError(t, err)
 	assert.Equal(t, "someString", installCmdOptions.OperatorImage)
 }
 
 func TestInstallOperatorImagePullPolicyFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--operator-image-pull-policy", "someString")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--operator-image-pull-policy", "someString")
 	require.NoError(t, err)
 	assert.Equal(t, "someString", installCmdOptions.OperatorImagePullPolicy)
 }
 
 func TestInstallOutputFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--output", "yaml")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--output", "yaml")
 	require.NoError(t, err)
 	assert.Equal(t, "yaml", installCmdOptions.OutputFormat)
 }
 
 func TestInstallPropertyFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall,
+	_, err := ExecuteCommand(rootCmd, cmdInstall,
 		"--maven-property", "someString1",
 		"--maven-property", "someString2")
 	require.NoError(t, err)
@@ -259,7 +258,7 @@ func TestInstallPropertyFlag(t *testing.T) {
 
 func TestInstallRegistryFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall,
+	_, err := ExecuteCommand(rootCmd, cmdInstall,
 		"--registry", "registry",
 		"--organization", "organization",
 		"--registry-insecure",
@@ -273,7 +272,7 @@ func TestInstallRegistryFlag(t *testing.T) {
 
 func TestInstallRegistryWithAuthFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall,
+	_, err := ExecuteCommand(rootCmd, cmdInstall,
 		"--registry-auth-password", "authPassword",
 		"--registry-auth-server", "authServer",
 		"--registry-auth-username", "authUsername")
@@ -285,56 +284,56 @@ func TestInstallRegistryWithAuthFlag(t *testing.T) {
 
 func TestInstallRuntimeVersionFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--runtime-version", "1.3.0")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--runtime-version", "1.3.0")
 	require.NoError(t, err)
 	assert.Equal(t, "1.3.0", installCmdOptions.RuntimeVersion)
 }
 
 func TestInstallSaveFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--save")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--save")
 	require.NoError(t, err)
 	assert.True(t, installCmdOptions.Save)
 }
 
 func TestInstallSkipClusterSetupFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--skip-cluster-setup")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--skip-cluster-setup")
 	require.NoError(t, err)
 	assert.True(t, installCmdOptions.SkipClusterSetup)
 }
 
 func TestInstallSkipOperatorSetupFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--skip-operator-setup")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--skip-operator-setup")
 	require.NoError(t, err)
 	assert.True(t, installCmdOptions.SkipOperatorSetup)
 }
 
 func TestInstallSkipRegistrySetupFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--skip-registry-setup")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--skip-registry-setup")
 	require.NoError(t, err)
 	assert.True(t, installCmdOptions.SkipRegistrySetup)
 }
 
 func TestInstallSkipDefaultKameletsSetupFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--skip-default-kamelets-setup")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--skip-default-kamelets-setup")
 	require.NoError(t, err)
 	assert.True(t, installCmdOptions.SkipDefaultKameletsSetup)
 }
 
 func TestInstallTraitProfileFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--trait-profile", "someString")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--trait-profile", "someString")
 	require.NoError(t, err)
 	assert.Equal(t, "someString", installCmdOptions.TraitProfile)
 }
 
 func TestInstallWaitFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--wait")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--wait")
 	require.NoError(t, err)
 	assert.True(t, installCmdOptions.Wait)
 }
@@ -380,7 +379,7 @@ func TestDecodeMavenSettings(t *testing.T) {
 
 func TestInstallTolerationFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall,
+	_, err := ExecuteCommand(rootCmd, cmdInstall,
 		"--toleration", "key1=value1:NoSchedule",
 		"--toleration", "key2=value2:NoExecute")
 	require.NoError(t, err)
@@ -390,7 +389,7 @@ func TestInstallTolerationFlag(t *testing.T) {
 
 func TestInstallMavenExtension(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall,
+	_, err := ExecuteCommand(rootCmd, cmdInstall,
 		"--maven-extension", "fi.yle.tools:aws-maven:1.4.2")
 	require.NoError(t, err)
 	assert.Equal(t, "fi.yle.tools:aws-maven:1.4.2", installCmdOptions.MavenExtensions[0])
@@ -398,63 +397,63 @@ func TestInstallMavenExtension(t *testing.T) {
 
 func TestInstallInfoLogging(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall)
+	_, err := ExecuteCommand(rootCmd, cmdInstall)
 	require.NoError(t, err)
 	assert.Equal(t, "info", installCmdOptions.LogLevel)
 }
 
 func TestInstallInfoLogging1(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "-z", "0")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "-z", "0")
 	require.NoError(t, err)
 	assert.Equal(t, "0", installCmdOptions.LogLevel)
 }
 
 func TestInstallInfoLogging2(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--log-level", "0")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--log-level", "0")
 	require.NoError(t, err)
 	assert.Equal(t, "0", installCmdOptions.LogLevel)
 }
 
 func TestInstallInfoLogging3(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "-z", "info")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "-z", "info")
 	require.NoError(t, err)
 	assert.Equal(t, "info", installCmdOptions.LogLevel)
 }
 
 func TestInstallInfoLogging4(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--log-level", "info")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--log-level", "info")
 	require.NoError(t, err)
 	assert.Equal(t, "info", installCmdOptions.LogLevel)
 }
 
 func TestInstallDebugLogging1(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "-z", "1")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "-z", "1")
 	require.NoError(t, err)
 	assert.Equal(t, "1", installCmdOptions.LogLevel)
 }
 
 func TestInstallDebugLogging2(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--log-level", "1")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--log-level", "1")
 	require.NoError(t, err)
 	assert.Equal(t, "1", installCmdOptions.LogLevel)
 }
 
 func TestInstallDebugLogging3(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "-z", "debug")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "-z", "debug")
 	require.NoError(t, err)
 	assert.Equal(t, "debug", installCmdOptions.LogLevel)
 }
 
 func TestInstallDebugLogging4(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--log-level", "debug")
+	_, err := ExecuteCommand(rootCmd, cmdInstall, "--log-level", "debug")
 	require.NoError(t, err)
 	assert.Equal(t, "debug", installCmdOptions.LogLevel)
 }

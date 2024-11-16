@@ -191,20 +191,6 @@ func ToTraitMap(traits interface{}) (Options, error) {
 	return traitMap, nil
 }
 
-// ToPropertyMap accepts a trait and converts it to a map of trait properties.
-func ToPropertyMap(trait interface{}) (map[string]interface{}, error) {
-	data, err := json.Marshal(trait)
-	if err != nil {
-		return nil, err
-	}
-	propMap := make(map[string]interface{})
-	if err = json.Unmarshal(data, &propMap); err != nil {
-		return nil, err
-	}
-
-	return propMap, nil
-}
-
 // MigrateLegacyConfiguration moves up the legacy configuration in a trait to the new top-level properties.
 // Values of the new properties always take precedence over the ones from the legacy configuration
 // with the same property names.

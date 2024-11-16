@@ -26,10 +26,10 @@ import (
 	"github.com/stretchr/testify/require"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/log"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -37,7 +37,7 @@ func TestDefaultRuntimeSpec(t *testing.T) {
 	ip := v1.IntegrationPlatform{}
 	ip.Namespace = "ns"
 	ip.Name = "ck"
-	c, err := test.NewFakeClient(&ip)
+	c, err := internal.NewFakeClient(&ip)
 	require.NoError(t, err)
 
 	h := NewInitializeAction()
@@ -61,7 +61,7 @@ func TestUserRuntimeSpec(t *testing.T) {
 			RuntimeProvider: "MyProvider",
 		},
 	}
-	c, err := test.NewFakeClient(&ip)
+	c, err := internal.NewFakeClient(&ip)
 	require.NoError(t, err)
 
 	h := NewInitializeAction()
@@ -79,7 +79,7 @@ func TestDefaultTimeouts(t *testing.T) {
 	ip := v1.IntegrationPlatform{}
 	ip.Namespace = "ns"
 	ip.Name = "ck"
-	c, err := test.NewFakeClient(&ip)
+	c, err := internal.NewFakeClient(&ip)
 
 	require.NoError(t, err)
 	require.NoError(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
@@ -103,7 +103,7 @@ func TestMavenComputedFromBuildTimeouts(t *testing.T) {
 	ip.Spec.Build.Timeout = &metav1.Duration{
 		Duration: timeout,
 	}
-	c, err := test.NewFakeClient(&ip)
+	c, err := internal.NewFakeClient(&ip)
 	require.NoError(t, err)
 
 	h := NewInitializeAction()
@@ -125,7 +125,7 @@ func TestTruncatedTimeouts(t *testing.T) {
 	ip.Spec.Build.Timeout = &metav1.Duration{
 		Duration: bt,
 	}
-	c, err := test.NewFakeClient(&ip)
+	c, err := internal.NewFakeClient(&ip)
 	require.NoError(t, err)
 
 	h := NewInitializeAction()

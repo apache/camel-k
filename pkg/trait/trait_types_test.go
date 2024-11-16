@@ -28,10 +28,10 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 func TestCollectConfigurationValues(t *testing.T) {
@@ -199,7 +199,7 @@ func createTestEnvironment(t *testing.T, profile v1.TraitProfile) *Environment {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	client, _ := test.NewFakeClient()
+	client, _ := internal.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	environment := &Environment{
@@ -265,7 +265,7 @@ func createTestEnvironment(t *testing.T, profile v1.TraitProfile) *Environment {
 
 func createNonManagedBuildTestEnvironment(t *testing.T, profile v1.TraitProfile) *Environment {
 	t.Helper()
-	client, _ := test.NewFakeClient()
+	client, _ := internal.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)

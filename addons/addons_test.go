@@ -18,6 +18,7 @@ limitations under the License.
 package addons
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/apache/camel-k/v2/addons/master"
@@ -35,13 +36,13 @@ func TestTraitConfiguration(t *testing.T) {
 				Profile: v1.TraitProfileKubernetes,
 				Traits: v1.Traits{
 					Addons: map[string]v1.AddonTrait{
-						"master": trait.ToAddonTrait(t, map[string]interface{}{
+						"master": toAddonTrait(t, map[string]interface{}{
 							"enabled":      true,
 							"resourceName": "test-lock",
 							"labelKey":     "test-label",
 							"labelValue":   "test-value",
 						}),
-						"telemetry": trait.ToAddonTrait(t, map[string]interface{}{
+						"telemetry": toAddonTrait(t, map[string]interface{}{
 							"enabled": true,
 						}),
 					},
@@ -60,4 +61,17 @@ func TestTraitConfiguration(t *testing.T) {
 	assert.Equal(t, "test-label", *master.LabelKey)
 	assert.Equal(t, "test-value", *master.LabelValue)
 
+}
+
+func toAddonTrait(t *testing.T, config map[string]interface{}) v1.AddonTrait {
+	t.Helper()
+
+	data, err := json.Marshal(config)
+	require.NoError(t, err)
+
+	var addon v1.AddonTrait
+	err = json.Unmarshal(data, &addon)
+	require.NoError(t, err)
+
+	return addon
 }

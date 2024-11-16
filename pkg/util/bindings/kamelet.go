@@ -192,16 +192,6 @@ func (k BindingConverter) Order() int {
 	return OrderStandard
 }
 
-// V1alpha1BindingConverter converts a reference to a Kamelet into a Camel URI.
-// Deprecated.
-type V1alpha1BindingConverter struct{}
-
-// ID -- .
-// Deprecated.
-func (k V1alpha1BindingConverter) ID() string {
-	return "kamelet"
-}
-
 func init() {
 	RegisterBindingProvider(BindingConverter{})
 }
