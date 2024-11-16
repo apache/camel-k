@@ -61,15 +61,6 @@ func (action *initializeAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.
 func initializePipe(ctx context.Context, c client.Client, l log.Logger, pipe *v1.Pipe) (*v1.Pipe, error) {
 	// Remove the previous conditions
 	pipe.Status = v1.PipeStatus{}
-	if pipe.Spec.Integration != nil {
-		l.Infof("Pipe %s is using deprecated .spec.integration parameter. Please, update and use annotation traits instead", pipe.Name)
-		pipe.Status.SetCondition(
-			v1.PipeIntegrationDeprecationNotice,
-			corev1.ConditionTrue,
-			".spec.integration parameter is deprecated",
-			".spec.integration parameter is deprecated. Use annotation traits instead",
-		)
-	}
 	it, err := CreateIntegrationFor(ctx, c, pipe)
 	if err != nil {
 		pipe.Status.Phase = v1.PipePhaseError

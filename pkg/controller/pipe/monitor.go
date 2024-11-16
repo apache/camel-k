@@ -79,15 +79,6 @@ func (action *monitorAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.Pip
 
 	// Check if the integration needs to be changed
 	expected, err := CreateIntegrationFor(ctx, action.client, pipe)
-	if pipe.Spec.Integration != nil {
-		action.L.Infof("Pipe %s is using deprecated .spec.integration parameter. Please, update and use annotation traits instead", pipe.Name)
-		pipe.Status.SetCondition(
-			v1.PipeIntegrationDeprecationNotice,
-			corev1.ConditionTrue,
-			".spec.integration parameter is deprecated",
-			".spec.integration parameter is deprecated. Use annotation traits instead",
-		)
-	}
 	if err != nil {
 		pipe.Status.Phase = v1.PipePhaseError
 		pipe.Status.SetErrorCondition(
