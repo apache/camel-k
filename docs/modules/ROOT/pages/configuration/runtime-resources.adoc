@@ -99,7 +99,7 @@ Let's see an example where your integration expect a text file to be consumed un
       - to: "log:info"
 ----
 
-When running the `Integration`, you can specify where to mount the resource content (either a `File`, `Configmap` or `Secret`) with the _@path_ syntax:
+When running the `Integration`, you can specify where to mount the resource content (either a `Configmap` or `Secret`) with the _@path_ syntax:
 
 ----
 kamel run --resource configmap:my-cm-files@/tmp/inputs resource-file-location-route.yaml
