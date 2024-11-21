@@ -1,10 +1,10 @@
 # Changelog
 
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2024-11-19)
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2024-11-20)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...v2.5.1-nightly)
 
-## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2024-11-19)
+## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2024-11-20)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.6.0-nightly)
 
@@ -12,6 +12,7 @@
 
 - Traits review [\#5936](https://github.com/apache/camel-k/issues/5936)
 - Do not fail if sources are exclusively passed via configuration file. [\#5933](https://github.com/apache/camel-k/issues/5933)
+- Mount trait regression with release 2.5.0 [\#5924](https://github.com/apache/camel-k/issues/5924)
 - Add a note to clarify about deprecation policy [\#5923](https://github.com/apache/camel-k/issues/5923)
 - Integration build pushes image successfully using credentials but fails on pulling built image [\#5898](https://github.com/apache/camel-k/issues/5898)
 - How to troubleshoot Maven configuration [\#5894](https://github.com/apache/camel-k/issues/5894)
