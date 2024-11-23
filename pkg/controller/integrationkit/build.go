@@ -155,13 +155,6 @@ func (action *buildAction) createBuild(ctx context.Context, kit *v1.IntegrationK
 		}
 	}
 
-	//nolint:contextcheck
-	if buildConfig.Strategy == v1.BuildStrategyPod {
-		err = platform.CreateBuilderServiceAccount(env.Ctx, env.Client, env.Platform)
-		if err != nil {
-			return nil, fmt.Errorf("error while creating Camel K Builder service account: %w", err)
-		}
-	}
 	// The build operation, when executed as a Pod, should be executed by a container image containing the
 	// `kamel builder` command. Likely the same image running the operator should be fine.
 	buildConfig.ToolImage = platform.OperatorImage

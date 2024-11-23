@@ -19,7 +19,6 @@ package platform
 
 import (
 	"context"
-	"fmt"
 	"runtime"
 	"strings"
 	"time"
@@ -30,11 +29,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
-	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
-
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
-	"github.com/apache/camel-k/v2/pkg/install"
 	"github.com/apache/camel-k/v2/pkg/kamelet/repository"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/log"
@@ -109,12 +105,6 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		return err
 	}
 
-	if p.Status.Build.BuildConfiguration.Strategy == v1.BuildStrategyPod {
-		if err := CreateBuilderServiceAccount(ctx, c, p); err != nil {
-			return fmt.Errorf("cannot ensure service account is present: %w", err)
-		}
-	}
-
 	err = configureRegistry(ctx, c, p, verbose)
 	if err != nil {
 		return err
@@ -129,22 +119,6 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 	}
 
 	return nil
-}
-
-func CreateBuilderServiceAccount(ctx context.Context, client client.Client, p *v1.IntegrationPlatform) error {
-	log.Debugf("Integration Platform %s [%s]: creating build service account", p.Name, p.Namespace)
-	sa := corev1.ServiceAccount{}
-	key := ctrl.ObjectKey{
-		Name:      BuilderServiceAccount,
-		Namespace: p.Namespace,
-	}
-
-	err := client.Get(ctx, key, &sa)
-	if err != nil && k8serrors.IsNotFound(err) {
-		return install.BuilderServiceAccountRoles(ctx, client, p.Namespace, p.Status.Cluster)
-	}
-
-	return err
 }
 
 func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPlatform, verbose bool) error {
