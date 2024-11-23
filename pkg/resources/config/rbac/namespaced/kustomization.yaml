@@ -27,6 +27,7 @@ resources:
 - operator-role-keda.yaml
 - operator-role-knative.yaml
 - operator-role-leases.yaml
+- operator-role-openshift.yaml
 - operator-role-podmonitors.yaml
 - operator-role-strimzi.yaml
 - operator-role-binding.yaml
@@ -34,5 +35,6 @@ resources:
 - operator-role-binding-keda.yaml
 - operator-role-binding-knative.yaml
 - operator-role-binding-leases.yaml
+- operator-role-binding-openshift.yaml
 - operator-role-binding-podmonitors.yaml
 - operator-role-binding-strimzi.yaml

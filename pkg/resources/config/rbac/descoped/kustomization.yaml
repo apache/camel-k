@@ -27,12 +27,14 @@ resources:
 - operator-cluster-role-keda.yaml
 - operator-cluster-role-knative.yaml
 - operator-cluster-role-leases.yaml
+- operator-cluster-role-openshift.yaml
 - operator-cluster-role-podmonitors.yaml
 - operator-cluster-role-strimzi.yaml
 - operator-cluster-role-binding-events.yaml
 - operator-cluster-role-binding-keda.yaml
 - operator-cluster-role-binding-knative.yaml
 - operator-cluster-role-binding-leases.yaml
+- operator-cluster-role-binding-openshift.yaml
 - operator-cluster-role-binding-podmonitors.yaml
 - operator-cluster-role-binding-strimzi.yaml
 - operator-cluster-role-binding.yaml
