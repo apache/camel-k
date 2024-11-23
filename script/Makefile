@@ -355,9 +355,13 @@ build-resources:
 	./script/get_catalog.sh $(DEFAULT_RUNTIME_VERSION)
 
 build-compile-integration-tests:
+ifndef NOTEST
 	@echo "####### Compiling integration tests..."
 	export CAMEL_K_E2E_JUST_COMPILE="true"; \
 	go test -run nope -tags="integration" ./e2e/...
+else
+	@echo "####### Skipping integration tests compilation..."
+endif
 
 clean:
 	# disable gomodules when executing go clean:
@@ -788,14 +792,6 @@ install-k8s-global: clone-kustomize-dir set-operator-id set-operator-env install
 install-k8s-ns: DEFAULT_NS="default"
 install-k8s-ns: KUSTOMIZE_DIR="install/overlays/kubernetes/namespaced"
 install-k8s-ns: clone-kustomize-dir set-operator-id set-operator-env install-operator install-registry
-
-install-openshift-global: DEFAULT_NS="camel-k"
-install-openshift-global: KUSTOMIZE_DIR="install/overlays/openshift/descoped"
-install-openshift-global: clone-kustomize-dir set-operator-id set-operator-env install-operator
-
-install-openshift-ns: DEFAULT_NS="default"
-install-openshift-ns: KUSTOMIZE_DIR="install/overlays/openshift/namespaced"
-install-openshift-ns: clone-kustomize-dir set-operator-id set-operator-env install-operator
 
 uninstall:
 ifdef NAMESPACE

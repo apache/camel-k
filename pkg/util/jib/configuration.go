@@ -134,7 +134,7 @@ func JibMavenProfile(jibMavenPluginVersion string, jibLayerFilterExtensionMavenV
 				Permissions: []v1.Permission{
 					{
 						File: "/deployments/*",
-						Mode: "544",
+						Mode: "755",
 					},
 				},
 			},

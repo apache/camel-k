@@ -42,7 +42,7 @@ func TestJibBuildMavenArgs(t *testing.T) {
 	require.NoError(t, err)
 	expectedParams := strings.Split(
 		fmt.Sprintf("jib:build -Djib.disableUpdateChecks=true -x some-maven-option -P jib -Djib.to.image=my-image "+
-			"-Djib.from.image=my-base-image -Djib.baseImageCache=%s -Djib.allowInsecureRegistries=true", tmpMvnCtxDir+"/jib"),
+			"-Djib.from.image=my-base-image -Djib.baseImageCache=%s -Djib.container.user=1000 -Djib.allowInsecureRegistries=true", tmpMvnCtxDir+"/jib"),
 		" ")
 	assert.Equal(t, expectedParams, args)
 }
@@ -55,7 +55,7 @@ func TestJibBuildMavenArgsWithPlatforms(t *testing.T) {
 	require.NoError(t, err)
 	expectedParams := strings.Split(
 		fmt.Sprintf("jib:build -Djib.disableUpdateChecks=true -x some-maven-option -P jib -Djib.to.image=my-image "+
-			"-Djib.from.image=my-base-image -Djib.baseImageCache=%s -Djib.from.platforms=amd64,arm64 -Djib.allowInsecureRegistries=true",
+			"-Djib.from.image=my-base-image -Djib.baseImageCache=%s -Djib.container.user=1000 -Djib.from.platforms=amd64,arm64 -Djib.allowInsecureRegistries=true",
 			tmpMvnCtxDir+"/jib"),
 		" ")
 	assert.Equal(t, expectedParams, args)

@@ -240,8 +240,7 @@ func CopyFile(src, dst string) (int64, error) {
 	}
 
 	if !stat.Mode().IsRegular() {
-		err = fmt.Errorf("%s is not a regular file", src)
-		return 0, err
+		return 0, fmt.Errorf("%s is not a regular file", src)
 	}
 
 	source, err := Open(src)
@@ -504,7 +503,7 @@ func WriteFileWithContent(filePath string, content []byte) error {
 	fileDir := path.Dir(filePath)
 
 	// Create dir if not present
-	err := os.MkdirAll(fileDir, io2.FilePerm700)
+	err := os.MkdirAll(fileDir, io2.FilePerm755)
 	if err != nil {
 		return fmt.Errorf("could not create dir for file "+filePath+": %w", err)
 	}

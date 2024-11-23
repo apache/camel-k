@@ -52,7 +52,7 @@ func newDeployerTrait() Trait {
 
 func (t *deployerTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	var condition *TraitCondition
-	//nolint: staticcheck
+	//nolint:staticcheck
 	if !ptr.Deref(t.UseSSA, true) {
 		condition = NewIntegrationCondition(
 			"Deployer",
@@ -70,7 +70,7 @@ func (t *deployerTrait) Apply(e *Environment) error {
 	e.PostActions = append(e.PostActions, func(env *Environment) error {
 		applier := e.Client.ServerOrClientSideApplier()
 		for _, resource := range env.Resources.Items() {
-			//nolint: staticcheck
+			//nolint:staticcheck
 			if ptr.Deref(t.UseSSA, true) {
 				if err := applier.Apply(e.Ctx, resource); err != nil {
 					return err

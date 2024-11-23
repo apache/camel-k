@@ -112,6 +112,7 @@ func TestPrepareKameletsDirectory(t *testing.T) {
 }
 
 func TestDownloadKameletDependencyAndExtract(t *testing.T) {
+	itp := v1.NewIntegrationPlatform("itp-ns", "my-itp")
 	// use local Maven executable in tests
 	t.Setenv("MAVEN_WRAPPER", boolean.FalseString)
 	_, ok := os.LookupEnv("MAVEN_CMD")
@@ -126,7 +127,7 @@ func TestDownloadKameletDependencyAndExtract(t *testing.T) {
 	assert.NoError(t, err)
 	camelVersion := c.Runtime.Metadata["camel.version"]
 	assert.NotEqual(t, "", camelVersion)
-	err = downloadKameletDependency(context.TODO(), camelVersion, tmpDir)
+	err = downloadKameletDependency(context.TODO(), &itp, camelVersion, tmpDir)
 	assert.NoError(t, err)
 	downloadedDependency, err := os.Stat(path.Join(tmpDir, fmt.Sprintf("camel-kamelets-%s.jar", camelVersion)))
 	assert.NoError(t, err)
