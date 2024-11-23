@@ -61,7 +61,7 @@ func installKameletCatalog(ctx context.Context, c client.Client, platform *v1.In
 		return -1, -1, err
 	}
 	// Download Kamelet dependency
-	if err := downloadKameletDependency(ctx, version, kameletDir); err != nil {
+	if err := downloadKameletDependency(ctx, platform, version, kameletDir); err != nil {
 		return -1, -1, err
 	}
 	// Extract Kamelets files
@@ -100,11 +100,13 @@ func prepareKameletDirectory() (string, error) {
 	return kameletDir, nil
 }
 
-func downloadKameletDependency(ctx context.Context, version, kameletsDir string) error {
+func downloadKameletDependency(ctx context.Context, platform *v1.IntegrationPlatform, version, kameletsDir string) error {
 	// TODO: we may want to add the maven settings coming from the platform
 	// in order to cover any user security setting in place
 	p := maven.NewProjectWithGAV("org.apache.camel.k.kamelets", "kamelets-catalog", defaults.Version)
 	mc := maven.NewContext(kameletsDir)
+	mc.LocalRepository = platform.Status.Build.Maven.LocalRepository
+	mc.AdditionalArguments = platform.Status.Build.Maven.CLIOptions
 	mc.AddArgument("-q")
 	mc.AddArgument("dependency:copy")
 	mc.AddArgument(fmt.Sprintf("-Dartifact=org.apache.camel.kamelets:camel-kamelets:%s:jar", version))

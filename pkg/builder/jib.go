@@ -156,6 +156,7 @@ func buildJibMavenArgs(mavenDir, image, baseImage string, insecureRegistry bool,
 	mavenArgs = append(mavenArgs, jib.JibMavenToImageParam+image)
 	mavenArgs = append(mavenArgs, jib.JibMavenFromImageParam+baseImage)
 	mavenArgs = append(mavenArgs, jib.JibMavenBaseImageCache+mavenDir+"/jib")
+	mavenArgs = append(mavenArgs, "-Djib.container.user=1000")
 
 	if imagePlatforms != nil {
 		platforms := strings.Join(imagePlatforms, ",")
