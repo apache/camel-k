@@ -1,23 +1,16 @@
 # Changelog
 
-## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2024-11-24)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...HEAD)
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...v2.5.1-nightly)
+
+## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2024-11-24)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.6.0-nightly)
 
 **Closed issues:**
 
 - Rest "contract first" fails with variable in api path [\#5939](https://github.com/apache/camel-k/issues/5939)
-
-## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2024-11-23)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
-
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2024-11-21)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.5.1-nightly)
-
-**Closed issues:**
-
 - Traits review [\#5936](https://github.com/apache/camel-k/issues/5936)
 - Do not fail if sources are exclusively passed via configuration file. [\#5933](https://github.com/apache/camel-k/issues/5933)
 - Mount trait regression with release 2.5.0 [\#5924](https://github.com/apache/camel-k/issues/5924)
