@@ -743,7 +743,6 @@ ifdef OPERATOR_ID
 	@sed -i 's/value: .*/value: $(OPERATOR_ID)/' $(KUST_TMP)/$(KUSTOMIZE_DIR)/patch-operator-id.yaml
 	@echo "INFO: adding a suffix for ClusterRoleBindings $(OPERATOR_ID)"
 	cd $(KUST_TMP)/install/base/config/rbac/descoped && kustomize edit set namesuffix -- -$(OPERATOR_ID)
-	cd $(KUST_TMP)/install/base/config/rbac/openshift/descoped && kustomize edit set namesuffix -- -$(OPERATOR_ID)
 else
 	@echo "INFO: no operator ID variable \"OPERATOR_ID\" provided. Keeping default."
 endif

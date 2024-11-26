@@ -467,13 +467,13 @@ func installClusterRoleBinding(ctx context.Context, c client.Client, collection 
 func installOpenShiftRoles(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool, global bool) error {
 	if global {
 		return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
-			"/config/rbac/openshift/descoped/operator-cluster-role-openshift.yaml",
-			"/config/rbac/openshift/descoped/operator-cluster-role-binding-openshift.yaml",
+			"/config/rbac/descoped/operator-cluster-role-openshift.yaml",
+			"/config/rbac/descoped/operator-cluster-role-binding-openshift.yaml",
 		)
 	} else {
 		return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
-			"/config/rbac/openshift/namespaced/operator-role-openshift.yaml",
-			"/config/rbac/openshift/namespaced/operator-role-binding-openshift.yaml",
+			"/config/rbac/namespaced/operator-role-openshift.yaml",
+			"/config/rbac/namespaced/operator-role-binding-openshift.yaml",
 		)
 	}
 }
