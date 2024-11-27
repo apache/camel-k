@@ -1,12 +1,20 @@
 # Changelog
 
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...HEAD)
+
+**Closed issues:**
+
+- KameletBinding panics when missing binding type [\#5953](https://github.com/apache/camel-k/issues/5953)
+
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2024-11-26)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...v2.5.1-nightly)
+
 ## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2024-11-25)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
-
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2024-11-25)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.5.1-nightly)
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.6.0-nightly)
 
 **Closed issues:**
 
