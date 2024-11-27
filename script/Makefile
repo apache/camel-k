@@ -343,7 +343,7 @@ build-kamel:
 	ln -sf build/_output/bin/kamel-$(IMAGE_ARCH) ./kamel
 
 build-kamel-platform:
-	# Perform only when running on OS other than linux
+# Perform only when running on OS other than linux
 ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
 	@echo "####### Building platform specific kamel CLI for $(IMAGE_ARCH) architecture..."
 	CGO_ENABLED=0 GOARCH=$(IMAGE_ARCH) go build $(GOFLAGS) -o build/_output/bin/kamel-$(IMAGE_ARCH) ./cmd/kamel/*.go
