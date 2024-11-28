@@ -30,6 +30,7 @@ LAST_RELEASED_VERSION ?= 2.5.0
 DEFAULT_RUNTIME_VERSION := 3.15.0
 # Kubernetes tooling
 CONTROLLER_GEN_VERSION := v0.15.0
+CONTROLLER_GEN=$(GOBIN)/controller-gen
 CODEGEN_VERSION := v0.30.6
 OPERATOR_SDK_VERSION := v1.30.0
 KUSTOMIZE_VERSION := v4.5.4
@@ -221,7 +222,7 @@ generate: codegen-tools-install
 	cd pkg/apis/camel && $(CONTROLLER_GEN) paths="./..." object
 	cd addons/keda/duck && $(CONTROLLER_GEN) paths="./..." object
 
-codegen-tools-install: controller-gen
+codegen-tools-install:
 	@# We must force the installation to make sure we are using the correct version
 	@# Note: as there is no --version in the tools, we cannot rely on cached local versions
 	@echo "Installing k8s.io/code-generator tools with version $(CODEGEN_VERSION)"
@@ -229,6 +230,7 @@ codegen-tools-install: controller-gen
 	go install k8s.io/code-generator/cmd/client-gen@$(CODEGEN_VERSION)
 	go install k8s.io/code-generator/cmd/lister-gen@$(CODEGEN_VERSION)
 	go install k8s.io/code-generator/cmd/informer-gen@$(CODEGEN_VERSION)
+	go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_GEN_VERSION)
 
 build: codegen build-resources test build-kamel build-compile-integration-tests
 
@@ -543,16 +545,7 @@ release-helm:
 	./script/release_helm.sh ${VERSION}
 
 .PHONY: do-build build build-kamel build-kamel-platform build-resources dep codegen images images-push images-push-staging image-build test check clean release cross-compile package-examples set-version git-tag check-licenses build-resources release-helm release-staging release-nightly get-staging-repo get-version
-.PHONY: controller-gen kubectl kustomize operator-sdk opm
-
-# find or download controller-gen if necessary
-controller-gen:
-ifeq (, $(shell command -v controller-gen 2> /dev/null))
-	go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_GEN_VERSION)
-CONTROLLER_GEN=$(GOBIN)/controller-gen
-else
-CONTROLLER_GEN=$(shell command -v controller-gen 2> /dev/null)
-endif
+.PHONY: kubectl kustomize operator-sdk opm
 
 kubectl:
 ifeq (, $(shell command -v kubectl 2> /dev/null))
@@ -560,12 +553,8 @@ ifeq (, $(shell command -v kubectl 2> /dev/null))
 endif
 
 kustomize:
-ifeq (, $(shell command -v kustomize 2> /dev/null))
 	go install sigs.k8s.io/kustomize/kustomize/v4@$(KUSTOMIZE_VERSION)
 KUSTOMIZE=$(GOBIN)/kustomize
-else
-KUSTOMIZE=$(shell command -v kustomize 2> /dev/null)
-endif
 
 operator-sdk: detect-os
 	@echo "####### Installing operator-sdk version $(OPERATOR_SDK_VERSION)..."
