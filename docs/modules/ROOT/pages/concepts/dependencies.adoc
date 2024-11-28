@@ -4,9 +4,10 @@ From Camel K version 2 onward you will be able to use any Camel K Runtime. Each 
 
 [caption=]
 .Camel dependencies matrix
-[width="100%",cols="4,2,2,2,2,3",options="header"]
+[width="100%",cols="4,2,2,2,2,2,3",options="header"]
 |===
 |Camel K Version
+|Last release
 |(Default) Camel K Runtime
 |Camel Quarkus
 |Camel
@@ -15,7 +16,7 @@ From Camel K version 2 onward you will be able to use any Camel K Runtime. Each 
 |===
 
 //cannot use top level index.adoc as the page with the query is always omitted.
-indexTable::[version="*",relative="running/running.adoc",cellformats="util.ckRef(pageComponentDisplayVersion, pageComponentVersion)|camelKRuntimeVersion|util.camelQuarkusRef(camelQuarkusVersion, camelQuarkusDocsVersion)|util.camelRef(camelVersion, camelDocsVersion)|util.quarkusRef(quarkusVersion)|ck.branch(pageComponentVersion)", requires={requires},transform=util.sortCompatibilityItems]
+indexTable::[version="*",relative="running/running.adoc",cellformats="util.ckRef(pageComponentDisplayVersion, pageComponentVersion)|lastReleasedVersion|camelKRuntimeVersion|util.camelQuarkusRef(camelQuarkusVersion, camelQuarkusDocsVersion)|util.camelRef(camelVersion, camelDocsVersion)|util.quarkusRef(quarkusVersion)|ck.branch(pageComponentVersion)", requires={requires},transform=util.sortCompatibilityItems]
 
 == Other APIs version matrix
 

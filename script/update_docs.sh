@@ -18,6 +18,7 @@
 location=$(dirname $0)
 
 echo "Scraping information from Makefile"
+LAST_RELEASED_VERSION=$(grep '^LAST_RELEASED_VERSION ?= ' Makefile | sed 's/^.* \?= //')
 RUNTIME_VERSION=$(grep '^DEFAULT_RUNTIME_VERSION := ' Makefile | sed 's/^.* \?= //')
 
 CATALOG="$location/../pkg/resources/resources/camel-catalog-$RUNTIME_VERSION.yaml"
@@ -52,11 +53,13 @@ fi
 CAMEL_QUARKUS_DOCS_VERSION="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.x"
 QUARKUS_VERSION=$(yq '.spec.runtime.metadata."quarkus.version"' $CATALOG)
 
+echo "Camel K latest version: $LAST_RELEASED_VERSION"
 echo "Camel K Runtime version: $RUNTIME_VERSION"
 echo "Camel version: $CAMEL_VERSION"
 echo "Camel Quarkus version: $CAMEL_QUARKUS_VERSION"
 echo "Quarkus version: $QUARKUS_VERSION"
 
+yq -i ".asciidoc.attributes.last-released-version = \"$LAST_RELEASED_VERSION\"" $location/../docs/antora.yml
 yq -i ".asciidoc.attributes.camel-k-runtime-version = \"$RUNTIME_VERSION\"" $location/../docs/antora.yml
 yq -i ".asciidoc.attributes.camel-version = \"$CAMEL_VERSION\"" $location/../docs/antora.yml
 yq -i ".asciidoc.attributes.camel-docs-version = \"$CAMEL_DOCS_VERSION\"" $location/../docs/antora.yml
