@@ -15,10 +15,10 @@ https://kustomize.io[Kustomize] provides a declarative approach to the configura
 
 ```
 $ kubectl create ns camel-k
-$ kubectl apply -k github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v2.4.0 --server-side
+$ kubectl apply -k github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v{last-released-version} --server-side
 ```
 
-You can specify as `ref` parameter the version you're willing to install (ie, `v2.4.0`). The command above will install a descoped (global) operator in the camel-k namespace. This is the suggested configuration in order to manage Integrations in all namespaces.
+You can specify as `ref` parameter the version you're willing to install (ie, `v{last-released-version}`). The command above will install a descoped (global) operator in the camel-k namespace. This is the suggested configuration in order to manage Integrations in all namespaces.
 
 [[helm]]
 === Installation via Helm Hub
