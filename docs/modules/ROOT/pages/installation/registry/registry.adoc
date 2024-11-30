@@ -8,14 +8,26 @@ The Camel K operator is in charge to build a Camel application and to "container
 
 For the reason above it's important that you provide a container registry which is accessible from both the operator Pod and the cluster internal mechanisms. However, a **default registry** is present in certain platforms such as _Minikube_, _Openshift_ or _Docker Desktop_.
 
-For any other platform that do not provide a default container registry, then, a registry must be provided accordingly.
+For any other platform that do not provide a default container registry, then, a container registry must be provided accordingly.
 
 [[how-to-configure]]
 == How to configure Camel K container registry
 
 When running a production grade installation, you'll be probably using a private container registry which is accessible via authenticated method. The secret is something that will be https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-pod-that-uses-your-secret[included at deployment time] as `imagePullSecret` configuration.
 
-As each registry may have a slightly different way of securing the access you can use the generic guidelines provided in xref:installation/registry/registry-secret.adoc[Secret registry configuration] and adjust accordingly. We expect that at the end of the process you have a public address (1) an _organization_ (2) and a _secret_ (3) values that will be used to configure the registry.
+[[kubernetes-secret]]
+=== Create a secret for your registry
+
+The easiest way to create a Secret is to leverage the `kubectl` CLI:
+
+[source,bash]
+----
+kubectl create secret docker-registry registry --docker-server <my-registry-address> --docker-username <my-user> --docker-password <my-password>
+----
+
+NOTE: you must include `--docker-server docker.io` value also if you're using Docker Hub. The default value provided by `kubectl` won't.
+
+As each registry may have a slightly different way of securing the access you can use the generic guidelines provided in and adjust accordingly (more information in the xref:installation/registry/registry-secret.adoc[Secret registry configuration] guide). We expect that at the end of the process you have a public address (1) an _organization_ (2) (optional, see details below) and a _secret_ (3) values that will be used to configure the registry.
 
 You will need to create or edit any existing `IntegrationPlatform` custom resource with the values as expected in the `.spec.build.registry`.
 
@@ -31,13 +43,18 @@ spec:
   build:
     registry:
       address: <my-registry-address>
-      organization: <my-organization>
+      organization: <my-organization> (optional)
       secret: <my-secret-credentials>
 ----
 
 The changes will be immediately reconciled and the operator will be able to push and pull resources in a secure manner.
 
-[[configuring-registry]]
+[[organization]]
+=== Role of the organization parameter
+
+The `organization` parameter is optional. When it's missing, the operator will use the namespace name to create an image within such organization name. When you're using an container registry you may be limited to store image in a given organization only. In this case, you must provide the name of such `organization` with this option.
+
+[[requirements]]
 == Container registry requirements
 Each platform may have its default registry of choice. And each container registry may have a slight different configuration. Please, be aware that we won't be able to support all the available solutions.
 
@@ -57,6 +74,7 @@ We have some hints that can help you configuring on the most common platforms:
 - xref:installation/registry/special/icr.adoc[IBM Container Registry]
 - xref:installation/registry/special/kind.adoc[Kind]
 - xref:installation/registry/special/minikube.adoc[Minikube]
+- xref:installation/registry/special/openshift.adoc[Openshift]
 
 [[configuring-registry-run-it-yours]]
 == Run your own container registry

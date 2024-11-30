@@ -1,0 +1,54 @@
+= Configuring Openshift registry
+
+Openshift has an embedded container registry you can use to store the images produced by Camel K build process. The full details required to provide access to the registry are available in the https://docs.openshift.com/container-platform/4.17/registry/accessing-the-registry.html[Openshift registry documentation].
+
+NOTE: before version 2.6, Camel K used S2I as a default publishing strategy against the embedded registry. Any upgrade from S2I to Jib should work out of the box.
+
+== Service Account secret credentials
+
+The first thing you need to do is to create an access token for the service account you want to use to pull/push images from the registry. We suggest to use the `camel-k-builder` Service Account which was created during the installation procedure and is normally used to perform "building" operations.
+
+```bash
+oc serviceaccounts new-token camel-k-builder -n camel-k
+eyJhb[...]Uhz0
+```
+
+WARNING: treat the token with the due level of confidentiality.
+
+You will need to use this token to create a secret:
+```bash
+oc create secret docker-registry ocp-registry --docker-server image-registry.openshift-image-registry.svc:5000 --docker-username camel-k-builder --docker-password eyJhb[...]Uhz0 -n camel-k
+```
+
+NOTE: `image-registry.openshift-image-registry.svc:5000` is the default internal route exposed by Openshift. You may need to use an alternative route according to the configuration of your cluster.
+
+== Service account pull and push permissions
+
+Before being able to pull and push containers images to the registry, you need to provide the proper privileges to access:
+
+```bash
+oc policy add-role-to-user registry-viewer -z camel-k-builder -n camel-k
+oc policy add-role-to-user registry-editor -z camel-k-builder -n camel-k
+```
+
+NOTE: `-z` identifies a Service Account.
+
+== Configure the IntegrationPlatform
+
+Now you should have all the authorizations required to pull and push containers to the image registry. In order to do that you will need to provide the Secret created above into your IntegrationPlatform configuration:
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: IntegrationPlatform
+metadata:
+  name: camel-k
+  namespace: camel-k
+spec:
+  build:
+    registry:
+      address: image-registry.openshift-image-registry.svc:5000
+      secret: ocp-registry
+----
+
+NOTE: make sure to use the same address provided in the secret above.

@@ -59,6 +59,7 @@ type s2iTask struct {
 var _ Task = &s2iTask{}
 
 func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
+	log.Info("S2I publishing strategy is deprecated and may be removed in the future, use Jib strategy instead")
 	status := initializeStatusFrom(t.build.Status, t.task.BaseImage)
 
 	bc := &buildv1.BuildConfig{

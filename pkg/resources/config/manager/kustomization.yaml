@@ -22,7 +22,3 @@ resources:
 - operator-deployment.yaml
 - operator-service-account.yaml
 - builder-service-account.yaml
-- builder-role.yaml
-- builder-role-openshift.yaml
-- builder-role-binding.yaml
-- builder-role-binding-openshift.yaml

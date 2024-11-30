@@ -5696,7 +5696,7 @@ a PackageTask, used to package the project
 
 
 a BuildahTask, for Buildah strategy
-Deprecated: use jib, s2i or a custom publishing strategy instead
+Deprecated: use jib or a custom publishing strategy instead
 
 |`kaniko` +
 *xref:#_camel_apache_org_v1_KanikoTask[KanikoTask]*
@@ -5704,7 +5704,7 @@ Deprecated: use jib, s2i or a custom publishing strategy instead
 
 
 a KanikoTask, for Kaniko strategy
-Deprecated: use jib, s2i or a custom publishing strategy instead
+Deprecated: use jib or a custom publishing strategy instead
 
 |`spectrum` +
 *xref:#_camel_apache_org_v1_SpectrumTask[SpectrumTask]*
@@ -5712,7 +5712,7 @@ Deprecated: use jib, s2i or a custom publishing strategy instead
 
 
 a SpectrumTask, for Spectrum strategy
-Deprecated: use jib, s2i or a custom publishing strategy instead
+Deprecated: use jib or a custom publishing strategy instead
 
 |`s2i` +
 *xref:#_camel_apache_org_v1_S2iTask[S2iTask]*
@@ -5720,6 +5720,7 @@ Deprecated: use jib, s2i or a custom publishing strategy instead
 
 
 a S2iTask, for S2I strategy
+Deprecated: use jib or a custom publishing strategy instead
 
 |`jib` +
 *xref:#_camel_apache_org_v1_JibTask[JibTask]*
@@ -8524,6 +8525,8 @@ as a Maven repository.
 *Appears on:*
 
 * <<#_camel_apache_org_v1_Traits, Traits>>
+
+WARNING: The Route trait is **deprecated** and will removed in future release versions: use Ingress trait istead.
 
 The Route trait can be used to configure the creation of OpenShift routes for the integration.
 

@@ -30,8 +30,6 @@ This command will build and publish your actual Camel K development version to t
 ----
 make install-k8s-global (default in camel-k namespace)
 make install-k8s-ns (default in default namespace)
-make install-openshift-global (default in camel-k namespace)
-make install-openshift-ns (default in default namespace)
 ----
 
 Those targets may use two variables, `NAMESPACE` and `REGISTRY` in order to let you specify the namespace where to install the operator and the container registry to use. For instance:
@@ -44,6 +42,25 @@ NAMESPACE=test REGISTRY=1.2.3.4 make install-k8s-global
 Will install a global operator in the `test` namespace with the registry located at IP 1.2.3.4. Mind that when you're using Minikube, the target will be able to automatically detect any existing local registry and set it up for you. For more complex customization you'll need to use the regular Kustomization installation procedure.
 
 In order to uninstall the local operator you can also run `make uninstall` (will keep CRDs) and `make uninstall-all` (will remove CRDs and consequently any running Integration). You can use variable `NAMESPACE` as well if the operator was installed in a namespace different than default.
+
+=== CRC special requirement
+
+You may need to test the operator on CRC. In such case you can login to the Openshift registry accessing its local interface:
+
+```
+docker login -u kubeadmin -p $(oc whoami -t) default-route-openshift-image-registry.apps-crc.testing
+```
+
+At this stage you will need to hack a little bit in order to be able to push the operator image to the registry:
+```
+CUSTOM_IMAGE=default-route-openshift-image-registry.apps-crc.testing/camel-k/camel-k make bundle
+NOTEST=true CUSTOM_IMAGE=default-route-openshift-image-registry.apps-crc.testing/camel-k/camel-k make images
+docker push default-route-openshift-image-registry.apps-crc.testing/camel-k/camel-k:2.6.0-SNAPSHOT
+```
+
+With the steps above you should have available a local operator into CRC and proceed normally with the `make install-k8s-global` procedure.
+
+NOTE: you will need to configure the IntegrationPlatform and the registry as required for Openshift and the operator Deployment may fail due to high amount of resources limit (which you can remove to let the operator start).
 
 [[local-camel-k-runtime]]
 === Local Camel K runtime

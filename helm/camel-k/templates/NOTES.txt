@@ -1,7 +1,7 @@
 Thanks for installing Camel K version {{ .Chart.Version }}!
 
 {{- if .Values.platform }}
-WARNING: you're setting some IntegrationPlatform values. This is deprecated and may remove in future releases. Make sure to install an IntegrationPlatform as a separate process.
+WARNING: you're setting some IntegrationPlatform values. This is deprecated and may be removed in future releases. Make sure to install an IntegrationPlatform as a separate process.
 {{- end }}
 
 {{- if not (.Values.platform) }}

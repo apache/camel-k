@@ -82,12 +82,18 @@ func (action *monitorAction) Handle(ctx context.Context, platform *v1.Integratio
 	if err != nil {
 		return platform, err
 	}
-	if isOpenshift {
+	if isOpenshift && platform.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyS2I {
 		platform.Status.SetCondition(
 			v1.IntegrationPlatformConditionTypeRegistryAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationPlatformConditionTypeRegistryAvailableReason,
-			"registry not available because provided by Openshift")
+			"registry not available because provided by Openshift S2I")
+		action.L.Infof("WARN: S2I publishing strategy is deprecated and may be removed in the future, use Jib strategy instead")
+		platform.Status.SetCondition(
+			"S2IPublishingStrategyDeprecated",
+			corev1.ConditionTrue,
+			"PublishingStrategyDeprecationNoticeReason",
+			"S2I publishing strategy is deprecated and may be removed in the future, use Jib strategy instead")
 	} else {
 		if platform.Status.Build.Registry.Address == "" {
 			// error, we need a registry if we're not on Openshift
