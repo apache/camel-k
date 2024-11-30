@@ -1,38 +1,31 @@
 # Changelog
 
-## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...HEAD)
-
-**Closed issues:**
-
-- Change Kamelet Distribution - provide your own catalog method [\#5958](https://github.com/apache/camel-k/issues/5958)
-
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2024-11-28)
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2024-11-29)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...v2.5.1-nightly)
 
-**Closed issues:**
-
-- KameletBinding panics when missing binding type [\#5953](https://github.com/apache/camel-k/issues/5953)
-
-## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2024-11-25)
+## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2024-11-29)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.6.0-nightly)
 
 **Closed issues:**
 
+- Change Kamelet Distribution - provide your own catalog method [\#5958](https://github.com/apache/camel-k/issues/5958)
+- KameletBinding panics when missing binding type [\#5953](https://github.com/apache/camel-k/issues/5953)
+- Installation page should report the version [\#5951](https://github.com/apache/camel-k/issues/5951)
 - Rest "contract first" fails with variable in api path [\#5939](https://github.com/apache/camel-k/issues/5939)
 - Traits review [\#5936](https://github.com/apache/camel-k/issues/5936)
 - Do not fail if sources are exclusively passed via configuration file. [\#5933](https://github.com/apache/camel-k/issues/5933)
 - Mount trait regression with release 2.5.0 [\#5924](https://github.com/apache/camel-k/issues/5924)
 - Add a note to clarify about deprecation policy [\#5923](https://github.com/apache/camel-k/issues/5923)
+- Custom resource generation should always use a fixed tooling version [\#5903](https://github.com/apache/camel-k/issues/5903)
 - Integration build pushes image successfully using credentials but fails on pulling built image [\#5898](https://github.com/apache/camel-k/issues/5898)
 - How to troubleshoot Maven configuration [\#5894](https://github.com/apache/camel-k/issues/5894)
 - Fix doc failure on compatibility matrix [\#5890](https://github.com/apache/camel-k/issues/5890)
 - Creating camel-k with helm cannot publish integrations [\#5888](https://github.com/apache/camel-k/issues/5888)
 - Release 2.5.0 [\#5887](https://github.com/apache/camel-k/issues/5887)
 - Bump Golang version to 1.23 [\#5877](https://github.com/apache/camel-k/issues/5877)
+- Remove github.com/mitchellh/mapstructure dependency [\#5858](https://github.com/apache/camel-k/issues/5858)
 - \[features request\] add the hability to set Jib registryMirrors [\#5691](https://github.com/apache/camel-k/issues/5691)
 - Pipe is waiting forever on Revision to become available [\#5623](https://github.com/apache/camel-k/issues/5623)
 - Align the Hashicorp Vault Add-on to CAMEL-20775 [\#5527](https://github.com/apache/camel-k/issues/5527)
