@@ -150,13 +150,14 @@ type IntegrationPlatformKameletSpec struct {
 type IntegrationPlatformBuildPublishStrategy string
 
 const (
-	// IntegrationPlatformBuildPublishStrategyS2I uses the Source to Images (S2I) feature
+	// IntegrationPlatformBuildPublishStrategyJib uses the Source to Images (S2I) feature
 	// (https://docs.openshift.com/container-platform/4.9/openshift_images/create-images.html#images-create-s2i_create-images)
 	// provided by an OpenShift cluster in order to create and push the images to the registry. It is the default choice on OpenShift cluster.
+	// Deprecated: use jib or a custom publishing strategy instead.
 	IntegrationPlatformBuildPublishStrategyS2I IntegrationPlatformBuildPublishStrategy = "S2I"
 	// IntegrationPlatformBuildPublishStrategySpectrum uses Spectrum project (https://github.com/container-tools/spectrum)
 	// in order to push the incremental images to the image repository. It is the default choice on vanilla Kubernetes cluster.
-	// Deprecated: use jib, s2i or a custom publishing strategy instead.
+	// Deprecated: use jib or a custom publishing strategy instead.
 	IntegrationPlatformBuildPublishStrategySpectrum IntegrationPlatformBuildPublishStrategy = "Spectrum"
 	// IntegrationPlatformBuildPublishStrategyJib uses Jib maven plugin (https://github.com/GoogleContainerTools/jib)
 	// in order to push the incremental images to the image repository.

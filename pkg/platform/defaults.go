@@ -81,11 +81,7 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 	}
 
 	if p.Status.Build.PublishStrategy == "" {
-		if p.Status.Cluster == v1.IntegrationPlatformClusterOpenShift {
-			p.Status.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategyS2I
-		} else {
-			p.Status.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategyJib
-		}
+		p.Status.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategyJib
 		log.Debugf("Integration Platform %s [%s]: setting publishing strategy %s", p.Name, p.Namespace, p.Status.Build.PublishStrategy)
 	}
 
@@ -123,7 +119,7 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 
 func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPlatform, verbose bool) error {
 	if p.Status.Cluster == v1.IntegrationPlatformClusterOpenShift &&
-		p.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategyS2I &&
+		p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyS2I &&
 		p.Status.Build.Registry.Address == "" {
 
 		err := configureForOpenShiftS2i(ctx, c, p)

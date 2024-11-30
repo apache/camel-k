@@ -78,7 +78,15 @@ func (t *routeTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		return false, nil, nil
 	}
 
-	return true, nil, nil
+	condition := NewIntegrationCondition(
+		"Route",
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		TraitConfigurationReason,
+		"Route trait is deprecated in favour of Ingress. It may be removed in future version.",
+	)
+
+	return true, condition, nil
 }
 
 func (t *routeTrait) Apply(e *Environment) error {

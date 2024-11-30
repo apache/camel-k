@@ -17,6 +17,8 @@ limitations under the License.
 
 package trait
 
+// WARNING: The Route trait is **deprecated** and will removed in future release versions: use Ingress trait istead.
+//
 // The Route trait can be used to configure the creation of OpenShift routes for the integration.
 //
 // The certificate and key contents may be sourced either from the local filesystem or in a OpenShift `secret` object.
@@ -28,6 +30,7 @@ package trait
 // See the examples section at the end of this page to see the setup options.
 //
 // +camel-k:trait=route.
+// +camel-k:deprecated=2.6.0.
 type RouteTrait struct {
 	Trait `property:",squash" json:",inline"`
 	// The annotations added to route.

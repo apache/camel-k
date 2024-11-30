@@ -20,10 +20,8 @@ The most relevant are the `resource` and `limit` parameters which can be used to
 
 The publish strategy is used to control the behavior of the creation of the container after a build. Basically it create a container image from the application built in the previous step and store as a container in the xref:installation/registry/registry.adoc[registry] configured.
 
-The operator has 2 different strategy which you can adopt: Jib (default in plain Kubernetes profile) and S2I (default in Openshift profile).
+The operator has one unique strategy which you can adopt: Jib. Alternatively you can provide your own publishing strategy (although this is not recommended).
 
 https://cloud.google.com/java/getting-started/jib[Jib] is a technology that transform a Java project into a container image and is configurable directly in Maven.
-
-https://access.redhat.com/documentation/es-es/openshift_container_platform/4.2/html/builds/understanding-image-builds#build-strategy-s2i_understanding-image-builds[S2I] is an efficient technology integrated in Openshift, reason why it is enabled by default in such a profile.
 
 NOTE: you may define your own publishing technology by using xref:pipeline/pipeline.adoc[pipelines].

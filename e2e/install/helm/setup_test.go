@@ -40,7 +40,7 @@ import (
 func TestHelmInstallation(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		containerRegistry, ok := os.LookupEnv("KAMEL_INSTALL_REGISTRY")
-		g.Expect(ok).To(BeTrue())
+		g.Expect(ok).To(BeTrue(), "This test requires setting KAMEL_INSTALL_REGISTRY variable.")
 		// Let's make sure no CRD is yet available in the cluster
 		// as we must make the procedure to install them accordingly
 		g.Eventually(CRDs(t)).Should(BeNil(), "No Camel K CRDs should be previously installed for this test")
