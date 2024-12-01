@@ -1,12 +1,12 @@
 # Changelog
 
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2024-11-29)
+## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2024-11-30)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...v2.5.1-nightly)
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
 
-## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2024-11-29)
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2024-11-30)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.6.0-nightly)
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.5.1-nightly)
 
 **Closed issues:**
 
