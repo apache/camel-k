@@ -2,19 +2,19 @@
 
 ## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...HEAD)
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...HEAD)
 
 **Closed issues:**
 
-- Kustomize common labels deprecated [\#5928](https://github.com/apache/camel-k/issues/5928)
+- Deprecate Openshift specific features [\#5771](https://github.com/apache/camel-k/issues/5771)
 
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2024-12-02)
+## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2024-12-03)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...v2.5.1-nightly)
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
 
-## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2024-11-30)
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2024-12-03)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.6.0-nightly)
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.5.1-nightly)
 
 **Closed issues:**
 
@@ -24,6 +24,7 @@
 - Rest "contract first" fails with variable in api path [\#5939](https://github.com/apache/camel-k/issues/5939)
 - Traits review [\#5936](https://github.com/apache/camel-k/issues/5936)
 - Do not fail if sources are exclusively passed via configuration file. [\#5933](https://github.com/apache/camel-k/issues/5933)
+- Kustomize common labels deprecated [\#5928](https://github.com/apache/camel-k/issues/5928)
 - Mount trait regression with release 2.5.0 [\#5924](https://github.com/apache/camel-k/issues/5924)
 - Add a note to clarify about deprecation policy [\#5923](https://github.com/apache/camel-k/issues/5923)
 - Custom resource generation should always use a fixed tooling version [\#5903](https://github.com/apache/camel-k/issues/5903)
