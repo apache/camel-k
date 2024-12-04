@@ -93,13 +93,6 @@ func installClusterRoles(
 		}
 	}
 
-	// ClusterRole: camel-k-operator-local-registry
-	ok, err = isClusterRoleInstalled(ctx, c, "camel-k-operator-local-registry")
-	if err == nil && !ok {
-		// ignore errors
-		_ = installResource(ctx, c, collection, "/config/rbac/operator-cluster-role-local-registry.yaml")
-	}
-
 	// === For OpenShift ===
 	// ClusterRole: camel-k-operator-console-openshift
 	isOpenShift, err := isOpenShift(c, clusterType)
