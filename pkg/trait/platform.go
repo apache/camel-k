@@ -28,7 +28,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
-	image "github.com/apache/camel-k/v2/pkg/util/registry"
 )
 
 const (
@@ -65,10 +64,6 @@ func (t *platformTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 		if ocp, err := openshift.IsOpenShift(t.Client); err != nil {
 			return false, nil, err
 		} else if ocp {
-			t.createDefault = ptr.To(true)
-		} else if addr, err := image.GetRegistryAddress(e.Ctx, t.Client); err != nil {
-			return false, nil, err
-		} else if addr != nil {
 			t.createDefault = ptr.To(true)
 		}
 	}

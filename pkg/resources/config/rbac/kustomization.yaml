@@ -27,12 +27,6 @@ resources:
 - operator-cluster-role-binding-custom-resource-definitions.yaml
 - operator-cluster-role-addressable-resolver.yaml
 - operator-cluster-role-binding-addressable-resolver.yaml
-- operator-cluster-role-local-registry.yaml
-- operator-role-binding-local-registry.yaml
-- builder-role.yaml
-- builder-role-openshift.yaml
-- builder-role-binding.yaml
-- builder-role-binding-openshift.yaml
 
 transformers:
 - |-

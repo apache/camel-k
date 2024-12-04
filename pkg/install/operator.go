@@ -45,7 +45,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/minikube"
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
 	"github.com/apache/camel-k/v2/pkg/util/patch"
-	image "github.com/apache/camel-k/v2/pkg/util/registry"
 )
 
 type OperatorConfiguration struct {
@@ -633,13 +632,6 @@ func NewPlatform(
 			address, err := minikube.FindRegistry(ctx, c)
 			if err != nil {
 				return nil, err
-			}
-			if address == nil {
-				// try KEP-1755
-				address, err = image.GetRegistryAddress(ctx, c)
-				if err != nil {
-					return nil, err
-				}
 			}
 
 			if address == nil || *address == "" {

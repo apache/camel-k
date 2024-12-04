@@ -35,7 +35,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
-	image "github.com/apache/camel-k/v2/pkg/util/registry"
 )
 
 const (
@@ -125,15 +124,6 @@ func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		err := configureForOpenShiftS2i(ctx, c, p)
 		if err != nil {
 			return err
-		}
-	}
-	if p.Status.Build.Registry.Address == "" {
-		// try KEP-1755
-		address, err := image.GetRegistryAddress(ctx, c)
-		if err != nil && verbose {
-			log.Error(err, "Cannot find a registry where to push images via KEP-1755")
-		} else if err == nil && address != nil {
-			p.Status.Build.Registry.Address = *address
 		}
 	}
 

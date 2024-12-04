@@ -63,7 +63,7 @@ The operator is now up and running. However, there is a second step you need to 
 
 The majority of configuration required to tune the operator are stored in an `IntegrationPlatform` custom resource. This is mainly required to provide configuration for the container registry, build time configuration or common profile you want to apply to all your `Integrations`.
 
-Camel K requires a container registry which is used to store the images built for your applications. Certain clusters may use their internal container registry (ie, Openshift, Minikube or https://github.com/kubernetes/enhancements/tree/master/keps/sig-cluster-lifecycle/generic/1755-communicating-a-local-registry[KEP-1755 compatible] clusters).
+Camel K requires a container registry which is used to store the images built for your applications. Certain clusters may use their internal container registry (eg, Openshift, Minikube).
 
 **IMPORTANT:** You need to create an `IntegrationPlatform` with the following configuration in the namespace where the operator is running:
 
