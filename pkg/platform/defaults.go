@@ -100,7 +100,7 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		return err
 	}
 
-	err = configureRegistry(ctx, c, p, verbose)
+	err = configureRegistry(ctx, c, p)
 	if err != nil {
 		return err
 	}
@@ -116,7 +116,7 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 	return nil
 }
 
-func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPlatform, verbose bool) error {
+func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPlatform) error {
 	if p.Status.Cluster == v1.IntegrationPlatformClusterOpenShift &&
 		p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyS2I &&
 		p.Status.Build.Registry.Address == "" {

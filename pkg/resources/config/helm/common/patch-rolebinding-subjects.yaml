@@ -15,36 +15,6 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-{{- if eq .Values.operator.global "false" }}
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: camel-k-operator
-  labels:
-    app: "camel-k"
-    {{- include "camel-k.labels" . | nindent 4 }}
-subjects:
-- kind: ServiceAccount
-  name: camel-k-operator
-roleRef:
-  kind: Role
-  name: camel-k-operator
-  apiGroup: rbac.authorization.k8s.io
-
----
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: camel-k-builder-openshift
-  labels:
-    app: "camel-k"
-    {{- include "camel-k.labels" . | nindent 4 }}
-subjects:
-- kind: ServiceAccount
-  name: camel-k-builder
-roleRef:
-  kind: Role
-  name: camel-k-builder-openshift
-  apiGroup: rbac.authorization.k8s.io
-
-{{- end }}
+- op: add
+  path: /subjects/0/namespace
+  value: "{{ .Release.Namespace }}"

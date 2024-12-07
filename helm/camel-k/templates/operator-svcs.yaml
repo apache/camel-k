@@ -15,19 +15,23 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-#
-# rbac resources applicable for all kubernetes platforms
-#
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: camel-k-operator
+  labels:
+    app: "camel-k"
+    {{- include "camel-k.labels" . | nindent 4 }}
+  {{- with .Values.operator.serviceAccount.annotations }}
+  annotations:
+    {{ toYaml . | nindent 4 }}
+  {{- end }}
 
-resources:
-- user-cluster-role.yaml
-- operator-cluster-role-custom-resource-definitions.yaml
-- operator-cluster-role-binding-custom-resource-definitions.yaml
-- operator-cluster-role-addressable-resolver.yaml
-- operator-cluster-role-binding-addressable-resolver.yaml
-- builder-role.yaml
-- builder-role-openshift.yaml
-- builder-role-binding.yaml
-- builder-role-binding-openshift.yaml
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: camel-k-builder
+  labels:
+    app: "camel-k"
