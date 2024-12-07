@@ -20,7 +20,7 @@ https://camel.apache.org/camel-k/next/[How does it work?]
 
 == :gear: Installation
 
-Camel K allows you to run integrations directly on a `Kubernetes` or `OpenShift` cluster. To use it, you need to be connected to a cloud environment or to a local cluster created for development purposes.
+Camel K allows you to run integrations directly on any `Kubernetes` cluster. To use it, you need to be connected to a cloud environment or to a local cluster created for development purposes.
 
 https://camel.apache.org/camel-k/next/installation/installation.html[Installation procedure.]
 
