@@ -14,15 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ---------------------------------------------------------------------------
-
 {{- if eq .Values.operator.global "false" }}
-kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
 metadata:
-  name: camel-k-operator
   labels:
-    app: "camel-k"
-    {{- include "camel-k.labels" . | nindent 4 }}
+    app: camel-k
+  name: camel-k-operator
 rules:
 - apiGroups:
   - camel.apache.org
@@ -42,13 +40,6 @@ rules:
   - patch
   - update
   - watch
-- apiGroups:
-  - ""
-  resources:
-  - namespaces
-  verbs:
-  - get
-  - list
 - apiGroups:
   - camel.apache.org
   resources:
@@ -189,6 +180,21 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - namespaces
+  verbs:
+  - get
+  - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app: camel-k
+  name: camel-k-operator-events
+rules:
+- apiGroups:
+  - ""
+  resources:
   - events
   verbs:
   - create
@@ -196,6 +202,14 @@ rules:
   - get
   - list
   - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app: camel-k
+  name: camel-k-operator-keda
+rules:
 - apiGroups:
   - keda.sh
   resources:
@@ -210,10 +224,19 @@ rules:
   - patch
   - update
   - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app: camel-k
+  name: camel-k-operator-knative
+rules:
 - apiGroups:
   - serving.knative.dev
   resources:
   - services
+  - routes
   verbs:
   - create
   - delete
@@ -259,6 +282,21 @@ rules:
   - patch
   - update
 - apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app: camel-k
+  name: camel-k-operator-leases
+rules:
+- apiGroups:
   - coordination.k8s.io
   resources:
   - leases
@@ -271,6 +309,14 @@ rules:
   - patch
   - update
   - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app: camel-k
+  name: camel-k-operator-openshift
+rules:
 - apiGroups:
   - camel.apache.org
   resources:
@@ -346,6 +392,14 @@ rules:
   - routes/custom-host
   verbs:
   - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app: camel-k
+  name: camel-k-operator-podmonitors
+rules:
 - apiGroups:
   - monitoring.coreos.com
   resources:
@@ -359,6 +413,14 @@ rules:
   - patch
   - update
   - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app: camel-k
+  name: camel-k-operator-strimzi
+rules:
 - apiGroups:
   - kafka.strimzi.io
   resources:
@@ -369,16 +431,116 @@ rules:
   - get
   - list
   - watch
-- apiGroups:
-  - "apiextensions.k8s.io"
-  resources:
-  - customresourcedefinitions
-  verbs:
-  - get
-- apiGroups:
-  - rbac.authorization.k8s.io
-  resources:
-  - clusterroles
-  verbs:
-  - bind
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app: camel-k
+  name: camel-k-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: camel-k-operator
+subjects:
+- kind: ServiceAccount
+  name: camel-k-operator
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app: camel-k
+  name: camel-k-operator-events
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: camel-k-operator-events
+subjects:
+- kind: ServiceAccount
+  name: camel-k-operator
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app: camel-k
+  name: camel-k-operator-keda
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: camel-k-operator-keda
+subjects:
+- kind: ServiceAccount
+  name: camel-k-operator
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app: camel-k
+  name: camel-k-operator-knative
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: camel-k-operator-knative
+subjects:
+- kind: ServiceAccount
+  name: camel-k-operator
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app: camel-k
+  name: camel-k-operator-leases
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: camel-k-operator-leases
+subjects:
+- kind: ServiceAccount
+  name: camel-k-operator
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app: camel-k
+  name: camel-k-operator-openshift
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: camel-k-operator-openshift
+subjects:
+- kind: ServiceAccount
+  name: camel-k-operator
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app: camel-k
+  name: camel-k-operator-podmonitors
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: camel-k-operator-podmonitors
+subjects:
+- kind: ServiceAccount
+  name: camel-k-operator
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app: camel-k
+  name: camel-k-operator-strimzi
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: camel-k-operator-strimzi
+subjects:
+- kind: ServiceAccount
+  name: camel-k-operator
 {{- end }}

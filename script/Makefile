@@ -221,6 +221,7 @@ generate: codegen-tools-install
 	./script/gen_doc.sh
 	cd pkg/apis/camel && $(CONTROLLER_GEN) paths="./..." object
 	cd addons/keda/duck && $(CONTROLLER_GEN) paths="./..." object
+	./script/gen_helm.sh
 
 codegen-tools-install:
 	@# We must force the installation to make sure we are using the correct version

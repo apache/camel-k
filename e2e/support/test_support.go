@@ -114,8 +114,7 @@ const ExpectedKubePromoteRoles = 7
 // camel-k-edit
 // camel-k-operator-custom-resource-definitions
 // camel-k-operator-bind-addressable-resolver
-// camel-k-operator-local-registry
-const ExpectedKubeClusterRoles = 4
+const ExpectedKubeClusterRoles = 3
 
 // camel-k-operator-openshift
 const ExpectedOSPromoteRoles = 1

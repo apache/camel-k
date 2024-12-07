@@ -14,20 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ---------------------------------------------------------------------------
-
-#
-# rbac resources applicable for all kubernetes platforms
-#
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+# Labels to add to all resources and selectors.
+commonLabels:
+  app: camel-k
+
 resources:
-- user-cluster-role.yaml
-- operator-cluster-role-custom-resource-definitions.yaml
-- operator-cluster-role-binding-custom-resource-definitions.yaml
-- operator-cluster-role-addressable-resolver.yaml
-- operator-cluster-role-binding-addressable-resolver.yaml
-- builder-role.yaml
-- builder-role-openshift.yaml
-- builder-role-binding.yaml
-- builder-role-binding-openshift.yaml
+- ../../rbac/descoped
+
+patches:
+ - target:
+      kind: ClusterRoleBinding
+   path: patch-rolebinding-subjects.yaml
