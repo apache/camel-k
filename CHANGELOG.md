@@ -1,23 +1,16 @@
 # Changelog
 
-## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...HEAD)
-
-**Closed issues:**
-
-- Knative Service is not created if "from" parameters are declared in the parameters section [\#5980](https://github.com/apache/camel-k/issues/5980)
-
-## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2024-12-06)
+## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2024-12-07)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
 
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2024-12-06)
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2024-12-07)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.5.1-nightly)
 
 **Closed issues:**
 
+- Knative Service is not created if "from" parameters are declared in the parameters section [\#5980](https://github.com/apache/camel-k/issues/5980)
 - Change Kamelet Distribution - provide your own catalog method [\#5958](https://github.com/apache/camel-k/issues/5958)
 - KameletBinding panics when missing binding type [\#5953](https://github.com/apache/camel-k/issues/5953)
 - Installation page should report the version [\#5951](https://github.com/apache/camel-k/issues/5951)
