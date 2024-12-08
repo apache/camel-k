@@ -19,9 +19,9 @@ kind: Kustomization
 
 # Labels to add to all resources and selectors.
 labels:
-  - pairs:
-      app: camel-k
-    includeSelectors: true
+- includeSelectors: true
+  pairs:
+    app: camel-k
 
 resources:
 - ../manager
@@ -31,8 +31,10 @@ resources:
 - ../rbac
 - ../rbac/namespaced
 
-patchesStrategicMerge:
-- patch-delete-user-cluster-role.yaml
+patches:
+  - path: patch-delete-user-cluster-role.yaml
+    target:
+      kind: ClusterRole
 images:
 - name: docker.io/apache/camel-k
   newName: docker.io/apache/camel-k
