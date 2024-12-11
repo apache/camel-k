@@ -20,8 +20,6 @@ package camel
 import (
 	"fmt"
 	"io"
-	"path/filepath"
-	"strconv"
 	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -135,10 +133,6 @@ func addDependencies(project *maven.Project, dependencies []string, catalog *Run
 			addCamelQuarkusComponent(project, d)
 		case strings.HasPrefix(d, "mvn:"):
 			addMavenDependency(project, d)
-		case strings.HasPrefix(d, "registry-mvn:"):
-			if err := addRegistryMavenDependency(project, d); err != nil {
-				return err
-			}
 		default:
 			if err := addJitPack(project, d); err != nil {
 				return err
@@ -201,61 +195,6 @@ func addCamelQuarkusComponent(project *maven.Project, dependency string) {
 func addMavenDependency(project *maven.Project, dependency string) {
 	gav := strings.TrimPrefix(dependency, "mvn:")
 	project.AddEncodedDependencyGAV(gav)
-}
-
-func addRegistryMavenDependency(project *maven.Project, dependency string) error {
-	mapping := strings.Split(dependency, "@")
-	outputFileRelativePath := mapping[1]
-	gavString := strings.TrimPrefix(mapping[0], "registry-mvn:")
-	gav, err := maven.ParseGAV(gavString)
-	if err != nil {
-		return err
-	}
-	plugin := getOrCreateBuildPlugin(project, "com.googlecode.maven-download-plugin", "download-maven-plugin", "1.6.8")
-	outputDirectory := "../context"
-
-	//nolint:mnd
-	isClasspath := len(mapping) == 3 && mapping[2] == "classpath"
-	if isClasspath {
-		outputDirectory = "src/main/resources"
-	}
-
-	properties := v1.PluginProperties{}
-	properties.Add("outputDirectory", filepath.Join(outputDirectory, filepath.Dir(outputFileRelativePath)))
-	properties.Add("outputFileName", filepath.Base(outputFileRelativePath))
-	properties.Add("groupId", gav.GroupID)
-	properties.Add("artifactId", gav.ArtifactID)
-	properties.Add("version", gav.Version)
-	properties.Add("type", gav.Type)
-
-	exec := maven.Execution{
-		ID:    strconv.Itoa(len(plugin.Executions)),
-		Phase: "validate",
-		Goals: []string{
-			"artifact",
-		},
-		Configuration: properties,
-	}
-	plugin.Executions = append(plugin.Executions, exec)
-
-	return nil
-}
-
-func getOrCreateBuildPlugin(project *maven.Project, groupID string, artifactID string, version string) *maven.Plugin {
-	for i, plugin := range project.Build.Plugins {
-		if plugin.GroupID == groupID && plugin.ArtifactID == artifactID && plugin.Version == version {
-			return &project.Build.Plugins[i]
-		}
-	}
-	plugin := maven.Plugin{
-		GroupID:    groupID,
-		ArtifactID: artifactID,
-		Version:    version,
-		Executions: []maven.Execution{},
-	}
-	project.Build.Plugins = append(project.Build.Plugins, plugin)
-
-	return &project.Build.Plugins[len(project.Build.Plugins)-1]
 }
 
 func addJitPack(project *maven.Project, dependency string) error {
