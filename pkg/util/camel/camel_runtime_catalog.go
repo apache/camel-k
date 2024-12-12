@@ -89,7 +89,7 @@ type RuntimeCatalog struct {
 func (c *RuntimeCatalog) HasArtifact(artifact string) bool {
 	a := artifact
 	if !strings.HasPrefix(a, "camel-") {
-		if c.Runtime.Provider == v1.RuntimeProviderQuarkus {
+		if c.Runtime.Provider.IsQuarkusBased() {
 			a = "camel-quarkus-" + a
 		} else {
 			a = "camel-" + a
@@ -105,7 +105,7 @@ func (c *RuntimeCatalog) HasArtifact(artifact string) bool {
 func (c *RuntimeCatalog) HasLoaderByArtifact(artifact string) bool {
 	a := artifact
 	if !strings.HasPrefix(a, "camel-") {
-		if c.Runtime.Provider == v1.RuntimeProviderQuarkus {
+		if c.Runtime.Provider.IsQuarkusBased() {
 			a = "camel-quarkus-" + a
 		} else {
 			a = "camel-" + a

@@ -3023,11 +3023,18 @@ spec:
                         items:
                           type: string
                         type: array
+                      runtimeProvider:
+                        description: The runtime provider to use for the integration.
+                          (Default, Camel K Runtime).
+                        enum:
+                        - quarkus
+                        - plain-quarkus
+                        type: string
                       runtimeVersion:
                         description: |-
-                          The camel-k-runtime version to use for the integration. It overrides the default version set in the Integration Platform.
+                          The runtime version to use for the integration. It overrides the default version set in the Integration Platform.
                           You can use a fixed version (for example "3.2.3") or a semantic version (for example "3.x") which will try to resolve
-                          to the best matching Catalog existing on the cluster.
+                          to the best matching Catalog existing on the cluster (Default, the one provided by the operator version).
                         type: string
                     type: object
                   quarkus:
@@ -3965,11 +3972,18 @@ spec:
                         items:
                           type: string
                         type: array
+                      runtimeProvider:
+                        description: The runtime provider to use for the integration.
+                          (Default, Camel K Runtime).
+                        enum:
+                        - quarkus
+                        - plain-quarkus
+                        type: string
                       runtimeVersion:
                         description: |-
-                          The camel-k-runtime version to use for the integration. It overrides the default version set in the Integration Platform.
+                          The runtime version to use for the integration. It overrides the default version set in the Integration Platform.
                           You can use a fixed version (for example "3.2.3") or a semantic version (for example "3.x") which will try to resolve
-                          to the best matching Catalog existing on the cluster.
+                          to the best matching Catalog existing on the cluster (Default, the one provided by the operator version).
                         type: string
                     type: object
                   container:
@@ -6154,11 +6168,18 @@ spec:
                         items:
                           type: string
                         type: array
+                      runtimeProvider:
+                        description: The runtime provider to use for the integration.
+                          (Default, Camel K Runtime).
+                        enum:
+                        - quarkus
+                        - plain-quarkus
+                        type: string
                       runtimeVersion:
                         description: |-
-                          The camel-k-runtime version to use for the integration. It overrides the default version set in the Integration Platform.
+                          The runtime version to use for the integration. It overrides the default version set in the Integration Platform.
                           You can use a fixed version (for example "3.2.3") or a semantic version (for example "3.x") which will try to resolve
-                          to the best matching Catalog existing on the cluster.
+                          to the best matching Catalog existing on the cluster (Default, the one provided by the operator version).
                         type: string
                     type: object
                   container:
@@ -8246,11 +8267,18 @@ spec:
                         items:
                           type: string
                         type: array
+                      runtimeProvider:
+                        description: The runtime provider to use for the integration.
+                          (Default, Camel K Runtime).
+                        enum:
+                        - quarkus
+                        - plain-quarkus
+                        type: string
                       runtimeVersion:
                         description: |-
-                          The camel-k-runtime version to use for the integration. It overrides the default version set in the Integration Platform.
+                          The runtime version to use for the integration. It overrides the default version set in the Integration Platform.
                           You can use a fixed version (for example "3.2.3") or a semantic version (for example "3.x") which will try to resolve
-                          to the best matching Catalog existing on the cluster.
+                          to the best matching Catalog existing on the cluster (Default, the one provided by the operator version).
                         type: string
                     type: object
                   container:
@@ -10314,11 +10342,18 @@ spec:
                         items:
                           type: string
                         type: array
+                      runtimeProvider:
+                        description: The runtime provider to use for the integration.
+                          (Default, Camel K Runtime).
+                        enum:
+                        - quarkus
+                        - plain-quarkus
+                        type: string
                       runtimeVersion:
                         description: |-
-                          The camel-k-runtime version to use for the integration. It overrides the default version set in the Integration Platform.
+                          The runtime version to use for the integration. It overrides the default version set in the Integration Platform.
                           You can use a fixed version (for example "3.2.3") or a semantic version (for example "3.x") which will try to resolve
-                          to the best matching Catalog existing on the cluster.
+                          to the best matching Catalog existing on the cluster (Default, the one provided by the operator version).
                         type: string
                     type: object
                   container:
@@ -18763,11 +18798,18 @@ spec:
                         items:
                           type: string
                         type: array
+                      runtimeProvider:
+                        description: The runtime provider to use for the integration.
+                          (Default, Camel K Runtime).
+                        enum:
+                        - quarkus
+                        - plain-quarkus
+                        type: string
                       runtimeVersion:
                         description: |-
-                          The camel-k-runtime version to use for the integration. It overrides the default version set in the Integration Platform.
+                          The runtime version to use for the integration. It overrides the default version set in the Integration Platform.
                           You can use a fixed version (for example "3.2.3") or a semantic version (for example "3.x") which will try to resolve
-                          to the best matching Catalog existing on the cluster.
+                          to the best matching Catalog existing on the cluster (Default, the one provided by the operator version).
                         type: string
                     type: object
                   container:
@@ -20758,11 +20800,18 @@ spec:
                         items:
                           type: string
                         type: array
+                      runtimeProvider:
+                        description: The runtime provider to use for the integration.
+                          (Default, Camel K Runtime).
+                        enum:
+                        - quarkus
+                        - plain-quarkus
+                        type: string
                       runtimeVersion:
                         description: |-
-                          The camel-k-runtime version to use for the integration. It overrides the default version set in the Integration Platform.
+                          The runtime version to use for the integration. It overrides the default version set in the Integration Platform.
                           You can use a fixed version (for example "3.2.3") or a semantic version (for example "3.x") which will try to resolve
-                          to the best matching Catalog existing on the cluster.
+                          to the best matching Catalog existing on the cluster (Default, the one provided by the operator version).
                         type: string
                     type: object
                   container:
@@ -30582,11 +30631,18 @@ spec:
                             items:
                               type: string
                             type: array
+                          runtimeProvider:
+                            description: The runtime provider to use for the integration.
+                              (Default, Camel K Runtime).
+                            enum:
+                            - quarkus
+                            - plain-quarkus
+                            type: string
                           runtimeVersion:
                             description: |-
-                              The camel-k-runtime version to use for the integration. It overrides the default version set in the Integration Platform.
+                              The runtime version to use for the integration. It overrides the default version set in the Integration Platform.
                               You can use a fixed version (for example "3.2.3") or a semantic version (for example "3.x") which will try to resolve
-                              to the best matching Catalog existing on the cluster.
+                              to the best matching Catalog existing on the cluster (Default, the one provided by the operator version).
                             type: string
                         type: object
                       container:

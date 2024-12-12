@@ -37,7 +37,7 @@ import (
 )
 
 func TestGenerateQuarkusProjectCommon(t *testing.T) {
-	p := generateQuarkusProjectCommon("1.2.3", "4.5.6")
+	p := generateQuarkusProjectCommon(v1.RuntimeProviderQuarkus, "1.2.3", "4.5.6")
 	assert.Equal(t, "org.apache.camel.k.integration", p.GroupID)
 	assert.Equal(t, "camel-k-integration", p.ArtifactID)
 	assert.Equal(t, defaults.Version, p.Version)

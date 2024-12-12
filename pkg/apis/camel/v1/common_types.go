@@ -18,10 +18,9 @@ limitations under the License.
 package v1
 
 import (
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 )
 
 const (
@@ -433,9 +432,15 @@ type Flow struct {
 type RuntimeProvider string
 
 const (
-	// RuntimeProviderQuarkus Camel Quarkus runtime.
+	// RuntimeProviderQuarkus Camel K runtime (Quarkus based).
 	RuntimeProviderQuarkus RuntimeProvider = "quarkus"
+	// RuntimeProviderPlainQuarkus Camel Quarkus plain runtime.
+	RuntimeProviderPlainQuarkus RuntimeProvider = "plain-quarkus"
 )
+
+func (rt RuntimeProvider) IsQuarkusBased() bool {
+	return rt == RuntimeProviderQuarkus || rt == RuntimeProviderPlainQuarkus
+}
 
 // SourceSpec defines the configuration for one or more routes to be executed in a certain Camel DSL language.
 type SourceSpec struct {

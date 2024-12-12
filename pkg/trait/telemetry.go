@@ -52,6 +52,13 @@ var (
 			propSamplerRatio:       "quarkus.opentelemetry.tracer.sampler.ratio",
 			propSamplerParentBased: "quarkus.opentelemetry.tracer.sampler.parent-based",
 		},
+		v1.RuntimeProviderPlainQuarkus: {
+			propEndpoint:           "quarkus.opentelemetry.tracer.exporter.otlp.endpoint",
+			propServiceName:        "quarkus.opentelemetry.tracer.resource-attributes",
+			propSampler:            "quarkus.opentelemetry.tracer.sampler",
+			propSamplerRatio:       "quarkus.opentelemetry.tracer.sampler.ratio",
+			propSamplerParentBased: "quarkus.opentelemetry.tracer.sampler.parent-based",
+		},
 	}
 )
 
@@ -124,7 +131,7 @@ func (t *telemetryTrait) Apply(e *Environment) error {
 	util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityTelemetry)
 
 	// Hack for camel-k-runtime 3.15.0
-	if e.CamelCatalog.CamelCatalogSpec.Runtime.Provider == v1.RuntimeProviderQuarkus &&
+	if e.CamelCatalog.CamelCatalogSpec.Runtime.Provider.IsQuarkusBased() &&
 		e.CamelCatalog.CamelCatalogSpec.Runtime.Version == "3.15.0" {
 		t.setRuntimeProviderQuarkus315Properties(e)
 		return nil

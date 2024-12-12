@@ -43,7 +43,8 @@ type camelTrait struct {
 	BasePlatformTrait
 	traitv1.CamelTrait `property:",squash"`
 	// private configuration used only internally
-	runtimeVersion string
+	runtimeVersion  string
+	runtimeProvider string
 }
 
 func newCamelTrait() Trait {
@@ -81,6 +82,12 @@ func (t *camelTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		t.runtimeVersion = t.RuntimeVersion
 	}
 
+	if t.RuntimeProvider == "" {
+		t.runtimeProvider = "quarkus"
+	} else {
+		t.runtimeProvider = t.RuntimeProvider
+	}
+
 	var cond *TraitCondition
 	//nolint: staticcheck
 	if (e.Integration != nil && !e.Integration.IsManagedBuild()) || (e.IntegrationKit != nil && e.IntegrationKit.IsSynthetic()) {
@@ -106,7 +113,7 @@ func (t *camelTrait) Apply(e *Environment) error {
 	// expects a CamelCatalog to be loaded regardless it's a managed or
 	// non managed build Integration
 	if e.CamelCatalog == nil {
-		if err := t.loadOrCreateCatalog(e, t.runtimeVersion); err != nil {
+		if err := t.loadOrCreateCatalog(e); err != nil {
 			return err
 		}
 	}
@@ -140,15 +147,15 @@ func (t *camelTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *camelTrait) loadOrCreateCatalog(e *Environment, runtimeVersion string) error {
+func (t *camelTrait) loadOrCreateCatalog(e *Environment) error {
 	catalogNamespace := e.DetermineCatalogNamespace()
 	if catalogNamespace == "" {
 		return errors.New("unable to determine namespace")
 	}
 
 	runtime := v1.RuntimeSpec{
-		Version:  runtimeVersion,
-		Provider: v1.RuntimeProviderQuarkus,
+		Version:  t.runtimeVersion,
+		Provider: v1.RuntimeProvider(t.runtimeProvider),
 	}
 
 	catalog, err := camel.LoadCatalog(e.Ctx, e.Client, catalogNamespace, runtime)
@@ -160,7 +167,7 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, runtimeVersion string) 
 		// if the catalog is not found in the cluster, try to create it if
 		// the required versions (camel and runtime) are not expressed as
 		// semver constraints
-		if exactVersionRegexp.MatchString(runtimeVersion) {
+		if exactVersionRegexp.MatchString(t.runtimeVersion) {
 			catalog, err = camel.CreateCatalog(e.Ctx, e.Client, catalogNamespace, e.Platform, runtime)
 			if err != nil {
 				return err

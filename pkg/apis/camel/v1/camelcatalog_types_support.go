@@ -182,6 +182,11 @@ func (c *CamelCatalogSpec) GetRuntimeVersion() string {
 	return c.Runtime.Version
 }
 
+// GetRuntimeVersion returns the Camel K runtime version of the catalog.
+func (c *CamelCatalogSpec) GetRuntimeProvider() RuntimeProvider {
+	return c.Runtime.Provider
+}
+
 // GetCamelVersion returns the Camel version the runtime is based on.
 func (c *CamelCatalogSpec) GetCamelVersion() string {
 	return c.Runtime.Metadata["camel.version"]

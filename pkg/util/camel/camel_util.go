@@ -105,7 +105,7 @@ func newCatalogVersionCollection(catalogs []v1.CamelCatalog) CatalogVersionColle
 }
 
 func getDependency(artifact v1.CamelArtifact, runtimeProvider v1.RuntimeProvider) string {
-	if runtimeProvider == v1.RuntimeProviderQuarkus {
+	if runtimeProvider.IsQuarkusBased() {
 		return strings.Replace(artifact.ArtifactID, "camel-quarkus-", "camel:", 1)
 	}
 	return strings.Replace(artifact.ArtifactID, "camel-", "camel:", 1)
