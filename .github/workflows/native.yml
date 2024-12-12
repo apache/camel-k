@@ -73,11 +73,6 @@ jobs:
     - name: Infra setting
       uses: ./.github/actions/infra-setting
 
-    - name: Install Knative
-      shell: bash
-      run: |
-        ./e2e/knative/files/setup.sh
-
     - name: Install operator
       shell: bash
       run: |

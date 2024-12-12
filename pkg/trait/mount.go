@@ -433,43 +433,51 @@ func (t *mountTrait) computeApplicationProperties(e *Environment) (*corev1.Confi
 }
 
 // addSourcesProperties is in charge to add the sources in the application.properties required by Camel K Runtime.
+//
+//nolint:nestif
 func (t *mountTrait) addSourcesProperties(e *Environment) {
 	if e.ApplicationProperties == nil {
 		e.ApplicationProperties = make(map[string]string)
 	}
-	idx := 0
-	for _, s := range e.Integration.AllSources() {
-		// We don't process routes embedded (native) or Kamelets
-		if e.isEmbedded(s) || s.IsGeneratedFromKamelet() {
-			continue
-		}
-		srcName := strings.TrimPrefix(filepath.ToSlash(s.Name), "/")
-		src := "file:" + path.Join(filepath.ToSlash(camel.SourcesMountPath), srcName)
-		e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].location", idx)] = src
+	if e.CamelCatalog.GetRuntimeProvider() == v1.RuntimeProviderPlainQuarkus {
+		e.ApplicationProperties["camel.main.source-location-enabled"] = boolean.TrueString
+		e.ApplicationProperties["camel.main.routes-include-pattern"] = fmt.Sprintf("file:%s/**", camel.SourcesMountPath)
+	} else {
+		idx := 0
+		for _, s := range e.Integration.AllSources() {
+			// We don't process routes embedded (native) or Kamelets
+			if e.isEmbedded(s) || s.IsGeneratedFromKamelet() {
+				continue
+			}
+			srcName := strings.TrimPrefix(filepath.ToSlash(s.Name), "/")
+			src := "file:" + path.Join(filepath.ToSlash(camel.SourcesMountPath), srcName)
+			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].location", idx)] = src
 
-		simpleName := srcName
-		if strings.Contains(srcName, ".") {
-			simpleName = srcName[0:strings.Index(srcName, ".")]
-		}
-		e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].name", idx)] = simpleName
+			simpleName := srcName
+			if strings.Contains(srcName, ".") {
+				simpleName = srcName[0:strings.Index(srcName, ".")]
+			}
+			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].name", idx)] = simpleName
 
-		for pid, p := range s.PropertyNames {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].property-names[%d]", idx, pid)] = p
+			for pid, p := range s.PropertyNames {
+				e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].property-names[%d]", idx, pid)] = p
+			}
+
+			if s.Type != "" {
+				e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].type", idx)] = string(s.Type)
+			}
+			if s.InferLanguage() != "" {
+				e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].language", idx)] = string(s.InferLanguage())
+			}
+			if s.Loader != "" {
+				e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].loader", idx)] = s.Loader
+			}
+			if s.Compression {
+				e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].compressed", idx)] = boolean.TrueString
+			}
+
+			idx++
 		}
 
-		if s.Type != "" {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].type", idx)] = string(s.Type)
-		}
-		if s.InferLanguage() != "" {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].language", idx)] = string(s.InferLanguage())
-		}
-		if s.Loader != "" {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].loader", idx)] = s.Loader
-		}
-		if s.Compression {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].compressed", idx)] = boolean.TrueString
-		}
-
-		idx++
 	}
 }

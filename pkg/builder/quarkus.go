@@ -119,6 +119,7 @@ func loadCamelQuarkusCatalog(ctx *builderContext) error {
 
 func generateQuarkusProject(ctx *builderContext) error {
 	p := generateQuarkusProjectCommon(
+		ctx.Build.Runtime.Provider,
 		ctx.Build.Runtime.Version,
 		ctx.Build.Runtime.Metadata["quarkus.version"],
 	)
@@ -132,7 +133,7 @@ func generateQuarkusProject(ctx *builderContext) error {
 	return nil
 }
 
-func generateQuarkusProjectCommon(runtimeVersion string, quarkusPlatformVersion string) maven.Project {
+func generateQuarkusProjectCommon(runtimeProvider v1.RuntimeProvider, runtimeVersion string, quarkusPlatformVersion string) maven.Project {
 	p := maven.NewProjectWithGAV("org.apache.camel.k.integration", "camel-k-integration", defaults.Version)
 	p.DependencyManagement = &maven.DependencyManagement{Dependencies: make([]maven.Dependency, 0)}
 	p.Dependencies = make([]maven.Dependency, 0)
@@ -143,15 +144,35 @@ func generateQuarkusProjectCommon(runtimeVersion string, quarkusPlatformVersion 
 	// Reproducible builds: https://maven.apache.org/guides/mini/guide-reproducible-builds.html
 	p.Properties.Add("project.build.outputTimestamp", time.Now().Format(time.RFC3339))
 	// DependencyManagement
-	p.DependencyManagement.Dependencies = append(p.DependencyManagement.Dependencies,
-		maven.Dependency{
-			GroupID:    "org.apache.camel.k",
-			ArtifactID: "camel-k-runtime-bom",
-			Version:    runtimeVersion,
-			Type:       "pom",
-			Scope:      "import",
-		},
-	)
+	if runtimeProvider == v1.RuntimeProviderPlainQuarkus {
+		p.DependencyManagement.Dependencies = append(p.DependencyManagement.Dependencies,
+			maven.Dependency{
+				GroupID:    "io.quarkus.platform",
+				ArtifactID: "quarkus-camel-bom",
+				Version:    runtimeVersion,
+				Type:       "pom",
+				Scope:      "import",
+			},
+			maven.Dependency{
+				GroupID:    "io.quarkus.platform",
+				ArtifactID: "quarkus-bom",
+				Version:    runtimeVersion,
+				Type:       "pom",
+				Scope:      "import",
+			},
+		)
+	} else {
+		// Camel K Runtime (Quarkus based) default
+		p.DependencyManagement.Dependencies = append(p.DependencyManagement.Dependencies,
+			maven.Dependency{
+				GroupID:    "org.apache.camel.k",
+				ArtifactID: "camel-k-runtime-bom",
+				Version:    runtimeVersion,
+				Type:       "pom",
+				Scope:      "import",
+			},
+		)
+	}
 
 	// Plugins
 	p.Build.Plugins = append(p.Build.Plugins,

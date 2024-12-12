@@ -32,7 +32,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  release:
+  smoke-tests:
     strategy:
       fail-fast: false
       matrix:
