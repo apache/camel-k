@@ -41,14 +41,14 @@ require (
 	golang.org/x/text v0.21.0
 	golang.org/x/time v0.8.0
 	gopkg.in/yaml.v2 v2.4.0
-	k8s.io/api v0.30.7
-	k8s.io/apiextensions-apiserver v0.30.7
-	k8s.io/apimachinery v0.30.7
-	k8s.io/cli-runtime v0.30.7
-	k8s.io/client-go v0.30.7
+	k8s.io/api v0.30.8
+	k8s.io/apiextensions-apiserver v0.30.8
+	k8s.io/apimachinery v0.30.8
+	k8s.io/cli-runtime v0.30.8
+	k8s.io/client-go v0.30.8
 	k8s.io/gengo v0.0.0-20240404160639-a0386bf69313
 	k8s.io/klog/v2 v2.130.1
-	k8s.io/kubectl v0.30.7
+	k8s.io/kubectl v0.30.8
 	k8s.io/utils v0.0.0-20240711033017-18e509b52bc8
 	knative.dev/eventing v0.43.3
 	knative.dev/pkg v0.0.0-20241021183759-9b9d535af5ad
