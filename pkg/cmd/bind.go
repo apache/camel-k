@@ -281,7 +281,6 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 // for example, `-t camel.properties=a=1 -t camel.properties=b=2` would convert into annotation
 // `camel.properties=[a=1,b=2]“.
 func maybeBuildArrayNotation(array, value string) string {
-	fmt.Println(array, value)
 	if array == "" {
 		return value
 	}
