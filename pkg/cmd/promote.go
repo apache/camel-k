@@ -21,12 +21,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/util/io"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/sets"
 	"github.com/spf13/cobra"
@@ -54,6 +57,7 @@ func newCmdPromote(rootCmdOptions *RootCmdOptions) (*cobra.Command, *promoteCmdO
 	cmd.Flags().StringP("to-operator", "x", "", "The operator id which will reconcile the promoted Integration/Pipe")
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
 	cmd.Flags().BoolP("image", "i", false, "Output the container image only")
+	cmd.Flags().String("export-gitops-dir", "", "Export to a Kustomize GitOps overlay structure")
 
 	return &cmd, &options
 }
@@ -64,6 +68,7 @@ type promoteCmdOptions struct {
 	ToOperator   string `mapstructure:"to-operator" yaml:",omitempty"`
 	OutputFormat string `mapstructure:"output" yaml:",omitempty"`
 	Image        bool   `mapstructure:"image" yaml:",omitempty"`
+	ToGitOpsDir  string `mapstructure:"export-gitops-dir" yaml:",omitempty"`
 }
 
 func (o *promoteCmdOptions) validate(_ *cobra.Command, args []string) error {
@@ -74,7 +79,8 @@ func (o *promoteCmdOptions) validate(_ *cobra.Command, args []string) error {
 		return errors.New("promote requires a destination namespace as --to argument")
 	}
 	if o.To == o.Namespace {
-		return errors.New("source and destination namespaces must be different in order to avoid promoted Integration/Pipe clashes with the source Integration/Pipe")
+		return errors.New("source and destination namespaces must be different in order to avoid promoted Integration/Pipe " +
+			"clashes with the source Integration/Pipe")
 	}
 	return nil
 }
@@ -142,6 +148,14 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 		if o.OutputFormat != "" {
 			return showPipeOutput(cmd, destPipe, o.OutputFormat, c.GetScheme())
 		}
+		if o.ToGitOpsDir != "" {
+			err = appendKustomizePipe(destPipe, o.ToGitOpsDir)
+			if err != nil {
+				return err
+			}
+			fmt.Fprintln(cmd.OutOrStdout(), `Exported a Kustomize based Gitops directory to `+o.ToGitOpsDir+` for "`+name+`" Pipe`)
+			return nil
+		}
 		// Ensure the destination namespace has access to the source namespace images
 		err = addSystemPullerRoleBinding(o.Context, c, sourceIntegration.Namespace, destPipe.Namespace)
 		if err != nil {
@@ -163,6 +177,14 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 	destIntegration := o.editIntegration(sourceIntegration, sourceKit)
 	if o.OutputFormat != "" {
 		return showIntegrationOutput(cmd, destIntegration, o.OutputFormat)
+	}
+	if o.ToGitOpsDir != "" {
+		err = appendKustomizeIntegration(destIntegration, o.ToGitOpsDir)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintln(cmd.OutOrStdout(), `Exported a Kustomize based Gitops directory to `+o.ToGitOpsDir+` for "`+name+`" Integration`)
+		return nil
 	}
 	// Ensure the destination namespace has access to the source namespace images
 	err = addSystemPullerRoleBinding(o.Context, c, sourceIntegration.Namespace, destIntegration.Namespace)
@@ -420,4 +442,246 @@ func addSystemPullerRoleBinding(ctx context.Context, c client.Client, sourceNS s
 
 func showImageOnly(cmd *cobra.Command, integration *v1.Integration) {
 	fmt.Fprintln(cmd.OutOrStdout(), integration.Status.Image)
+}
+
+const kustomizationContent = `apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+`
+
+// appendKustomizeIntegration creates a Kustomize GitOps based directory structure for the chosen Integration.
+func appendKustomizeIntegration(dstIt *v1.Integration, destinationDir string) error {
+	namespaceDest := dstIt.Namespace
+	if _, err := os.Stat(destinationDir); err != nil {
+		return err
+	}
+
+	baseIt := dstIt.DeepCopy()
+	baseIt.Namespace = ""
+	if baseIt.Annotations != nil {
+		delete(baseIt.Annotations, v1.OperatorIDAnnotation)
+	}
+	appFolderName := strings.ToLower(baseIt.Name)
+
+	newpath := filepath.Join(destinationDir, appFolderName, "routes")
+	err := os.MkdirAll(newpath, io.FilePerm755)
+	if err != nil {
+		return err
+	}
+	for _, src := range baseIt.OriginalSourcesOnly() {
+		srcName := filepath.Join(newpath, src.Name)
+		cnt := []byte(src.Content)
+		if err := os.WriteFile(srcName, cnt, io.FilePerm755); err != nil {
+			return err
+		}
+	}
+
+	newpath = filepath.Join(destinationDir, appFolderName, "base")
+	err = os.MkdirAll(newpath, io.FilePerm755)
+	if err != nil {
+		return err
+	}
+	marshalledIt, err := kubernetes.ToYAML(baseIt)
+	if err != nil {
+		return err
+	}
+	filename := "integration.yaml"
+	itName := filepath.Join(newpath, filename)
+	if err := os.WriteFile(itName, marshalledIt, io.FilePerm755); err != nil {
+		return err
+	}
+	baseKustCnt := kustomizationContent + `- ` + filename
+	kustName := filepath.Join(newpath, "kustomization.yaml")
+	if err := os.WriteFile(kustName, []byte(baseKustCnt), io.FilePerm755); err != nil {
+		return err
+	}
+
+	newpath = filepath.Join(destinationDir, appFolderName, "overlays", namespaceDest)
+	err = os.MkdirAll(newpath, io.FilePerm755)
+	if err != nil {
+		return err
+	}
+	patchName := "patch-integration.yaml"
+	patchedIt := getIntegrationPatch(baseIt)
+	marshalledPatchIt, err := kubernetes.ToYAML(patchedIt)
+	if err != nil {
+		return err
+	}
+	patchFileName := filepath.Join(newpath, patchName)
+	if err := os.WriteFile(patchFileName, marshalledPatchIt, io.FilePerm755); err != nil {
+		return err
+	}
+	nsKustCnt := kustomizationContent + `- ../../base`
+	nsKustCnt += `
+namespace: ` + namespaceDest + `
+patches:
+- path: patch-integration.yaml
+`
+	kustName = filepath.Join(newpath, "kustomization.yaml")
+	if err := os.WriteFile(kustName, []byte(nsKustCnt), io.FilePerm755); err != nil {
+		return err
+	}
+
+	return err
+}
+
+// getIntegrationPatch will filter those traits/configuration we want to include in the Integration patch.
+func getIntegrationPatch(baseIt *v1.Integration) *v1.Integration {
+	patchedTraits := v1.Traits{}
+	baseTraits := baseIt.Spec.Traits
+	if baseTraits.Affinity != nil {
+		patchedTraits.Affinity = baseIt.Spec.Traits.Affinity
+	}
+	if baseTraits.Camel != nil && baseTraits.Camel.Properties != nil {
+		patchedTraits.Camel = &traitv1.CamelTrait{
+			Properties: baseTraits.Camel.Properties,
+		}
+	}
+	if baseTraits.Container != nil && (baseTraits.Container.RequestCPU != "" || baseTraits.Container.RequestMemory != "" ||
+		baseTraits.Container.LimitCPU != "" || baseTraits.Container.LimitMemory != "") {
+		patchedTraits.Container = &traitv1.ContainerTrait{
+			RequestCPU:    baseTraits.Container.RequestCPU,
+			RequestMemory: baseTraits.Container.RequestMemory,
+			LimitCPU:      baseTraits.Container.LimitCPU,
+			LimitMemory:   baseTraits.Container.LimitMemory,
+		}
+	}
+	if baseTraits.Environment != nil && baseTraits.Environment.Vars != nil {
+		patchedTraits.Environment = &traitv1.EnvironmentTrait{
+			Vars: baseTraits.Environment.Vars,
+		}
+	}
+	if baseTraits.JVM != nil && baseTraits.JVM.Options != nil {
+		patchedTraits.JVM = &traitv1.JVMTrait{
+			Options: baseTraits.JVM.Options,
+		}
+	}
+	if baseTraits.Mount != nil && (baseTraits.Mount.Configs != nil || baseTraits.Mount.Resources != nil ||
+		baseTraits.Mount.Volumes != nil || baseTraits.Mount.EmptyDirs != nil) {
+		patchedTraits.Mount = &traitv1.MountTrait{
+			Configs:   baseTraits.Mount.Configs,
+			Resources: baseTraits.Mount.Resources,
+			Volumes:   baseTraits.Mount.Volumes,
+			EmptyDirs: baseTraits.Mount.EmptyDirs,
+		}
+	}
+	if baseTraits.Toleration != nil {
+		patchedTraits.Toleration = baseIt.Spec.Traits.Toleration
+	}
+
+	patchedIt := v1.NewIntegration("", baseIt.Name)
+	patchedIt.Spec = v1.IntegrationSpec{
+		Traits: patchedTraits,
+	}
+
+	return &patchedIt
+}
+
+// appendKustomizePipe creates a Kustomize GitOps based directory structure for the chosen Pipe.
+func appendKustomizePipe(dstPipe *v1.Pipe, destinationDir string) error {
+	namespaceDest := dstPipe.Namespace
+	if _, err := os.Stat(destinationDir); err != nil {
+		return err
+	}
+
+	basePipe := dstPipe.DeepCopy()
+	basePipe.Namespace = ""
+	if basePipe.Annotations != nil {
+		delete(basePipe.Annotations, v1.OperatorIDAnnotation)
+	}
+	appFolderName := strings.ToLower(basePipe.Name)
+
+	newpath := filepath.Join(destinationDir, appFolderName, "base")
+	err := os.MkdirAll(newpath, io.FilePerm755)
+	if err != nil {
+		return err
+	}
+	marshalledPipe, err := kubernetes.ToYAML(basePipe)
+	if err != nil {
+		return err
+	}
+	filename := "pipe.yaml"
+	itName := filepath.Join(newpath, filename)
+	if err := os.WriteFile(itName, marshalledPipe, io.FilePerm755); err != nil {
+		return err
+	}
+	baseKustCnt := kustomizationContent + `- ` + filename
+	kustName := filepath.Join(newpath, "kustomization.yaml")
+	if err := os.WriteFile(kustName, []byte(baseKustCnt), io.FilePerm755); err != nil {
+		return err
+	}
+
+	newpath = filepath.Join(destinationDir, appFolderName, "overlays", namespaceDest)
+	err = os.MkdirAll(newpath, io.FilePerm755)
+	if err != nil {
+		return err
+	}
+	patchName := "patch-pipe.yaml"
+	patchedPipe := getPipePatch(basePipe)
+	marshalledPatchPipe, err := kubernetes.ToYAML(patchedPipe)
+	if err != nil {
+		return err
+	}
+	patchFileName := filepath.Join(newpath, patchName)
+	if err := os.WriteFile(patchFileName, marshalledPatchPipe, io.FilePerm755); err != nil {
+		return err
+	}
+	nsKustCnt := kustomizationContent + `- ../../base`
+	nsKustCnt += `
+namespace: ` + namespaceDest + `
+patches:
+- path: patch-pipe.yaml
+`
+	kustName = filepath.Join(newpath, "kustomization.yaml")
+	if err := os.WriteFile(kustName, []byte(nsKustCnt), io.FilePerm755); err != nil {
+		return err
+	}
+
+	return err
+}
+
+// getPipePatch will filter those traits/configuration we want to include in the Pipe patch.
+func getPipePatch(basePipe *v1.Pipe) *v1.Pipe {
+	patchedPipe := v1.NewPipe("", basePipe.Name)
+	patchedPipe.Annotations = basePipe.Annotations
+	// Only keep those traits we want to include in the patch
+	for kAnn := range basePipe.Annotations {
+		if strings.HasPrefix(kAnn, v1.TraitAnnotationPrefix) {
+			if !isPipeTraitPatch(kAnn) {
+				delete(basePipe.Annotations, kAnn)
+			}
+		}
+	}
+	return &patchedPipe
+}
+
+// isPipeTraitPatch returns true if it belongs to the list of the opinionated traits we want to keep in the patch.
+func isPipeTraitPatch(keyAnnotation string) bool {
+	if strings.HasPrefix(keyAnnotation, v1.TraitAnnotationPrefix+"affinity") {
+		return true
+	}
+	if keyAnnotation == v1.TraitAnnotationPrefix+"camel.properties" {
+		return true
+	}
+	if strings.HasPrefix(keyAnnotation, v1.TraitAnnotationPrefix+"container.request") ||
+		strings.HasPrefix(keyAnnotation, v1.TraitAnnotationPrefix+"container.limit") {
+		return true
+	}
+	if keyAnnotation == v1.TraitAnnotationPrefix+"environment.vars" {
+		return true
+	}
+	if keyAnnotation == v1.TraitAnnotationPrefix+"jvm.options" {
+		return true
+	}
+	if strings.HasPrefix(keyAnnotation, v1.TraitAnnotationPrefix+"mount.configs") ||
+		strings.HasPrefix(keyAnnotation, v1.TraitAnnotationPrefix+"mount.resources") ||
+		strings.HasPrefix(keyAnnotation, v1.TraitAnnotationPrefix+"mount.volumes") ||
+		strings.HasPrefix(keyAnnotation, v1.TraitAnnotationPrefix+"mount.empty-dirs") {
+		return true
+	}
+	if strings.HasPrefix(keyAnnotation, v1.TraitAnnotationPrefix+"toleration") {
+		return true
+	}
+
+	return false
 }

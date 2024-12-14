@@ -19,6 +19,8 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -142,13 +144,13 @@ func TestPipeDryRun(t *testing.T) {
 	dstPlatform.Status.Version = defaults.Version
 	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
 	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
-	defaultKB := nominalPipe("my-kb-test")
-	defaultIntegration, defaultKit := nominalIntegration("my-kb-test")
+	defaultKB := nominalPipe("my-pipe-test")
+	defaultIntegration, defaultKit := nominalIntegration("my-pipe-test")
 	srcCatalog := createTestCamelCatalog(srcPlatform)
 	dstCatalog := createTestCamelCatalog(dstPlatform)
 
 	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultKB, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
-	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-kb-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
+	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-pipe-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
 	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
 	require.NoError(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
@@ -159,7 +161,7 @@ metadata:
     trait.camel.apache.org/container.image: my-special-image
     trait.camel.apache.org/jvm.classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
   creationTimestamp: null
-  name: my-kb-test
+  name: my-pipe-test
   namespace: prod-namespace
 spec:
   sink: {}
@@ -235,7 +237,7 @@ func TestPipeWithMetadataDryRun(t *testing.T) {
 	dstPlatform.Status.Version = defaults.Version
 	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
 	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
-	defaultKB := nominalPipe("my-kb-test")
+	defaultKB := nominalPipe("my-pipe-test")
 	defaultKB.Annotations = map[string]string{
 		"camel.apache.org/operator.id": "camel-k",
 		"my-annotation":                "my-value",
@@ -243,12 +245,12 @@ func TestPipeWithMetadataDryRun(t *testing.T) {
 	defaultKB.Labels = map[string]string{
 		"my-label": "my-value",
 	}
-	defaultIntegration, defaultKit := nominalIntegration("my-kb-test")
+	defaultIntegration, defaultKit := nominalIntegration("my-pipe-test")
 	srcCatalog := createTestCamelCatalog(srcPlatform)
 	dstCatalog := createTestCamelCatalog(dstPlatform)
 
 	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultKB, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
-	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-kb-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
+	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-pipe-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
 	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
 	require.NoError(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
@@ -262,7 +264,7 @@ metadata:
   creationTimestamp: null
   labels:
     my-label: my-value
-  name: my-kb-test
+  name: my-pipe-test
   namespace: prod-namespace
 spec:
   sink: {}
@@ -299,13 +301,13 @@ func TestPipeImageOnly(t *testing.T) {
 	dstPlatform.Status.Version = defaults.Version
 	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
 	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
-	defaultKB := nominalPipe("my-kb-test")
-	defaultIntegration, defaultKit := nominalIntegration("my-kb-test")
+	defaultKB := nominalPipe("my-pipe-test")
+	defaultIntegration, defaultKit := nominalIntegration("my-pipe-test")
 	srcCatalog := createTestCamelCatalog(srcPlatform)
 	dstCatalog := createTestCamelCatalog(dstPlatform)
 
 	_, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultKB, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
-	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-kb-test", "--to", "prod-namespace", "-i", "-n", "default")
+	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-pipe-test", "--to", "prod-namespace", "-i", "-n", "default")
 	require.NoError(t, err)
 	assert.Equal(t, "my-special-image\n", output)
 }
@@ -427,7 +429,7 @@ func TestPipeWithSavedTraitsDryRun(t *testing.T) {
 	dstPlatform.Status.Version = defaults.Version
 	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
 	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
-	defaultKB := nominalPipe("my-kb-test")
+	defaultKB := nominalPipe("my-pipe-test")
 	defaultKB.Annotations = map[string]string{
 		"camel.apache.org/operator.id": "camel-k",
 		"my-annotation":                "my-value",
@@ -435,12 +437,12 @@ func TestPipeWithSavedTraitsDryRun(t *testing.T) {
 	defaultKB.Labels = map[string]string{
 		"my-label": "my-value",
 	}
-	defaultIntegration, defaultKit := nominalIntegration("my-kb-test")
+	defaultIntegration, defaultKit := nominalIntegration("my-pipe-test")
 	srcCatalog := createTestCamelCatalog(srcPlatform)
 	dstCatalog := createTestCamelCatalog(dstPlatform)
 
 	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultKB, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
-	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-kb-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
+	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-pipe-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
 	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
 	require.NoError(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
@@ -454,11 +456,267 @@ metadata:
   creationTimestamp: null
   labels:
     my-label: my-value
-  name: my-kb-test
+  name: my-pipe-test
   namespace: prod-namespace
 spec:
   sink: {}
   source: {}
 status: {}
 `, output)
+}
+
+const expectedGitOpsIt = `apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  creationTimestamp: null
+  name: my-it-test
+spec:
+  traits:
+    affinity:
+      nodeAffinityLabels:
+      - my-node
+    camel:
+      properties:
+      - my.property=val
+      runtimeVersion: 1.2.3
+    container:
+      image: my-special-image
+      imagePullPolicy: Always
+      limitCPU: "1"
+      limitMemory: 1024Mi
+      port: 2000
+      requestCPU: "0.5"
+      requestMemory: 512Mi
+    environment:
+      vars:
+      - MY_VAR=val
+    jvm:
+      classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
+      jar: my.jar
+      options:
+      - -XMX 123
+    mount:
+      configs:
+      - configmap:my-cm
+      - secret:my-sec
+    service:
+      annotations:
+        my-annotation: "123"
+      auto: false
+      enabled: true
+    toleration:
+      taints:
+      - taint1:true
+status: {}
+`
+
+const expectedGitOpsItPatch = `apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  creationTimestamp: null
+  name: my-it-test
+spec:
+  traits:
+    affinity:
+      nodeAffinityLabels:
+      - my-node
+    camel:
+      properties:
+      - my.property=val
+    container:
+      limitCPU: "1"
+      limitMemory: 1024Mi
+      requestCPU: "0.5"
+      requestMemory: 512Mi
+    environment:
+      vars:
+      - MY_VAR=val
+    jvm:
+      options:
+      - -XMX 123
+    mount:
+      configs:
+      - configmap:my-cm
+      - secret:my-sec
+    toleration:
+      taints:
+      - taint1:true
+status: {}
+`
+
+func TestIntegrationGitOps(t *testing.T) {
+	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
+	srcPlatform.Status.Version = defaults.Version
+	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
+	dstPlatform.Status.Version = defaults.Version
+	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	defaultIntegration, defaultKit := nominalIntegration("my-it-test")
+	defaultIntegration.Status.Traits = &v1.Traits{
+		Affinity: &trait.AffinityTrait{
+			NodeAffinityLabels: []string{"my-node"},
+		},
+		Camel: &trait.CamelTrait{
+			Properties: []string{"my.property=val"},
+		},
+		Container: &trait.ContainerTrait{
+			LimitCPU:        "1",
+			LimitMemory:     "1024Mi",
+			RequestCPU:      "0.5",
+			RequestMemory:   "512Mi",
+			Port:            2000,
+			ImagePullPolicy: corev1.PullAlways,
+		},
+		Environment: &trait.EnvironmentTrait{
+			Vars: []string{"MY_VAR=val"},
+		},
+		JVM: &trait.JVMTrait{
+			Jar:     "my.jar",
+			Options: []string{"-XMX 123"},
+		},
+		Mount: &trait.MountTrait{
+			Configs: []string{"configmap:my-cm", "secret:my-sec"},
+		},
+		Service: &trait.ServiceTrait{
+			Trait: trait.Trait{
+				Enabled: ptr.To(true),
+			},
+			Auto: ptr.To(false),
+			Annotations: map[string]string{
+				"my-annotation": "123",
+			},
+		},
+		Toleration: &trait.TolerationTrait{
+			Taints: []string{"taint1:true"},
+		},
+	}
+	srcCatalog := createTestCamelCatalog(srcPlatform)
+	dstCatalog := createTestCamelCatalog(dstPlatform)
+
+	tmpDir, err := os.MkdirTemp("", "ck-promote-it-*")
+	if err != nil {
+		t.Error(err)
+	}
+
+	_, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
+	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "--export-gitops-dir", tmpDir, "-n", "default")
+	require.NoError(t, err)
+	assert.Contains(t, output, `Exported a Kustomize based Gitops directory`)
+
+	baseIt, err := os.ReadFile(filepath.Join(tmpDir, "my-it-test", "base", "integration.yaml"))
+	require.NoError(t, err)
+	assert.Equal(t, expectedGitOpsIt, string(baseIt))
+
+	patchIt, err := os.ReadFile(filepath.Join(tmpDir, "my-it-test", "overlays", "prod-namespace", "patch-integration.yaml"))
+	require.NoError(t, err)
+	assert.Equal(t, expectedGitOpsItPatch, string(patchIt))
+}
+
+const expectedGitOpsPipe = `apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  annotations:
+    my-annotation: my-value
+    trait.camel.apache.org/affinity.node-affinity-labels: '[node1,node2]'
+    trait.camel.apache.org/camel.properties: '[a=1]'
+    trait.camel.apache.org/camel.runtime-version: 1.2.3
+    trait.camel.apache.org/container.image: my-special-image
+    trait.camel.apache.org/container.image-pull-policy: Always
+    trait.camel.apache.org/container.limit-cpu: "2"
+    trait.camel.apache.org/container.limit-memory: 1024Mi
+    trait.camel.apache.org/container.request-cpu: "1"
+    trait.camel.apache.org/container.request-memory: 2048Mi
+    trait.camel.apache.org/environment.vars: '[MYVAR=1]'
+    trait.camel.apache.org/jvm.classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
+    trait.camel.apache.org/jvm.jar: my.jar
+    trait.camel.apache.org/jvm.options: '[-XMX 123]'
+    trait.camel.apache.org/mount.resources: '[configmap:my-cm,secret:my-sec/my-key@/tmp/file.txt]'
+    trait.camel.apache.org/service.auto: "false"
+    trait.camel.apache.org/toleration.taints: '[mytaints:true]'
+  creationTimestamp: null
+  labels:
+    my-label: my-value
+  name: my-pipe-test
+spec:
+  sink: {}
+  source: {}
+status: {}
+`
+
+const expectedGitOpsPipePatch = `apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  annotations:
+    my-annotation: my-value
+    trait.camel.apache.org/affinity.node-affinity-labels: '[node1,node2]'
+    trait.camel.apache.org/camel.properties: '[a=1]'
+    trait.camel.apache.org/container.limit-cpu: "2"
+    trait.camel.apache.org/container.limit-memory: 1024Mi
+    trait.camel.apache.org/container.request-cpu: "1"
+    trait.camel.apache.org/container.request-memory: 2048Mi
+    trait.camel.apache.org/environment.vars: '[MYVAR=1]'
+    trait.camel.apache.org/jvm.options: '[-XMX 123]'
+    trait.camel.apache.org/mount.resources: '[configmap:my-cm,secret:my-sec/my-key@/tmp/file.txt]'
+    trait.camel.apache.org/toleration.taints: '[mytaints:true]'
+  creationTimestamp: null
+  name: my-pipe-test
+spec:
+  sink: {}
+  source: {}
+status: {}
+`
+
+func TestPipeGitOps(t *testing.T) {
+	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
+	srcPlatform.Status.Version = defaults.Version
+	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
+	dstPlatform.Status.Version = defaults.Version
+	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	defaultKB := nominalPipe("my-pipe-test")
+	defaultKB.Annotations = map[string]string{
+		"camel.apache.org/operator.id": "camel-k",
+		"my-annotation":                "my-value",
+		v1.TraitAnnotationPrefix + "affinity.node-affinity-labels": "[node1,node2]",
+		v1.TraitAnnotationPrefix + "camel.properties":              "[a=1]",
+		v1.TraitAnnotationPrefix + "container.limit-cpu":           "2",
+		v1.TraitAnnotationPrefix + "container.limit-memory":        "1024Mi",
+		v1.TraitAnnotationPrefix + "container.request-cpu":         "1",
+		v1.TraitAnnotationPrefix + "container.request-memory":      "2048Mi",
+		v1.TraitAnnotationPrefix + "container.image-pull-policy":   "Always",
+		v1.TraitAnnotationPrefix + "environment.vars":              "[MYVAR=1]",
+		v1.TraitAnnotationPrefix + "jvm.options":                   "[-XMX 123]",
+		v1.TraitAnnotationPrefix + "jvm.jar":                       "my.jar",
+		v1.TraitAnnotationPrefix + "mount.resources":               "[configmap:my-cm,secret:my-sec/my-key@/tmp/file.txt]",
+		v1.TraitAnnotationPrefix + "service.auto":                  "false",
+		v1.TraitAnnotationPrefix + "toleration.taints":             "[mytaints:true]",
+	}
+	defaultKB.Labels = map[string]string{
+		"my-label": "my-value",
+	}
+	defaultIntegration, defaultKit := nominalIntegration("my-pipe-test")
+	srcCatalog := createTestCamelCatalog(srcPlatform)
+	dstCatalog := createTestCamelCatalog(dstPlatform)
+
+	tmpDir, err := os.MkdirTemp("", "ck-promote-pipe-*")
+	if err != nil {
+		t.Error(err)
+	}
+
+	_, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultKB, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
+	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-pipe-test", "--to", "prod-namespace", "--export-gitops-dir", tmpDir, "-n", "default")
+	require.NoError(t, err)
+	assert.Contains(t, output, `Exported a Kustomize based Gitops directory`)
+
+	baseIt, err := os.ReadFile(filepath.Join(tmpDir, "my-pipe-test", "base", "pipe.yaml"))
+	require.NoError(t, err)
+	assert.Equal(t, expectedGitOpsPipe, string(baseIt))
+
+	patchPipe, err := os.ReadFile(filepath.Join(tmpDir, "my-pipe-test", "overlays", "prod-namespace", "patch-pipe.yaml"))
+	require.NoError(t, err)
+	assert.Equal(t, expectedGitOpsPipePatch, string(patchPipe))
 }
