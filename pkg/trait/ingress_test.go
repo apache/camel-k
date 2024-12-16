@@ -188,6 +188,21 @@ func TestApplyIngressTraitWithPathsDoesSucceed(t *testing.T) {
 	assert.Equal(t, "service-name(hostname) -> service-name(http)", conditions[0].Message)
 }
 
+func TestApplyIngressTraitWithPathAndPathsDoesSucceed(t *testing.T) {
+	ingressTrait, environment := createNominalIngressTest()
+	ingressTrait.Path = string("/path")
+	ingressTrait.Paths = []string{"/path-a", "/path-b"}
+
+	err := ingressTrait.Apply(environment)
+
+	require.NoError(t, err)
+	environment.Resources.Visit(func(resource runtime.Object) {
+		if ingress, ok := resource.(*networkingv1.Ingress); ok {
+			assert.Len(t, ingress.Spec.Rules[0].HTTP.Paths, 3)
+		}
+	})
+}
+
 func TestApplyIngressTraitWithIngressClassNameDoesSucceed(t *testing.T) {
 	ingressTrait, environment := createNominalIngressTestWithIngressClassName("someIngressClass")
 
