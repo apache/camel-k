@@ -129,6 +129,65 @@ func TestApplyIngressTraitDoesSucceed(t *testing.T) {
 	assert.Equal(t, "service-name(hostname) -> service-name(http)", conditions[0].Message)
 }
 
+func TestApplyIngressTraitWithPathDoesSucceed(t *testing.T) {
+	ingressTrait, environment := createNominalIngressTest()
+	ingressTrait.Path = string("/path")
+
+	err := ingressTrait.Apply(environment)
+
+	require.NoError(t, err)
+	assert.Len(t, environment.Integration.Status.Conditions, 1)
+
+	assert.Len(t, environment.Resources.Items(), 2)
+	environment.Resources.Visit(func(resource runtime.Object) {
+		if ingress, ok := resource.(*networkingv1.Ingress); ok {
+			assert.Equal(t, "service-name", ingress.Name)
+			assert.Equal(t, "namespace", ingress.Namespace)
+			assert.Len(t, ingress.Spec.Rules, 1)
+			assert.Equal(t, "hostname", ingress.Spec.Rules[0].Host)
+			assert.Len(t, ingress.Spec.Rules[0].HTTP.Paths, 1)
+			assert.Equal(t, "/path", ingress.Spec.Rules[0].HTTP.Paths[0].Path)
+			assert.Equal(t, "service-name", ingress.Spec.Rules[0].HTTP.Paths[0].Backend.Service.Name)
+			assert.NotNil(t, *ingress.Spec.Rules[0].HTTP.Paths[0].PathType)
+			assert.Equal(t, networkingv1.PathTypePrefix, *ingress.Spec.Rules[0].HTTP.Paths[0].PathType)
+		}
+	})
+
+	conditions := environment.Integration.Status.Conditions
+	assert.Len(t, conditions, 1)
+	assert.Equal(t, "service-name(hostname) -> service-name(http)", conditions[0].Message)
+}
+
+func TestApplyIngressTraitWithPathsDoesSucceed(t *testing.T) {
+	ingressTrait, environment := createNominalIngressTest()
+	ingressTrait.Paths = []string{"/path-a", "/path-b"}
+
+	err := ingressTrait.Apply(environment)
+
+	require.NoError(t, err)
+	assert.Len(t, environment.Integration.Status.Conditions, 1)
+
+	assert.Len(t, environment.Resources.Items(), 2)
+	environment.Resources.Visit(func(resource runtime.Object) {
+		if ingress, ok := resource.(*networkingv1.Ingress); ok {
+			assert.Equal(t, "service-name", ingress.Name)
+			assert.Equal(t, "namespace", ingress.Namespace)
+			assert.Len(t, ingress.Spec.Rules, 1)
+			assert.Equal(t, "hostname", ingress.Spec.Rules[0].Host)
+			assert.Len(t, ingress.Spec.Rules[0].HTTP.Paths, 2)
+			assert.Equal(t, "/path-a", ingress.Spec.Rules[0].HTTP.Paths[0].Path)
+			assert.Equal(t, "/path-b", ingress.Spec.Rules[0].HTTP.Paths[1].Path)
+			assert.Equal(t, "service-name", ingress.Spec.Rules[0].HTTP.Paths[0].Backend.Service.Name)
+			assert.NotNil(t, *ingress.Spec.Rules[0].HTTP.Paths[0].PathType)
+			assert.Equal(t, networkingv1.PathTypePrefix, *ingress.Spec.Rules[0].HTTP.Paths[0].PathType)
+		}
+	})
+
+	conditions := environment.Integration.Status.Conditions
+	assert.Len(t, conditions, 1)
+	assert.Equal(t, "service-name(hostname) -> service-name(http)", conditions[0].Message)
+}
+
 func TestApplyIngressTraitWithIngressClassNameDoesSucceed(t *testing.T) {
 	ingressTrait, environment := createNominalIngressTestWithIngressClassName("someIngressClass")
 

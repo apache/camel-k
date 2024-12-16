@@ -1106,9 +1106,15 @@ spec:
                           See https://kubernetes.io/docs/concepts/services-networking/ingress/
                         type: string
                       path:
-                        description: To configure the path exposed by the ingress
-                          (default `/`).
+                        description: |-
+                          To configure the path exposed by the ingress (default `/`).
+                          Deprecated: In favor of `paths` - left for backward compatibility.
                         type: string
+                      paths:
+                        description: To configure the paths exposed by the ingress (default `['/']`).
+                        items:
+                          type: string
+                        type: array
                       pathType:
                         description: |-
                           To configure the path type exposed by the ingress.
@@ -3174,9 +3180,15 @@ spec:
                           See https://kubernetes.io/docs/concepts/services-networking/ingress/
                         type: string
                       path:
-                        description: To configure the path exposed by the ingress
-                          (default `/`).
+                        description: |-
+                          To configure the path exposed by the ingress (default `/`).
+                          Deprecated: In favor of `paths` - left for backward compatibility.
                         type: string
+                      paths:
+                        description: To configure the paths exposed by the ingress (default `['/']`).
+                        items:
+                          type: string
+                        type: array
                       pathType:
                         description: |-
                           To configure the path type exposed by the ingress.

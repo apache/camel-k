@@ -101,20 +101,7 @@ func (t *ingressTrait) Apply(e *Environment) error {
 					Host: t.Host,
 					IngressRuleValue: networkingv1.IngressRuleValue{
 						HTTP: &networkingv1.HTTPIngressRuleValue{
-							Paths: []networkingv1.HTTPIngressPath{
-								{
-									Path:     t.getPath(),
-									PathType: t.getPathType(),
-									Backend: networkingv1.IngressBackend{
-										Service: &networkingv1.IngressServiceBackend{
-											Name: service.Name,
-											Port: networkingv1.ServiceBackendPort{
-												Name: "http",
-											},
-										},
-									},
-								},
-							},
+							Paths: t.getPaths(service),
 						},
 					},
 				},
@@ -148,12 +135,34 @@ func (t *ingressTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *ingressTrait) getPath() string {
-	if t.Path == "" {
-		return defaultPath
+func (t *ingressTrait) getPaths(service *corev1.Service) []networkingv1.HTTPIngressPath {
+	createIngressPath := func(path string) networkingv1.HTTPIngressPath {
+		return networkingv1.HTTPIngressPath{
+			Path:     path,
+			PathType: t.getPathType(),
+			Backend: networkingv1.IngressBackend{
+				Service: &networkingv1.IngressServiceBackend{
+					Name: service.Name,
+					Port: networkingv1.ServiceBackendPort{
+						Name: "http",
+					},
+				},
+			},
+		}
 	}
 
-	return t.Path
+	paths := []networkingv1.HTTPIngressPath{}
+	if t.Path == "" && len(t.Paths) == 0 {
+		paths = append(paths, createIngressPath(defaultPath))
+	} else if t.Path != "" {
+		paths = append(paths, createIngressPath(t.Path))
+	} else {
+		for _, p := range t.Paths {
+			paths = append(paths, createIngressPath(p))
+		}
+	}
+
+	return paths
 }
 
 func (t *ingressTrait) getPathType() *networkingv1.PathType {
