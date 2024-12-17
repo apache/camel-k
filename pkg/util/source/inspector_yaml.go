@@ -88,6 +88,10 @@ func (i YAMLInspector) parseDefinition(def map[string]interface{}, meta *Metadat
 //nolint:nestif
 func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata) error {
 	switch key {
+	case "bean":
+		if bean := i.catalog.GetArtifactByScheme("bean"); bean != nil {
+			meta.AddDependency(bean.GetDependencyID())
+		}
 	case "rest":
 		meta.ExposesHTTPServices = true
 		meta.RequiredCapabilities.Add(v1.CapabilityRest)

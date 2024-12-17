@@ -43,53 +43,6 @@ import (
 	yaml2 "gopkg.in/yaml.v2"
 )
 
-// Directories and file names:
-
-// DefaultDependenciesDirectoryName --.
-const DefaultDependenciesDirectoryName = "dependencies"
-
-// DefaultPropertiesDirectoryName --.
-const DefaultPropertiesDirectoryName = "properties"
-
-// DefaultRoutesDirectoryName --.
-const DefaultRoutesDirectoryName = "routes"
-
-// DefaultWorkingDirectoryName --.
-const DefaultWorkingDirectoryName = "workspace"
-
-// CustomQuarkusDirectoryName --.
-const CustomQuarkusDirectoryName = "quarkus"
-
-// CustomAppDirectoryName --.
-const CustomAppDirectoryName = "app"
-
-// CustomLibDirectoryName --.
-const CustomLibDirectoryName = "lib/main"
-
-// ContainerDependenciesDirectory --.
-var ContainerDependenciesDirectory = "/deployments/dependencies"
-
-// ContainerPropertiesDirectory --.
-var ContainerPropertiesDirectory = "/etc/camel/conf.d"
-
-// ContainerRoutesDirectory --.
-var ContainerRoutesDirectory = "/etc/camel/sources"
-
-// ContainerResourcesDirectory --.
-var ContainerResourcesDirectory = "/etc/camel/resources.d"
-
-// ContainerQuarkusDirectoryName --.
-const ContainerQuarkusDirectoryName = "/quarkus"
-
-// ContainerAppDirectoryName --.
-const ContainerAppDirectoryName = "/app"
-
-// ContainerLibDirectoryName --.
-const ContainerLibDirectoryName = "/lib/main"
-
-// QuarkusDependenciesBaseDirectory --.
-var QuarkusDependenciesBaseDirectory = "/quarkus-app"
-
 // ListOfLazyEvaluatedEnvVars -- List of unevaluated environment variables.
 // These are sensitive values or values that may have different values depending on
 // where the integration is run (locally vs. the cloud). These environment variables

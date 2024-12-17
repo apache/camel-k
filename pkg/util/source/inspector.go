@@ -50,6 +50,7 @@ var (
 	camelTypeRegexp         = regexp.MustCompile(`.*(org.apache.camel.*Component|DataFormat|Language)`)
 	jsonLibraryRegexp       = regexp.MustCompile(`.*JsonLibrary\.Jackson.*`)
 	jsonLanguageRegexp      = regexp.MustCompile(`.*\.json\(\).*`)
+	beanRegexp              = regexp.MustCompile(`.*\.bean\(.*\).*`)
 	circuitBreakerRegexp    = regexp.MustCompile(`.*\.circuitBreaker\(\).*`)
 	restConfigurationRegexp = regexp.MustCompile(`.*restConfiguration\(\).*`)
 	restRegexp              = regexp.MustCompile(`.*rest\s*\([^)]*\).*`)
@@ -70,6 +71,13 @@ var (
 	}
 
 	sourceDependencies = map[*regexp.Regexp]catalog2deps{
+		beanRegexp: func(catalog *camel.RuntimeCatalog) []string {
+			res := make([]string, 0)
+			if bean := catalog.GetArtifactByScheme("bean"); bean != nil {
+				res = append(res, bean.GetDependencyID())
+			}
+			return res
+		},
 		jsonLibraryRegexp: func(catalog *camel.RuntimeCatalog) []string {
 			res := make([]string, 0)
 			if jsonDF := catalog.GetArtifactByDataFormat(defaultJSONDataFormat); jsonDF != nil {

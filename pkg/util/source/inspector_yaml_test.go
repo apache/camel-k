@@ -757,3 +757,22 @@ func TestYAMLRESTContractFirst(t *testing.T) {
 		})
 	})
 }
+
+const yamlBean = `
+- from:
+    uri: "timer:foo"
+    steps:
+    - bean:
+        type: "#xyz"
+    - to: "log:bar"
+`
+
+func TestYamlBeanDependencies(t *testing.T) {
+	inspector := newTestYAMLInspector(t)
+
+	assertExtract(t, inspector, yamlBean, func(meta *Metadata) {
+		assert.Contains(t, meta.Dependencies.List(), "camel:timer")
+		assert.Contains(t, meta.Dependencies.List(), "camel:bean")
+		assert.Contains(t, meta.Dependencies.List(), "camel:log")
+	})
+}

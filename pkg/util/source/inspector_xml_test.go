@@ -228,3 +228,13 @@ func TestXMLRestOpenapiFirst(t *testing.T) {
 	require.NoError(t, err)
 	assert.Contains(t, meta.Dependencies.List(), "camel:rest-openapi")
 }
+
+func TestXMLBeanDependencies(t *testing.T) {
+	inspector := newTestXMLInspector(t)
+
+	assertExtract(t, inspector, "<from uri=\"timer:foo\"/><bean>something</bean><to uri=\"log:bar\"></to>", func(meta *Metadata) {
+		assert.Contains(t, meta.Dependencies.List(), "camel:timer")
+		assert.Contains(t, meta.Dependencies.List(), "camel:bean")
+		assert.Contains(t, meta.Dependencies.List(), "camel:log")
+	})
+}

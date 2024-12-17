@@ -439,7 +439,13 @@ func (t *mountTrait) addSourcesProperties(e *Environment) {
 	if e.ApplicationProperties == nil {
 		e.ApplicationProperties = make(map[string]string)
 	}
-	if e.CamelCatalog.GetRuntimeProvider() == v1.RuntimeProviderPlainQuarkus {
+	isQuarkusNative := false
+	if qt := e.Catalog.GetTrait(quarkusTraitID); qt != nil {
+		if quarkus, ok := qt.(*quarkusTrait); ok && quarkus.isNativeIntegration(e) {
+			isQuarkusNative = true
+		}
+	}
+	if e.CamelCatalog.GetRuntimeProvider() == v1.RuntimeProviderPlainQuarkus && !isQuarkusNative {
 		e.ApplicationProperties["camel.main.source-location-enabled"] = boolean.TrueString
 		e.ApplicationProperties["camel.main.routes-include-pattern"] = fmt.Sprintf("file:%s/**", camel.SourcesMountPath)
 	} else {
