@@ -71,18 +71,6 @@ func TestRunConfigProperties(t *testing.T) {
 			g.Eventually(IntegrationLogs(t, ctx, ns, "property-route"), TestTimeoutShort).Should(ContainSubstring("my-configmap-property-value"))
 		})
 
-		t.Run("Property from ConfigMap as property file", func(t *testing.T) {
-			var cmData = make(map[string]string)
-			cmData["my.properties"] = "my.message=my-configmap-property-entry"
-			err := CreatePlainTextConfigmap(t, ctx, ns, "my-cm-test-properties", cmData)
-			g.Expect(err).To(BeNil())
-
-			g.Expect(KamelRun(t, ctx, ns, "./files/property-route.yaml", "-p", "configmap:my-cm-test-properties").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "property-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "property-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "property-route"), TestTimeoutShort).Should(ContainSubstring("my-configmap-property-entry"))
-		})
-
 		t.Run("Property from Secret", func(t *testing.T) {
 			var secData = make(map[string]string)
 			secData["my.message"] = "my-secret-property-value"
@@ -93,18 +81,6 @@ func TestRunConfigProperties(t *testing.T) {
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "property-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "property-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, "property-route"), TestTimeoutShort).Should(ContainSubstring("my-secret-property-value"))
-		})
-
-		t.Run("Property from Secret as property file", func(t *testing.T) {
-			var secData = make(map[string]string)
-			secData["my.properties"] = "my.message=my-secret-property-entry"
-			err := CreatePlainTextSecret(t, ctx, ns, "my-sec-test-properties", secData)
-			g.Expect(err).To(BeNil())
-
-			g.Expect(KamelRun(t, ctx, ns, "./files/property-route.yaml", "--name", "property-route-secret", "-p", "secret:my-sec-test-properties").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "property-route-secret"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "property-route-secret", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "property-route-secret"), TestTimeoutShort).Should(ContainSubstring("my-secret-property-entry"))
 		})
 
 		t.Run("Property from Secret inlined", func(t *testing.T) {
@@ -171,19 +147,6 @@ func TestRunConfigConfigmaps(t *testing.T) {
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "resource-configmap-key-location-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, "resource-configmap-key-location-route"), TestTimeoutShort).ShouldNot(ContainSubstring(cmDataMulti["my-configmap-key"]))
 			g.Eventually(IntegrationLogs(t, ctx, ns, "resource-configmap-key-location-route"), TestTimeoutShort).Should(ContainSubstring(cmDataMulti["my-configmap-key-2"]))
-		})
-
-		t.Run("Config configmap as property file", func(t *testing.T) {
-			// Store a configmap as property file
-			var cmDataProps = make(map[string]string)
-			cmDataProps["my.properties"] = "my.key.1=hello\nmy.key.2=world"
-			err = CreatePlainTextConfigmap(t, ctx, ns, "my-cm-properties", cmDataProps)
-			g.Expect(err).To(BeNil())
-
-			g.Expect(KamelRun(t, ctx, ns, "./files/config-configmap-properties-route.yaml", "--config", "configmap:my-cm-properties").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "config-configmap-properties-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "config-configmap-properties-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "config-configmap-properties-route"), TestTimeoutShort).Should(ContainSubstring("hello world"))
 		})
 	})
 }

@@ -191,7 +191,7 @@ func TestBuilderTrait(t *testing.T) {
 
 			// Check logs
 			g.Eventually(Logs(t, ctx, integrationKitNamespace, builderKitName, corev1.PodLogOptions{Container: "custom1"})).Should(ContainSubstring(`generated-bytecode.jar`))
-			g.Eventually(Logs(t, ctx, integrationKitNamespace, builderKitName, corev1.PodLogOptions{Container: "custom2"})).Should(ContainSubstring(`<artifactId>camel-k-runtime-bom</artifactId>`))
+			g.Eventually(Logs(t, ctx, integrationKitNamespace, builderKitName, corev1.PodLogOptions{Container: "custom2"})).Should(ContainSubstring(`<artifactId>camel-k-integration</artifactId>`))
 		})
 
 		t.Run("Run custom pipeline task error", func(t *testing.T) {

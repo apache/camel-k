@@ -190,3 +190,19 @@ public void configure() throws Exception {
 	require.NoError(t, err)
 	assert.Contains(t, meta.Dependencies.List(), "camel:rest-openapi")
 }
+
+func TestJavaBeanDependencies(t *testing.T) {
+	inspector := newTestJavaSourceInspector(t)
+
+	sourceSpec := &v1.SourceSpec{
+		DataSpec: v1.DataSpec{
+			Name:    "test.java",
+			Content: "from(\"timer:foo\").bean(\"myBean\").to(\"log:bar\")",
+		},
+	}
+	assertExtract(t, inspector, sourceSpec.Content, func(meta *Metadata) {
+		assert.Contains(t, meta.Dependencies.List(), "camel:timer")
+		assert.Contains(t, meta.Dependencies.List(), "camel:bean")
+		assert.Contains(t, meta.Dependencies.List(), "camel:log")
+	})
+}
