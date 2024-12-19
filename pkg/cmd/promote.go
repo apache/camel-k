@@ -18,7 +18,6 @@ limitations under the License.
 package cmd
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -34,9 +33,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/sets"
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
-	rbacv1 "k8s.io/api/rbac/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -156,11 +153,6 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 			fmt.Fprintln(cmd.OutOrStdout(), `Exported a Kustomize based Gitops directory to `+o.ToGitOpsDir+` for "`+name+`" Pipe`)
 			return nil
 		}
-		// Ensure the destination namespace has access to the source namespace images
-		err = addSystemPullerRoleBinding(o.Context, c, sourceIntegration.Namespace, destPipe.Namespace)
-		if err != nil {
-			return err
-		}
 		replaced, err := o.replaceResource(destPipe)
 		if err != nil {
 			return err
@@ -186,11 +178,7 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 		fmt.Fprintln(cmd.OutOrStdout(), `Exported a Kustomize based Gitops directory to `+o.ToGitOpsDir+` for "`+name+`" Integration`)
 		return nil
 	}
-	// Ensure the destination namespace has access to the source namespace images
-	err = addSystemPullerRoleBinding(o.Context, c, sourceIntegration.Namespace, destIntegration.Namespace)
-	if err != nil {
-		return err
-	}
+
 	replaced, err := o.replaceResource(destIntegration)
 	if err != nil {
 		return err
@@ -407,37 +395,6 @@ func (o *promoteCmdOptions) replaceResource(res k8sclient.Object) (bool, error) 
 
 func (o *promoteCmdOptions) isDryRun() bool {
 	return o.OutputFormat != "" || o.Image
-}
-
-// RoleBinding is required to allow access to images in one namespace
-// by another namespace. Without this on rbac-enabled clusters, the
-// image cannot be pulled.
-func addSystemPullerRoleBinding(ctx context.Context, c client.Client, sourceNS string, destNS string) error {
-	rb := &rbacv1.RoleBinding{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "RoleBinding",
-			APIVersion: "rbac.authorization.k8s.io/v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-image-puller", destNS),
-			Namespace: sourceNS,
-		},
-		Subjects: []rbacv1.Subject{
-			{
-				Kind:      "ServiceAccount",
-				Name:      "default",
-				Namespace: destNS,
-			},
-		},
-		RoleRef: rbacv1.RoleRef{
-			Kind: "ClusterRole",
-			Name: "system:image-puller",
-		},
-	}
-	applier := c.ServerOrClientSideApplier()
-	err := applier.Apply(ctx, rb)
-
-	return err
 }
 
 func showImageOnly(cmd *cobra.Command, integration *v1.Integration) {
