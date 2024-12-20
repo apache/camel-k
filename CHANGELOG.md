@@ -1,18 +1,10 @@
 # Changelog
 
-## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...HEAD)
-
-**Closed issues:**
-
-- Promote Integration/IntegrationKit kustomization patch file [\#5456](https://github.com/apache/camel-k/issues/5456)
-
-## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2024-12-16)
+## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2024-12-19)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
 
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2024-12-16)
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2024-12-19)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.5.1-nightly)
 
@@ -41,6 +33,7 @@
 - \[features request\] add the hability to set Jib registryMirrors [\#5691](https://github.com/apache/camel-k/issues/5691)
 - Pipe is waiting forever on Revision to become available [\#5623](https://github.com/apache/camel-k/issues/5623)
 - Align the Hashicorp Vault Add-on to CAMEL-20775 [\#5527](https://github.com/apache/camel-k/issues/5527)
+- Promote Integration/IntegrationKit kustomization patch file [\#5456](https://github.com/apache/camel-k/issues/5456)
 - Kubernetes API 1.30 [\#5455](https://github.com/apache/camel-k/issues/5455)
 - Simplify Vaults addons [\#5258](https://github.com/apache/camel-k/issues/5258)
 - The Yaml Parser diverges for Kamelets and Integration Resources [\#5135](https://github.com/apache/camel-k/issues/5135)
