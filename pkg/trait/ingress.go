@@ -57,9 +57,11 @@ func (t *ingressTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	if e.Integration == nil {
 		return false, nil, nil
 	}
+
 	if !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
+
 	if !ptr.Deref(t.Enabled, true) {
 		return false, NewIntegrationCondition(
 			"Ingress",
@@ -74,6 +76,18 @@ func (t *ingressTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 		if e.Resources.GetUserServiceForIntegration(e.Integration) == nil {
 			return false, nil, nil
 		}
+	}
+
+	if t.Path != "" {
+		condition := NewIntegrationCondition(
+			"Ingress",
+			v1.IntegrationConditionTraitInfo,
+			corev1.ConditionTrue,
+			TraitConfigurationReason,
+			"The path parameter is deprecated and may be removed in future releases. Use the paths parameter instead.",
+		)
+
+		return true, condition, nil
 	}
 
 	return true, nil, nil
