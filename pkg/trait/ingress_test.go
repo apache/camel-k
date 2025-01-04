@@ -156,6 +156,15 @@ func TestApplyIngressTraitWithPathDoesSucceed(t *testing.T) {
 	conditions := environment.Integration.Status.Conditions
 	assert.Len(t, conditions, 1)
 	assert.Equal(t, "service-name(hostname) -> service-name(http)", conditions[0].Message)
+
+	// ensure a condition exists with the depreciation notice
+	enabled, condition, err := ingressTrait.Configure(environment)
+	require.NoError(t, err)
+	assert.True(t, enabled)
+	assert.NotNil(t, condition)
+	assert.Equal(t, "The path parameter is deprecated and may be removed in a future release. Use the paths parameter instead.",
+		condition.message,
+	)
 }
 
 func TestApplyIngressTraitWithPathsDoesSucceed(t *testing.T) {
