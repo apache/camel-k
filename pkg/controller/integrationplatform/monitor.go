@@ -194,7 +194,20 @@ func (action *monitorAction) addPlainQuarkusCatalog(ctx context.Context, catalog
 			}
 			runtimesProps := clonedCatalog.Spec.Runtime.Capabilities["master"].RuntimeProperties
 			clonedCatalog.Spec.Runtime.Capabilities["master"] = v1.Capability{
-				Dependencies:      []v1.MavenArtifact{},
+				Dependencies: []v1.MavenArtifact{
+					{
+						GroupID:    "org.apache.camel.quarkus",
+						ArtifactID: "camel-quarkus-master",
+					},
+					{
+						GroupID:    "org.apache.camel.quarkus",
+						ArtifactID: "camel-quarkus-kubernetes",
+					},
+					{
+						GroupID:    "org.apache.camel.quarkus",
+						ArtifactID: "camel-quarkus-kubernetes-cluster-service",
+					},
+				},
 				RuntimeProperties: runtimesProps,
 			}
 			clonedCatalog.Spec.Runtime.Capabilities["resume-kafka"] = v1.Capability{
