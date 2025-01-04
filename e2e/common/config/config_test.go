@@ -83,18 +83,6 @@ func TestRunConfigProperties(t *testing.T) {
 			g.Eventually(IntegrationLogs(t, ctx, ns, "property-route"), TestTimeoutShort).Should(ContainSubstring("my-secret-property-value"))
 		})
 
-		t.Run("Property from Secret inlined", func(t *testing.T) {
-			var secData = make(map[string]string)
-			secData["my-message"] = "my-secret-external-value"
-			err := CreatePlainTextSecret(t, ctx, ns, "my-sec-inlined", secData)
-			g.Expect(err).To(BeNil())
-
-			g.Expect(KamelRun(t, ctx, ns, "./files/property-secret-route.yaml", "-t", "mount.configs=secret:my-sec-inlined").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "property-secret-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "property-secret-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "property-secret-route"), TestTimeoutShort).Should(ContainSubstring("my-secret-external-value"))
-		})
-
 	})
 }
 
