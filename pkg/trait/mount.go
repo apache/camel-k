@@ -439,15 +439,20 @@ func (t *mountTrait) addSourcesProperties(e *Environment) {
 	if e.ApplicationProperties == nil {
 		e.ApplicationProperties = make(map[string]string)
 	}
-	isQuarkusNative := false
-	if qt := e.Catalog.GetTrait(quarkusTraitID); qt != nil {
-		if quarkus, ok := qt.(*quarkusTrait); ok && quarkus.isNativeIntegration(e) {
-			isQuarkusNative = true
+	if e.CamelCatalog.GetRuntimeProvider() == v1.RuntimeProviderPlainQuarkus {
+		sourceLocationEnabled := false
+		for _, s := range e.Integration.AllSources() {
+			// We don't process routes embedded (native) or Kamelets
+			if e.isEmbedded(s) || s.IsGeneratedFromKamelet() {
+				continue
+			}
+			sourceLocationEnabled = true
+			break
 		}
-	}
-	if e.CamelCatalog.GetRuntimeProvider() == v1.RuntimeProviderPlainQuarkus && !isQuarkusNative {
-		e.ApplicationProperties["camel.main.source-location-enabled"] = boolean.TrueString
-		e.ApplicationProperties["camel.main.routes-include-pattern"] = fmt.Sprintf("file:%s/**", camel.SourcesMountPath)
+		if sourceLocationEnabled {
+			e.ApplicationProperties["camel.main.source-location-enabled"] = boolean.TrueString
+			e.ApplicationProperties["camel.main.routes-include-pattern"] = fmt.Sprintf("file:%s/**", camel.SourcesMountPath)
+		}
 	} else {
 		idx := 0
 		for _, s := range e.Integration.AllSources() {
