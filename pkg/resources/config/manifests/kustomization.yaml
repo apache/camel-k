@@ -32,10 +32,13 @@ resources:
 - ../rbac/namespaced
 
 patches:
-  - path: patch-delete-user-cluster-role.yaml
-    target:
-      kind: ClusterRole
+- path: patch-delete-user-cluster-role.yaml
+  target:
+    kind: ClusterRole
 images:
 - name: docker.io/apache/camel-k
   newName: docker.io/apache/camel-k
   newTag: 2.6.0-SNAPSHOT
+- name: docker.io/testcamelk/camel-k
+  newName: docker.io/testcamelk/camel-k
+  newTag: 2.6.0-nightly
