@@ -79,12 +79,14 @@ func (t *ingressTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	}
 
 	if t.Path != "" {
+		m := "The path parameter is deprecated and may be removed in a future release. Use the paths parameter instead."
+		t.L.Info(m)
 		condition := NewIntegrationCondition(
 			"Ingress",
 			v1.IntegrationConditionTraitInfo,
 			corev1.ConditionTrue,
 			TraitConfigurationReason,
-			"The path parameter is deprecated and may be removed in future releases. Use the paths parameter instead.",
+			m,
 		)
 
 		return true, condition, nil
