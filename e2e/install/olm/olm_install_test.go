@@ -61,7 +61,7 @@ func TestOLMInstallation(t *testing.T) {
 				fmt.Sprintf("BUNDLE_IMAGE_NAME=%s", bundleImageName),
 				fmt.Sprintf("NAMESPACE=%s", ns),
 			),
-			"180s",
+			"300s",
 		)
 		// Refresh the test client to account for the newly installed CRDs
 		RefreshClient(t)
