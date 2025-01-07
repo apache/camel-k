@@ -31,7 +31,6 @@
 ** xref:languages/java.adoc[Java]
 ** xref:languages/yaml.adoc[YAML]
 ** xref:languages/xml.adoc[XML]
-** xref:languages/groovy.adoc[Groovy]
 * xref:configuration/configuration.adoc[Configuration]
 ** xref:configuration/dependencies.adoc[Dependencies]
 ** xref:configuration/build-time-properties.adoc[Build time properties]

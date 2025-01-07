@@ -79,18 +79,5 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 
 		})
 
-		t.Run("groovy native support", func(t *testing.T) {
-			name := RandomizedSuffixName("groovy-native")
-			g.Expect(KamelRun(t, ctx, ns, "files/Groovy.groovy", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi").Execute()).To(Succeed())
-
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationPod(t, ctx, ns, name), TestTimeoutShort).
-				Should(WithTransform(getContainerCommand(), MatchRegexp(".*camel-k-integration-\\d+\\.\\d+\\.\\d+[-A-Za-z]*-runner.*")))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
-				Should(Equal(corev1.ConditionTrue))
-
-			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Groovy Magicstring!"))
-		})
-
 	})
 }
