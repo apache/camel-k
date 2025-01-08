@@ -49,6 +49,11 @@ See https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-
 | string
 | To configure the path exposed by the ingress (default `/`).
 
+| ingress.paths
+| []string
+| To configure the paths exposed by the ingress (default `['/']`).
+Deprecated: In favor of `paths` - left for backward compatibility.
+
 | ingress.path-type
 | k8s.io/api/networking/v1.PathType
 | To configure the path type exposed by the ingress.

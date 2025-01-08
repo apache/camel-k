@@ -447,6 +447,11 @@ func (in *IngressTrait) DeepCopyInto(out *IngressTrait) {
 			(*out)[key] = val
 		}
 	}
+	if in.Paths != nil {
+		in, out := &in.Paths, &out.Paths
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	if in.PathType != nil {
 		in, out := &in.PathType, &out.PathType
 		*out = new(networkingv1.PathType)
