@@ -148,7 +148,7 @@ cat <<EOF > ${pom}
     <version>0.1</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <quarkus.package.type>fast-jar</quarkus.package.type>
+        <quarkus.package.jar.type>fast-jar</quarkus.package.jar.type>
         <maven.compiler.release>17</maven.compiler.release>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
@@ -244,7 +244,7 @@ cat <<EOF > ${pom_min}
     <version>0.1</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <quarkus.package.type>fast-jar</quarkus.package.type>
+        <quarkus.package.jar.type>fast-jar</quarkus.package.jar.type>
         <maven.compiler.release>17</maven.compiler.release>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>

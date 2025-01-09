@@ -384,7 +384,7 @@ func (t *quarkusTrait) applyWhenBuildSubmitted(e *Environment) error {
 	//nolint:nestif
 	if native {
 		if nativePackageType := builder.QuarkusRuntimeSupport(e.CamelCatalog.GetCamelQuarkusVersion()).NativeMavenProperty(); nativePackageType != "" {
-			buildTask.Maven.Properties["quarkus.package.type"] = nativePackageType
+			buildTask.Maven.Properties[nativePackageType] = "true"
 			if t.NativeBaseImage == "" {
 				packageTask.BaseImage = QuarkusNativeDefaultBaseImageName
 			} else {
@@ -400,7 +400,7 @@ func (t *quarkusTrait) applyWhenBuildSubmitted(e *Environment) error {
 		packageSteps = append(packageSteps, builder.Image.ExecutableDockerfile)
 	} else {
 		// Default, if nothing is specified
-		buildTask.Maven.Properties["quarkus.package.type"] = string(fastJarPackageType)
+		buildTask.Maven.Properties["quarkus.package.jar.type"] = string(fastJarPackageType)
 		packageSteps = append(packageSteps, builder.Quarkus.ComputeQuarkusDependencies)
 		if t.isIncrementalImageBuild(e) {
 			packageSteps = append(packageSteps, builder.Image.IncrementalImageContext)
