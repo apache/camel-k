@@ -54,7 +54,7 @@ func (n *NativeSourcesAdapter) TargetDirectory(ctxPath, runner string) string {
 
 // NativeMavenProperty -- .
 func (n *NativeSourcesAdapter) NativeMavenProperty() string {
-	return "native-sources"
+	return "quarkus.native.sources-only"
 }
 
 // NativeAdapter used for Camel Quarkus runtime < 3.5.0.
@@ -64,7 +64,7 @@ type NativeAdapter struct {
 // BuildCommands -- .
 func (n *NativeAdapter) BuildCommands() string {
 	// We must override the local repo as it's not shared from the builder container
-	return "cd " + n.Directory() + " && ./mvnw $(cat MAVEN_CONTEXT) package -Dquarkus.package.type=native -Dmaven.repo.local=./repo"
+	return "cd " + n.Directory() + " && ./mvnw $(cat MAVEN_CONTEXT) package -Dquarkus.native.enabled=true -Dmaven.repo.local=./repo"
 }
 
 // Directory -- .

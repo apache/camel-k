@@ -41,7 +41,7 @@ func TestGenerateQuarkusProjectCommon(t *testing.T) {
 	assert.Equal(t, "org.apache.camel.k.integration", p.GroupID)
 	assert.Equal(t, "camel-k-integration", p.ArtifactID)
 	assert.Equal(t, defaults.Version, p.Version)
-	assert.Equal(t, "fast-jar", p.Properties["quarkus.package.type"])
+	assert.Equal(t, "fast-jar", p.Properties["quarkus.package.jar.type"])
 	assert.Equal(t, "org.apache.camel.k", p.DependencyManagement.Dependencies[0].GroupID)
 	assert.Equal(t, "camel-k-runtime-bom", p.DependencyManagement.Dependencies[0].ArtifactID)
 	assert.Equal(t, "1.2.3", p.DependencyManagement.Dependencies[0].Version)

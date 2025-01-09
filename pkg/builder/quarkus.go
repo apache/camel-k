@@ -140,7 +140,7 @@ func generateQuarkusProjectCommon(runtimeProvider v1.RuntimeProvider, runtimeVer
 	p.Build = &maven.Build{Plugins: make([]maven.Plugin, 0)}
 
 	// set fast-jar packaging by default, since it gives some startup time improvements
-	p.Properties.Add("quarkus.package.type", "fast-jar")
+	p.Properties.Add("quarkus.package.jar.type", "fast-jar")
 	// Reproducible builds: https://maven.apache.org/guides/mini/guide-reproducible-builds.html
 	p.Properties.Add("project.build.outputTimestamp", time.Now().Format(time.RFC3339))
 	// DependencyManagement

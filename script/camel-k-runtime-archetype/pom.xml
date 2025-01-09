@@ -22,7 +22,7 @@
   <version>2.0.0</version>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <quarkus.package.type>fast-jar</quarkus.package.type>
+    <quarkus.package.jar.type>fast-jar</quarkus.package.jar.type>
     <runtime.version>${RUNTIME_VERSION_CMD}</runtime.version>
     <quarkus.version>${QUARKUS_VERSION_CMD}</quarkus.version>
   </properties>
