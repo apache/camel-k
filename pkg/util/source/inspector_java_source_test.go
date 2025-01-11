@@ -206,3 +206,24 @@ func TestJavaBeanDependencies(t *testing.T) {
 		assert.Contains(t, meta.Dependencies.List(), "camel:log")
 	})
 }
+
+func TestErrorHandlerDependencies(t *testing.T) {
+	inspector := newTestJavaSourceInspector(t)
+
+	sourceSpec := &v1.SourceSpec{
+		DataSpec: v1.DataSpec{
+			Name: "test.java",
+			Content: `
+			public void configure() throws Exception {
+				errorHandler(deadLetterChannel("seda:error"));
+				from("timer:foo").to("log:bar");
+			}
+			`,
+		},
+	}
+	assertExtract(t, inspector, sourceSpec.Content, func(meta *Metadata) {
+		assert.Contains(t, meta.Dependencies.List(), "camel:timer")
+		assert.Contains(t, meta.Dependencies.List(), "camel:seda")
+		assert.Contains(t, meta.Dependencies.List(), "camel:log")
+	})
+}

@@ -111,13 +111,13 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 				}
 			}
 		}
-	case "kamelet":
+	case kamelet:
 		switch t := content.(type) {
 		case string:
-			AddKamelet(meta, "kamelet:"+t)
+			AddKamelet(meta, kamelet+":"+t)
 		case map[interface{}]interface{}:
 			if name, ok := t["name"].(string); ok {
-				AddKamelet(meta, "kamelet:"+name)
+				AddKamelet(meta, kamelet+":"+name)
 			}
 		}
 	}
@@ -168,6 +168,16 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 				} else if m, ok := v.(map[interface{}]interface{}); ok {
 					if err := i.parseStep("language", m, meta); err != nil {
 						return err
+					}
+				}
+			case "deadLetterUri":
+				if s, ok := v.(string); ok {
+					_, scheme := i.catalog.DecodeComponent(s)
+					if dfDep := i.catalog.GetArtifactByScheme(scheme.ID); dfDep != nil {
+						meta.AddDependency(dfDep.GetDependencyID())
+					}
+					if scheme.ID == kamelet {
+						AddKamelet(meta, s)
 					}
 				}
 			default:
