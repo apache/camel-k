@@ -75,6 +75,7 @@ const (
 // The KEDA trait is disabled by default.
 //
 // +camel-k:trait=keda.
+// +camel-k:deprecated=2.5.0.
 type Trait struct {
 	traitv1.Trait `property:",squash" json:",inline"`
 	// Enables automatic configuration of the trait. Allows the trait to infer KEDA triggers from the Kamelets.
