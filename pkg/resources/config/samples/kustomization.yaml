@@ -20,10 +20,6 @@
 # customizes the integration platform custom resource
 # Edit the patch manually to add required configuration
 #
-
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
 resources:
 - bases/camel_v1_integrationplatform.yaml
 - bases/camel_v1_integrationprofile.yaml
@@ -34,7 +30,5 @@ resources:
 - bases/camel_v1_kamelet.yaml
 - bases/camel_v1_pipe.yaml
 
-patches:
-  - path: patch-integration-platform.yaml
-    target:
-      kind: IntegrationPlatform
+patchesStrategicMerge:
+- patch-integration-platform.yaml
