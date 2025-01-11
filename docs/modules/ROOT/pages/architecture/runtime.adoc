@@ -5,8 +5,6 @@ image::architecture/camel-k-runtimes.jpg[runtimes, width=1024]
 
 Camel runtime application is in charge to bridge the output produced by the operator during a `Build` to the Camel runtime. It will finally execute an application containing the `Route` as defined by `Camel K` user. It will take care of converting all the different configuration and tuning into something meaningful to `Apache Camel` framework. We use a java application, `camel-k-runtime` which is based on `camel-quarkus` to achieve the goal.
 
-NOTE: This document reflects Camel K version 1.6. It may not reflect slight changes developed after this review.
-
 [[runtime-quarkus]]
 == Based on Camel Quarkus
 
@@ -19,16 +17,15 @@ Learn more in the xref:camel-quarkus::index.adoc[Camel Quarkus documentation sec
 [[runtime-duties]]
 == Runtime main duties
 
-The main goal of the Camel-k-runtime is to launch a Camel Quarkus application and setup the routes configured by the Camel K user. When a user run a new `Integration`, the xref:architecture/operator.adoc[`Operator`] will take care of building an application containing the `camel-k-runtime dependency`. During application startup, the camel-k-runtime will be in charge to take care of the following aspects:
+The main goal of the Camel-k-runtime is to launch a Camel Quarkus application and setup the routes configured by the Camel K user. When a user run a new `Integration`, the xref:architecture/operator.adoc[`Operator`] will take care of building an application basing it on Camel K Runtime dependency.
 
-* Sources loading
-* Properties setting
-* Cron
-* Knative
-* Kamelet
-* Master
-* Webhook
+[[plain-quarkus]]
+== Plain Camel Quarkus runtime
 
-Basically the application will apply the configuration/customizations needed to run your application on Camel, transforming those configuration coming from the `Integration` spec into something meaningful to Camel framework.
+More recently we are working to make it easier and run a Camel Quarkus application out of the box instead. You're strongly recommended to use the `plain-quarkus` Camel trait runtime provider for any Integration you're running. You can do this following the example:
 
-NOTE: Camel-k-runtime is a very fast evolving project. You may find more relevant details accessing directly to the https://github.com/apache/camel-k-runtime[application source code].
+```shell
+kamel run test.yaml -t camel.runtime-provider=plain-quarkus
+```
+
+NOTE: we plan to graduate plain Camel Quarkus runtime as default runtime in the future (likely in the next major release).

@@ -92,6 +92,32 @@ spec:
 
 You can see the specification is a lot neater, so, try choosing Yaml DSL whenever it's possible.
 
+== Runtime provider
+
+Camel K was originally equipped with a dedicated runtime known as Camel K Runtime. This is a lightweight layer on top of Camel Quarkus. However, you can directly run plain regular Camel Quarkus runtime applications as well. You will learn the concept of traits later on. For now, just be aware that you can run any Integration setting the plain Quarkus runtime using `camel` trait configuration. Here an example of how that would be:
+
+```yaml
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: my-plain-quarkus-it
+spec:
+  flows:
+  - from:
+      parameters:
+        period: "1000"
+      steps:
+      - setBody:
+          simple: Hello Camel from ${routeId}
+      - log: ${body}
+      uri: timer:yaml
+  traits:
+    camel:
+      runtimeProvider: plain-quarkus
+```
+
+NOTE: we plan to graduate plain Camel Quarkus runtime as default runtime in the future (likely in the next major release). We therefore recommend to use the plain Camel Quarkus runtime in any of your Integrations already.
+
 == Using Kamel CLI
 
 Camel K works very well with any Kubernetes compatible user interface (such as CLI as `kubectl`, `oc` or any other visual tooling). However we do provide a simple CLI that helps you performing most of the Integration works in an easier fashion: it's xref:running/running-cli.adoc[`kamel` CLI].
