@@ -776,3 +776,57 @@ func TestYamlBeanDependencies(t *testing.T) {
 		assert.Contains(t, meta.Dependencies.List(), "camel:log")
 	})
 }
+
+func TestYAMLErrorHandler(t *testing.T) {
+	yamlContractFirst := `
+- errorHandler:
+    deadLetterChannel:
+      deadLetterUri: kafka:my-dlc
+- route:
+    id: route1
+    from:
+      uri: "timer:tick"
+      parameters:
+        period: "5000"
+    steps:
+      - setBody:
+          constant: "Hello Yaml !!!"
+      - transform:
+          simple: "${body.toUpperCase()}"
+      - to: "{{url}}"
+`
+
+	inspector := newTestYAMLInspector(t)
+	t.Run("TestYAMLErrorHandler", func(t *testing.T) {
+		assertExtractYAML(t, inspector, yamlContractFirst, func(meta *Metadata) {
+			assert.Contains(t, meta.Dependencies.List(), "camel:kafka")
+		})
+	})
+}
+
+func TestYAMLErrorHandlerKamelet(t *testing.T) {
+	yamlContractFirst := `
+- errorHandler:
+    deadLetterChannel:
+      deadLetterUri: kamelet:my-kamelet/errorHandler
+- route:
+    id: route1
+    from:
+      uri: "timer:tick"
+      parameters:
+        period: "5000"
+    steps:
+      - setBody:
+          constant: "Hello Yaml !!!"
+      - transform:
+          simple: "${body.toUpperCase()}"
+      - to: "{{url}}"
+`
+
+	inspector := newTestYAMLInspector(t)
+	t.Run("TestYAMLErrorHandler", func(t *testing.T) {
+		assertExtractYAML(t, inspector, yamlContractFirst, func(meta *Metadata) {
+			assert.Contains(t, meta.Kamelets, "my-kamelet/error")
+		})
+	})
+}

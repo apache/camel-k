@@ -238,3 +238,22 @@ func TestXMLBeanDependencies(t *testing.T) {
 		assert.Contains(t, meta.Dependencies.List(), "camel:log")
 	})
 }
+
+func TestXMLErrorHandlerDependencies(t *testing.T) {
+	xmlCode := `
+	<errorHandler>
+		<deadLetterChannel deadLetterUri="seda:dead">
+			<redeliveryPolicy maximumRedeliveries="3" redeliveryDelay="250"/>
+		</deadLetterChannel>
+	</errorHandler>
+	<from uri="timer:foo"/>
+	<to uri="log:bar"></to>
+	`
+	inspector := newTestXMLInspector(t)
+
+	assertExtract(t, inspector, xmlCode, func(meta *Metadata) {
+		assert.Contains(t, meta.Dependencies.List(), "camel:timer")
+		assert.Contains(t, meta.Dependencies.List(), "camel:seda")
+		assert.Contains(t, meta.Dependencies.List(), "camel:log")
+	})
+}

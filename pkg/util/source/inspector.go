@@ -31,6 +31,7 @@ type catalog2deps func(*camel.RuntimeCatalog) []string
 
 const (
 	defaultJSONDataFormat = "jackson"
+	kamelet               = "kamelet"
 )
 
 var (
@@ -51,6 +52,7 @@ var (
 	jsonLibraryRegexp       = regexp.MustCompile(`.*JsonLibrary\.Jackson.*`)
 	jsonLanguageRegexp      = regexp.MustCompile(`.*\.json\(\).*`)
 	beanRegexp              = regexp.MustCompile(`.*\.bean\(.*\).*`)
+	errorHandlerRegexp      = regexp.MustCompile(`errorHandler\s*\(\s*deadLetterChannel\s*\(\s*["|']([a-zA-Z0-9-]+:[^"|']+)["|']\s*\).*`)
 	circuitBreakerRegexp    = regexp.MustCompile(`.*\.circuitBreaker\(\).*`)
 	restConfigurationRegexp = regexp.MustCompile(`.*restConfiguration\(\).*`)
 	restRegexp              = regexp.MustCompile(`.*rest\s*\([^)]*\).*`)
@@ -253,7 +255,7 @@ func (i *baseInspector) extract(source v1.SourceSpec, meta *Metadata,
 	meta.ToURIs = append(meta.ToURIs, to...)
 
 	for _, k := range kameletEips {
-		AddKamelet(meta, "kamelet:"+k)
+		AddKamelet(meta, kamelet+":"+k)
 	}
 
 	if err := i.discoverCapabilities(source, meta); err != nil {
@@ -350,6 +352,18 @@ func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadat
 		}
 	}
 
+	for _, match := range errorHandlerRegexp.FindAllStringSubmatch(source.Content, -1) {
+		if len(match) > 1 {
+			_, scheme := i.catalog.DecodeComponent(match[1])
+			if dfDep := i.catalog.GetArtifactByScheme(scheme.ID); dfDep != nil {
+				meta.AddDependency(dfDep.GetDependencyID())
+			}
+			if scheme.ID == kamelet {
+				AddKamelet(meta, match[1])
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -430,7 +444,7 @@ func (i *baseInspector) hasOnlyPassiveEndpoints(fromURIs []string) bool {
 
 func (i *baseInspector) containsOnlyURIsIn(fromURI []string, allowed map[string]bool) bool {
 	for _, uri := range fromURI {
-		if uri == "kamelet:source" {
+		if uri == kamelet+":source" {
 			continue
 		}
 		prefix := i.getURIPrefix(uri)
