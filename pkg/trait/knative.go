@@ -319,6 +319,7 @@ func (t *knativeTrait) configureEvents(e *Environment, env *knativeapi.CamelEnvi
 			eventType := knativeutil.ExtractEventType(serviceURI)
 			serviceName := eventType
 			if serviceName == "" {
+				//nolint:goconst
 				serviceName = "default"
 			}
 			servicePath := fmt.Sprintf("/events/%s", eventType)

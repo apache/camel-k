@@ -15,14 +15,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package master
+package trait
 
 import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/v2/pkg/trait"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/stretchr/testify/assert"
@@ -36,11 +36,11 @@ func TestMasterOn(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	client, err := newFakeClient()
+	client, err := internal.NewFakeClient()
 	require.NoError(t, err)
-	traitCatalog := trait.NewCatalog(nil)
+	traitCatalog := NewCatalog(nil)
 
-	environment := trait.Environment{
+	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
 		Client:       client,
@@ -81,7 +81,7 @@ func TestMasterOn(t *testing.T) {
 			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
-		ExecutedTraits: make([]trait.Trait, 0),
+		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
 	environment.Platform.ResyncStatusFullConfig()
@@ -127,11 +127,11 @@ func TestMasterOff(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	client, err := newFakeClient()
+	client, err := internal.NewFakeClient()
 	require.NoError(t, err)
-	traitCatalog := trait.NewCatalog(nil)
+	traitCatalog := NewCatalog(nil)
 
-	environment := trait.Environment{
+	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
 		Client:       client,
@@ -172,7 +172,7 @@ func TestMasterOff(t *testing.T) {
 			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
-		ExecutedTraits: make([]trait.Trait, 0),
+		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
 	environment.Platform.ResyncStatusFullConfig()
@@ -190,11 +190,11 @@ func TestMasterAuto(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	client, err := newFakeClient()
+	client, err := internal.NewFakeClient()
 	require.NoError(t, err)
-	traitCatalog := trait.NewCatalog(nil)
+	traitCatalog := NewCatalog(nil)
 
-	environment := trait.Environment{
+	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
 		Client:       client,
@@ -234,7 +234,7 @@ func TestMasterAuto(t *testing.T) {
 			},
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
-		ExecutedTraits: make([]trait.Trait, 0),
+		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
 	environment.Platform.ResyncStatusFullConfig()
@@ -251,7 +251,7 @@ func TestMasterAuto(t *testing.T) {
 	require.NoError(t, err)
 
 	expectedTrait := &masterTrait{
-		Trait: Trait{
+		MasterTrait: traitv1.MasterTrait{
 			Trait: traitv1.Trait{
 				Enabled: ptr.To(true),
 			},

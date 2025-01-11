@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package master
+package trait
 
 import (
 	"fmt"
@@ -29,50 +29,21 @@ import (
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/resources"
-	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/uri"
 )
 
-// The Master trait allows to configure the integration to automatically leverage Kubernetes resources for doing
-// leader election and starting *master* routes only on certain instances.
-//
-// It's activated automatically when using the master endpoint in a route, e.g. `from("master:lockname:telegram:bots")...`.
-//
-// NOTE: this trait adds special permissions to the integration service account in order to read/write configmaps and read pods.
-// It's recommended to use a different service account than "default" when running the integration.
-//
-// +camel-k:trait=master.
-type Trait struct {
-	traitv1.Trait `property:",squash" json:",inline"`
-	// Enables automatic configuration of the trait.
-	Auto *bool `property:"auto" json:"auto,omitempty"`
-	// When this flag is active, the operator analyzes the source code to add dependencies required by delegate endpoints.
-	// E.g. when using `master:lockname:timer`, then `camel:timer` is automatically added to the set of dependencies.
-	// It's enabled by default.
-	IncludeDelegateDependencies *bool `property:"include-delegate-dependencies" json:"includeDelegateDependencies,omitempty"`
-	// Name of the configmap that will be used to store the lock. Defaults to "<integration-name>-lock".
-	// Name of the configmap/lease resource that will be used to store the lock. Defaults to "<integration-name>-lock".
-	ResourceName *string `property:"resource-name" json:"resourceName,omitempty"`
-	// Type of Kubernetes resource to use for locking ("ConfigMap" or "Lease"). Defaults to "Lease".
-	ResourceType *string `property:"resource-type" json:"resourceType,omitempty"`
-	// Label that will be used to identify all pods contending the lock. Defaults to "camel.apache.org/integration".
-	LabelKey *string `property:"label-key" json:"labelKey,omitempty"`
-	// Label value that will be used to identify all pods contending the lock. Defaults to the integration name.
-	LabelValue *string `property:"label-value" json:"labelValue,omitempty"`
-}
-
 type masterTrait struct {
-	trait.BaseTrait
-	Trait                `property:",squash"`
+	BaseTrait
+	traitv1.MasterTrait  `property:",squash"`
 	delegateDependencies []string
 }
 
 // NewMasterTrait --.
-func NewMasterTrait() trait.Trait {
+func NewMasterTrait() Trait {
 	return &masterTrait{
-		BaseTrait: trait.NewBaseTrait("master", trait.TraitOrderBeforeControllerCreation),
+		BaseTrait: NewBaseTrait("master", TraitOrderBeforeControllerCreation),
 	}
 }
 
@@ -81,12 +52,12 @@ const (
 	leaseResourceType = "Lease"
 )
 
-func (t *masterTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondition, error) {
+func (t *masterTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil {
 		return false, nil, nil
 	}
 	if !ptr.Deref(t.Enabled, true) {
-		return false, trait.NewIntegrationConditionUserDisabled(masterComponent), nil
+		return false, NewIntegrationConditionUserDisabled(masterComponent), nil
 	}
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseBuildingKit) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
@@ -130,7 +101,7 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, *trait.TraitConditi
 	return enabled, nil, nil
 }
 
-func (t *masterTrait) Apply(e *trait.Environment) error {
+func (t *masterTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityMaster)
 		// Master sub endpoints need to be added to the list of dependencies
@@ -157,7 +128,7 @@ func (t *masterTrait) Apply(e *trait.Environment) error {
 }
 
 // Deprecated: to be removed in future release in favor of func setCatalogConfiguration().
-func (t *masterTrait) setCustomizerConfiguration(e *trait.Environment) {
+func (t *masterTrait) setCustomizerConfiguration(e *Environment) {
 	e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
 		v1.ConfigurationSpec{Type: "property", Value: "customizer.master.enabled=true"},
 	)
@@ -175,7 +146,7 @@ func (t *masterTrait) setCustomizerConfiguration(e *trait.Environment) {
 	)
 }
 
-func (t *masterTrait) setCatalogConfiguration(e *trait.Environment) {
+func (t *masterTrait) setCatalogConfiguration(e *Environment) {
 	if e.ApplicationProperties == nil {
 		e.ApplicationProperties = make(map[string]string)
 	}
@@ -185,7 +156,7 @@ func (t *masterTrait) setCatalogConfiguration(e *trait.Environment) {
 	e.ApplicationProperties["camel.k.master.labelValue"] = *t.LabelValue
 
 	for _, cp := range e.CamelCatalog.Runtime.Capabilities["master"].RuntimeProperties {
-		e.ApplicationProperties[trait.CapabilityPropertyKey(cp.Key, e.ApplicationProperties)] = cp.Value
+		e.ApplicationProperties[CapabilityPropertyKey(cp.Key, e.ApplicationProperties)] = cp.Value
 	}
 }
 
@@ -205,7 +176,7 @@ func (t *masterTrait) getLabelKey() string {
 	return *t.LabelKey
 }
 
-func findAdditionalDependencies(e *trait.Environment, meta metadata.IntegrationMetadata) []string {
+func findAdditionalDependencies(e *Environment, meta metadata.IntegrationMetadata) []string {
 	var dependencies []string
 	for _, endpoint := range meta.FromURIs {
 		if uri.GetComponent(endpoint) == masterComponent {

@@ -41,6 +41,7 @@ func init() {
 	AddToTraits(newKnativeTrait)
 	AddToTraits(newKnativeServiceTrait)
 	AddToTraits(newLoggingTraitTrait)
+	AddToTraits(NewMasterTrait)
 	AddToTraits(newMountTrait)
 	AddToTraits(newOpenAPITrait)
 	AddToTraits(newOwnerTrait)

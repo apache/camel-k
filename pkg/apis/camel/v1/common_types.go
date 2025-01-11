@@ -220,6 +220,8 @@ type Traits struct {
 	KnativeService *trait.KnativeServiceTrait `property:"knative-service" json:"knative-service,omitempty"`
 	// The configuration of Logging trait
 	Logging *trait.LoggingTrait `property:"logging" json:"logging,omitempty"`
+	// The configuration of Master trait
+	Master *trait.MasterTrait `property:"master" json:"master,omitempty"`
 	// The configuration of Mount trait
 	Mount *trait.MountTrait `property:"mount" json:"mount,omitempty"`
 	// The configuration of OpenAPI trait
@@ -259,8 +261,6 @@ type Traits struct {
 
 	// Deprecated: for backward compatibility.
 	Keda *TraitSpec `property:"keda" json:"keda,omitempty"`
-	// Deprecated: for backward compatibility.
-	Master *TraitSpec `property:"master" json:"master,omitempty"`
 	// Deprecated: for backward compatibility.
 	Strimzi *TraitSpec `property:"strimzi" json:"strimzi,omitempty"`
 	// Deprecated: for backward compatibility.

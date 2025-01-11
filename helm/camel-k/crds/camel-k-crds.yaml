@@ -4899,14 +4899,44 @@ spec:
                         type: string
                     type: object
                   master:
-                    description: 'Deprecated: for backward compatibility.'
+                    description: The configuration of Master trait
                     properties:
+                      auto:
+                        description: Enables automatic configuration of the trait.
+                        type: boolean
                       configuration:
-                        description: TraitConfiguration parameters configuration
+                        description: |-
+                          Legacy trait configuration parameters.
+                          Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
-                    required:
-                    - configuration
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                      includeDelegateDependencies:
+                        description: |-
+                          When this flag is active, the operator analyzes the source code to add dependencies required by delegate endpoints.
+                          E.g. when using `master:lockname:timer`, then `camel:timer` is automatically added to the set of dependencies.
+                          It's enabled by default.
+                        type: boolean
+                      labelKey:
+                        description: Label that will be used to identify all pods
+                          contending the lock. Defaults to "camel.apache.org/integration".
+                        type: string
+                      labelValue:
+                        description: Label value that will be used to identify all
+                          pods contending the lock. Defaults to the integration name.
+                        type: string
+                      resourceName:
+                        description: |-
+                          Name of the configmap that will be used to store the lock. Defaults to "<integration-name>-lock".
+                          Name of the configmap/lease resource that will be used to store the lock. Defaults to "<integration-name>-lock".
+                        type: string
+                      resourceType:
+                        description: Type of Kubernetes resource to use for locking
+                          ("ConfigMap" or "Lease"). Defaults to "Lease".
+                        type: string
                     type: object
                   mount:
                     description: The configuration of Mount trait
@@ -7095,14 +7125,44 @@ spec:
                         type: string
                     type: object
                   master:
-                    description: 'Deprecated: for backward compatibility.'
+                    description: The configuration of Master trait
                     properties:
+                      auto:
+                        description: Enables automatic configuration of the trait.
+                        type: boolean
                       configuration:
-                        description: TraitConfiguration parameters configuration
+                        description: |-
+                          Legacy trait configuration parameters.
+                          Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
-                    required:
-                    - configuration
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                      includeDelegateDependencies:
+                        description: |-
+                          When this flag is active, the operator analyzes the source code to add dependencies required by delegate endpoints.
+                          E.g. when using `master:lockname:timer`, then `camel:timer` is automatically added to the set of dependencies.
+                          It's enabled by default.
+                        type: boolean
+                      labelKey:
+                        description: Label that will be used to identify all pods
+                          contending the lock. Defaults to "camel.apache.org/integration".
+                        type: string
+                      labelValue:
+                        description: Label value that will be used to identify all
+                          pods contending the lock. Defaults to the integration name.
+                        type: string
+                      resourceName:
+                        description: |-
+                          Name of the configmap that will be used to store the lock. Defaults to "<integration-name>-lock".
+                          Name of the configmap/lease resource that will be used to store the lock. Defaults to "<integration-name>-lock".
+                        type: string
+                      resourceType:
+                        description: Type of Kubernetes resource to use for locking
+                          ("ConfigMap" or "Lease"). Defaults to "Lease".
+                        type: string
                     type: object
                   mount:
                     description: The configuration of Mount trait
@@ -9194,14 +9254,44 @@ spec:
                         type: string
                     type: object
                   master:
-                    description: 'Deprecated: for backward compatibility.'
+                    description: The configuration of Master trait
                     properties:
+                      auto:
+                        description: Enables automatic configuration of the trait.
+                        type: boolean
                       configuration:
-                        description: TraitConfiguration parameters configuration
+                        description: |-
+                          Legacy trait configuration parameters.
+                          Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
-                    required:
-                    - configuration
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                      includeDelegateDependencies:
+                        description: |-
+                          When this flag is active, the operator analyzes the source code to add dependencies required by delegate endpoints.
+                          E.g. when using `master:lockname:timer`, then `camel:timer` is automatically added to the set of dependencies.
+                          It's enabled by default.
+                        type: boolean
+                      labelKey:
+                        description: Label that will be used to identify all pods
+                          contending the lock. Defaults to "camel.apache.org/integration".
+                        type: string
+                      labelValue:
+                        description: Label value that will be used to identify all
+                          pods contending the lock. Defaults to the integration name.
+                        type: string
+                      resourceName:
+                        description: |-
+                          Name of the configmap that will be used to store the lock. Defaults to "<integration-name>-lock".
+                          Name of the configmap/lease resource that will be used to store the lock. Defaults to "<integration-name>-lock".
+                        type: string
+                      resourceType:
+                        description: Type of Kubernetes resource to use for locking
+                          ("ConfigMap" or "Lease"). Defaults to "Lease".
+                        type: string
                     type: object
                   mount:
                     description: The configuration of Mount trait
@@ -11269,14 +11359,44 @@ spec:
                         type: string
                     type: object
                   master:
-                    description: 'Deprecated: for backward compatibility.'
+                    description: The configuration of Master trait
                     properties:
+                      auto:
+                        description: Enables automatic configuration of the trait.
+                        type: boolean
                       configuration:
-                        description: TraitConfiguration parameters configuration
+                        description: |-
+                          Legacy trait configuration parameters.
+                          Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
-                    required:
-                    - configuration
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                      includeDelegateDependencies:
+                        description: |-
+                          When this flag is active, the operator analyzes the source code to add dependencies required by delegate endpoints.
+                          E.g. when using `master:lockname:timer`, then `camel:timer` is automatically added to the set of dependencies.
+                          It's enabled by default.
+                        type: boolean
+                      labelKey:
+                        description: Label that will be used to identify all pods
+                          contending the lock. Defaults to "camel.apache.org/integration".
+                        type: string
+                      labelValue:
+                        description: Label value that will be used to identify all
+                          pods contending the lock. Defaults to the integration name.
+                        type: string
+                      resourceName:
+                        description: |-
+                          Name of the configmap that will be used to store the lock. Defaults to "<integration-name>-lock".
+                          Name of the configmap/lease resource that will be used to store the lock. Defaults to "<integration-name>-lock".
+                        type: string
+                      resourceType:
+                        description: Type of Kubernetes resource to use for locking
+                          ("ConfigMap" or "Lease"). Defaults to "Lease".
+                        type: string
                     type: object
                   mount:
                     description: The configuration of Mount trait
@@ -19725,14 +19845,44 @@ spec:
                         type: string
                     type: object
                   master:
-                    description: 'Deprecated: for backward compatibility.'
+                    description: The configuration of Master trait
                     properties:
+                      auto:
+                        description: Enables automatic configuration of the trait.
+                        type: boolean
                       configuration:
-                        description: TraitConfiguration parameters configuration
+                        description: |-
+                          Legacy trait configuration parameters.
+                          Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
-                    required:
-                    - configuration
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                      includeDelegateDependencies:
+                        description: |-
+                          When this flag is active, the operator analyzes the source code to add dependencies required by delegate endpoints.
+                          E.g. when using `master:lockname:timer`, then `camel:timer` is automatically added to the set of dependencies.
+                          It's enabled by default.
+                        type: boolean
+                      labelKey:
+                        description: Label that will be used to identify all pods
+                          contending the lock. Defaults to "camel.apache.org/integration".
+                        type: string
+                      labelValue:
+                        description: Label value that will be used to identify all
+                          pods contending the lock. Defaults to the integration name.
+                        type: string
+                      resourceName:
+                        description: |-
+                          Name of the configmap that will be used to store the lock. Defaults to "<integration-name>-lock".
+                          Name of the configmap/lease resource that will be used to store the lock. Defaults to "<integration-name>-lock".
+                        type: string
+                      resourceType:
+                        description: Type of Kubernetes resource to use for locking
+                          ("ConfigMap" or "Lease"). Defaults to "Lease".
+                        type: string
                     type: object
                   mount:
                     description: The configuration of Mount trait
@@ -21727,14 +21877,44 @@ spec:
                         type: string
                     type: object
                   master:
-                    description: 'Deprecated: for backward compatibility.'
+                    description: The configuration of Master trait
                     properties:
+                      auto:
+                        description: Enables automatic configuration of the trait.
+                        type: boolean
                       configuration:
-                        description: TraitConfiguration parameters configuration
+                        description: |-
+                          Legacy trait configuration parameters.
+                          Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
-                    required:
-                    - configuration
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                      includeDelegateDependencies:
+                        description: |-
+                          When this flag is active, the operator analyzes the source code to add dependencies required by delegate endpoints.
+                          E.g. when using `master:lockname:timer`, then `camel:timer` is automatically added to the set of dependencies.
+                          It's enabled by default.
+                        type: boolean
+                      labelKey:
+                        description: Label that will be used to identify all pods
+                          contending the lock. Defaults to "camel.apache.org/integration".
+                        type: string
+                      labelValue:
+                        description: Label value that will be used to identify all
+                          pods contending the lock. Defaults to the integration name.
+                        type: string
+                      resourceName:
+                        description: |-
+                          Name of the configmap that will be used to store the lock. Defaults to "<integration-name>-lock".
+                          Name of the configmap/lease resource that will be used to store the lock. Defaults to "<integration-name>-lock".
+                        type: string
+                      resourceType:
+                        description: Type of Kubernetes resource to use for locking
+                          ("ConfigMap" or "Lease"). Defaults to "Lease".
+                        type: string
                     type: object
                   mount:
                     description: The configuration of Mount trait
@@ -31561,14 +31741,45 @@ spec:
                             type: string
                         type: object
                       master:
-                        description: 'Deprecated: for backward compatibility.'
+                        description: The configuration of Master trait
                         properties:
+                          auto:
+                            description: Enables automatic configuration of the trait.
+                            type: boolean
                           configuration:
-                            description: TraitConfiguration parameters configuration
+                            description: |-
+                              Legacy trait configuration parameters.
+                              Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
-                        required:
-                        - configuration
+                          enabled:
+                            description: Can be used to enable or disable a trait.
+                              All traits share this common property.
+                            type: boolean
+                          includeDelegateDependencies:
+                            description: |-
+                              When this flag is active, the operator analyzes the source code to add dependencies required by delegate endpoints.
+                              E.g. when using `master:lockname:timer`, then `camel:timer` is automatically added to the set of dependencies.
+                              It's enabled by default.
+                            type: boolean
+                          labelKey:
+                            description: Label that will be used to identify all pods
+                              contending the lock. Defaults to "camel.apache.org/integration".
+                            type: string
+                          labelValue:
+                            description: Label value that will be used to identify
+                              all pods contending the lock. Defaults to the integration
+                              name.
+                            type: string
+                          resourceName:
+                            description: |-
+                              Name of the configmap that will be used to store the lock. Defaults to "<integration-name>-lock".
+                              Name of the configmap/lease resource that will be used to store the lock. Defaults to "<integration-name>-lock".
+                            type: string
+                          resourceType:
+                            description: Type of Kubernetes resource to use for locking
+                              ("ConfigMap" or "Lease"). Defaults to "Lease".
+                            type: string
                         type: object
                       mount:
                         description: The configuration of Mount trait

@@ -3238,6 +3238,11 @@ func (in *Traits) DeepCopyInto(out *Traits) {
 		*out = new(trait.LoggingTrait)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.Master != nil {
+		in, out := &in.Master, &out.Master
+		*out = new(trait.MasterTrait)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Mount != nil {
 		in, out := &in.Mount, &out.Mount
 		*out = new(trait.MountTrait)
@@ -3327,11 +3332,6 @@ func (in *Traits) DeepCopyInto(out *Traits) {
 	}
 	if in.Keda != nil {
 		in, out := &in.Keda, &out.Keda
-		*out = new(TraitSpec)
-		(*in).DeepCopyInto(*out)
-	}
-	if in.Master != nil {
-		in, out := &in.Master, &out.Master
 		*out = new(TraitSpec)
 		(*in).DeepCopyInto(*out)
 	}

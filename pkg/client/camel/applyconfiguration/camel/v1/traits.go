@@ -46,6 +46,7 @@ type TraitsApplyConfiguration struct {
 	Knative         *trait.KnativeTrait                     `json:"knative,omitempty"`
 	KnativeService  *trait.KnativeServiceTrait              `json:"knative-service,omitempty"`
 	Logging         *trait.LoggingTrait                     `json:"logging,omitempty"`
+	Master          *trait.MasterTrait                      `json:"master,omitempty"`
 	Mount           *trait.MountTrait                       `json:"mount,omitempty"`
 	OpenAPI         *trait.OpenAPITrait                     `json:"openapi,omitempty"`
 	Owner           *trait.OwnerTrait                       `json:"owner,omitempty"`
@@ -64,7 +65,6 @@ type TraitsApplyConfiguration struct {
 	Toleration      *trait.TolerationTrait                  `json:"toleration,omitempty"`
 	Addons          map[string]AddonTraitApplyConfiguration `json:"addons,omitempty"`
 	Keda            *TraitSpecApplyConfiguration            `json:"keda,omitempty"`
-	Master          *TraitSpecApplyConfiguration            `json:"master,omitempty"`
 	Strimzi         *TraitSpecApplyConfiguration            `json:"strimzi,omitempty"`
 	ThreeScale      *TraitSpecApplyConfiguration            `json:"3scale,omitempty"`
 	Tracing         *TraitSpecApplyConfiguration            `json:"tracing,omitempty"`
@@ -236,6 +236,14 @@ func (b *TraitsApplyConfiguration) WithLogging(value trait.LoggingTrait) *Traits
 	return b
 }
 
+// WithMaster sets the Master field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Master field is set to the value of the last call.
+func (b *TraitsApplyConfiguration) WithMaster(value trait.MasterTrait) *TraitsApplyConfiguration {
+	b.Master = &value
+	return b
+}
+
 // WithMount sets the Mount field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Mount field is set to the value of the last call.
@@ -383,14 +391,6 @@ func (b *TraitsApplyConfiguration) WithAddons(entries map[string]AddonTraitApply
 // If called multiple times, the Keda field is set to the value of the last call.
 func (b *TraitsApplyConfiguration) WithKeda(value *TraitSpecApplyConfiguration) *TraitsApplyConfiguration {
 	b.Keda = value
-	return b
-}
-
-// WithMaster sets the Master field in the declarative configuration to the given value
-// and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Master field is set to the value of the last call.
-func (b *TraitsApplyConfiguration) WithMaster(value *TraitSpecApplyConfiguration) *TraitsApplyConfiguration {
-	b.Master = value
 	return b
 }
 
