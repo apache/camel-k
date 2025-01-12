@@ -1,17 +1,31 @@
 # Changelog
 
-## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-01-10)
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...HEAD)
+
+**Closed issues:**
+
+- Camel Quarkus \(plain\) runtime usage [\#5999](https://github.com/apache/camel-k/issues/5999)
+- `kamel promote` GitOps [\#5998](https://github.com/apache/camel-k/issues/5998)
+- Don't test github actions checks but build [\#5992](https://github.com/apache/camel-k/issues/5992)
+- Ingress Trait to support an array on the path [\#5981](https://github.com/apache/camel-k/issues/5981)
+- Flaky Docker build process [\#5920](https://github.com/apache/camel-k/issues/5920)
+- Support File Based Catalog [\#5917](https://github.com/apache/camel-k/issues/5917)
+- Move addons into trait [\#5787](https://github.com/apache/camel-k/issues/5787)
+
+## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-01-11)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
 
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-01-10)
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-01-11)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.5.1-nightly)
 
 **Closed issues:**
 
+- Quarkus runtime deprecated configuration [\#5987](https://github.com/apache/camel-k/issues/5987)
 - Knative Service is not created if "from" parameters are declared in the parameters section [\#5980](https://github.com/apache/camel-k/issues/5980)
-- `make bundle` deprecated warnings [\#5972](https://github.com/apache/camel-k/issues/5972)
 - Change Kamelet Distribution - provide your own catalog method [\#5958](https://github.com/apache/camel-k/issues/5958)
 - KameletBinding panics when missing binding type [\#5953](https://github.com/apache/camel-k/issues/5953)
 - Installation page should report the version [\#5951](https://github.com/apache/camel-k/issues/5951)
