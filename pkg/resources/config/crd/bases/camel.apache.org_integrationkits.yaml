@@ -121,7 +121,7 @@ spec:
                   type: object
                 type: array
               dependencies:
-                description: a list of Camel dependecies used by this kit
+                description: a list of Camel dependencies used by this kit
                 items:
                   type: string
                 type: array

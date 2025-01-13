@@ -10,7 +10,7 @@ require to be activated at specific hours of the day or with a periodic delay of
 For such tasks, the cron trait can materialize the integration as a Kubernetes CronJob instead of a standard deployment,
 in order to save resources when the integration does not need to be executed.
 
-Integrations that start from the following components are evaluated by the cron trait: `timer`, `cron`, `quartz`. The trait does support multiple evaluated components only if they have the same schedule, else it will fallback to Camel implementation instead of instanciating a Kubernetes CronJob.
+Integrations that start from the following components are evaluated by the cron trait: `timer`, `cron`, `quartz`. The trait does support multiple evaluated components only if they have the same schedule, else it will fallback to Camel implementation instead of instantiating a Kubernetes CronJob.
 
 WARNING: In case of native build-mode defined in xref:traits:quarkus.adoc[quarkus] trait, the component can't be customized.
 
