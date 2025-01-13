@@ -414,7 +414,7 @@ func TestMatchingBuildsSchedulingSameDependenciesSameRuntime(t *testing.T) {
 	assert.Equal(t, buildA.Name, buildMatch.Name)
 }
 
-func TestMatchingBuildsSchedulingMutipleSubsets(t *testing.T) {
+func TestMatchingBuildsSchedulingMultipleSubsets(t *testing.T) {
 	timestamp, _ := time.Parse("2006-01-02T15:04:05-0700", "2024-08-09T10:00:00Z")
 	creationTimestamp := v1.Time{Time: timestamp}
 	buildA := Build{

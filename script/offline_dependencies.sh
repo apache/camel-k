@@ -79,7 +79,7 @@ pom_min=${offline_dir}/pom-min.xml
 camelk_mvn_ver=$(curl -s https://raw.githubusercontent.com/apache/camel-k/release-2.3.x/build/Dockerfile|grep MAVEN_DEFAULT_VERSION= |cut -d\" -f2)
 # get the maven version set by the user from the parameters
 mvn_ver=$($mvnCmd --version |grep "Apache Maven"|awk '{print $3}')
-# the maven version executing the task MUST be exactly the same versin as set by the camel-k-operator
+# the maven version executing the task MUST be exactly the same version as set by the camel-k-operator
 if [ "${camelk_mvn_ver}" != "${mvn_ver}" ]; then
     # if the maven version is different, download the correct maven version
     url="https://archive.apache.org/dist/maven/maven-3/${camelk_mvn_ver}/binaries/apache-maven-${camelk_mvn_ver}-bin.tar.gz"

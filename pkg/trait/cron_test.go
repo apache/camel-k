@@ -379,7 +379,7 @@ func TestCronMultipleScheduleFallback(t *testing.T) {
 
 	ct, _ := environment.GetTrait("cron").(*cronTrait)
 	assert.NotNil(t, ct)
-	assert.NotNil(t, ct.Fallback, "Should apply Fallback since non equivalent scheduling for mutiple cron compatible component")
+	assert.NotNil(t, ct.Fallback, "Should apply Fallback since non equivalent scheduling for multiple cron compatible component")
 }
 
 func TestCronDepsFallback(t *testing.T) {

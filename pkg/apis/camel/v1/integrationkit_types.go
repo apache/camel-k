@@ -57,7 +57,7 @@ type IntegrationKit struct {
 type IntegrationKitSpec struct {
 	// the container image as identified in the container registry
 	Image string `json:"image,omitempty"`
-	// a list of Camel dependecies used by this kit
+	// a list of Camel dependencies used by this kit
 	Dependencies []string `json:"dependencies,omitempty"`
 	// the profile which is expected by this kit
 	Profile TraitProfile `json:"profile,omitempty"`
