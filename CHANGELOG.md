@@ -1,30 +1,20 @@
 # Changelog
 
-## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-01-12)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...HEAD)
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
+
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-01-12)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.5.1-nightly)
 
 **Closed issues:**
 
 - Camel Quarkus \(plain\) runtime usage [\#5999](https://github.com/apache/camel-k/issues/5999)
 - `kamel promote` GitOps [\#5998](https://github.com/apache/camel-k/issues/5998)
 - Don't test github actions checks but build [\#5992](https://github.com/apache/camel-k/issues/5992)
-- Ingress Trait to support an array on the path [\#5981](https://github.com/apache/camel-k/issues/5981)
-- Flaky Docker build process [\#5920](https://github.com/apache/camel-k/issues/5920)
-- Support File Based Catalog [\#5917](https://github.com/apache/camel-k/issues/5917)
-- Move addons into trait [\#5787](https://github.com/apache/camel-k/issues/5787)
-
-## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-01-11)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
-
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-01-11)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.5.1-nightly)
-
-**Closed issues:**
-
 - Quarkus runtime deprecated configuration [\#5987](https://github.com/apache/camel-k/issues/5987)
+- Ingress Trait to support an array on the path [\#5981](https://github.com/apache/camel-k/issues/5981)
 - Knative Service is not created if "from" parameters are declared in the parameters section [\#5980](https://github.com/apache/camel-k/issues/5980)
 - Change Kamelet Distribution - provide your own catalog method [\#5958](https://github.com/apache/camel-k/issues/5958)
 - KameletBinding panics when missing binding type [\#5953](https://github.com/apache/camel-k/issues/5953)
@@ -35,6 +25,8 @@
 - Kustomize common labels deprecated [\#5928](https://github.com/apache/camel-k/issues/5928)
 - Mount trait regression with release 2.5.0 [\#5924](https://github.com/apache/camel-k/issues/5924)
 - Add a note to clarify about deprecation policy [\#5923](https://github.com/apache/camel-k/issues/5923)
+- Flaky Docker build process [\#5920](https://github.com/apache/camel-k/issues/5920)
+- Support File Based Catalog [\#5917](https://github.com/apache/camel-k/issues/5917)
 - Custom resource generation should always use a fixed tooling version [\#5903](https://github.com/apache/camel-k/issues/5903)
 - Integration build pushes image successfully using credentials but fails on pulling built image [\#5898](https://github.com/apache/camel-k/issues/5898)
 - How to troubleshoot Maven configuration [\#5894](https://github.com/apache/camel-k/issues/5894)
@@ -43,6 +35,7 @@
 - Release 2.5.0 [\#5887](https://github.com/apache/camel-k/issues/5887)
 - Bump Golang version to 1.23 [\#5877](https://github.com/apache/camel-k/issues/5877)
 - Remove github.com/mitchellh/mapstructure dependency [\#5858](https://github.com/apache/camel-k/issues/5858)
+- Move addons into trait [\#5787](https://github.com/apache/camel-k/issues/5787)
 - Deprecate Openshift specific features [\#5771](https://github.com/apache/camel-k/issues/5771)
 - \[features request\] add the hability to set Jib registryMirrors [\#5691](https://github.com/apache/camel-k/issues/5691)
 - Pipe is waiting forever on Revision to become available [\#5623](https://github.com/apache/camel-k/issues/5623)
