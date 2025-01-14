@@ -37,9 +37,9 @@ type IngressTrait struct {
 	// To configure the host exposed by the ingress.
 	Host string `property:"host" json:"host,omitempty"`
 	// To configure the path exposed by the ingress (default `/`).
+	// Deprecated: In favor of `paths` - left for backward compatibility.
 	Path string `property:"path" json:"path,omitempty"`
 	// To configure the paths exposed by the ingress (default `['/']`).
-	// Deprecated: In favor of `paths` - left for backward compatibility.
 	Paths []string `property:"paths" json:"paths,omitempty"`
 	// To configure the path type exposed by the ingress.
 	// One of `Exact`, `Prefix`, `ImplementationSpecific` (default to `Prefix`).
