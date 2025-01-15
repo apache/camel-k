@@ -149,7 +149,7 @@ func TestCamelURIFormat(t *testing.T) {
 		invalid bool
 	}{
 		{
-			uri: "knative:channnel",
+			uri: "knative:channel",
 		},
 		{
 			uri: "atomix-value:",

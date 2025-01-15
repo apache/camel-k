@@ -41,7 +41,7 @@ runs:
           name: otlp
         EOF
 
-        # Add collector configuration : basic otlp grpc reciever to logging
+        # Add collector configuration : basic otlp grpc receiver to logging
         cat <<EOF | kubectl apply -n otlp -f -
         kind: ConfigMap
         apiVersion: v1

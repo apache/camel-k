@@ -7,7 +7,7 @@ If your environments has not yet any, here we provide some simple example that c
 
 == Nexus Maven repository manager
 
-The following configuration is a very simple one from where you can start your own self managed Maven repository manager. It is based on https://www.sonatype.com/products/sonatype-nexus-repository[Nexus] and once it's up and running, it can work togheter with Camel K as explained in /camel-k/next/installation/advanced/maven.html#maven-proxy[Maven proxy configuration].
+The following configuration is a very simple one from where you can start your own self managed Maven repository manager. It is based on https://www.sonatype.com/products/sonatype-nexus-repository[Nexus] and once it's up and running, it can work together with Camel K as explained in /camel-k/next/installation/advanced/maven.html#maven-proxy[Maven proxy configuration].
 
 NOTE: this configuration is NOT production ready. It is ephemeral and uses plain http protocol. It requires some important tuning in order to be used in a production environment.
 

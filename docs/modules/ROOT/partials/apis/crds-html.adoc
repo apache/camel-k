@@ -5220,7 +5220,7 @@ ErrorHandlerSpec
 </em>
 </td>
 <td>
-<p>ErrorHandler is an optional handler called upon an error occuring in the integration</p>
+<p>ErrorHandler is an optional handler called upon an error occurring in the integration</p>
 </td>
 </tr>
 <tr>
@@ -6286,7 +6286,7 @@ ErrorHandlerSpec
 </em>
 </td>
 <td>
-<p>ErrorHandler is an optional handler called upon an error occuring in the integration</p>
+<p>ErrorHandler is an optional handler called upon an error occurring in the integration</p>
 </td>
 </tr>
 <tr>

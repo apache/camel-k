@@ -34,14 +34,14 @@ Users should be able to connect to a _Provisioned Service_ by specifying one or 
 
 [source,console]
 ----
-$ kamel run intergration --connect database,broker
+$ kamel run integration --connect database,broker
 ----
 
 The _Service Binding_ could be referenced by name like shown above, in which case the _Service Binding_ already exists, or it could be created and managed by Camel K in which case the user would have to explicitly specify the _Provisioned Service_ they want to connect to:
 
 [source,console]
 ----
-$ kamel run intergration --connect Database.v1alpha1.postgresql.baiju.dev/db-demo
+$ kamel run integration --connect Database.v1alpha1.postgresql.baiju.dev/db-demo
 ----
 
 The user may then reference the binding properties inside the integration just like any other properties.
