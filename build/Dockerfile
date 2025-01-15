@@ -22,9 +22,7 @@ ARG MAVEN_HOME="/usr/share/maven"
 ARG MAVEN_DIST_URL="https://archive.apache.org/dist/maven/maven-3/${MAVEN_DEFAULT_VERSION}/binaries/apache-maven-${MAVEN_DEFAULT_VERSION}-bin.zip"
 ARG MVNW_DIR="/usr/share/maven/mvnw/"
 ARG MVN_REPO="/etc/maven/m2"
-ARG MAVEN_OPTS="-Xmx512m -Xms256m -XX:MaxRAMPercentage=75.0"
-
-ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
+ARG MAVEN_OPTS=""
 
 USER 0
 
