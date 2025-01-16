@@ -36,6 +36,8 @@ import (
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/jvm"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 	"github.com/apache/camel-k/v2/pkg/util/maven"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -61,7 +63,7 @@ func installKameletCatalog(ctx context.Context, c client.Client, platform *v1.In
 		return -1, -1, err
 	}
 	// Download Kamelet dependency
-	if err := downloadKameletDependency(ctx, platform, version, kameletDir); err != nil {
+	if err := downloadKameletDependency(ctx, c, platform, version, kameletDir); err != nil {
 		return -1, -1, err
 	}
 	// Extract Kamelets files
@@ -100,9 +102,7 @@ func prepareKameletDirectory() (string, error) {
 	return kameletDir, nil
 }
 
-func downloadKameletDependency(ctx context.Context, platform *v1.IntegrationPlatform, version, kameletsDir string) error {
-	// TODO: we may want to add the maven settings coming from the platform
-	// in order to cover any user security setting in place
+func downloadKameletDependency(ctx context.Context, c client.Client, platform *v1.IntegrationPlatform, version, kameletsDir string) error {
 	p := maven.NewProjectWithGAV("org.apache.camel.k.kamelets", "kamelets-catalog", defaults.Version)
 	mc := maven.NewContext(kameletsDir)
 	mc.LocalRepository = platform.Status.Build.Maven.LocalRepository
@@ -113,7 +113,44 @@ func downloadKameletDependency(ctx context.Context, platform *v1.IntegrationPlat
 	mc.AddArgument("-Dmdep.useBaseVersion=true")
 	mc.AddArgument(fmt.Sprintf("-DoutputDirectory=%s", kameletsDir))
 
-	return p.Command(mc).Do(ctx)
+	if settings, err := kubernetes.ResolveValueSource(ctx, c, platform.Namespace, &platform.Status.Build.Maven.Settings); err != nil {
+		return err
+	} else if settings != "" {
+		mc.UserSettings = []byte(settings)
+	}
+
+	settings, err := maven.NewSettings(maven.DefaultRepositories, maven.ProxyFromEnvironment)
+	if err != nil {
+		return err
+	}
+	data, err := settings.MarshalBytes()
+	if err != nil {
+		return err
+	}
+	mc.GlobalSettings = data
+	secrets := platform.Status.Build.Maven.CASecrets
+
+	if secrets != nil {
+		certsData, err := kubernetes.GetSecretsRefData(ctx, c, platform.Namespace, secrets)
+		if err != nil {
+			return err
+		}
+		trustStoreName := "trust.jks"
+		trustStorePass := jvm.NewKeystorePassword()
+		err = jvm.GenerateKeystore(ctx, kameletsDir, trustStoreName, trustStorePass, certsData)
+		if err != nil {
+			return err
+		}
+		mc.ExtraMavenOpts = append(mc.ExtraMavenOpts,
+			"-Djavax.net.ssl.trustStore="+trustStoreName,
+			"-Djavax.net.ssl.trustStorePassword="+trustStorePass,
+		)
+	}
+
+	timeoutCtx, cancel := context.WithTimeout(ctx, platform.Status.Build.GetTimeout().Duration)
+	defer cancel()
+
+	return p.Command(mc).Do(timeoutCtx)
 }
 
 func extractKameletsFromDependency(ctx context.Context, version, kameletsDir string) error {
