@@ -1113,8 +1113,9 @@ spec:
                           See https://kubernetes.io/docs/concepts/services-networking/ingress/
                         type: string
                       path:
-                        description: To configure the path exposed by the ingress
-                          (default `/`).
+                        description: |-
+                          To configure the path exposed by the ingress (default `/`).
+                          Deprecated: In favor of `paths` - left for backward compatibility.
                         type: string
                       pathType:
                         description: |-
@@ -1126,9 +1127,8 @@ spec:
                         - ImplementationSpecific
                         type: string
                       paths:
-                        description: |-
-                          To configure the paths exposed by the ingress (default `['/']`).
-                          Deprecated: In favor of `paths` - left for backward compatibility.
+                        description: To configure the paths exposed by the ingress
+                          (default `['/']`).
                         items:
                           type: string
                         type: array
@@ -3225,8 +3225,9 @@ spec:
                           See https://kubernetes.io/docs/concepts/services-networking/ingress/
                         type: string
                       path:
-                        description: To configure the path exposed by the ingress
-                          (default `/`).
+                        description: |-
+                          To configure the path exposed by the ingress (default `/`).
+                          Deprecated: In favor of `paths` - left for backward compatibility.
                         type: string
                       pathType:
                         description: |-
@@ -3238,9 +3239,8 @@ spec:
                         - ImplementationSpecific
                         type: string
                       paths:
-                        description: |-
-                          To configure the paths exposed by the ingress (default `['/']`).
-                          Deprecated: In favor of `paths` - left for backward compatibility.
+                        description: To configure the paths exposed by the ingress
+                          (default `['/']`).
                         items:
                           type: string
                         type: array

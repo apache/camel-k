@@ -7338,6 +7338,7 @@ string
 
 
 To configure the path exposed by the ingress (default `/`).
+Deprecated: In favor of `paths` - left for backward compatibility.
 
 |`paths` +
 []string
@@ -7345,7 +7346,6 @@ To configure the path exposed by the ingress (default `/`).
 
 
 To configure the paths exposed by the ingress (default `['/']`).
-Deprecated: In favor of `paths` - left for backward compatibility.
 
 |`pathType` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#pathtype-v1-networking[Kubernetes networking/v1.PathType]*
