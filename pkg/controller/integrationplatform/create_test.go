@@ -24,6 +24,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/platform"
@@ -35,6 +36,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	k8stesting "k8s.io/client-go/testing"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -124,6 +126,9 @@ func TestCreateNewCatalog(t *testing.T) {
 			Build: v1.IntegrationPlatformBuildSpec{
 				RuntimeProvider: v1.RuntimeProviderQuarkus,
 				RuntimeVersion:  defaults.DefaultRuntimeVersion,
+				Timeout: &metav1.Duration{
+					Duration: 1 * time.Minute,
+				},
 			},
 		},
 	}
@@ -187,6 +192,9 @@ func TestCreateNewCatalog(t *testing.T) {
 			Build: v1.IntegrationPlatformBuildSpec{
 				RuntimeProvider: v1.RuntimeProviderQuarkus,
 				RuntimeVersion:  defaults.DefaultRuntimeVersion,
+				Timeout: &metav1.Duration{
+					Duration: 1 * time.Minute,
+				},
 			},
 		},
 	}
