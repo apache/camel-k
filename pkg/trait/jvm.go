@@ -225,7 +225,7 @@ func (t *jvmTrait) enableDebug(e *Environment) string {
 		if meta.Labels == nil {
 			meta.Labels = make(map[string]string)
 		}
-		meta.Labels["camel.apache.org/debug"] = "true"
+		meta.Labels["camel.apache.org/debug"] = trueString
 	})
 	t.DebugAddress = "*:5005"
 

@@ -383,13 +383,14 @@ func (t *quarkusTrait) applyWhenBuildSubmitted(e *Environment) error {
 
 	//nolint:nestif
 	if native {
+		buildTask.Maven.Properties["quarkus.native.enabled"] = "true"
 		if nativePackageType := builder.QuarkusRuntimeSupport(e.CamelCatalog.GetCamelQuarkusVersion()).NativeMavenProperty(); nativePackageType != "" {
 			buildTask.Maven.Properties[nativePackageType] = "true"
-			if t.NativeBaseImage == "" {
-				packageTask.BaseImage = QuarkusNativeDefaultBaseImageName
-			} else {
-				packageTask.BaseImage = t.NativeBaseImage
-			}
+		}
+		if t.NativeBaseImage == "" {
+			packageTask.BaseImage = QuarkusNativeDefaultBaseImageName
+		} else {
+			packageTask.BaseImage = t.NativeBaseImage
 		}
 		if len(e.IntegrationKit.Spec.Sources) > 0 {
 			buildTask.Sources = e.IntegrationKit.Spec.Sources
