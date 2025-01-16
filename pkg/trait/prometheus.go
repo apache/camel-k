@@ -87,7 +87,7 @@ func (t *prometheusTrait) Apply(e *Environment) error {
 
 	// Add the PodMonitor resource
 	if ptr.Deref(t.PodMonitor, true) {
-		portName := containerPort.Name
+		portName := getPortName(containerPort.Name)
 		podMonitor, err := t.getPodMonitorFor(e, portName)
 		if err != nil {
 			return err
@@ -101,6 +101,15 @@ func (t *prometheusTrait) Apply(e *Environment) error {
 	e.Integration.Status.SetConditions(condition)
 
 	return nil
+}
+
+func getPortName(portName string) string {
+	// This is a workaround to fix Knative behavior
+	// as described in https://github.com/apache/camel-k/issues/6014
+	if portName == defaultKnativeContainerPortName {
+		return "user-port"
+	}
+	return portName
 }
 
 func (t *prometheusTrait) getPodMonitorFor(e *Environment, portName string) (*monitoringv1.PodMonitor, error) {
