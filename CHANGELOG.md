@@ -1,12 +1,21 @@
 # Changelog
 
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-01-15)
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...v2.5.1-nightly)
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...HEAD)
 
-## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-01-13)
+**Closed issues:**
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.6.0-nightly)
+- Ingress Docs Misgenerated [\#6028](https://github.com/apache/camel-k/issues/6028)
+- Update platform properly in test [\#5852](https://github.com/apache/camel-k/issues/5852)
+
+## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-01-16)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
+
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-01-16)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.5.1-nightly)
 
 **Closed issues:**
 
@@ -2340,6 +2349,7 @@
 - fix\(ci\): build resources before testing [\#3714](https://github.com/apache/camel-k/pull/3714) ([squakez](https://github.com/squakez))
 - chore: add test-fmt make target [\#3712](https://github.com/apache/camel-k/pull/3712) ([tadayosi](https://github.com/tadayosi))
 - chore: Upgrade go.uber.org/automaxprocs to v1.5.1 [\#3711](https://github.com/apache/camel-k/pull/3711) ([astefanutti](https://github.com/astefanutti))
+- chore: Use global client discovery API to check Knative install [\#3701](https://github.com/apache/camel-k/pull/3701) ([astefanutti](https://github.com/astefanutti))
 - Update camel quarkus micropofile metrics doc [\#3698](https://github.com/apache/camel-k/pull/3698) ([zbendhiba](https://github.com/zbendhiba))
 - Remove deprecated spectrum fix [\#3693](https://github.com/apache/camel-k/pull/3693) ([tadayosi](https://github.com/tadayosi))
 - chore: Add client argument to controllers [\#3681](https://github.com/apache/camel-k/pull/3681) ([astefanutti](https://github.com/astefanutti))
