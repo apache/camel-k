@@ -7030,6 +7030,8 @@ These take precedence over any previously defined environment variables.
 
 * <<#_camel_apache_org_v1_Traits, Traits>>
 
+WARNING: This trait is no longer in use.
+
 The error-handler is a platform trait used to inject Error Handler source into the integration runtime.
 
 

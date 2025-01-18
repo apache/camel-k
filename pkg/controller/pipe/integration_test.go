@@ -54,6 +54,38 @@ func TestCreateIntegrationForPipe(t *testing.T) {
 	assert.Equal(t, expectedNominalRoute(), string(dsl))
 }
 
+func TestCreateIntegrationForPipeWithSinkKameletErrorHandler(t *testing.T) {
+	client, err := internal.NewFakeClient()
+	require.NoError(t, err)
+
+	pipe := nominalPipe("my-error-handler-pipe")
+	pipe.Spec.ErrorHandler = &v1.ErrorHandlerSpec{
+		RawMessage: []byte(`{"sink": {"endpoint": {"ref": {"kind": "Kamelet", "apiVersion": "camel.apache.org/v1", "name": "my-err"}}}}`),
+	}
+
+	it, err := CreateIntegrationFor(context.TODO(), client, &pipe)
+	require.NoError(t, err)
+	assert.Equal(t, "my-error-handler-pipe", it.Name)
+	assert.Equal(t, "default", it.Namespace)
+	assert.Equal(t, "camel.apache.org/v1", it.OwnerReferences[0].APIVersion)
+	assert.Equal(t, "Pipe", it.OwnerReferences[0].Kind)
+	assert.Equal(t, "my-error-handler-pipe", it.OwnerReferences[0].Name)
+	dsl, err := v1.ToYamlDSL(it.Spec.Flows)
+	require.NoError(t, err)
+	assert.Equal(t,
+		`- errorHandler:
+    deadLetterChannel:
+      deadLetterUri: kamelet:my-err/errorHandler
+- route:
+    from:
+      steps:
+      - to: kamelet:my-sink/sink
+      uri: kamelet:my-source/source
+    id: binding
+`, string(dsl),
+	)
+}
+
 func TestCreateIntegrationForPipeWithSinkErrorHandler(t *testing.T) {
 	client, err := internal.NewFakeClient()
 	require.NoError(t, err)
@@ -70,13 +102,20 @@ func TestCreateIntegrationForPipeWithSinkErrorHandler(t *testing.T) {
 	assert.Equal(t, "camel.apache.org/v1", it.OwnerReferences[0].APIVersion)
 	assert.Equal(t, "Pipe", it.OwnerReferences[0].Kind)
 	assert.Equal(t, "my-error-handler-pipe", it.OwnerReferences[0].Name)
-	assert.Len(t, it.Spec.Configuration, 3)
-	assert.Equal(t, "#class:org.apache.camel.builder.DeadLetterChannelBuilder", it.Spec.GetConfigurationProperty("camel.beans.defaultErrorHandler"))
-	assert.Equal(t, "someUri", it.Spec.GetConfigurationProperty("camel.beans.defaultErrorHandler.deadLetterUri"))
-	assert.Equal(t, "defaultErrorHandler", it.Spec.GetConfigurationProperty(v1.ErrorHandlerRefName))
 	dsl, err := v1.ToYamlDSL(it.Spec.Flows)
 	require.NoError(t, err)
-	assert.Equal(t, expectedNominalRoute(), string(dsl))
+	assert.Equal(t,
+		`- errorHandler:
+    deadLetterChannel:
+      deadLetterUri: someUri
+- route:
+    from:
+      steps:
+      - to: kamelet:my-sink/sink
+      uri: kamelet:my-source/source
+    id: binding
+`, string(dsl),
+	)
 }
 
 func TestCreateIntegrationForPipeWithLogErrorHandler(t *testing.T) {
@@ -95,13 +134,52 @@ func TestCreateIntegrationForPipeWithLogErrorHandler(t *testing.T) {
 	assert.Equal(t, "camel.apache.org/v1", it.OwnerReferences[0].APIVersion)
 	assert.Equal(t, "Pipe", it.OwnerReferences[0].Kind)
 	assert.Equal(t, "my-error-handler-pipe", it.OwnerReferences[0].Name)
-	assert.Len(t, it.Spec.Configuration, 3)
-	assert.Equal(t, "#class:org.apache.camel.builder.DefaultErrorHandlerBuilder", it.Spec.GetConfigurationProperty("camel.beans.defaultErrorHandler"))
-	assert.Equal(t, "true", it.Spec.GetConfigurationProperty("camel.beans.defaultErrorHandler.showHeaders"))
-	assert.Equal(t, "defaultErrorHandler", it.Spec.GetConfigurationProperty(v1.ErrorHandlerRefName))
 	dsl, err := v1.ToYamlDSL(it.Spec.Flows)
 	require.NoError(t, err)
-	assert.Equal(t, expectedNominalRoute(), string(dsl))
+	assert.Equal(t,
+		`- errorHandler:
+    defaultErrorHandler:
+      logName: err
+- route:
+    from:
+      steps:
+      - to: kamelet:my-sink/sink
+      uri: kamelet:my-source/source
+    id: binding
+`, string(dsl),
+	)
+}
+
+func TestCreateIntegrationForPipeWithNoneErrorHandler(t *testing.T) {
+	client, err := internal.NewFakeClient()
+	require.NoError(t, err)
+
+	pipe := nominalPipe("my-error-handler-pipe")
+	pipe.Spec.ErrorHandler = &v1.ErrorHandlerSpec{
+		RawMessage: []byte(`{"none": {}}`),
+	}
+
+	it, err := CreateIntegrationFor(context.TODO(), client, &pipe)
+	require.NoError(t, err)
+	assert.Equal(t, "my-error-handler-pipe", it.Name)
+	assert.Equal(t, "default", it.Namespace)
+	assert.Equal(t, "camel.apache.org/v1", it.OwnerReferences[0].APIVersion)
+	assert.Equal(t, "Pipe", it.OwnerReferences[0].Kind)
+	assert.Equal(t, "my-error-handler-pipe", it.OwnerReferences[0].Name)
+	dsl, err := v1.ToYamlDSL(it.Spec.Flows)
+	require.NoError(t, err)
+	assert.Equal(t,
+		`- errorHandler:
+    noErrorHandler: {}
+- route:
+    from:
+      steps:
+      - to: kamelet:my-sink/sink
+      uri: kamelet:my-source/source
+    id: binding
+`,
+		string(dsl),
+	)
 }
 
 func TestCreateIntegrationForPipeDataType(t *testing.T) {

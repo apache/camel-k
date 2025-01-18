@@ -29,7 +29,6 @@ func init() {
 	AddToTraits(newDeployerTrait)
 	AddToTraits(newDeploymentTrait)
 	AddToTraits(newEnvironmentTrait)
-	AddToTraits(newErrorHandlerTrait)
 	AddToTraits(newGCTrait)
 	AddToTraits(newHealthTrait)
 	AddToTraits(NewInitTrait)

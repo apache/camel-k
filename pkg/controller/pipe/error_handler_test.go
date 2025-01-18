@@ -31,10 +31,8 @@ func TestParseErrorHandlerNoneDoesSucceed(t *testing.T) {
 	)
 	require.NoError(t, err)
 	assert.Equal(t, v1.ErrorHandlerTypeNone, noErrorHandler.Type())
-	parameters, err := noErrorHandler.Configuration()
+	_, err = noErrorHandler.Configuration()
 	require.NoError(t, err)
-	assert.Equal(t, "#class:org.apache.camel.builder.NoErrorHandlerBuilder", parameters[v1.ErrorHandlerAppPropertiesPrefix])
-	assert.Equal(t, v1.ErrorHandlerRefDefaultName, parameters[v1.ErrorHandlerRefName])
 }
 
 func TestParseErrorHandlerLogDoesSucceed(t *testing.T) {
@@ -43,10 +41,8 @@ func TestParseErrorHandlerLogDoesSucceed(t *testing.T) {
 	)
 	require.NoError(t, err)
 	assert.Equal(t, v1.ErrorHandlerTypeLog, logErrorHandler.Type())
-	parameters, err := logErrorHandler.Configuration()
+	_, err = logErrorHandler.Configuration()
 	require.NoError(t, err)
-	assert.Equal(t, "#class:org.apache.camel.builder.DefaultErrorHandlerBuilder", parameters[v1.ErrorHandlerAppPropertiesPrefix])
-	assert.Equal(t, v1.ErrorHandlerRefDefaultName, parameters[v1.ErrorHandlerRefName])
 }
 
 func TestParseErrorHandlerLogWithParametersDoesSucceed(t *testing.T) {
@@ -55,12 +51,8 @@ func TestParseErrorHandlerLogWithParametersDoesSucceed(t *testing.T) {
 	)
 	require.NoError(t, err)
 	assert.Equal(t, v1.ErrorHandlerTypeLog, logErrorHandler.Type())
-	parameters, err := logErrorHandler.Configuration()
+	_, err = logErrorHandler.Configuration()
 	require.NoError(t, err)
-	assert.Equal(t, "#class:org.apache.camel.builder.DefaultErrorHandlerBuilder", parameters[v1.ErrorHandlerAppPropertiesPrefix])
-	assert.Equal(t, "value1", parameters["camel.beans.defaultErrorHandler.param1"])
-	assert.Equal(t, "value2", parameters["camel.beans.defaultErrorHandler.param2"])
-	assert.Equal(t, v1.ErrorHandlerRefDefaultName, parameters[v1.ErrorHandlerRefName])
 }
 
 func TestParseErrorHandlerSinkDoesSucceed(t *testing.T) {
@@ -71,10 +63,8 @@ func TestParseErrorHandlerSinkDoesSucceed(t *testing.T) {
 	assert.NotNil(t, sinkErrorHandler)
 	assert.Equal(t, v1.ErrorHandlerTypeSink, sinkErrorHandler.Type())
 	assert.Equal(t, "someUri", *sinkErrorHandler.Endpoint().URI)
-	parameters, err := sinkErrorHandler.Configuration()
+	_, err = sinkErrorHandler.Configuration()
 	require.NoError(t, err)
-	assert.Equal(t, "#class:org.apache.camel.builder.DeadLetterChannelBuilder", parameters[v1.ErrorHandlerAppPropertiesPrefix])
-	assert.Equal(t, v1.ErrorHandlerRefDefaultName, parameters[v1.ErrorHandlerRefName])
 }
 
 func TestParseErrorHandlerSinkWithParametersDoesSucceed(t *testing.T) {
@@ -93,12 +83,8 @@ func TestParseErrorHandlerSinkWithParametersDoesSucceed(t *testing.T) {
 	assert.NotNil(t, sinkErrorHandler)
 	assert.Equal(t, v1.ErrorHandlerTypeSink, sinkErrorHandler.Type())
 	assert.Equal(t, "someUri", *sinkErrorHandler.Endpoint().URI)
-	parameters, err := sinkErrorHandler.Configuration()
+	_, err = sinkErrorHandler.Configuration()
 	require.NoError(t, err)
-	assert.Equal(t, "#class:org.apache.camel.builder.DeadLetterChannelBuilder", parameters[v1.ErrorHandlerAppPropertiesPrefix])
-	assert.Equal(t, v1.ErrorHandlerRefDefaultName, parameters[v1.ErrorHandlerRefName])
-	assert.Equal(t, "value1", parameters["camel.beans.defaultErrorHandler.param1"])
-	assert.Equal(t, "value2", parameters["camel.beans.defaultErrorHandler.param2"])
 }
 
 func TestParseErrorHandlerSinkFail(t *testing.T) {

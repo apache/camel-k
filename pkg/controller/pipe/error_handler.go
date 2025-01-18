@@ -26,6 +26,10 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/bindings"
 )
 
+const defaultCamelErrorHandler = "defaultErrorHandler"
+
+// maybeErrorHandler will return a Binding mapping a DeadLetterChannel, a Log or a None Error Handler.
+// If the bindings has no URI, then, you can assume it's a none Error Handler.
 func maybeErrorHandler(errHandlConf *v1.ErrorHandlerSpec, bindingContext bindings.BindingContext) (*bindings.Binding, error) {
 	if errHandlConf == nil {
 		return nil, nil
@@ -39,7 +43,11 @@ func maybeErrorHandler(errHandlConf *v1.ErrorHandlerSpec, bindingContext binding
 	}
 	// We need to get the translated URI from any referenced resource (ie, kamelets)
 	if errorHandlerSpec.Type() == v1.ErrorHandlerTypeSink {
-		errorHandlerBinding, err = bindings.Translate(bindingContext, bindings.EndpointContext{Type: v1.EndpointTypeErrorHandler}, *errorHandlerSpec.Endpoint())
+		errorHandlerBinding, err = bindings.Translate(
+			bindingContext,
+			bindings.EndpointContext{Type: v1.EndpointTypeErrorHandler},
+			*errorHandlerSpec.Endpoint(),
+		)
 		if err != nil {
 			return nil, fmt.Errorf("could not determine error handler URI: %w", err)
 		}
@@ -47,6 +55,9 @@ func maybeErrorHandler(errHandlConf *v1.ErrorHandlerSpec, bindingContext binding
 		// Create a new binding otherwise in order to store error handler application properties
 		errorHandlerBinding = &bindings.Binding{
 			ApplicationProperties: make(map[string]string),
+		}
+		if errorHandlerSpec.Type() == v1.ErrorHandlerTypeLog {
+			errorHandlerBinding.URI = defaultCamelErrorHandler
 		}
 	}
 
@@ -106,8 +117,31 @@ func setErrorHandlerConfiguration(errorHandlerBinding *bindings.Binding, errorHa
 	for key, value := range properties {
 		errorHandlerBinding.ApplicationProperties[key] = fmt.Sprintf("%v", value)
 	}
-	if errorHandler.Type() == v1.ErrorHandlerTypeSink && errorHandlerBinding.URI != "" {
-		errorHandlerBinding.ApplicationProperties[fmt.Sprintf("%s.deadLetterUri", v1.ErrorHandlerAppPropertiesPrefix)] = errorHandlerBinding.URI
-	}
+
 	return nil
+}
+
+// translateCamelErrorHandler will translate a binding as an error handler YAML as expected by Camel.
+func translateCamelErrorHandler(b *bindings.Binding) map[string]interface{} {
+	yamlCode := map[string]interface{}{}
+	switch b.URI {
+	case "":
+		yamlCode["errorHandler"] = map[string]interface{}{
+			"noErrorHandler": map[string]interface{}{},
+		}
+	case defaultCamelErrorHandler:
+		yamlCode["errorHandler"] = map[string]interface{}{
+			"defaultErrorHandler": map[string]interface{}{
+				"logName": "err",
+			},
+		}
+	default:
+		yamlCode["errorHandler"] = map[string]interface{}{
+			"deadLetterChannel": map[string]interface{}{
+				"deadLetterUri": b.URI,
+			},
+		}
+	}
+
+	return yamlCode
 }
