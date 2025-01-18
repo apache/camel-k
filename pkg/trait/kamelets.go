@@ -39,7 +39,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/digest"
 	"github.com/apache/camel-k/v2/pkg/util/dsl"
-	"github.com/apache/camel-k/v2/pkg/util/source"
 )
 
 const (
@@ -48,6 +47,7 @@ const (
 
 	contentKey                  = "content"
 	KameletLocationProperty     = "camel.component.kamelet.location"
+	KameletErrorHandler         = "camel.component.kamelet.no-error-handler"
 	kameletMountPointAnnotation = "camel.apache.org/kamelet.mount-point"
 )
 
@@ -82,11 +82,6 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 		})
 		if err != nil {
 			return false, nil, err
-		}
-		// Check if a Kamelet is configured as default error handler URI
-		defaultErrorHandlerURI := e.Integration.Spec.GetConfigurationProperty(v1.ErrorHandlerAppPropertiesPrefix + ".deadLetterUri")
-		if defaultErrorHandlerURI != "" && strings.HasPrefix(defaultErrorHandlerURI, "kamelet:") {
-			kamelets = append(kamelets, source.ExtractKamelet(defaultErrorHandlerURI))
 		}
 		if len(kamelets) > 0 {
 			sort.Strings(kamelets)
@@ -228,6 +223,8 @@ func (t *kameletsTrait) addKamelets(e *Environment) error {
 		}
 	}
 	e.ApplicationProperties[KameletLocationProperty] += ",classpath:/kamelets"
+	// required because of https://issues.apache.org/jira/browse/CAMEL-21599
+	e.ApplicationProperties[KameletErrorHandler] = "false"
 	// resort dependencies
 	sort.Strings(e.Integration.Status.Dependencies)
 

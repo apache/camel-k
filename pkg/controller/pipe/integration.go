@@ -204,10 +204,21 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Pipe
 			"from": fromWrapper,
 		},
 	}
+
+	if errorHandler != nil {
+		eh := translateCamelErrorHandler(errorHandler)
+		encodedErrorHandler, err := json.Marshal(eh)
+		if err != nil {
+			return nil, err
+		}
+		it.Spec.Flows = append(it.Spec.Flows, v1.Flow{RawMessage: encodedErrorHandler})
+	}
+
 	encodedRoute, err := json.Marshal(flowRoute)
 	if err != nil {
 		return nil, err
 	}
+
 	it.Spec.Flows = append(it.Spec.Flows, v1.Flow{RawMessage: encodedRoute})
 
 	return &it, nil

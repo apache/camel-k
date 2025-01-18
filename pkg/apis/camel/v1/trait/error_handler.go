@@ -17,6 +17,8 @@ limitations under the License.
 
 package trait
 
+// WARNING: This trait is no longer in use.
+//
 // The error-handler is a platform trait used to inject Error Handler source into the integration runtime.
 //
 // +camel-k:trait=error-handler.

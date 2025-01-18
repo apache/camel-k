@@ -502,7 +502,7 @@ func ToYamlDSL(flows []Flow) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	jsondata := make([]map[string]interface{}, 0)
+	var jsondata interface{}
 	d := json.NewDecoder(bytes.NewReader(data))
 	d.UseNumber()
 	if err := d.Decode(&jsondata); err != nil {

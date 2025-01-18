@@ -68,10 +68,7 @@ func (e ErrorHandlerNone) Type() ErrorHandlerType {
 
 // Configuration --.
 func (e ErrorHandlerNone) Configuration() (map[string]interface{}, error) {
-	return map[string]interface{}{
-		ErrorHandlerAppPropertiesPrefix: "#class:org.apache.camel.builder.NoErrorHandlerBuilder",
-		ErrorHandlerRefName:             ErrorHandlerRefDefaultName,
-	}, nil
+	return map[string]interface{}{}, nil
 }
 
 // ErrorHandlerLog represent a default (log) error handler type.
@@ -91,16 +88,11 @@ func (e ErrorHandlerLog) Configuration() (map[string]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	properties[ErrorHandlerAppPropertiesPrefix] = "#class:org.apache.camel.builder.DefaultErrorHandlerBuilder"
-
 	if e.Parameters != nil {
 		var parameters map[string]interface{}
 		err := json.Unmarshal(e.Parameters.RawMessage, &parameters)
 		if err != nil {
 			return nil, err
-		}
-		for key, value := range parameters {
-			properties[ErrorHandlerAppPropertiesPrefix+"."+key] = value
 		}
 	}
 
@@ -129,7 +121,6 @@ func (e ErrorHandlerSink) Configuration() (map[string]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	properties[ErrorHandlerAppPropertiesPrefix] = "#class:org.apache.camel.builder.DeadLetterChannelBuilder"
 
 	return properties, err
 }

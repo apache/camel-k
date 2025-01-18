@@ -17,15 +17,6 @@ limitations under the License.
 
 package v1
 
-const (
-	// ErrorHandlerRefName the reference name to use when looking for an error handler.
-	ErrorHandlerRefName = "camel.k.errorHandler.ref"
-	// ErrorHandlerRefDefaultName the default name of the error handler.
-	ErrorHandlerRefDefaultName = "defaultErrorHandler"
-	// ErrorHandlerAppPropertiesPrefix the prefix used for the error handler bean.
-	ErrorHandlerAppPropertiesPrefix = "camel.beans.defaultErrorHandler"
-)
-
 // ErrorHandlerSpec represents an unstructured object for an error handler.
 type ErrorHandlerSpec struct {
 	RawMessage `json:",inline,omitempty"`

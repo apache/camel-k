@@ -747,4 +747,9 @@ func TestKameletAuto(t *testing.T) {
 	assert.Equal(t, traitv1.KameletsTrait{
 		List: "none,timer",
 	}, trait.KameletsTrait)
+	assert.Equal(t,
+		"file:/etc/camel/kamelets/kamelets-bundle-it-001,classpath:/kamelets",
+		environment.ApplicationProperties[KameletLocationProperty],
+	)
+	assert.Equal(t, "false", environment.ApplicationProperties[KameletErrorHandler])
 }
