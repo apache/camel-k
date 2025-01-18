@@ -1,24 +1,16 @@
 # Changelog
 
-## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-01-17)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...HEAD)
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...v2.5.1-nightly)
+
+## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-01-17)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.6.0-nightly)
 
 **Closed issues:**
 
 - Ingress Docs Misgenerated [\#6028](https://github.com/apache/camel-k/issues/6028)
-- Update platform properly in test [\#5852](https://github.com/apache/camel-k/issues/5852)
-
-## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-01-16)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
-
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-01-16)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.5.1-nightly)
-
-**Closed issues:**
-
 - Camel Quarkus \(plain\) runtime usage [\#5999](https://github.com/apache/camel-k/issues/5999)
 - `kamel promote` GitOps [\#5998](https://github.com/apache/camel-k/issues/5998)
 - Don't test github actions checks but build [\#5992](https://github.com/apache/camel-k/issues/5992)
@@ -44,6 +36,7 @@
 - Release 2.5.0 [\#5887](https://github.com/apache/camel-k/issues/5887)
 - Bump Golang version to 1.23 [\#5877](https://github.com/apache/camel-k/issues/5877)
 - Remove github.com/mitchellh/mapstructure dependency [\#5858](https://github.com/apache/camel-k/issues/5858)
+- Update platform properly in test [\#5852](https://github.com/apache/camel-k/issues/5852)
 - Move addons into trait [\#5787](https://github.com/apache/camel-k/issues/5787)
 - Deprecate Openshift specific features [\#5771](https://github.com/apache/camel-k/issues/5771)
 - \[features request\] add the hability to set Jib registryMirrors [\#5691](https://github.com/apache/camel-k/issues/5691)
