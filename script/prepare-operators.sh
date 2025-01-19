@@ -17,13 +17,14 @@
 
 set -e
 
-if [ "$#" -lt 1 ]; then
-    echo "usage: $0 prepare-operators release-version"
+if [ "$#" -lt 2 ]; then
+    echo "usage: $0 prepare-operators <release-version> <github-user>"
     exit 1
 fi
 
 location=$(dirname $0)
 version=$1
+gh_user=$2
 
 cd bundle/
 
@@ -62,3 +63,31 @@ cp ./tests/scorecard/config.yaml openshift-ecosystem/$1/tests/scorecard/config.y
 
 sed -i 's/camel-k.v/camel-k-operator.v/g' k8s-operatorhub/$1/manifests/camel-k.v$1.clusterserviceversion.yaml
 sed -i 's/camel-k.v/camel-k-operator.v/g' openshift-ecosystem/$1/manifests/camel-k.v$1.clusterserviceversion.yaml
+
+# Clone projects
+git clone https://github.com/$gh_user/community-operators.git /tmp/operators/community-operators
+cp -r k8s-operatorhub/$version /tmp/operators/community-operators/operators/camel-k/.
+git clone https://github.com/$gh_user/community-operators-prod.git /tmp/operators/community-operators-prod
+cp -r openshift-ecosystem/$version /tmp/operators/community-operators-prod/operators/camel-k/.
+
+# Community operators
+cd /tmp/operators/community-operators
+git checkout -b feat/v$version
+git add operators/camel-k/$version
+git commit -s -m "operator camel-k ($version)"
+git remote add upstream https://github.com/k8s-operatorhub/community-operators -f
+git pull --rebase upstream main
+git push --set-upstream origin feat/v$version
+
+# Community operators PROD
+cd /tmp/operators/community-operators-prod
+git checkout -b feat/v$version
+git add operators/camel-k/$version
+git commit -s -m "operator camel-k ($version)"
+git remote add upstream https://github.com/redhat-openshift-ecosystem/community-operators-prod -f
+git pull --rebase upstream main
+git push --set-upstream origin feat/v$version
+
+echo "### You need to create PRs manually:"
+echo "--> https://github.com/$gh_user/community-operators/pull/new/feat/v$version"
+echo "--> https://github.com/$gh_user/community-operators-prod/pull/new/feat/v$version"

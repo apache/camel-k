@@ -531,7 +531,7 @@ cross-compile:
 
 release: clean codegen set-version build-resources check-licenses images images-push cross-compile git-tag
 
-release-staging: clean codegen set-version build-resources check-licenses images-all images-push-staging cross-compile git-tag sbomgen
+release-staging: clean codegen set-version check-licenses build-resources images-all images-push-staging cross-compile release-helm bundle-push-staging git-tag sbomgen
 
 sbomgen:
 	cyclonedx-gomod mod -licenses -json -output sbom.json
@@ -543,6 +543,7 @@ images-nightly: clean codegen set-version build-resources images-all
 release-nightly: cross-compile images-push
 
 release-helm:
+	./script/set_version.sh ${VERSION}
 	./script/release_helm.sh ${VERSION}
 
 .PHONY: do-build build build-kamel build-kamel-platform build-resources dep codegen images images-push images-push-staging image-build test check clean release cross-compile package-examples set-version git-tag check-licenses build-resources release-helm release-staging release-nightly get-staging-repo get-version
@@ -675,6 +676,10 @@ bundle-build: bundle
 .PHONY: bundle-push bundle-index
 
 bundle-push: bundle-build
+	docker push $(BUNDLE_IMAGE_NAME):$(CUSTOM_VERSION)
+
+bundle-push-staging: BUNDLE_IMAGE_NAME="$(STAGING_IMAGE)-bundle"
+bundle-push-staging: bundle-build
 	docker push $(BUNDLE_IMAGE_NAME):$(CUSTOM_VERSION)
 
 bundle-test: operator-sdk
