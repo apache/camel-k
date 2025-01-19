@@ -84,7 +84,7 @@ runs:
         echo "UPD_DATE=$D" >> $GITHUB_ENV
         IMAGE_NAME=docker.io/${TEST_DOCKER_HUB_USERNAME:-testcamelk}/camel-k
         echo "Using IMAGE_NAME=$IMAGE_NAME"
-        echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV 
+        echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
 
     - name: Login to staging container registry
       uses: docker/login-action@v3
@@ -154,10 +154,3 @@ runs:
         replacesArtifacts: true
         tag: v${{ env.VERSION }}
         commit: ${{ env.COMMIT_ID }}
-
-    # If release was okey, we can also release the java extensions
-    - name: Deploy Camel-K-CRDs to ASF Snapshots Repository
-      working-directory: java/crds
-      shell: bash
-      run: |
-        mvn clean deploy --settings ../../.github/asf-deploy-settings.xml -q
