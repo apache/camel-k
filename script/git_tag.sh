@@ -28,6 +28,10 @@ target_tag=v$target_version
 target_staging=staging-$target_tag
 target_remote=$2
 
+git add *
+git commit -m "chore(release): preparing $target_version"
+git push
+
 git branch -D ${target_staging} || true
 git checkout -b ${target_staging}
 git add * || true

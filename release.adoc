@@ -6,12 +6,7 @@ the technical process changes.
 
 NOTE: starting Camel K version 2, the release process of Kamelets catalog and Camel K Runtime is independent.
 
-[[releasing-settings]]
-== First time settings
-
-If it's the first time you are releasing Camel K, you may be required to follow certain configuration for `gpg` and `maven`. Just follow the instructions you can find in https://github.com/apache/camel-k-runtime[Camel K Runtime project] about release. They contain a simplified guidelines to the more generic https://github.com/apache/camel/blob/main/docs/user-manual/modules/ROOT/pages/release-guide.adoc[Camel release guide] required to setup the Maven environment and gpg for the release.
-
-=== Docker Hub staging setting
+== Docker Hub staging setting
 
 This project staging is hosted on https://hub.docker.com/orgs/camelk/repositories[CamelK Docker Hub organization]. Make sure one of the organization administrator grant your personal user the right privileges to push an image to this org.
 
@@ -43,8 +38,8 @@ NOTE: if you don't list any available builder, if you're on Ubuntu, you can inst
 As the process will do Git operations, it is advisable that you clone the Camel K repository to some new location (ie `/Desktop/`) in order to avoid to conflict with any other development in progress. If you’re starting a major or a minor release version, you need to create the respective `release-a.b.x` branch. It’s highly advisable not to release directly from `main` branch.
 
 ```
-git clone https://github.com/apache/camel-k.git /tmp/camel-k
-cd /tmp/camel-k
+git clone https://github.com/apache/camel-k.git
+cd camel-k
 
 # If you release a patch version, otherwise see next chapter
 git checkout release-2.0.x
@@ -64,66 +59,15 @@ We have a script that simplify this process as we also need to provide the CI ta
 
 NOTE: you can run the script with -d option to dry run and evaluate the changes before pushing them to the repo.
 
-[[releasing-camel-k-crds]]
-=== Release Camel K CRD dependency
-
-Checkout the release branch for which you want to perform the release:
-```
-git checkout release-2.x.0
-```
-
-To prepare a release and check problems:
-```
-cd java/crds
-mvn release:prepare -Prelease -DautoVersionSubmodules=true -DdryRun
-```
-
-Check the signatures of the files, then clean and prepare the actual release:
-
-```
-mvn release:clean release:prepare -Prelease -Duser=<your Apache LDAP id> [-Dpassword=<your Apache LDAP pwd>] -Darguments=-DskipTests -DautoVersionSubmodules=true
-```
-
-Then perform the release (use any settings holding your Apache credentials):
-
-```
-mvn release:perform -Prelease [-s path/to/your/settings.xml]
-```
-
-Go to https://repository.apache.org/ and close the staging repository.
-
-A URL will be generated for the repository, like: https://repository.apache.org/content/repositories/orgapachecamel-xxxx. The URL needs to be communicated during the voting process.
-
 [[release-camel-k-operator]]
 === Release Camel K Operator and CLI
 
-Releasing the Camel K main artifacts require some manual steps. The following tasks need to be done:
-
-- Align `DEFAULT_RUNTIME_VERSION` in Makefile to latest Camel K Runtime release
-- Set the proper `VERSION`, likely just remove `-SNAPSHOT` suffix
-- Ensure `LAST_RELEASED_VERSION` points to latest released version of Camel K
-
 ```
-# you probably were in /java/
-cd ..
-make clean codegen set-version generate check-licenses build-resources build
-```
-
-Commit and push the changes done so far.
-
-```
-git add *
-git commit -m "chore(release): preparing for next release"
-# assuming you're on release branch and have write permissions
-git push
-```
-
-Now you can execute the release on staging.
-
-```
+make bump VERSION=<new-version>
 make release-staging
 ```
-A docker image `camelk/camel-k:<version>` will be pushed to the https://hub.docker.com/r/camelk/camel-k/tags[staging organization] (`camelk`, not `apache`). Binary files (CLIs) will be generated as well and put in the project root directory.
+
+A docker image `camelk/camel-k:<version>` will be pushed to the https://hub.docker.com/r/camelk/camel-k/tags[staging organization] (`camelk`, not `apache`). Binary files (CLIs) will be generated as well and put in the project root directory. Also the OLM staging bundle is going to be published as `camelk/camel-k-bundle:<version>` to the https://hub.docker.com/r/camelk/camel-k/tags[staging organization].
 
 [[testing]]
 === Do some testing
@@ -137,11 +81,10 @@ $ ./kamel version
 Camel K Client 2.0.0
 ```
 
-If the version retrieved is the one expected you can run an installation procedure
+If the version retrieved is the one expected you can run an installation procedure:
 
 ```
-CUSTOM_IMAGE=camelk/camel-k CUSTOM_VERSION=$CAMEL_K_VERSION make bundle
-make install-k8s-global
+kustomize build github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v<version> | sed 's#apache/camel-k#camelk/camel-k#g'
 ```
 
 Make some test and if all is in order, you can upload the sources and CLIs to the dist/dev repository in ASF the staged artifacts, in order to link them in the release vote communication.
@@ -150,8 +93,29 @@ Make some test and if all is in order, you can upload the sources and CLIs to th
 cd release-utils/scripts/
 ./upload-source.sh <released_version>
 ```
-
 Check that all resources have been correctly uploaded to https://dist.apache.org/repos/dist/dev/camel/camel-k/<released_version>/ directory.
+
+=== Github draft release
+You can start a **draft** release from the tag created in the previous steps (ie, `v2.1.0`). You can use the automatic release note generator, making sure to select the previous stable release to generate the differences. You need to manually add the CLI files and the sbom.json created in the previous steps. Select it as latest stable release and finalize the process.
+
+You should also manually add some text to explain how to test the staging artifacts. You can copy the following text to add to the top of the release note just changing the release version:
+
+```
+This release is on vote. It is using a **staging** operator image published as `docker.io/camelk/camel-k:<version>`. The available platforms are AMD64 and ARM64. You can test it following these instructions:
+### Kubectl
+\`\`\`
+kustomize build github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v<version> | sed 's#apache/camel-k#camelk/camel-k#g' | kubectl apply -f - --server-side
+\`\`\`
+### Helm
+\`\`\`
+helm install camel-k https://github.com/apache/camel-k/raw/v<version>/docs/charts/camel-k-<version>.tgz
+\`\`\`
+### OLM
+Use the `operator-sdk` tool and run the bundle via:
+\`\`\`
+operator-sdk run bundle docker.io/camelk/camel-k-bundle:<version>
+\`\`\`
+```
 
 [[voting]]
 == Voting
@@ -161,9 +125,7 @@ An email should be sent to dev@camel.apache.org asking to test the staged artifa
 [[finalizing]]
 == Finalizing the release
 
-After the voting is complete with success, the artifacts can be released.
-
-Republish docker image in the Apache org on Docker Hub:
+After the voting is complete with success, the artifacts can be released. Republish docker image in the Apache org on Docker Hub:
 
 ```
 # assuming logged in to docker hub (default amd64)
@@ -179,7 +141,6 @@ docker manifest create apache/camel-k:$VERSION--amend apache/camel-k:$VERSION-am
 docker manifest push --purge apache/camel-k:$VERSION
 ```
 
-Release the staging repository at: https://repository.apache.org (Camel K CRD dependency).
 Artifacts committed on https://dist.apache.org/repos/dist/dev/ before the voting process need to be copied to the Apache dist repository on: https://dist.apache.org/repos/dist/release/camel.
 
 ```
@@ -189,70 +150,27 @@ cd release-utils/scripts/
 
 Wait for maven mirrors to sync the new artifacts. This can take more than 1 hour sometimes.
 
-=== Github release
-You can start a release from the tag created in the previous steps (ie, `v2.1.0`). You can use the automatic release note generator, making sure to select the previous stable release to generate the differences. You need to manually add the CLI files, the CRDs dependency and the sbom.json created in the previous steps. Select it as latest stable release and finalize the process.
-
-Before announcing the release, perform a simple test to verify that everything is in place (running a "Hello World" integration
-after an installation done with, as an example `kubectl apply -k github.com/apache/camel-k/install/overlays/openshift/descoped?ref=v2.1.0 --server-side`). Do a simple final test.
-
-The release can be now announced to dev@camel.apache.org and users@camel.apache.org ideally accompanied by a blog post to explain what's new. A PMC member with access to the @ApacheCamel former Twitter account should announce the release on former Twitter as well.
-
-[[post-release]]
-== Post Release
-
-[[documentation]]
-== Documentation updates
-
-The version of Camel K and the main related dependencies are scraped automatically in a Github Action. You only need to provide the LTS parameter in the related `release` branch, when the release is marked as LTS (such as in https://github.com/apache/camel-k/blob/f15124949e43bb859d07f555b9e510956d6ed823/docs/antora.yml#L30). You also need to make sure that the `antora.yml` file has correctly set the version (which may be still set as `main`) and the `prerelease` tag (which should be removed as we are officially releasing).
-
-After the vote has passed you should update camel-website project:
-
-1. update the https://github.com/apache/camel-website/blob/main/antora-playbook-snippets/antora-playbook.yml[camel-website `antora-playbook.yml` `content.sources` section] for camel-k to use the newly released versions, replacing the previous released version or any unsupported version.
-1. update the https://github.com/apache/camel-k/blob/release-2.5.x/docs/antora.yml[camel k release branch] antora configuration.
-1. create an entry in the release section of Camel website project: https://github.com/apache/camel-website/tree/main/content/releases/k - you can use any previous document as a reference.
-1. provide a blog post announcing the release
-
-NOTE: the milestone is the github project milestone ID used to track the release.
-
 === Operator Hub
 
 The https://github.com/k8s-operatorhub/community-operators/[OperatorHub] downstream channel should be synced to publish the latest version
 of Camel K, so that it can be easily installed on platforms that support Operator Hub.
 
-The https://github.com/redhat-openshift-ecosystem/community-operators-prod/[Embedded OperatorHub in OpenShift and OKD] downstream channel should be synced to publish the latest version
-of Camel K, so that it can be easily installed on OpenShift and OKD.
+The https://github.com/redhat-openshift-ecosystem/community-operators-prod/[Embedded OperatorHub in OpenShift and OKD] downstream channel should be synced to publish the latest versionof Camel K, so that it can be easily installed on OpenShift and OKD.
 
 You can create the bundle and prepare the supported OLM environments:
 
 ```
 make bundle
-./script/prepare-operators.sh <version_just_released>
+./script/prepare-operators.sh <version> <github-userid>
 ```
 
-You'll get two different folders in the bundle folder
-- k8s-operators
-- openshift-ecosystem
-
-In both the directories you'll have a folder with the version number specified in the command line.
-
-The content of these folders is exactly what you need as base to create a PR for https://github.com/k8s-operatorhub/community-operators/[OperatorHub] and https://github.com/redhat-openshift-ecosystem/community-operators-prod/[Embedded OperatorHub in OpenShift and OKD].
+The script is in charge to clone a fork you had to do have available on with your Github user and issue a PR with the required changes.
 
 === Helm
 
-An helm chart must be generated with the new version.
+An Helm chart was generated during the staging procedure. Use the commit ID to cherry pick the commit which created the chart to the `main` branch. It should be 2 files, the tar.gz file that have been generated in `/docs/charts` and the updated `Chart.yaml`.
 
-First update the chart version in the `Chart.yaml` file under the `/helm` section, setting a new chart release from the release branch:
-
-```
-./script/set_version.sh <released-version>
-make release-helm
-```
-
-Locally commit the changes and use the commit ID to cherry pick this commit to the `main` branch. It should be 2 files, the tar.gz file that have been generated in `/docs/charts` and the updated `Chart.yaml`.
-
-NOTE: if you're releasing from a release branch, then, you need to generate the Helm chart in the specific release branch, and later manually commit the chart in `main` branch accordingly.
-
-Wait for them to be available on https://hub.helm.sh/.
+After this is done, wait for them to be available on https://hub.helm.sh/ (generally within some hour after the cherry-pick).
 
 === Homebrew
 
@@ -260,18 +178,36 @@ The https://brew.sh/[HomeBrew] formula for _kamel_ must be synced to download an
 
 NOTE: it seems it exist an automatic process in charge to update Brew formula as soon as there is a release. Check it out if after the release, https://github.com/Homebrew/homebrew-core/pulls?q=is%3Apr+kamel+is%3Aclosed[a pull request with the new version for kamel] is automatically done.
 
-==== Manual procedure
+== Finalize the release
 
-If the automatic procedure does not start, the content of https://github.com/Homebrew/homebrew-core/blob/master/Formula/k/kamel.rb[kamel.rb] _(the package definition)_ should be updated to point the latest release of https://github.com/apache/camel-k[Camel K]. This is something done using `brew` CLI and providing a `HOMEBREW_GITHUB_API_TOKEN` env variable to contain `gists`, `repo` and `workflow` grants [1]. Once these are set, you need to run:
+The release is complete, we only need to make it official:
+
+=== Official Apache documentation page
+
+The version of Camel K and the main related dependencies are scraped automatically in a Github Action. You only need to provide the LTS parameter in the related `release` branch, when the release is marked as LTS (such as in https://github.com/apache/camel-k/blob/f15124949e43bb859d07f555b9e510956d6ed823/docs/antora.yml#L30). You also need to make sure that the `antora.yml` file has correctly set the version (which may be still set as `main`) and the `prerelease` tag (which should be removed as we are officially releasing).
+
+After the vote has passed you should update camel-website project:
+
+1. update the https://github.com/apache/camel-website/blob/main/antora-playbook-snippets/antora-playbook.yml[camel-website `antora-playbook.yml` `content.sources` section] for camel-k to use the newly released versions, replacing the previous released version or any unsupported version.
+2. update the https://github.com/apache/camel-k/blob/release-2.5.x/docs/antora.yml[camel k release branch] antora configuration.
+3. create an entry in the release section of Camel website project: https://github.com/apache/camel-website/tree/main/content/releases/k - you can use any previous document as a reference.
+4. provide a blog post announcing the release
+
+NOTE: the milestone is the Github project milestone ID used to track the release.
+
+=== Github release page
+You can edit the draft release and set it to final, marking as last release. You will also need to edit the text with the staging installation instruction and point to the official documentation installation page:
+
 ```
-brew tap homebrew/core
-brew bump-formula-pr --strict kamel --version=<x.y.z>
+## Installation procedure
+Install the operator looking at the official https://camel.apache.org/camel-k/<2.5.x>/installation/installation.html[Camel K operator <version> installation procedure].
 ```
-The previous script should create a PR on behalf of your Github account with the required changes to update the formula.
 
-NOTE: be patient, it can take a little time to update the formula.
+Perform a simple test to verify that everything is in place (running a "Hello World" integration after an installation done with, as an example `kubectl apply -k github.com/apache/camel-k/install/overlays/openshift/descoped?ref=v<version> --server-side`). Do a simple final test.
 
-[1] https://github.com/settings/tokens/new?scopes=gist,repo,workflow&description=Homebrew
+=== Announce the release
+
+The release can be now announced to dev@camel.apache.org and users@camel.apache.org ideally accompanied by a blog post to explain what's new. The blog should be also promoted to social links (above all Linkedin).
 
 === Bump to next version
 
