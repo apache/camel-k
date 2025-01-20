@@ -6,23 +6,25 @@
 
 **Closed issues:**
 
-- Integration can't start as non-root if it was created wit Jib [\#6038](https://github.com/apache/camel-k/issues/6038)
-- Error build example integration - github.com/apache/camel-k/v2/pkg/util/log.Logger.Errorf [\#6013](https://github.com/apache/camel-k/issues/6013)
+- Add installation instructions in github release page [\#5950](https://github.com/apache/camel-k/issues/5950)
+- Drop Camel K CRDs dependency? [\#5910](https://github.com/apache/camel-k/issues/5910)
 
-## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-01-18)
+## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-01-19)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
 
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-01-18)
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-01-19)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.5.1-nightly)
 
 **Closed issues:**
 
+- Integration can't start as non-root if it was created wit Jib [\#6038](https://github.com/apache/camel-k/issues/6038)
 - Can't install Camel-K operator using a local maven repository. [\#6030](https://github.com/apache/camel-k/issues/6030)
 - Ingress Docs Misgenerated [\#6028](https://github.com/apache/camel-k/issues/6028)
 - Quarkus native is not yet using native source mode [\#6021](https://github.com/apache/camel-k/issues/6021)
 - Prometheus PodMonitor for Knative is incorrectly generated [\#6014](https://github.com/apache/camel-k/issues/6014)
+- Error build example integration - github.com/apache/camel-k/v2/pkg/util/log.Logger.Errorf [\#6013](https://github.com/apache/camel-k/issues/6013)
 - Camel Quarkus \(plain\) runtime usage [\#5999](https://github.com/apache/camel-k/issues/5999)
 - `kamel promote` GitOps [\#5998](https://github.com/apache/camel-k/issues/5998)
 - Don't test github actions checks but build [\#5992](https://github.com/apache/camel-k/issues/5992)
