@@ -1,21 +1,12 @@
 # Changelog
 
-## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-01-20)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...HEAD)
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...v2.5.1-nightly)
 
-**Closed issues:**
+## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-01-20)
 
-- Add installation instructions in github release page [\#5950](https://github.com/apache/camel-k/issues/5950)
-- Drop Camel K CRDs dependency? [\#5910](https://github.com/apache/camel-k/issues/5910)
-
-## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-01-19)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
-
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-01-19)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.5.1-nightly)
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.6.0-nightly)
 
 **Closed issues:**
 
@@ -34,6 +25,7 @@
 - Change Kamelet Distribution - provide your own catalog method [\#5958](https://github.com/apache/camel-k/issues/5958)
 - KameletBinding panics when missing binding type [\#5953](https://github.com/apache/camel-k/issues/5953)
 - Installation page should report the version [\#5951](https://github.com/apache/camel-k/issues/5951)
+- Add installation instructions in github release page [\#5950](https://github.com/apache/camel-k/issues/5950)
 - Rest "contract first" fails with variable in api path [\#5939](https://github.com/apache/camel-k/issues/5939)
 - Traits review [\#5936](https://github.com/apache/camel-k/issues/5936)
 - Do not fail if sources are exclusively passed via configuration file. [\#5933](https://github.com/apache/camel-k/issues/5933)
@@ -42,6 +34,7 @@
 - Add a note to clarify about deprecation policy [\#5923](https://github.com/apache/camel-k/issues/5923)
 - Flaky Docker build process [\#5920](https://github.com/apache/camel-k/issues/5920)
 - Support File Based Catalog [\#5917](https://github.com/apache/camel-k/issues/5917)
+- Drop Camel K CRDs dependency? [\#5910](https://github.com/apache/camel-k/issues/5910)
 - Custom resource generation should always use a fixed tooling version [\#5903](https://github.com/apache/camel-k/issues/5903)
 - Integration build pushes image successfully using credentials but fails on pulling built image [\#5898](https://github.com/apache/camel-k/issues/5898)
 - How to troubleshoot Maven configuration [\#5894](https://github.com/apache/camel-k/issues/5894)
