@@ -52,7 +52,7 @@ require (
 	k8s.io/utils v0.0.0-20240711033017-18e509b52bc8
 	knative.dev/eventing v0.43.3
 	knative.dev/pkg v0.0.0-20241021183759-9b9d535af5ad
-	knative.dev/serving v0.43.0
+	knative.dev/serving v0.43.1
 	sigs.k8s.io/controller-runtime v0.18.5
 	sigs.k8s.io/structured-merge-diff/v4 v4.5.0
 )
