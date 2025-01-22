@@ -24,6 +24,7 @@ import (
 	"testing"
 
 	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -37,5 +38,23 @@ func TestRunAndLogErrorMvn(t *testing.T) {
 	err := util.RunAndLog(context.Background(), cmd, LogHandler, LogHandler)
 
 	require.Error(t, err)
-	require.ErrorContains(t, err, "[ERROR] The goal you specified requires a project to execute but there is no POM in this directory")
+	require.ErrorContains(t, err, "The goal you specified requires a project to execute but there is no POM in this directory")
+}
+
+func TestParseLog(t *testing.T) {
+	mavenLogLine := parseLog("[INFO] this is an info log trace")
+	assert.Equal(t, INFO, mavenLogLine.Level)
+	assert.Equal(t, "this is an info log trace", mavenLogLine.Msg)
+}
+
+func TestParseErrorLog(t *testing.T) {
+	mavenLogLine := parseLog("[ERROR] this is an error log trace")
+	assert.Equal(t, ERROR, mavenLogLine.Level)
+	assert.Equal(t, "this is an error log trace", mavenLogLine.Msg)
+}
+
+func TestParseLogCannotTrace(t *testing.T) {
+	mavenLogLine := parseLog("[FAILING] this is a failing log trace")
+	assert.Equal(t, INFO, mavenLogLine.Level)
+	assert.Equal(t, "[FAILING] this is a failing log trace", mavenLogLine.Msg)
 }

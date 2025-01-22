@@ -22,15 +22,12 @@ ARG MAVEN_HOME="/usr/share/maven"
 ARG MAVEN_DIST_URL="https://archive.apache.org/dist/maven/maven-3/${MAVEN_DEFAULT_VERSION}/binaries/apache-maven-${MAVEN_DEFAULT_VERSION}-bin.zip"
 ARG MVNW_DIR="/usr/share/maven/mvnw/"
 ARG MVN_REPO="/etc/maven/m2"
-ARG MAVEN_OPTS=""
 
 USER 0
 
 # Maven configuration
 RUN mkdir -p ${MAVEN_HOME}
 RUN mkdir -p ${MVN_REPO}
-COPY build/_maven_overlay/ /usr/share/maven/lib/
-ADD build/_maven_overlay/logback.xml /usr/share/maven/conf/
 
 # Prepare the maven wrapper required in the build Pod strategy
 COPY build/mvnw/mvnw.tar ${MVNW_DIR}
@@ -39,13 +36,8 @@ RUN tar -xC ${MVNW_DIR} -f ${MVNW_DIR}mvnw.tar \
     && sed -i "s;distributionUrl=.*;distributionUrl=${MAVEN_DIST_URL};" ${MVNW_DIR}.mvn/wrapper/maven-wrapper.properties
 # Used by mvnw to download maven dist into it
 ENV MAVEN_USER_HOME="${MAVEN_HOME}"
-# Install a default mvnw distribution at build time and prepare the config for formatting log
-RUN ${MVNW_DIR}/mvnw --version | grep "Maven home:" | sed 's/Maven home: //' >> ${MVNW_DIR}default \
-    && cp -r /usr/share/maven/lib/. $(cat ${MVNW_DIR}default)/lib \
-    && rm $(cat ${MVNW_DIR}default)/lib/maven-slf4j-provider* \
-    && rm $(cat ${MVNW_DIR}default)/lib/slf4j-api-1.*
-
-ENV MAVEN_OPTS="${MAVEN_OPTS} -Dlogback.configurationFile=${MAVEN_HOME}/conf/logback.xml"
+# Install a default mvnw distribution at build time
+RUN ${MVNW_DIR}/mvnw --version
 
 ADD build/_maven_output ${MVN_REPO}
 # Fix https://github.com/moby/moby/issues/37965

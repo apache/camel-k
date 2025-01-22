@@ -496,7 +496,6 @@ func Logs(t *testing.T, ctx context.Context, ns, podName string, options corev1.
 }
 
 func StructuredLogs(t *testing.T, ctx context.Context, ns, podName string, options *corev1.PodLogOptions, ignoreParseErrors bool) ([]util.LogEntry, error) {
-
 	stream, err := TestClient(t).CoreV1().Pods(ns).GetLogs(podName, options).Stream(ctx)
 	if err != nil {
 		msg := "Error while reading container logs"

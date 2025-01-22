@@ -44,9 +44,7 @@ build/_offline
 build/camel-k-runtime-*-maven-offline.tar.gz
 build/_test
 build/_maven_output
-build/_maven_overlay
 build/_kamelets
-build/_maven_overlay/
 build/maven/target/
 build/maven
 build/m2

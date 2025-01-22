@@ -377,7 +377,6 @@ clean:
 	rm -f *.test
 	rm -rf $(LOCALBIN)
 	rm -rf build/_maven_output
-	rm -rf build/_maven_overlay
 	rm -rf build/_output
 	rm -rf camel-k-client-*.tar.gz
 	rm -rf camel-k-examples-*.tar.gz
@@ -430,13 +429,6 @@ dir-licenses:
 check-licenses:
 	./script/check_licenses.sh
 
-# The below are dependencies needed for maven structured logs. We must bundle into the final container image.
-maven-overlay:
-	@echo "####### Preparing maven dependencies bundle..."
-	rm -rf build/_maven_overlay
-	mkdir -p build/_maven_overlay
-	./script/maven_overlay.sh build/_maven_overlay
-
 TARGET_STAGE := base
 ifeq ($(DEBUG_MODE),true)
 	TARGET_STAGE := debug
@@ -445,7 +437,7 @@ endif
 
 DOCKER_TAG := $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-$(IMAGE_ARCH)
 
-images: build maven-overlay image-build build-kamel-platform
+images: build image-build build-kamel-platform
 
 image-build:
 ifneq (,$(findstring SNAPSHOT,$(DEFAULT_RUNTIME_VERSION)))
