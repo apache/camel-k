@@ -1,6 +1,15 @@
 # Changelog
 
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-01-22)
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...HEAD)
+
+**Closed issues:**
+
+- Replace `{last-released-version}` variable [\#5988](https://github.com/apache/camel-k/issues/5988)
+- Be able to switch controller strategy dynamically [\#5885](https://github.com/apache/camel-k/issues/5885)
+
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-01-23)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...v2.5.1-nightly)
 
