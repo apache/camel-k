@@ -1,21 +1,12 @@
 # Changelog
 
-## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-01-24)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...HEAD)
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
 
-**Closed issues:**
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-01-24)
 
-- Replace `{last-released-version}` variable [\#5988](https://github.com/apache/camel-k/issues/5988)
-- Be able to switch controller strategy dynamically [\#5885](https://github.com/apache/camel-k/issues/5885)
-
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-01-23)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...v2.5.1-nightly)
-
-## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-01-21)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.6.0-nightly)
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.5.1-nightly)
 
 **Closed issues:**
 
@@ -28,6 +19,7 @@
 - Camel Quarkus \(plain\) runtime usage [\#5999](https://github.com/apache/camel-k/issues/5999)
 - `kamel promote` GitOps [\#5998](https://github.com/apache/camel-k/issues/5998)
 - Don't test github actions checks but build [\#5992](https://github.com/apache/camel-k/issues/5992)
+- Replace `{last-released-version}` variable [\#5988](https://github.com/apache/camel-k/issues/5988)
 - Quarkus runtime deprecated configuration [\#5987](https://github.com/apache/camel-k/issues/5987)
 - Ingress Trait to support an array on the path [\#5981](https://github.com/apache/camel-k/issues/5981)
 - Knative Service is not created if "from" parameters are declared in the parameters section [\#5980](https://github.com/apache/camel-k/issues/5980)
@@ -50,6 +42,7 @@
 - Fix doc failure on compatibility matrix [\#5890](https://github.com/apache/camel-k/issues/5890)
 - Creating camel-k with helm cannot publish integrations [\#5888](https://github.com/apache/camel-k/issues/5888)
 - Release 2.5.0 [\#5887](https://github.com/apache/camel-k/issues/5887)
+- Be able to switch controller strategy dynamically [\#5885](https://github.com/apache/camel-k/issues/5885)
 - Bump Golang version to 1.23 [\#5877](https://github.com/apache/camel-k/issues/5877)
 - Remove github.com/mitchellh/mapstructure dependency [\#5858](https://github.com/apache/camel-k/issues/5858)
 - Update platform properly in test [\#5852](https://github.com/apache/camel-k/issues/5852)
