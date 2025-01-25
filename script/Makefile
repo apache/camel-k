@@ -47,12 +47,16 @@ LINT_DEADLINE ?= 10m
 DEBUG_MODE ?= false
 
 # Operator building configuration
-BASE_IMAGE := eclipse-temurin:17
+BASE_IMAGE_NAME := eclipse-temurin
+BASE_IMAGE_VERSION := 17-jdk
+OFFICIAL_IMAGE_VERSION := 17-jdk
+BASE_IMAGE := $(BASE_IMAGE_NAME):$(BASE_IMAGE_VERSION)
 LOCAL_REPOSITORY := /etc/maven/m2
 OPENSHIFT_REGISTRY := image-registry.openshift-image-registry.svc:5000
 IMAGE_NAME ?= docker.io/apache/camel-k
 # Test for arm64, fall back to amd64
 IMAGE_ARCH ?= $(if $(filter arm64 aarch64,$(shell uname -m)),arm64,amd64)
+OFFICIAL_IMAGE_ARCH := amd64
 #
 # Situations when user wants to override
 # the image name and version
@@ -435,7 +439,7 @@ ifeq ($(DEBUG_MODE),true)
 	CUSTOM_IMAGE := $(CUSTOM_IMAGE)-debug
 endif
 
-DOCKER_TAG := $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-$(IMAGE_ARCH)
+DOCKER_TAG := $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-$(BASE_IMAGE_VERSION)-$(IMAGE_ARCH)
 
 images: build image-build build-kamel-platform
 
@@ -443,10 +447,24 @@ image-build:
 ifneq (,$(findstring SNAPSHOT,$(DEFAULT_RUNTIME_VERSION)))
 	./script/package_maven_artifacts.sh -d "$(CAMEL_K_RUNTIME_DIR)" $(DEFAULT_RUNTIME_VERSION)
 endif
-	@echo "####### Building Camel K operator arch $(IMAGE_ARCH) container image..."
+	@echo "####### Building Camel K operator jdk $(BASE_IMAGE_VERSION) arch $(IMAGE_ARCH) container image..."
 	mkdir -p build/_maven_output
-	docker buildx build --target $(TARGET_STAGE) --platform=linux/$(IMAGE_ARCH) --build-arg IMAGE_ARCH=$(IMAGE_ARCH) --load -t $(DOCKER_TAG) -f build/Dockerfile .
+	docker buildx build --target $(TARGET_STAGE) \
+		--platform=linux/$(IMAGE_ARCH) \
+		--build-arg CK_BASE_IMAGE=$(BASE_IMAGE) \
+		--build-arg IMAGE_ARCH=$(IMAGE_ARCH) \
+		--load -t $(DOCKER_TAG) -f build/Dockerfile .
+ifeq ($(BASE_IMAGE_VERSION),$(OFFICIAL_IMAGE_VERSION))
+ifeq ($(IMAGE_ARCH),$(OFFICIAL_IMAGE_ARCH))
+	docker tag $(DOCKER_TAG) $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-$(BASE_IMAGE_VERSION)
 	docker tag $(DOCKER_TAG) $(CUSTOM_IMAGE):$(CUSTOM_VERSION)
+endif
+	docker tag $(DOCKER_TAG) $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-$(IMAGE_ARCH)
+else
+ifeq ($(IMAGE_ARCH),$(OFFICIAL_IMAGE_ARCH))
+	docker tag $(DOCKER_TAG) $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-$(BASE_IMAGE_VERSION)
+endif
+endif
 
 # Mainly used for internal CI purposes
 image-push:
@@ -461,21 +479,40 @@ image-push:
 #
 # docker buildx create --name mybuilder --platform linux/amd64,linux/arm64
 # docker buildx use mybuilder
+
+JDK_VERSIONS = 17-jdk 21-jdk
+ARCH_VERSIONS = amd64 arm64
 images-all:
-	make IMAGE_ARCH=arm64 images
-	make IMAGE_ARCH=amd64 images
+	for i in $(JDK_VERSIONS); do \
+		for j in $(ARCH_VERSIONS); do \
+			make IMAGE_ARCH=$$j BASE_IMAGE_VERSION=$$i images; \
+		done \
+	done
+
+IMAGE_PUSH = $(CUSTOM_IMAGE):$(CUSTOM_VERSION)
+images-push-all:
+	make IMAGE_PUSH=$(CUSTOM_IMAGE):$(CUSTOM_VERSION) images-push
+	for i in $(JDK_VERSIONS); do \
+		make IMAGE_PUSH=$(CUSTOM_IMAGE):$(CUSTOM_VERSION)-$$i images-push ; \
+	done
 
 images-push:
-	docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-amd64
-	docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)
-	@if docker inspect $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 &> /dev/null; then \
-		echo "Image $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 exists, building the multiarch manifest"; \
-		docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64; \
-		docker manifest create $(CUSTOM_IMAGE):$(CUSTOM_VERSION) --amend $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-amd64 --amend $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64; \
-		docker manifest push --purge $(CUSTOM_IMAGE):$(CUSTOM_VERSION); \
-	else \
-		echo "Image $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 does not exist"; \
-	fi
+	docker push $(IMAGE_PUSH)
+	docker manifest create $(IMAGE_PUSH) $(IMAGE_PUSH)
+	for i in $(ARCH_VERSIONS); do \
+		docker push $(IMAGE_PUSH)-$$i ; \
+		docker manifest create $(IMAGE_PUSH) -a $(IMAGE_PUSH)-$$i; \
+	done
+	docker manifest push $(IMAGE_PUSH) --purge
+
+images-push-staging-all:
+	docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION) $(STAGING_IMAGE):$(CUSTOM_VERSION)
+	for i in $(JDK_VERSIONS); do \
+		docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-$$i $(STAGING_IMAGE):$(CUSTOM_VERSION)-$$i; \
+		for j in $(ARCH_VERSIONS); do \
+			docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-$$i-$$j $(STAGING_IMAGE):$(CUSTOM_VERSION)-$$i-$$j; \
+		done \
+	done
 
 images-push-staging:
 	docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-amd64 $(STAGING_IMAGE):$(CUSTOM_VERSION)-amd64
@@ -521,9 +558,7 @@ cross-compile:
 	# be processed as a single argument by the cross compile script
 	./script/cross_compile.sh $(CUSTOM_VERSION) $(subst ","\",$(GOFLAGS))
 
-release: clean codegen set-version build-resources check-licenses images images-push cross-compile git-tag
-
-release-staging: clean codegen set-version check-licenses build-resources images-all images-push-staging cross-compile release-helm bundle-push-staging git-tag sbomgen
+release-staging: clean codegen set-version check-licenses build-resources images-all images-push-staging-all cross-compile release-helm bundle-push-staging git-tag sbomgen
 
 sbomgen:
 	cyclonedx-gomod mod -licenses -json -output sbom.json
@@ -532,13 +567,13 @@ sbomgen:
 images-nightly: clean codegen set-version build-resources images-all
 
 # Release artifacts
-release-nightly: cross-compile images-push
+release-nightly: cross-compile images-push-all
 
 release-helm:
 	./script/set_version.sh ${VERSION}
 	./script/release_helm.sh ${VERSION}
 
-.PHONY: do-build build build-kamel build-kamel-platform build-resources dep codegen images images-push images-push-staging image-build test check clean release cross-compile package-examples set-version git-tag check-licenses build-resources release-helm release-staging release-nightly get-staging-repo get-version
+.PHONY: do-build build build-kamel build-kamel-platform build-resources dep codegen images images-push image-build test check clean release cross-compile package-examples set-version git-tag check-licenses build-resources release-helm release-staging release-nightly get-staging-repo get-version
 .PHONY: kubectl kustomize operator-sdk opm
 
 kubectl:

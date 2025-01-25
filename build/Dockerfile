@@ -13,7 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM eclipse-temurin:17-jdk AS base
+ARG CK_BASE_IMAGE=eclipse-temurin:17-jdk
+
+FROM $CK_BASE_IMAGE AS base
 
 ARG IMAGE_ARCH
 
