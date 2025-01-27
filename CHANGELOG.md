@@ -1,24 +1,16 @@
 # Changelog
 
-## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...HEAD)
-
-**Closed issues:**
-
-- Test arm-64 github actions runners [\#6048](https://github.com/apache/camel-k/issues/6048)
-- Every component \(like the builder\) should use Java 21 as it is the current LTS version [\#5805](https://github.com/apache/camel-k/issues/5805)
-
-## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-01-25)
+## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-01-26)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
 
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-01-25)
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-01-26)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.5.1-nightly)
 
 **Closed issues:**
 
+- Test arm-64 github actions runners [\#6048](https://github.com/apache/camel-k/issues/6048)
 - Integration can't start as non-root if it was created wit Jib [\#6038](https://github.com/apache/camel-k/issues/6038)
 - Can't install Camel-K operator using a local maven repository. [\#6030](https://github.com/apache/camel-k/issues/6030)
 - Ingress Docs Misgenerated [\#6028](https://github.com/apache/camel-k/issues/6028)
@@ -55,6 +47,7 @@
 - Bump Golang version to 1.23 [\#5877](https://github.com/apache/camel-k/issues/5877)
 - Remove github.com/mitchellh/mapstructure dependency [\#5858](https://github.com/apache/camel-k/issues/5858)
 - Update platform properly in test [\#5852](https://github.com/apache/camel-k/issues/5852)
+- Every component \(like the builder\) should use Java 21 as it is the current LTS version [\#5805](https://github.com/apache/camel-k/issues/5805)
 - Move addons into trait [\#5787](https://github.com/apache/camel-k/issues/5787)
 - Deprecate Openshift specific features [\#5771](https://github.com/apache/camel-k/issues/5771)
 - \[features request\] add the hability to set Jib registryMirrors [\#5691](https://github.com/apache/camel-k/issues/5691)
