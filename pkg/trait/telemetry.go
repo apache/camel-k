@@ -20,6 +20,7 @@ package trait
 import (
 	"fmt"
 
+	"github.com/Masterminds/semver"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/trait/discovery"
@@ -130,11 +131,20 @@ func (t *telemetryTrait) Configure(e *Environment) (bool, *TraitCondition, error
 func (t *telemetryTrait) Apply(e *Environment) error {
 	util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityTelemetry)
 
-	// Hack for camel-k-runtime 3.15.0
-	if e.CamelCatalog.CamelCatalogSpec.Runtime.Provider.IsQuarkusBased() &&
-		e.CamelCatalog.CamelCatalogSpec.Runtime.Version == "3.15.0" {
-		t.setRuntimeProviderQuarkus315Properties(e)
-		return nil
+	if e.CamelCatalog.CamelCatalogSpec.Runtime.Provider.IsQuarkusBased() {
+		// Hack for camel-k-runtime >= 3.15.0
+		ck315, err := semver.NewVersion("3.15.0")
+		if err != nil {
+			return err
+		}
+		qv, err := semver.NewVersion(e.CamelCatalog.CamelCatalogSpec.Runtime.Version)
+		if err != nil {
+			return err
+		}
+		if qv.Compare(ck315) >= 0 {
+			t.setRuntimeProviderQuarkus315Properties(e)
+			return nil
+		}
 	}
 	if e.CamelCatalog.Runtime.Capabilities["telemetry"].RuntimeProperties != nil {
 		t.setCatalogConfiguration(e)
