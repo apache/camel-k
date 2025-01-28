@@ -1,0 +1,24 @@
+= Choose your JDK version
+
+Camel K requires a JDK to be able to build and properly run a Camel application. From version 2.6.0 onward, we are publishing multiple JDK containers which you can choose if you want to use a different JDK from the default provided.
+
+The list of available container images is published in (https://hub.docker.com/r/apache/camel-k/tags)[official Docker Apache Camel K page].
+
+[[camel-k-jdk-21]]
+== Install Camel K JDK 21 operator
+
+If you want to use a different container image instead of the default, you will need to edit your operator Deployment by replacing the default image with the one you're choosing. You can use the following script in order to change on the fly the value and install a Camel K JDK 21 based operator:
+
+```bash
+kustomize build github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v2.6.0 | sed 's#docker.io/apache/camel-k:2.6.0#docker.io/apache/camel-k:2.6.0-21-jdk#g' | kubectl apply -f - --server-side -n camel-k
+```
+
+During the build, you should see the version used in the Maven building log traces:
+
+```
+...
+camel-k-operator-578585fb59-9d987 camel-k-operator {"level":"info","ts":"2025-01-28T21:25:53Z","logger":"camel-k.maven.build","msg":"Java version: 21.0.5, vendor: Eclipse Adoptium, runtime: /opt/java/openjdk"}
+...
+```
+
+NOTE: the base image used for the Integrations will be a JDK 21 image as well.

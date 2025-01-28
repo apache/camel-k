@@ -1,5 +1,5 @@
 [[multi-architecture-props]]
-= Multi Architecture
+= Platform architecture
 
 Since version 2, Camel K is publishing an ARM64 architecture beside the default AMD64 architecture. You can build your particular architecture from source as well, following the guidelines in xref:contributing/local-development.adoc[Local development].
 
@@ -17,7 +17,7 @@ The logs should indicate the architecture at the start of the operator pod:
 {"level":"info","ts":"2023-12-19T16:40:31Z","logger":"camel-k.cmd","msg":"Camel K Operator Version: 2.1.0"}
 ----
 
-=== Example
+=== Run multi architecture Camel applications
 
 The operator will by default build integrations for the same platform it is running on. It is however also possible to explicitly define the set of target platforms integrations should be built for. You can use `builder.platforms` trait option to control this behavior.
 
