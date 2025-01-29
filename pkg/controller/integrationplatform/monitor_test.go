@@ -87,6 +87,7 @@ func TestMonitorReady(t *testing.T) {
 
 	assert.Equal(t, v1.IntegrationPlatformPhaseReady, answer.Status.Phase)
 	assert.Equal(t, corev1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionTypeRegistryAvailable).Status)
+	assert.Nil(t, answer.Status.GetCondition(v1.IntegrationPlatformConditionType("InsecureRegistryWarning")))
 	assert.Equal(t, "3.2.1", answer.Status.Build.RuntimeCoreVersion)
 }
 
@@ -254,4 +255,42 @@ func TestMonitorMissingCatalogError(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf("camel catalog %s not available, please review given runtime version",
 		defaults.DefaultRuntimeVersion), answer.Status.GetCondition(
 		v1.IntegrationPlatformConditionCamelCatalogAvailable).Message)
+}
+
+func TestMonitorWarningInsecureRegistry(t *testing.T) {
+	catalog := v1.NewCamelCatalog("ns", fmt.Sprintf("camel-catalog-%s", "1.2.3"))
+	catalog.Spec.Runtime.Version = "1.2.3"
+	catalog.Spec.Runtime.Provider = v1.RuntimeProviderQuarkus
+	catalog.Spec.Runtime.Metadata = map[string]string{
+		"camel.version": "3.2.1",
+	}
+	ip := v1.IntegrationPlatform{}
+	ip.Namespace = "ns"
+	ip.Name = "ck"
+	ip.Spec.Build.Registry.Address = "1.2.3.4"
+	ip.Spec.Build.Registry.Insecure = true
+	ip.Spec.Build.RuntimeVersion = "1.2.3"
+	ip.Spec.Build.RuntimeProvider = v1.RuntimeProviderQuarkus
+	ip.Status.Build.RuntimeVersion = "1.2.3"
+	ip.Status.Build.RuntimeProvider = v1.RuntimeProviderQuarkus
+	ip.Status.Build.Registry.Address = "1.2.3.4"
+	ip.Status.Build.Registry.Insecure = true
+	ip.Status.Phase = v1.IntegrationPlatformPhaseReady
+	c, err := internal.NewFakeClient(&ip, &catalog)
+	require.NoError(t, err)
+
+	action := NewMonitorAction()
+	action.InjectLogger(log.Log)
+	action.InjectClient(c)
+
+	answer, err := action.Handle(context.TODO(), &ip)
+	require.NoError(t, err)
+	assert.NotNil(t, answer)
+
+	assert.Equal(t, v1.IntegrationPlatformPhaseReady, answer.Status.Phase)
+	assert.Equal(t, corev1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionTypeRegistryAvailable).Status)
+	assert.Equal(t, corev1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionType("InsecureRegistryWarning")).Status)
+	assert.Equal(t, "Registry is insecure. This setup should not be used in a production environment.",
+		answer.Status.GetCondition(
+			v1.IntegrationPlatformConditionType("InsecureRegistryWarning")).Message)
 }

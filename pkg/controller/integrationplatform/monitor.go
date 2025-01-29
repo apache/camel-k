@@ -83,6 +83,7 @@ func (action *monitorAction) Handle(ctx context.Context, platform *v1.Integratio
 	if err != nil {
 		return platform, err
 	}
+	//nolint: nestif
 	if isOpenshift && platform.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyS2I {
 		platform.Status.SetCondition(
 			v1.IntegrationPlatformConditionTypeRegistryAvailable,
@@ -110,6 +111,17 @@ func (action *monitorAction) Handle(ctx context.Context, platform *v1.Integratio
 				corev1.ConditionTrue,
 				v1.IntegrationPlatformConditionTypeRegistryAvailableReason,
 				fmt.Sprintf("registry available at %s", platform.Status.Build.Registry.Address))
+			// Warn if insecure registry
+			if platform.Status.Build.Registry.Insecure {
+				platform.Status.SetCondition(
+					v1.IntegrationPlatformConditionType("InsecureRegistryWarning"),
+					corev1.ConditionTrue,
+					"InsecureRegistryWarningReason",
+					"Registry is insecure. This setup should not be used in a production environment.")
+				action.L.Infof(
+					"WARN: provided container registry is insecure. This setup should not be used in a production environment.",
+				)
+			}
 		}
 	}
 	action.checkTraitAnnotationsDeprecatedNotice(platform)
