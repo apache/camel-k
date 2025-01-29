@@ -68,7 +68,7 @@ The following configuration options are available:
 [source,console]
 $ kamel run -t telemetry.enable=true ...
 
-* To define a specific deployed OTLP gRPC reciever: 
+* To define a specific deployed OTLP gRPC receiver:
 +
 [source,console]
 $ kamel run -t telemetry.enable=true -t telemetry.endpoint=http://instance-collector:4317 ...
