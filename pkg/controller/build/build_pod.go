@@ -24,6 +24,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -108,16 +109,15 @@ func newBuildPod(ctx context.Context, client client.Client, build *v1.Build) *co
 }
 
 func configureResources(taskName string, build *v1.Build, container *corev1.Container) {
-	conf := build.TaskConfiguration(taskName)
-	requestsList := container.Resources.Requests
-	limitsList := container.Resources.Limits
 	var err error
-	if requestsList == nil {
-		requestsList = make(corev1.ResourceList)
+	requestsList := corev1.ResourceList{}
+	// Default limit to prevent resource Node starvation
+	limitsList := corev1.ResourceList{
+		corev1.ResourceCPU:    resource.MustParse("500m"),
+		corev1.ResourceMemory: resource.MustParse("1Gi"),
 	}
-	if limitsList == nil {
-		limitsList = make(corev1.ResourceList)
-	}
+
+	conf := build.TaskConfiguration(taskName)
 
 	requestsList, err = kubernetes.ConfigureResource(conf.RequestCPU, requestsList, corev1.ResourceCPU)
 	if err != nil {
