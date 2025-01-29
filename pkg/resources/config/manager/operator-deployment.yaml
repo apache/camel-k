@@ -83,8 +83,13 @@ spec:
               memory: "2Gi"
               cpu: "500m"
             limits:
-              memory: "8Gi"
-              cpu: "2"
+            - default:
+                memory: "8Gi"
+                cpu: "2"
+              defaultRequest:
+                memory: "512Mi"
+                cpu: "300m"
+              type:container
           securityContext:
             runAsNonRoot: true
             seccompProfile:
