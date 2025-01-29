@@ -185,9 +185,6 @@ All options that are available for the `kamel run` command can be specified as m
 |build-property
 |Add a build time property or properties file (syntax: _[my-key=my-value\|file:/path/to/my-conf.properties]_
 
-|config
-|Add a runtime configuration from a Configmap, Secret or file (syntax: _[configmap\|secret\|file]:name[/key]_, where name represents the local file path or the configmap/secret name and key optionally represents the configmap/secret key to be filtered)
-
 |dependency
 |An external library that should be included, e.g. for Maven dependencies `dependency=mvn:org.my:app:1.0`
 
@@ -210,7 +207,7 @@ All options that are available for the `kamel run` command can be specified as m
 |Add a runtime property or properties file (syntax: _[my-key=my-value\|file:/path/to/my-conf.properties]_)
 
 |resource
-|Add a runtime resource from a Configmap, Secret or file (syntax: _[configmap\|secret\|file]:name[/key][@path]_, where name represents the local file path or the configmap/secret name, key optionally represents the configmap/secret key to be filtered and path represents the destination path)
+|Add a runtime resource from a Configmap or Secret (syntax: _[configmap\|secret]:name[/key][@path]_, where name represents the configmap/secret name, key optionally represents the configmap/secret key to be filtered and path represents the destination path)
 
 |trait
 |Configure a trait, e.g. `trait=service.enabled=false`
