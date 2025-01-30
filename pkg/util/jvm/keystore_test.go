@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -38,10 +39,12 @@ func TestGenerateKeystore(t *testing.T) {
 	data = [][]byte{{0}, {1}}
 	err = GenerateKeystore(ctx, "", "/tmp/keystore", NewKeystorePassword(), data)
 	require.Error(t, err)
+	assert.Equal(t, "keytool error: java.io.IOException: keystore password was incorrect: exit status 1", err.Error())
 
 	// Incorrect password format
 	err = GenerateKeystore(ctx, "", "/tmp/keystore", "", data)
 	require.Error(t, err)
+	assert.Equal(t, "Illegal option:  /tmp/keystore: exit status 1", err.Error())
 
 	testFileExists, _ := util.FileExists("/tmp/keystore")
 	if testFileExists {

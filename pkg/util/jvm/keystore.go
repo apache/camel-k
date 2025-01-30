@@ -37,8 +37,8 @@ const (
 var (
 	logger = log.WithName("keytool")
 
-	loggerInfo  = func(s string) string { logger.Info(s); return "" }
-	loggerError = func(s string) string { logger.Error(nil, s); return "" }
+	loggerInfo  = func(s string) string { logger.Info(s); return s }
+	loggerError = func(s string) string { logger.Error(nil, s); return s }
 )
 
 func GenerateKeystore(ctx context.Context, keystoreDir, keystoreName, keystorePass string, data [][]byte) error {
@@ -49,7 +49,7 @@ func GenerateKeystore(ctx context.Context, keystoreDir, keystoreName, keystorePa
 		cmd.Stdin = bytes.NewReader(data)
 		// keytool logs info messages to stderr, as stdout is used to output results,
 		// otherwise it logs error messages to stdout.
-		err := util.RunAndLog(ctx, cmd, loggerError, loggerInfo)
+		err := util.RunAndLog(ctx, cmd, loggerInfo, loggerError)
 		if err != nil {
 			return err
 		}
@@ -66,7 +66,7 @@ func GenerateKeystore(ctx context.Context, keystoreDir, keystoreName, keystorePa
 		cmd.Dir = keystoreDir
 		// keytool logs info messages to stderr, as stdout is used to output results,
 		// otherwise it logs error messages to stdout.
-		err := util.RunAndLog(ctx, cmd, loggerError, loggerInfo)
+		err := util.RunAndLog(ctx, cmd, loggerInfo, loggerError)
 		if err != nil {
 			return err
 		}
