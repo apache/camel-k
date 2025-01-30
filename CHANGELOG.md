@@ -1,12 +1,20 @@
 # Changelog
 
-## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-01-28)
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...HEAD)
 
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-01-28)
+**Closed issues:**
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.5.1-nightly)
+- pipe  and integration creation based on YAML file fails ,  [\#5963](https://github.com/apache/camel-k/issues/5963)
+
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-01-29)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...v2.5.1-nightly)
+
+## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-01-29)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.6.0-nightly)
 
 **Closed issues:**
 
@@ -17,6 +25,7 @@
 - Quarkus native is not yet using native source mode [\#6021](https://github.com/apache/camel-k/issues/6021)
 - Prometheus PodMonitor for Knative is incorrectly generated [\#6014](https://github.com/apache/camel-k/issues/6014)
 - Error build example integration - github.com/apache/camel-k/v2/pkg/util/log.Logger.Errorf [\#6013](https://github.com/apache/camel-k/issues/6013)
+- Telemetry addon configuration not working [\#6002](https://github.com/apache/camel-k/issues/6002)
 - Camel Quarkus \(plain\) runtime usage [\#5999](https://github.com/apache/camel-k/issues/5999)
 - `kamel promote` GitOps [\#5998](https://github.com/apache/camel-k/issues/5998)
 - Don't test github actions checks but build [\#5992](https://github.com/apache/camel-k/issues/5992)
