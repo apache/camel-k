@@ -50,8 +50,8 @@ const (
 	kamelVersionAnnotation = "camel.apache.org/version"
 )
 
-// installKameletCatalog installs the version Apache Kamelet Catalog into the specified namespace. It returns the number of Kamelets installed and errored
-// if successful.
+// installKameletCatalog installs the version Apache Kamelet Catalog into the specified namespace.
+// It returns the number of Kamelets installed and errored if successful.
 func installKameletCatalog(ctx context.Context, c client.Client, platform *v1.IntegrationPlatform, version string) (int, int, error) {
 	// Prepare proper privileges for Kamelets installed globally
 	if err := prepareKameletsPermissions(ctx, c, platform.Namespace); err != nil {
