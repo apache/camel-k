@@ -6,11 +6,15 @@
 
 **Closed issues:**
 
-- pipe  and integration creation based on YAML file fails ,  [\#5963](https://github.com/apache/camel-k/issues/5963)
+- Report usage of insecure registry in IntegrationPlatform conditions [\#5809](https://github.com/apache/camel-k/issues/5809)
 
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-01-29)
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-01-30)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...v2.5.1-nightly)
+
+**Closed issues:**
+
+- pipe  and integration creation based on YAML file fails ,  [\#5963](https://github.com/apache/camel-k/issues/5963)
 
 ## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-01-29)
 
