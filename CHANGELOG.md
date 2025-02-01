@@ -1,24 +1,12 @@
 # Changelog
 
-## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-01-31)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...HEAD)
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
 
-**Closed issues:**
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-01-31)
 
-- Report usage of insecure registry in IntegrationPlatform conditions [\#5809](https://github.com/apache/camel-k/issues/5809)
-
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-01-30)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...v2.5.1-nightly)
-
-**Closed issues:**
-
-- pipe  and integration creation based on YAML file fails ,  [\#5963](https://github.com/apache/camel-k/issues/5963)
-
-## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-01-29)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.6.0-nightly)
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.5.1-nightly)
 
 **Closed issues:**
 
@@ -37,6 +25,7 @@
 - Quarkus runtime deprecated configuration [\#5987](https://github.com/apache/camel-k/issues/5987)
 - Ingress Trait to support an array on the path [\#5981](https://github.com/apache/camel-k/issues/5981)
 - Knative Service is not created if "from" parameters are declared in the parameters section [\#5980](https://github.com/apache/camel-k/issues/5980)
+- pipe  and integration creation based on YAML file fails ,  [\#5963](https://github.com/apache/camel-k/issues/5963)
 - Change Kamelet Distribution - provide your own catalog method [\#5958](https://github.com/apache/camel-k/issues/5958)
 - KameletBinding panics when missing binding type [\#5953](https://github.com/apache/camel-k/issues/5953)
 - Installation page should report the version [\#5951](https://github.com/apache/camel-k/issues/5951)
@@ -60,6 +49,7 @@
 - Bump Golang version to 1.23 [\#5877](https://github.com/apache/camel-k/issues/5877)
 - Remove github.com/mitchellh/mapstructure dependency [\#5858](https://github.com/apache/camel-k/issues/5858)
 - Update platform properly in test [\#5852](https://github.com/apache/camel-k/issues/5852)
+- Report usage of insecure registry in IntegrationPlatform conditions [\#5809](https://github.com/apache/camel-k/issues/5809)
 - Every component \(like the builder\) should use Java 21 as it is the current LTS version [\#5805](https://github.com/apache/camel-k/issues/5805)
 - Move addons into trait [\#5787](https://github.com/apache/camel-k/issues/5787)
 - Deprecate Openshift specific features [\#5771](https://github.com/apache/camel-k/issues/5771)
