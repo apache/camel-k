@@ -107,8 +107,15 @@ func newBuildPod(ctx context.Context, client client.Client, build *v1.Build) *co
 	return pod
 }
 
-func configureResources(taskName string, build *v1.Build, container *corev1.Container) {
+func configureTaskResources(taskName string, build *v1.Build, container *corev1.Container) {
 	conf := build.TaskConfiguration(taskName)
+	configureResources(taskName, build, container,
+		conf.RequestCPU, conf.LimitCPU, conf.RequestMemory, conf.LimitMemory)
+}
+
+func configureResources(
+	taskName string, build *v1.Build, container *corev1.Container,
+	requestCPU, limitCPU, requestMemory, limitMemory string) {
 	requestsList := container.Resources.Requests
 	limitsList := container.Resources.Limits
 	var err error
@@ -119,25 +126,25 @@ func configureResources(taskName string, build *v1.Build, container *corev1.Cont
 		limitsList = make(corev1.ResourceList)
 	}
 
-	requestsList, err = kubernetes.ConfigureResource(conf.RequestCPU, requestsList, corev1.ResourceCPU)
+	requestsList, err = kubernetes.ConfigureResource(requestCPU, requestsList, corev1.ResourceCPU)
 	if err != nil {
 		Log.WithValues("request-namespace", build.Namespace, "request-name", build.Name).
-			Errorf(err, "Could not configure builder resource cpu, leaving default value")
+			Errorf(err, "Could not configure %s resource cpu, leaving default value", taskName)
 	}
-	requestsList, err = kubernetes.ConfigureResource(conf.RequestMemory, requestsList, corev1.ResourceMemory)
+	requestsList, err = kubernetes.ConfigureResource(requestMemory, requestsList, corev1.ResourceMemory)
 	if err != nil {
 		Log.WithValues("request-namespace", build.Namespace, "request-name", build.Name).
-			Errorf(err, "Could not configure builder resource memory, leaving default value")
+			Errorf(err, "Could not configure %s resource memory, leaving default value", taskName)
 	}
-	limitsList, err = kubernetes.ConfigureResource(conf.LimitCPU, limitsList, corev1.ResourceCPU)
+	limitsList, err = kubernetes.ConfigureResource(limitCPU, limitsList, corev1.ResourceCPU)
 	if err != nil {
 		Log.WithValues("request-namespace", build.Namespace, "request-name", build.Name).
-			Errorf(err, "Could not configure builder limit cpu, leaving default value")
+			Errorf(err, "Could not configure %s limit cpu, leaving default value", taskName)
 	}
-	limitsList, err = kubernetes.ConfigureResource(conf.LimitMemory, limitsList, corev1.ResourceMemory)
+	limitsList, err = kubernetes.ConfigureResource(limitMemory, limitsList, corev1.ResourceMemory)
 	if err != nil {
 		Log.WithValues("request-namespace", build.Namespace, "request-name", build.Name).
-			Errorf(err, "Could not configure builder limit memory, leaving default value")
+			Errorf(err, "Could not configure %s limit memory, leaving default value", taskName)
 	}
 
 	container.Resources.Requests = requestsList
@@ -228,7 +235,12 @@ func addBuildTaskToPod(ctx context.Context, client client.Client, build *v1.Buil
 		}
 	}
 
-	configureResources(taskName, build, &container)
+	// Default resources for a build. We set a high upper bound limit
+	// in order to let any heavy Maven build to run without problems.
+	// If the process cannot complete, then the user should increase these limits accordingly.
+	configureResources(taskName, build, &container, "500m", "1", "512Mi", "4Gi")
+	// possible user based resource configuration
+	configureTaskResources(taskName, build, &container)
 	addContainerToPod(build, container, pod)
 }
 
@@ -249,7 +261,10 @@ func addCustomTaskToPod(build *v1.Build, task *v1.UserTask, pod *corev1.Pod) {
 		}
 	}
 
-	configureResources(task.Name, build, &container)
+	// Default resources for a custom task. We assume some
+	// lighter process which won't require too much resources.
+	configureResources(task.Name, build, &container, "250m", "500m", "256Mi", "1Gi")
+	configureTaskResources(task.Name, build, &container)
 	addContainerToPod(build, container, pod)
 }
 

@@ -124,6 +124,7 @@ func (t *builderTrait) configureForQuarkus(trait Trait, e *Environment, conditio
 		return condition, err
 	}
 
+	//nolint: nestif
 	if ok && (isNativeIntegration || isNativeKit) {
 		// TODO expect maven repository in local repo (need to change builder pod accordingly!)
 		command := builder.QuarkusRuntimeSupport(e.CamelCatalog.GetCamelQuarkusVersion()).BuildCommands()
@@ -136,7 +137,9 @@ func (t *builderTrait) configureForQuarkus(trait Trait, e *Environment, conditio
 		// it should be performed as the last custom task
 		t.Tasks = append(t.Tasks, fmt.Sprintf(`quarkus-native;%s;/bin/bash -c "%s"`, nativeBuilderImage, command))
 		// Force the build to run in a separate Pod and strictly sequential
-		m := "This is a Quarkus native build: setting build configuration with build Pod strategy and native container sensible resources (if not specified by the user). Make sure your cluster can handle it."
+		m := "This is a Quarkus native build: setting default build configuration with build Pod strategy and " +
+			"native container sensible resources (max 4 cpus, 16 Gi memory, unless specified by the user). " +
+			"Make sure your cluster can handle it."
 		t.L.Info(m)
 
 		condition = newOrAppend(condition, m)
@@ -149,11 +152,18 @@ func (t *builderTrait) configureForQuarkus(trait Trait, e *Environment, conditio
 		if !existsTaskRequest(t.TasksRequestMemory, "quarkus-native") {
 			t.TasksRequestMemory = append(t.TasksRequestMemory, "quarkus-native:4Gi")
 		}
+		if !existsTaskRequest(t.TasksLimitCPU, "quarkus-native") {
+			t.TasksLimitCPU = append(t.TasksLimitCPU, "quarkus-native:4000m")
+		}
+		if !existsTaskRequest(t.TasksLimitMemory, "quarkus-native") {
+			t.TasksLimitMemory = append(t.TasksLimitMemory, "quarkus-native:16Gi")
+		}
 	}
 
 	return condition, nil
 }
 
+//nolint:unparam
 func existsTaskRequest(tasks []string, taskName string) bool {
 	for _, task := range tasks {
 		ts := strings.Split(task, ":")

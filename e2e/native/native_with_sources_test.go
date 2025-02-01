@@ -41,7 +41,8 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 
 		t.Run("java native support", func(t *testing.T) {
 			name := javaNativeName
-			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "quarkus.build-mode=native",
+				"-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi").Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationPod(t, ctx, ns, name), TestTimeoutShort).
@@ -52,7 +53,8 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 
 			t.Run("java native same should not rebuild", func(t *testing.T) {
 				name := javaNativeCloneName
-				g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi").Execute()).To(Succeed())
+				g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "quarkus.build-mode=native",
+					"-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi").Execute()).To(Succeed())
 
 				// This one should run quickly as it suppose to reuse an IntegrationKit
 				g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
@@ -66,7 +68,8 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 
 			t.Run("java native should rebuild", func(t *testing.T) {
 				name := javaNative2Name
-				g.Expect(KamelRun(t, ctx, ns, "files/Java2.java", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi").Execute()).To(Succeed())
+				g.Expect(KamelRun(t, ctx, ns, "files/Java2.java", "--name", name, "-t", "quarkus.build-mode=native",
+					"-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi").Execute()).To(Succeed())
 
 				g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
 				g.Eventually(IntegrationPod(t, ctx, ns, name), TestTimeoutShort).
