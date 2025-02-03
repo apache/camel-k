@@ -1,20 +1,28 @@
 # Changelog
 
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...HEAD)
+
+**Closed issues:**
+
+- Set default resource for builder Pods [\#5811](https://github.com/apache/camel-k/issues/5811)
+
+## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-02-02)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
+
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-02-02)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1...v2.5.1-nightly)
+
 ## [v2.5.1](https://github.com/apache/camel-k/tree/v2.5.1) (2025-02-01)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/camel-k-crds-2.5.1...v2.5.1)
 
 ## [camel-k-crds-2.5.1](https://github.com/apache/camel-k/tree/camel-k-crds-2.5.1) (2025-02-01)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...camel-k-crds-2.5.1)
-
-## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-02-01)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
-
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-02-01)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.5.1-nightly)
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...camel-k-crds-2.5.1)
 
 **Closed issues:**
 
