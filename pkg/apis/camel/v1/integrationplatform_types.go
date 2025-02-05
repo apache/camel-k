@@ -207,6 +207,8 @@ const (
 	IntegrationPlatformConditionCamelCatalogAvailable IntegrationPlatformConditionType = "CamelCatalogAvailable"
 	// IntegrationPlatformConditionKameletCatalogAvailable is the condition for the availability of a Kamelet catalog.
 	IntegrationPlatformConditionKameletCatalogAvailable IntegrationPlatformConditionType = "KameletCatalogAvailable"
+	// IntegrationPlatformConditionMavenSettingsAvailable is the condition for the availability of a Maven settings configuration.
+	IntegrationPlatformConditionMavenSettingsAvailable IntegrationPlatformConditionType = "MavenSettingsAvailable"
 
 	// IntegrationPlatformConditionCreatedReason represents the reason that the IntegrationPlatform is created.
 	IntegrationPlatformConditionCreatedReason = "IntegrationPlatformCreated"
