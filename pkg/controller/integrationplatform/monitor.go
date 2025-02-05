@@ -125,6 +125,7 @@ func (action *monitorAction) Handle(ctx context.Context, platform *v1.Integratio
 		}
 	}
 	action.checkTraitAnnotationsDeprecatedNotice(platform)
+	action.checkMavenSettings(platform)
 	if err = action.addPlainQuarkusCatalog(ctx, catalog); err != nil {
 		// Only warn the user, we don't want to fail
 		action.L.Infof(
@@ -154,6 +155,30 @@ func (action *monitorAction) checkTraitAnnotationsDeprecatedNotice(platform *v1.
 				return
 			}
 		}
+	}
+}
+
+func (action *monitorAction) checkMavenSettings(platform *v1.IntegrationPlatform) {
+	if platform.Status.Build.Maven.Settings.ConfigMapKeyRef != nil ||
+		platform.Status.Build.Maven.Settings.SecretKeyRef != nil {
+		platform.Status.SetCondition(
+			v1.IntegrationPlatformConditionMavenSettingsAvailable,
+			corev1.ConditionTrue,
+			"MavenSettingsAvailable",
+			"Maven settings are available.",
+		)
+	} else {
+		platform.Status.SetCondition(
+			v1.IntegrationPlatformConditionMavenSettingsAvailable,
+			corev1.ConditionFalse,
+			"MavenSettingsAvailable",
+			"Maven settings are missing. You need to provide at least a Maven proxy configuration for performance reasons.",
+		)
+		action.L.Infof(
+			"WARN: Maven settings are missing for platform %s. "+
+				"You need to provide at least a Maven proxy configuration for performance reasons.",
+			platform.Name,
+		)
 	}
 }
 

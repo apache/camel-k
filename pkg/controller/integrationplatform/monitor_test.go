@@ -70,6 +70,10 @@ func TestMonitorReady(t *testing.T) {
 	ip.Spec.Build.Registry.Address = "1.2.3.4"
 	ip.Spec.Build.RuntimeVersion = "1.2.3"
 	ip.Spec.Build.RuntimeProvider = v1.RuntimeProviderQuarkus
+	ip.Spec.Build.Maven.Settings.ConfigMapKeyRef = &corev1.ConfigMapKeySelector{
+		Key:                  "k",
+		LocalObjectReference: corev1.LocalObjectReference{Name: "v"},
+	}
 	ip.Status.Build.RuntimeVersion = "1.2.3"
 	ip.Status.Build.RuntimeProvider = v1.RuntimeProviderQuarkus
 	ip.Status.Build.Registry.Address = "1.2.3.4"
@@ -86,8 +90,11 @@ func TestMonitorReady(t *testing.T) {
 	assert.NotNil(t, answer)
 
 	assert.Equal(t, v1.IntegrationPlatformPhaseReady, answer.Status.Phase)
-	assert.Equal(t, corev1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionTypeRegistryAvailable).Status)
+	assert.Equal(t, corev1.ConditionTrue,
+		answer.Status.GetCondition(v1.IntegrationPlatformConditionTypeRegistryAvailable).Status)
 	assert.Nil(t, answer.Status.GetCondition(v1.IntegrationPlatformConditionType("InsecureRegistryWarning")))
+	assert.Equal(t, corev1.ConditionTrue,
+		answer.Status.GetCondition(v1.IntegrationPlatformConditionMavenSettingsAvailable).Status)
 	assert.Equal(t, "3.2.1", answer.Status.Build.RuntimeCoreVersion)
 }
 
@@ -142,6 +149,8 @@ func TestMonitorDriftDefault(t *testing.T) {
 	assert.NotNil(t, answer)
 
 	assert.Equal(t, v1.IntegrationPlatformPhaseReady, answer.Status.Phase)
+	assert.Equal(t, corev1.ConditionFalse,
+		answer.Status.GetCondition(v1.IntegrationPlatformConditionMavenSettingsAvailable).Status)
 	assert.Equal(t, "3.2.1", answer.Status.Build.RuntimeCoreVersion)
 }
 
