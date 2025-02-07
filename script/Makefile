@@ -26,7 +26,7 @@ LOCALBIN := $(PROJECT_PATH)/bin
 VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION ?= 2.6.0-SNAPSHOT
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
-LAST_RELEASED_VERSION ?= 2.5.0
+LAST_RELEASED_VERSION ?= 2.5.1
 DEFAULT_RUNTIME_VERSION := 3.15.2
 # Kubernetes tooling
 CONTROLLER_GEN_VERSION := v0.15.0
@@ -169,8 +169,6 @@ update-default-camel:
 bump-replace:
 	@# Bump version and replace with the variables provided by the user
 	@sed -i 's/^VERSION ?= .*$//VERSION ?= $(VERSION)/' ./script/Makefile
-	@mvn -f java/crds/pom.xml versions:set -DgenerateBackupPoms=false -DnewVersion=$(VERSION)
-	@mvn -f java/maven-logging/pom.xml versions:set -DgenerateBackupPoms=false -DnewVersion=$(VERSION)
 	@sed -i 's/^LAST_RELEASED_VERSION ?= .*$//LAST_RELEASED_VERSION ?= $(LAST_RELEASED_VERSION)/' ./script/Makefile
 
 bump: bump-replace codegen bundle

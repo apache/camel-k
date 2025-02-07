@@ -19,9 +19,9 @@ kind: Kustomization
 
 # Labels to add to all resources and selectors.
 labels:
-  - pairs:
-      app: camel-k
-    includeSelectors: true
+- includeSelectors: true
+  pairs:
+    app: camel-k
 
 resources:
 - ../manager
