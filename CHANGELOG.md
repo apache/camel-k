@@ -1,15 +1,17 @@
 # Changelog
 
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-02-05)
+## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-02-06)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...v2.5.1-nightly)
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
 
-## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-02-04)
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-02-06)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1...v2.6.0-nightly)
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1...v2.5.1-nightly)
 
 **Closed issues:**
 
+- Test arm-64 github actions runners [\#6049](https://github.com/apache/camel-k/issues/6049)
+- Move Maven repository settings directly into IntegrationPlatform [\#5876](https://github.com/apache/camel-k/issues/5876)
 - Set default resource for builder Pods [\#5811](https://github.com/apache/camel-k/issues/5811)
 
 ## [v2.5.1](https://github.com/apache/camel-k/tree/v2.5.1) (2025-02-01)
