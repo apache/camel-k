@@ -1,10 +1,18 @@
 # Changelog
 
-## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-02-06)
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...HEAD)
+
+**Closed issues:**
+
+- Release 2.5.1 [\#5956](https://github.com/apache/camel-k/issues/5956)
+
+## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2025-02-07)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
 
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-02-06)
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2025-02-07)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1...v2.5.1-nightly)
 
