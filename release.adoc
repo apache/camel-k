@@ -84,7 +84,7 @@ Camel K Client 2.0.0
 If the version retrieved is the one expected you can run an installation procedure:
 
 ```
-kustomize build github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v<version> | sed 's#apache/camel-k#camelk/camel-k#g'
+kustomize build github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v<version> | sed 's#apache/camel-k#camelk/camel-k#g' | kubectl apply -f -
 ```
 
 Make some test and if all is in order, you can upload the sources and CLIs to the dist/dev repository in ASF the staged artifacts, in order to link them in the release vote communication.
