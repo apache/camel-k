@@ -494,6 +494,12 @@ images-push-all:
 		make IMAGE_PUSH=$(CUSTOM_IMAGE):$(CUSTOM_VERSION)-$$i images-push ; \
 	done
 
+images-push-staging-all:
+	make IMAGE_PUSH=$(STAGING_IMAGE):$(CUSTOM_VERSION) images-push
+	for i in $(JDK_VERSIONS); do \
+		make IMAGE_PUSH=$(STAGING_IMAGE):$(CUSTOM_VERSION)-$$i images-push ; \
+	done
+
 images-push:
 	docker push $(IMAGE_PUSH)
 	docker manifest create $(IMAGE_PUSH) $(IMAGE_PUSH)
@@ -503,8 +509,11 @@ images-push:
 	done
 	docker manifest push $(IMAGE_PUSH) --purge
 
-images-push-staging-all:
+images-tag-staging-all:
 	docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION) $(STAGING_IMAGE):$(CUSTOM_VERSION)
+	for j in $(ARCH_VERSIONS); do \
+		docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-$$j $(STAGING_IMAGE):$(CUSTOM_VERSION)-$$j; \
+	done; \
 	for i in $(JDK_VERSIONS); do \
 		docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-$$i $(STAGING_IMAGE):$(CUSTOM_VERSION)-$$i; \
 		for j in $(ARCH_VERSIONS); do \
@@ -556,7 +565,7 @@ cross-compile:
 	# be processed as a single argument by the cross compile script
 	./script/cross_compile.sh $(CUSTOM_VERSION) $(subst ","\",$(GOFLAGS))
 
-release-staging: clean codegen set-version check-licenses build-resources images-all images-push-staging-all cross-compile release-helm bundle-push-staging git-tag sbomgen
+release-staging: clean codegen set-version check-licenses build-resources images-all images-tag-staging-all images-push-staging-all cross-compile release-helm bundle-push-staging git-tag sbomgen
 
 sbomgen:
 	cyclonedx-gomod mod -licenses -json -output sbom.json
