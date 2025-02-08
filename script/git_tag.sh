@@ -28,14 +28,14 @@ target_tag=v$target_version
 target_staging=staging-$target_tag
 target_remote=$2
 
-git add *
-git commit -m "chore(release): preparing $target_version"
-git push
+git add helm docs || true
+git commit -m "chore(release): Helm chart for $target_version"
+git push -f
 
 git branch -D ${target_staging} || true
 git checkout -b ${target_staging}
-git add * || true
-git commit -a -m "Release ${target_version}" || true
+git add pkg/resources script || true
+git commit -m "chore(release): preparing for tag v$target_version" || true
 
 git tag --force ${target_tag} ${target_staging}
 git push --force ${target_remote} ${target_tag}
