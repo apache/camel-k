@@ -30,11 +30,11 @@ target_remote=$2
 
 git add helm docs || true
 git commit -m "chore(release): Helm chart for $target_version"
-git push -f
+git push
 
 git branch -D ${target_staging} || true
 git checkout -b ${target_staging}
-git add pkg/resources script || true
+git add pkg/resources pkg/util script || true
 git commit -m "chore(release): preparing for tag v$target_version" || true
 
 git tag --force ${target_tag} ${target_staging}
