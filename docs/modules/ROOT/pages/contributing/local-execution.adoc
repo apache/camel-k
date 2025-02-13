@@ -47,7 +47,7 @@ IMPORTANT: make sure no other Camel K Operators are watching this namespace, nei
 [[local-minikube]]
 == Local operator and local cluster
 
-If you want to run a local operator togheter with ``Minikube`` you will need an additional step in order to let the local operator push images in the local registry. We need to expose the local registry as described in https://minikube.sigs.k8s.io/docs/handbook/registry/#docker-on-windows[this procedure]:
+If you want to run a local operator together with ``Minikube`` you will need an additional step in order to let the local operator push images in the local registry. We need to expose the local registry as described in https://minikube.sigs.k8s.io/docs/handbook/registry/#docker-on-windows[this procedure]:
 
 Enable the addon registry (this should be already in place):
 ----
