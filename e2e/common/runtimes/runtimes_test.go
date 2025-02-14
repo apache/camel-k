@@ -24,6 +24,8 @@ package common
 
 import (
 	"context"
+	"runtime"
+	"strings"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -35,6 +37,10 @@ import (
 )
 
 func TestSelfManagedBuildIntegrations(t *testing.T) {
+	if !isAmd() {
+		t.Skip("This test can only run in an AMD based architecture.")
+	}
+
 	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		var cmData = make(map[string]string)
@@ -71,4 +77,8 @@ func TestSelfManagedBuildIntegrations(t *testing.T) {
 			g.Eventually(IntegrationLogs(t, ctx, ns, itName), TestTimeoutShort).Should(ContainSubstring("powered by Quarkus"))
 		})
 	})
+}
+
+func isAmd() bool {
+	return strings.Contains(runtime.GOARCH, "amd")
 }
