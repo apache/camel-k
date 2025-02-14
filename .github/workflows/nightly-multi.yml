@@ -51,9 +51,12 @@ jobs:
     - name: Install operator
       shell: bash
       run: |
+        THIS_VERSION="$(make get-version)"
+        VERSION="$(make get-version | sed s/-SNAPSHOT//)-nightly"
+        sed "s#apache/camel-k:$THIS_VERSION#testcamelk/camel-k:$VERSION#g" install/base/config/manager/operator-deployment.yaml
         kubectl create ns camel-k
         make install-k8s-global
-        kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=180s
+        kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=120s
 
     - name: Run test
       shell: bash
