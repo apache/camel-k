@@ -175,7 +175,7 @@ The https://github.com/redhat-openshift-ecosystem/community-operators-prod/[Embe
 You can create the bundle and prepare the supported OLM environments:
 
 ```
-make bundle
+VERSION=<version> make bundle
 ./script/prepare-operators.sh <version> <github-userid>
 ```
 
