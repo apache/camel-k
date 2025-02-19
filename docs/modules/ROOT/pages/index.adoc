@@ -8,7 +8,7 @@ This version ({page-component-display-version}) of {page-component-title} depend
 ** xref:{camel-quarkus-docs-version}@camel-quarkus::index.adoc[] at version {camel-quarkus-version}.
 ** xref:{camel-docs-version}@components::index.adoc[Camel] at version {camel-version}
 ** https://quarkus.io[Quarkus] at version {quarkus-version}
-* xref:{camel-kamelets-docs-version}@camel-kamelets::index.adoc[] at version {camel-kamelets-version}
+* Kamelet catalog at version {camel-kamelets-version}
 
 ifdef::lts[This is a long term service release.]
 ifndef::lts[]
@@ -68,7 +68,7 @@ From Camel K version 2 onward you will be able to use any Camel K Runtime. Each 
 |===
 
 //cannot use top level index.adoc as the page with the query is always omitted.
-indexTable::[version="*",relative="running/running.adoc",cellformats="util.ckRef(pageComponentDisplayVersion, pageComponentVersion)|camelKRuntimeVersion|util.camelQuarkusRef(camelQuarkusVersion, camelQuarkusDocsVersion)|util.camelRef(camelVersion, camelDocsVersion)|util.quarkusRef(quarkusVersion)|util.kameletsRef(camelKameletsVersion, camelKameletsDocsVersion)|lts|ck.branch(pageComponentVersion)", requires={requires},transform=util.sortCompatibilityItems]
+indexTable::[version="*",relative="running/running.adoc",cellformats="util.ckRef(pageComponentDisplayVersion, pageComponentVersion)|camelKRuntimeVersion|util.camelQuarkusRef(camelQuarkusVersion, camelQuarkusDocsVersion)|util.camelRef(camelVersion, camelDocsVersion)|util.quarkusRef(quarkusVersion)|camelKameletsDocsVersion|lts|ck.branch(pageComponentVersion)", requires={requires},transform=util.sortCompatibilityItems]
 
 == Other APIs version matrix
 
