@@ -1,3 +1,0 @@
-= Kamelets API
-
-include::partial$apis/kamelets-crds.adoc[]

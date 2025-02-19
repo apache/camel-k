@@ -18,7 +18,6 @@
 location=$(dirname $0)
 rootdir=$location/../..
 crd_file_camel=$rootdir/docs/modules/ROOT/partials/apis/camel-k-crds.adoc
-crd_file_kamelets=$rootdir/docs/modules/ROOT/partials/apis/kamelets-crds.adoc
 
 # Until the pull req below is merged upstream, we need to use a self-hosted
 # version of gen-crd-api-reference-docs:
