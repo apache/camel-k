@@ -119,31 +119,10 @@ func (t *masterTrait) Apply(e *Environment) error {
 
 		if e.CamelCatalog.Runtime.Capabilities["master"].RuntimeProperties != nil {
 			t.setCatalogConfiguration(e)
-		} else {
-			t.setCustomizerConfiguration(e)
 		}
 	}
 
 	return nil
-}
-
-// Deprecated: to be removed in future release in favor of func setCatalogConfiguration().
-func (t *masterTrait) setCustomizerConfiguration(e *Environment) {
-	e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-		v1.ConfigurationSpec{Type: "property", Value: "customizer.master.enabled=true"},
-	)
-	e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-		v1.ConfigurationSpec{Type: "property", Value: "customizer.master.kubernetesResourceNames=" + *t.ResourceName},
-	)
-	e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-		v1.ConfigurationSpec{Type: "property", Value: "customizer.master.leaseResourceType" + t.getResourceKey()},
-	)
-	e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-		v1.ConfigurationSpec{Type: "property", Value: "customizer.master.labelKey=" + t.getLabelKey()},
-	)
-	e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-		v1.ConfigurationSpec{Type: "property", Value: "customizer.master.labelValue=" + *t.LabelValue},
-	)
 }
 
 func (t *masterTrait) setCatalogConfiguration(e *Environment) {
