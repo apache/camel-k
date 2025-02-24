@@ -38,7 +38,7 @@ func newCompositeKameletRepository(repositories ...KameletRepository) KameletRep
 	}
 }
 
-func (c compositeKameletRepository) List(ctx context.Context) ([]string, error) {
+func (c *compositeKameletRepository) List(ctx context.Context) ([]string, error) {
 	kSet := make(map[string]bool)
 	for _, repo := range c.repositories {
 		lst, err := repo.List(ctx)
@@ -57,7 +57,7 @@ func (c compositeKameletRepository) List(ctx context.Context) ([]string, error) 
 	return res, nil
 }
 
-func (c compositeKameletRepository) Get(ctx context.Context, name string) (*v1.Kamelet, error) {
+func (c *compositeKameletRepository) Get(ctx context.Context, name string) (*v1.Kamelet, error) {
 	for _, repo := range c.repositories {
 		kam, err := repo.Get(ctx, name)
 		if kam != nil || err != nil {

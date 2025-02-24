@@ -29,38 +29,38 @@ import (
 func (in *KameletStatus) GetConditions() []ResourceCondition {
 	res := make([]ResourceCondition, 0, len(in.Conditions))
 	for _, c := range in.Conditions {
-		res = append(res, c)
+		res = append(res, &c)
 	}
 	return res
 }
 
 // GetType --.
-func (c KameletCondition) GetType() string {
+func (c *KameletCondition) GetType() string {
 	return string(c.Type)
 }
 
 // GetStatus --.
-func (c KameletCondition) GetStatus() corev1.ConditionStatus {
+func (c *KameletCondition) GetStatus() corev1.ConditionStatus {
 	return c.Status
 }
 
 // GetLastUpdateTime --.
-func (c KameletCondition) GetLastUpdateTime() metav1.Time {
+func (c *KameletCondition) GetLastUpdateTime() metav1.Time {
 	return c.LastUpdateTime
 }
 
 // GetLastTransitionTime --.
-func (c KameletCondition) GetLastTransitionTime() metav1.Time {
+func (c *KameletCondition) GetLastTransitionTime() metav1.Time {
 	return c.LastTransitionTime
 }
 
 // GetReason --.
-func (c KameletCondition) GetReason() string {
+func (c *KameletCondition) GetReason() string {
 	return c.Reason
 }
 
 // GetMessage --.
-func (c KameletCondition) GetMessage() string {
+func (c *KameletCondition) GetMessage() string {
 	return c.Message
 }
 

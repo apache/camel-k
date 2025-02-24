@@ -37,22 +37,22 @@ type baseErrorHandler struct {
 }
 
 // Type --.
-func (e baseErrorHandler) Type() ErrorHandlerType {
+func (e *baseErrorHandler) Type() ErrorHandlerType {
 	return errorHandlerTypeBase
 }
 
 // Endpoint --.
-func (e baseErrorHandler) Endpoint() *Endpoint {
+func (e *baseErrorHandler) Endpoint() *Endpoint {
 	return nil
 }
 
 // Configuration --.
-func (e baseErrorHandler) Configuration() (map[string]interface{}, error) {
+func (e *baseErrorHandler) Configuration() (map[string]interface{}, error) {
 	return nil, nil
 }
 
 // Validate --.
-func (e baseErrorHandler) Validate() error {
+func (e *baseErrorHandler) Validate() error {
 	return nil
 }
 
@@ -62,12 +62,12 @@ type ErrorHandlerNone struct {
 }
 
 // Type --.
-func (e ErrorHandlerNone) Type() ErrorHandlerType {
+func (e *ErrorHandlerNone) Type() ErrorHandlerType {
 	return ErrorHandlerTypeNone
 }
 
 // Configuration --.
-func (e ErrorHandlerNone) Configuration() (map[string]interface{}, error) {
+func (e *ErrorHandlerNone) Configuration() (map[string]interface{}, error) {
 	return map[string]interface{}{}, nil
 }
 
@@ -78,12 +78,12 @@ type ErrorHandlerLog struct {
 }
 
 // Type --.
-func (e ErrorHandlerLog) Type() ErrorHandlerType {
+func (e *ErrorHandlerLog) Type() ErrorHandlerType {
 	return ErrorHandlerTypeLog
 }
 
 // Configuration --.
-func (e ErrorHandlerLog) Configuration() (map[string]interface{}, error) {
+func (e *ErrorHandlerLog) Configuration() (map[string]interface{}, error) {
 	properties, err := e.ErrorHandlerNone.Configuration()
 	if err != nil {
 		return nil, err
@@ -106,17 +106,17 @@ type ErrorHandlerSink struct {
 }
 
 // Type --.
-func (e ErrorHandlerSink) Type() ErrorHandlerType {
+func (e *ErrorHandlerSink) Type() ErrorHandlerType {
 	return ErrorHandlerTypeSink
 }
 
 // Endpoint --.
-func (e ErrorHandlerSink) Endpoint() *Endpoint {
+func (e *ErrorHandlerSink) Endpoint() *Endpoint {
 	return e.DLCEndpoint
 }
 
 // Configuration --.
-func (e ErrorHandlerSink) Configuration() (map[string]interface{}, error) {
+func (e *ErrorHandlerSink) Configuration() (map[string]interface{}, error) {
 	properties, err := e.ErrorHandlerLog.Configuration()
 	if err != nil {
 		return nil, err
@@ -126,7 +126,7 @@ func (e ErrorHandlerSink) Configuration() (map[string]interface{}, error) {
 }
 
 // Validate --.
-func (e ErrorHandlerSink) Validate() error {
+func (e *ErrorHandlerSink) Validate() error {
 	if e.DLCEndpoint == nil {
 		return fmt.Errorf("missing endpoint in Error Handler Sink")
 	}

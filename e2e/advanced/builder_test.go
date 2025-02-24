@@ -139,7 +139,7 @@ func newMavenProfileConfigMap(ns, name, key string) *corev1.ConfigMap {
 		Data: map[string]string{
 			key: fmt.Sprintf(`
 <profile>
-  <id>` + key + `</id>
+  <id>%s</id>
   <build>
     <plugins>
       <plugin>
@@ -157,7 +157,7 @@ func newMavenProfileConfigMap(ns, name, key string) *corev1.ConfigMap {
     </plugins>
   </build>
 </profile>
-`,
+`, key,
 			),
 		},
 	}

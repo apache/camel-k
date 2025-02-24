@@ -199,12 +199,12 @@ func (in *IntegrationKitStatus) RemoveCondition(condType IntegrationKitCondition
 	in.Conditions = newConditions
 }
 
-var _ ResourceCondition = IntegrationKitCondition{}
+var _ ResourceCondition = &IntegrationKitCondition{}
 
 func (in *IntegrationKitStatus) GetConditions() []ResourceCondition {
 	res := make([]ResourceCondition, 0, len(in.Conditions))
 	for _, c := range in.Conditions {
-		res = append(res, c)
+		res = append(res, &c)
 	}
 	return res
 }
@@ -220,26 +220,26 @@ func (in *IntegrationKitStatus) GetDependenciesPaths() *sets.Set {
 	return s
 }
 
-func (c IntegrationKitCondition) GetType() string {
+func (c *IntegrationKitCondition) GetType() string {
 	return string(c.Type)
 }
 
-func (c IntegrationKitCondition) GetStatus() corev1.ConditionStatus {
+func (c *IntegrationKitCondition) GetStatus() corev1.ConditionStatus {
 	return c.Status
 }
 
-func (c IntegrationKitCondition) GetLastUpdateTime() metav1.Time {
+func (c *IntegrationKitCondition) GetLastUpdateTime() metav1.Time {
 	return c.LastUpdateTime
 }
 
-func (c IntegrationKitCondition) GetLastTransitionTime() metav1.Time {
+func (c *IntegrationKitCondition) GetLastTransitionTime() metav1.Time {
 	return c.LastTransitionTime
 }
 
-func (c IntegrationKitCondition) GetReason() string {
+func (c *IntegrationKitCondition) GetReason() string {
 	return c.Reason
 }
 
-func (c IntegrationKitCondition) GetMessage() string {
+func (c *IntegrationKitCondition) GetMessage() string {
 	return c.Message
 }

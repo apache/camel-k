@@ -31,38 +31,38 @@ import (
 func (in *PipeStatus) GetConditions() []ResourceCondition {
 	res := make([]ResourceCondition, 0, len(in.Conditions))
 	for _, c := range in.Conditions {
-		res = append(res, c)
+		res = append(res, &c)
 	}
 	return res
 }
 
 // GetType --.
-func (c PipeCondition) GetType() string {
+func (c *PipeCondition) GetType() string {
 	return string(c.Type)
 }
 
 // GetStatus --.
-func (c PipeCondition) GetStatus() corev1.ConditionStatus {
+func (c *PipeCondition) GetStatus() corev1.ConditionStatus {
 	return c.Status
 }
 
 // GetLastUpdateTime --.
-func (c PipeCondition) GetLastUpdateTime() metav1.Time {
+func (c *PipeCondition) GetLastUpdateTime() metav1.Time {
 	return c.LastUpdateTime
 }
 
 // GetLastTransitionTime --.
-func (c PipeCondition) GetLastTransitionTime() metav1.Time {
+func (c *PipeCondition) GetLastTransitionTime() metav1.Time {
 	return c.LastTransitionTime
 }
 
 // GetReason --.
-func (c PipeCondition) GetReason() string {
+func (c *PipeCondition) GetReason() string {
 	return c.Reason
 }
 
 // GetMessage --.
-func (c PipeCondition) GetMessage() string {
+func (c *PipeCondition) GetMessage() string {
 	return c.Message
 }
 

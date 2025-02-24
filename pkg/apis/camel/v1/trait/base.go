@@ -47,4 +47,4 @@ type Configuration struct {
 // +kubebuilder:validation:Format=""
 // +kubebuilder:pruning:PreserveUnknownFields
 // Deprecated: for backward compatibility.
-type RawMessage []byte
+type RawMessage []byte //nolint: recvcheck
