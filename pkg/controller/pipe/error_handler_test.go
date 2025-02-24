@@ -26,8 +26,9 @@ import (
 )
 
 func TestParseErrorHandlerNoneDoesSucceed(t *testing.T) {
+	cnt := v1.RawMessage([]byte(`{"none": null}`))
 	noErrorHandler, err := parseErrorHandler(
-		[]byte(`{"none": null}`),
+		&cnt,
 	)
 	require.NoError(t, err)
 	assert.Equal(t, v1.ErrorHandlerTypeNone, noErrorHandler.Type())
@@ -36,8 +37,9 @@ func TestParseErrorHandlerNoneDoesSucceed(t *testing.T) {
 }
 
 func TestParseErrorHandlerLogDoesSucceed(t *testing.T) {
+	cnt := v1.RawMessage([]byte(`{"log": null}`))
 	logErrorHandler, err := parseErrorHandler(
-		[]byte(`{"log": null}`),
+		&cnt,
 	)
 	require.NoError(t, err)
 	assert.Equal(t, v1.ErrorHandlerTypeLog, logErrorHandler.Type())
@@ -46,8 +48,9 @@ func TestParseErrorHandlerLogDoesSucceed(t *testing.T) {
 }
 
 func TestParseErrorHandlerLogWithParametersDoesSucceed(t *testing.T) {
+	cnt := v1.RawMessage([]byte(`{"log": {"parameters": {"param1": "value1", "param2": "value2"}}}`))
 	logErrorHandler, err := parseErrorHandler(
-		[]byte(`{"log": {"parameters": {"param1": "value1", "param2": "value2"}}}`),
+		&cnt,
 	)
 	require.NoError(t, err)
 	assert.Equal(t, v1.ErrorHandlerTypeLog, logErrorHandler.Type())
@@ -56,8 +59,9 @@ func TestParseErrorHandlerLogWithParametersDoesSucceed(t *testing.T) {
 }
 
 func TestParseErrorHandlerSinkDoesSucceed(t *testing.T) {
+	cnt := v1.RawMessage([]byte(`{"sink": {"endpoint": {"uri": "someUri"}}}`))
 	sinkErrorHandler, err := parseErrorHandler(
-		[]byte(`{"sink": {"endpoint": {"uri": "someUri"}}}`),
+		&cnt,
 	)
 	require.NoError(t, err)
 	assert.NotNil(t, sinkErrorHandler)
@@ -68,7 +72,7 @@ func TestParseErrorHandlerSinkDoesSucceed(t *testing.T) {
 }
 
 func TestParseErrorHandlerSinkWithParametersDoesSucceed(t *testing.T) {
-	sinkErrorHandler, err := parseErrorHandler(
+	cnt := v1.RawMessage(
 		[]byte(`{
 			"sink": {
 				"endpoint": {
@@ -79,6 +83,9 @@ func TestParseErrorHandlerSinkWithParametersDoesSucceed(t *testing.T) {
 			}
 		}`),
 	)
+	sinkErrorHandler, err := parseErrorHandler(
+		&cnt,
+	)
 	require.NoError(t, err)
 	assert.NotNil(t, sinkErrorHandler)
 	assert.Equal(t, v1.ErrorHandlerTypeSink, sinkErrorHandler.Type())
@@ -88,8 +95,9 @@ func TestParseErrorHandlerSinkWithParametersDoesSucceed(t *testing.T) {
 }
 
 func TestParseErrorHandlerSinkFail(t *testing.T) {
+	cnt := v1.RawMessage([]byte(`{"sink": {"ref": {"uri": "someUri"}}}`))
 	_, err := parseErrorHandler(
-		[]byte(`{"sink": {"ref": {"uri": "someUri"}}}`),
+		&cnt,
 	)
 	require.Error(t, err)
 	assert.Equal(t, "missing endpoint in Error Handler Sink", err.Error())

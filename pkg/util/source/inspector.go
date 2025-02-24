@@ -241,11 +241,11 @@ type baseInspector struct {
 	catalog *camel.RuntimeCatalog
 }
 
-func (i baseInspector) Extract(v1.SourceSpec, *Metadata) error {
+func (i *baseInspector) Extract(v1.SourceSpec, *Metadata) error {
 	return nil
 }
 
-func (i baseInspector) ReplaceFromURI(source *v1.SourceSpec, newFromURI string) (bool, error) {
+func (i *baseInspector) ReplaceFromURI(source *v1.SourceSpec, newFromURI string) (bool, error) {
 	return false, nil
 }
 

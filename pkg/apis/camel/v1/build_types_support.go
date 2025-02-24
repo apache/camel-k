@@ -207,41 +207,41 @@ func (in *BuildStatus) RemoveCondition(condType BuildConditionType) {
 	in.Conditions = newConditions
 }
 
-var _ ResourceCondition = BuildCondition{}
+var _ ResourceCondition = &BuildCondition{}
 
 func (in *BuildStatus) GetConditions() []ResourceCondition {
 	res := make([]ResourceCondition, 0, len(in.Conditions))
 	for _, c := range in.Conditions {
-		res = append(res, c)
+		res = append(res, &c)
 	}
 	return res
 }
 
-func (c BuildCondition) GetType() string {
+func (c *BuildCondition) GetType() string {
 	return string(c.Type)
 }
 
-func (c BuildCondition) GetStatus() corev1.ConditionStatus {
+func (c *BuildCondition) GetStatus() corev1.ConditionStatus {
 	return c.Status
 }
 
-func (c BuildCondition) GetLastUpdateTime() metav1.Time {
+func (c *BuildCondition) GetLastUpdateTime() metav1.Time {
 	return c.LastUpdateTime
 }
 
-func (c BuildCondition) GetLastTransitionTime() metav1.Time {
+func (c *BuildCondition) GetLastTransitionTime() metav1.Time {
 	return c.LastTransitionTime
 }
 
-func (c BuildCondition) GetReason() string {
+func (c *BuildCondition) GetReason() string {
 	return c.Reason
 }
 
-func (c BuildCondition) GetMessage() string {
+func (c *BuildCondition) GetMessage() string {
 	return c.Message
 }
 
-func (bl BuildList) HasRunningBuilds() bool {
+func (bl *BuildList) HasRunningBuilds() bool {
 	for _, b := range bl.Items {
 		if b.Status.Phase == BuildPhasePending || b.Status.Phase == BuildPhaseRunning {
 			return true
@@ -251,7 +251,7 @@ func (bl BuildList) HasRunningBuilds() bool {
 	return false
 }
 
-func (bl BuildList) HasScheduledBuildsBefore(build *Build) (bool, *Build) {
+func (bl *BuildList) HasScheduledBuildsBefore(build *Build) (bool, *Build) {
 	for _, b := range bl.Items {
 		if b.Name == build.Name {
 			continue
@@ -268,7 +268,7 @@ func (bl BuildList) HasScheduledBuildsBefore(build *Build) (bool, *Build) {
 
 // HasMatchingBuild visit all items in the list of builds and search for a scheduled build that matches the given build's dependencies.
 // It returns the first matching build found regardless it may have any one more appropriate.
-func (bl BuildList) HasMatchingBuild(build *Build) (bool, *Build) {
+func (bl *BuildList) HasMatchingBuild(build *Build) (bool, *Build) {
 	required := build.BuilderDependencies()
 	if len(required) == 0 {
 		return false, nil

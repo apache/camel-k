@@ -172,50 +172,50 @@ func (in *IntegrationPlatformStatus) RemoveCondition(condType IntegrationPlatfor
 }
 
 // GetTimeout returns the specified duration or a default one.
-func (b IntegrationPlatformBuildSpec) GetTimeout() metav1.Duration {
+func (b *IntegrationPlatformBuildSpec) GetTimeout() metav1.Duration {
 	if b.Timeout == nil {
 		return metav1.Duration{}
 	}
 	return *b.Timeout
 }
 
-var _ ResourceCondition = IntegrationPlatformCondition{}
+var _ ResourceCondition = &IntegrationPlatformCondition{}
 
 // GetConditions --.
 func (in *IntegrationPlatformStatus) GetConditions() []ResourceCondition {
 	res := make([]ResourceCondition, 0, len(in.Conditions))
 	for _, c := range in.Conditions {
-		res = append(res, c)
+		res = append(res, &c)
 	}
 	return res
 }
 
 // GetType --.
-func (c IntegrationPlatformCondition) GetType() string {
+func (c *IntegrationPlatformCondition) GetType() string {
 	return string(c.Type)
 }
 
 // GetStatus --.
-func (c IntegrationPlatformCondition) GetStatus() corev1.ConditionStatus {
+func (c *IntegrationPlatformCondition) GetStatus() corev1.ConditionStatus {
 	return c.Status
 }
 
 // GetLastUpdateTime --.
-func (c IntegrationPlatformCondition) GetLastUpdateTime() metav1.Time {
+func (c *IntegrationPlatformCondition) GetLastUpdateTime() metav1.Time {
 	return c.LastUpdateTime
 }
 
 // GetLastTransitionTime --.
-func (c IntegrationPlatformCondition) GetLastTransitionTime() metav1.Time {
+func (c *IntegrationPlatformCondition) GetLastTransitionTime() metav1.Time {
 	return c.LastTransitionTime
 }
 
 // GetReason --.
-func (c IntegrationPlatformCondition) GetReason() string {
+func (c *IntegrationPlatformCondition) GetReason() string {
 	return c.Reason
 }
 
 // GetMessage --.
-func (c IntegrationPlatformCondition) GetMessage() string {
+func (c *IntegrationPlatformCondition) GetMessage() string {
 	return c.Message
 }
