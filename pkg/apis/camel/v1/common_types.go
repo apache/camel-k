@@ -295,7 +295,7 @@ type TraitConfiguration struct {
 // +kubebuilder:validation:Type=""
 // +kubebuilder:validation:Format=""
 // +kubebuilder:pruning:PreserveUnknownFields
-type RawMessage []byte
+type RawMessage []byte //nolint: recvcheck
 
 // +kubebuilder:object:generate=false
 

@@ -84,7 +84,7 @@ func (s *Source) setContent(content []byte) error {
 	return nil
 }
 
-func (s Source) IsYaml() bool {
+func (s *Source) IsYaml() bool {
 	return strings.HasSuffix(s.Name, ".yaml") || strings.HasSuffix(s.Name, ".yml")
 }
 

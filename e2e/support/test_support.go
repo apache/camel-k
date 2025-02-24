@@ -520,7 +520,7 @@ func StructuredLogs(t *testing.T, ctx context.Context, ns, podName string, optio
 				continue
 			} else {
 				msg := fmt.Sprintf("Unable to parse structured content: %s", t)
-				log.Errorf(err, msg)
+				log.Error(err, msg)
 				return nil, fmt.Errorf("%s %w\n", msg, err)
 			}
 		}

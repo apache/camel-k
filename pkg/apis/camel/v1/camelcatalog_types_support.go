@@ -64,32 +64,32 @@ func NewCamelCatalogList() CamelCatalogList {
 }
 
 // GetType --.
-func (c CamelCatalogCondition) GetType() string {
+func (c *CamelCatalogCondition) GetType() string {
 	return string(c.Type)
 }
 
 // GetStatus --.
-func (c CamelCatalogCondition) GetStatus() corev1.ConditionStatus {
+func (c *CamelCatalogCondition) GetStatus() corev1.ConditionStatus {
 	return c.Status
 }
 
 // GetLastUpdateTime --.
-func (c CamelCatalogCondition) GetLastUpdateTime() metav1.Time {
+func (c *CamelCatalogCondition) GetLastUpdateTime() metav1.Time {
 	return c.LastUpdateTime
 }
 
 // GetLastTransitionTime --.
-func (c CamelCatalogCondition) GetLastTransitionTime() metav1.Time {
+func (c *CamelCatalogCondition) GetLastTransitionTime() metav1.Time {
 	return c.LastTransitionTime
 }
 
 // GetReason --.
-func (c CamelCatalogCondition) GetReason() string {
+func (c *CamelCatalogCondition) GetReason() string {
 	return c.Reason
 }
 
 // GetMessage --.
-func (c CamelCatalogCondition) GetMessage() string {
+func (c *CamelCatalogCondition) GetMessage() string {
 	return c.Message
 }
 
@@ -97,7 +97,7 @@ func (c CamelCatalogCondition) GetMessage() string {
 func (in *CamelCatalogStatus) GetConditions() []ResourceCondition {
 	res := make([]ResourceCondition, 0, len(in.Conditions))
 	for _, c := range in.Conditions {
-		res = append(res, c)
+		res = append(res, &c)
 	}
 	return res
 }

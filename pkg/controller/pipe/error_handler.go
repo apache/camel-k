@@ -37,7 +37,7 @@ func maybeErrorHandler(errHandlConf *v1.ErrorHandlerSpec, bindingContext binding
 
 	var errorHandlerBinding *bindings.Binding
 
-	errorHandlerSpec, err := parseErrorHandler(errHandlConf.RawMessage)
+	errorHandlerSpec, err := parseErrorHandler(&errHandlConf.RawMessage)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse error handler: %w", err)
 	}
@@ -69,9 +69,9 @@ func maybeErrorHandler(errHandlConf *v1.ErrorHandlerSpec, bindingContext binding
 	return errorHandlerBinding, nil
 }
 
-func parseErrorHandler(rawMessage v1.RawMessage) (v1.ErrorHandler, error) {
+func parseErrorHandler(rawMessage *v1.RawMessage) (v1.ErrorHandler, error) {
 	var properties map[v1.ErrorHandlerType]v1.RawMessage
-	err := json.Unmarshal(rawMessage, &properties)
+	err := json.Unmarshal(*rawMessage, &properties)
 	if err != nil {
 		return nil, err
 	}

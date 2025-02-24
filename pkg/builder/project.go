@@ -130,7 +130,7 @@ func generateProjectSettings(ctx *builderContext) error {
 }
 
 func injectServersIntoMavenSettings(settings string, servers []v1.Server) string {
-	if servers == nil || len(servers) < 1 {
+	if len(servers) < 1 {
 		return settings
 	}
 	newSettings, i := getServerTagIndex(settings)
