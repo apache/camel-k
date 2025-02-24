@@ -33,7 +33,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
-	"github.com/apache/camel-k/v2/pkg/util/envvar"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
@@ -154,23 +153,4 @@ func TestJsonLoggingTrait(t *testing.T) {
 	assert.Equal(t, "${camel.k.logging.json}", env.ApplicationProperties["quarkus.log.console.json"])
 	assert.Equal(t, "${camel.k.logging.jsonPrettyPrint}", env.ApplicationProperties["quarkus.log.console.json.pretty-print"])
 	assert.Equal(t, "", env.ApplicationProperties["quarkus.console.color"])
-}
-
-func TestDefaultQuarkusLogging(t *testing.T) {
-	env := createDefaultLoggingTestEnv(t)
-	// Simulate an older catalog configuration which is missing the logging
-	// capability
-	env.CamelCatalog.Runtime.Capabilities["logging"] = v1.Capability{
-		RuntimeProperties: nil,
-	}
-	env.EnvVars = []corev1.EnvVar{}
-	conditions, traits, err := NewLoggingTestCatalog().apply(env)
-
-	require.NoError(t, err)
-	assert.NotEmpty(t, traits)
-	assert.NotEmpty(t, conditions)
-	assert.NotEmpty(t, env.ExecutedTraits)
-
-	assert.Equal(t, &corev1.EnvVar{Name: "QUARKUS_LOG_LEVEL", Value: "INFO"}, envvar.Get(env.EnvVars, envVarQuarkusLogLevel))
-	assert.Equal(t, &corev1.EnvVar{Name: "QUARKUS_LOG_CONSOLE_JSON", Value: "false"}, envvar.Get(env.EnvVars, envVarQuarkusLogConsoleJSON))
 }

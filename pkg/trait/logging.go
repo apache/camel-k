@@ -20,7 +20,6 @@ package trait
 import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
-	"github.com/apache/camel-k/v2/pkg/util/envvar"
 	"k8s.io/utils/ptr"
 )
 
@@ -61,34 +60,9 @@ func (l *loggingTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 func (l *loggingTrait) Apply(e *Environment) error {
 	if e.CamelCatalog.Runtime.Capabilities["logging"].RuntimeProperties != nil {
 		l.setCatalogConfiguration(e)
-	} else {
-		l.setEnvConfiguration(e)
 	}
 
 	return nil
-}
-
-// Deprecated: to be removed in future release in favor of func setCatalogConfiguration().
-func (l *loggingTrait) setEnvConfiguration(e *Environment) {
-	envvar.SetVal(&e.EnvVars, envVarQuarkusLogLevel, l.getLevel())
-
-	if l.Format != "" {
-		envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleFormat, l.Format)
-	}
-
-	if ptr.Deref(l.JSON, false) {
-		envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleJSON, boolean.TrueString)
-		if ptr.Deref(l.JSONPrettyPrint, false) {
-			envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleJSONPrettyPrint, boolean.TrueString)
-		}
-	} else {
-		// If the trait is false OR unset, we default to false.
-		envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleJSON, boolean.FalseString)
-
-		if ptr.Deref(l.Color, true) {
-			envvar.SetVal(&e.EnvVars, envVarQuarkusConsoleColor, boolean.TrueString)
-		}
-	}
 }
 
 func (l *loggingTrait) setCatalogConfiguration(e *Environment) {
