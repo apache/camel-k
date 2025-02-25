@@ -236,8 +236,29 @@ func TestMonitorMissingRegistryError(t *testing.T) {
 
 	assert.Equal(t, v1.IntegrationPlatformPhaseError, answer.Status.Phase)
 	assert.Equal(t, corev1.ConditionFalse, answer.Status.GetCondition(v1.IntegrationPlatformConditionTypeRegistryAvailable).Status)
-	assert.Equal(t, v1.IntegrationPlatformConditionTypeRegistryAvailableReason, answer.Status.GetCondition(v1.IntegrationPlatformConditionTypeRegistryAvailable).Reason)
-	assert.Equal(t, "registry address not available, you need to set one", answer.Status.GetCondition(v1.IntegrationPlatformConditionTypeRegistryAvailable).Message)
+	assert.Equal(t,
+		v1.IntegrationPlatformConditionTypeRegistryAvailableReason,
+		answer.Status.GetCondition(v1.IntegrationPlatformConditionTypeRegistryAvailable).Reason)
+	assert.Equal(t,
+		"registry address not available, you need to set one",
+		answer.Status.GetCondition(v1.IntegrationPlatformConditionTypeRegistryAvailable).Message)
+
+	// fix and see if it reconciles correctly
+	ip.Spec.Build.Registry = v1.RegistrySpec{
+		Address: "1.2.3.4",
+	}
+	answer, err = action.Handle(context.TODO(), &ip)
+	require.NoError(t, err)
+	assert.NotNil(t, answer)
+
+	assert.Equal(t, v1.IntegrationPlatformPhaseReady, answer.Status.Phase)
+	assert.Equal(t, corev1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionTypeRegistryAvailable).Status)
+	assert.Equal(t,
+		v1.IntegrationPlatformConditionTypeRegistryAvailableReason,
+		answer.Status.GetCondition(v1.IntegrationPlatformConditionTypeRegistryAvailable).Reason)
+	assert.Equal(t,
+		"registry available at 1.2.3.4",
+		answer.Status.GetCondition(v1.IntegrationPlatformConditionTypeRegistryAvailable).Message)
 }
 
 func TestMonitorMissingCatalogError(t *testing.T) {
