@@ -77,6 +77,8 @@ func (action *monitorAction) Handle(ctx context.Context, platform *v1.Integratio
 
 		return platform, err
 	}
+	// So far the ITP is good
+	platform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	platform.Status.Build.RuntimeCoreVersion = catalog.Spec.GetCamelVersion()
 	// Registry condition
 	isOpenshift, err := openshift.IsOpenShift(action.client)
