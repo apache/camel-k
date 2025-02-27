@@ -63,8 +63,6 @@ func (t *mountTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil || !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
-	// Look for secrets which may have been created by service binding trait
-	t.addServiceBindingSecret(e)
 
 	// Validate resources and pvcs
 	for _, c := range t.Configs {
@@ -276,14 +274,6 @@ func (t *mountTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.VolumeM
 	*mnts = append(*mnts, *mnt)
 
 	return mnt.MountPath
-}
-
-func (t *mountTrait) addServiceBindingSecret(e *Environment) {
-	e.Resources.VisitSecret(func(secret *corev1.Secret) {
-		if secret.Labels[serviceBindingLabel] == boolean.TrueString {
-			t.Configs = append(t.Configs, "secret:"+secret.Name)
-		}
-	})
 }
 
 // ParseEmptyDirVolume will parse and return an empty-dir volume.

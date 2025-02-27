@@ -199,6 +199,7 @@ type Traits struct {
 	// The configuration of Environment trait
 	Environment *trait.EnvironmentTrait `property:"environment" json:"environment,omitempty"`
 	// The configuration of Error Handler trait
+	// Deprecated: no longer in use.
 	ErrorHandler *trait.ErrorHandlerTrait `property:"error-handler" json:"error-handler,omitempty"`
 	// The configuration of GC trait
 	GC *trait.GCTrait `property:"gc" json:"gc,omitempty"`
@@ -250,6 +251,7 @@ type Traits struct {
 	// The configuration of Service trait
 	Service *trait.ServiceTrait `property:"service" json:"service,omitempty"`
 	// The configuration of Service Binding trait
+	// Deprecated: no longer in use.
 	ServiceBinding *trait.ServiceBindingTrait `property:"service-binding" json:"service-binding,omitempty"`
 	// The configuration of Telemetry trait
 	Telemetry *trait.TelemetryTrait `property:"telemetry" json:"telemetry,omitempty"`

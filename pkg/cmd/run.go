@@ -82,9 +82,6 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 
 	cmd.Flags().String("name", "", "The integration name")
 	cmd.Flags().String("image", "", "An image built externally (ie, via CICD). Enabling it will skip the Integration build phase.")
-	// Deprecated: service binding parameter won't be supported in future releases.
-	cmd.Flags().StringArrayP("connect", "c", nil, "A Service that the integration should bind to, specified as [[apigroup/]version:]kind:[namespace/]name."+
-		"Deprecated: service binding won't be supported in future releases.")
 	cmd.Flags().StringArrayP("dependency", "d", nil, `A dependency that should be included, e.g., "-d camel:mail" for a Camel component, "-d mvn:org.my:app:1.0" for a Maven dependency`)
 	cmd.Flags().BoolP("wait", "w", false, "Wait for the integration to be running")
 	cmd.Flags().StringP("kit", "k", "", "The kit used to run the integration")
@@ -129,25 +126,23 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 
 type runCmdOptions struct {
 	*RootCmdOptions    `json:"-"`
-	Compression        bool   `mapstructure:"compression" yaml:",omitempty"`
-	Wait               bool   `mapstructure:"wait" yaml:",omitempty"`
-	Logs               bool   `mapstructure:"logs" yaml:",omitempty"`
-	Sync               bool   `mapstructure:"sync" yaml:",omitempty"`
-	Dev                bool   `mapstructure:"dev" yaml:",omitempty"`
-	UseFlows           bool   `mapstructure:"use-flows" yaml:",omitempty"`
-	Save               bool   `mapstructure:"save" yaml:",omitempty" kamel:"omitsave"`
-	IntegrationKit     string `mapstructure:"kit" yaml:",omitempty"`
-	IntegrationName    string `mapstructure:"name" yaml:",omitempty"`
-	ContainerImage     string `mapstructure:"image" yaml:",omitempty"`
-	Profile            string `mapstructure:"profile" yaml:",omitempty"`
-	IntegrationProfile string `mapstructure:"integration-profile" yaml:",omitempty"`
-	OperatorID         string `mapstructure:"operator-id" yaml:",omitempty"`
-	OutputFormat       string `mapstructure:"output" yaml:",omitempty"`
-	PodTemplate        string `mapstructure:"pod-template" yaml:",omitempty"`
-	ServiceAccount     string `mapstructure:"service-account" yaml:",omitempty"`
-	// Deprecated: service binding parameter won't be supported in future releases.
-	Connects  []string `mapstructure:"connects" yaml:",omitempty"`
-	Resources []string `mapstructure:"resources" yaml:",omitempty"`
+	Compression        bool     `mapstructure:"compression" yaml:",omitempty"`
+	Wait               bool     `mapstructure:"wait" yaml:",omitempty"`
+	Logs               bool     `mapstructure:"logs" yaml:",omitempty"`
+	Sync               bool     `mapstructure:"sync" yaml:",omitempty"`
+	Dev                bool     `mapstructure:"dev" yaml:",omitempty"`
+	UseFlows           bool     `mapstructure:"use-flows" yaml:",omitempty"`
+	Save               bool     `mapstructure:"save" yaml:",omitempty" kamel:"omitsave"`
+	IntegrationKit     string   `mapstructure:"kit" yaml:",omitempty"`
+	IntegrationName    string   `mapstructure:"name" yaml:",omitempty"`
+	ContainerImage     string   `mapstructure:"image" yaml:",omitempty"`
+	Profile            string   `mapstructure:"profile" yaml:",omitempty"`
+	IntegrationProfile string   `mapstructure:"integration-profile" yaml:",omitempty"`
+	OperatorID         string   `mapstructure:"operator-id" yaml:",omitempty"`
+	OutputFormat       string   `mapstructure:"output" yaml:",omitempty"`
+	PodTemplate        string   `mapstructure:"pod-template" yaml:",omitempty"`
+	ServiceAccount     string   `mapstructure:"service-account" yaml:",omitempty"`
+	Resources          []string `mapstructure:"resources" yaml:",omitempty"`
 	// Deprecated: openapi parameter won't be supported in future releases.
 	OpenAPIs        []string `mapstructure:"open-apis" yaml:",omitempty"`
 	Dependencies    []string `mapstructure:"dependencies" yaml:",omitempty"`
@@ -749,9 +744,6 @@ func (o *runCmdOptions) convertOptionsToTraits(cmd *cobra.Command, c client.Clie
 	}
 	for _, item := range o.EnvVars {
 		o.Traits = append(o.Traits, fmt.Sprintf("environment.vars=%s", item))
-	}
-	for _, item := range o.Connects {
-		o.Traits = append(o.Traits, fmt.Sprintf("service-binding.services=%s", item))
 	}
 
 	return nil

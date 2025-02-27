@@ -178,8 +178,8 @@ func TestTraitListConfigurationFromAnnotations(t *testing.T) {
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
-					v1.TraitAnnotationPrefix + "jolokia.options":          `["opt1", "opt2"]`,
-					v1.TraitAnnotationPrefix + "service-binding.services": `Binding:xxx`, // lenient
+					v1.TraitAnnotationPrefix + "jolokia.options":       `["opt1", "opt2"]`,
+					v1.TraitAnnotationPrefix + "camel.runtime-version": "1.2.3",
 				},
 			},
 			Spec: v1.IntegrationSpec{
@@ -191,8 +191,8 @@ func TestTraitListConfigurationFromAnnotations(t *testing.T) {
 	require.NoError(t, c.Configure(&env))
 	jt, _ := c.GetTrait("jolokia").(*jolokiaTrait)
 	assert.Equal(t, []string{"opt1", "opt2"}, jt.Options)
-	sbt, _ := c.GetTrait("service-binding").(*serviceBindingTrait)
-	assert.Equal(t, []string{"Binding:xxx"}, sbt.Services)
+	cml, _ := c.GetTrait("camel").(*camelTrait)
+	assert.Equal(t, "1.2.3", cml.RuntimeVersion)
 }
 
 func TestTraitSplitConfiguration(t *testing.T) {
