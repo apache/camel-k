@@ -54,7 +54,6 @@ func newCmdBind(rootCmdOptions *RootCmdOptions) (*cobra.Command, *bindCmdOptions
 		Annotations:       make(map[string]string),
 	}
 
-	cmd.Flags().StringArrayP("connect", "c", nil, "A ServiceBinding or Provisioned Service that the integration should bind to, specified as [[apigroup/]version:]kind:[namespace/]name")
 	cmd.Flags().String("error-handler", "", `Add error handler (none|log|sink:<endpoint>). Sink endpoints are expected in the format "[[apigroup/]version:]kind:[namespace/]name", plain Camel URIs or Kamelet name.`)
 	cmd.Flags().String("name", "", "Name for the binding")
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
@@ -81,7 +80,6 @@ type bindCmdOptions struct {
 	*RootCmdOptions
 	ErrorHandler   string   `mapstructure:"error-handler" yaml:",omitempty"`
 	Name           string   `mapstructure:"name" yaml:",omitempty"`
-	Connects       []string `mapstructure:"connects" yaml:",omitempty"`
 	OutputFormat   string   `mapstructure:"output" yaml:",omitempty"`
 	Properties     []string `mapstructure:"properties" yaml:",omitempty"`
 	SkipChecks     bool     `mapstructure:"skip-checks" yaml:",omitempty"`
@@ -226,9 +224,6 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 			}
 			binding.Spec.Steps = append(binding.Spec.Steps, step)
 		}
-	}
-	for _, item := range o.Connects {
-		o.Traits = append(o.Traits, fmt.Sprintf("service-binding.services=%s", item))
 	}
 
 	if len(o.Traits) > 0 {
@@ -471,23 +466,6 @@ func (o *bindCmdOptions) checkCompliance(cmd *cobra.Command, endpoint v1.Endpoin
 				return nil
 			}
 			return err
-		}
-		if kamelet.Spec.Definition != nil && len(kamelet.Spec.Definition.Required) > 0 {
-			pMap, err := endpoint.Properties.GetPropertyMap()
-			if err != nil {
-				return err
-			}
-			for _, reqProp := range kamelet.Spec.Definition.Required {
-				found := false
-				if endpoint.Properties != nil {
-					if _, contains := pMap[reqProp]; contains {
-						found = true
-					}
-				}
-				if !found && len(o.Connects) == 0 {
-					return fmt.Errorf("binding is missing required property %q for Kamelet %q", reqProp, key.Name)
-				}
-			}
 		}
 	}
 	return nil

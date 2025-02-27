@@ -177,7 +177,7 @@ status: {}
 func TestBindTraits(t *testing.T) {
 	buildCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
 	output, err := ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml",
-		"-t", "mount.configs=configmap:my-cm", "-c", "my-service-binding")
+		"-t", "mount.configs=configmap:my-cm")
 	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
 
 	require.NoError(t, err)
@@ -187,7 +187,6 @@ metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
     trait.camel.apache.org/mount.configs: configmap:my-cm
-    trait.camel.apache.org/service-binding.services: my-service-binding
   creationTimestamp: null
   name: my-to-my
 spec:
