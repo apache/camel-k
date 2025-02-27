@@ -101,15 +101,22 @@ func prepareProjectWithSources(ctx *builderContext) error {
 }
 
 func loadCamelQuarkusCatalog(ctx *builderContext) error {
-	catalog, err := camel.LoadCatalog(ctx.C, ctx.Client, ctx.Namespace, ctx.Build.Runtime)
+	runtime := ctx.Build.Runtime.DeepCopy()
+	if runtime.Provider == v1.RuntimeProviderPlainQuarkus {
+		// We need this workaround to load the last existing catalog
+		// TODO: this part will be subject to future refactoring
+		runtime.Version = defaults.DefaultRuntimeVersion
+	}
+
+	catalog, err := camel.LoadCatalog(ctx.C, ctx.Client, ctx.Namespace, *runtime)
 	if err != nil {
 		return err
 	}
 
 	if catalog == nil {
 		return fmt.Errorf("unable to find catalog matching version requirement: runtime=%s, provider=%s",
-			ctx.Build.Runtime.Version,
-			ctx.Build.Runtime.Provider)
+			runtime.Version,
+			runtime.Provider)
 	}
 
 	ctx.Catalog = catalog
@@ -133,7 +140,13 @@ func generateQuarkusProject(ctx *builderContext) error {
 	return nil
 }
 
-func generateQuarkusProjectCommon(runtimeProvider v1.RuntimeProvider, runtimeVersion string, quarkusPlatformVersion string) maven.Project {
+func generateQuarkusProjectCommon(runtimeProvider v1.RuntimeProvider, runtimeVersion string,
+	quarkusPlatformVersion string) maven.Project {
+	if runtimeProvider == v1.RuntimeProviderPlainQuarkus {
+		// We need this workaround to load the last existing catalog
+		// TODO: this part will be subject to future refactoring
+		quarkusPlatformVersion = runtimeVersion
+	}
 	p := maven.NewProjectWithGAV("org.apache.camel.k.integration", "camel-k-integration", defaults.Version)
 	p.DependencyManagement = &maven.DependencyManagement{Dependencies: make([]maven.Dependency, 0)}
 	p.Dependencies = make([]maven.Dependency, 0)

@@ -29,6 +29,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/property"
 )
@@ -157,6 +158,11 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment) error {
 		Version:  t.runtimeVersion,
 		Provider: v1.RuntimeProvider(t.runtimeProvider),
 	}
+	if runtime.Provider == v1.RuntimeProviderPlainQuarkus {
+		// We need this workaround to load the last existing catalog
+		// TODO: this part will be subject to future refactoring
+		runtime.Version = defaults.DefaultRuntimeVersion
+	}
 
 	catalog, err := camel.LoadCatalog(e.Ctx, e.Client, catalogNamespace, runtime)
 	if err != nil {
@@ -179,6 +185,11 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment) error {
 		return fmt.Errorf("unable to find catalog matching version requirement: runtime=%s, provider=%s",
 			runtime.Version,
 			runtime.Provider)
+	}
+	if runtime.Provider == v1.RuntimeProviderPlainQuarkus {
+		// We need this workaround to load the last existing catalog
+		// TODO: this part will be subject to future refactoring
+		catalog.Runtime.Version = t.runtimeVersion
 	}
 
 	e.CamelCatalog = catalog

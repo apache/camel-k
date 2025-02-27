@@ -79,11 +79,17 @@ func (action *initializeAction) Handle(ctx context.Context, kit *v1.IntegrationK
 }
 
 func (action *initializeAction) image(ctx context.Context, env *trait.Environment, kit *v1.IntegrationKit) error {
+	catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(env.CamelCatalog.GetRuntimeVersion()))
+	if env.CamelCatalog.GetRuntimeProvider() == v1.RuntimeProviderPlainQuarkus {
+		// We need this workaround to load the last existing catalog
+		// TODO: this part will be subject to future refactoring
+		catalogName = fmt.Sprintf("camel-catalog-quarkus-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
+	}
 	// Wait for CamelCatalog to be ready
 	catalog, err := kubernetes.GetCamelCatalog(
 		ctx,
 		action.client,
-		fmt.Sprintf("camel-catalog-%s", strings.ToLower(env.CamelCatalog.GetRuntimeVersion())),
+		catalogName,
 		kit.Namespace,
 	)
 
