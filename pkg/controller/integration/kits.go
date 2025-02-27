@@ -31,7 +31,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
-	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 )
@@ -169,11 +168,7 @@ func statusMatches(integration *v1.Integration, kit *v1.IntegrationKit, ilog *lo
 
 // kitMatches returns whether the kit matches with the existing target kit.
 func kitMatches(c client.Client, kit *v1.IntegrationKit, target *v1.IntegrationKit) (bool, error) {
-	version := kit.Status.RuntimeVersion
-	if version == "" {
-		// Defaults with the version that is going to be set during the kit initialization
-		version = defaults.DefaultRuntimeVersion
-	}
+	version := kit.Labels[kubernetes.CamelLabelRuntimeVersion]
 	if version != target.Status.RuntimeVersion {
 		return false, nil
 	}
