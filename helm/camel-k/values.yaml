@@ -48,3 +48,9 @@ operator:
 
   serviceAccount:
     annotations:
+
+  ## Extra environment variables.
+  ## ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
+  extraEnv: []
+    # - name: MY_VAR
+      # value: my_value

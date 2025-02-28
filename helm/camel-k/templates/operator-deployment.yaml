@@ -73,6 +73,9 @@ spec:
                   fieldPath: metadata.namespace
             - name: OPERATOR_ID
               value: {{ .Values.operator.operatorId }}
+            {{- with .Values.operator.extraEnv }}
+            {{- . | toYaml | nindent 12 }}
+            {{- end }}
           image: {{ .Values.operator.image }}
           imagePullPolicy: IfNotPresent
           livenessProbe:
