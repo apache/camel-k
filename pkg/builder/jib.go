@@ -87,11 +87,7 @@ func (t *jibTask) Do(ctx context.Context) v1.BuildStatus {
 		}
 	}
 
-	mavenArgs, err := buildJibMavenArgs(mavenDir, t.task.Image, status.BaseImage, t.task.Registry.Insecure, t.task.Configuration.ImagePlatforms)
-	if err != nil {
-		return status.Failed(err)
-	}
-
+	mavenArgs := buildJibMavenArgs(mavenDir, t.task.Image, status.BaseImage, t.task.Registry.Insecure, t.task.Configuration.ImagePlatforms)
 	mvnCmd := "./mvnw"
 	if c, ok := os.LookupEnv("MAVEN_CMD"); ok {
 		mvnCmd = c
@@ -141,17 +137,10 @@ func cleanRegistryConfig(registryConfigDir string) error {
 }
 
 // buildJibMavenArgs build the jib execution expected parameters.
-func buildJibMavenArgs(mavenDir, image, baseImage string, insecureRegistry bool, imagePlatforms []string) ([]string, error) {
-	// TODO refactor maven code to avoid creating a file to pass command args
-	mavenCommand, err := util.ReadFile(filepath.Join(mavenDir, "MAVEN_CONTEXT"))
-	if err != nil {
-		return nil, err
-	}
-
+func buildJibMavenArgs(mavenDir, image, baseImage string, insecureRegistry bool, imagePlatforms []string) []string {
 	mavenArgs := make([]string, 0)
 	mavenArgs = append(mavenArgs, jib.JibMavenGoal)
 	mavenArgs = append(mavenArgs, "-Djib.disableUpdateChecks=true")
-	mavenArgs = append(mavenArgs, strings.Split(string(mavenCommand), " ")...)
 	mavenArgs = append(mavenArgs, "-P", "jib")
 	mavenArgs = append(mavenArgs, jib.JibMavenToImageParam+image)
 	mavenArgs = append(mavenArgs, jib.JibMavenFromImageParam+baseImage)
@@ -167,5 +156,5 @@ func buildJibMavenArgs(mavenDir, image, baseImage string, insecureRegistry bool,
 		mavenArgs = append(mavenArgs, jib.JibMavenInsecureRegistries+"true")
 	}
 
-	return mavenArgs, nil
+	return mavenArgs
 }

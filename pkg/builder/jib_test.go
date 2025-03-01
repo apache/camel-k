@@ -27,21 +27,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestJibBuildMavenMissingContext(t *testing.T) {
-	args, err := buildJibMavenArgs("missing-dir", "my-image", "my-base-image", true, nil)
-	require.Error(t, err)
-	assert.Nil(t, args)
-	assert.Contains(t, err.Error(), "no such file or directory")
-}
-
 func TestJibBuildMavenArgs(t *testing.T) {
 	tmpMvnCtxDir, err := os.MkdirTemp("", "my-build-test")
 	require.NoError(t, err)
-	require.NoError(t, os.WriteFile(tmpMvnCtxDir+"/MAVEN_CONTEXT", []byte(`-x some-maven-option`), 0o400))
-	args, err := buildJibMavenArgs(tmpMvnCtxDir, "my-image", "my-base-image", true, nil)
-	require.NoError(t, err)
+	args := buildJibMavenArgs(tmpMvnCtxDir, "my-image", "my-base-image", true, nil)
 	expectedParams := strings.Split(
-		fmt.Sprintf("jib:build -Djib.disableUpdateChecks=true -x some-maven-option -P jib -Djib.to.image=my-image "+
+		fmt.Sprintf("jib:build -Djib.disableUpdateChecks=true -P jib -Djib.to.image=my-image "+
 			"-Djib.from.image=my-base-image -Djib.baseImageCache=%s -Djib.container.user=1000 -Djib.allowInsecureRegistries=true", tmpMvnCtxDir+"/jib"),
 		" ")
 	assert.Equal(t, expectedParams, args)
@@ -50,11 +41,9 @@ func TestJibBuildMavenArgs(t *testing.T) {
 func TestJibBuildMavenArgsWithPlatforms(t *testing.T) {
 	tmpMvnCtxDir, err := os.MkdirTemp("", "my-build-test")
 	require.NoError(t, err)
-	require.NoError(t, os.WriteFile(tmpMvnCtxDir+"/MAVEN_CONTEXT", []byte(`-x some-maven-option`), 0o400))
-	args, err := buildJibMavenArgs(tmpMvnCtxDir, "my-image", "my-base-image", true, []string{"amd64", "arm64"})
-	require.NoError(t, err)
+	args := buildJibMavenArgs(tmpMvnCtxDir, "my-image", "my-base-image", true, []string{"amd64", "arm64"})
 	expectedParams := strings.Split(
-		fmt.Sprintf("jib:build -Djib.disableUpdateChecks=true -x some-maven-option -P jib -Djib.to.image=my-image "+
+		fmt.Sprintf("jib:build -Djib.disableUpdateChecks=true -P jib -Djib.to.image=my-image "+
 			"-Djib.from.image=my-base-image -Djib.baseImageCache=%s -Djib.container.user=1000 -Djib.from.platforms=amd64,arm64 -Djib.allowInsecureRegistries=true",
 			tmpMvnCtxDir+"/jib"),
 		" ")

@@ -18,19 +18,32 @@ limitations under the License.
 package maven
 
 import (
+	"os"
+	"path"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetMavenContext(t *testing.T) {
-	mvnSimpleCompile := getMavenContext([]string{"compile", "-s", "my-settings.xml"}, "")
-	mvnOptionsCompile := getMavenContext([]string{"compile", "-s", "my-settings.xml"}, "-DmyProperty=hello")
-	mvnSimplePackage := getMavenContext([]string{"package", "-s", "my-settings.xml"}, "")
-	mvnOptionsPackage := getMavenContext([]string{"package", "-s", "my-settings.xml"}, "-DmyProperty=hello")
+	mvnSimpleCompile := getMavenContext([]string{"compile", "-s", "my-settings.xml"}, nil)
+	mvnOptionsCompile := getMavenContext([]string{"compile", "-s", "my-settings.xml"}, []string{"-DmyProperty=hello"})
+	mvnSimplePackage := getMavenContext([]string{"package", "-s", "my-settings.xml"}, nil)
+	mvnOptionsPackage := getMavenContext([]string{"package", "-s", "my-settings.xml"}, []string{"-DmyProperty=hello"})
 
-	assert.Equal(t, "compile -s my-settings.xml", mvnSimpleCompile)
-	assert.Equal(t, "compile -s my-settings.xml -DmyProperty=hello", mvnOptionsCompile)
-	assert.Equal(t, "-s my-settings.xml", mvnSimplePackage)
-	assert.Equal(t, "-s my-settings.xml -DmyProperty=hello", mvnOptionsPackage)
+	assert.Equal(t, "compile\n-s\nmy-settings.xml\n", mvnSimpleCompile)
+	assert.Equal(t, "compile\n-s\nmy-settings.xml\n-DmyProperty=hello\n", mvnOptionsCompile)
+	assert.Equal(t, "-s\nmy-settings.xml\n", mvnSimplePackage)
+	assert.Equal(t, "-s\nmy-settings.xml\n-DmyProperty=hello\n", mvnOptionsPackage)
+}
+
+func TestGenerateMavenContext(t *testing.T) {
+	dir, err := os.MkdirTemp("", "camel-k-mvnconfig-*")
+	require.NoError(t, err)
+	err = generateMavenContext(dir, []string{"hello"}, nil)
+	require.NoError(t, err)
+	f, err := os.Stat(path.Join(dir, ".mvn", "maven.config"))
+	require.NoError(t, err)
+	assert.Equal(t, "maven.config", f.Name())
 }

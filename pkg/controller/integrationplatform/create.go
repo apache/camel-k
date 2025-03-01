@@ -172,7 +172,7 @@ func installKamelets(ctx context.Context, c client.Client, platform *v1.Integrat
 				v1.IntegrationPlatformConditionKameletCatalogAvailable,
 				corev1.ConditionFalse,
 				"IntegrationPlatformKameletCatalogAvailable",
-				fmt.Sprintf("kamelet catalog %s not available. Error: %s", camelVersion, err),
+				fmt.Sprintf("kamelet catalog %s not available. Error: %v", camelVersion, err),
 			)
 		} else {
 			message := fmt.Sprintf("successfully installed Kamelet catalog version %s: success %d Kamelets, failed %d Kamelets",
