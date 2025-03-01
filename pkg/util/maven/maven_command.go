@@ -100,16 +100,18 @@ func (c *Command) Do(ctx context.Context) error {
 	Log.WithValues("MAVEN_OPTS", mavenOptions).Infof("executing: %s", strings.Join(cmd.Args, " "))
 
 	// generate maven file
-	if err := generateMavenContext(c.context.Path, args, mavenOptions); err != nil {
-		return err
+	if !c.context.SkipMavenConfigGeneration {
+		if err := generateMavenContext(c.context.Path, args, mavenOptions); err != nil {
+			return err
+		}
 	}
 
 	return util.RunAndLog(ctx, cmd, LogHandler, LogHandler)
 }
 
-func (c *Command) optionsFromEnv() (string, []string) {
+func (c *Command) optionsFromEnv() ([]string, []string) {
 	if len(c.context.ExtraMavenOpts) == 0 {
-		return "", nil
+		return nil, nil
 	}
 
 	var mavenOptions string
@@ -151,7 +153,7 @@ func (c *Command) optionsFromEnv() (string, []string) {
 		}
 	}
 
-	return mavenOptions, env
+	return c.context.ExtraMavenOpts, env
 }
 
 func NewContext(buildDir string) Context {
@@ -163,14 +165,15 @@ func NewContext(buildDir string) Context {
 }
 
 type Context struct {
-	Path                string
-	ExtraMavenOpts      []string
-	GlobalSettings      []byte
-	UserSettings        []byte
-	SettingsSecurity    []byte
-	AdditionalArguments []string
-	AdditionalEntries   map[string]interface{}
-	LocalRepository     string
+	SkipMavenConfigGeneration bool
+	Path                      string
+	ExtraMavenOpts            []string
+	GlobalSettings            []byte
+	UserSettings              []byte
+	SettingsSecurity          []byte
+	AdditionalArguments       []string
+	AdditionalEntries         map[string]interface{}
+	LocalRepository           string
 }
 
 func (c *Context) AddEntry(id string, entry interface{}) {
@@ -293,23 +296,24 @@ func ParseGAV(gav string) (Dependency, error) {
 	return dep, nil
 }
 
-// Create a MAVEN_CONTEXT file containing all arguments for a maven command.
-func generateMavenContext(path string, args []string, options string) error {
-	// TODO refactor maven code to avoid creating a file to pass command args
-	return util.WriteToFile(filepath.Join(path, "MAVEN_CONTEXT"), getMavenContext(args, options))
+// Create a .mvn/maven.config file containing all arguments for any follow up maven command.
+func generateMavenContext(path string, args, options []string) error {
+	return util.WriteFileWithContent(filepath.Join(path, ".mvn", "maven.config"), []byte(getMavenContext(args, options)))
 }
 
-func getMavenContext(args []string, options string) string {
-	commandArgs := make([]string, 0)
+func getMavenContext(args, options []string) string {
+	mavenContext := ""
 	for _, arg := range args {
-		if arg != "package" && len(strings.TrimSpace(arg)) != 0 {
-			commandArgs = append(commandArgs, strings.TrimSpace(arg))
+		arg = strings.TrimSpace(arg)
+		if arg != "package" && len(arg) != 0 {
+			mavenContext += fmt.Sprintf("%s\n", arg)
 		}
 	}
-
-	mavenContext := strings.Join(commandArgs, " ")
-	if options != "" {
-		mavenContext += " " + options
+	for _, opt := range options {
+		opt = strings.TrimSpace(opt)
+		if len(opt) != 0 {
+			mavenContext += fmt.Sprintf("%s\n", opt)
+		}
 	}
 
 	return mavenContext

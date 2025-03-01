@@ -105,6 +105,7 @@ func prepareKameletDirectory() (string, error) {
 func downloadKameletDependency(ctx context.Context, c client.Client, platform *v1.IntegrationPlatform, version, kameletsDir string) error {
 	p := maven.NewProjectWithGAV("org.apache.camel.k.kamelets", "kamelets-catalog", defaults.Version)
 	mc := maven.NewContext(kameletsDir)
+	mc.SkipMavenConfigGeneration = true
 	mc.LocalRepository = platform.Status.Build.Maven.LocalRepository
 	mc.AdditionalArguments = platform.Status.Build.Maven.CLIOptions
 	mc.AddArgument("-q")

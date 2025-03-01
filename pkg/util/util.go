@@ -369,15 +369,6 @@ func MapToYAML(src map[string]interface{}) ([]byte, error) {
 	return yamldata, nil
 }
 
-func WriteToFile(filePath string, fileContents string) error {
-	err := os.WriteFile(filePath, []byte(fileContents), io2.FilePerm400)
-	if err != nil {
-		return fmt.Errorf("error writing file: %v", filePath)
-	}
-
-	return nil
-}
-
 func GetEnvironmentVariable(variable string) (string, error) {
 	value, isPresent := os.LookupEnv(variable)
 	if !isPresent {
