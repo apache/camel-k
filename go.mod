@@ -21,7 +21,7 @@ require (
 	github.com/openshift/api v0.0.0-20240228005710-4511c790cc60
 	github.com/operator-framework/api v0.26.0
 	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.76.2
-	github.com/prometheus/client_golang v1.21.0
+	github.com/prometheus/client_golang v1.21.1
 	github.com/prometheus/client_model v0.6.1
 	github.com/prometheus/common v0.62.0
 	github.com/rs/xid v1.6.0
@@ -55,8 +55,6 @@ require (
 	sigs.k8s.io/controller-runtime v0.20.2
 	sigs.k8s.io/structured-merge-diff/v4 v4.5.0
 )
-
-require github.com/redhat-developer/service-binding-operator v1.4.1
 
 require (
 	contrib.go.opencensus.io/exporter/ocagent v0.7.1-0.20200907061046-05415f1de66d // indirect
