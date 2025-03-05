@@ -53,10 +53,8 @@ require (
 	knative.dev/pkg v0.0.0-20241021183759-9b9d535af5ad
 	knative.dev/serving v0.43.1
 	sigs.k8s.io/controller-runtime v0.20.2
-	sigs.k8s.io/structured-merge-diff/v4 v4.5.0
+	sigs.k8s.io/structured-merge-diff/v4 v4.6.0
 )
-
-require github.com/redhat-developer/service-binding-operator v1.4.1
 
 require (
 	contrib.go.opencensus.io/exporter/ocagent v0.7.1-0.20200907061046-05415f1de66d // indirect
