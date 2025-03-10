@@ -49,8 +49,8 @@ require (
 	k8s.io/klog/v2 v2.130.1
 	k8s.io/kubectl v0.32.2
 	k8s.io/utils v0.0.0-20241104100929-3ea5e8cea738
-	knative.dev/eventing v0.43.3
-	knative.dev/pkg v0.0.0-20241021183759-9b9d535af5ad
+	knative.dev/eventing v0.44.3
+	knative.dev/pkg v0.0.0-20250117084104-c43477f0052b
 	knative.dev/serving v0.43.1
 	sigs.k8s.io/controller-runtime v0.20.2
 	sigs.k8s.io/structured-merge-diff/v4 v4.6.0
@@ -141,7 +141,7 @@ require (
 	google.golang.org/api v0.183.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250303144028-a0af3efb3deb // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250227231956-55c901821b1e // indirect
-	google.golang.org/grpc v1.67.1 // indirect
+	google.golang.org/grpc v1.69.2 // indirect
 	google.golang.org/protobuf v1.36.5 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.12.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
