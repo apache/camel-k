@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
+	"github.com/apache/camel-k/v2/pkg/util/jib"
 
 	"github.com/apache/camel-k/v2/pkg/util/io"
 
@@ -203,6 +204,9 @@ func generateQuarkusProjectCommon(runtimeProvider v1.RuntimeProvider, runtimeVer
 			},
 		},
 	)
+
+	// Jib publish profile
+	p.AddProfiles(jib.XMLJibProfile)
 
 	return p
 }
