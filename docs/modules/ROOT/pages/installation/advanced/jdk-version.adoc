@@ -2,7 +2,7 @@
 
 Camel K requires a JDK to be able to build and properly run a Camel application. From version 2.6.0 onward, we are publishing multiple JDK containers which you can choose if you want to use a different JDK from the default provided.
 
-The list of available container images is published in (https://hub.docker.com/r/apache/camel-k/tags)[official Docker Apache Camel K page].
+The list of available container images is published in (https://hub.docker.com/r/apache/camel-k/tags[official Docker Apache Camel K page]).
 
 [[camel-k-jdk-21]]
 == Install Camel K JDK 21 operator
