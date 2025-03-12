@@ -19,14 +19,14 @@ limitations under the License.
 
 package v1
 
-// ConfigurationSpecApplyConfiguration represents an declarative configuration of the ConfigurationSpec type for use
+// ConfigurationSpecApplyConfiguration represents a declarative configuration of the ConfigurationSpec type for use
 // with apply.
 type ConfigurationSpecApplyConfiguration struct {
 	Type  *string `json:"type,omitempty"`
 	Value *string `json:"value,omitempty"`
 }
 
-// ConfigurationSpecApplyConfiguration constructs an declarative configuration of the ConfigurationSpec type for use with
+// ConfigurationSpecApplyConfiguration constructs a declarative configuration of the ConfigurationSpec type for use with
 // apply.
 func ConfigurationSpec() *ConfigurationSpecApplyConfiguration {
 	return &ConfigurationSpecApplyConfiguration{}

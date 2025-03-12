@@ -20,10 +20,10 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/client-go/tools/cache"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	labels "k8s.io/apimachinery/pkg/labels"
+	listers "k8s.io/client-go/listers"
+	cache "k8s.io/client-go/tools/cache"
 )
 
 // IntegrationLister helps list Integrations.
@@ -31,7 +31,7 @@ import (
 type IntegrationLister interface {
 	// List lists all Integrations in the indexer.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1.Integration, err error)
+	List(selector labels.Selector) (ret []*camelv1.Integration, err error)
 	// Integrations returns an object that can list and get Integrations.
 	Integrations(namespace string) IntegrationNamespaceLister
 	IntegrationListerExpansion
@@ -39,25 +39,17 @@ type IntegrationLister interface {
 
 // integrationLister implements the IntegrationLister interface.
 type integrationLister struct {
-	indexer cache.Indexer
+	listers.ResourceIndexer[*camelv1.Integration]
 }
 
 // NewIntegrationLister returns a new IntegrationLister.
 func NewIntegrationLister(indexer cache.Indexer) IntegrationLister {
-	return &integrationLister{indexer: indexer}
-}
-
-// List lists all Integrations in the indexer.
-func (s *integrationLister) List(selector labels.Selector) (ret []*v1.Integration, err error) {
-	err = cache.ListAll(s.indexer, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1.Integration))
-	})
-	return ret, err
+	return &integrationLister{listers.New[*camelv1.Integration](indexer, camelv1.Resource("integration"))}
 }
 
 // Integrations returns an object that can list and get Integrations.
 func (s *integrationLister) Integrations(namespace string) IntegrationNamespaceLister {
-	return integrationNamespaceLister{indexer: s.indexer, namespace: namespace}
+	return integrationNamespaceLister{listers.NewNamespaced[*camelv1.Integration](s.ResourceIndexer, namespace)}
 }
 
 // IntegrationNamespaceLister helps list and get Integrations.
@@ -65,36 +57,15 @@ func (s *integrationLister) Integrations(namespace string) IntegrationNamespaceL
 type IntegrationNamespaceLister interface {
 	// List lists all Integrations in the indexer for a given namespace.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1.Integration, err error)
+	List(selector labels.Selector) (ret []*camelv1.Integration, err error)
 	// Get retrieves the Integration from the indexer for a given namespace and name.
 	// Objects returned here must be treated as read-only.
-	Get(name string) (*v1.Integration, error)
+	Get(name string) (*camelv1.Integration, error)
 	IntegrationNamespaceListerExpansion
 }
 
 // integrationNamespaceLister implements the IntegrationNamespaceLister
 // interface.
 type integrationNamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all Integrations in the indexer for a given namespace.
-func (s integrationNamespaceLister) List(selector labels.Selector) (ret []*v1.Integration, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1.Integration))
-	})
-	return ret, err
-}
-
-// Get retrieves the Integration from the indexer for a given namespace and name.
-func (s integrationNamespaceLister) Get(name string) (*v1.Integration, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, errors.NewNotFound(v1.Resource("integration"), name)
-	}
-	return obj.(*v1.Integration), nil
+	listers.ResourceIndexer[*camelv1.Integration]
 }

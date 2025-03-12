@@ -19,7 +19,7 @@ limitations under the License.
 
 package v1
 
-// RepositoryPolicyApplyConfiguration represents an declarative configuration of the RepositoryPolicy type for use
+// RepositoryPolicyApplyConfiguration represents a declarative configuration of the RepositoryPolicy type for use
 // with apply.
 type RepositoryPolicyApplyConfiguration struct {
 	Enabled        *bool   `json:"enabled,omitempty"`
@@ -27,7 +27,7 @@ type RepositoryPolicyApplyConfiguration struct {
 	ChecksumPolicy *string `json:"checksumPolicy,omitempty"`
 }
 
-// RepositoryPolicyApplyConfiguration constructs an declarative configuration of the RepositoryPolicy type for use with
+// RepositoryPolicyApplyConfiguration constructs a declarative configuration of the RepositoryPolicy type for use with
 // apply.
 func RepositoryPolicy() *RepositoryPolicyApplyConfiguration {
 	return &RepositoryPolicyApplyConfiguration{}

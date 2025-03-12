@@ -19,7 +19,7 @@ limitations under the License.
 
 package v1
 
-// PipeSpecApplyConfiguration represents an declarative configuration of the PipeSpec type for use
+// PipeSpecApplyConfiguration represents a declarative configuration of the PipeSpec type for use
 // with apply.
 type PipeSpecApplyConfiguration struct {
 	Integration        *IntegrationSpecApplyConfiguration  `json:"integration,omitempty"`
@@ -31,7 +31,7 @@ type PipeSpecApplyConfiguration struct {
 	ServiceAccountName *string                             `json:"serviceAccountName,omitempty"`
 }
 
-// PipeSpecApplyConfiguration constructs an declarative configuration of the PipeSpec type for use with
+// PipeSpecApplyConfiguration constructs a declarative configuration of the PipeSpec type for use with
 // apply.
 func PipeSpec() *PipeSpecApplyConfiguration {
 	return &PipeSpecApplyConfiguration{}

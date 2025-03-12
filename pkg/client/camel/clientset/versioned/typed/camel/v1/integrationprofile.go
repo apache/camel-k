@@ -20,18 +20,15 @@ limitations under the License.
 package v1
 
 import (
-	"context"
-	json "encoding/json"
-	"fmt"
-	"time"
+	context "context"
 
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	applyconfigurationcamelv1 "github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration/camel/v1"
 	scheme "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/scheme"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
-	rest "k8s.io/client-go/rest"
+	gentype "k8s.io/client-go/gentype"
 )
 
 // IntegrationProfilesGetter has a method to return a IntegrationProfileInterface.
@@ -42,216 +39,37 @@ type IntegrationProfilesGetter interface {
 
 // IntegrationProfileInterface has methods to work with IntegrationProfile resources.
 type IntegrationProfileInterface interface {
-	Create(ctx context.Context, integrationProfile *v1.IntegrationProfile, opts metav1.CreateOptions) (*v1.IntegrationProfile, error)
-	Update(ctx context.Context, integrationProfile *v1.IntegrationProfile, opts metav1.UpdateOptions) (*v1.IntegrationProfile, error)
-	UpdateStatus(ctx context.Context, integrationProfile *v1.IntegrationProfile, opts metav1.UpdateOptions) (*v1.IntegrationProfile, error)
+	Create(ctx context.Context, integrationProfile *camelv1.IntegrationProfile, opts metav1.CreateOptions) (*camelv1.IntegrationProfile, error)
+	Update(ctx context.Context, integrationProfile *camelv1.IntegrationProfile, opts metav1.UpdateOptions) (*camelv1.IntegrationProfile, error)
+	// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+	UpdateStatus(ctx context.Context, integrationProfile *camelv1.IntegrationProfile, opts metav1.UpdateOptions) (*camelv1.IntegrationProfile, error)
 	Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error
 	DeleteCollection(ctx context.Context, opts metav1.DeleteOptions, listOpts metav1.ListOptions) error
-	Get(ctx context.Context, name string, opts metav1.GetOptions) (*v1.IntegrationProfile, error)
-	List(ctx context.Context, opts metav1.ListOptions) (*v1.IntegrationProfileList, error)
+	Get(ctx context.Context, name string, opts metav1.GetOptions) (*camelv1.IntegrationProfile, error)
+	List(ctx context.Context, opts metav1.ListOptions) (*camelv1.IntegrationProfileList, error)
 	Watch(ctx context.Context, opts metav1.ListOptions) (watch.Interface, error)
-	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts metav1.PatchOptions, subresources ...string) (result *v1.IntegrationProfile, err error)
-	Apply(ctx context.Context, integrationProfile *camelv1.IntegrationProfileApplyConfiguration, opts metav1.ApplyOptions) (result *v1.IntegrationProfile, err error)
-	ApplyStatus(ctx context.Context, integrationProfile *camelv1.IntegrationProfileApplyConfiguration, opts metav1.ApplyOptions) (result *v1.IntegrationProfile, err error)
+	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts metav1.PatchOptions, subresources ...string) (result *camelv1.IntegrationProfile, err error)
+	Apply(ctx context.Context, integrationProfile *applyconfigurationcamelv1.IntegrationProfileApplyConfiguration, opts metav1.ApplyOptions) (result *camelv1.IntegrationProfile, err error)
+	// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
+	ApplyStatus(ctx context.Context, integrationProfile *applyconfigurationcamelv1.IntegrationProfileApplyConfiguration, opts metav1.ApplyOptions) (result *camelv1.IntegrationProfile, err error)
 	IntegrationProfileExpansion
 }
 
 // integrationProfiles implements IntegrationProfileInterface
 type integrationProfiles struct {
-	client rest.Interface
-	ns     string
+	*gentype.ClientWithListAndApply[*camelv1.IntegrationProfile, *camelv1.IntegrationProfileList, *applyconfigurationcamelv1.IntegrationProfileApplyConfiguration]
 }
 
 // newIntegrationProfiles returns a IntegrationProfiles
 func newIntegrationProfiles(c *CamelV1Client, namespace string) *integrationProfiles {
 	return &integrationProfiles{
-		client: c.RESTClient(),
-		ns:     namespace,
+		gentype.NewClientWithListAndApply[*camelv1.IntegrationProfile, *camelv1.IntegrationProfileList, *applyconfigurationcamelv1.IntegrationProfileApplyConfiguration](
+			"integrationprofiles",
+			c.RESTClient(),
+			scheme.ParameterCodec,
+			namespace,
+			func() *camelv1.IntegrationProfile { return &camelv1.IntegrationProfile{} },
+			func() *camelv1.IntegrationProfileList { return &camelv1.IntegrationProfileList{} },
+		),
 	}
-}
-
-// Get takes name of the integrationProfile, and returns the corresponding integrationProfile object, and an error if there is any.
-func (c *integrationProfiles) Get(ctx context.Context, name string, options metav1.GetOptions) (result *v1.IntegrationProfile, err error) {
-	result = &v1.IntegrationProfile{}
-	err = c.client.Get().
-		Namespace(c.ns).
-		Resource("integrationprofiles").
-		Name(name).
-		VersionedParams(&options, scheme.ParameterCodec).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// List takes label and field selectors, and returns the list of IntegrationProfiles that match those selectors.
-func (c *integrationProfiles) List(ctx context.Context, opts metav1.ListOptions) (result *v1.IntegrationProfileList, err error) {
-	var timeout time.Duration
-	if opts.TimeoutSeconds != nil {
-		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
-	}
-	result = &v1.IntegrationProfileList{}
-	err = c.client.Get().
-		Namespace(c.ns).
-		Resource("integrationprofiles").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Watch returns a watch.Interface that watches the requested integrationProfiles.
-func (c *integrationProfiles) Watch(ctx context.Context, opts metav1.ListOptions) (watch.Interface, error) {
-	var timeout time.Duration
-	if opts.TimeoutSeconds != nil {
-		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
-	}
-	opts.Watch = true
-	return c.client.Get().
-		Namespace(c.ns).
-		Resource("integrationprofiles").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Watch(ctx)
-}
-
-// Create takes the representation of a integrationProfile and creates it.  Returns the server's representation of the integrationProfile, and an error, if there is any.
-func (c *integrationProfiles) Create(ctx context.Context, integrationProfile *v1.IntegrationProfile, opts metav1.CreateOptions) (result *v1.IntegrationProfile, err error) {
-	result = &v1.IntegrationProfile{}
-	err = c.client.Post().
-		Namespace(c.ns).
-		Resource("integrationprofiles").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(integrationProfile).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Update takes the representation of a integrationProfile and updates it. Returns the server's representation of the integrationProfile, and an error, if there is any.
-func (c *integrationProfiles) Update(ctx context.Context, integrationProfile *v1.IntegrationProfile, opts metav1.UpdateOptions) (result *v1.IntegrationProfile, err error) {
-	result = &v1.IntegrationProfile{}
-	err = c.client.Put().
-		Namespace(c.ns).
-		Resource("integrationprofiles").
-		Name(integrationProfile.Name).
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(integrationProfile).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *integrationProfiles) UpdateStatus(ctx context.Context, integrationProfile *v1.IntegrationProfile, opts metav1.UpdateOptions) (result *v1.IntegrationProfile, err error) {
-	result = &v1.IntegrationProfile{}
-	err = c.client.Put().
-		Namespace(c.ns).
-		Resource("integrationprofiles").
-		Name(integrationProfile.Name).
-		SubResource("status").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(integrationProfile).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Delete takes name of the integrationProfile and deletes it. Returns an error if one occurs.
-func (c *integrationProfiles) Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error {
-	return c.client.Delete().
-		Namespace(c.ns).
-		Resource("integrationprofiles").
-		Name(name).
-		Body(&opts).
-		Do(ctx).
-		Error()
-}
-
-// DeleteCollection deletes a collection of objects.
-func (c *integrationProfiles) DeleteCollection(ctx context.Context, opts metav1.DeleteOptions, listOpts metav1.ListOptions) error {
-	var timeout time.Duration
-	if listOpts.TimeoutSeconds != nil {
-		timeout = time.Duration(*listOpts.TimeoutSeconds) * time.Second
-	}
-	return c.client.Delete().
-		Namespace(c.ns).
-		Resource("integrationprofiles").
-		VersionedParams(&listOpts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Body(&opts).
-		Do(ctx).
-		Error()
-}
-
-// Patch applies the patch and returns the patched integrationProfile.
-func (c *integrationProfiles) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts metav1.PatchOptions, subresources ...string) (result *v1.IntegrationProfile, err error) {
-	result = &v1.IntegrationProfile{}
-	err = c.client.Patch(pt).
-		Namespace(c.ns).
-		Resource("integrationprofiles").
-		Name(name).
-		SubResource(subresources...).
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(data).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Apply takes the given apply declarative configuration, applies it and returns the applied integrationProfile.
-func (c *integrationProfiles) Apply(ctx context.Context, integrationProfile *camelv1.IntegrationProfileApplyConfiguration, opts metav1.ApplyOptions) (result *v1.IntegrationProfile, err error) {
-	if integrationProfile == nil {
-		return nil, fmt.Errorf("integrationProfile provided to Apply must not be nil")
-	}
-	patchOpts := opts.ToPatchOptions()
-	data, err := json.Marshal(integrationProfile)
-	if err != nil {
-		return nil, err
-	}
-	name := integrationProfile.Name
-	if name == nil {
-		return nil, fmt.Errorf("integrationProfile.Name must be provided to Apply")
-	}
-	result = &v1.IntegrationProfile{}
-	err = c.client.Patch(types.ApplyPatchType).
-		Namespace(c.ns).
-		Resource("integrationprofiles").
-		Name(*name).
-		VersionedParams(&patchOpts, scheme.ParameterCodec).
-		Body(data).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// ApplyStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
-func (c *integrationProfiles) ApplyStatus(ctx context.Context, integrationProfile *camelv1.IntegrationProfileApplyConfiguration, opts metav1.ApplyOptions) (result *v1.IntegrationProfile, err error) {
-	if integrationProfile == nil {
-		return nil, fmt.Errorf("integrationProfile provided to Apply must not be nil")
-	}
-	patchOpts := opts.ToPatchOptions()
-	data, err := json.Marshal(integrationProfile)
-	if err != nil {
-		return nil, err
-	}
-
-	name := integrationProfile.Name
-	if name == nil {
-		return nil, fmt.Errorf("integrationProfile.Name must be provided to Apply")
-	}
-
-	result = &v1.IntegrationProfile{}
-	err = c.client.Patch(types.ApplyPatchType).
-		Namespace(c.ns).
-		Resource("integrationprofiles").
-		Name(*name).
-		SubResource("status").
-		VersionedParams(&patchOpts, scheme.ParameterCodec).
-		Body(data).
-		Do(ctx).
-		Into(result)
-	return
 }

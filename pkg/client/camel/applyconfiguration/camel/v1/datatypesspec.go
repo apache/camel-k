@@ -19,7 +19,7 @@ limitations under the License.
 
 package v1
 
-// DataTypesSpecApplyConfiguration represents an declarative configuration of the DataTypesSpec type for use
+// DataTypesSpecApplyConfiguration represents a declarative configuration of the DataTypesSpec type for use
 // with apply.
 type DataTypesSpecApplyConfiguration struct {
 	Default *string                                   `json:"default,omitempty"`
@@ -27,7 +27,7 @@ type DataTypesSpecApplyConfiguration struct {
 	Headers map[string]HeaderSpecApplyConfiguration   `json:"headers,omitempty"`
 }
 
-// DataTypesSpecApplyConfiguration constructs an declarative configuration of the DataTypesSpec type for use with
+// DataTypesSpecApplyConfiguration constructs a declarative configuration of the DataTypesSpec type for use with
 // apply.
 func DataTypesSpec() *DataTypesSpecApplyConfiguration {
 	return &DataTypesSpecApplyConfiguration{}

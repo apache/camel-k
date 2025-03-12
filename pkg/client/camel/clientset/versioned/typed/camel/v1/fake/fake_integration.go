@@ -20,194 +20,60 @@ limitations under the License.
 package fake
 
 import (
-	"context"
-	json "encoding/json"
-	"fmt"
+	context "context"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration/camel/v1"
+	typedcamelv1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	labels "k8s.io/apimachinery/pkg/labels"
-	types "k8s.io/apimachinery/pkg/types"
-	watch "k8s.io/apimachinery/pkg/watch"
+	gentype "k8s.io/client-go/gentype"
 	testing "k8s.io/client-go/testing"
 )
 
-// FakeIntegrations implements IntegrationInterface
-type FakeIntegrations struct {
+// fakeIntegrations implements IntegrationInterface
+type fakeIntegrations struct {
+	*gentype.FakeClientWithListAndApply[*v1.Integration, *v1.IntegrationList, *camelv1.IntegrationApplyConfiguration]
 	Fake *FakeCamelV1
-	ns   string
 }
 
-var integrationsResource = v1.SchemeGroupVersion.WithResource("integrations")
-
-var integrationsKind = v1.SchemeGroupVersion.WithKind("Integration")
-
-// Get takes name of the integration, and returns the corresponding integration object, and an error if there is any.
-func (c *FakeIntegrations) Get(ctx context.Context, name string, options metav1.GetOptions) (result *v1.Integration, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(integrationsResource, c.ns, name), &v1.Integration{})
-
-	if obj == nil {
-		return nil, err
+func newFakeIntegrations(fake *FakeCamelV1, namespace string) typedcamelv1.IntegrationInterface {
+	return &fakeIntegrations{
+		gentype.NewFakeClientWithListAndApply[*v1.Integration, *v1.IntegrationList, *camelv1.IntegrationApplyConfiguration](
+			fake.Fake,
+			namespace,
+			v1.SchemeGroupVersion.WithResource("integrations"),
+			v1.SchemeGroupVersion.WithKind("Integration"),
+			func() *v1.Integration { return &v1.Integration{} },
+			func() *v1.IntegrationList { return &v1.IntegrationList{} },
+			func(dst, src *v1.IntegrationList) { dst.ListMeta = src.ListMeta },
+			func(list *v1.IntegrationList) []*v1.Integration { return gentype.ToPointerSlice(list.Items) },
+			func(list *v1.IntegrationList, items []*v1.Integration) { list.Items = gentype.FromPointerSlice(items) },
+		),
+		fake,
 	}
-	return obj.(*v1.Integration), err
-}
-
-// List takes label and field selectors, and returns the list of Integrations that match those selectors.
-func (c *FakeIntegrations) List(ctx context.Context, opts metav1.ListOptions) (result *v1.IntegrationList, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewListAction(integrationsResource, integrationsKind, c.ns, opts), &v1.IntegrationList{})
-
-	if obj == nil {
-		return nil, err
-	}
-
-	label, _, _ := testing.ExtractFromListOptions(opts)
-	if label == nil {
-		label = labels.Everything()
-	}
-	list := &v1.IntegrationList{ListMeta: obj.(*v1.IntegrationList).ListMeta}
-	for _, item := range obj.(*v1.IntegrationList).Items {
-		if label.Matches(labels.Set(item.Labels)) {
-			list.Items = append(list.Items, item)
-		}
-	}
-	return list, err
-}
-
-// Watch returns a watch.Interface that watches the requested integrations.
-func (c *FakeIntegrations) Watch(ctx context.Context, opts metav1.ListOptions) (watch.Interface, error) {
-	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(integrationsResource, c.ns, opts))
-
-}
-
-// Create takes the representation of a integration and creates it.  Returns the server's representation of the integration, and an error, if there is any.
-func (c *FakeIntegrations) Create(ctx context.Context, integration *v1.Integration, opts metav1.CreateOptions) (result *v1.Integration, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(integrationsResource, c.ns, integration), &v1.Integration{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1.Integration), err
-}
-
-// Update takes the representation of a integration and updates it. Returns the server's representation of the integration, and an error, if there is any.
-func (c *FakeIntegrations) Update(ctx context.Context, integration *v1.Integration, opts metav1.UpdateOptions) (result *v1.Integration, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(integrationsResource, c.ns, integration), &v1.Integration{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1.Integration), err
-}
-
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeIntegrations) UpdateStatus(ctx context.Context, integration *v1.Integration, opts metav1.UpdateOptions) (*v1.Integration, error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(integrationsResource, "status", c.ns, integration), &v1.Integration{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1.Integration), err
-}
-
-// Delete takes name of the integration and deletes it. Returns an error if one occurs.
-func (c *FakeIntegrations) Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error {
-	_, err := c.Fake.
-		Invokes(testing.NewDeleteActionWithOptions(integrationsResource, c.ns, name, opts), &v1.Integration{})
-
-	return err
-}
-
-// DeleteCollection deletes a collection of objects.
-func (c *FakeIntegrations) DeleteCollection(ctx context.Context, opts metav1.DeleteOptions, listOpts metav1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(integrationsResource, c.ns, listOpts)
-
-	_, err := c.Fake.Invokes(action, &v1.IntegrationList{})
-	return err
-}
-
-// Patch applies the patch and returns the patched integration.
-func (c *FakeIntegrations) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts metav1.PatchOptions, subresources ...string) (result *v1.Integration, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(integrationsResource, c.ns, name, pt, data, subresources...), &v1.Integration{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1.Integration), err
-}
-
-// Apply takes the given apply declarative configuration, applies it and returns the applied integration.
-func (c *FakeIntegrations) Apply(ctx context.Context, integration *camelv1.IntegrationApplyConfiguration, opts metav1.ApplyOptions) (result *v1.Integration, err error) {
-	if integration == nil {
-		return nil, fmt.Errorf("integration provided to Apply must not be nil")
-	}
-	data, err := json.Marshal(integration)
-	if err != nil {
-		return nil, err
-	}
-	name := integration.Name
-	if name == nil {
-		return nil, fmt.Errorf("integration.Name must be provided to Apply")
-	}
-	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(integrationsResource, c.ns, *name, types.ApplyPatchType, data), &v1.Integration{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1.Integration), err
-}
-
-// ApplyStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
-func (c *FakeIntegrations) ApplyStatus(ctx context.Context, integration *camelv1.IntegrationApplyConfiguration, opts metav1.ApplyOptions) (result *v1.Integration, err error) {
-	if integration == nil {
-		return nil, fmt.Errorf("integration provided to Apply must not be nil")
-	}
-	data, err := json.Marshal(integration)
-	if err != nil {
-		return nil, err
-	}
-	name := integration.Name
-	if name == nil {
-		return nil, fmt.Errorf("integration.Name must be provided to Apply")
-	}
-	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(integrationsResource, c.ns, *name, types.ApplyPatchType, data, "status"), &v1.Integration{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1.Integration), err
 }
 
 // GetScale takes name of the integration, and returns the corresponding scale object, and an error if there is any.
-func (c *FakeIntegrations) GetScale(ctx context.Context, integrationName string, options metav1.GetOptions) (result *autoscalingv1.Scale, err error) {
+func (c *fakeIntegrations) GetScale(ctx context.Context, integrationName string, options metav1.GetOptions) (result *autoscalingv1.Scale, err error) {
+	emptyResult := &autoscalingv1.Scale{}
 	obj, err := c.Fake.
-		Invokes(testing.NewGetSubresourceAction(integrationsResource, c.ns, "scale", integrationName), &autoscalingv1.Scale{})
+		Invokes(testing.NewGetSubresourceActionWithOptions(c.Resource(), c.Namespace(), "scale", integrationName, options), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*autoscalingv1.Scale), err
 }
 
 // UpdateScale takes the representation of a scale and updates it. Returns the server's representation of the scale, and an error, if there is any.
-func (c *FakeIntegrations) UpdateScale(ctx context.Context, integrationName string, scale *autoscalingv1.Scale, opts metav1.UpdateOptions) (result *autoscalingv1.Scale, err error) {
+func (c *fakeIntegrations) UpdateScale(ctx context.Context, integrationName string, scale *autoscalingv1.Scale, opts metav1.UpdateOptions) (result *autoscalingv1.Scale, err error) {
+	emptyResult := &autoscalingv1.Scale{}
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(integrationsResource, "scale", c.ns, scale), &autoscalingv1.Scale{})
+		Invokes(testing.NewUpdateSubresourceActionWithOptions(c.Resource(), "scale", c.Namespace(), scale, opts), &autoscalingv1.Scale{})
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*autoscalingv1.Scale), err
 }

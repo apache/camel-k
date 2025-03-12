@@ -23,7 +23,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-// MavenBuildSpecApplyConfiguration represents an declarative configuration of the MavenBuildSpec type for use
+// MavenBuildSpecApplyConfiguration represents a declarative configuration of the MavenBuildSpec type for use
 // with apply.
 type MavenBuildSpecApplyConfiguration struct {
 	MavenSpecApplyConfiguration `json:",inline"`
@@ -31,7 +31,7 @@ type MavenBuildSpecApplyConfiguration struct {
 	Servers                     []ServerApplyConfiguration     `json:"servers,omitempty"`
 }
 
-// MavenBuildSpecApplyConfiguration constructs an declarative configuration of the MavenBuildSpec type for use with
+// MavenBuildSpecApplyConfiguration constructs a declarative configuration of the MavenBuildSpec type for use with
 // apply.
 func MavenBuildSpec() *MavenBuildSpecApplyConfiguration {
 	return &MavenBuildSpecApplyConfiguration{}
@@ -41,7 +41,7 @@ func MavenBuildSpec() *MavenBuildSpecApplyConfiguration {
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the LocalRepository field is set to the value of the last call.
 func (b *MavenBuildSpecApplyConfiguration) WithLocalRepository(value string) *MavenBuildSpecApplyConfiguration {
-	b.LocalRepository = &value
+	b.MavenSpecApplyConfiguration.LocalRepository = &value
 	return b
 }
 
@@ -50,11 +50,11 @@ func (b *MavenBuildSpecApplyConfiguration) WithLocalRepository(value string) *Ma
 // If called multiple times, the entries provided by each call will be put on the Properties field,
 // overwriting an existing map entries in Properties field with the same key.
 func (b *MavenBuildSpecApplyConfiguration) WithProperties(entries map[string]string) *MavenBuildSpecApplyConfiguration {
-	if b.Properties == nil && len(entries) > 0 {
-		b.Properties = make(map[string]string, len(entries))
+	if b.MavenSpecApplyConfiguration.Properties == nil && len(entries) > 0 {
+		b.MavenSpecApplyConfiguration.Properties = make(map[string]string, len(entries))
 	}
 	for k, v := range entries {
-		b.Properties[k] = v
+		b.MavenSpecApplyConfiguration.Properties[k] = v
 	}
 	return b
 }
@@ -67,7 +67,7 @@ func (b *MavenBuildSpecApplyConfiguration) WithProfiles(values ...*ValueSourceAp
 		if values[i] == nil {
 			panic("nil value passed to WithProfiles")
 		}
-		b.Profiles = append(b.Profiles, *values[i])
+		b.MavenSpecApplyConfiguration.Profiles = append(b.MavenSpecApplyConfiguration.Profiles, *values[i])
 	}
 	return b
 }
@@ -76,7 +76,7 @@ func (b *MavenBuildSpecApplyConfiguration) WithProfiles(values ...*ValueSourceAp
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Settings field is set to the value of the last call.
 func (b *MavenBuildSpecApplyConfiguration) WithSettings(value *ValueSourceApplyConfiguration) *MavenBuildSpecApplyConfiguration {
-	b.Settings = value
+	b.MavenSpecApplyConfiguration.Settings = value
 	return b
 }
 
@@ -84,7 +84,7 @@ func (b *MavenBuildSpecApplyConfiguration) WithSettings(value *ValueSourceApplyC
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the SettingsSecurity field is set to the value of the last call.
 func (b *MavenBuildSpecApplyConfiguration) WithSettingsSecurity(value *ValueSourceApplyConfiguration) *MavenBuildSpecApplyConfiguration {
-	b.SettingsSecurity = value
+	b.MavenSpecApplyConfiguration.SettingsSecurity = value
 	return b
 }
 
@@ -93,7 +93,7 @@ func (b *MavenBuildSpecApplyConfiguration) WithSettingsSecurity(value *ValueSour
 // If called multiple times, values provided by each call will be appended to the CASecrets field.
 func (b *MavenBuildSpecApplyConfiguration) WithCASecrets(values ...corev1.SecretKeySelector) *MavenBuildSpecApplyConfiguration {
 	for i := range values {
-		b.CASecrets = append(b.CASecrets, values[i])
+		b.MavenSpecApplyConfiguration.CASecrets = append(b.MavenSpecApplyConfiguration.CASecrets, values[i])
 	}
 	return b
 }
@@ -106,7 +106,7 @@ func (b *MavenBuildSpecApplyConfiguration) WithExtension(values ...*MavenArtifac
 		if values[i] == nil {
 			panic("nil value passed to WithExtension")
 		}
-		b.Extension = append(b.Extension, *values[i])
+		b.MavenSpecApplyConfiguration.Extension = append(b.MavenSpecApplyConfiguration.Extension, *values[i])
 	}
 	return b
 }
@@ -116,7 +116,7 @@ func (b *MavenBuildSpecApplyConfiguration) WithExtension(values ...*MavenArtifac
 // If called multiple times, values provided by each call will be appended to the CLIOptions field.
 func (b *MavenBuildSpecApplyConfiguration) WithCLIOptions(values ...string) *MavenBuildSpecApplyConfiguration {
 	for i := range values {
-		b.CLIOptions = append(b.CLIOptions, values[i])
+		b.MavenSpecApplyConfiguration.CLIOptions = append(b.MavenSpecApplyConfiguration.CLIOptions, values[i])
 	}
 	return b
 }

@@ -19,13 +19,13 @@ limitations under the License.
 
 package v1
 
-// KameletRepositorySpecApplyConfiguration represents an declarative configuration of the KameletRepositorySpec type for use
+// KameletRepositorySpecApplyConfiguration represents a declarative configuration of the KameletRepositorySpec type for use
 // with apply.
 type KameletRepositorySpecApplyConfiguration struct {
 	URI *string `json:"uri,omitempty"`
 }
 
-// KameletRepositorySpecApplyConfiguration constructs an declarative configuration of the KameletRepositorySpec type for use with
+// KameletRepositorySpecApplyConfiguration constructs a declarative configuration of the KameletRepositorySpec type for use with
 // apply.
 func KameletRepositorySpec() *KameletRepositorySpecApplyConfiguration {
 	return &KameletRepositorySpecApplyConfiguration{}

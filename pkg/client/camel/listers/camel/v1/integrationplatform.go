@@ -20,10 +20,10 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/client-go/tools/cache"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	labels "k8s.io/apimachinery/pkg/labels"
+	listers "k8s.io/client-go/listers"
+	cache "k8s.io/client-go/tools/cache"
 )
 
 // IntegrationPlatformLister helps list IntegrationPlatforms.
@@ -31,7 +31,7 @@ import (
 type IntegrationPlatformLister interface {
 	// List lists all IntegrationPlatforms in the indexer.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1.IntegrationPlatform, err error)
+	List(selector labels.Selector) (ret []*camelv1.IntegrationPlatform, err error)
 	// IntegrationPlatforms returns an object that can list and get IntegrationPlatforms.
 	IntegrationPlatforms(namespace string) IntegrationPlatformNamespaceLister
 	IntegrationPlatformListerExpansion
@@ -39,25 +39,17 @@ type IntegrationPlatformLister interface {
 
 // integrationPlatformLister implements the IntegrationPlatformLister interface.
 type integrationPlatformLister struct {
-	indexer cache.Indexer
+	listers.ResourceIndexer[*camelv1.IntegrationPlatform]
 }
 
 // NewIntegrationPlatformLister returns a new IntegrationPlatformLister.
 func NewIntegrationPlatformLister(indexer cache.Indexer) IntegrationPlatformLister {
-	return &integrationPlatformLister{indexer: indexer}
-}
-
-// List lists all IntegrationPlatforms in the indexer.
-func (s *integrationPlatformLister) List(selector labels.Selector) (ret []*v1.IntegrationPlatform, err error) {
-	err = cache.ListAll(s.indexer, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1.IntegrationPlatform))
-	})
-	return ret, err
+	return &integrationPlatformLister{listers.New[*camelv1.IntegrationPlatform](indexer, camelv1.Resource("integrationplatform"))}
 }
 
 // IntegrationPlatforms returns an object that can list and get IntegrationPlatforms.
 func (s *integrationPlatformLister) IntegrationPlatforms(namespace string) IntegrationPlatformNamespaceLister {
-	return integrationPlatformNamespaceLister{indexer: s.indexer, namespace: namespace}
+	return integrationPlatformNamespaceLister{listers.NewNamespaced[*camelv1.IntegrationPlatform](s.ResourceIndexer, namespace)}
 }
 
 // IntegrationPlatformNamespaceLister helps list and get IntegrationPlatforms.
@@ -65,36 +57,15 @@ func (s *integrationPlatformLister) IntegrationPlatforms(namespace string) Integ
 type IntegrationPlatformNamespaceLister interface {
 	// List lists all IntegrationPlatforms in the indexer for a given namespace.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1.IntegrationPlatform, err error)
+	List(selector labels.Selector) (ret []*camelv1.IntegrationPlatform, err error)
 	// Get retrieves the IntegrationPlatform from the indexer for a given namespace and name.
 	// Objects returned here must be treated as read-only.
-	Get(name string) (*v1.IntegrationPlatform, error)
+	Get(name string) (*camelv1.IntegrationPlatform, error)
 	IntegrationPlatformNamespaceListerExpansion
 }
 
 // integrationPlatformNamespaceLister implements the IntegrationPlatformNamespaceLister
 // interface.
 type integrationPlatformNamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all IntegrationPlatforms in the indexer for a given namespace.
-func (s integrationPlatformNamespaceLister) List(selector labels.Selector) (ret []*v1.IntegrationPlatform, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1.IntegrationPlatform))
-	})
-	return ret, err
-}
-
-// Get retrieves the IntegrationPlatform from the indexer for a given namespace and name.
-func (s integrationPlatformNamespaceLister) Get(name string) (*v1.IntegrationPlatform, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, errors.NewNotFound(v1.Resource("integrationplatform"), name)
-	}
-	return obj.(*v1.IntegrationPlatform), nil
+	listers.ResourceIndexer[*camelv1.IntegrationPlatform]
 }

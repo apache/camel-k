@@ -19,7 +19,7 @@ limitations under the License.
 
 package v1
 
-// BuildahTaskApplyConfiguration represents an declarative configuration of the BuildahTask type for use
+// BuildahTaskApplyConfiguration represents a declarative configuration of the BuildahTask type for use
 // with apply.
 type BuildahTaskApplyConfiguration struct {
 	BaseTaskApplyConfiguration    `json:",inline"`
@@ -29,7 +29,7 @@ type BuildahTaskApplyConfiguration struct {
 	ExecutorImage                 *string `json:"executorImage,omitempty"`
 }
 
-// BuildahTaskApplyConfiguration constructs an declarative configuration of the BuildahTask type for use with
+// BuildahTaskApplyConfiguration constructs a declarative configuration of the BuildahTask type for use with
 // apply.
 func BuildahTask() *BuildahTaskApplyConfiguration {
 	return &BuildahTaskApplyConfiguration{}
@@ -39,7 +39,7 @@ func BuildahTask() *BuildahTaskApplyConfiguration {
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Name field is set to the value of the last call.
 func (b *BuildahTaskApplyConfiguration) WithName(value string) *BuildahTaskApplyConfiguration {
-	b.Name = &value
+	b.BaseTaskApplyConfiguration.Name = &value
 	return b
 }
 
@@ -47,7 +47,7 @@ func (b *BuildahTaskApplyConfiguration) WithName(value string) *BuildahTaskApply
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Configuration field is set to the value of the last call.
 func (b *BuildahTaskApplyConfiguration) WithConfiguration(value *BuildConfigurationApplyConfiguration) *BuildahTaskApplyConfiguration {
-	b.Configuration = value
+	b.BaseTaskApplyConfiguration.Configuration = value
 	return b
 }
 
@@ -55,7 +55,7 @@ func (b *BuildahTaskApplyConfiguration) WithConfiguration(value *BuildConfigurat
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the ContextDir field is set to the value of the last call.
 func (b *BuildahTaskApplyConfiguration) WithContextDir(value string) *BuildahTaskApplyConfiguration {
-	b.ContextDir = &value
+	b.PublishTaskApplyConfiguration.ContextDir = &value
 	return b
 }
 
@@ -63,7 +63,7 @@ func (b *BuildahTaskApplyConfiguration) WithContextDir(value string) *BuildahTas
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the BaseImage field is set to the value of the last call.
 func (b *BuildahTaskApplyConfiguration) WithBaseImage(value string) *BuildahTaskApplyConfiguration {
-	b.BaseImage = &value
+	b.PublishTaskApplyConfiguration.BaseImage = &value
 	return b
 }
 
@@ -71,7 +71,7 @@ func (b *BuildahTaskApplyConfiguration) WithBaseImage(value string) *BuildahTask
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Image field is set to the value of the last call.
 func (b *BuildahTaskApplyConfiguration) WithImage(value string) *BuildahTaskApplyConfiguration {
-	b.Image = &value
+	b.PublishTaskApplyConfiguration.Image = &value
 	return b
 }
 
@@ -79,7 +79,7 @@ func (b *BuildahTaskApplyConfiguration) WithImage(value string) *BuildahTaskAppl
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Registry field is set to the value of the last call.
 func (b *BuildahTaskApplyConfiguration) WithRegistry(value *RegistrySpecApplyConfiguration) *BuildahTaskApplyConfiguration {
-	b.Registry = value
+	b.PublishTaskApplyConfiguration.Registry = value
 	return b
 }
 

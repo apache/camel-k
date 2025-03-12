@@ -20,19 +20,19 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// ServerApplyConfiguration represents an declarative configuration of the Server type for use
+// ServerApplyConfiguration represents a declarative configuration of the Server type for use
 // with apply.
 type ServerApplyConfiguration struct {
-	ID            *string        `json:"id,omitempty"`
-	Username      *string        `json:"username,omitempty"`
-	Password      *string        `json:"password,omitempty"`
-	Configuration *v1.Properties `json:"configuration,omitempty"`
+	ID            *string             `json:"id,omitempty"`
+	Username      *string             `json:"username,omitempty"`
+	Password      *string             `json:"password,omitempty"`
+	Configuration *camelv1.Properties `json:"configuration,omitempty"`
 }
 
-// ServerApplyConfiguration constructs an declarative configuration of the Server type for use with
+// ServerApplyConfiguration constructs a declarative configuration of the Server type for use with
 // apply.
 func Server() *ServerApplyConfiguration {
 	return &ServerApplyConfiguration{}
@@ -65,7 +65,7 @@ func (b *ServerApplyConfiguration) WithPassword(value string) *ServerApplyConfig
 // WithConfiguration sets the Configuration field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Configuration field is set to the value of the last call.
-func (b *ServerApplyConfiguration) WithConfiguration(value v1.Properties) *ServerApplyConfiguration {
+func (b *ServerApplyConfiguration) WithConfiguration(value camelv1.Properties) *ServerApplyConfiguration {
 	b.Configuration = &value
 	return b
 }

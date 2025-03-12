@@ -20,19 +20,19 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// CamelCatalogStatusApplyConfiguration represents an declarative configuration of the CamelCatalogStatus type for use
+// CamelCatalogStatusApplyConfiguration represents a declarative configuration of the CamelCatalogStatus type for use
 // with apply.
 type CamelCatalogStatusApplyConfiguration struct {
 	ObservedGeneration *int64                                    `json:"observedGeneration,omitempty"`
-	Phase              *v1.CamelCatalogPhase                     `json:"phase,omitempty"`
+	Phase              *camelv1.CamelCatalogPhase                `json:"phase,omitempty"`
 	Conditions         []CamelCatalogConditionApplyConfiguration `json:"conditions,omitempty"`
 	Image              *string                                   `json:"image,omitempty"`
 }
 
-// CamelCatalogStatusApplyConfiguration constructs an declarative configuration of the CamelCatalogStatus type for use with
+// CamelCatalogStatusApplyConfiguration constructs a declarative configuration of the CamelCatalogStatus type for use with
 // apply.
 func CamelCatalogStatus() *CamelCatalogStatusApplyConfiguration {
 	return &CamelCatalogStatusApplyConfiguration{}
@@ -49,7 +49,7 @@ func (b *CamelCatalogStatusApplyConfiguration) WithObservedGeneration(value int6
 // WithPhase sets the Phase field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Phase field is set to the value of the last call.
-func (b *CamelCatalogStatusApplyConfiguration) WithPhase(value v1.CamelCatalogPhase) *CamelCatalogStatusApplyConfiguration {
+func (b *CamelCatalogStatusApplyConfiguration) WithPhase(value camelv1.CamelCatalogPhase) *CamelCatalogStatusApplyConfiguration {
 	b.Phase = &value
 	return b
 }

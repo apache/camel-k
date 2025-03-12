@@ -19,14 +19,14 @@ limitations under the License.
 
 package v1
 
-// KameletPropertyApplyConfiguration represents an declarative configuration of the KameletProperty type for use
+// KameletPropertyApplyConfiguration represents a declarative configuration of the KameletProperty type for use
 // with apply.
 type KameletPropertyApplyConfiguration struct {
 	Name    *string `json:"name,omitempty"`
 	Default *string `json:"default,omitempty"`
 }
 
-// KameletPropertyApplyConfiguration constructs an declarative configuration of the KameletProperty type for use with
+// KameletPropertyApplyConfiguration constructs a declarative configuration of the KameletProperty type for use with
 // apply.
 func KameletProperty() *KameletPropertyApplyConfiguration {
 	return &KameletPropertyApplyConfiguration{}

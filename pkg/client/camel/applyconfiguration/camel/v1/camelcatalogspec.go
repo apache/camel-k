@@ -19,7 +19,7 @@ limitations under the License.
 
 package v1
 
-// CamelCatalogSpecApplyConfiguration represents an declarative configuration of the CamelCatalogSpec type for use
+// CamelCatalogSpecApplyConfiguration represents a declarative configuration of the CamelCatalogSpec type for use
 // with apply.
 type CamelCatalogSpecApplyConfiguration struct {
 	Runtime   *RuntimeSpecApplyConfiguration             `json:"runtime,omitempty"`
@@ -27,7 +27,7 @@ type CamelCatalogSpecApplyConfiguration struct {
 	Loaders   map[string]CamelLoaderApplyConfiguration   `json:"loaders,omitempty"`
 }
 
-// CamelCatalogSpecApplyConfiguration constructs an declarative configuration of the CamelCatalogSpec type for use with
+// CamelCatalogSpecApplyConfiguration constructs a declarative configuration of the CamelCatalogSpec type for use with
 // apply.
 func CamelCatalogSpec() *CamelCatalogSpecApplyConfiguration {
 	return &CamelCatalogSpecApplyConfiguration{}

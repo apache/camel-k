@@ -19,7 +19,7 @@ limitations under the License.
 
 package v1
 
-// MavenArtifactApplyConfiguration represents an declarative configuration of the MavenArtifact type for use
+// MavenArtifactApplyConfiguration represents a declarative configuration of the MavenArtifact type for use
 // with apply.
 type MavenArtifactApplyConfiguration struct {
 	GroupID    *string `json:"groupId,omitempty"`
@@ -29,7 +29,7 @@ type MavenArtifactApplyConfiguration struct {
 	Classifier *string `json:"classifier,omitempty"`
 }
 
-// MavenArtifactApplyConfiguration constructs an declarative configuration of the MavenArtifact type for use with
+// MavenArtifactApplyConfiguration constructs a declarative configuration of the MavenArtifact type for use with
 // apply.
 func MavenArtifact() *MavenArtifactApplyConfiguration {
 	return &MavenArtifactApplyConfiguration{}

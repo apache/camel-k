@@ -23,7 +23,7 @@ import (
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// IntegrationPlatformStatusApplyConfiguration represents an declarative configuration of the IntegrationPlatformStatus type for use
+// IntegrationPlatformStatusApplyConfiguration represents a declarative configuration of the IntegrationPlatformStatus type for use
 // with apply.
 type IntegrationPlatformStatusApplyConfiguration struct {
 	IntegrationPlatformSpecApplyConfiguration `json:",inline"`
@@ -34,7 +34,7 @@ type IntegrationPlatformStatusApplyConfiguration struct {
 	Info                                      map[string]string                                `json:"info,omitempty"`
 }
 
-// IntegrationPlatformStatusApplyConfiguration constructs an declarative configuration of the IntegrationPlatformStatus type for use with
+// IntegrationPlatformStatusApplyConfiguration constructs a declarative configuration of the IntegrationPlatformStatus type for use with
 // apply.
 func IntegrationPlatformStatus() *IntegrationPlatformStatusApplyConfiguration {
 	return &IntegrationPlatformStatusApplyConfiguration{}
@@ -44,7 +44,7 @@ func IntegrationPlatformStatus() *IntegrationPlatformStatusApplyConfiguration {
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Cluster field is set to the value of the last call.
 func (b *IntegrationPlatformStatusApplyConfiguration) WithCluster(value camelv1.IntegrationPlatformCluster) *IntegrationPlatformStatusApplyConfiguration {
-	b.Cluster = &value
+	b.IntegrationPlatformSpecApplyConfiguration.Cluster = &value
 	return b
 }
 
@@ -52,7 +52,7 @@ func (b *IntegrationPlatformStatusApplyConfiguration) WithCluster(value camelv1.
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Profile field is set to the value of the last call.
 func (b *IntegrationPlatformStatusApplyConfiguration) WithProfile(value camelv1.TraitProfile) *IntegrationPlatformStatusApplyConfiguration {
-	b.Profile = &value
+	b.IntegrationPlatformSpecApplyConfiguration.Profile = &value
 	return b
 }
 
@@ -60,7 +60,7 @@ func (b *IntegrationPlatformStatusApplyConfiguration) WithProfile(value camelv1.
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Build field is set to the value of the last call.
 func (b *IntegrationPlatformStatusApplyConfiguration) WithBuild(value *IntegrationPlatformBuildSpecApplyConfiguration) *IntegrationPlatformStatusApplyConfiguration {
-	b.Build = value
+	b.IntegrationPlatformSpecApplyConfiguration.Build = value
 	return b
 }
 
@@ -68,7 +68,7 @@ func (b *IntegrationPlatformStatusApplyConfiguration) WithBuild(value *Integrati
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Traits field is set to the value of the last call.
 func (b *IntegrationPlatformStatusApplyConfiguration) WithTraits(value *TraitsApplyConfiguration) *IntegrationPlatformStatusApplyConfiguration {
-	b.Traits = value
+	b.IntegrationPlatformSpecApplyConfiguration.Traits = value
 	return b
 }
 
@@ -80,7 +80,7 @@ func (b *IntegrationPlatformStatusApplyConfiguration) WithConfiguration(values .
 		if values[i] == nil {
 			panic("nil value passed to WithConfiguration")
 		}
-		b.Configuration = append(b.Configuration, *values[i])
+		b.IntegrationPlatformSpecApplyConfiguration.Configuration = append(b.IntegrationPlatformSpecApplyConfiguration.Configuration, *values[i])
 	}
 	return b
 }
@@ -89,7 +89,7 @@ func (b *IntegrationPlatformStatusApplyConfiguration) WithConfiguration(values .
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Kamelet field is set to the value of the last call.
 func (b *IntegrationPlatformStatusApplyConfiguration) WithKamelet(value *IntegrationPlatformKameletSpecApplyConfiguration) *IntegrationPlatformStatusApplyConfiguration {
-	b.Kamelet = value
+	b.IntegrationPlatformSpecApplyConfiguration.Kamelet = value
 	return b
 }
 

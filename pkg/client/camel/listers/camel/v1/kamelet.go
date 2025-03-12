@@ -20,10 +20,10 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/client-go/tools/cache"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	labels "k8s.io/apimachinery/pkg/labels"
+	listers "k8s.io/client-go/listers"
+	cache "k8s.io/client-go/tools/cache"
 )
 
 // KameletLister helps list Kamelets.
@@ -31,7 +31,7 @@ import (
 type KameletLister interface {
 	// List lists all Kamelets in the indexer.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1.Kamelet, err error)
+	List(selector labels.Selector) (ret []*camelv1.Kamelet, err error)
 	// Kamelets returns an object that can list and get Kamelets.
 	Kamelets(namespace string) KameletNamespaceLister
 	KameletListerExpansion
@@ -39,25 +39,17 @@ type KameletLister interface {
 
 // kameletLister implements the KameletLister interface.
 type kameletLister struct {
-	indexer cache.Indexer
+	listers.ResourceIndexer[*camelv1.Kamelet]
 }
 
 // NewKameletLister returns a new KameletLister.
 func NewKameletLister(indexer cache.Indexer) KameletLister {
-	return &kameletLister{indexer: indexer}
-}
-
-// List lists all Kamelets in the indexer.
-func (s *kameletLister) List(selector labels.Selector) (ret []*v1.Kamelet, err error) {
-	err = cache.ListAll(s.indexer, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1.Kamelet))
-	})
-	return ret, err
+	return &kameletLister{listers.New[*camelv1.Kamelet](indexer, camelv1.Resource("kamelet"))}
 }
 
 // Kamelets returns an object that can list and get Kamelets.
 func (s *kameletLister) Kamelets(namespace string) KameletNamespaceLister {
-	return kameletNamespaceLister{indexer: s.indexer, namespace: namespace}
+	return kameletNamespaceLister{listers.NewNamespaced[*camelv1.Kamelet](s.ResourceIndexer, namespace)}
 }
 
 // KameletNamespaceLister helps list and get Kamelets.
@@ -65,36 +57,15 @@ func (s *kameletLister) Kamelets(namespace string) KameletNamespaceLister {
 type KameletNamespaceLister interface {
 	// List lists all Kamelets in the indexer for a given namespace.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1.Kamelet, err error)
+	List(selector labels.Selector) (ret []*camelv1.Kamelet, err error)
 	// Get retrieves the Kamelet from the indexer for a given namespace and name.
 	// Objects returned here must be treated as read-only.
-	Get(name string) (*v1.Kamelet, error)
+	Get(name string) (*camelv1.Kamelet, error)
 	KameletNamespaceListerExpansion
 }
 
 // kameletNamespaceLister implements the KameletNamespaceLister
 // interface.
 type kameletNamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all Kamelets in the indexer for a given namespace.
-func (s kameletNamespaceLister) List(selector labels.Selector) (ret []*v1.Kamelet, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1.Kamelet))
-	})
-	return ret, err
-}
-
-// Get retrieves the Kamelet from the indexer for a given namespace and name.
-func (s kameletNamespaceLister) Get(name string) (*v1.Kamelet, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, errors.NewNotFound(v1.Resource("kamelet"), name)
-	}
-	return obj.(*v1.Kamelet), nil
+	listers.ResourceIndexer[*camelv1.Kamelet]
 }

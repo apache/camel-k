@@ -20,7 +20,7 @@ limitations under the License.
 package externalversions
 
 import (
-	"fmt"
+	fmt "fmt"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

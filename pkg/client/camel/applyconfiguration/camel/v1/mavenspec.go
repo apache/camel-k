@@ -23,7 +23,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-// MavenSpecApplyConfiguration represents an declarative configuration of the MavenSpec type for use
+// MavenSpecApplyConfiguration represents a declarative configuration of the MavenSpec type for use
 // with apply.
 type MavenSpecApplyConfiguration struct {
 	LocalRepository  *string                           `json:"localRepository,omitempty"`
@@ -36,7 +36,7 @@ type MavenSpecApplyConfiguration struct {
 	CLIOptions       []string                          `json:"cliOptions,omitempty"`
 }
 
-// MavenSpecApplyConfiguration constructs an declarative configuration of the MavenSpec type for use with
+// MavenSpecApplyConfiguration constructs a declarative configuration of the MavenSpec type for use with
 // apply.
 func MavenSpec() *MavenSpecApplyConfiguration {
 	return &MavenSpecApplyConfiguration{}

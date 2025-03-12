@@ -19,14 +19,14 @@ limitations under the License.
 
 package v1
 
-// CamelPropertyApplyConfiguration represents an declarative configuration of the CamelProperty type for use
+// CamelPropertyApplyConfiguration represents a declarative configuration of the CamelProperty type for use
 // with apply.
 type CamelPropertyApplyConfiguration struct {
 	Key   *string `json:"key,omitempty"`
 	Value *string `json:"value,omitempty"`
 }
 
-// CamelPropertyApplyConfiguration constructs an declarative configuration of the CamelProperty type for use with
+// CamelPropertyApplyConfiguration constructs a declarative configuration of the CamelProperty type for use with
 // apply.
 func CamelProperty() *CamelPropertyApplyConfiguration {
 	return &CamelPropertyApplyConfiguration{}

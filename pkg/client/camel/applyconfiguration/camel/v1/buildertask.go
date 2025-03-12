@@ -19,7 +19,7 @@ limitations under the License.
 
 package v1
 
-// BuilderTaskApplyConfiguration represents an declarative configuration of the BuilderTask type for use
+// BuilderTaskApplyConfiguration represents a declarative configuration of the BuilderTask type for use
 // with apply.
 type BuilderTaskApplyConfiguration struct {
 	BaseTaskApplyConfiguration `json:",inline"`
@@ -32,7 +32,7 @@ type BuilderTaskApplyConfiguration struct {
 	Sources                    []SourceSpecApplyConfiguration    `json:"sources,omitempty"`
 }
 
-// BuilderTaskApplyConfiguration constructs an declarative configuration of the BuilderTask type for use with
+// BuilderTaskApplyConfiguration constructs a declarative configuration of the BuilderTask type for use with
 // apply.
 func BuilderTask() *BuilderTaskApplyConfiguration {
 	return &BuilderTaskApplyConfiguration{}
@@ -42,7 +42,7 @@ func BuilderTask() *BuilderTaskApplyConfiguration {
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Name field is set to the value of the last call.
 func (b *BuilderTaskApplyConfiguration) WithName(value string) *BuilderTaskApplyConfiguration {
-	b.Name = &value
+	b.BaseTaskApplyConfiguration.Name = &value
 	return b
 }
 
@@ -50,7 +50,7 @@ func (b *BuilderTaskApplyConfiguration) WithName(value string) *BuilderTaskApply
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Configuration field is set to the value of the last call.
 func (b *BuilderTaskApplyConfiguration) WithConfiguration(value *BuildConfigurationApplyConfiguration) *BuilderTaskApplyConfiguration {
-	b.Configuration = value
+	b.BaseTaskApplyConfiguration.Configuration = value
 	return b
 }
 

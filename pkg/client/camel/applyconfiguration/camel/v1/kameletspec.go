@@ -23,14 +23,14 @@ import (
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// KameletSpecApplyConfiguration represents an declarative configuration of the KameletSpec type for use
+// KameletSpecApplyConfiguration represents a declarative configuration of the KameletSpec type for use
 // with apply.
 type KameletSpecApplyConfiguration struct {
 	KameletSpecBaseApplyConfiguration `json:",inline"`
 	Versions                          map[string]KameletSpecBaseApplyConfiguration `json:"versions,omitempty"`
 }
 
-// KameletSpecApplyConfiguration constructs an declarative configuration of the KameletSpec type for use with
+// KameletSpecApplyConfiguration constructs a declarative configuration of the KameletSpec type for use with
 // apply.
 func KameletSpec() *KameletSpecApplyConfiguration {
 	return &KameletSpecApplyConfiguration{}
@@ -40,7 +40,7 @@ func KameletSpec() *KameletSpecApplyConfiguration {
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Definition field is set to the value of the last call.
 func (b *KameletSpecApplyConfiguration) WithDefinition(value *JSONSchemaPropsApplyConfiguration) *KameletSpecApplyConfiguration {
-	b.Definition = value
+	b.KameletSpecBaseApplyConfiguration.Definition = value
 	return b
 }
 
@@ -52,7 +52,7 @@ func (b *KameletSpecApplyConfiguration) WithSources(values ...*SourceSpecApplyCo
 		if values[i] == nil {
 			panic("nil value passed to WithSources")
 		}
-		b.Sources = append(b.Sources, *values[i])
+		b.KameletSpecBaseApplyConfiguration.Sources = append(b.KameletSpecBaseApplyConfiguration.Sources, *values[i])
 	}
 	return b
 }
@@ -61,7 +61,7 @@ func (b *KameletSpecApplyConfiguration) WithSources(values ...*SourceSpecApplyCo
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Template field is set to the value of the last call.
 func (b *KameletSpecApplyConfiguration) WithTemplate(value *TemplateApplyConfiguration) *KameletSpecApplyConfiguration {
-	b.Template = value
+	b.KameletSpecBaseApplyConfiguration.Template = value
 	return b
 }
 
@@ -70,11 +70,11 @@ func (b *KameletSpecApplyConfiguration) WithTemplate(value *TemplateApplyConfigu
 // If called multiple times, the entries provided by each call will be put on the Types field,
 // overwriting an existing map entries in Types field with the same key.
 func (b *KameletSpecApplyConfiguration) WithTypes(entries map[camelv1.TypeSlot]EventTypeSpecApplyConfiguration) *KameletSpecApplyConfiguration {
-	if b.Types == nil && len(entries) > 0 {
-		b.Types = make(map[camelv1.TypeSlot]EventTypeSpecApplyConfiguration, len(entries))
+	if b.KameletSpecBaseApplyConfiguration.Types == nil && len(entries) > 0 {
+		b.KameletSpecBaseApplyConfiguration.Types = make(map[camelv1.TypeSlot]EventTypeSpecApplyConfiguration, len(entries))
 	}
 	for k, v := range entries {
-		b.Types[k] = v
+		b.KameletSpecBaseApplyConfiguration.Types[k] = v
 	}
 	return b
 }
@@ -84,11 +84,11 @@ func (b *KameletSpecApplyConfiguration) WithTypes(entries map[camelv1.TypeSlot]E
 // If called multiple times, the entries provided by each call will be put on the DataTypes field,
 // overwriting an existing map entries in DataTypes field with the same key.
 func (b *KameletSpecApplyConfiguration) WithDataTypes(entries map[camelv1.TypeSlot]DataTypesSpecApplyConfiguration) *KameletSpecApplyConfiguration {
-	if b.DataTypes == nil && len(entries) > 0 {
-		b.DataTypes = make(map[camelv1.TypeSlot]DataTypesSpecApplyConfiguration, len(entries))
+	if b.KameletSpecBaseApplyConfiguration.DataTypes == nil && len(entries) > 0 {
+		b.KameletSpecBaseApplyConfiguration.DataTypes = make(map[camelv1.TypeSlot]DataTypesSpecApplyConfiguration, len(entries))
 	}
 	for k, v := range entries {
-		b.DataTypes[k] = v
+		b.KameletSpecBaseApplyConfiguration.DataTypes[k] = v
 	}
 	return b
 }
@@ -98,7 +98,7 @@ func (b *KameletSpecApplyConfiguration) WithDataTypes(entries map[camelv1.TypeSl
 // If called multiple times, values provided by each call will be appended to the Dependencies field.
 func (b *KameletSpecApplyConfiguration) WithDependencies(values ...string) *KameletSpecApplyConfiguration {
 	for i := range values {
-		b.Dependencies = append(b.Dependencies, values[i])
+		b.KameletSpecBaseApplyConfiguration.Dependencies = append(b.KameletSpecBaseApplyConfiguration.Dependencies, values[i])
 	}
 	return b
 }

@@ -19,7 +19,7 @@ limitations under the License.
 
 package v1
 
-// KanikoTaskApplyConfiguration represents an declarative configuration of the KanikoTask type for use
+// KanikoTaskApplyConfiguration represents a declarative configuration of the KanikoTask type for use
 // with apply.
 type KanikoTaskApplyConfiguration struct {
 	BaseTaskApplyConfiguration    `json:",inline"`
@@ -29,7 +29,7 @@ type KanikoTaskApplyConfiguration struct {
 	ExecutorImage                 *string                            `json:"executorImage,omitempty"`
 }
 
-// KanikoTaskApplyConfiguration constructs an declarative configuration of the KanikoTask type for use with
+// KanikoTaskApplyConfiguration constructs a declarative configuration of the KanikoTask type for use with
 // apply.
 func KanikoTask() *KanikoTaskApplyConfiguration {
 	return &KanikoTaskApplyConfiguration{}
@@ -39,7 +39,7 @@ func KanikoTask() *KanikoTaskApplyConfiguration {
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Name field is set to the value of the last call.
 func (b *KanikoTaskApplyConfiguration) WithName(value string) *KanikoTaskApplyConfiguration {
-	b.Name = &value
+	b.BaseTaskApplyConfiguration.Name = &value
 	return b
 }
 
@@ -47,7 +47,7 @@ func (b *KanikoTaskApplyConfiguration) WithName(value string) *KanikoTaskApplyCo
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Configuration field is set to the value of the last call.
 func (b *KanikoTaskApplyConfiguration) WithConfiguration(value *BuildConfigurationApplyConfiguration) *KanikoTaskApplyConfiguration {
-	b.Configuration = value
+	b.BaseTaskApplyConfiguration.Configuration = value
 	return b
 }
 
@@ -55,7 +55,7 @@ func (b *KanikoTaskApplyConfiguration) WithConfiguration(value *BuildConfigurati
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the ContextDir field is set to the value of the last call.
 func (b *KanikoTaskApplyConfiguration) WithContextDir(value string) *KanikoTaskApplyConfiguration {
-	b.ContextDir = &value
+	b.PublishTaskApplyConfiguration.ContextDir = &value
 	return b
 }
 
@@ -63,7 +63,7 @@ func (b *KanikoTaskApplyConfiguration) WithContextDir(value string) *KanikoTaskA
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the BaseImage field is set to the value of the last call.
 func (b *KanikoTaskApplyConfiguration) WithBaseImage(value string) *KanikoTaskApplyConfiguration {
-	b.BaseImage = &value
+	b.PublishTaskApplyConfiguration.BaseImage = &value
 	return b
 }
 
@@ -71,7 +71,7 @@ func (b *KanikoTaskApplyConfiguration) WithBaseImage(value string) *KanikoTaskAp
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Image field is set to the value of the last call.
 func (b *KanikoTaskApplyConfiguration) WithImage(value string) *KanikoTaskApplyConfiguration {
-	b.Image = &value
+	b.PublishTaskApplyConfiguration.Image = &value
 	return b
 }
 
@@ -79,7 +79,7 @@ func (b *KanikoTaskApplyConfiguration) WithImage(value string) *KanikoTaskApplyC
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Registry field is set to the value of the last call.
 func (b *KanikoTaskApplyConfiguration) WithRegistry(value *RegistrySpecApplyConfiguration) *KanikoTaskApplyConfiguration {
-	b.Registry = value
+	b.PublishTaskApplyConfiguration.Registry = value
 	return b
 }
 

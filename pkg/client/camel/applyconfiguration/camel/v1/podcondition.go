@@ -20,18 +20,18 @@ limitations under the License.
 package v1
 
 import (
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
-// PodConditionApplyConfiguration represents an declarative configuration of the PodCondition type for use
+// PodConditionApplyConfiguration represents a declarative configuration of the PodCondition type for use
 // with apply.
 type PodConditionApplyConfiguration struct {
 	Name      *string                                 `json:"name,omitempty"`
-	Condition *v1.PodCondition                        `json:"condition,omitempty"`
+	Condition *corev1.PodCondition                    `json:"condition,omitempty"`
 	Health    []HealthCheckResponseApplyConfiguration `json:"health,omitempty"`
 }
 
-// PodConditionApplyConfiguration constructs an declarative configuration of the PodCondition type for use with
+// PodConditionApplyConfiguration constructs a declarative configuration of the PodCondition type for use with
 // apply.
 func PodCondition() *PodConditionApplyConfiguration {
 	return &PodConditionApplyConfiguration{}
@@ -48,7 +48,7 @@ func (b *PodConditionApplyConfiguration) WithName(value string) *PodConditionApp
 // WithCondition sets the Condition field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Condition field is set to the value of the last call.
-func (b *PodConditionApplyConfiguration) WithCondition(value v1.PodCondition) *PodConditionApplyConfiguration {
+func (b *PodConditionApplyConfiguration) WithCondition(value corev1.PodCondition) *PodConditionApplyConfiguration {
 	b.Condition = &value
 	return b
 }

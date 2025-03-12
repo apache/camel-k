@@ -19,7 +19,7 @@ limitations under the License.
 
 package v1
 
-// CamelLoaderApplyConfiguration represents an declarative configuration of the CamelLoader type for use
+// CamelLoaderApplyConfiguration represents a declarative configuration of the CamelLoader type for use
 // with apply.
 type CamelLoaderApplyConfiguration struct {
 	MavenArtifactApplyConfiguration `json:",inline"`
@@ -28,7 +28,7 @@ type CamelLoaderApplyConfiguration struct {
 	Metadata                        map[string]string                 `json:"metadata,omitempty"`
 }
 
-// CamelLoaderApplyConfiguration constructs an declarative configuration of the CamelLoader type for use with
+// CamelLoaderApplyConfiguration constructs a declarative configuration of the CamelLoader type for use with
 // apply.
 func CamelLoader() *CamelLoaderApplyConfiguration {
 	return &CamelLoaderApplyConfiguration{}
@@ -38,7 +38,7 @@ func CamelLoader() *CamelLoaderApplyConfiguration {
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the GroupID field is set to the value of the last call.
 func (b *CamelLoaderApplyConfiguration) WithGroupID(value string) *CamelLoaderApplyConfiguration {
-	b.GroupID = &value
+	b.MavenArtifactApplyConfiguration.GroupID = &value
 	return b
 }
 
@@ -46,7 +46,7 @@ func (b *CamelLoaderApplyConfiguration) WithGroupID(value string) *CamelLoaderAp
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the ArtifactID field is set to the value of the last call.
 func (b *CamelLoaderApplyConfiguration) WithArtifactID(value string) *CamelLoaderApplyConfiguration {
-	b.ArtifactID = &value
+	b.MavenArtifactApplyConfiguration.ArtifactID = &value
 	return b
 }
 
@@ -54,7 +54,7 @@ func (b *CamelLoaderApplyConfiguration) WithArtifactID(value string) *CamelLoade
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Type field is set to the value of the last call.
 func (b *CamelLoaderApplyConfiguration) WithType(value string) *CamelLoaderApplyConfiguration {
-	b.Type = &value
+	b.MavenArtifactApplyConfiguration.Type = &value
 	return b
 }
 
@@ -62,7 +62,7 @@ func (b *CamelLoaderApplyConfiguration) WithType(value string) *CamelLoaderApply
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Version field is set to the value of the last call.
 func (b *CamelLoaderApplyConfiguration) WithVersion(value string) *CamelLoaderApplyConfiguration {
-	b.Version = &value
+	b.MavenArtifactApplyConfiguration.Version = &value
 	return b
 }
 
@@ -70,7 +70,7 @@ func (b *CamelLoaderApplyConfiguration) WithVersion(value string) *CamelLoaderAp
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Classifier field is set to the value of the last call.
 func (b *CamelLoaderApplyConfiguration) WithClassifier(value string) *CamelLoaderApplyConfiguration {
-	b.Classifier = &value
+	b.MavenArtifactApplyConfiguration.Classifier = &value
 	return b
 }
 

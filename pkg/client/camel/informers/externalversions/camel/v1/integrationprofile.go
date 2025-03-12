@@ -20,13 +20,13 @@ limitations under the License.
 package v1
 
 import (
-	"context"
+	context "context"
 	time "time"
 
-	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	apiscamelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	versioned "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
 	internalinterfaces "github.com/apache/camel-k/v2/pkg/client/camel/informers/externalversions/internalinterfaces"
-	v1 "github.com/apache/camel-k/v2/pkg/client/camel/listers/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/listers/camel/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
@@ -37,7 +37,7 @@ import (
 // IntegrationProfiles.
 type IntegrationProfileInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1.IntegrationProfileLister
+	Lister() camelv1.IntegrationProfileLister
 }
 
 type integrationProfileInformer struct {
@@ -72,7 +72,7 @@ func NewFilteredIntegrationProfileInformer(client versioned.Interface, namespace
 				return client.CamelV1().IntegrationProfiles(namespace).Watch(context.TODO(), options)
 			},
 		},
-		&camelv1.IntegrationProfile{},
+		&apiscamelv1.IntegrationProfile{},
 		resyncPeriod,
 		indexers,
 	)
@@ -83,9 +83,9 @@ func (f *integrationProfileInformer) defaultInformer(client versioned.Interface,
 }
 
 func (f *integrationProfileInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&camelv1.IntegrationProfile{}, f.defaultInformer)
+	return f.factory.InformerFor(&apiscamelv1.IntegrationProfile{}, f.defaultInformer)
 }
 
-func (f *integrationProfileInformer) Lister() v1.IntegrationProfileLister {
-	return v1.NewIntegrationProfileLister(f.Informer().GetIndexer())
+func (f *integrationProfileInformer) Lister() camelv1.IntegrationProfileLister {
+	return camelv1.NewIntegrationProfileLister(f.Informer().GetIndexer())
 }

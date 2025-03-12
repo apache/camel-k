@@ -23,7 +23,7 @@ import (
 	json "encoding/json"
 )
 
-// JSONSchemaPropApplyConfiguration represents an declarative configuration of the JSONSchemaProp type for use
+// JSONSchemaPropApplyConfiguration represents a declarative configuration of the JSONSchemaProp type for use
 // with apply.
 type JSONSchemaPropApplyConfiguration struct {
 	ID               *string                  `json:"id,omitempty"`
@@ -52,7 +52,7 @@ type JSONSchemaPropApplyConfiguration struct {
 	XDescriptors     []string                 `json:"x-descriptors,omitempty"`
 }
 
-// JSONSchemaPropApplyConfiguration constructs an declarative configuration of the JSONSchemaProp type for use with
+// JSONSchemaPropApplyConfiguration constructs a declarative configuration of the JSONSchemaProp type for use with
 // apply.
 func JSONSchemaProp() *JSONSchemaPropApplyConfiguration {
 	return &JSONSchemaPropApplyConfiguration{}

@@ -20,19 +20,16 @@ limitations under the License.
 package v1
 
 import (
-	"context"
-	json "encoding/json"
-	"fmt"
-	"time"
+	context "context"
 
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	applyconfigurationcamelv1 "github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration/camel/v1"
 	scheme "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/scheme"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
-	rest "k8s.io/client-go/rest"
+	gentype "k8s.io/client-go/gentype"
 )
 
 // IntegrationsGetter has a method to return a IntegrationInterface.
@@ -43,17 +40,19 @@ type IntegrationsGetter interface {
 
 // IntegrationInterface has methods to work with Integration resources.
 type IntegrationInterface interface {
-	Create(ctx context.Context, integration *v1.Integration, opts metav1.CreateOptions) (*v1.Integration, error)
-	Update(ctx context.Context, integration *v1.Integration, opts metav1.UpdateOptions) (*v1.Integration, error)
-	UpdateStatus(ctx context.Context, integration *v1.Integration, opts metav1.UpdateOptions) (*v1.Integration, error)
+	Create(ctx context.Context, integration *camelv1.Integration, opts metav1.CreateOptions) (*camelv1.Integration, error)
+	Update(ctx context.Context, integration *camelv1.Integration, opts metav1.UpdateOptions) (*camelv1.Integration, error)
+	// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+	UpdateStatus(ctx context.Context, integration *camelv1.Integration, opts metav1.UpdateOptions) (*camelv1.Integration, error)
 	Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error
 	DeleteCollection(ctx context.Context, opts metav1.DeleteOptions, listOpts metav1.ListOptions) error
-	Get(ctx context.Context, name string, opts metav1.GetOptions) (*v1.Integration, error)
-	List(ctx context.Context, opts metav1.ListOptions) (*v1.IntegrationList, error)
+	Get(ctx context.Context, name string, opts metav1.GetOptions) (*camelv1.Integration, error)
+	List(ctx context.Context, opts metav1.ListOptions) (*camelv1.IntegrationList, error)
 	Watch(ctx context.Context, opts metav1.ListOptions) (watch.Interface, error)
-	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts metav1.PatchOptions, subresources ...string) (result *v1.Integration, err error)
-	Apply(ctx context.Context, integration *camelv1.IntegrationApplyConfiguration, opts metav1.ApplyOptions) (result *v1.Integration, err error)
-	ApplyStatus(ctx context.Context, integration *camelv1.IntegrationApplyConfiguration, opts metav1.ApplyOptions) (result *v1.Integration, err error)
+	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts metav1.PatchOptions, subresources ...string) (result *camelv1.Integration, err error)
+	Apply(ctx context.Context, integration *applyconfigurationcamelv1.IntegrationApplyConfiguration, opts metav1.ApplyOptions) (result *camelv1.Integration, err error)
+	// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
+	ApplyStatus(ctx context.Context, integration *applyconfigurationcamelv1.IntegrationApplyConfiguration, opts metav1.ApplyOptions) (result *camelv1.Integration, err error)
 	GetScale(ctx context.Context, integrationName string, options metav1.GetOptions) (*autoscalingv1.Scale, error)
 	UpdateScale(ctx context.Context, integrationName string, scale *autoscalingv1.Scale, opts metav1.UpdateOptions) (*autoscalingv1.Scale, error)
 
@@ -62,209 +61,28 @@ type IntegrationInterface interface {
 
 // integrations implements IntegrationInterface
 type integrations struct {
-	client rest.Interface
-	ns     string
+	*gentype.ClientWithListAndApply[*camelv1.Integration, *camelv1.IntegrationList, *applyconfigurationcamelv1.IntegrationApplyConfiguration]
 }
 
 // newIntegrations returns a Integrations
 func newIntegrations(c *CamelV1Client, namespace string) *integrations {
 	return &integrations{
-		client: c.RESTClient(),
-		ns:     namespace,
+		gentype.NewClientWithListAndApply[*camelv1.Integration, *camelv1.IntegrationList, *applyconfigurationcamelv1.IntegrationApplyConfiguration](
+			"integrations",
+			c.RESTClient(),
+			scheme.ParameterCodec,
+			namespace,
+			func() *camelv1.Integration { return &camelv1.Integration{} },
+			func() *camelv1.IntegrationList { return &camelv1.IntegrationList{} },
+		),
 	}
-}
-
-// Get takes name of the integration, and returns the corresponding integration object, and an error if there is any.
-func (c *integrations) Get(ctx context.Context, name string, options metav1.GetOptions) (result *v1.Integration, err error) {
-	result = &v1.Integration{}
-	err = c.client.Get().
-		Namespace(c.ns).
-		Resource("integrations").
-		Name(name).
-		VersionedParams(&options, scheme.ParameterCodec).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// List takes label and field selectors, and returns the list of Integrations that match those selectors.
-func (c *integrations) List(ctx context.Context, opts metav1.ListOptions) (result *v1.IntegrationList, err error) {
-	var timeout time.Duration
-	if opts.TimeoutSeconds != nil {
-		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
-	}
-	result = &v1.IntegrationList{}
-	err = c.client.Get().
-		Namespace(c.ns).
-		Resource("integrations").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Watch returns a watch.Interface that watches the requested integrations.
-func (c *integrations) Watch(ctx context.Context, opts metav1.ListOptions) (watch.Interface, error) {
-	var timeout time.Duration
-	if opts.TimeoutSeconds != nil {
-		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
-	}
-	opts.Watch = true
-	return c.client.Get().
-		Namespace(c.ns).
-		Resource("integrations").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Watch(ctx)
-}
-
-// Create takes the representation of a integration and creates it.  Returns the server's representation of the integration, and an error, if there is any.
-func (c *integrations) Create(ctx context.Context, integration *v1.Integration, opts metav1.CreateOptions) (result *v1.Integration, err error) {
-	result = &v1.Integration{}
-	err = c.client.Post().
-		Namespace(c.ns).
-		Resource("integrations").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(integration).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Update takes the representation of a integration and updates it. Returns the server's representation of the integration, and an error, if there is any.
-func (c *integrations) Update(ctx context.Context, integration *v1.Integration, opts metav1.UpdateOptions) (result *v1.Integration, err error) {
-	result = &v1.Integration{}
-	err = c.client.Put().
-		Namespace(c.ns).
-		Resource("integrations").
-		Name(integration.Name).
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(integration).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *integrations) UpdateStatus(ctx context.Context, integration *v1.Integration, opts metav1.UpdateOptions) (result *v1.Integration, err error) {
-	result = &v1.Integration{}
-	err = c.client.Put().
-		Namespace(c.ns).
-		Resource("integrations").
-		Name(integration.Name).
-		SubResource("status").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(integration).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Delete takes name of the integration and deletes it. Returns an error if one occurs.
-func (c *integrations) Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error {
-	return c.client.Delete().
-		Namespace(c.ns).
-		Resource("integrations").
-		Name(name).
-		Body(&opts).
-		Do(ctx).
-		Error()
-}
-
-// DeleteCollection deletes a collection of objects.
-func (c *integrations) DeleteCollection(ctx context.Context, opts metav1.DeleteOptions, listOpts metav1.ListOptions) error {
-	var timeout time.Duration
-	if listOpts.TimeoutSeconds != nil {
-		timeout = time.Duration(*listOpts.TimeoutSeconds) * time.Second
-	}
-	return c.client.Delete().
-		Namespace(c.ns).
-		Resource("integrations").
-		VersionedParams(&listOpts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Body(&opts).
-		Do(ctx).
-		Error()
-}
-
-// Patch applies the patch and returns the patched integration.
-func (c *integrations) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts metav1.PatchOptions, subresources ...string) (result *v1.Integration, err error) {
-	result = &v1.Integration{}
-	err = c.client.Patch(pt).
-		Namespace(c.ns).
-		Resource("integrations").
-		Name(name).
-		SubResource(subresources...).
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(data).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Apply takes the given apply declarative configuration, applies it and returns the applied integration.
-func (c *integrations) Apply(ctx context.Context, integration *camelv1.IntegrationApplyConfiguration, opts metav1.ApplyOptions) (result *v1.Integration, err error) {
-	if integration == nil {
-		return nil, fmt.Errorf("integration provided to Apply must not be nil")
-	}
-	patchOpts := opts.ToPatchOptions()
-	data, err := json.Marshal(integration)
-	if err != nil {
-		return nil, err
-	}
-	name := integration.Name
-	if name == nil {
-		return nil, fmt.Errorf("integration.Name must be provided to Apply")
-	}
-	result = &v1.Integration{}
-	err = c.client.Patch(types.ApplyPatchType).
-		Namespace(c.ns).
-		Resource("integrations").
-		Name(*name).
-		VersionedParams(&patchOpts, scheme.ParameterCodec).
-		Body(data).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// ApplyStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
-func (c *integrations) ApplyStatus(ctx context.Context, integration *camelv1.IntegrationApplyConfiguration, opts metav1.ApplyOptions) (result *v1.Integration, err error) {
-	if integration == nil {
-		return nil, fmt.Errorf("integration provided to Apply must not be nil")
-	}
-	patchOpts := opts.ToPatchOptions()
-	data, err := json.Marshal(integration)
-	if err != nil {
-		return nil, err
-	}
-
-	name := integration.Name
-	if name == nil {
-		return nil, fmt.Errorf("integration.Name must be provided to Apply")
-	}
-
-	result = &v1.Integration{}
-	err = c.client.Patch(types.ApplyPatchType).
-		Namespace(c.ns).
-		Resource("integrations").
-		Name(*name).
-		SubResource("status").
-		VersionedParams(&patchOpts, scheme.ParameterCodec).
-		Body(data).
-		Do(ctx).
-		Into(result)
-	return
 }
 
 // GetScale takes name of the integration, and returns the corresponding autoscalingv1.Scale object, and an error if there is any.
 func (c *integrations) GetScale(ctx context.Context, integrationName string, options metav1.GetOptions) (result *autoscalingv1.Scale, err error) {
 	result = &autoscalingv1.Scale{}
-	err = c.client.Get().
-		Namespace(c.ns).
+	err = c.GetClient().Get().
+		Namespace(c.GetNamespace()).
 		Resource("integrations").
 		Name(integrationName).
 		SubResource("scale").
@@ -277,8 +95,8 @@ func (c *integrations) GetScale(ctx context.Context, integrationName string, opt
 // UpdateScale takes the top resource name and the representation of a scale and updates it. Returns the server's representation of the scale, and an error, if there is any.
 func (c *integrations) UpdateScale(ctx context.Context, integrationName string, scale *autoscalingv1.Scale, opts metav1.UpdateOptions) (result *autoscalingv1.Scale, err error) {
 	result = &autoscalingv1.Scale{}
-	err = c.client.Put().
-		Namespace(c.ns).
+	err = c.GetClient().Put().
+		Namespace(c.GetNamespace()).
 		Resource("integrations").
 		Name(integrationName).
 		SubResource("scale").

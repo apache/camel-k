@@ -20,13 +20,13 @@ limitations under the License.
 package v1
 
 import (
-	"context"
+	context "context"
 	time "time"
 
-	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	apiscamelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	versioned "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
 	internalinterfaces "github.com/apache/camel-k/v2/pkg/client/camel/informers/externalversions/internalinterfaces"
-	v1 "github.com/apache/camel-k/v2/pkg/client/camel/listers/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/listers/camel/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
@@ -37,7 +37,7 @@ import (
 // Pipes.
 type PipeInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1.PipeLister
+	Lister() camelv1.PipeLister
 }
 
 type pipeInformer struct {
@@ -72,7 +72,7 @@ func NewFilteredPipeInformer(client versioned.Interface, namespace string, resyn
 				return client.CamelV1().Pipes(namespace).Watch(context.TODO(), options)
 			},
 		},
-		&camelv1.Pipe{},
+		&apiscamelv1.Pipe{},
 		resyncPeriod,
 		indexers,
 	)
@@ -83,9 +83,9 @@ func (f *pipeInformer) defaultInformer(client versioned.Interface, resyncPeriod 
 }
 
 func (f *pipeInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&camelv1.Pipe{}, f.defaultInformer)
+	return f.factory.InformerFor(&apiscamelv1.Pipe{}, f.defaultInformer)
 }
 
-func (f *pipeInformer) Lister() v1.PipeLister {
-	return v1.NewPipeLister(f.Informer().GetIndexer())
+func (f *pipeInformer) Lister() camelv1.PipeLister {
+	return camelv1.NewPipeLister(f.Informer().GetIndexer())
 }

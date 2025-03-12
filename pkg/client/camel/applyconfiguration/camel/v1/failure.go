@@ -20,18 +20,18 @@ limitations under the License.
 package v1
 
 import (
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// FailureApplyConfiguration represents an declarative configuration of the Failure type for use
+// FailureApplyConfiguration represents a declarative configuration of the Failure type for use
 // with apply.
 type FailureApplyConfiguration struct {
 	Reason   *string                            `json:"reason,omitempty"`
-	Time     *v1.Time                           `json:"time,omitempty"`
+	Time     *metav1.Time                       `json:"time,omitempty"`
 	Recovery *FailureRecoveryApplyConfiguration `json:"recovery,omitempty"`
 }
 
-// FailureApplyConfiguration constructs an declarative configuration of the Failure type for use with
+// FailureApplyConfiguration constructs a declarative configuration of the Failure type for use with
 // apply.
 func Failure() *FailureApplyConfiguration {
 	return &FailureApplyConfiguration{}
@@ -48,7 +48,7 @@ func (b *FailureApplyConfiguration) WithReason(value string) *FailureApplyConfig
 // WithTime sets the Time field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Time field is set to the value of the last call.
-func (b *FailureApplyConfiguration) WithTime(value v1.Time) *FailureApplyConfiguration {
+func (b *FailureApplyConfiguration) WithTime(value metav1.Time) *FailureApplyConfiguration {
 	b.Time = &value
 	return b
 }

@@ -20,15 +20,15 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// PipeConditionApplyConfiguration represents an declarative configuration of the PipeCondition type for use
+// PipeConditionApplyConfiguration represents a declarative configuration of the PipeCondition type for use
 // with apply.
 type PipeConditionApplyConfiguration struct {
-	Type               *v1.PipeConditionType            `json:"type,omitempty"`
+	Type               *camelv1.PipeConditionType       `json:"type,omitempty"`
 	Status             *corev1.ConditionStatus          `json:"status,omitempty"`
 	LastUpdateTime     *metav1.Time                     `json:"lastUpdateTime,omitempty"`
 	LastTransitionTime *metav1.Time                     `json:"lastTransitionTime,omitempty"`
@@ -37,7 +37,7 @@ type PipeConditionApplyConfiguration struct {
 	Pods               []PodConditionApplyConfiguration `json:"pods,omitempty"`
 }
 
-// PipeConditionApplyConfiguration constructs an declarative configuration of the PipeCondition type for use with
+// PipeConditionApplyConfiguration constructs a declarative configuration of the PipeCondition type for use with
 // apply.
 func PipeCondition() *PipeConditionApplyConfiguration {
 	return &PipeConditionApplyConfiguration{}
@@ -46,7 +46,7 @@ func PipeCondition() *PipeConditionApplyConfiguration {
 // WithType sets the Type field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Type field is set to the value of the last call.
-func (b *PipeConditionApplyConfiguration) WithType(value v1.PipeConditionType) *PipeConditionApplyConfiguration {
+func (b *PipeConditionApplyConfiguration) WithType(value camelv1.PipeConditionType) *PipeConditionApplyConfiguration {
 	b.Type = &value
 	return b
 }

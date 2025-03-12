@@ -20,21 +20,21 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// IntegrationPlatformSpecApplyConfiguration represents an declarative configuration of the IntegrationPlatformSpec type for use
+// IntegrationPlatformSpecApplyConfiguration represents a declarative configuration of the IntegrationPlatformSpec type for use
 // with apply.
 type IntegrationPlatformSpecApplyConfiguration struct {
-	Cluster       *v1.IntegrationPlatformCluster                    `json:"cluster,omitempty"`
-	Profile       *v1.TraitProfile                                  `json:"profile,omitempty"`
+	Cluster       *camelv1.IntegrationPlatformCluster               `json:"cluster,omitempty"`
+	Profile       *camelv1.TraitProfile                             `json:"profile,omitempty"`
 	Build         *IntegrationPlatformBuildSpecApplyConfiguration   `json:"build,omitempty"`
 	Traits        *TraitsApplyConfiguration                         `json:"traits,omitempty"`
 	Configuration []ConfigurationSpecApplyConfiguration             `json:"configuration,omitempty"`
 	Kamelet       *IntegrationPlatformKameletSpecApplyConfiguration `json:"kamelet,omitempty"`
 }
 
-// IntegrationPlatformSpecApplyConfiguration constructs an declarative configuration of the IntegrationPlatformSpec type for use with
+// IntegrationPlatformSpecApplyConfiguration constructs a declarative configuration of the IntegrationPlatformSpec type for use with
 // apply.
 func IntegrationPlatformSpec() *IntegrationPlatformSpecApplyConfiguration {
 	return &IntegrationPlatformSpecApplyConfiguration{}
@@ -43,7 +43,7 @@ func IntegrationPlatformSpec() *IntegrationPlatformSpecApplyConfiguration {
 // WithCluster sets the Cluster field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Cluster field is set to the value of the last call.
-func (b *IntegrationPlatformSpecApplyConfiguration) WithCluster(value v1.IntegrationPlatformCluster) *IntegrationPlatformSpecApplyConfiguration {
+func (b *IntegrationPlatformSpecApplyConfiguration) WithCluster(value camelv1.IntegrationPlatformCluster) *IntegrationPlatformSpecApplyConfiguration {
 	b.Cluster = &value
 	return b
 }
@@ -51,7 +51,7 @@ func (b *IntegrationPlatformSpecApplyConfiguration) WithCluster(value v1.Integra
 // WithProfile sets the Profile field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Profile field is set to the value of the last call.
-func (b *IntegrationPlatformSpecApplyConfiguration) WithProfile(value v1.TraitProfile) *IntegrationPlatformSpecApplyConfiguration {
+func (b *IntegrationPlatformSpecApplyConfiguration) WithProfile(value camelv1.TraitProfile) *IntegrationPlatformSpecApplyConfiguration {
 	b.Profile = &value
 	return b
 }

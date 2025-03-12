@@ -20,18 +20,18 @@ limitations under the License.
 package v1
 
 import (
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// FailureRecoveryApplyConfiguration represents an declarative configuration of the FailureRecovery type for use
+// FailureRecoveryApplyConfiguration represents a declarative configuration of the FailureRecovery type for use
 // with apply.
 type FailureRecoveryApplyConfiguration struct {
-	Attempt     *int     `json:"attempt,omitempty"`
-	AttemptMax  *int     `json:"attemptMax,omitempty"`
-	AttemptTime *v1.Time `json:"attemptTime,omitempty"`
+	Attempt     *int         `json:"attempt,omitempty"`
+	AttemptMax  *int         `json:"attemptMax,omitempty"`
+	AttemptTime *metav1.Time `json:"attemptTime,omitempty"`
 }
 
-// FailureRecoveryApplyConfiguration constructs an declarative configuration of the FailureRecovery type for use with
+// FailureRecoveryApplyConfiguration constructs a declarative configuration of the FailureRecovery type for use with
 // apply.
 func FailureRecovery() *FailureRecoveryApplyConfiguration {
 	return &FailureRecoveryApplyConfiguration{}
@@ -56,7 +56,7 @@ func (b *FailureRecoveryApplyConfiguration) WithAttemptMax(value int) *FailureRe
 // WithAttemptTime sets the AttemptTime field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the AttemptTime field is set to the value of the last call.
-func (b *FailureRecoveryApplyConfiguration) WithAttemptTime(value v1.Time) *FailureRecoveryApplyConfiguration {
+func (b *FailureRecoveryApplyConfiguration) WithAttemptTime(value metav1.Time) *FailureRecoveryApplyConfiguration {
 	b.AttemptTime = &value
 	return b
 }

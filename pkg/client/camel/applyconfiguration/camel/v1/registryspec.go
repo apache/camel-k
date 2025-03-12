@@ -19,7 +19,7 @@ limitations under the License.
 
 package v1
 
-// RegistrySpecApplyConfiguration represents an declarative configuration of the RegistrySpec type for use
+// RegistrySpecApplyConfiguration represents a declarative configuration of the RegistrySpec type for use
 // with apply.
 type RegistrySpecApplyConfiguration struct {
 	Insecure     *bool   `json:"insecure,omitempty"`
@@ -29,7 +29,7 @@ type RegistrySpecApplyConfiguration struct {
 	Organization *string `json:"organization,omitempty"`
 }
 
-// RegistrySpecApplyConfiguration constructs an declarative configuration of the RegistrySpec type for use with
+// RegistrySpecApplyConfiguration constructs a declarative configuration of the RegistrySpec type for use with
 // apply.
 func RegistrySpec() *RegistrySpecApplyConfiguration {
 	return &RegistrySpecApplyConfiguration{}

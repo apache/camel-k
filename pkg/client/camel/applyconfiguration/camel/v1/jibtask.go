@@ -19,14 +19,14 @@ limitations under the License.
 
 package v1
 
-// JibTaskApplyConfiguration represents an declarative configuration of the JibTask type for use
+// JibTaskApplyConfiguration represents a declarative configuration of the JibTask type for use
 // with apply.
 type JibTaskApplyConfiguration struct {
 	BaseTaskApplyConfiguration    `json:",inline"`
 	PublishTaskApplyConfiguration `json:",inline"`
 }
 
-// JibTaskApplyConfiguration constructs an declarative configuration of the JibTask type for use with
+// JibTaskApplyConfiguration constructs a declarative configuration of the JibTask type for use with
 // apply.
 func JibTask() *JibTaskApplyConfiguration {
 	return &JibTaskApplyConfiguration{}
@@ -36,7 +36,7 @@ func JibTask() *JibTaskApplyConfiguration {
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Name field is set to the value of the last call.
 func (b *JibTaskApplyConfiguration) WithName(value string) *JibTaskApplyConfiguration {
-	b.Name = &value
+	b.BaseTaskApplyConfiguration.Name = &value
 	return b
 }
 
@@ -44,7 +44,7 @@ func (b *JibTaskApplyConfiguration) WithName(value string) *JibTaskApplyConfigur
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Configuration field is set to the value of the last call.
 func (b *JibTaskApplyConfiguration) WithConfiguration(value *BuildConfigurationApplyConfiguration) *JibTaskApplyConfiguration {
-	b.Configuration = value
+	b.BaseTaskApplyConfiguration.Configuration = value
 	return b
 }
 
@@ -52,7 +52,7 @@ func (b *JibTaskApplyConfiguration) WithConfiguration(value *BuildConfigurationA
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the ContextDir field is set to the value of the last call.
 func (b *JibTaskApplyConfiguration) WithContextDir(value string) *JibTaskApplyConfiguration {
-	b.ContextDir = &value
+	b.PublishTaskApplyConfiguration.ContextDir = &value
 	return b
 }
 
@@ -60,7 +60,7 @@ func (b *JibTaskApplyConfiguration) WithContextDir(value string) *JibTaskApplyCo
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the BaseImage field is set to the value of the last call.
 func (b *JibTaskApplyConfiguration) WithBaseImage(value string) *JibTaskApplyConfiguration {
-	b.BaseImage = &value
+	b.PublishTaskApplyConfiguration.BaseImage = &value
 	return b
 }
 
@@ -68,7 +68,7 @@ func (b *JibTaskApplyConfiguration) WithBaseImage(value string) *JibTaskApplyCon
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Image field is set to the value of the last call.
 func (b *JibTaskApplyConfiguration) WithImage(value string) *JibTaskApplyConfiguration {
-	b.Image = &value
+	b.PublishTaskApplyConfiguration.Image = &value
 	return b
 }
 
@@ -76,6 +76,6 @@ func (b *JibTaskApplyConfiguration) WithImage(value string) *JibTaskApplyConfigu
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Registry field is set to the value of the last call.
 func (b *JibTaskApplyConfiguration) WithRegistry(value *RegistrySpecApplyConfiguration) *JibTaskApplyConfiguration {
-	b.Registry = value
+	b.PublishTaskApplyConfiguration.Registry = value
 	return b
 }

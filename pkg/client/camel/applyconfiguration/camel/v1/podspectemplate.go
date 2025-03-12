@@ -19,13 +19,13 @@ limitations under the License.
 
 package v1
 
-// PodSpecTemplateApplyConfiguration represents an declarative configuration of the PodSpecTemplate type for use
+// PodSpecTemplateApplyConfiguration represents a declarative configuration of the PodSpecTemplate type for use
 // with apply.
 type PodSpecTemplateApplyConfiguration struct {
 	Spec *PodSpecApplyConfiguration `json:"spec,omitempty"`
 }
 
-// PodSpecTemplateApplyConfiguration constructs an declarative configuration of the PodSpecTemplate type for use with
+// PodSpecTemplateApplyConfiguration constructs a declarative configuration of the PodSpecTemplate type for use with
 // apply.
 func PodSpecTemplate() *PodSpecTemplateApplyConfiguration {
 	return &PodSpecTemplateApplyConfiguration{}

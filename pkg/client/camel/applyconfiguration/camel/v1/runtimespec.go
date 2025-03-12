@@ -20,21 +20,21 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// RuntimeSpecApplyConfiguration represents an declarative configuration of the RuntimeSpec type for use
+// RuntimeSpecApplyConfiguration represents a declarative configuration of the RuntimeSpec type for use
 // with apply.
 type RuntimeSpecApplyConfiguration struct {
 	Version          *string                                 `json:"version,omitempty"`
-	Provider         *v1.RuntimeProvider                     `json:"provider,omitempty"`
+	Provider         *camelv1.RuntimeProvider                `json:"provider,omitempty"`
 	ApplicationClass *string                                 `json:"applicationClass,omitempty"`
 	Dependencies     []MavenArtifactApplyConfiguration       `json:"dependencies,omitempty"`
 	Metadata         map[string]string                       `json:"metadata,omitempty"`
 	Capabilities     map[string]CapabilityApplyConfiguration `json:"capabilities,omitempty"`
 }
 
-// RuntimeSpecApplyConfiguration constructs an declarative configuration of the RuntimeSpec type for use with
+// RuntimeSpecApplyConfiguration constructs a declarative configuration of the RuntimeSpec type for use with
 // apply.
 func RuntimeSpec() *RuntimeSpecApplyConfiguration {
 	return &RuntimeSpecApplyConfiguration{}
@@ -51,7 +51,7 @@ func (b *RuntimeSpecApplyConfiguration) WithVersion(value string) *RuntimeSpecAp
 // WithProvider sets the Provider field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Provider field is set to the value of the last call.
-func (b *RuntimeSpecApplyConfiguration) WithProvider(value v1.RuntimeProvider) *RuntimeSpecApplyConfiguration {
+func (b *RuntimeSpecApplyConfiguration) WithProvider(value camelv1.RuntimeProvider) *RuntimeSpecApplyConfiguration {
 	b.Provider = &value
 	return b
 }

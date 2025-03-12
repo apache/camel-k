@@ -30,11 +30,11 @@ type FakeKafkaV1beta2 struct {
 }
 
 func (c *FakeKafkaV1beta2) Kafkas(namespace string) v1beta2.KafkaInterface {
-	return &FakeKafkas{c, namespace}
+	return newFakeKafkas(c, namespace)
 }
 
 func (c *FakeKafkaV1beta2) KafkaTopics(namespace string) v1beta2.KafkaTopicInterface {
-	return &FakeKafkaTopics{c, namespace}
+	return newFakeKafkaTopics(c, namespace)
 }
 
 // RESTClient returns a RESTClient that is used to communicate

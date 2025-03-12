@@ -19,14 +19,14 @@ limitations under the License.
 
 package v1
 
-// DataTypeReferenceApplyConfiguration represents an declarative configuration of the DataTypeReference type for use
+// DataTypeReferenceApplyConfiguration represents a declarative configuration of the DataTypeReference type for use
 // with apply.
 type DataTypeReferenceApplyConfiguration struct {
 	Scheme *string `json:"scheme,omitempty"`
 	Format *string `json:"format,omitempty"`
 }
 
-// DataTypeReferenceApplyConfiguration constructs an declarative configuration of the DataTypeReference type for use with
+// DataTypeReferenceApplyConfiguration constructs a declarative configuration of the DataTypeReference type for use with
 // apply.
 func DataTypeReference() *DataTypeReferenceApplyConfiguration {
 	return &DataTypeReferenceApplyConfiguration{}

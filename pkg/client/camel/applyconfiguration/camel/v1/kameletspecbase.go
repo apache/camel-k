@@ -23,7 +23,7 @@ import (
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// KameletSpecBaseApplyConfiguration represents an declarative configuration of the KameletSpecBase type for use
+// KameletSpecBaseApplyConfiguration represents a declarative configuration of the KameletSpecBase type for use
 // with apply.
 type KameletSpecBaseApplyConfiguration struct {
 	Definition   *JSONSchemaPropsApplyConfiguration                   `json:"definition,omitempty"`
@@ -34,7 +34,7 @@ type KameletSpecBaseApplyConfiguration struct {
 	Dependencies []string                                             `json:"dependencies,omitempty"`
 }
 
-// KameletSpecBaseApplyConfiguration constructs an declarative configuration of the KameletSpecBase type for use with
+// KameletSpecBaseApplyConfiguration constructs a declarative configuration of the KameletSpecBase type for use with
 // apply.
 func KameletSpecBase() *KameletSpecBaseApplyConfiguration {
 	return &KameletSpecBaseApplyConfiguration{}

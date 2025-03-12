@@ -19,7 +19,7 @@ limitations under the License.
 
 package v1
 
-// S2iTaskApplyConfiguration represents an declarative configuration of the S2iTask type for use
+// S2iTaskApplyConfiguration represents a declarative configuration of the S2iTask type for use
 // with apply.
 type S2iTaskApplyConfiguration struct {
 	BaseTaskApplyConfiguration    `json:",inline"`
@@ -27,7 +27,7 @@ type S2iTaskApplyConfiguration struct {
 	Tag                           *string `json:"tag,omitempty"`
 }
 
-// S2iTaskApplyConfiguration constructs an declarative configuration of the S2iTask type for use with
+// S2iTaskApplyConfiguration constructs a declarative configuration of the S2iTask type for use with
 // apply.
 func S2iTask() *S2iTaskApplyConfiguration {
 	return &S2iTaskApplyConfiguration{}
@@ -37,7 +37,7 @@ func S2iTask() *S2iTaskApplyConfiguration {
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Name field is set to the value of the last call.
 func (b *S2iTaskApplyConfiguration) WithName(value string) *S2iTaskApplyConfiguration {
-	b.Name = &value
+	b.BaseTaskApplyConfiguration.Name = &value
 	return b
 }
 
@@ -45,7 +45,7 @@ func (b *S2iTaskApplyConfiguration) WithName(value string) *S2iTaskApplyConfigur
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Configuration field is set to the value of the last call.
 func (b *S2iTaskApplyConfiguration) WithConfiguration(value *BuildConfigurationApplyConfiguration) *S2iTaskApplyConfiguration {
-	b.Configuration = value
+	b.BaseTaskApplyConfiguration.Configuration = value
 	return b
 }
 
@@ -53,7 +53,7 @@ func (b *S2iTaskApplyConfiguration) WithConfiguration(value *BuildConfigurationA
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the ContextDir field is set to the value of the last call.
 func (b *S2iTaskApplyConfiguration) WithContextDir(value string) *S2iTaskApplyConfiguration {
-	b.ContextDir = &value
+	b.PublishTaskApplyConfiguration.ContextDir = &value
 	return b
 }
 
@@ -61,7 +61,7 @@ func (b *S2iTaskApplyConfiguration) WithContextDir(value string) *S2iTaskApplyCo
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the BaseImage field is set to the value of the last call.
 func (b *S2iTaskApplyConfiguration) WithBaseImage(value string) *S2iTaskApplyConfiguration {
-	b.BaseImage = &value
+	b.PublishTaskApplyConfiguration.BaseImage = &value
 	return b
 }
 
@@ -69,7 +69,7 @@ func (b *S2iTaskApplyConfiguration) WithBaseImage(value string) *S2iTaskApplyCon
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Image field is set to the value of the last call.
 func (b *S2iTaskApplyConfiguration) WithImage(value string) *S2iTaskApplyConfiguration {
-	b.Image = &value
+	b.PublishTaskApplyConfiguration.Image = &value
 	return b
 }
 
@@ -77,7 +77,7 @@ func (b *S2iTaskApplyConfiguration) WithImage(value string) *S2iTaskApplyConfigu
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Registry field is set to the value of the last call.
 func (b *S2iTaskApplyConfiguration) WithRegistry(value *RegistrySpecApplyConfiguration) *S2iTaskApplyConfiguration {
-	b.Registry = value
+	b.PublishTaskApplyConfiguration.Registry = value
 	return b
 }
 

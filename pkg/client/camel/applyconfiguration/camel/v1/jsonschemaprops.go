@@ -23,7 +23,7 @@ import (
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// JSONSchemaPropsApplyConfiguration represents an declarative configuration of the JSONSchemaProps type for use
+// JSONSchemaPropsApplyConfiguration represents a declarative configuration of the JSONSchemaProps type for use
 // with apply.
 type JSONSchemaPropsApplyConfiguration struct {
 	ID           *string                                     `json:"id,omitempty"`
@@ -37,7 +37,7 @@ type JSONSchemaPropsApplyConfiguration struct {
 	Type         *string                                     `json:"type,omitempty"`
 }
 
-// JSONSchemaPropsApplyConfiguration constructs an declarative configuration of the JSONSchemaProps type for use with
+// JSONSchemaPropsApplyConfiguration constructs a declarative configuration of the JSONSchemaProps type for use with
 // apply.
 func JSONSchemaProps() *JSONSchemaPropsApplyConfiguration {
 	return &JSONSchemaPropsApplyConfiguration{}

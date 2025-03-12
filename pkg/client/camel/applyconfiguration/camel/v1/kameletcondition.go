@@ -20,23 +20,23 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// KameletConditionApplyConfiguration represents an declarative configuration of the KameletCondition type for use
+// KameletConditionApplyConfiguration represents a declarative configuration of the KameletCondition type for use
 // with apply.
 type KameletConditionApplyConfiguration struct {
-	Type               *v1.KameletConditionType `json:"type,omitempty"`
-	Status             *corev1.ConditionStatus  `json:"status,omitempty"`
-	LastUpdateTime     *metav1.Time             `json:"lastUpdateTime,omitempty"`
-	LastTransitionTime *metav1.Time             `json:"lastTransitionTime,omitempty"`
-	Reason             *string                  `json:"reason,omitempty"`
-	Message            *string                  `json:"message,omitempty"`
+	Type               *camelv1.KameletConditionType `json:"type,omitempty"`
+	Status             *corev1.ConditionStatus       `json:"status,omitempty"`
+	LastUpdateTime     *metav1.Time                  `json:"lastUpdateTime,omitempty"`
+	LastTransitionTime *metav1.Time                  `json:"lastTransitionTime,omitempty"`
+	Reason             *string                       `json:"reason,omitempty"`
+	Message            *string                       `json:"message,omitempty"`
 }
 
-// KameletConditionApplyConfiguration constructs an declarative configuration of the KameletCondition type for use with
+// KameletConditionApplyConfiguration constructs a declarative configuration of the KameletCondition type for use with
 // apply.
 func KameletCondition() *KameletConditionApplyConfiguration {
 	return &KameletConditionApplyConfiguration{}
@@ -45,7 +45,7 @@ func KameletCondition() *KameletConditionApplyConfiguration {
 // WithType sets the Type field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Type field is set to the value of the last call.
-func (b *KameletConditionApplyConfiguration) WithType(value v1.KameletConditionType) *KameletConditionApplyConfiguration {
+func (b *KameletConditionApplyConfiguration) WithType(value camelv1.KameletConditionType) *KameletConditionApplyConfiguration {
 	b.Type = &value
 	return b
 }

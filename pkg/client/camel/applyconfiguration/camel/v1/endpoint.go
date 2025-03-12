@@ -20,20 +20,20 @@ limitations under the License.
 package v1
 
 import (
-	apiscamelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	v1 "k8s.io/api/core/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
-// EndpointApplyConfiguration represents an declarative configuration of the Endpoint type for use
+// EndpointApplyConfiguration represents a declarative configuration of the Endpoint type for use
 // with apply.
 type EndpointApplyConfiguration struct {
-	Ref        *v1.ObjectReference                                          `json:"ref,omitempty"`
-	URI        *string                                                      `json:"uri,omitempty"`
-	Properties *EndpointPropertiesApplyConfiguration                        `json:"properties,omitempty"`
-	DataTypes  map[apiscamelv1.TypeSlot]DataTypeReferenceApplyConfiguration `json:"dataTypes,omitempty"`
+	Ref        *corev1.ObjectReference                                  `json:"ref,omitempty"`
+	URI        *string                                                  `json:"uri,omitempty"`
+	Properties *EndpointPropertiesApplyConfiguration                    `json:"properties,omitempty"`
+	DataTypes  map[camelv1.TypeSlot]DataTypeReferenceApplyConfiguration `json:"dataTypes,omitempty"`
 }
 
-// EndpointApplyConfiguration constructs an declarative configuration of the Endpoint type for use with
+// EndpointApplyConfiguration constructs a declarative configuration of the Endpoint type for use with
 // apply.
 func Endpoint() *EndpointApplyConfiguration {
 	return &EndpointApplyConfiguration{}
@@ -42,7 +42,7 @@ func Endpoint() *EndpointApplyConfiguration {
 // WithRef sets the Ref field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Ref field is set to the value of the last call.
-func (b *EndpointApplyConfiguration) WithRef(value v1.ObjectReference) *EndpointApplyConfiguration {
+func (b *EndpointApplyConfiguration) WithRef(value corev1.ObjectReference) *EndpointApplyConfiguration {
 	b.Ref = &value
 	return b
 }
@@ -67,9 +67,9 @@ func (b *EndpointApplyConfiguration) WithProperties(value *EndpointPropertiesApp
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, the entries provided by each call will be put on the DataTypes field,
 // overwriting an existing map entries in DataTypes field with the same key.
-func (b *EndpointApplyConfiguration) WithDataTypes(entries map[apiscamelv1.TypeSlot]DataTypeReferenceApplyConfiguration) *EndpointApplyConfiguration {
+func (b *EndpointApplyConfiguration) WithDataTypes(entries map[camelv1.TypeSlot]DataTypeReferenceApplyConfiguration) *EndpointApplyConfiguration {
 	if b.DataTypes == nil && len(entries) > 0 {
-		b.DataTypes = make(map[apiscamelv1.TypeSlot]DataTypeReferenceApplyConfiguration, len(entries))
+		b.DataTypes = make(map[camelv1.TypeSlot]DataTypeReferenceApplyConfiguration, len(entries))
 	}
 	for k, v := range entries {
 		b.DataTypes[k] = v

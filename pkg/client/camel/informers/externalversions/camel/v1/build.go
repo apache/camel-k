@@ -20,13 +20,13 @@ limitations under the License.
 package v1
 
 import (
-	"context"
+	context "context"
 	time "time"
 
-	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	apiscamelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	versioned "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
 	internalinterfaces "github.com/apache/camel-k/v2/pkg/client/camel/informers/externalversions/internalinterfaces"
-	v1 "github.com/apache/camel-k/v2/pkg/client/camel/listers/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/listers/camel/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
@@ -37,7 +37,7 @@ import (
 // Builds.
 type BuildInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1.BuildLister
+	Lister() camelv1.BuildLister
 }
 
 type buildInformer struct {
@@ -72,7 +72,7 @@ func NewFilteredBuildInformer(client versioned.Interface, namespace string, resy
 				return client.CamelV1().Builds(namespace).Watch(context.TODO(), options)
 			},
 		},
-		&camelv1.Build{},
+		&apiscamelv1.Build{},
 		resyncPeriod,
 		indexers,
 	)
@@ -83,9 +83,9 @@ func (f *buildInformer) defaultInformer(client versioned.Interface, resyncPeriod
 }
 
 func (f *buildInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&camelv1.Build{}, f.defaultInformer)
+	return f.factory.InformerFor(&apiscamelv1.Build{}, f.defaultInformer)
 }
 
-func (f *buildInformer) Lister() v1.BuildLister {
-	return v1.NewBuildLister(f.Informer().GetIndexer())
+func (f *buildInformer) Lister() camelv1.BuildLister {
+	return camelv1.NewBuildLister(f.Informer().GetIndexer())
 }
