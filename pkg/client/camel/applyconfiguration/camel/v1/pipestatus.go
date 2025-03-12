@@ -20,20 +20,20 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// PipeStatusApplyConfiguration represents an declarative configuration of the PipeStatus type for use
+// PipeStatusApplyConfiguration represents a declarative configuration of the PipeStatus type for use
 // with apply.
 type PipeStatusApplyConfiguration struct {
 	ObservedGeneration *int64                            `json:"observedGeneration,omitempty"`
-	Phase              *v1.PipePhase                     `json:"phase,omitempty"`
+	Phase              *camelv1.PipePhase                `json:"phase,omitempty"`
 	Conditions         []PipeConditionApplyConfiguration `json:"conditions,omitempty"`
 	Replicas           *int32                            `json:"replicas,omitempty"`
 	Selector           *string                           `json:"selector,omitempty"`
 }
 
-// PipeStatusApplyConfiguration constructs an declarative configuration of the PipeStatus type for use with
+// PipeStatusApplyConfiguration constructs a declarative configuration of the PipeStatus type for use with
 // apply.
 func PipeStatus() *PipeStatusApplyConfiguration {
 	return &PipeStatusApplyConfiguration{}
@@ -50,7 +50,7 @@ func (b *PipeStatusApplyConfiguration) WithObservedGeneration(value int64) *Pipe
 // WithPhase sets the Phase field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Phase field is set to the value of the last call.
-func (b *PipeStatusApplyConfiguration) WithPhase(value v1.PipePhase) *PipeStatusApplyConfiguration {
+func (b *PipeStatusApplyConfiguration) WithPhase(value camelv1.PipePhase) *PipeStatusApplyConfiguration {
 	b.Phase = &value
 	return b
 }

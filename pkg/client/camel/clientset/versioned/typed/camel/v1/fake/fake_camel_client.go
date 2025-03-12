@@ -30,35 +30,35 @@ type FakeCamelV1 struct {
 }
 
 func (c *FakeCamelV1) Builds(namespace string) v1.BuildInterface {
-	return &FakeBuilds{c, namespace}
+	return newFakeBuilds(c, namespace)
 }
 
 func (c *FakeCamelV1) CamelCatalogs(namespace string) v1.CamelCatalogInterface {
-	return &FakeCamelCatalogs{c, namespace}
+	return newFakeCamelCatalogs(c, namespace)
 }
 
 func (c *FakeCamelV1) Integrations(namespace string) v1.IntegrationInterface {
-	return &FakeIntegrations{c, namespace}
+	return newFakeIntegrations(c, namespace)
 }
 
 func (c *FakeCamelV1) IntegrationKits(namespace string) v1.IntegrationKitInterface {
-	return &FakeIntegrationKits{c, namespace}
+	return newFakeIntegrationKits(c, namespace)
 }
 
 func (c *FakeCamelV1) IntegrationPlatforms(namespace string) v1.IntegrationPlatformInterface {
-	return &FakeIntegrationPlatforms{c, namespace}
+	return newFakeIntegrationPlatforms(c, namespace)
 }
 
 func (c *FakeCamelV1) IntegrationProfiles(namespace string) v1.IntegrationProfileInterface {
-	return &FakeIntegrationProfiles{c, namespace}
+	return newFakeIntegrationProfiles(c, namespace)
 }
 
 func (c *FakeCamelV1) Kamelets(namespace string) v1.KameletInterface {
-	return &FakeKamelets{c, namespace}
+	return newFakeKamelets(c, namespace)
 }
 
 func (c *FakeCamelV1) Pipes(namespace string) v1.PipeInterface {
-	return &FakePipes{c, namespace}
+	return newFakePipes(c, namespace)
 }
 
 // RESTClient returns a RESTClient that is used to communicate

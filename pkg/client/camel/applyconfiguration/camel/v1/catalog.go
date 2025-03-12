@@ -20,17 +20,17 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// CatalogApplyConfiguration represents an declarative configuration of the Catalog type for use
+// CatalogApplyConfiguration represents a declarative configuration of the Catalog type for use
 // with apply.
 type CatalogApplyConfiguration struct {
-	Version  *string             `json:"version,omitempty"`
-	Provider *v1.RuntimeProvider `json:"provider,omitempty"`
+	Version  *string                  `json:"version,omitempty"`
+	Provider *camelv1.RuntimeProvider `json:"provider,omitempty"`
 }
 
-// CatalogApplyConfiguration constructs an declarative configuration of the Catalog type for use with
+// CatalogApplyConfiguration constructs a declarative configuration of the Catalog type for use with
 // apply.
 func Catalog() *CatalogApplyConfiguration {
 	return &CatalogApplyConfiguration{}
@@ -47,7 +47,7 @@ func (b *CatalogApplyConfiguration) WithVersion(value string) *CatalogApplyConfi
 // WithProvider sets the Provider field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Provider field is set to the value of the last call.
-func (b *CatalogApplyConfiguration) WithProvider(value v1.RuntimeProvider) *CatalogApplyConfiguration {
+func (b *CatalogApplyConfiguration) WithProvider(value camelv1.RuntimeProvider) *CatalogApplyConfiguration {
 	b.Provider = &value
 	return b
 }

@@ -19,7 +19,7 @@ limitations under the License.
 
 package v1
 
-// PublishTaskApplyConfiguration represents an declarative configuration of the PublishTask type for use
+// PublishTaskApplyConfiguration represents a declarative configuration of the PublishTask type for use
 // with apply.
 type PublishTaskApplyConfiguration struct {
 	ContextDir *string                         `json:"contextDir,omitempty"`
@@ -28,7 +28,7 @@ type PublishTaskApplyConfiguration struct {
 	Registry   *RegistrySpecApplyConfiguration `json:"registry,omitempty"`
 }
 
-// PublishTaskApplyConfiguration constructs an declarative configuration of the PublishTask type for use with
+// PublishTaskApplyConfiguration constructs a declarative configuration of the PublishTask type for use with
 // apply.
 func PublishTask() *PublishTaskApplyConfiguration {
 	return &PublishTaskApplyConfiguration{}

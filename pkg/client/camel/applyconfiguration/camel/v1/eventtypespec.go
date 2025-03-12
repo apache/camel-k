@@ -19,14 +19,14 @@ limitations under the License.
 
 package v1
 
-// EventTypeSpecApplyConfiguration represents an declarative configuration of the EventTypeSpec type for use
+// EventTypeSpecApplyConfiguration represents a declarative configuration of the EventTypeSpec type for use
 // with apply.
 type EventTypeSpecApplyConfiguration struct {
 	MediaType *string                            `json:"mediaType,omitempty"`
 	Schema    *JSONSchemaPropsApplyConfiguration `json:"schema,omitempty"`
 }
 
-// EventTypeSpecApplyConfiguration constructs an declarative configuration of the EventTypeSpec type for use with
+// EventTypeSpecApplyConfiguration constructs a declarative configuration of the EventTypeSpec type for use with
 // apply.
 func EventTypeSpec() *EventTypeSpecApplyConfiguration {
 	return &EventTypeSpecApplyConfiguration{}

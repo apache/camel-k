@@ -23,7 +23,7 @@ import (
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// IntegrationProfileStatusApplyConfiguration represents an declarative configuration of the IntegrationProfileStatus type for use
+// IntegrationProfileStatusApplyConfiguration represents a declarative configuration of the IntegrationProfileStatus type for use
 // with apply.
 type IntegrationProfileStatusApplyConfiguration struct {
 	IntegrationProfileSpecApplyConfiguration `json:",inline"`
@@ -32,7 +32,7 @@ type IntegrationProfileStatusApplyConfiguration struct {
 	Conditions                               []IntegrationProfileConditionApplyConfiguration `json:"conditions,omitempty"`
 }
 
-// IntegrationProfileStatusApplyConfiguration constructs an declarative configuration of the IntegrationProfileStatus type for use with
+// IntegrationProfileStatusApplyConfiguration constructs a declarative configuration of the IntegrationProfileStatus type for use with
 // apply.
 func IntegrationProfileStatus() *IntegrationProfileStatusApplyConfiguration {
 	return &IntegrationProfileStatusApplyConfiguration{}
@@ -42,7 +42,7 @@ func IntegrationProfileStatus() *IntegrationProfileStatusApplyConfiguration {
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Build field is set to the value of the last call.
 func (b *IntegrationProfileStatusApplyConfiguration) WithBuild(value *IntegrationProfileBuildSpecApplyConfiguration) *IntegrationProfileStatusApplyConfiguration {
-	b.Build = value
+	b.IntegrationProfileSpecApplyConfiguration.Build = value
 	return b
 }
 
@@ -50,7 +50,7 @@ func (b *IntegrationProfileStatusApplyConfiguration) WithBuild(value *Integratio
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Traits field is set to the value of the last call.
 func (b *IntegrationProfileStatusApplyConfiguration) WithTraits(value *TraitsApplyConfiguration) *IntegrationProfileStatusApplyConfiguration {
-	b.Traits = value
+	b.IntegrationProfileSpecApplyConfiguration.Traits = value
 	return b
 }
 
@@ -58,7 +58,7 @@ func (b *IntegrationProfileStatusApplyConfiguration) WithTraits(value *TraitsApp
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Kamelet field is set to the value of the last call.
 func (b *IntegrationProfileStatusApplyConfiguration) WithKamelet(value *IntegrationProfileKameletSpecApplyConfiguration) *IntegrationProfileStatusApplyConfiguration {
-	b.Kamelet = value
+	b.IntegrationProfileSpecApplyConfiguration.Kamelet = value
 	return b
 }
 

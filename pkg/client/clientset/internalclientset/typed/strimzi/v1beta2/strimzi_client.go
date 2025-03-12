@@ -20,10 +20,10 @@ limitations under the License.
 package v1beta2
 
 import (
-	"net/http"
+	http "net/http"
 
-	v1beta2 "github.com/apache/camel-k/v2/pkg/apis/duck/strimzi/v1beta2"
-	"github.com/apache/camel-k/v2/pkg/client/duck/strimzi/clientset/internalclientset/scheme"
+	strimziv1beta2 "github.com/apache/camel-k/v2/pkg/apis/duck/strimzi/v1beta2"
+	scheme "github.com/apache/camel-k/v2/pkg/client/duck/strimzi/clientset/internalclientset/scheme"
 	rest "k8s.io/client-go/rest"
 )
 
@@ -91,10 +91,10 @@ func New(c rest.Interface) *KafkaV1beta2Client {
 }
 
 func setConfigDefaults(config *rest.Config) error {
-	gv := v1beta2.SchemeGroupVersion
+	gv := strimziv1beta2.SchemeGroupVersion
 	config.GroupVersion = &gv
 	config.APIPath = "/apis"
-	config.NegotiatedSerializer = scheme.Codecs.WithoutConversion()
+	config.NegotiatedSerializer = rest.CodecFactoryForGeneratedClient(scheme.Scheme, scheme.Codecs).WithoutConversion()
 
 	if config.UserAgent == "" {
 		config.UserAgent = rest.DefaultKubernetesUserAgent()

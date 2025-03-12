@@ -19,7 +19,7 @@ limitations under the License.
 
 package v1
 
-// CamelSchemeApplyConfiguration represents an declarative configuration of the CamelScheme type for use
+// CamelSchemeApplyConfiguration represents a declarative configuration of the CamelScheme type for use
 // with apply.
 type CamelSchemeApplyConfiguration struct {
 	ID       *string                             `json:"id,omitempty"`
@@ -29,7 +29,7 @@ type CamelSchemeApplyConfiguration struct {
 	Producer *CamelSchemeScopeApplyConfiguration `json:"producer,omitempty"`
 }
 
-// CamelSchemeApplyConfiguration constructs an declarative configuration of the CamelScheme type for use with
+// CamelSchemeApplyConfiguration constructs a declarative configuration of the CamelScheme type for use with
 // apply.
 func CamelScheme() *CamelSchemeApplyConfiguration {
 	return &CamelSchemeApplyConfiguration{}

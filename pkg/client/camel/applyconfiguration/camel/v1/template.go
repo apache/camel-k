@@ -20,16 +20,16 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// TemplateApplyConfiguration represents an declarative configuration of the Template type for use
+// TemplateApplyConfiguration represents a declarative configuration of the Template type for use
 // with apply.
 type TemplateApplyConfiguration struct {
-	v1.RawMessage `json:",inline"`
+	camelv1.RawMessage `json:",inline"`
 }
 
-// TemplateApplyConfiguration constructs an declarative configuration of the Template type for use with
+// TemplateApplyConfiguration constructs a declarative configuration of the Template type for use with
 // apply.
 func Template() *TemplateApplyConfiguration {
 	return &TemplateApplyConfiguration{}

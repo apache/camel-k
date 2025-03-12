@@ -19,7 +19,7 @@ limitations under the License.
 
 package v1
 
-// ArtifactApplyConfiguration represents an declarative configuration of the Artifact type for use
+// ArtifactApplyConfiguration represents a declarative configuration of the Artifact type for use
 // with apply.
 type ArtifactApplyConfiguration struct {
 	ID       *string `json:"id,omitempty"`
@@ -28,7 +28,7 @@ type ArtifactApplyConfiguration struct {
 	Checksum *string `json:"checksum,omitempty"`
 }
 
-// ArtifactApplyConfiguration constructs an declarative configuration of the Artifact type for use with
+// ArtifactApplyConfiguration constructs a declarative configuration of the Artifact type for use with
 // apply.
 func Artifact() *ArtifactApplyConfiguration {
 	return &ArtifactApplyConfiguration{}

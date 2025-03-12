@@ -19,7 +19,7 @@ limitations under the License.
 
 package v1
 
-// HeaderSpecApplyConfiguration represents an declarative configuration of the HeaderSpec type for use
+// HeaderSpecApplyConfiguration represents a declarative configuration of the HeaderSpec type for use
 // with apply.
 type HeaderSpecApplyConfiguration struct {
 	Type        *string `json:"type,omitempty"`
@@ -29,7 +29,7 @@ type HeaderSpecApplyConfiguration struct {
 	Default     *string `json:"default,omitempty"`
 }
 
-// HeaderSpecApplyConfiguration constructs an declarative configuration of the HeaderSpec type for use with
+// HeaderSpecApplyConfiguration constructs a declarative configuration of the HeaderSpec type for use with
 // apply.
 func HeaderSpec() *HeaderSpecApplyConfiguration {
 	return &HeaderSpecApplyConfiguration{}

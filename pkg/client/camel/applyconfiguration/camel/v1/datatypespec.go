@@ -19,7 +19,7 @@ limitations under the License.
 
 package v1
 
-// DataTypeSpecApplyConfiguration represents an declarative configuration of the DataTypeSpec type for use
+// DataTypeSpecApplyConfiguration represents a declarative configuration of the DataTypeSpec type for use
 // with apply.
 type DataTypeSpecApplyConfiguration struct {
 	Scheme       *string                                 `json:"scheme,omitempty"`
@@ -31,7 +31,7 @@ type DataTypeSpecApplyConfiguration struct {
 	Schema       *JSONSchemaPropsApplyConfiguration      `json:"schema,omitempty"`
 }
 
-// DataTypeSpecApplyConfiguration constructs an declarative configuration of the DataTypeSpec type for use with
+// DataTypeSpecApplyConfiguration constructs a declarative configuration of the DataTypeSpec type for use with
 // apply.
 func DataTypeSpec() *DataTypeSpecApplyConfiguration {
 	return &DataTypeSpecApplyConfiguration{}

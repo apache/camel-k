@@ -20,22 +20,22 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// IntegrationProfileBuildSpecApplyConfiguration represents an declarative configuration of the IntegrationProfileBuildSpec type for use
+// IntegrationProfileBuildSpecApplyConfiguration represents a declarative configuration of the IntegrationProfileBuildSpec type for use
 // with apply.
 type IntegrationProfileBuildSpecApplyConfiguration struct {
 	RuntimeVersion  *string                         `json:"runtimeVersion,omitempty"`
-	RuntimeProvider *v1.RuntimeProvider             `json:"runtimeProvider,omitempty"`
+	RuntimeProvider *camelv1.RuntimeProvider        `json:"runtimeProvider,omitempty"`
 	BaseImage       *string                         `json:"baseImage,omitempty"`
 	Registry        *RegistrySpecApplyConfiguration `json:"registry,omitempty"`
 	Timeout         *metav1.Duration                `json:"timeout,omitempty"`
 	Maven           *MavenSpecApplyConfiguration    `json:"maven,omitempty"`
 }
 
-// IntegrationProfileBuildSpecApplyConfiguration constructs an declarative configuration of the IntegrationProfileBuildSpec type for use with
+// IntegrationProfileBuildSpecApplyConfiguration constructs a declarative configuration of the IntegrationProfileBuildSpec type for use with
 // apply.
 func IntegrationProfileBuildSpec() *IntegrationProfileBuildSpecApplyConfiguration {
 	return &IntegrationProfileBuildSpecApplyConfiguration{}
@@ -52,7 +52,7 @@ func (b *IntegrationProfileBuildSpecApplyConfiguration) WithRuntimeVersion(value
 // WithRuntimeProvider sets the RuntimeProvider field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the RuntimeProvider field is set to the value of the last call.
-func (b *IntegrationProfileBuildSpecApplyConfiguration) WithRuntimeProvider(value v1.RuntimeProvider) *IntegrationProfileBuildSpecApplyConfiguration {
+func (b *IntegrationProfileBuildSpecApplyConfiguration) WithRuntimeProvider(value camelv1.RuntimeProvider) *IntegrationProfileBuildSpecApplyConfiguration {
 	b.RuntimeProvider = &value
 	return b
 }

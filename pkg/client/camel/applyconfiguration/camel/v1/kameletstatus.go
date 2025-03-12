@@ -20,19 +20,19 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// KameletStatusApplyConfiguration represents an declarative configuration of the KameletStatus type for use
+// KameletStatusApplyConfiguration represents a declarative configuration of the KameletStatus type for use
 // with apply.
 type KameletStatusApplyConfiguration struct {
 	ObservedGeneration *int64                               `json:"observedGeneration,omitempty"`
-	Phase              *v1.KameletPhase                     `json:"phase,omitempty"`
+	Phase              *camelv1.KameletPhase                `json:"phase,omitempty"`
 	Conditions         []KameletConditionApplyConfiguration `json:"conditions,omitempty"`
 	Properties         []KameletPropertyApplyConfiguration  `json:"properties,omitempty"`
 }
 
-// KameletStatusApplyConfiguration constructs an declarative configuration of the KameletStatus type for use with
+// KameletStatusApplyConfiguration constructs a declarative configuration of the KameletStatus type for use with
 // apply.
 func KameletStatus() *KameletStatusApplyConfiguration {
 	return &KameletStatusApplyConfiguration{}
@@ -49,7 +49,7 @@ func (b *KameletStatusApplyConfiguration) WithObservedGeneration(value int64) *K
 // WithPhase sets the Phase field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Phase field is set to the value of the last call.
-func (b *KameletStatusApplyConfiguration) WithPhase(value v1.KameletPhase) *KameletStatusApplyConfiguration {
+func (b *KameletStatusApplyConfiguration) WithPhase(value camelv1.KameletPhase) *KameletStatusApplyConfiguration {
 	b.Phase = &value
 	return b
 }

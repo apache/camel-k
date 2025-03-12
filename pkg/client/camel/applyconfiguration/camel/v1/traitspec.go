@@ -19,13 +19,13 @@ limitations under the License.
 
 package v1
 
-// TraitSpecApplyConfiguration represents an declarative configuration of the TraitSpec type for use
+// TraitSpecApplyConfiguration represents a declarative configuration of the TraitSpec type for use
 // with apply.
 type TraitSpecApplyConfiguration struct {
 	Configuration *TraitConfigurationApplyConfiguration `json:"configuration,omitempty"`
 }
 
-// TraitSpecApplyConfiguration constructs an declarative configuration of the TraitSpec type for use with
+// TraitSpecApplyConfiguration constructs a declarative configuration of the TraitSpec type for use with
 // apply.
 func TraitSpec() *TraitSpecApplyConfiguration {
 	return &TraitSpecApplyConfiguration{}

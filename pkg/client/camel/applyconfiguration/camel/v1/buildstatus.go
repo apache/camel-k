@@ -20,15 +20,15 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// BuildStatusApplyConfiguration represents an declarative configuration of the BuildStatus type for use
+// BuildStatusApplyConfiguration represents a declarative configuration of the BuildStatus type for use
 // with apply.
 type BuildStatusApplyConfiguration struct {
 	ObservedGeneration *int64                             `json:"observedGeneration,omitempty"`
-	Phase              *v1.BuildPhase                     `json:"phase,omitempty"`
+	Phase              *camelv1.BuildPhase                `json:"phase,omitempty"`
 	Image              *string                            `json:"image,omitempty"`
 	Digest             *string                            `json:"digest,omitempty"`
 	RootImage          *string                            `json:"rootImage,omitempty"`
@@ -41,7 +41,7 @@ type BuildStatusApplyConfiguration struct {
 	Duration           *string                            `json:"duration,omitempty"`
 }
 
-// BuildStatusApplyConfiguration constructs an declarative configuration of the BuildStatus type for use with
+// BuildStatusApplyConfiguration constructs a declarative configuration of the BuildStatus type for use with
 // apply.
 func BuildStatus() *BuildStatusApplyConfiguration {
 	return &BuildStatusApplyConfiguration{}
@@ -58,7 +58,7 @@ func (b *BuildStatusApplyConfiguration) WithObservedGeneration(value int64) *Bui
 // WithPhase sets the Phase field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Phase field is set to the value of the last call.
-func (b *BuildStatusApplyConfiguration) WithPhase(value v1.BuildPhase) *BuildStatusApplyConfiguration {
+func (b *BuildStatusApplyConfiguration) WithPhase(value camelv1.BuildPhase) *BuildStatusApplyConfiguration {
 	b.Phase = &value
 	return b
 }

@@ -23,7 +23,7 @@ import (
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// SourceSpecApplyConfiguration represents an declarative configuration of the SourceSpec type for use
+// SourceSpecApplyConfiguration represents a declarative configuration of the SourceSpec type for use
 // with apply.
 type SourceSpecApplyConfiguration struct {
 	DataSpecApplyConfiguration `json:",inline"`
@@ -35,7 +35,7 @@ type SourceSpecApplyConfiguration struct {
 	FromKamelet                *bool               `json:"from-kamelet,omitempty"`
 }
 
-// SourceSpecApplyConfiguration constructs an declarative configuration of the SourceSpec type for use with
+// SourceSpecApplyConfiguration constructs a declarative configuration of the SourceSpec type for use with
 // apply.
 func SourceSpec() *SourceSpecApplyConfiguration {
 	return &SourceSpecApplyConfiguration{}
@@ -45,7 +45,7 @@ func SourceSpec() *SourceSpecApplyConfiguration {
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Name field is set to the value of the last call.
 func (b *SourceSpecApplyConfiguration) WithName(value string) *SourceSpecApplyConfiguration {
-	b.Name = &value
+	b.DataSpecApplyConfiguration.Name = &value
 	return b
 }
 
@@ -53,7 +53,7 @@ func (b *SourceSpecApplyConfiguration) WithName(value string) *SourceSpecApplyCo
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Path field is set to the value of the last call.
 func (b *SourceSpecApplyConfiguration) WithPath(value string) *SourceSpecApplyConfiguration {
-	b.Path = &value
+	b.DataSpecApplyConfiguration.Path = &value
 	return b
 }
 
@@ -61,7 +61,7 @@ func (b *SourceSpecApplyConfiguration) WithPath(value string) *SourceSpecApplyCo
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Content field is set to the value of the last call.
 func (b *SourceSpecApplyConfiguration) WithContent(value string) *SourceSpecApplyConfiguration {
-	b.Content = &value
+	b.DataSpecApplyConfiguration.Content = &value
 	return b
 }
 
@@ -70,7 +70,7 @@ func (b *SourceSpecApplyConfiguration) WithContent(value string) *SourceSpecAppl
 // If called multiple times, values provided by each call will be appended to the RawContent field.
 func (b *SourceSpecApplyConfiguration) WithRawContent(values ...byte) *SourceSpecApplyConfiguration {
 	for i := range values {
-		b.RawContent = append(b.RawContent, values[i])
+		b.DataSpecApplyConfiguration.RawContent = append(b.DataSpecApplyConfiguration.RawContent, values[i])
 	}
 	return b
 }
@@ -79,7 +79,7 @@ func (b *SourceSpecApplyConfiguration) WithRawContent(values ...byte) *SourceSpe
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the ContentRef field is set to the value of the last call.
 func (b *SourceSpecApplyConfiguration) WithContentRef(value string) *SourceSpecApplyConfiguration {
-	b.ContentRef = &value
+	b.DataSpecApplyConfiguration.ContentRef = &value
 	return b
 }
 
@@ -87,7 +87,7 @@ func (b *SourceSpecApplyConfiguration) WithContentRef(value string) *SourceSpecA
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the ContentKey field is set to the value of the last call.
 func (b *SourceSpecApplyConfiguration) WithContentKey(value string) *SourceSpecApplyConfiguration {
-	b.ContentKey = &value
+	b.DataSpecApplyConfiguration.ContentKey = &value
 	return b
 }
 
@@ -95,7 +95,7 @@ func (b *SourceSpecApplyConfiguration) WithContentKey(value string) *SourceSpecA
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the ContentType field is set to the value of the last call.
 func (b *SourceSpecApplyConfiguration) WithContentType(value string) *SourceSpecApplyConfiguration {
-	b.ContentType = &value
+	b.DataSpecApplyConfiguration.ContentType = &value
 	return b
 }
 
@@ -103,7 +103,7 @@ func (b *SourceSpecApplyConfiguration) WithContentType(value string) *SourceSpec
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Compression field is set to the value of the last call.
 func (b *SourceSpecApplyConfiguration) WithCompression(value bool) *SourceSpecApplyConfiguration {
-	b.Compression = &value
+	b.DataSpecApplyConfiguration.Compression = &value
 	return b
 }
 

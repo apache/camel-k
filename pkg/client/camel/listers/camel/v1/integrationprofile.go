@@ -20,10 +20,10 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/client-go/tools/cache"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	labels "k8s.io/apimachinery/pkg/labels"
+	listers "k8s.io/client-go/listers"
+	cache "k8s.io/client-go/tools/cache"
 )
 
 // IntegrationProfileLister helps list IntegrationProfiles.
@@ -31,7 +31,7 @@ import (
 type IntegrationProfileLister interface {
 	// List lists all IntegrationProfiles in the indexer.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1.IntegrationProfile, err error)
+	List(selector labels.Selector) (ret []*camelv1.IntegrationProfile, err error)
 	// IntegrationProfiles returns an object that can list and get IntegrationProfiles.
 	IntegrationProfiles(namespace string) IntegrationProfileNamespaceLister
 	IntegrationProfileListerExpansion
@@ -39,25 +39,17 @@ type IntegrationProfileLister interface {
 
 // integrationProfileLister implements the IntegrationProfileLister interface.
 type integrationProfileLister struct {
-	indexer cache.Indexer
+	listers.ResourceIndexer[*camelv1.IntegrationProfile]
 }
 
 // NewIntegrationProfileLister returns a new IntegrationProfileLister.
 func NewIntegrationProfileLister(indexer cache.Indexer) IntegrationProfileLister {
-	return &integrationProfileLister{indexer: indexer}
-}
-
-// List lists all IntegrationProfiles in the indexer.
-func (s *integrationProfileLister) List(selector labels.Selector) (ret []*v1.IntegrationProfile, err error) {
-	err = cache.ListAll(s.indexer, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1.IntegrationProfile))
-	})
-	return ret, err
+	return &integrationProfileLister{listers.New[*camelv1.IntegrationProfile](indexer, camelv1.Resource("integrationprofile"))}
 }
 
 // IntegrationProfiles returns an object that can list and get IntegrationProfiles.
 func (s *integrationProfileLister) IntegrationProfiles(namespace string) IntegrationProfileNamespaceLister {
-	return integrationProfileNamespaceLister{indexer: s.indexer, namespace: namespace}
+	return integrationProfileNamespaceLister{listers.NewNamespaced[*camelv1.IntegrationProfile](s.ResourceIndexer, namespace)}
 }
 
 // IntegrationProfileNamespaceLister helps list and get IntegrationProfiles.
@@ -65,36 +57,15 @@ func (s *integrationProfileLister) IntegrationProfiles(namespace string) Integra
 type IntegrationProfileNamespaceLister interface {
 	// List lists all IntegrationProfiles in the indexer for a given namespace.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1.IntegrationProfile, err error)
+	List(selector labels.Selector) (ret []*camelv1.IntegrationProfile, err error)
 	// Get retrieves the IntegrationProfile from the indexer for a given namespace and name.
 	// Objects returned here must be treated as read-only.
-	Get(name string) (*v1.IntegrationProfile, error)
+	Get(name string) (*camelv1.IntegrationProfile, error)
 	IntegrationProfileNamespaceListerExpansion
 }
 
 // integrationProfileNamespaceLister implements the IntegrationProfileNamespaceLister
 // interface.
 type integrationProfileNamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all IntegrationProfiles in the indexer for a given namespace.
-func (s integrationProfileNamespaceLister) List(selector labels.Selector) (ret []*v1.IntegrationProfile, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1.IntegrationProfile))
-	})
-	return ret, err
-}
-
-// Get retrieves the IntegrationProfile from the indexer for a given namespace and name.
-func (s integrationProfileNamespaceLister) Get(name string) (*v1.IntegrationProfile, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, errors.NewNotFound(v1.Resource("integrationprofile"), name)
-	}
-	return obj.(*v1.IntegrationProfile), nil
+	listers.ResourceIndexer[*camelv1.IntegrationProfile]
 }

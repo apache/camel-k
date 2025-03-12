@@ -19,13 +19,13 @@ limitations under the License.
 
 package v1
 
-// IntegrationProfileKameletSpecApplyConfiguration represents an declarative configuration of the IntegrationProfileKameletSpec type for use
+// IntegrationProfileKameletSpecApplyConfiguration represents a declarative configuration of the IntegrationProfileKameletSpec type for use
 // with apply.
 type IntegrationProfileKameletSpecApplyConfiguration struct {
 	Repositories []KameletRepositorySpecApplyConfiguration `json:"repositories,omitempty"`
 }
 
-// IntegrationProfileKameletSpecApplyConfiguration constructs an declarative configuration of the IntegrationProfileKameletSpec type for use with
+// IntegrationProfileKameletSpecApplyConfiguration constructs a declarative configuration of the IntegrationProfileKameletSpec type for use with
 // apply.
 func IntegrationProfileKameletSpec() *IntegrationProfileKameletSpecApplyConfiguration {
 	return &IntegrationProfileKameletSpecApplyConfiguration{}

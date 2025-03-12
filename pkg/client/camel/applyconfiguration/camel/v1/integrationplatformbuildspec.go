@@ -24,7 +24,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// IntegrationPlatformBuildSpecApplyConfiguration represents an declarative configuration of the IntegrationPlatformBuildSpec type for use
+// IntegrationPlatformBuildSpecApplyConfiguration represents a declarative configuration of the IntegrationPlatformBuildSpec type for use
 // with apply.
 type IntegrationPlatformBuildSpecApplyConfiguration struct {
 	BuildConfiguration      *BuildConfigurationApplyConfiguration            `json:"buildConfiguration,omitempty"`
@@ -41,7 +41,7 @@ type IntegrationPlatformBuildSpecApplyConfiguration struct {
 	MaxRunningBuilds        *int32                                           `json:"maxRunningBuilds,omitempty"`
 }
 
-// IntegrationPlatformBuildSpecApplyConfiguration constructs an declarative configuration of the IntegrationPlatformBuildSpec type for use with
+// IntegrationPlatformBuildSpecApplyConfiguration constructs a declarative configuration of the IntegrationPlatformBuildSpec type for use with
 // apply.
 func IntegrationPlatformBuildSpec() *IntegrationPlatformBuildSpecApplyConfiguration {
 	return &IntegrationPlatformBuildSpecApplyConfiguration{}

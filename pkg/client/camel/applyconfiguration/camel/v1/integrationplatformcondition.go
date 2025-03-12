@@ -20,23 +20,23 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// IntegrationPlatformConditionApplyConfiguration represents an declarative configuration of the IntegrationPlatformCondition type for use
+// IntegrationPlatformConditionApplyConfiguration represents a declarative configuration of the IntegrationPlatformCondition type for use
 // with apply.
 type IntegrationPlatformConditionApplyConfiguration struct {
-	Type               *v1.IntegrationPlatformConditionType `json:"type,omitempty"`
-	Status             *corev1.ConditionStatus              `json:"status,omitempty"`
-	LastUpdateTime     *metav1.Time                         `json:"lastUpdateTime,omitempty"`
-	LastTransitionTime *metav1.Time                         `json:"lastTransitionTime,omitempty"`
-	Reason             *string                              `json:"reason,omitempty"`
-	Message            *string                              `json:"message,omitempty"`
+	Type               *camelv1.IntegrationPlatformConditionType `json:"type,omitempty"`
+	Status             *corev1.ConditionStatus                   `json:"status,omitempty"`
+	LastUpdateTime     *metav1.Time                              `json:"lastUpdateTime,omitempty"`
+	LastTransitionTime *metav1.Time                              `json:"lastTransitionTime,omitempty"`
+	Reason             *string                                   `json:"reason,omitempty"`
+	Message            *string                                   `json:"message,omitempty"`
 }
 
-// IntegrationPlatformConditionApplyConfiguration constructs an declarative configuration of the IntegrationPlatformCondition type for use with
+// IntegrationPlatformConditionApplyConfiguration constructs a declarative configuration of the IntegrationPlatformCondition type for use with
 // apply.
 func IntegrationPlatformCondition() *IntegrationPlatformConditionApplyConfiguration {
 	return &IntegrationPlatformConditionApplyConfiguration{}
@@ -45,7 +45,7 @@ func IntegrationPlatformCondition() *IntegrationPlatformConditionApplyConfigurat
 // WithType sets the Type field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Type field is set to the value of the last call.
-func (b *IntegrationPlatformConditionApplyConfiguration) WithType(value v1.IntegrationPlatformConditionType) *IntegrationPlatformConditionApplyConfiguration {
+func (b *IntegrationPlatformConditionApplyConfiguration) WithType(value camelv1.IntegrationPlatformConditionType) *IntegrationPlatformConditionApplyConfiguration {
 	b.Type = &value
 	return b
 }

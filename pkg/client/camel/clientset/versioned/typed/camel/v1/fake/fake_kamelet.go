@@ -20,171 +20,31 @@ limitations under the License.
 package fake
 
 import (
-	"context"
-	json "encoding/json"
-	"fmt"
-
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration/camel/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	labels "k8s.io/apimachinery/pkg/labels"
-	types "k8s.io/apimachinery/pkg/types"
-	watch "k8s.io/apimachinery/pkg/watch"
-	testing "k8s.io/client-go/testing"
+	typedcamelv1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1"
+	gentype "k8s.io/client-go/gentype"
 )
 
-// FakeKamelets implements KameletInterface
-type FakeKamelets struct {
+// fakeKamelets implements KameletInterface
+type fakeKamelets struct {
+	*gentype.FakeClientWithListAndApply[*v1.Kamelet, *v1.KameletList, *camelv1.KameletApplyConfiguration]
 	Fake *FakeCamelV1
-	ns   string
 }
 
-var kameletsResource = v1.SchemeGroupVersion.WithResource("kamelets")
-
-var kameletsKind = v1.SchemeGroupVersion.WithKind("Kamelet")
-
-// Get takes name of the kamelet, and returns the corresponding kamelet object, and an error if there is any.
-func (c *FakeKamelets) Get(ctx context.Context, name string, options metav1.GetOptions) (result *v1.Kamelet, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(kameletsResource, c.ns, name), &v1.Kamelet{})
-
-	if obj == nil {
-		return nil, err
+func newFakeKamelets(fake *FakeCamelV1, namespace string) typedcamelv1.KameletInterface {
+	return &fakeKamelets{
+		gentype.NewFakeClientWithListAndApply[*v1.Kamelet, *v1.KameletList, *camelv1.KameletApplyConfiguration](
+			fake.Fake,
+			namespace,
+			v1.SchemeGroupVersion.WithResource("kamelets"),
+			v1.SchemeGroupVersion.WithKind("Kamelet"),
+			func() *v1.Kamelet { return &v1.Kamelet{} },
+			func() *v1.KameletList { return &v1.KameletList{} },
+			func(dst, src *v1.KameletList) { dst.ListMeta = src.ListMeta },
+			func(list *v1.KameletList) []*v1.Kamelet { return gentype.ToPointerSlice(list.Items) },
+			func(list *v1.KameletList, items []*v1.Kamelet) { list.Items = gentype.FromPointerSlice(items) },
+		),
+		fake,
 	}
-	return obj.(*v1.Kamelet), err
-}
-
-// List takes label and field selectors, and returns the list of Kamelets that match those selectors.
-func (c *FakeKamelets) List(ctx context.Context, opts metav1.ListOptions) (result *v1.KameletList, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewListAction(kameletsResource, kameletsKind, c.ns, opts), &v1.KameletList{})
-
-	if obj == nil {
-		return nil, err
-	}
-
-	label, _, _ := testing.ExtractFromListOptions(opts)
-	if label == nil {
-		label = labels.Everything()
-	}
-	list := &v1.KameletList{ListMeta: obj.(*v1.KameletList).ListMeta}
-	for _, item := range obj.(*v1.KameletList).Items {
-		if label.Matches(labels.Set(item.Labels)) {
-			list.Items = append(list.Items, item)
-		}
-	}
-	return list, err
-}
-
-// Watch returns a watch.Interface that watches the requested kamelets.
-func (c *FakeKamelets) Watch(ctx context.Context, opts metav1.ListOptions) (watch.Interface, error) {
-	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(kameletsResource, c.ns, opts))
-
-}
-
-// Create takes the representation of a kamelet and creates it.  Returns the server's representation of the kamelet, and an error, if there is any.
-func (c *FakeKamelets) Create(ctx context.Context, kamelet *v1.Kamelet, opts metav1.CreateOptions) (result *v1.Kamelet, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(kameletsResource, c.ns, kamelet), &v1.Kamelet{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1.Kamelet), err
-}
-
-// Update takes the representation of a kamelet and updates it. Returns the server's representation of the kamelet, and an error, if there is any.
-func (c *FakeKamelets) Update(ctx context.Context, kamelet *v1.Kamelet, opts metav1.UpdateOptions) (result *v1.Kamelet, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(kameletsResource, c.ns, kamelet), &v1.Kamelet{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1.Kamelet), err
-}
-
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeKamelets) UpdateStatus(ctx context.Context, kamelet *v1.Kamelet, opts metav1.UpdateOptions) (*v1.Kamelet, error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(kameletsResource, "status", c.ns, kamelet), &v1.Kamelet{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1.Kamelet), err
-}
-
-// Delete takes name of the kamelet and deletes it. Returns an error if one occurs.
-func (c *FakeKamelets) Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error {
-	_, err := c.Fake.
-		Invokes(testing.NewDeleteActionWithOptions(kameletsResource, c.ns, name, opts), &v1.Kamelet{})
-
-	return err
-}
-
-// DeleteCollection deletes a collection of objects.
-func (c *FakeKamelets) DeleteCollection(ctx context.Context, opts metav1.DeleteOptions, listOpts metav1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(kameletsResource, c.ns, listOpts)
-
-	_, err := c.Fake.Invokes(action, &v1.KameletList{})
-	return err
-}
-
-// Patch applies the patch and returns the patched kamelet.
-func (c *FakeKamelets) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts metav1.PatchOptions, subresources ...string) (result *v1.Kamelet, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(kameletsResource, c.ns, name, pt, data, subresources...), &v1.Kamelet{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1.Kamelet), err
-}
-
-// Apply takes the given apply declarative configuration, applies it and returns the applied kamelet.
-func (c *FakeKamelets) Apply(ctx context.Context, kamelet *camelv1.KameletApplyConfiguration, opts metav1.ApplyOptions) (result *v1.Kamelet, err error) {
-	if kamelet == nil {
-		return nil, fmt.Errorf("kamelet provided to Apply must not be nil")
-	}
-	data, err := json.Marshal(kamelet)
-	if err != nil {
-		return nil, err
-	}
-	name := kamelet.Name
-	if name == nil {
-		return nil, fmt.Errorf("kamelet.Name must be provided to Apply")
-	}
-	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(kameletsResource, c.ns, *name, types.ApplyPatchType, data), &v1.Kamelet{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1.Kamelet), err
-}
-
-// ApplyStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
-func (c *FakeKamelets) ApplyStatus(ctx context.Context, kamelet *camelv1.KameletApplyConfiguration, opts metav1.ApplyOptions) (result *v1.Kamelet, err error) {
-	if kamelet == nil {
-		return nil, fmt.Errorf("kamelet provided to Apply must not be nil")
-	}
-	data, err := json.Marshal(kamelet)
-	if err != nil {
-		return nil, err
-	}
-	name := kamelet.Name
-	if name == nil {
-		return nil, fmt.Errorf("kamelet.Name must be provided to Apply")
-	}
-	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(kameletsResource, c.ns, *name, types.ApplyPatchType, data, "status"), &v1.Kamelet{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1.Kamelet), err
 }

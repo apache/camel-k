@@ -20,16 +20,16 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// FlowApplyConfiguration represents an declarative configuration of the Flow type for use
+// FlowApplyConfiguration represents a declarative configuration of the Flow type for use
 // with apply.
 type FlowApplyConfiguration struct {
-	v1.RawMessage `json:",inline"`
+	camelv1.RawMessage `json:",inline"`
 }
 
-// FlowApplyConfiguration constructs an declarative configuration of the Flow type for use with
+// FlowApplyConfiguration constructs a declarative configuration of the Flow type for use with
 // apply.
 func Flow() *FlowApplyConfiguration {
 	return &FlowApplyConfiguration{}

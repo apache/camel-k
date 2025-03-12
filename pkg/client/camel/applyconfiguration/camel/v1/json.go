@@ -20,16 +20,16 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// JSONApplyConfiguration represents an declarative configuration of the JSON type for use
+// JSONApplyConfiguration represents a declarative configuration of the JSON type for use
 // with apply.
 type JSONApplyConfiguration struct {
-	v1.RawMessage `json:",inline"`
+	camelv1.RawMessage `json:",inline"`
 }
 
-// JSONApplyConfiguration constructs an declarative configuration of the JSON type for use with
+// JSONApplyConfiguration constructs a declarative configuration of the JSON type for use with
 // apply.
 func JSON() *JSONApplyConfiguration {
 	return &JSONApplyConfiguration{}

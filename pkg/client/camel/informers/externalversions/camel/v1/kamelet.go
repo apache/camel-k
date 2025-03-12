@@ -20,13 +20,13 @@ limitations under the License.
 package v1
 
 import (
-	"context"
+	context "context"
 	time "time"
 
-	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	apiscamelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	versioned "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
 	internalinterfaces "github.com/apache/camel-k/v2/pkg/client/camel/informers/externalversions/internalinterfaces"
-	v1 "github.com/apache/camel-k/v2/pkg/client/camel/listers/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/listers/camel/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
@@ -37,7 +37,7 @@ import (
 // Kamelets.
 type KameletInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1.KameletLister
+	Lister() camelv1.KameletLister
 }
 
 type kameletInformer struct {
@@ -72,7 +72,7 @@ func NewFilteredKameletInformer(client versioned.Interface, namespace string, re
 				return client.CamelV1().Kamelets(namespace).Watch(context.TODO(), options)
 			},
 		},
-		&camelv1.Kamelet{},
+		&apiscamelv1.Kamelet{},
 		resyncPeriod,
 		indexers,
 	)
@@ -83,9 +83,9 @@ func (f *kameletInformer) defaultInformer(client versioned.Interface, resyncPeri
 }
 
 func (f *kameletInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&camelv1.Kamelet{}, f.defaultInformer)
+	return f.factory.InformerFor(&apiscamelv1.Kamelet{}, f.defaultInformer)
 }
 
-func (f *kameletInformer) Lister() v1.KameletLister {
-	return v1.NewKameletLister(f.Informer().GetIndexer())
+func (f *kameletInformer) Lister() camelv1.KameletLister {
+	return camelv1.NewKameletLister(f.Informer().GetIndexer())
 }

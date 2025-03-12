@@ -20,61 +20,30 @@ limitations under the License.
 package fake
 
 import (
-	"context"
-
 	v1beta2 "github.com/apache/camel-k/v2/pkg/apis/duck/strimzi/v1beta2"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	labels "k8s.io/apimachinery/pkg/labels"
-	watch "k8s.io/apimachinery/pkg/watch"
-	testing "k8s.io/client-go/testing"
+	strimziv1beta2 "github.com/apache/camel-k/v2/pkg/client/duck/strimzi/clientset/internalclientset/typed/strimzi/v1beta2"
+	gentype "k8s.io/client-go/gentype"
 )
 
-// FakeKafkas implements KafkaInterface
-type FakeKafkas struct {
+// fakeKafkas implements KafkaInterface
+type fakeKafkas struct {
+	*gentype.FakeClientWithList[*v1beta2.Kafka, *v1beta2.KafkaList]
 	Fake *FakeKafkaV1beta2
-	ns   string
 }
 
-var kafkasResource = v1beta2.SchemeGroupVersion.WithResource("kafkas")
-
-var kafkasKind = v1beta2.SchemeGroupVersion.WithKind("Kafka")
-
-// Get takes name of the kafka, and returns the corresponding kafka object, and an error if there is any.
-func (c *FakeKafkas) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta2.Kafka, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(kafkasResource, c.ns, name), &v1beta2.Kafka{})
-
-	if obj == nil {
-		return nil, err
+func newFakeKafkas(fake *FakeKafkaV1beta2, namespace string) strimziv1beta2.KafkaInterface {
+	return &fakeKafkas{
+		gentype.NewFakeClientWithList[*v1beta2.Kafka, *v1beta2.KafkaList](
+			fake.Fake,
+			namespace,
+			v1beta2.SchemeGroupVersion.WithResource("kafkas"),
+			v1beta2.SchemeGroupVersion.WithKind("Kafka"),
+			func() *v1beta2.Kafka { return &v1beta2.Kafka{} },
+			func() *v1beta2.KafkaList { return &v1beta2.KafkaList{} },
+			func(dst, src *v1beta2.KafkaList) { dst.ListMeta = src.ListMeta },
+			func(list *v1beta2.KafkaList) []*v1beta2.Kafka { return gentype.ToPointerSlice(list.Items) },
+			func(list *v1beta2.KafkaList, items []*v1beta2.Kafka) { list.Items = gentype.FromPointerSlice(items) },
+		),
+		fake,
 	}
-	return obj.(*v1beta2.Kafka), err
-}
-
-// List takes label and field selectors, and returns the list of Kafkas that match those selectors.
-func (c *FakeKafkas) List(ctx context.Context, opts v1.ListOptions) (result *v1beta2.KafkaList, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewListAction(kafkasResource, kafkasKind, c.ns, opts), &v1beta2.KafkaList{})
-
-	if obj == nil {
-		return nil, err
-	}
-
-	label, _, _ := testing.ExtractFromListOptions(opts)
-	if label == nil {
-		label = labels.Everything()
-	}
-	list := &v1beta2.KafkaList{ListMeta: obj.(*v1beta2.KafkaList).ListMeta}
-	for _, item := range obj.(*v1beta2.KafkaList).Items {
-		if label.Matches(labels.Set(item.Labels)) {
-			list.Items = append(list.Items, item)
-		}
-	}
-	return list, err
-}
-
-// Watch returns a watch.Interface that watches the requested kafkas.
-func (c *FakeKafkas) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
-	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(kafkasResource, c.ns, opts))
-
 }

@@ -20,194 +20,60 @@ limitations under the License.
 package fake
 
 import (
-	"context"
-	json "encoding/json"
-	"fmt"
+	context "context"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration/camel/v1"
+	typedcamelv1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	labels "k8s.io/apimachinery/pkg/labels"
-	types "k8s.io/apimachinery/pkg/types"
-	watch "k8s.io/apimachinery/pkg/watch"
+	gentype "k8s.io/client-go/gentype"
 	testing "k8s.io/client-go/testing"
 )
 
-// FakePipes implements PipeInterface
-type FakePipes struct {
+// fakePipes implements PipeInterface
+type fakePipes struct {
+	*gentype.FakeClientWithListAndApply[*v1.Pipe, *v1.PipeList, *camelv1.PipeApplyConfiguration]
 	Fake *FakeCamelV1
-	ns   string
 }
 
-var pipesResource = v1.SchemeGroupVersion.WithResource("pipes")
-
-var pipesKind = v1.SchemeGroupVersion.WithKind("Pipe")
-
-// Get takes name of the pipe, and returns the corresponding pipe object, and an error if there is any.
-func (c *FakePipes) Get(ctx context.Context, name string, options metav1.GetOptions) (result *v1.Pipe, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(pipesResource, c.ns, name), &v1.Pipe{})
-
-	if obj == nil {
-		return nil, err
+func newFakePipes(fake *FakeCamelV1, namespace string) typedcamelv1.PipeInterface {
+	return &fakePipes{
+		gentype.NewFakeClientWithListAndApply[*v1.Pipe, *v1.PipeList, *camelv1.PipeApplyConfiguration](
+			fake.Fake,
+			namespace,
+			v1.SchemeGroupVersion.WithResource("pipes"),
+			v1.SchemeGroupVersion.WithKind("Pipe"),
+			func() *v1.Pipe { return &v1.Pipe{} },
+			func() *v1.PipeList { return &v1.PipeList{} },
+			func(dst, src *v1.PipeList) { dst.ListMeta = src.ListMeta },
+			func(list *v1.PipeList) []*v1.Pipe { return gentype.ToPointerSlice(list.Items) },
+			func(list *v1.PipeList, items []*v1.Pipe) { list.Items = gentype.FromPointerSlice(items) },
+		),
+		fake,
 	}
-	return obj.(*v1.Pipe), err
-}
-
-// List takes label and field selectors, and returns the list of Pipes that match those selectors.
-func (c *FakePipes) List(ctx context.Context, opts metav1.ListOptions) (result *v1.PipeList, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewListAction(pipesResource, pipesKind, c.ns, opts), &v1.PipeList{})
-
-	if obj == nil {
-		return nil, err
-	}
-
-	label, _, _ := testing.ExtractFromListOptions(opts)
-	if label == nil {
-		label = labels.Everything()
-	}
-	list := &v1.PipeList{ListMeta: obj.(*v1.PipeList).ListMeta}
-	for _, item := range obj.(*v1.PipeList).Items {
-		if label.Matches(labels.Set(item.Labels)) {
-			list.Items = append(list.Items, item)
-		}
-	}
-	return list, err
-}
-
-// Watch returns a watch.Interface that watches the requested pipes.
-func (c *FakePipes) Watch(ctx context.Context, opts metav1.ListOptions) (watch.Interface, error) {
-	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(pipesResource, c.ns, opts))
-
-}
-
-// Create takes the representation of a pipe and creates it.  Returns the server's representation of the pipe, and an error, if there is any.
-func (c *FakePipes) Create(ctx context.Context, pipe *v1.Pipe, opts metav1.CreateOptions) (result *v1.Pipe, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(pipesResource, c.ns, pipe), &v1.Pipe{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1.Pipe), err
-}
-
-// Update takes the representation of a pipe and updates it. Returns the server's representation of the pipe, and an error, if there is any.
-func (c *FakePipes) Update(ctx context.Context, pipe *v1.Pipe, opts metav1.UpdateOptions) (result *v1.Pipe, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(pipesResource, c.ns, pipe), &v1.Pipe{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1.Pipe), err
-}
-
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakePipes) UpdateStatus(ctx context.Context, pipe *v1.Pipe, opts metav1.UpdateOptions) (*v1.Pipe, error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(pipesResource, "status", c.ns, pipe), &v1.Pipe{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1.Pipe), err
-}
-
-// Delete takes name of the pipe and deletes it. Returns an error if one occurs.
-func (c *FakePipes) Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error {
-	_, err := c.Fake.
-		Invokes(testing.NewDeleteActionWithOptions(pipesResource, c.ns, name, opts), &v1.Pipe{})
-
-	return err
-}
-
-// DeleteCollection deletes a collection of objects.
-func (c *FakePipes) DeleteCollection(ctx context.Context, opts metav1.DeleteOptions, listOpts metav1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(pipesResource, c.ns, listOpts)
-
-	_, err := c.Fake.Invokes(action, &v1.PipeList{})
-	return err
-}
-
-// Patch applies the patch and returns the patched pipe.
-func (c *FakePipes) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts metav1.PatchOptions, subresources ...string) (result *v1.Pipe, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(pipesResource, c.ns, name, pt, data, subresources...), &v1.Pipe{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1.Pipe), err
-}
-
-// Apply takes the given apply declarative configuration, applies it and returns the applied pipe.
-func (c *FakePipes) Apply(ctx context.Context, pipe *camelv1.PipeApplyConfiguration, opts metav1.ApplyOptions) (result *v1.Pipe, err error) {
-	if pipe == nil {
-		return nil, fmt.Errorf("pipe provided to Apply must not be nil")
-	}
-	data, err := json.Marshal(pipe)
-	if err != nil {
-		return nil, err
-	}
-	name := pipe.Name
-	if name == nil {
-		return nil, fmt.Errorf("pipe.Name must be provided to Apply")
-	}
-	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(pipesResource, c.ns, *name, types.ApplyPatchType, data), &v1.Pipe{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1.Pipe), err
-}
-
-// ApplyStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
-func (c *FakePipes) ApplyStatus(ctx context.Context, pipe *camelv1.PipeApplyConfiguration, opts metav1.ApplyOptions) (result *v1.Pipe, err error) {
-	if pipe == nil {
-		return nil, fmt.Errorf("pipe provided to Apply must not be nil")
-	}
-	data, err := json.Marshal(pipe)
-	if err != nil {
-		return nil, err
-	}
-	name := pipe.Name
-	if name == nil {
-		return nil, fmt.Errorf("pipe.Name must be provided to Apply")
-	}
-	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(pipesResource, c.ns, *name, types.ApplyPatchType, data, "status"), &v1.Pipe{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1.Pipe), err
 }
 
 // GetScale takes name of the pipe, and returns the corresponding scale object, and an error if there is any.
-func (c *FakePipes) GetScale(ctx context.Context, pipeName string, options metav1.GetOptions) (result *autoscalingv1.Scale, err error) {
+func (c *fakePipes) GetScale(ctx context.Context, pipeName string, options metav1.GetOptions) (result *autoscalingv1.Scale, err error) {
+	emptyResult := &autoscalingv1.Scale{}
 	obj, err := c.Fake.
-		Invokes(testing.NewGetSubresourceAction(pipesResource, c.ns, "scale", pipeName), &autoscalingv1.Scale{})
+		Invokes(testing.NewGetSubresourceActionWithOptions(c.Resource(), c.Namespace(), "scale", pipeName, options), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*autoscalingv1.Scale), err
 }
 
 // UpdateScale takes the representation of a scale and updates it. Returns the server's representation of the scale, and an error, if there is any.
-func (c *FakePipes) UpdateScale(ctx context.Context, pipeName string, scale *autoscalingv1.Scale, opts metav1.UpdateOptions) (result *autoscalingv1.Scale, err error) {
+func (c *fakePipes) UpdateScale(ctx context.Context, pipeName string, scale *autoscalingv1.Scale, opts metav1.UpdateOptions) (result *autoscalingv1.Scale, err error) {
+	emptyResult := &autoscalingv1.Scale{}
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(pipesResource, "scale", c.ns, scale), &autoscalingv1.Scale{})
+		Invokes(testing.NewUpdateSubresourceActionWithOptions(c.Resource(), "scale", c.Namespace(), scale, opts), &autoscalingv1.Scale{})
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*autoscalingv1.Scale), err
 }

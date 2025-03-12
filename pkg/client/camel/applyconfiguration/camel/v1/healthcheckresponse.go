@@ -20,18 +20,18 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// HealthCheckResponseApplyConfiguration represents an declarative configuration of the HealthCheckResponse type for use
+// HealthCheckResponseApplyConfiguration represents a declarative configuration of the HealthCheckResponse type for use
 // with apply.
 type HealthCheckResponseApplyConfiguration struct {
-	Name   *string               `json:"name,omitempty"`
-	Status *v1.HealthCheckStatus `json:"status,omitempty"`
-	Data   *v1.RawMessage        `json:"data,omitempty"`
+	Name   *string                    `json:"name,omitempty"`
+	Status *camelv1.HealthCheckStatus `json:"status,omitempty"`
+	Data   *camelv1.RawMessage        `json:"data,omitempty"`
 }
 
-// HealthCheckResponseApplyConfiguration constructs an declarative configuration of the HealthCheckResponse type for use with
+// HealthCheckResponseApplyConfiguration constructs a declarative configuration of the HealthCheckResponse type for use with
 // apply.
 func HealthCheckResponse() *HealthCheckResponseApplyConfiguration {
 	return &HealthCheckResponseApplyConfiguration{}
@@ -48,7 +48,7 @@ func (b *HealthCheckResponseApplyConfiguration) WithName(value string) *HealthCh
 // WithStatus sets the Status field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Status field is set to the value of the last call.
-func (b *HealthCheckResponseApplyConfiguration) WithStatus(value v1.HealthCheckStatus) *HealthCheckResponseApplyConfiguration {
+func (b *HealthCheckResponseApplyConfiguration) WithStatus(value camelv1.HealthCheckStatus) *HealthCheckResponseApplyConfiguration {
 	b.Status = &value
 	return b
 }
@@ -56,7 +56,7 @@ func (b *HealthCheckResponseApplyConfiguration) WithStatus(value v1.HealthCheckS
 // WithData sets the Data field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Data field is set to the value of the last call.
-func (b *HealthCheckResponseApplyConfiguration) WithData(value v1.RawMessage) *HealthCheckResponseApplyConfiguration {
+func (b *HealthCheckResponseApplyConfiguration) WithData(value camelv1.RawMessage) *HealthCheckResponseApplyConfiguration {
 	b.Data = &value
 	return b
 }

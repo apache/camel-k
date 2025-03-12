@@ -20,14 +20,13 @@ limitations under the License.
 package v1beta2
 
 import (
-	"context"
-	"time"
+	context "context"
 
-	v1beta2 "github.com/apache/camel-k/v2/pkg/apis/duck/strimzi/v1beta2"
+	strimziv1beta2 "github.com/apache/camel-k/v2/pkg/apis/duck/strimzi/v1beta2"
 	scheme "github.com/apache/camel-k/v2/pkg/client/duck/strimzi/clientset/internalclientset/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	watch "k8s.io/apimachinery/pkg/watch"
-	rest "k8s.io/client-go/rest"
+	gentype "k8s.io/client-go/gentype"
 )
 
 // KafkaTopicsGetter has a method to return a KafkaTopicInterface.
@@ -38,67 +37,27 @@ type KafkaTopicsGetter interface {
 
 // KafkaTopicInterface has methods to work with KafkaTopic resources.
 type KafkaTopicInterface interface {
-	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1beta2.KafkaTopic, error)
-	List(ctx context.Context, opts v1.ListOptions) (*v1beta2.KafkaTopicList, error)
+	Get(ctx context.Context, name string, opts v1.GetOptions) (*strimziv1beta2.KafkaTopic, error)
+	List(ctx context.Context, opts v1.ListOptions) (*strimziv1beta2.KafkaTopicList, error)
 	Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error)
 	KafkaTopicExpansion
 }
 
 // kafkaTopics implements KafkaTopicInterface
 type kafkaTopics struct {
-	client rest.Interface
-	ns     string
+	*gentype.ClientWithList[*strimziv1beta2.KafkaTopic, *strimziv1beta2.KafkaTopicList]
 }
 
 // newKafkaTopics returns a KafkaTopics
 func newKafkaTopics(c *KafkaV1beta2Client, namespace string) *kafkaTopics {
 	return &kafkaTopics{
-		client: c.RESTClient(),
-		ns:     namespace,
+		gentype.NewClientWithList[*strimziv1beta2.KafkaTopic, *strimziv1beta2.KafkaTopicList](
+			"kafkatopics",
+			c.RESTClient(),
+			scheme.ParameterCodec,
+			namespace,
+			func() *strimziv1beta2.KafkaTopic { return &strimziv1beta2.KafkaTopic{} },
+			func() *strimziv1beta2.KafkaTopicList { return &strimziv1beta2.KafkaTopicList{} },
+		),
 	}
-}
-
-// Get takes name of the kafkaTopic, and returns the corresponding kafkaTopic object, and an error if there is any.
-func (c *kafkaTopics) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta2.KafkaTopic, err error) {
-	result = &v1beta2.KafkaTopic{}
-	err = c.client.Get().
-		Namespace(c.ns).
-		Resource("kafkatopics").
-		Name(name).
-		VersionedParams(&options, scheme.ParameterCodec).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// List takes label and field selectors, and returns the list of KafkaTopics that match those selectors.
-func (c *kafkaTopics) List(ctx context.Context, opts v1.ListOptions) (result *v1beta2.KafkaTopicList, err error) {
-	var timeout time.Duration
-	if opts.TimeoutSeconds != nil {
-		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
-	}
-	result = &v1beta2.KafkaTopicList{}
-	err = c.client.Get().
-		Namespace(c.ns).
-		Resource("kafkatopics").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Watch returns a watch.Interface that watches the requested kafkaTopics.
-func (c *kafkaTopics) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
-	var timeout time.Duration
-	if opts.TimeoutSeconds != nil {
-		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
-	}
-	opts.Watch = true
-	return c.client.Get().
-		Namespace(c.ns).
-		Resource("kafkatopics").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Watch(ctx)
 }

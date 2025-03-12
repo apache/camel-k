@@ -20,18 +20,15 @@ limitations under the License.
 package v1
 
 import (
-	"context"
-	json "encoding/json"
-	"fmt"
-	"time"
+	context "context"
 
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	applyconfigurationcamelv1 "github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration/camel/v1"
 	scheme "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/scheme"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
-	rest "k8s.io/client-go/rest"
+	gentype "k8s.io/client-go/gentype"
 )
 
 // IntegrationPlatformsGetter has a method to return a IntegrationPlatformInterface.
@@ -42,216 +39,37 @@ type IntegrationPlatformsGetter interface {
 
 // IntegrationPlatformInterface has methods to work with IntegrationPlatform resources.
 type IntegrationPlatformInterface interface {
-	Create(ctx context.Context, integrationPlatform *v1.IntegrationPlatform, opts metav1.CreateOptions) (*v1.IntegrationPlatform, error)
-	Update(ctx context.Context, integrationPlatform *v1.IntegrationPlatform, opts metav1.UpdateOptions) (*v1.IntegrationPlatform, error)
-	UpdateStatus(ctx context.Context, integrationPlatform *v1.IntegrationPlatform, opts metav1.UpdateOptions) (*v1.IntegrationPlatform, error)
+	Create(ctx context.Context, integrationPlatform *camelv1.IntegrationPlatform, opts metav1.CreateOptions) (*camelv1.IntegrationPlatform, error)
+	Update(ctx context.Context, integrationPlatform *camelv1.IntegrationPlatform, opts metav1.UpdateOptions) (*camelv1.IntegrationPlatform, error)
+	// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+	UpdateStatus(ctx context.Context, integrationPlatform *camelv1.IntegrationPlatform, opts metav1.UpdateOptions) (*camelv1.IntegrationPlatform, error)
 	Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error
 	DeleteCollection(ctx context.Context, opts metav1.DeleteOptions, listOpts metav1.ListOptions) error
-	Get(ctx context.Context, name string, opts metav1.GetOptions) (*v1.IntegrationPlatform, error)
-	List(ctx context.Context, opts metav1.ListOptions) (*v1.IntegrationPlatformList, error)
+	Get(ctx context.Context, name string, opts metav1.GetOptions) (*camelv1.IntegrationPlatform, error)
+	List(ctx context.Context, opts metav1.ListOptions) (*camelv1.IntegrationPlatformList, error)
 	Watch(ctx context.Context, opts metav1.ListOptions) (watch.Interface, error)
-	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts metav1.PatchOptions, subresources ...string) (result *v1.IntegrationPlatform, err error)
-	Apply(ctx context.Context, integrationPlatform *camelv1.IntegrationPlatformApplyConfiguration, opts metav1.ApplyOptions) (result *v1.IntegrationPlatform, err error)
-	ApplyStatus(ctx context.Context, integrationPlatform *camelv1.IntegrationPlatformApplyConfiguration, opts metav1.ApplyOptions) (result *v1.IntegrationPlatform, err error)
+	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts metav1.PatchOptions, subresources ...string) (result *camelv1.IntegrationPlatform, err error)
+	Apply(ctx context.Context, integrationPlatform *applyconfigurationcamelv1.IntegrationPlatformApplyConfiguration, opts metav1.ApplyOptions) (result *camelv1.IntegrationPlatform, err error)
+	// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
+	ApplyStatus(ctx context.Context, integrationPlatform *applyconfigurationcamelv1.IntegrationPlatformApplyConfiguration, opts metav1.ApplyOptions) (result *camelv1.IntegrationPlatform, err error)
 	IntegrationPlatformExpansion
 }
 
 // integrationPlatforms implements IntegrationPlatformInterface
 type integrationPlatforms struct {
-	client rest.Interface
-	ns     string
+	*gentype.ClientWithListAndApply[*camelv1.IntegrationPlatform, *camelv1.IntegrationPlatformList, *applyconfigurationcamelv1.IntegrationPlatformApplyConfiguration]
 }
 
 // newIntegrationPlatforms returns a IntegrationPlatforms
 func newIntegrationPlatforms(c *CamelV1Client, namespace string) *integrationPlatforms {
 	return &integrationPlatforms{
-		client: c.RESTClient(),
-		ns:     namespace,
+		gentype.NewClientWithListAndApply[*camelv1.IntegrationPlatform, *camelv1.IntegrationPlatformList, *applyconfigurationcamelv1.IntegrationPlatformApplyConfiguration](
+			"integrationplatforms",
+			c.RESTClient(),
+			scheme.ParameterCodec,
+			namespace,
+			func() *camelv1.IntegrationPlatform { return &camelv1.IntegrationPlatform{} },
+			func() *camelv1.IntegrationPlatformList { return &camelv1.IntegrationPlatformList{} },
+		),
 	}
-}
-
-// Get takes name of the integrationPlatform, and returns the corresponding integrationPlatform object, and an error if there is any.
-func (c *integrationPlatforms) Get(ctx context.Context, name string, options metav1.GetOptions) (result *v1.IntegrationPlatform, err error) {
-	result = &v1.IntegrationPlatform{}
-	err = c.client.Get().
-		Namespace(c.ns).
-		Resource("integrationplatforms").
-		Name(name).
-		VersionedParams(&options, scheme.ParameterCodec).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// List takes label and field selectors, and returns the list of IntegrationPlatforms that match those selectors.
-func (c *integrationPlatforms) List(ctx context.Context, opts metav1.ListOptions) (result *v1.IntegrationPlatformList, err error) {
-	var timeout time.Duration
-	if opts.TimeoutSeconds != nil {
-		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
-	}
-	result = &v1.IntegrationPlatformList{}
-	err = c.client.Get().
-		Namespace(c.ns).
-		Resource("integrationplatforms").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Watch returns a watch.Interface that watches the requested integrationPlatforms.
-func (c *integrationPlatforms) Watch(ctx context.Context, opts metav1.ListOptions) (watch.Interface, error) {
-	var timeout time.Duration
-	if opts.TimeoutSeconds != nil {
-		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
-	}
-	opts.Watch = true
-	return c.client.Get().
-		Namespace(c.ns).
-		Resource("integrationplatforms").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Watch(ctx)
-}
-
-// Create takes the representation of a integrationPlatform and creates it.  Returns the server's representation of the integrationPlatform, and an error, if there is any.
-func (c *integrationPlatforms) Create(ctx context.Context, integrationPlatform *v1.IntegrationPlatform, opts metav1.CreateOptions) (result *v1.IntegrationPlatform, err error) {
-	result = &v1.IntegrationPlatform{}
-	err = c.client.Post().
-		Namespace(c.ns).
-		Resource("integrationplatforms").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(integrationPlatform).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Update takes the representation of a integrationPlatform and updates it. Returns the server's representation of the integrationPlatform, and an error, if there is any.
-func (c *integrationPlatforms) Update(ctx context.Context, integrationPlatform *v1.IntegrationPlatform, opts metav1.UpdateOptions) (result *v1.IntegrationPlatform, err error) {
-	result = &v1.IntegrationPlatform{}
-	err = c.client.Put().
-		Namespace(c.ns).
-		Resource("integrationplatforms").
-		Name(integrationPlatform.Name).
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(integrationPlatform).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *integrationPlatforms) UpdateStatus(ctx context.Context, integrationPlatform *v1.IntegrationPlatform, opts metav1.UpdateOptions) (result *v1.IntegrationPlatform, err error) {
-	result = &v1.IntegrationPlatform{}
-	err = c.client.Put().
-		Namespace(c.ns).
-		Resource("integrationplatforms").
-		Name(integrationPlatform.Name).
-		SubResource("status").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(integrationPlatform).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Delete takes name of the integrationPlatform and deletes it. Returns an error if one occurs.
-func (c *integrationPlatforms) Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error {
-	return c.client.Delete().
-		Namespace(c.ns).
-		Resource("integrationplatforms").
-		Name(name).
-		Body(&opts).
-		Do(ctx).
-		Error()
-}
-
-// DeleteCollection deletes a collection of objects.
-func (c *integrationPlatforms) DeleteCollection(ctx context.Context, opts metav1.DeleteOptions, listOpts metav1.ListOptions) error {
-	var timeout time.Duration
-	if listOpts.TimeoutSeconds != nil {
-		timeout = time.Duration(*listOpts.TimeoutSeconds) * time.Second
-	}
-	return c.client.Delete().
-		Namespace(c.ns).
-		Resource("integrationplatforms").
-		VersionedParams(&listOpts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Body(&opts).
-		Do(ctx).
-		Error()
-}
-
-// Patch applies the patch and returns the patched integrationPlatform.
-func (c *integrationPlatforms) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts metav1.PatchOptions, subresources ...string) (result *v1.IntegrationPlatform, err error) {
-	result = &v1.IntegrationPlatform{}
-	err = c.client.Patch(pt).
-		Namespace(c.ns).
-		Resource("integrationplatforms").
-		Name(name).
-		SubResource(subresources...).
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(data).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Apply takes the given apply declarative configuration, applies it and returns the applied integrationPlatform.
-func (c *integrationPlatforms) Apply(ctx context.Context, integrationPlatform *camelv1.IntegrationPlatformApplyConfiguration, opts metav1.ApplyOptions) (result *v1.IntegrationPlatform, err error) {
-	if integrationPlatform == nil {
-		return nil, fmt.Errorf("integrationPlatform provided to Apply must not be nil")
-	}
-	patchOpts := opts.ToPatchOptions()
-	data, err := json.Marshal(integrationPlatform)
-	if err != nil {
-		return nil, err
-	}
-	name := integrationPlatform.Name
-	if name == nil {
-		return nil, fmt.Errorf("integrationPlatform.Name must be provided to Apply")
-	}
-	result = &v1.IntegrationPlatform{}
-	err = c.client.Patch(types.ApplyPatchType).
-		Namespace(c.ns).
-		Resource("integrationplatforms").
-		Name(*name).
-		VersionedParams(&patchOpts, scheme.ParameterCodec).
-		Body(data).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// ApplyStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
-func (c *integrationPlatforms) ApplyStatus(ctx context.Context, integrationPlatform *camelv1.IntegrationPlatformApplyConfiguration, opts metav1.ApplyOptions) (result *v1.IntegrationPlatform, err error) {
-	if integrationPlatform == nil {
-		return nil, fmt.Errorf("integrationPlatform provided to Apply must not be nil")
-	}
-	patchOpts := opts.ToPatchOptions()
-	data, err := json.Marshal(integrationPlatform)
-	if err != nil {
-		return nil, err
-	}
-
-	name := integrationPlatform.Name
-	if name == nil {
-		return nil, fmt.Errorf("integrationPlatform.Name must be provided to Apply")
-	}
-
-	result = &v1.IntegrationPlatform{}
-	err = c.client.Patch(types.ApplyPatchType).
-		Namespace(c.ns).
-		Resource("integrationplatforms").
-		Name(*name).
-		SubResource("status").
-		VersionedParams(&patchOpts, scheme.ParameterCodec).
-		Body(data).
-		Do(ctx).
-		Into(result)
-	return
 }

@@ -19,14 +19,14 @@ limitations under the License.
 
 package v1
 
-// CamelArtifactExclusionApplyConfiguration represents an declarative configuration of the CamelArtifactExclusion type for use
+// CamelArtifactExclusionApplyConfiguration represents a declarative configuration of the CamelArtifactExclusion type for use
 // with apply.
 type CamelArtifactExclusionApplyConfiguration struct {
 	GroupID    *string `json:"groupId,omitempty"`
 	ArtifactID *string `json:"artifactId,omitempty"`
 }
 
-// CamelArtifactExclusionApplyConfiguration constructs an declarative configuration of the CamelArtifactExclusion type for use with
+// CamelArtifactExclusionApplyConfiguration constructs a declarative configuration of the CamelArtifactExclusion type for use with
 // apply.
 func CamelArtifactExclusion() *CamelArtifactExclusionApplyConfiguration {
 	return &CamelArtifactExclusionApplyConfiguration{}

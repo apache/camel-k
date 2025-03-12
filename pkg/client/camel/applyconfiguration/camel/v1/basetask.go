@@ -19,14 +19,14 @@ limitations under the License.
 
 package v1
 
-// BaseTaskApplyConfiguration represents an declarative configuration of the BaseTask type for use
+// BaseTaskApplyConfiguration represents a declarative configuration of the BaseTask type for use
 // with apply.
 type BaseTaskApplyConfiguration struct {
 	Name          *string                               `json:"name,omitempty"`
 	Configuration *BuildConfigurationApplyConfiguration `json:"configuration,omitempty"`
 }
 
-// BaseTaskApplyConfiguration constructs an declarative configuration of the BaseTask type for use with
+// BaseTaskApplyConfiguration constructs a declarative configuration of the BaseTask type for use with
 // apply.
 func BaseTask() *BaseTaskApplyConfiguration {
 	return &BaseTaskApplyConfiguration{}

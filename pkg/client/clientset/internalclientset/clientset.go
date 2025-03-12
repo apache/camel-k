@@ -20,8 +20,8 @@ limitations under the License.
 package internalclientset
 
 import (
-	"fmt"
-	"net/http"
+	fmt "fmt"
+	http "net/http"
 
 	kafkav1beta2 "github.com/apache/camel-k/v2/pkg/client/duck/strimzi/clientset/internalclientset/typed/strimzi/v1beta2"
 	discovery "k8s.io/client-go/discovery"

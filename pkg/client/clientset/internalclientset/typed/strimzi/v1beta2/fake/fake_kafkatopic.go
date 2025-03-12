@@ -20,61 +20,32 @@ limitations under the License.
 package fake
 
 import (
-	"context"
-
 	v1beta2 "github.com/apache/camel-k/v2/pkg/apis/duck/strimzi/v1beta2"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	labels "k8s.io/apimachinery/pkg/labels"
-	watch "k8s.io/apimachinery/pkg/watch"
-	testing "k8s.io/client-go/testing"
+	strimziv1beta2 "github.com/apache/camel-k/v2/pkg/client/duck/strimzi/clientset/internalclientset/typed/strimzi/v1beta2"
+	gentype "k8s.io/client-go/gentype"
 )
 
-// FakeKafkaTopics implements KafkaTopicInterface
-type FakeKafkaTopics struct {
+// fakeKafkaTopics implements KafkaTopicInterface
+type fakeKafkaTopics struct {
+	*gentype.FakeClientWithList[*v1beta2.KafkaTopic, *v1beta2.KafkaTopicList]
 	Fake *FakeKafkaV1beta2
-	ns   string
 }
 
-var kafkatopicsResource = v1beta2.SchemeGroupVersion.WithResource("kafkatopics")
-
-var kafkatopicsKind = v1beta2.SchemeGroupVersion.WithKind("KafkaTopic")
-
-// Get takes name of the kafkaTopic, and returns the corresponding kafkaTopic object, and an error if there is any.
-func (c *FakeKafkaTopics) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta2.KafkaTopic, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(kafkatopicsResource, c.ns, name), &v1beta2.KafkaTopic{})
-
-	if obj == nil {
-		return nil, err
+func newFakeKafkaTopics(fake *FakeKafkaV1beta2, namespace string) strimziv1beta2.KafkaTopicInterface {
+	return &fakeKafkaTopics{
+		gentype.NewFakeClientWithList[*v1beta2.KafkaTopic, *v1beta2.KafkaTopicList](
+			fake.Fake,
+			namespace,
+			v1beta2.SchemeGroupVersion.WithResource("kafkatopics"),
+			v1beta2.SchemeGroupVersion.WithKind("KafkaTopic"),
+			func() *v1beta2.KafkaTopic { return &v1beta2.KafkaTopic{} },
+			func() *v1beta2.KafkaTopicList { return &v1beta2.KafkaTopicList{} },
+			func(dst, src *v1beta2.KafkaTopicList) { dst.ListMeta = src.ListMeta },
+			func(list *v1beta2.KafkaTopicList) []*v1beta2.KafkaTopic { return gentype.ToPointerSlice(list.Items) },
+			func(list *v1beta2.KafkaTopicList, items []*v1beta2.KafkaTopic) {
+				list.Items = gentype.FromPointerSlice(items)
+			},
+		),
+		fake,
 	}
-	return obj.(*v1beta2.KafkaTopic), err
-}
-
-// List takes label and field selectors, and returns the list of KafkaTopics that match those selectors.
-func (c *FakeKafkaTopics) List(ctx context.Context, opts v1.ListOptions) (result *v1beta2.KafkaTopicList, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewListAction(kafkatopicsResource, kafkatopicsKind, c.ns, opts), &v1beta2.KafkaTopicList{})
-
-	if obj == nil {
-		return nil, err
-	}
-
-	label, _, _ := testing.ExtractFromListOptions(opts)
-	if label == nil {
-		label = labels.Everything()
-	}
-	list := &v1beta2.KafkaTopicList{ListMeta: obj.(*v1beta2.KafkaTopicList).ListMeta}
-	for _, item := range obj.(*v1beta2.KafkaTopicList).Items {
-		if label.Matches(labels.Set(item.Labels)) {
-			list.Items = append(list.Items, item)
-		}
-	}
-	return list, err
-}
-
-// Watch returns a watch.Interface that watches the requested kafkaTopics.
-func (c *FakeKafkaTopics) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
-	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(kafkatopicsResource, c.ns, opts))
-
 }

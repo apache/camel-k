@@ -20,16 +20,16 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// AddonTraitApplyConfiguration represents an declarative configuration of the AddonTrait type for use
+// AddonTraitApplyConfiguration represents a declarative configuration of the AddonTrait type for use
 // with apply.
 type AddonTraitApplyConfiguration struct {
-	v1.RawMessage `json:",inline"`
+	camelv1.RawMessage `json:",inline"`
 }
 
-// AddonTraitApplyConfiguration constructs an declarative configuration of the AddonTrait type for use with
+// AddonTraitApplyConfiguration constructs a declarative configuration of the AddonTrait type for use with
 // apply.
 func AddonTrait() *AddonTraitApplyConfiguration {
 	return &AddonTraitApplyConfiguration{}

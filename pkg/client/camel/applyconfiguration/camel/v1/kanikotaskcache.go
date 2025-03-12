@@ -19,14 +19,14 @@ limitations under the License.
 
 package v1
 
-// KanikoTaskCacheApplyConfiguration represents an declarative configuration of the KanikoTaskCache type for use
+// KanikoTaskCacheApplyConfiguration represents a declarative configuration of the KanikoTaskCache type for use
 // with apply.
 type KanikoTaskCacheApplyConfiguration struct {
 	Enabled               *bool   `json:"enabled,omitempty"`
 	PersistentVolumeClaim *string `json:"persistentVolumeClaim,omitempty"`
 }
 
-// KanikoTaskCacheApplyConfiguration constructs an declarative configuration of the KanikoTaskCache type for use with
+// KanikoTaskCacheApplyConfiguration constructs a declarative configuration of the KanikoTaskCache type for use with
 // apply.
 func KanikoTaskCache() *KanikoTaskCacheApplyConfiguration {
 	return &KanikoTaskCacheApplyConfiguration{}

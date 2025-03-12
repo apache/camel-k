@@ -19,7 +19,7 @@ limitations under the License.
 
 package v1
 
-// CamelArtifactApplyConfiguration represents an declarative configuration of the CamelArtifact type for use
+// CamelArtifactApplyConfiguration represents a declarative configuration of the CamelArtifact type for use
 // with apply.
 type CamelArtifactApplyConfiguration struct {
 	CamelArtifactDependencyApplyConfiguration `json:",inline"`
@@ -30,7 +30,7 @@ type CamelArtifactApplyConfiguration struct {
 	JavaTypes                                 []string                                    `json:"javaTypes,omitempty"`
 }
 
-// CamelArtifactApplyConfiguration constructs an declarative configuration of the CamelArtifact type for use with
+// CamelArtifactApplyConfiguration constructs a declarative configuration of the CamelArtifact type for use with
 // apply.
 func CamelArtifact() *CamelArtifactApplyConfiguration {
 	return &CamelArtifactApplyConfiguration{}
@@ -40,7 +40,7 @@ func CamelArtifact() *CamelArtifactApplyConfiguration {
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the GroupID field is set to the value of the last call.
 func (b *CamelArtifactApplyConfiguration) WithGroupID(value string) *CamelArtifactApplyConfiguration {
-	b.GroupID = &value
+	b.MavenArtifactApplyConfiguration.GroupID = &value
 	return b
 }
 
@@ -48,7 +48,7 @@ func (b *CamelArtifactApplyConfiguration) WithGroupID(value string) *CamelArtifa
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the ArtifactID field is set to the value of the last call.
 func (b *CamelArtifactApplyConfiguration) WithArtifactID(value string) *CamelArtifactApplyConfiguration {
-	b.ArtifactID = &value
+	b.MavenArtifactApplyConfiguration.ArtifactID = &value
 	return b
 }
 
@@ -56,7 +56,7 @@ func (b *CamelArtifactApplyConfiguration) WithArtifactID(value string) *CamelArt
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Type field is set to the value of the last call.
 func (b *CamelArtifactApplyConfiguration) WithType(value string) *CamelArtifactApplyConfiguration {
-	b.Type = &value
+	b.MavenArtifactApplyConfiguration.Type = &value
 	return b
 }
 
@@ -64,7 +64,7 @@ func (b *CamelArtifactApplyConfiguration) WithType(value string) *CamelArtifactA
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Version field is set to the value of the last call.
 func (b *CamelArtifactApplyConfiguration) WithVersion(value string) *CamelArtifactApplyConfiguration {
-	b.Version = &value
+	b.MavenArtifactApplyConfiguration.Version = &value
 	return b
 }
 
@@ -72,7 +72,7 @@ func (b *CamelArtifactApplyConfiguration) WithVersion(value string) *CamelArtifa
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Classifier field is set to the value of the last call.
 func (b *CamelArtifactApplyConfiguration) WithClassifier(value string) *CamelArtifactApplyConfiguration {
-	b.Classifier = &value
+	b.MavenArtifactApplyConfiguration.Classifier = &value
 	return b
 }
 
@@ -84,7 +84,7 @@ func (b *CamelArtifactApplyConfiguration) WithExclusions(values ...*CamelArtifac
 		if values[i] == nil {
 			panic("nil value passed to WithExclusions")
 		}
-		b.Exclusions = append(b.Exclusions, *values[i])
+		b.CamelArtifactDependencyApplyConfiguration.Exclusions = append(b.CamelArtifactDependencyApplyConfiguration.Exclusions, *values[i])
 	}
 	return b
 }

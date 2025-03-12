@@ -19,7 +19,7 @@ limitations under the License.
 
 package v1
 
-// IntegrationProfileSpecApplyConfiguration represents an declarative configuration of the IntegrationProfileSpec type for use
+// IntegrationProfileSpecApplyConfiguration represents a declarative configuration of the IntegrationProfileSpec type for use
 // with apply.
 type IntegrationProfileSpecApplyConfiguration struct {
 	Build   *IntegrationProfileBuildSpecApplyConfiguration   `json:"build,omitempty"`
@@ -27,7 +27,7 @@ type IntegrationProfileSpecApplyConfiguration struct {
 	Kamelet *IntegrationProfileKameletSpecApplyConfiguration `json:"kamelet,omitempty"`
 }
 
-// IntegrationProfileSpecApplyConfiguration constructs an declarative configuration of the IntegrationProfileSpec type for use with
+// IntegrationProfileSpecApplyConfiguration constructs a declarative configuration of the IntegrationProfileSpec type for use with
 // apply.
 func IntegrationProfileSpec() *IntegrationProfileSpecApplyConfiguration {
 	return &IntegrationProfileSpecApplyConfiguration{}

@@ -23,7 +23,7 @@ import (
 	trait "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 )
 
-// IntegrationKitTraitsApplyConfiguration represents an declarative configuration of the IntegrationKitTraits type for use
+// IntegrationKitTraitsApplyConfiguration represents a declarative configuration of the IntegrationKitTraits type for use
 // with apply.
 type IntegrationKitTraitsApplyConfiguration struct {
 	Builder  *trait.BuilderTrait                     `json:"builder,omitempty"`
@@ -33,7 +33,7 @@ type IntegrationKitTraitsApplyConfiguration struct {
 	Addons   map[string]AddonTraitApplyConfiguration `json:"addons,omitempty"`
 }
 
-// IntegrationKitTraitsApplyConfiguration constructs an declarative configuration of the IntegrationKitTraits type for use with
+// IntegrationKitTraitsApplyConfiguration constructs a declarative configuration of the IntegrationKitTraits type for use with
 // apply.
 func IntegrationKitTraits() *IntegrationKitTraitsApplyConfiguration {
 	return &IntegrationKitTraitsApplyConfiguration{}

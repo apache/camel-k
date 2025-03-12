@@ -23,7 +23,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// BuildSpecApplyConfiguration represents an declarative configuration of the BuildSpec type for use
+// BuildSpecApplyConfiguration represents a declarative configuration of the BuildSpec type for use
 // with apply.
 type BuildSpecApplyConfiguration struct {
 	Tasks               []TaskApplyConfiguration              `json:"tasks,omitempty"`
@@ -34,7 +34,7 @@ type BuildSpecApplyConfiguration struct {
 	MaxRunningBuilds    *int32                                `json:"maxRunningBuilds,omitempty"`
 }
 
-// BuildSpecApplyConfiguration constructs an declarative configuration of the BuildSpec type for use with
+// BuildSpecApplyConfiguration constructs a declarative configuration of the BuildSpec type for use with
 // apply.
 func BuildSpec() *BuildSpecApplyConfiguration {
 	return &BuildSpecApplyConfiguration{}

@@ -23,7 +23,7 @@ import (
 	trait "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 )
 
-// TraitsApplyConfiguration represents an declarative configuration of the Traits type for use
+// TraitsApplyConfiguration represents a declarative configuration of the Traits type for use
 // with apply.
 type TraitsApplyConfiguration struct {
 	Affinity        *trait.AffinityTrait                    `json:"affinity,omitempty"`
@@ -70,7 +70,7 @@ type TraitsApplyConfiguration struct {
 	Tracing         *TraitSpecApplyConfiguration            `json:"tracing,omitempty"`
 }
 
-// TraitsApplyConfiguration constructs an declarative configuration of the Traits type for use with
+// TraitsApplyConfiguration constructs a declarative configuration of the Traits type for use with
 // apply.
 func Traits() *TraitsApplyConfiguration {
 	return &TraitsApplyConfiguration{}

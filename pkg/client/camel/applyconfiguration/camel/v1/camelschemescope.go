@@ -19,13 +19,13 @@ limitations under the License.
 
 package v1
 
-// CamelSchemeScopeApplyConfiguration represents an declarative configuration of the CamelSchemeScope type for use
+// CamelSchemeScopeApplyConfiguration represents a declarative configuration of the CamelSchemeScope type for use
 // with apply.
 type CamelSchemeScopeApplyConfiguration struct {
 	Dependencies []CamelArtifactDependencyApplyConfiguration `json:"dependencies,omitempty"`
 }
 
-// CamelSchemeScopeApplyConfiguration constructs an declarative configuration of the CamelSchemeScope type for use with
+// CamelSchemeScopeApplyConfiguration constructs a declarative configuration of the CamelSchemeScope type for use with
 // apply.
 func CamelSchemeScope() *CamelSchemeScopeApplyConfiguration {
 	return &CamelSchemeScopeApplyConfiguration{}

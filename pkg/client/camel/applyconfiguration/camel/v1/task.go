@@ -19,7 +19,7 @@ limitations under the License.
 
 package v1
 
-// TaskApplyConfiguration represents an declarative configuration of the Task type for use
+// TaskApplyConfiguration represents a declarative configuration of the Task type for use
 // with apply.
 type TaskApplyConfiguration struct {
 	Builder  *BuilderTaskApplyConfiguration  `json:"builder,omitempty"`
@@ -32,7 +32,7 @@ type TaskApplyConfiguration struct {
 	Jib      *JibTaskApplyConfiguration      `json:"jib,omitempty"`
 }
 
-// TaskApplyConfiguration constructs an declarative configuration of the Task type for use with
+// TaskApplyConfiguration constructs a declarative configuration of the Task type for use with
 // apply.
 func Task() *TaskApplyConfiguration {
 	return &TaskApplyConfiguration{}

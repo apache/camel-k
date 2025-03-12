@@ -19,7 +19,7 @@ limitations under the License.
 
 package v1
 
-// DataSpecApplyConfiguration represents an declarative configuration of the DataSpec type for use
+// DataSpecApplyConfiguration represents a declarative configuration of the DataSpec type for use
 // with apply.
 type DataSpecApplyConfiguration struct {
 	Name        *string `json:"name,omitempty"`
@@ -32,7 +32,7 @@ type DataSpecApplyConfiguration struct {
 	Compression *bool   `json:"compression,omitempty"`
 }
 
-// DataSpecApplyConfiguration constructs an declarative configuration of the DataSpec type for use with
+// DataSpecApplyConfiguration constructs a declarative configuration of the DataSpec type for use with
 // apply.
 func DataSpec() *DataSpecApplyConfiguration {
 	return &DataSpecApplyConfiguration{}

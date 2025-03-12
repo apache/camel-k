@@ -20,14 +20,14 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// IntegrationKitStatusApplyConfiguration represents an declarative configuration of the IntegrationKitStatus type for use
+// IntegrationKitStatusApplyConfiguration represents a declarative configuration of the IntegrationKitStatus type for use
 // with apply.
 type IntegrationKitStatusApplyConfiguration struct {
 	ObservedGeneration *int64                                      `json:"observedGeneration,omitempty"`
-	Phase              *v1.IntegrationKitPhase                     `json:"phase,omitempty"`
+	Phase              *camelv1.IntegrationKitPhase                `json:"phase,omitempty"`
 	RootImage          *string                                     `json:"rootImage,omitempty"`
 	BaseImage          *string                                     `json:"baseImage,omitempty"`
 	Image              *string                                     `json:"image,omitempty"`
@@ -35,14 +35,14 @@ type IntegrationKitStatusApplyConfiguration struct {
 	Artifacts          []ArtifactApplyConfiguration                `json:"artifacts,omitempty"`
 	Failure            *FailureApplyConfiguration                  `json:"failure,omitempty"`
 	RuntimeVersion     *string                                     `json:"runtimeVersion,omitempty"`
-	RuntimeProvider    *v1.RuntimeProvider                         `json:"runtimeProvider,omitempty"`
+	RuntimeProvider    *camelv1.RuntimeProvider                    `json:"runtimeProvider,omitempty"`
 	Catalog            *CatalogApplyConfiguration                  `json:"catalog,omitempty"`
 	Platform           *string                                     `json:"platform,omitempty"`
 	Version            *string                                     `json:"version,omitempty"`
 	Conditions         []IntegrationKitConditionApplyConfiguration `json:"conditions,omitempty"`
 }
 
-// IntegrationKitStatusApplyConfiguration constructs an declarative configuration of the IntegrationKitStatus type for use with
+// IntegrationKitStatusApplyConfiguration constructs a declarative configuration of the IntegrationKitStatus type for use with
 // apply.
 func IntegrationKitStatus() *IntegrationKitStatusApplyConfiguration {
 	return &IntegrationKitStatusApplyConfiguration{}
@@ -59,7 +59,7 @@ func (b *IntegrationKitStatusApplyConfiguration) WithObservedGeneration(value in
 // WithPhase sets the Phase field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Phase field is set to the value of the last call.
-func (b *IntegrationKitStatusApplyConfiguration) WithPhase(value v1.IntegrationKitPhase) *IntegrationKitStatusApplyConfiguration {
+func (b *IntegrationKitStatusApplyConfiguration) WithPhase(value camelv1.IntegrationKitPhase) *IntegrationKitStatusApplyConfiguration {
 	b.Phase = &value
 	return b
 }
@@ -128,7 +128,7 @@ func (b *IntegrationKitStatusApplyConfiguration) WithRuntimeVersion(value string
 // WithRuntimeProvider sets the RuntimeProvider field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the RuntimeProvider field is set to the value of the last call.
-func (b *IntegrationKitStatusApplyConfiguration) WithRuntimeProvider(value v1.RuntimeProvider) *IntegrationKitStatusApplyConfiguration {
+func (b *IntegrationKitStatusApplyConfiguration) WithRuntimeProvider(value camelv1.RuntimeProvider) *IntegrationKitStatusApplyConfiguration {
 	b.RuntimeProvider = &value
 	return b
 }

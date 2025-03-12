@@ -20,15 +20,15 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// IntegrationKitSpecApplyConfiguration represents an declarative configuration of the IntegrationKitSpec type for use
+// IntegrationKitSpecApplyConfiguration represents a declarative configuration of the IntegrationKitSpec type for use
 // with apply.
 type IntegrationKitSpecApplyConfiguration struct {
 	Image         *string                                 `json:"image,omitempty"`
 	Dependencies  []string                                `json:"dependencies,omitempty"`
-	Profile       *v1.TraitProfile                        `json:"profile,omitempty"`
+	Profile       *camelv1.TraitProfile                   `json:"profile,omitempty"`
 	Traits        *IntegrationKitTraitsApplyConfiguration `json:"traits,omitempty"`
 	Configuration []ConfigurationSpecApplyConfiguration   `json:"configuration,omitempty"`
 	Repositories  []string                                `json:"repositories,omitempty"`
@@ -36,7 +36,7 @@ type IntegrationKitSpecApplyConfiguration struct {
 	Capabilities  []string                                `json:"capabilities,omitempty"`
 }
 
-// IntegrationKitSpecApplyConfiguration constructs an declarative configuration of the IntegrationKitSpec type for use with
+// IntegrationKitSpecApplyConfiguration constructs a declarative configuration of the IntegrationKitSpec type for use with
 // apply.
 func IntegrationKitSpec() *IntegrationKitSpecApplyConfiguration {
 	return &IntegrationKitSpecApplyConfiguration{}
@@ -63,7 +63,7 @@ func (b *IntegrationKitSpecApplyConfiguration) WithDependencies(values ...string
 // WithProfile sets the Profile field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Profile field is set to the value of the last call.
-func (b *IntegrationKitSpecApplyConfiguration) WithProfile(value v1.TraitProfile) *IntegrationKitSpecApplyConfiguration {
+func (b *IntegrationKitSpecApplyConfiguration) WithProfile(value camelv1.TraitProfile) *IntegrationKitSpecApplyConfiguration {
 	b.Profile = &value
 	return b
 }

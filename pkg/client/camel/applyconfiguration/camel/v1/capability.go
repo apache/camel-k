@@ -19,7 +19,7 @@ limitations under the License.
 
 package v1
 
-// CapabilityApplyConfiguration represents an declarative configuration of the Capability type for use
+// CapabilityApplyConfiguration represents a declarative configuration of the Capability type for use
 // with apply.
 type CapabilityApplyConfiguration struct {
 	Dependencies        []MavenArtifactApplyConfiguration `json:"dependencies,omitempty"`
@@ -28,7 +28,7 @@ type CapabilityApplyConfiguration struct {
 	Metadata            map[string]string                 `json:"metadata,omitempty"`
 }
 
-// CapabilityApplyConfiguration constructs an declarative configuration of the Capability type for use with
+// CapabilityApplyConfiguration constructs a declarative configuration of the Capability type for use with
 // apply.
 func Capability() *CapabilityApplyConfiguration {
 	return &CapabilityApplyConfiguration{}

@@ -20,16 +20,16 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// ErrorHandlerSpecApplyConfiguration represents an declarative configuration of the ErrorHandlerSpec type for use
+// ErrorHandlerSpecApplyConfiguration represents a declarative configuration of the ErrorHandlerSpec type for use
 // with apply.
 type ErrorHandlerSpecApplyConfiguration struct {
-	v1.RawMessage `json:",omitempty,inline"`
+	camelv1.RawMessage `json:",omitempty,inline"`
 }
 
-// ErrorHandlerSpecApplyConfiguration constructs an declarative configuration of the ErrorHandlerSpec type for use with
+// ErrorHandlerSpecApplyConfiguration constructs a declarative configuration of the ErrorHandlerSpec type for use with
 // apply.
 func ErrorHandlerSpec() *ErrorHandlerSpecApplyConfiguration {
 	return &ErrorHandlerSpecApplyConfiguration{}

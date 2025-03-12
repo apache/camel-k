@@ -20,10 +20,10 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/client-go/tools/cache"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	labels "k8s.io/apimachinery/pkg/labels"
+	listers "k8s.io/client-go/listers"
+	cache "k8s.io/client-go/tools/cache"
 )
 
 // CamelCatalogLister helps list CamelCatalogs.
@@ -31,7 +31,7 @@ import (
 type CamelCatalogLister interface {
 	// List lists all CamelCatalogs in the indexer.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1.CamelCatalog, err error)
+	List(selector labels.Selector) (ret []*camelv1.CamelCatalog, err error)
 	// CamelCatalogs returns an object that can list and get CamelCatalogs.
 	CamelCatalogs(namespace string) CamelCatalogNamespaceLister
 	CamelCatalogListerExpansion
@@ -39,25 +39,17 @@ type CamelCatalogLister interface {
 
 // camelCatalogLister implements the CamelCatalogLister interface.
 type camelCatalogLister struct {
-	indexer cache.Indexer
+	listers.ResourceIndexer[*camelv1.CamelCatalog]
 }
 
 // NewCamelCatalogLister returns a new CamelCatalogLister.
 func NewCamelCatalogLister(indexer cache.Indexer) CamelCatalogLister {
-	return &camelCatalogLister{indexer: indexer}
-}
-
-// List lists all CamelCatalogs in the indexer.
-func (s *camelCatalogLister) List(selector labels.Selector) (ret []*v1.CamelCatalog, err error) {
-	err = cache.ListAll(s.indexer, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1.CamelCatalog))
-	})
-	return ret, err
+	return &camelCatalogLister{listers.New[*camelv1.CamelCatalog](indexer, camelv1.Resource("camelcatalog"))}
 }
 
 // CamelCatalogs returns an object that can list and get CamelCatalogs.
 func (s *camelCatalogLister) CamelCatalogs(namespace string) CamelCatalogNamespaceLister {
-	return camelCatalogNamespaceLister{indexer: s.indexer, namespace: namespace}
+	return camelCatalogNamespaceLister{listers.NewNamespaced[*camelv1.CamelCatalog](s.ResourceIndexer, namespace)}
 }
 
 // CamelCatalogNamespaceLister helps list and get CamelCatalogs.
@@ -65,36 +57,15 @@ func (s *camelCatalogLister) CamelCatalogs(namespace string) CamelCatalogNamespa
 type CamelCatalogNamespaceLister interface {
 	// List lists all CamelCatalogs in the indexer for a given namespace.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1.CamelCatalog, err error)
+	List(selector labels.Selector) (ret []*camelv1.CamelCatalog, err error)
 	// Get retrieves the CamelCatalog from the indexer for a given namespace and name.
 	// Objects returned here must be treated as read-only.
-	Get(name string) (*v1.CamelCatalog, error)
+	Get(name string) (*camelv1.CamelCatalog, error)
 	CamelCatalogNamespaceListerExpansion
 }
 
 // camelCatalogNamespaceLister implements the CamelCatalogNamespaceLister
 // interface.
 type camelCatalogNamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all CamelCatalogs in the indexer for a given namespace.
-func (s camelCatalogNamespaceLister) List(selector labels.Selector) (ret []*v1.CamelCatalog, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1.CamelCatalog))
-	})
-	return ret, err
-}
-
-// Get retrieves the CamelCatalog from the indexer for a given namespace and name.
-func (s camelCatalogNamespaceLister) Get(name string) (*v1.CamelCatalog, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, errors.NewNotFound(v1.Resource("camelcatalog"), name)
-	}
-	return obj.(*v1.CamelCatalog), nil
+	listers.ResourceIndexer[*camelv1.CamelCatalog]
 }

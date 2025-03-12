@@ -19,7 +19,7 @@ limitations under the License.
 
 package v1
 
-// UserTaskApplyConfiguration represents an declarative configuration of the UserTask type for use
+// UserTaskApplyConfiguration represents a declarative configuration of the UserTask type for use
 // with apply.
 type UserTaskApplyConfiguration struct {
 	BaseTaskApplyConfiguration `json:",inline"`
@@ -30,7 +30,7 @@ type UserTaskApplyConfiguration struct {
 	PublishingImage            *string  `json:"publishingImage,omitempty"`
 }
 
-// UserTaskApplyConfiguration constructs an declarative configuration of the UserTask type for use with
+// UserTaskApplyConfiguration constructs a declarative configuration of the UserTask type for use with
 // apply.
 func UserTask() *UserTaskApplyConfiguration {
 	return &UserTaskApplyConfiguration{}
@@ -40,7 +40,7 @@ func UserTask() *UserTaskApplyConfiguration {
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Name field is set to the value of the last call.
 func (b *UserTaskApplyConfiguration) WithName(value string) *UserTaskApplyConfiguration {
-	b.Name = &value
+	b.BaseTaskApplyConfiguration.Name = &value
 	return b
 }
 
@@ -48,7 +48,7 @@ func (b *UserTaskApplyConfiguration) WithName(value string) *UserTaskApplyConfig
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Configuration field is set to the value of the last call.
 func (b *UserTaskApplyConfiguration) WithConfiguration(value *BuildConfigurationApplyConfiguration) *UserTaskApplyConfiguration {
-	b.Configuration = value
+	b.BaseTaskApplyConfiguration.Configuration = value
 	return b
 }
 

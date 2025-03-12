@@ -20,17 +20,17 @@ limitations under the License.
 package v1
 
 import (
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
-// ValueSourceApplyConfiguration represents an declarative configuration of the ValueSource type for use
+// ValueSourceApplyConfiguration represents a declarative configuration of the ValueSource type for use
 // with apply.
 type ValueSourceApplyConfiguration struct {
-	ConfigMapKeyRef *v1.ConfigMapKeySelector `json:"configMapKeyRef,omitempty"`
-	SecretKeyRef    *v1.SecretKeySelector    `json:"secretKeyRef,omitempty"`
+	ConfigMapKeyRef *corev1.ConfigMapKeySelector `json:"configMapKeyRef,omitempty"`
+	SecretKeyRef    *corev1.SecretKeySelector    `json:"secretKeyRef,omitempty"`
 }
 
-// ValueSourceApplyConfiguration constructs an declarative configuration of the ValueSource type for use with
+// ValueSourceApplyConfiguration constructs a declarative configuration of the ValueSource type for use with
 // apply.
 func ValueSource() *ValueSourceApplyConfiguration {
 	return &ValueSourceApplyConfiguration{}
@@ -39,7 +39,7 @@ func ValueSource() *ValueSourceApplyConfiguration {
 // WithConfigMapKeyRef sets the ConfigMapKeyRef field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the ConfigMapKeyRef field is set to the value of the last call.
-func (b *ValueSourceApplyConfiguration) WithConfigMapKeyRef(value v1.ConfigMapKeySelector) *ValueSourceApplyConfiguration {
+func (b *ValueSourceApplyConfiguration) WithConfigMapKeyRef(value corev1.ConfigMapKeySelector) *ValueSourceApplyConfiguration {
 	b.ConfigMapKeyRef = &value
 	return b
 }
@@ -47,7 +47,7 @@ func (b *ValueSourceApplyConfiguration) WithConfigMapKeyRef(value v1.ConfigMapKe
 // WithSecretKeyRef sets the SecretKeyRef field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the SecretKeyRef field is set to the value of the last call.
-func (b *ValueSourceApplyConfiguration) WithSecretKeyRef(value v1.SecretKeySelector) *ValueSourceApplyConfiguration {
+func (b *ValueSourceApplyConfiguration) WithSecretKeyRef(value corev1.SecretKeySelector) *ValueSourceApplyConfiguration {
 	b.SecretKeyRef = &value
 	return b
 }

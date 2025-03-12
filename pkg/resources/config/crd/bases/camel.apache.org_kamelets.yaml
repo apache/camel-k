@@ -20,7 +20,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.15.0
+    controller-gen.kubebuilder.io/version: v0.17.2
   name: kamelets.camel.apache.org
 spec:
   group: camel.apache.org
@@ -198,7 +198,6 @@ spec:
                                       description: |-
                                         format is an OpenAPI v3 format string. Unknown formats are ignored. The following formats are validated:
 
-
                                         - bsonobjectid: a bson object ID, i.e. a 24 characters hex string
                                         - uri: an URI as parsed by Golang net/url.ParseRequestURI
                                         - email: an email address as parsed by Golang net/mail.ParseAddress
@@ -348,7 +347,6 @@ spec:
                         format:
                           description: |-
                             format is an OpenAPI v3 format string. Unknown formats are ignored. The following formats are validated:
-
 
                             - bsonobjectid: a bson object ID, i.e. a 24 characters hex string
                             - uri: an URI as parsed by Golang net/url.ParseRequestURI
@@ -568,7 +566,6 @@ spec:
                                 description: |-
                                   format is an OpenAPI v3 format string. Unknown formats are ignored. The following formats are validated:
 
-
                                   - bsonobjectid: a bson object ID, i.e. a 24 characters hex string
                                   - uri: an URI as parsed by Golang net/url.ParseRequestURI
                                   - email: an email address as parsed by Golang net/mail.ParseAddress
@@ -781,7 +778,6 @@ spec:
                                             description: |-
                                               format is an OpenAPI v3 format string. Unknown formats are ignored. The following formats are validated:
 
-
                                               - bsonobjectid: a bson object ID, i.e. a 24 characters hex string
                                               - uri: an URI as parsed by Golang net/url.ParseRequestURI
                                               - email: an email address as parsed by Golang net/mail.ParseAddress
@@ -931,7 +927,6 @@ spec:
                               format:
                                 description: |-
                                   format is an OpenAPI v3 format string. Unknown formats are ignored. The following formats are validated:
-
 
                                   - bsonobjectid: a bson object ID, i.e. a 24 characters hex string
                                   - uri: an URI as parsed by Golang net/url.ParseRequestURI
@@ -1151,7 +1146,6 @@ spec:
                                     format:
                                       description: |-
                                         format is an OpenAPI v3 format string. Unknown formats are ignored. The following formats are validated:
-
 
                                         - bsonobjectid: a bson object ID, i.e. a 24 characters hex string
                                         - uri: an URI as parsed by Golang net/url.ParseRequestURI

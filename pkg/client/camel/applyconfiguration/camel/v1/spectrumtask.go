@@ -19,14 +19,14 @@ limitations under the License.
 
 package v1
 
-// SpectrumTaskApplyConfiguration represents an declarative configuration of the SpectrumTask type for use
+// SpectrumTaskApplyConfiguration represents a declarative configuration of the SpectrumTask type for use
 // with apply.
 type SpectrumTaskApplyConfiguration struct {
 	BaseTaskApplyConfiguration    `json:",inline"`
 	PublishTaskApplyConfiguration `json:",inline"`
 }
 
-// SpectrumTaskApplyConfiguration constructs an declarative configuration of the SpectrumTask type for use with
+// SpectrumTaskApplyConfiguration constructs a declarative configuration of the SpectrumTask type for use with
 // apply.
 func SpectrumTask() *SpectrumTaskApplyConfiguration {
 	return &SpectrumTaskApplyConfiguration{}
@@ -36,7 +36,7 @@ func SpectrumTask() *SpectrumTaskApplyConfiguration {
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Name field is set to the value of the last call.
 func (b *SpectrumTaskApplyConfiguration) WithName(value string) *SpectrumTaskApplyConfiguration {
-	b.Name = &value
+	b.BaseTaskApplyConfiguration.Name = &value
 	return b
 }
 
@@ -44,7 +44,7 @@ func (b *SpectrumTaskApplyConfiguration) WithName(value string) *SpectrumTaskApp
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Configuration field is set to the value of the last call.
 func (b *SpectrumTaskApplyConfiguration) WithConfiguration(value *BuildConfigurationApplyConfiguration) *SpectrumTaskApplyConfiguration {
-	b.Configuration = value
+	b.BaseTaskApplyConfiguration.Configuration = value
 	return b
 }
 
@@ -52,7 +52,7 @@ func (b *SpectrumTaskApplyConfiguration) WithConfiguration(value *BuildConfigura
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the ContextDir field is set to the value of the last call.
 func (b *SpectrumTaskApplyConfiguration) WithContextDir(value string) *SpectrumTaskApplyConfiguration {
-	b.ContextDir = &value
+	b.PublishTaskApplyConfiguration.ContextDir = &value
 	return b
 }
 
@@ -60,7 +60,7 @@ func (b *SpectrumTaskApplyConfiguration) WithContextDir(value string) *SpectrumT
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the BaseImage field is set to the value of the last call.
 func (b *SpectrumTaskApplyConfiguration) WithBaseImage(value string) *SpectrumTaskApplyConfiguration {
-	b.BaseImage = &value
+	b.PublishTaskApplyConfiguration.BaseImage = &value
 	return b
 }
 
@@ -68,7 +68,7 @@ func (b *SpectrumTaskApplyConfiguration) WithBaseImage(value string) *SpectrumTa
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Image field is set to the value of the last call.
 func (b *SpectrumTaskApplyConfiguration) WithImage(value string) *SpectrumTaskApplyConfiguration {
-	b.Image = &value
+	b.PublishTaskApplyConfiguration.Image = &value
 	return b
 }
 
@@ -76,6 +76,6 @@ func (b *SpectrumTaskApplyConfiguration) WithImage(value string) *SpectrumTaskAp
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Registry field is set to the value of the last call.
 func (b *SpectrumTaskApplyConfiguration) WithRegistry(value *RegistrySpecApplyConfiguration) *SpectrumTaskApplyConfiguration {
-	b.Registry = value
+	b.PublishTaskApplyConfiguration.Registry = value
 	return b
 }

@@ -24,7 +24,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-// IntegrationSpecApplyConfiguration represents an declarative configuration of the IntegrationSpec type for use
+// IntegrationSpecApplyConfiguration represents a declarative configuration of the IntegrationSpec type for use
 // with apply.
 type IntegrationSpecApplyConfiguration struct {
 	Replicas           *int32                                `json:"replicas,omitempty"`
@@ -40,7 +40,7 @@ type IntegrationSpecApplyConfiguration struct {
 	ServiceAccountName *string                               `json:"serviceAccountName,omitempty"`
 }
 
-// IntegrationSpecApplyConfiguration constructs an declarative configuration of the IntegrationSpec type for use with
+// IntegrationSpecApplyConfiguration constructs a declarative configuration of the IntegrationSpec type for use with
 // apply.
 func IntegrationSpec() *IntegrationSpecApplyConfiguration {
 	return &IntegrationSpecApplyConfiguration{}

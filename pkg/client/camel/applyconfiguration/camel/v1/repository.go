@@ -19,7 +19,7 @@ limitations under the License.
 
 package v1
 
-// RepositoryApplyConfiguration represents an declarative configuration of the Repository type for use
+// RepositoryApplyConfiguration represents a declarative configuration of the Repository type for use
 // with apply.
 type RepositoryApplyConfiguration struct {
 	ID        *string                             `json:"id,omitempty"`
@@ -29,7 +29,7 @@ type RepositoryApplyConfiguration struct {
 	Releases  *RepositoryPolicyApplyConfiguration `json:"releases,omitempty"`
 }
 
-// RepositoryApplyConfiguration constructs an declarative configuration of the Repository type for use with
+// RepositoryApplyConfiguration constructs a declarative configuration of the Repository type for use with
 // apply.
 func Repository() *RepositoryApplyConfiguration {
 	return &RepositoryApplyConfiguration{}
