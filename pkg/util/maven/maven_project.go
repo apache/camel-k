@@ -152,8 +152,8 @@ func (p *Project) AddEncodedDependencyExclusion(gav string, exclusion Exclusion)
 	}
 }
 
-func (p *Project) AddProfiles(profiles string) {
-	p.Profiles = ProfilesContent{InnerXML: profiles}
+func (p *Project) AddProfile(profile Profile) {
+	p.Profiles = append(p.Profiles, profile)
 }
 
 // NewDependency creates an new dependency from the given GAV.

@@ -81,7 +81,11 @@ const expectedPom = `<?xml version="1.0" encoding="UTF-8"?>
       </releases>
     </pluginRepository>
   </pluginRepositories>
-  <profiles><profile><id>custom</id></profile></profiles>
+  <profiles>
+    <profile>
+      <id>custom</id>
+    </profile>
+  </profiles>
 </project>`
 
 func TestPomGeneration(t *testing.T) {
@@ -131,8 +135,9 @@ func TestPomGeneration(t *testing.T) {
 		},
 	}
 
-	project.Profiles = ProfilesContent{InnerXML: `<profile><id>custom</id></profile>`}
-
+	project.AddProfile(Profile{
+		ID: "custom",
+	})
 	pom, err := util.EncodeXML(project)
 
 	require.NoError(t, err)

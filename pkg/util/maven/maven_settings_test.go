@@ -53,7 +53,6 @@ const expectedSettings = `<?xml version="1.0" encoding="UTF-8"?>
           </releases>
         </repository>
       </repositories>
-      <pluginRepositories></pluginRepositories>
     </profile>
   </profiles>
   <proxies></proxies>
@@ -188,10 +187,10 @@ func TestSettingsGeneration(t *testing.T) {
 	settings.Profiles = []Profile{
 		{
 			ID: "my-profile",
-			Activation: Activation{
+			Activation: &Activation{
 				ActiveByDefault: true,
 			},
-			Repositories: []v1.Repository{
+			Repositories: &[]v1.Repository{
 				{
 					ID:  "central",
 					URL: "https://repo.maven.apache.org/maven2",

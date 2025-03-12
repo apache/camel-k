@@ -19,18 +19,8 @@ limitations under the License.
 package jib
 
 import (
-	"context"
-	"encoding/xml"
-	"fmt"
-
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/client"
-	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/maven"
-
-	corev1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const JibMavenGoal = "jib:build"
@@ -46,74 +36,17 @@ const JibLayerFilterExtensionMavenVersionDefault = "0.3.0"
 // See: https://github.com/GoogleContainerTools/jib/blob/master/jib-maven-plugin/README.md#using-docker-configuration-files
 const JibRegistryConfigEnvVar = "DOCKER_CONFIG"
 
-type JibBuild struct {
-	Plugins []maven.Plugin `xml:"plugins>plugin,omitempty"`
-}
-
-type JibProfile struct {
-	XMLName xml.Name
-	ID      string   `xml:"id"`
-	Build   JibBuild `xml:"build,omitempty"`
-}
-
-// Create a Configmap containing the default jib profile.
-func CreateProfileConfigmap(ctx context.Context, c client.Client, kit *v1.IntegrationKit, profile string) error {
-	annotations := util.CopyMap(kit.Annotations)
-	controller := true
-	blockOwnerDeletion := true
-	jibProfileConfigMap := &corev1.ConfigMap{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "ConfigMap",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        kit.Name + "-publish-jib-profile",
-			Namespace:   kit.Namespace,
-			Annotations: annotations,
-			Labels: map[string]string{
-				v1.IntegrationKitLabel: kit.Name,
-			},
-			OwnerReferences: []metav1.OwnerReference{
-				{
-					APIVersion:         kit.APIVersion,
-					Kind:               kit.Kind,
-					Name:               kit.Name,
-					UID:                kit.UID,
-					Controller:         &controller,
-					BlockOwnerDeletion: &blockOwnerDeletion,
-				}},
-		},
-		Data: map[string]string{
-			"profile.xml": profile,
-		},
-	}
-
-	err := c.Create(ctx, jibProfileConfigMap)
-	if err != nil && !k8serrors.IsAlreadyExists(err) {
-		return fmt.Errorf("error creating the configmap containing the default maven jib profile: %s: %w. ", kit.Name+"-publish-jib-profile", err)
-	}
-	return nil
-}
-
 // JibMavenProfile creates a maven profile defining jib plugin build.
-func JibMavenProfile(jibMavenPluginVersion string, jibLayerFilterExtensionMavenVersion string) (string, error) {
-	jibVersion := JibMavenPluginVersionDefault
-	if jibMavenPluginVersion != "" {
-		jibVersion = jibMavenPluginVersion
-	}
-	layerVersion := JibLayerFilterExtensionMavenVersionDefault
-	if jibLayerFilterExtensionMavenVersion != "" {
-		layerVersion = jibLayerFilterExtensionMavenVersion
-	}
+func JibMavenProfile(jibMavenPluginVersion string, jibLayerFilterExtensionMavenVersion string) maven.Profile {
 	jibPlugin := maven.Plugin{
 		GroupID:    "com.google.cloud.tools",
 		ArtifactID: "jib-maven-plugin",
-		Version:    jibVersion,
+		Version:    jibMavenPluginVersion,
 		Dependencies: []maven.Dependency{
 			{
 				GroupID:    "com.google.cloud.tools",
 				ArtifactID: "jib-layer-filter-extension-maven",
-				Version:    layerVersion,
+				Version:    jibLayerFilterExtensionMavenVersion,
 			},
 		},
 		Configuration: v1.PluginConfiguration{
@@ -154,17 +87,12 @@ func JibMavenProfile(jibMavenPluginVersion string, jibLayerFilterExtensionMavenV
 		},
 	}
 
-	jibMavenPluginProfile := JibProfile{
-		XMLName: xml.Name{Local: "profile"},
-		ID:      "jib",
-		Build: JibBuild{
+	jibMavenPluginProfile := maven.Profile{
+		ID: "jib",
+		Build: &maven.Build{
 			Plugins: []maven.Plugin{jibPlugin},
 		},
 	}
-	content, err := util.EncodeXMLWithoutHeader(jibMavenPluginProfile)
-	if err != nil {
-		return "", err
-	}
-	return string(content), nil
 
+	return jibMavenPluginProfile
 }

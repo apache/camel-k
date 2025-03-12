@@ -31,9 +31,9 @@ type Mirror struct {
 }
 
 type Build struct {
-	DefaultGoal string             `xml:"defaultGoal,omitempty"`
-	Plugins     []Plugin           `xml:"plugins>plugin,omitempty"`
-	Extensions  []v1.MavenArtifact `xml:"extensions>extension,omitempty"`
+	DefaultGoal string              `xml:"defaultGoal,omitempty"`
+	Plugins     []Plugin            `xml:"plugins>plugin,omitempty"`
+	Extensions  *[]v1.MavenArtifact `xml:"extensions>extension,omitempty"`
 }
 
 type Plugin struct {
@@ -81,7 +81,7 @@ type Project struct {
 	Repositories         []v1.Repository       `xml:"repositories>repository,omitempty"`
 	PluginRepositories   []v1.Repository       `xml:"pluginRepositories>pluginRepository,omitempty"`
 	Build                *Build                `xml:"build,omitempty"`
-	Profiles             ProfilesContent       `xml:"profiles,omitempty"`
+	Profiles             []Profile             `xml:"profiles>profile,omitempty"`
 }
 
 // Exclusion models a dependency exclusion.
@@ -107,11 +107,12 @@ type Dependency struct {
 }
 
 type Profile struct {
-	ID                 string          `xml:"id"`
-	Activation         Activation      `xml:"activation,omitempty"`
-	Properties         v1.Properties   `xml:"properties,omitempty"`
-	Repositories       []v1.Repository `xml:"repositories>repository,omitempty"`
-	PluginRepositories []v1.Repository `xml:"pluginRepositories>pluginRepository,omitempty"`
+	ID                 string           `xml:"id"`
+	Activation         *Activation      `xml:"activation,omitempty"`
+	Properties         *v1.Properties   `xml:"properties,omitempty"`
+	Repositories       *[]v1.Repository `xml:"repositories>repository,omitempty"`
+	PluginRepositories *[]v1.Repository `xml:"pluginRepositories>pluginRepository,omitempty"`
+	Build              *Build           `xml:"build,omitempty"`
 }
 
 type Activation struct {
@@ -133,8 +134,4 @@ type Proxy struct {
 	Username      string `xml:"username,omitempty"`
 	Password      string `xml:"password,omitempty"`
 	NonProxyHosts string `xml:"nonProxyHosts,omitempty"`
-}
-
-type ProfilesContent struct {
-	InnerXML string `xml:",innerxml"`
 }

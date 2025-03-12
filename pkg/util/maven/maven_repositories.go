@@ -30,8 +30,8 @@ type defaultRepositories struct{}
 
 func (o defaultRepositories) apply(settings *Settings) error {
 	for _, repository := range defaultMavenRepositories() {
-		upsertRepository(repository, &settings.Profiles[0].Repositories)
-		upsertRepository(repository, &settings.Profiles[0].PluginRepositories)
+		settings.Profiles[0].Repositories = upsertRepository(repository, settings.Profiles[0].Repositories)
+		settings.Profiles[0].PluginRepositories = upsertRepository(repository, settings.Profiles[0].PluginRepositories)
 	}
 	return nil
 }
@@ -68,29 +68,39 @@ func (o extraRepositories) apply(settings *Settings) error {
 			if repository.ID == "" {
 				repository.ID = fmt.Sprintf("repository-%03d", i)
 			}
-			upsertRepository(repository, &settings.Profiles[0].Repositories)
-			upsertRepository(repository, &settings.Profiles[0].PluginRepositories)
+			settings.Profiles[0].Repositories = upsertRepository(repository, settings.Profiles[0].Repositories)
+			settings.Profiles[0].PluginRepositories = upsertRepository(repository, settings.Profiles[0].PluginRepositories)
 		}
 	}
 	return nil
 }
 
-func upsertRepository(repository v1.Repository, repositories *[]v1.Repository) {
+func upsertRepository(repository v1.Repository, repositories *[]v1.Repository) *[]v1.Repository {
+	if repositories == nil {
+		repositories = &[]v1.Repository{}
+	}
 	for i, r := range *repositories {
 		if r.ID == repository.ID {
 			(*repositories)[i] = repository
-			return
+			return repositories
 		}
 	}
 	*repositories = append(*repositories, repository)
+
+	return repositories
 }
 
-func upsertMirror(mirror Mirror, mirrors *[]Mirror) {
+func upsertMirror(mirror Mirror, mirrors *[]Mirror) *[]Mirror {
+	if mirrors == nil {
+		mirrors = &[]Mirror{}
+	}
 	for i, r := range *mirrors {
 		if r.ID == mirror.ID {
 			(*mirrors)[i] = mirror
-			return
+			return mirrors
 		}
 	}
 	*mirrors = append(*mirrors, mirror)
+
+	return mirrors
 }

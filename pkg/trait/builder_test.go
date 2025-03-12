@@ -84,7 +84,7 @@ func TestJibBuilderTrait(t *testing.T) {
 	conditions, traits, err := NewBuilderTestCatalog().apply(env)
 
 	require.NoError(t, err)
-	assert.NotEmpty(t, traits)
+	assert.Empty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, env.ExecutedTraits)
 	assert.NotNil(t, env.GetTrait("builder"))
@@ -284,24 +284,6 @@ func TestInvalidMavenProfilesBuilderTrait(t *testing.T) {
 	assert.Equal(t, v1.IntegrationKitPhaseError, env.IntegrationKit.Status.Phase)
 	assert.Equal(t, corev1.ConditionFalse, env.IntegrationKit.Status.Conditions[0].Status)
 	assert.Contains(t, env.IntegrationKit.Status.Conditions[0].Message, "fakeprofile")
-}
-
-func TestMavenBuilderTraitJib(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
-	builderTrait := createNominalBuilderTraitTest()
-
-	err := builderTrait.Apply(env)
-
-	require.NoError(t, err)
-
-	assert.Equal(t, v1.ValueSource{
-		ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
-			LocalObjectReference: corev1.LocalObjectReference{
-				Name: "my-kit-publish-jib-profile",
-			},
-			Key: "profile.xml",
-		},
-	}, env.Pipeline[0].Builder.Maven.MavenSpec.Profiles[0])
 }
 
 func TestBuilderCustomTasks(t *testing.T) {

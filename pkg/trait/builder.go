@@ -32,7 +32,6 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/builder"
-	"github.com/apache/camel-k/v2/pkg/util/jib"
 	mvn "github.com/apache/camel-k/v2/pkg/util/maven"
 	"github.com/apache/camel-k/v2/pkg/util/property"
 )
@@ -417,17 +416,6 @@ func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfigurati
 		for _, cp := range e.CamelCatalog.Runtime.Capabilities["master"].BuildTimeProperties {
 			task.Maven.Properties[CapabilityPropertyKey(cp.Key, task.Maven.Properties)] = cp.Value
 		}
-	}
-
-	if e.Platform.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyJib {
-		profile, err := jib.JibMavenProfile(e.CamelCatalog.GetJibMavenPluginVersion(), e.CamelCatalog.GetJibLayerFilterExtensionMavenVersion())
-		if err != nil {
-			return nil, fmt.Errorf("error generating default maven jib profile: %w. ", err)
-		}
-		if err := jib.CreateProfileConfigmap(e.Ctx, e.Client, e.IntegrationKit, profile); err != nil {
-			return nil, fmt.Errorf("could not create default maven jib profile configmap: %w. ", err)
-		}
-		t.MavenProfiles = append(t.MavenProfiles, "configmap:"+e.IntegrationKit.Name+"-publish-jib-profile/profile.xml")
 	}
 
 	// User provides a maven profile

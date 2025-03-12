@@ -44,7 +44,7 @@ func NewSettings(options ...SettingsOption) (Settings, error) {
 		Profiles: []Profile{
 			{
 				ID: "camel-k",
-				Activation: Activation{
+				Activation: &Activation{
 					ActiveByDefault: true,
 				},
 			},

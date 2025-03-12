@@ -201,17 +201,19 @@ func sanitizeDependencies(ctx *builderContext) error {
 
 func injectProfiles(ctx *builderContext) error {
 	if ctx.Build.Maven.Profiles != nil {
-		profiles := ""
-		for i := range ctx.Build.Maven.Profiles {
-			val, err := kubernetes.ResolveValueSource(ctx.C, ctx.Client, ctx.Namespace, &ctx.Build.Maven.Profiles[i])
+		for _, p := range ctx.Build.Maven.Profiles {
+			val, err := kubernetes.ResolveValueSource(ctx.C, ctx.Client, ctx.Namespace, &p)
 			if err != nil {
-				return fmt.Errorf("could not load profile : %s: %w. ", ctx.Build.Maven.Profiles[i].String(), err)
+				return fmt.Errorf("could not load profile : %s: %w. ", p.String(), err)
 			}
 			if val != "" {
-				profiles += val
+				profile := maven.Profile{}
+				if err := xml.Unmarshal([]byte(val), &profile); err != nil {
+					return err
+				}
+				ctx.Maven.Project.AddProfile(profile)
 			}
 		}
-		ctx.Maven.Project.AddProfiles(profiles)
 	}
 	return nil
 }
