@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
+	"github.com/apache/camel-k/v2/pkg/util/jib"
 
 	"github.com/apache/camel-k/v2/pkg/util/io"
 
@@ -131,7 +132,7 @@ func generateQuarkusProject(ctx *builderContext) error {
 		ctx.Build.Runtime.Metadata["quarkus.version"],
 	)
 	// Add Maven build extensions
-	p.Build.Extensions = ctx.Build.Maven.Extension
+	p.Build.Extensions = &ctx.Build.Maven.Extension
 	// Add Maven repositories
 	p.Repositories = append(p.Repositories, ctx.Build.Maven.Repositories...)
 	p.PluginRepositories = append(p.PluginRepositories, ctx.Build.Maven.Repositories...)
@@ -203,6 +204,9 @@ func generateQuarkusProjectCommon(runtimeProvider v1.RuntimeProvider, runtimeVer
 			},
 		},
 	)
+
+	// Jib publish profile
+	p.AddProfile(jib.JibMavenProfile(jib.JibMavenPluginVersionDefault, jib.JibLayerFilterExtensionMavenVersionDefault))
 
 	return p
 }
