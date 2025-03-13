@@ -90,10 +90,15 @@ func (in *Integration) AllSources() []SourceSpec {
 		if len(in.Status.GeneratedSources) == 0 {
 			sources = append(sources, src)
 		} else {
+			found := false
 			for _, genSrc := range in.Status.GeneratedSources {
-				if src.Name != genSrc.Name {
-					sources = append(sources, src)
+				if src.Name == genSrc.Name {
+					found = true
+					break
 				}
+			}
+			if !found {
+				sources = append(sources, src)
 			}
 		}
 	}
