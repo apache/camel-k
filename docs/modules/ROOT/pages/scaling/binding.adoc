@@ -7,21 +7,21 @@ A Pipe can be scaled using the `kubectl scale` command, e.g.:
 
 [source,console]
 ----
-$ kubectl scale klb <kamelet_binding_name> --replicas <number_of_replicas>
+$ kubectl scale pipe <kamelet_binding_name> --replicas <number_of_replicas>
 ----
 
 This can also be achieved by editing the Pipe resource directly, e.g.:
 
 [source,console]
 ----
-$ kubectl patch klb <kamelet_binding_name> -p '{"spec":{"replicas":<number_of_replicas>}}'
+$ kubectl patch pipe <kamelet_binding_name> -p '{"spec":{"replicas":<number_of_replicas>}}'
 ----
 
 The Pipe also reports its number of replicas in the `.status.replicas` field, e.g.:
 
 [source,console]
 ----
-$ kubectl get klb <kamelet_binding_name> -o jsonpath='{.status.replicas}'
+$ kubectl get pipe <kamelet_binding_name> -o jsonpath='{.status.replicas}'
 ----
 
 == Autoscaling with Knative
@@ -89,7 +89,7 @@ Scale bounds can be reset by removing the `.spec.replicas` field from the Pipe, 
 
 [source,console]
 ----
-$ kubectl patch klb <kamelet_binding_name> --type=json -p='[{"op": "remove", "path": "/spec/replicas"}]'
+$ kubectl patch pipe <kamelet_binding_name> --type=json -p='[{"op": "remove", "path": "/spec/replicas"}]'
 ----
 ====
 
@@ -103,7 +103,7 @@ WARNING: the HPA can work when the Pipe replica field needs to be specified. You
 
 [source,console]
 ----
-$ kubectl autoscale klb <kamelet_binding_name> --min=2 --max=5 --cpu-percent=80
+$ kubectl autoscale pipe <kamelet_binding_name> --min=2 --max=5 --cpu-percent=80
 ----
 
 Refer to the xref:scaling/integration.adoc[Integration scaling] guide for information about using custom metrics.
