@@ -382,25 +382,20 @@ func extractAsArray(value string) []string {
 	return []string{value}
 }
 
+// NewSpecTraitsOptionsForIntegrationAndPlatform will merge traits giving priority to Integration configuration over Platform configuration.
 func NewSpecTraitsOptionsForIntegrationAndPlatform(c client.Client, i *v1.Integration, pl *v1.IntegrationPlatform) (Options, error) {
-	var options Options
-	var err error
+	var mergedTraits v1.Traits
 	if pl != nil {
-		options, err = ToTraitMap(pl.Status.Traits)
-		if err != nil {
+		mergedTraits = pl.Status.Traits
+		if err := mergedTraits.Merge(i.Spec.Traits); err != nil {
 			return nil, err
 		}
 	} else {
-		options = Options{}
+		mergedTraits = i.Spec.Traits
 	}
-
-	m1, err := ToTraitMap(i.Spec.Traits)
+	options, err := ToTraitMap(mergedTraits)
 	if err != nil {
 		return nil, err
-	}
-
-	for k, v := range m1 {
-		options[k] = v
 	}
 
 	// Deprecated: to remove when we remove support for traits annotations.
