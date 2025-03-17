@@ -42,7 +42,7 @@ func (c *Catalog) Configure(env *Environment) error {
 		}
 	}
 	if env.IntegrationProfile != nil {
-		if err := c.configureTraits(env.IntegrationProfile.Status.Traits); err != nil {
+		if err := c.configureTraits(env.IntegrationProfile.Spec.Traits); err != nil {
 			return err
 		}
 	}

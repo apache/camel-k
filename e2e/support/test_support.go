@@ -2160,16 +2160,6 @@ func SelectedPlatformPhase(t *testing.T, ctx context.Context, ns string, name st
 	}
 }
 
-func SelectedIntegrationProfilePhase(t *testing.T, ctx context.Context, ns string, name string) func() v1.IntegrationProfilePhase {
-	return func() v1.IntegrationProfilePhase {
-		pc := IntegrationProfileByName(t, ctx, ns, name)()
-		if pc == nil {
-			return ""
-		}
-		return pc.Status.Phase
-	}
-}
-
 func PlatformHas(t *testing.T, ctx context.Context, ns string, predicate func(pl *v1.IntegrationPlatform) bool) func() bool {
 	return func() bool {
 		pl := Platform(t, ctx, ns)()

@@ -297,7 +297,7 @@ func TestMergePlatformTraits(t *testing.T) {
 
 	c, err := internal.NewFakeClient()
 	require.NoError(t, err)
-	mergedOptions, err := NewSpecTraitsOptionsForIntegrationAndPlatform(c, integration, platform)
+	mergedOptions, err := NewSpecTraitsOptionsForIntegrationAndPlatform(c, integration, nil, platform)
 	require.NoError(t, err)
 	assert.Equal(t, expectedOptions, mergedOptions)
 }
@@ -334,7 +334,41 @@ func TestMergePlatformTraitsIntegrationPriority(t *testing.T) {
 
 	c, err := internal.NewFakeClient()
 	require.NoError(t, err)
-	mergedOptions, err := NewSpecTraitsOptionsForIntegrationAndPlatform(c, integration, platform)
+	mergedOptions, err := NewSpecTraitsOptionsForIntegrationAndPlatform(c, integration, nil, platform)
+	require.NoError(t, err)
+	assert.Equal(t, expectedOptions, mergedOptions)
+}
+
+func TestMergeIntegrationProfileTraits(t *testing.T) {
+	integration := &v1.Integration{
+		Spec: v1.IntegrationSpec{
+			Traits: v1.Traits{
+				Camel: &traitv1.CamelTrait{
+					Properties: []string{"hello=world"},
+				},
+			},
+		},
+	}
+	profile := &v1.IntegrationProfile{
+		Spec: v1.IntegrationProfileSpec{
+			Traits: v1.Traits{
+				Camel: &traitv1.CamelTrait{
+					RuntimeVersion: "1.2.3",
+				},
+			},
+		},
+	}
+
+	expectedOptions := Options{
+		"camel": {
+			"properties":     []any{"hello=world"},
+			"runtimeVersion": "1.2.3",
+		},
+	}
+
+	c, err := internal.NewFakeClient()
+	require.NoError(t, err)
+	mergedOptions, err := NewSpecTraitsOptionsForIntegrationAndPlatform(c, integration, profile, nil)
 	require.NoError(t, err)
 	assert.Equal(t, expectedOptions, mergedOptions)
 }

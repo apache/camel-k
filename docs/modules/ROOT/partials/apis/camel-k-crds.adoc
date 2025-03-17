@@ -226,7 +226,6 @@ Refer to the Kubernetes API documentation for the fields of the `metadata` field
 
 IntegrationProfile is the resource used to apply user defined settings to the Camel K operator behavior.
 It defines the behavior of all Custom Resources (`IntegrationKit`, `Integration`, `Kamelet`) in the given namespace.
-Deprecated: may be removed in future releases. Make use of IntegrationPlatform instead.
 
 [cols="2,2a",options="header"]
 |===
@@ -260,7 +259,7 @@ Refer to the Kubernetes API documentation for the fields of the `metadata` field
 |
 
 
-
+Deprecated: no longer in use.
 
 
 |===

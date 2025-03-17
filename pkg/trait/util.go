@@ -382,17 +382,24 @@ func extractAsArray(value string) []string {
 	return []string{value}
 }
 
-// NewSpecTraitsOptionsForIntegrationAndPlatform will merge traits giving priority to Integration configuration over Platform configuration.
-func NewSpecTraitsOptionsForIntegrationAndPlatform(c client.Client, i *v1.Integration, pl *v1.IntegrationPlatform) (Options, error) {
-	var mergedTraits v1.Traits
+// NewSpecTraitsOptionsForIntegrationAndPlatform will merge traits giving priority to Integration, Profile and Platform respectively.
+func NewSpecTraitsOptionsForIntegrationAndPlatform(
+	c client.Client, i *v1.Integration, itp *v1.IntegrationProfile, pl *v1.IntegrationPlatform) (Options, error) {
+	mergedTraits := v1.Traits{}
+	itpTraits := v1.Traits{}
 	if pl != nil {
 		mergedTraits = pl.Status.Traits
-		if err := mergedTraits.Merge(i.Spec.Traits); err != nil {
-			return nil, err
-		}
-	} else {
-		mergedTraits = i.Spec.Traits
 	}
+	if itp != nil {
+		itpTraits = itp.Spec.Traits
+	}
+	if err := mergedTraits.Merge(itpTraits); err != nil {
+		return nil, err
+	}
+	if err := mergedTraits.Merge(i.Spec.Traits); err != nil {
+		return nil, err
+	}
+
 	options, err := ToTraitMap(mergedTraits)
 	if err != nil {
 		return nil, err

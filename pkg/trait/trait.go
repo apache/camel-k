@@ -122,7 +122,7 @@ func newEnvironment(ctx context.Context, c client.Client, integration *v1.Integr
 		return nil, err
 	}
 
-	ipr, err := platform.ApplyIntegrationProfile(ctx, c, pl, obj)
+	ipr, err := platform.ApplyIntegrationProfile(ctx, c, obj)
 	if err != nil {
 		return nil, err
 	}

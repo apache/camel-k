@@ -238,45 +238,6 @@ func enqueueRequestsFromConfigFunc(ctx context.Context, c client.Client, res ctr
 	return requests
 }
 
-func integrationProfileEnqueueRequestsFromMapFunc(ctx context.Context, c client.Client, profile *v1.IntegrationProfile) []reconcile.Request {
-	var requests []reconcile.Request
-
-	if profile.Status.Phase != v1.IntegrationProfilePhaseReady {
-		return requests
-	}
-
-	list := &v1.IntegrationList{}
-
-	// Do global search in case of global operator
-	var opts []ctrl.ListOption
-
-	if !platform.IsCurrentOperatorGlobal() {
-		opts = append(opts, ctrl.InNamespace(profile.Namespace))
-	}
-
-	if err := c.List(ctx, list, opts...); err != nil {
-		log.Error(err, "Failed to list integrations")
-		return requests
-	}
-
-	for i := range list.Items {
-		integration := list.Items[i]
-		if integration.Status.Phase == v1.IntegrationPhaseRunning && v1.GetIntegrationProfileAnnotation(&integration) == profile.Name {
-			if profileNamespace := v1.GetIntegrationProfileNamespaceAnnotation(&integration); profileNamespace == "" || profileNamespace == profile.Namespace {
-				log.Infof("IntegrationProfile %s changed, notify integration: %s", profile.Name, integration.Name)
-				requests = append(requests, reconcile.Request{
-					NamespacedName: types.NamespacedName{
-						Namespace: integration.Namespace,
-						Name:      integration.Name,
-					},
-				})
-			}
-		}
-	}
-
-	return requests
-}
-
 func integrationPlatformEnqueueRequestsFromMapFunc(ctx context.Context, c client.Client, p *v1.IntegrationPlatform) []reconcile.Request {
 	var requests []reconcile.Request
 
@@ -374,16 +335,6 @@ func watchIntegrationResources(c client.Client, b *builder.Builder) {
 					return []reconcile.Request{}
 				}
 				return integrationPlatformEnqueueRequestsFromMapFunc(ctx, c, p)
-			})).
-		// Watch for IntegrationProfile and enqueue requests for any integrations that references the profile
-		Watches(&v1.IntegrationProfile{},
-			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
-				profile, ok := a.(*v1.IntegrationProfile)
-				if !ok {
-					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve IntegrationProfile")
-					return []reconcile.Request{}
-				}
-				return integrationProfileEnqueueRequestsFromMapFunc(ctx, c, profile)
 			})).
 		// Watch for Configmaps or Secret used in the Integrations for updates
 		Watches(&corev1.ConfigMap{},
