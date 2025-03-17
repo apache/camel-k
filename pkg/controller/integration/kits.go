@@ -117,11 +117,13 @@ func integrationMatches(ctx context.Context, c client.Client, integration *v1.In
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return false, err
 	}
-	if _, err := platform.ApplyIntegrationProfile(ctx, c, pl, integration); err != nil {
+
+	itp, err := platform.ApplyIntegrationProfile(ctx, c, integration)
+	if err != nil {
 		return false, err
 	}
 
-	itc, err := trait.NewSpecTraitsOptionsForIntegrationAndPlatform(c, integration, pl)
+	itc, err := trait.NewSpecTraitsOptionsForIntegrationAndPlatform(c, integration, itp, pl)
 	if err != nil {
 		return false, err
 	}
