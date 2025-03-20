@@ -112,7 +112,7 @@ func TestPrometheusTraitGetPodMonitor(t *testing.T) {
 	assert.Equal(t, "integration-name", podMonitor.Labels["camel.apache.org/integration"])
 	assert.Equal(t, "integration-name", podMonitor.Spec.Selector.MatchLabels["camel.apache.org/integration"])
 	assert.Len(t, podMonitor.Spec.PodMetricsEndpoints, 1)
-	assert.Equal(t, defaultContainerPortName, podMonitor.Spec.PodMetricsEndpoints[0].Port)
+	assert.Equal(t, defaultContainerPortName, *podMonitor.Spec.PodMetricsEndpoints[0].Port)
 }
 
 func createNominalPrometheusTest() (*prometheusTrait, *Environment) {
