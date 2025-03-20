@@ -137,7 +137,7 @@ func (t *prometheusTrait) getPodMonitorFor(e *Environment, portName string) (*mo
 			},
 			PodMetricsEndpoints: []monitoringv1.PodMetricsEndpoint{
 				{
-					Port: portName,
+					Port: &portName,
 					Path: "/q/metrics",
 				},
 			},
