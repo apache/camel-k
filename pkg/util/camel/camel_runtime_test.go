@@ -55,8 +55,11 @@ func TestCreateCatalog(t *testing.T) {
 		context.TODO(),
 		c,
 		"",
-		&ip,
-		v1.RuntimeSpec{Provider: v1.RuntimeProviderQuarkus, Version: defaults.DefaultRuntimeVersion})
+		ip.Status.Build.Maven,
+		ip.Status.Build.GetTimeout().Duration,
+		v1.RuntimeSpec{Provider: v1.RuntimeProviderQuarkus, Version: defaults.DefaultRuntimeVersion},
+		nil,
+	)
 	require.NoError(t, err)
 	assert.NotNil(t, catalog)
 	assert.Equal(t, defaults.DefaultRuntimeVersion, catalog.Runtime.Version)

@@ -21,9 +21,9 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/maven"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -33,11 +33,12 @@ import (
 )
 
 // CreateCatalog --.
-func CreateCatalog(ctx context.Context, client client.Client, namespace string, platform *v1.IntegrationPlatform,
-	runtime v1.RuntimeSpec) (*RuntimeCatalog, error) {
-	ctx, cancel := context.WithTimeout(ctx, platform.Status.Build.GetTimeout().Duration)
+func CreateCatalog(
+	ctx context.Context, client client.Client, namespace string,
+	mavenSpec v1.MavenSpec, timeout time.Duration, runtime v1.RuntimeSpec, extraRepositories []string) (*RuntimeCatalog, error) {
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
-	catalog, err := GenerateCatalog(ctx, client, namespace, platform.Status.Build.Maven, runtime, []maven.Dependency{})
+	catalog, err := GenerateCatalog(ctx, client, namespace, mavenSpec, runtime, extraRepositories)
 	if err != nil {
 		return nil, err
 	}

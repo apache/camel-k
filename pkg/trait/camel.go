@@ -148,6 +148,7 @@ func (t *camelTrait) Apply(e *Environment) error {
 	return nil
 }
 
+//nolint:nestif
 func (t *camelTrait) loadOrCreateCatalog(e *Environment) error {
 	catalogNamespace := e.DetermineCatalogNamespace()
 	if catalogNamespace == "" {
@@ -174,7 +175,16 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment) error {
 		// the required versions (camel and runtime) are not expressed as
 		// semver constraints
 		if exactVersionRegexp.MatchString(t.runtimeVersion) {
-			catalog, err = camel.CreateCatalog(e.Ctx, e.Client, catalogNamespace, e.Platform, runtime)
+			mavenSpec := e.Platform.Status.Build.Maven
+			var extraRepositories []string
+			if e.Integration != nil && e.Integration.Spec.Repositories != nil {
+				extraRepositories = append(extraRepositories, e.Integration.Spec.Repositories...)
+			}
+			if e.IntegrationKit != nil && e.IntegrationKit.Spec.Repositories != nil {
+				extraRepositories = append(extraRepositories, e.IntegrationKit.Spec.Repositories...)
+			}
+			catalog, err = camel.CreateCatalog(e.Ctx, e.Client, catalogNamespace,
+				mavenSpec, e.Platform.Status.Build.GetTimeout().Duration, runtime, extraRepositories)
 			if err != nil {
 				return err
 			}

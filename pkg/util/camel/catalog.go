@@ -78,13 +78,14 @@ func GenerateCatalog(
 	namespace string,
 	mvn v1.MavenSpec,
 	runtime v1.RuntimeSpec,
-	providerDependencies []maven.Dependency) (*RuntimeCatalog, error) {
+	extraRepositories []string) (*RuntimeCatalog, error) {
 
 	userSettings, err := kubernetes.ResolveValueSource(ctx, client, namespace, &mvn.Settings)
 	if err != nil {
 		return nil, err
 	}
-	settings, err := maven.NewSettings(maven.DefaultRepositories, maven.ProxyFromEnvironment)
+	settings, err := maven.NewSettings(
+		maven.DefaultRepositories, maven.ProxyFromEnvironment, maven.Repositories(extraRepositories...))
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +102,7 @@ func GenerateCatalog(
 		}
 	}
 
-	return GenerateCatalogCommon(ctx, globalSettings, []byte(userSettings), caCerts, mvn, runtime, providerDependencies)
+	return GenerateCatalogCommon(ctx, globalSettings, []byte(userSettings), caCerts, mvn, runtime)
 }
 
 func GenerateCatalogCommon(
@@ -110,13 +111,12 @@ func GenerateCatalogCommon(
 	userSettings []byte,
 	caCert [][]byte,
 	mvn v1.MavenSpec,
-	runtime v1.RuntimeSpec,
-	providerDependencies []maven.Dependency) (*RuntimeCatalog, error) {
+	runtime v1.RuntimeSpec) (*RuntimeCatalog, error) {
 
 	catalog := v1.CamelCatalog{}
 
 	err := util.WithTempDir("camel-catalog", func(tmpDir string) error {
-		project := generateMavenProject(runtime.Version, providerDependencies)
+		project := generateMavenProject(runtime.Version)
 
 		mc := maven.NewContext(tmpDir)
 		mc.LocalRepository = mvn.LocalRepository
@@ -159,7 +159,7 @@ func GenerateCatalogCommon(
 	return NewRuntimeCatalog(catalog), err
 }
 
-func generateMavenProject(runtimeVersion string, providerDependencies []maven.Dependency) maven.Project {
+func generateMavenProject(runtimeVersion string) maven.Project {
 	p := maven.NewProjectWithGAV("org.apache.camel.k.integration", "camel-k-catalog-generator", defaults.Version)
 
 	plugin := maven.Plugin{
@@ -175,8 +175,6 @@ func generateMavenProject(runtimeVersion string, providerDependencies []maven.De
 			},
 		},
 	}
-
-	plugin.Dependencies = append(plugin.Dependencies, providerDependencies...)
 
 	p.Build = &maven.Build{
 		DefaultGoal: "generate-resources",
