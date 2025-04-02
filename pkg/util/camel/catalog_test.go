@@ -26,7 +26,7 @@ import (
 )
 
 func TestCamelTraitGenerateMavenProjectSucceeds(t *testing.T) {
-	mvnProject := generateMavenProject("1.0.1", nil)
+	mvnProject := generateMavenProject("1.0.1")
 	assert.NotNil(t, mvnProject)
 	assert.Equal(t, "org.apache.camel.k.integration", mvnProject.GroupID)
 	assert.Equal(t, "camel-k-catalog-generator", mvnProject.ArtifactID)
