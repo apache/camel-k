@@ -7,21 +7,21 @@ A Pipe can be scaled using the `kubectl scale` command, e.g.:
 
 [source,console]
 ----
-$ kubectl scale pipe <kamelet_binding_name> --replicas <number_of_replicas>
+$ kubectl scale pipe <pipe_name> --replicas <number_of_replicas>
 ----
 
 This can also be achieved by editing the Pipe resource directly, e.g.:
 
 [source,console]
 ----
-$ kubectl patch pipe <kamelet_binding_name> -p '{"spec":{"replicas":<number_of_replicas>}}'
+$ kubectl patch pipe <pipe_name> -p '{"spec":{"replicas":<number_of_replicas>}}'
 ----
 
 The Pipe also reports its number of replicas in the `.status.replicas` field, e.g.:
 
 [source,console]
 ----
-$ kubectl get pipe <kamelet_binding_name> -o jsonpath='{.status.replicas}'
+$ kubectl get pipe <pipe_name> -o jsonpath='{.status.replicas}'
 ----
 
 == Autoscaling with Knative
@@ -89,7 +89,7 @@ Scale bounds can be reset by removing the `.spec.replicas` field from the Pipe, 
 
 [source,console]
 ----
-$ kubectl patch pipe <kamelet_binding_name> --type=json -p='[{"op": "remove", "path": "/spec/replicas"}]'
+$ kubectl patch pipe <pipe_name> --type=json -p='[{"op": "remove", "path": "/spec/replicas"}]'
 ----
 ====
 
@@ -99,11 +99,11 @@ A Pipe can automatically scale based on its CPU utilization and custom metrics u
 
 For example, executing the following command creates an _autoscaler_ for the Pipe, with target CPU utilization set to 80%, and the number of replicas between 2 and 5:
 
-WARNING: the HPA can work when the Pipe replica field needs to be specified. You need to scale the Pipe via `kubectl scale pipe my-pipe --replicas 1` or edit the `.spec.replicas` field of your Pipe to 1. This is due to a link:https://github.com/kubernetes/kubernetes/issues/111781[Kubernetes behavior which does not allow an empty value on the resource to scale].
+WARNING: For the HPA to work, the Pipe replica field must be specified. You need to scale the Pipe via `kubectl scale pipe my-pipe --replicas 1` or edit the `.spec.replicas` field of your Pipe to 1. This is due to a link:https://github.com/kubernetes/kubernetes/issues/111781[Kubernetes behavior which does not allow an empty value on the resource to scale].
 
 [source,console]
 ----
-$ kubectl autoscale pipe <kamelet_binding_name> --min=2 --max=5 --cpu-percent=80
+$ kubectl autoscale pipe <pipe_name> --min=2 --max=5 --cpu-percent=80
 ----
 
 Refer to the xref:scaling/integration.adoc[Integration scaling] guide for information about using custom metrics.
