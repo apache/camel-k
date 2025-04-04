@@ -98,7 +98,6 @@ linters:
     - gocyclo
     - godox
     - err113
-    - gomnd
     - ireturn
     - nilnil
     - nlreturn
