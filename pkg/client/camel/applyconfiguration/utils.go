@@ -105,6 +105,8 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.FailureRecoveryApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("Flow"):
 		return &camelv1.FlowApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("GitConfigSpec"):
+		return &camelv1.GitConfigSpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("HeaderSpec"):
 		return &camelv1.HeaderSpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("HealthCheckResponse"):

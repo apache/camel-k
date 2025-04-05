@@ -22,6 +22,7 @@ import (
 
 	"github.com/apache/camel-k/v2/pkg/client"
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	storagev1 "k8s.io/api/storage/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -150,4 +151,76 @@ func LookupDefaultStorageClass(ctx context.Context, c client.Client) (*storagev1
 		}
 	}
 	return nil, nil
+}
+
+// LookupServiceAccount will look for any k8s ServiceAccount with a given name in a given namespace.
+func LookupServiceAccount(ctx context.Context, c client.Client, ns string, name string) (*corev1.ServiceAccount, error) {
+	sa := corev1.ServiceAccount{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ServiceAccount",
+			APIVersion: corev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      name,
+		},
+	}
+	key := ctrl.ObjectKey{
+		Namespace: ns,
+		Name:      name,
+	}
+	if err := c.Get(ctx, key, &sa); err != nil && k8serrors.IsNotFound(err) {
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+	return &sa, nil
+}
+
+// LookupRole will look for any k8s Role with a given name in a given namespace.
+func LookupRole(ctx context.Context, c client.Client, ns string, name string) (*rbacv1.Role, error) {
+	r := rbacv1.Role{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Role",
+			APIVersion: rbacv1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      name,
+		},
+	}
+	key := ctrl.ObjectKey{
+		Namespace: ns,
+		Name:      name,
+	}
+	if err := c.Get(ctx, key, &r); err != nil && k8serrors.IsNotFound(err) {
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+	return &r, nil
+}
+
+// LookupRoleBinding will look for any k8s RoleBinding with a given name in a given namespace.
+func LookupRoleBinding(ctx context.Context, c client.Client, ns string, name string) (*rbacv1.RoleBinding, error) {
+	rb := rbacv1.RoleBinding{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "RoleBinding",
+			APIVersion: rbacv1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      name,
+		},
+	}
+	key := ctrl.ObjectKey{
+		Namespace: ns,
+		Name:      name,
+	}
+	if err := c.Get(ctx, key, &rb); err != nil && k8serrors.IsNotFound(err) {
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+	return &rb, nil
 }

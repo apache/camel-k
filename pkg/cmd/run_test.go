@@ -957,3 +957,24 @@ spec:
 status: {}
 `, output)
 }
+
+func TestGitRepoIntegration(t *testing.T) {
+	runCmdOptions, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
+	output, err := ExecuteCommand(runCmd, cmdRun, "--git", "http://my-git/my-org/my-it.git", "-o", "yaml")
+	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
+
+	require.NoError(t, err)
+	assert.Equal(t, `apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  annotations:
+    camel.apache.org/operator.id: camel-k
+  creationTimestamp: null
+  name: my-it
+spec:
+  git:
+    url: http://my-git/my-org/my-it.git
+  traits: {}
+status: {}
+`, output)
+}

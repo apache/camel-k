@@ -345,6 +345,17 @@ spec:
                           items:
                             type: string
                           type: array
+                        git:
+                          description: the configuration of the project to build on
+                            Git
+                          properties:
+                            secret:
+                              description: the Kubernetes secret where token is stored
+                              type: string
+                            url:
+                              description: the URL of the project
+                              type: string
+                          type: object
                         maven:
                           description: the configuration required by Maven for the
                             application build phase
@@ -1247,6 +1258,17 @@ spec:
                           items:
                             type: string
                           type: array
+                        git:
+                          description: the configuration of the project to build on
+                            Git
+                          properties:
+                            secret:
+                              description: the Kubernetes secret where token is stored
+                              type: string
+                            url:
+                              description: the URL of the project
+                              type: string
+                          type: object
                         maven:
                           description: the configuration required by Maven for the
                             application build phase
@@ -11966,6 +11988,16 @@ spec:
                   type: object
                   x-kubernetes-preserve-unknown-fields: true
                 type: array
+              git:
+                description: the configuration of the project to build on Git
+                properties:
+                  secret:
+                    description: the Kubernetes secret where token is stored
+                    type: string
+                  url:
+                    description: the URL of the project
+                    type: string
+                type: object
               integrationKit:
                 description: the reference of the `IntegrationKit` which is used for
                   this Integration
@@ -20612,6 +20644,9 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+              jar:
+                description: the Java jar dependency to execute (if available)
+                type: string
               lastInitTimestamp:
                 description: the timestamp representing the last time when this integration
                   was initialized.
@@ -23796,6 +23831,16 @@ spec:
                       type: object
                       x-kubernetes-preserve-unknown-fields: true
                     type: array
+                  git:
+                    description: the configuration of the project to build on Git
+                    properties:
+                      secret:
+                        description: the Kubernetes secret where token is stored
+                        type: string
+                      url:
+                        description: the URL of the project
+                        type: string
+                    type: object
                   integrationKit:
                     description: the reference of the `IntegrationKit` which is used
                       for this Integration

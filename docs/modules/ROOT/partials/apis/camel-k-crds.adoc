@@ -993,6 +993,13 @@ workspace directory to use
 
 the sources to add at build time
 
+|`git` +
+*xref:#_camel_apache_org_v1_GitConfigSpec[GitConfigSpec]*
+|
+
+
+the configuration of the project to build on Git
+
 
 |===
 
@@ -2226,6 +2233,38 @@ Flow is an unstructured object representing a Camel Flow in YAML/JSON DSL.
 
 |===
 
+[#_camel_apache_org_v1_GitConfigSpec]
+=== GitConfigSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuilderTask, BuilderTask>>
+* <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
+
+GitConfigSpec defines the Git configuration of a project.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`url` +
+string
+|
+
+
+the URL of the project
+
+|`secret` +
+string
+|
+
+
+the Kubernetes secret where token is stored
+
+
+|===
+
 [#_camel_apache_org_v1_HeaderSpec]
 === HeaderSpec
 
@@ -3407,6 +3446,13 @@ the number of `Pods` needed for the running Integration
 
 the sources which contain the Camel routes to run
 
+|`git` +
+*xref:#_camel_apache_org_v1_GitConfigSpec[GitConfigSpec]*
+|
+
+
+the configuration of the project to build on Git
+
 |`flows` +
 *xref:#_camel_apache_org_v1_Flow[[\]Flow]*
 |
@@ -3518,6 +3564,13 @@ string
 
 
 the container image used
+
+|`jar` +
+string
+|
+
+
+the Java jar dependency to execute (if available)
 
 |`dependencies` +
 []string
