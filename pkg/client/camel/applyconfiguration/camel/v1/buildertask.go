@@ -30,6 +30,7 @@ type BuilderTaskApplyConfiguration struct {
 	Maven                      *MavenBuildSpecApplyConfiguration `json:"maven,omitempty"`
 	BuildDir                   *string                           `json:"buildDir,omitempty"`
 	Sources                    []SourceSpecApplyConfiguration    `json:"sources,omitempty"`
+	Git                        *GitConfigSpecApplyConfiguration  `json:"git,omitempty"`
 }
 
 // BuilderTaskApplyConfiguration constructs a declarative configuration of the BuilderTask type for use with
@@ -116,5 +117,13 @@ func (b *BuilderTaskApplyConfiguration) WithSources(values ...*SourceSpecApplyCo
 		}
 		b.Sources = append(b.Sources, *values[i])
 	}
+	return b
+}
+
+// WithGit sets the Git field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Git field is set to the value of the last call.
+func (b *BuilderTaskApplyConfiguration) WithGit(value *GitConfigSpecApplyConfiguration) *BuilderTaskApplyConfiguration {
+	b.Git = value
 	return b
 }

@@ -144,6 +144,12 @@ func GenerateCatalogCommon(
 			)
 		}
 
+		if err := project.Command(mc).DoSettings(ctx); err != nil {
+			return err
+		}
+		if err := project.Command(mc).DoPom(ctx); err != nil {
+			return err
+		}
 		if err := project.Command(mc).Do(ctx); err != nil {
 			return err
 		}

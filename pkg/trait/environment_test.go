@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -218,7 +217,6 @@ func TestValueSourceEnvVars(t *testing.T) {
 	userK2 := false
 
 	env.Resources.VisitDeployment(func(deployment *appsv1.Deployment) {
-		fmt.Println(deployment.Spec.Template.Spec.Containers[0].Env)
 		for _, e := range deployment.Spec.Template.Spec.Containers[0].Env {
 			if e.Name == "MY_VAR_1" {
 				userK1 = e.Value == "" &&
