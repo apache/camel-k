@@ -153,7 +153,7 @@ func TestGenerateQuarkusProjectWithBuildTimeProperties(t *testing.T) {
 	if !ok {
 		t.Setenv("MAVEN_CMD", "mvn")
 	}
-	err = buildQuarkusRunner(&builderContext)
+	err = buildMavenProject(&builderContext)
 	require.NoError(t, err)
 	appProps, err := os.ReadFile(filepath.Join(tmpDir, "maven", "src", "main", "resources", "application.properties"))
 	require.NoError(t, err)
@@ -212,7 +212,7 @@ func TestGenerateQuarkusProjectWithNativeSources(t *testing.T) {
 	if !ok {
 		t.Setenv("MAVEN_CMD", "mvn")
 	}
-	err = buildQuarkusRunner(&builderContext)
+	err = buildMavenProject(&builderContext)
 	require.NoError(t, err)
 	appProps, err := os.ReadFile(filepath.Join(tmpDir, "maven", "src", "main", "resources", "application.properties"))
 	require.NoError(t, err)
@@ -288,7 +288,7 @@ func TestBuildQuarkusRunner(t *testing.T) {
 	if !ok {
 		t.Setenv("MAVEN_CMD", "mvn")
 	}
-	err = buildQuarkusRunner(&builderContext)
+	err = buildMavenProject(&builderContext)
 	require.NoError(t, err)
 	// Verify default application properties
 	appProps, err := os.ReadFile(filepath.Join(tmpDir, "maven", "src", "main", "resources", "application.properties"))

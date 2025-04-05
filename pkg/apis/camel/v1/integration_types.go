@@ -59,6 +59,8 @@ type IntegrationSpec struct {
 	Replicas *int32 `json:"replicas,omitempty"`
 	// the sources which contain the Camel routes to run
 	Sources []SourceSpec `json:"sources,omitempty"`
+	// the configuration of the project to build on Git
+	Git *GitConfigSpec `json:"git,omitempty"`
 	// a source in YAML DSL language which contain the routes to run
 	Flows []Flow `json:"flows,omitempty"`
 	// the reference of the `IntegrationKit` which is used for this Integration
@@ -93,6 +95,8 @@ type IntegrationStatus struct {
 	Digest string `json:"digest,omitempty"`
 	// the container image used
 	Image string `json:"image,omitempty"`
+	// the Java jar dependency to execute (if available)
+	Jar string `json:"jar,omitempty"`
 	// a list of dependencies needed by the application
 	Dependencies []string `json:"dependencies,omitempty"`
 	// the profile needed to run this Integration
@@ -153,8 +157,12 @@ const (
 	IntegrationPhaseWaitingForPlatform IntegrationPhase = "Waiting For Platform"
 	// IntegrationPhaseInitialization --.
 	IntegrationPhaseInitialization IntegrationPhase = "Initialization"
-	// IntegrationPhaseBuildingKit --.
+	// IntegrationPhaseBuildingKit if building from a Camel route.
 	IntegrationPhaseBuildingKit IntegrationPhase = "Building Kit"
+	// IntegrationPhaseBuildSubmitted if building from a Git repository.
+	IntegrationPhaseBuildSubmitted IntegrationPhase = "BuildSubmitted"
+	// IntegrationPhaseBuildRunning if building from a Git repository.
+	IntegrationPhaseBuildRunning IntegrationPhase = "BuildRunning"
 	// IntegrationPhaseDeploying --.
 	IntegrationPhaseDeploying IntegrationPhase = "Deploying"
 	// IntegrationPhaseRunning --.

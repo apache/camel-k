@@ -58,6 +58,11 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1.Inte
 		return action.importFromExternalApp(integration)
 	}
 
+	if integration.Spec.Git != nil {
+		integration.Status.Phase = v1.IntegrationPhaseBuildSubmitted
+		return integration, nil
+	}
+
 	if _, err := trait.Apply(ctx, action.client, integration, nil); err != nil {
 		integration.Status.Phase = v1.IntegrationPhaseError
 		integration.SetReadyCondition(corev1.ConditionFalse,

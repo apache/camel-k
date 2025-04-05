@@ -89,6 +89,10 @@ func (t *jvmTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		}
 	}
 
+	if t.Jar == "" && e.Integration.Status.Jar != "" {
+		t.Jar = e.Integration.Status.Jar
+	}
+
 	return true, nil, nil
 }
 

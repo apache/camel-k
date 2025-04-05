@@ -252,8 +252,14 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Dat
 
 	ctx, cancel := context.WithTimeout(e.Ctx, e.Platform.Status.Build.GetTimeout().Duration)
 	defer cancel()
-	err = project.Command(mc).Do(ctx)
-	if err != nil {
+
+	if err := project.Command(mc).DoSettings(ctx); err != nil {
+		return err
+	}
+	if err := project.Command(mc).DoPom(ctx); err != nil {
+		return err
+	}
+	if err := project.Command(mc).Do(ctx); err != nil {
 		return err
 	}
 

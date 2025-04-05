@@ -45,25 +45,29 @@ func init() {
 	Quarkus.CommonSteps = []Step{
 		Quarkus.LoadCamelQuarkusCatalog,
 		Quarkus.GenerateQuarkusProject,
-		Quarkus.BuildQuarkusRunner,
+		Quarkus.BuildQuarkusMavenContext,
+		Quarkus.BuildQuarkusMavenProject,
 	}
 }
 
 type quarkusSteps struct {
 	LoadCamelQuarkusCatalog    Step
 	GenerateQuarkusProject     Step
-	BuildQuarkusRunner         Step
+	BuildQuarkusMavenContext   Step
+	BuildQuarkusMavenProject   Step
 	ComputeQuarkusDependencies Step
 	PrepareProjectWithSources  Step
 
 	CommonSteps []Step
 }
 
+//nolint:mnd
 var Quarkus = quarkusSteps{
 	LoadCamelQuarkusCatalog:    NewStep(InitPhase, loadCamelQuarkusCatalog),
 	GenerateQuarkusProject:     NewStep(ProjectGenerationPhase, generateQuarkusProject),
+	BuildQuarkusMavenContext:   NewStep(ProjectGenerationPhase+1, buildMavenContextSettings),
 	PrepareProjectWithSources:  NewStep(ProjectBuildPhase-1, prepareProjectWithSources),
-	BuildQuarkusRunner:         NewStep(ProjectBuildPhase, buildQuarkusRunner),
+	BuildQuarkusMavenProject:   NewStep(ProjectBuildPhase+2, buildMavenProject),
 	ComputeQuarkusDependencies: NewStep(ProjectBuildPhase+1, computeQuarkusDependencies),
 }
 
@@ -211,27 +215,10 @@ func generateQuarkusProjectCommon(runtimeProvider v1.RuntimeProvider, runtimeVer
 	return p
 }
 
-func buildQuarkusRunner(ctx *builderContext) error {
-	mc := maven.NewContext(filepath.Join(ctx.Path, "maven"))
-	mc.GlobalSettings = ctx.Maven.GlobalSettings
-	mc.UserSettings = ctx.Maven.UserSettings
-	mc.SettingsSecurity = ctx.Maven.SettingsSecurity
-	mc.LocalRepository = ctx.Build.Maven.LocalRepository
-	mc.AdditionalArguments = ctx.Build.Maven.CLIOptions
+func buildMavenProject(ctx *builderContext) error {
+	mc := newMavenContext(ctx)
 
-	if ctx.Maven.TrustStoreName != "" {
-		mc.ExtraMavenOpts = append(mc.ExtraMavenOpts,
-			"-Djavax.net.ssl.trustStore="+filepath.Join(ctx.Path, ctx.Maven.TrustStoreName),
-			"-Djavax.net.ssl.trustStorePassword="+ctx.Maven.TrustStorePass,
-		)
-	}
-
-	err := BuildQuarkusRunnerCommon(ctx.C, mc, ctx.Maven.Project, ctx.Build.Maven.Properties)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return BuildQuarkusRunnerCommon(ctx.C, *mc, ctx.Maven.Project, ctx.Build.Maven.Properties)
 }
 
 func BuildQuarkusRunnerCommon(ctx context.Context, mc maven.Context, project maven.Project, applicationProperties map[string]string) error {
@@ -242,9 +229,11 @@ func BuildQuarkusRunnerCommon(ctx context.Context, mc maven.Context, project mav
 	if err := computeApplicationProperties(filepath.Join(resourcesPath, "application.properties"), applicationProperties); err != nil {
 		return err
 	}
+	if err := project.Command(mc).DoPom(ctx); err != nil {
+		return fmt.Errorf("failure while generating pom file: %w", err)
+	}
 	mc.AddArgument("package")
 	mc.AddArgument("-Dmaven.test.skip=true")
-	// Run the Maven goal
 	if err := project.Command(mc).Do(ctx); err != nil {
 		return fmt.Errorf("failure while building project: %w", err)
 	}
@@ -294,15 +283,10 @@ func computeApplicationProperties(appPropertiesPath string, applicationPropertie
 }
 
 func computeQuarkusDependencies(ctx *builderContext) error {
-	mc := maven.NewContext(filepath.Join(ctx.Path, "maven"))
-	mc.GlobalSettings = ctx.Maven.GlobalSettings
-	mc.UserSettings = ctx.Maven.UserSettings
-	mc.SettingsSecurity = ctx.Maven.SettingsSecurity
-	mc.LocalRepository = ctx.Build.Maven.LocalRepository
-	mc.AdditionalArguments = ctx.Build.Maven.CLIOptions
-
+	// Quarkus fast-jar format is split into various sub-directories in quarkus-app
+	quarkusAppDir := filepath.Join(ctx.Path, "maven", "target", "quarkus-app")
 	// Process artifacts list and add it to existing artifacts
-	artifacts, err := ProcessQuarkusTransitiveDependencies(mc)
+	artifacts, err := processQuarkusTransitiveDependencies(quarkusAppDir)
 	if err != nil {
 		return err
 	}
@@ -311,19 +295,16 @@ func computeQuarkusDependencies(ctx *builderContext) error {
 	return nil
 }
 
-func ProcessQuarkusTransitiveDependencies(mc maven.Context) ([]v1.Artifact, error) {
+func processQuarkusTransitiveDependencies(dir string) ([]v1.Artifact, error) {
 	var artifacts []v1.Artifact
 
-	// Quarkus fast-jar format is split into various sub-directories in quarkus-app
-	quarkusAppDir := filepath.Join(mc.Path, "target", "quarkus-app")
-
 	// Discover application dependencies from the Quarkus fast-jar directory tree
-	err := filepath.Walk(quarkusAppDir, func(filePath string, info os.FileInfo, err error) error {
+	err := filepath.Walk(dir, func(filePath string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
-		fileRelPath := strings.Replace(filePath, quarkusAppDir, "", 1)
+		fileRelPath := strings.Replace(filePath, dir, "", 1)
 
 		if !info.IsDir() {
 			sha1, err := digest.ComputeSHA1(filePath)

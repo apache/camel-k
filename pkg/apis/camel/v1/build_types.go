@@ -107,6 +107,16 @@ type BuilderTask struct {
 	BuildDir string `json:"buildDir,omitempty"`
 	// the sources to add at build time
 	Sources []SourceSpec `json:"sources,omitempty"`
+	// the configuration of the project to build on Git
+	Git *GitConfigSpec `json:"git,omitempty"`
+}
+
+// GitConfigSpec defines the Git configuration of a project.
+type GitConfigSpec struct {
+	// the URL of the project
+	URL string `json:"url,omitempty"`
+	// the Kubernetes secret where token is stored
+	Secret string `json:"secret,omitempty"`
 }
 
 // MavenBuildSpec defines the Maven configuration plus additional repositories to use.

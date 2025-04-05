@@ -294,6 +294,7 @@ func add(ctx context.Context, mgr manager.Manager, c client.Client, r reconcile.
 					return !e.DeleteStateUnknown
 				},
 			}))
+
 	// Watch for all the resources
 	watchIntegrationResources(c, b)
 	// Watch for the CronJob conditionally
@@ -384,7 +385,9 @@ func watchIntegrationResources(c client.Client, b *builder.Builder) {
 				}
 			})).
 		// Watch for the owned Deployments
-		Owns(&appsv1.Deployment{}, builder.WithPredicates(StatusChangedPredicate{}))
+		Owns(&appsv1.Deployment{}, builder.WithPredicates(StatusChangedPredicate{})).
+		// Watch for the owned Builds
+		Owns(&v1.Build{}, builder.WithPredicates(StatusChangedPredicate{}))
 }
 
 func watchCronJobResources(b *builder.Builder) {
@@ -476,6 +479,7 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 	actions := []Action{
 		NewPlatformSetupAction(),
 		NewInitializeAction(),
+		NewBuildAction(),
 		newBuildKitAction(),
 	}
 

@@ -18,11 +18,15 @@ limitations under the License.
 package builder
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/jib"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -48,4 +52,47 @@ func TestJibBuildMavenArgsWithPlatforms(t *testing.T) {
 			tmpMvnCtxDir+"/jib"),
 		" ")
 	assert.Equal(t, expectedParams, args)
+}
+
+func TestInjectJibProfileMissingPom(t *testing.T) {
+	tmpMvnCtxDir, err := os.MkdirTemp("", "ck-jib-profile-test")
+	require.NoError(t, err)
+	builderContext := builderContext{
+		C:    context.TODO(),
+		Path: tmpMvnCtxDir,
+	}
+	err = injectJibProfile(&builderContext)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "no such file or directory")
+}
+
+var poms = []string{
+	"<project>something</project>",
+	"<project>something<profiles><profile></profile></profiles></project>",
+	"<no-project-tag></no-project-tag>",
+}
+
+func TestInjectJibProfiles(t *testing.T) {
+	tmpMvnCtxDir, err := os.MkdirTemp("", "ck-jib-profile-test")
+	require.NoError(t, err)
+	builderContext := builderContext{
+		C:    context.TODO(),
+		Path: tmpMvnCtxDir,
+	}
+
+	for _, p := range poms {
+		pom := filepath.Join(tmpMvnCtxDir, "maven", "pom.xml")
+		err = util.WriteFileWithContent(pom, []byte(p))
+		require.NoError(t, err)
+		err = injectJibProfile(&builderContext)
+		require.NoError(t, err)
+
+		newPom, err := util.ReadFile(pom)
+		require.NoError(t, err)
+		// This case should never happen but we check if the user set a non valid pom
+		if p != "<no-project-tag></no-project-tag>" {
+			assert.Contains(t, string(newPom), jib.XMLJibProfile)
+		}
+	}
+
 }

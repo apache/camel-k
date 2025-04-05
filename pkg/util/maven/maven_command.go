@@ -39,26 +39,31 @@ type Command struct {
 	project Project
 }
 
+// Do is in charge to execute a given Maven phase.
 func (c *Command) Do(ctx context.Context) error {
-	if err := generateProjectStructure(c.context, c.project); err != nil {
+	mvnCmd, err := c.mvnCmd(ctx)
+	if err != nil {
 		return err
 	}
+	mavenOptions, env := c.optionsFromEnv()
 
-	mvnCmd := ""
-	if c, ok := os.LookupEnv("MAVEN_CMD"); ok {
-		mvnCmd = c
-	}
+	cmd := exec.CommandContext(ctx, mvnCmd, c.context.AdditionalArguments...)
+	cmd.Dir = c.context.Path
+	cmd.Env = env
 
-	if mvnCmd == "" {
-		if e, ok := os.LookupEnv("MAVEN_WRAPPER"); (ok && e == "true") || !ok {
-			// Prepare maven wrapper helps when running the builder as Pod as it makes
-			// the builder container, Maven agnostic
-			if err := c.prepareMavenWrapper(ctx); err != nil {
-				return err
-			}
-		}
+	Log.WithValues("MAVEN_OPTS", mavenOptions).Infof("executing: %s", strings.Join(cmd.Args, " "))
+	return util.RunAndLog(ctx, cmd, LogHandler, LogHandler)
+}
 
-		mvnCmd = "./mvnw"
+// DoPom is in charge to generate the pom file.
+func (c *Command) DoPom(ctx context.Context) error {
+	return generateProjectPom(c.context, c.project)
+}
+
+// DoSettings is in charge to prepare the maven settings required for a maven project.
+func (c *Command) DoSettings(ctx context.Context) error {
+	if err := generateProjectSettings(c.context); err != nil {
+		return err
 	}
 
 	args := make([]string, 0)
@@ -91,22 +96,14 @@ func (c *Command) Do(ctx context.Context) error {
 		args = append(args, "-Dsettings.security="+settingsSecurityPath)
 	}
 
-	mavenOptions, env := c.optionsFromEnv()
-
-	cmd := exec.CommandContext(ctx, mvnCmd, args...)
-	cmd.Dir = c.context.Path
-	cmd.Env = env
-
-	Log.WithValues("MAVEN_OPTS", mavenOptions).Infof("executing: %s", strings.Join(cmd.Args, " "))
-
 	// generate maven file
 	if !c.context.SkipMavenConfigGeneration {
-		if err := generateMavenContext(c.context.Path, args, mavenOptions); err != nil {
+		if err := generateMavenContext(c.context.Path, args, c.context.ExtraMavenOpts); err != nil {
 			return err
 		}
 	}
 
-	return util.RunAndLog(ctx, cmd, LogHandler, LogHandler)
+	return nil
 }
 
 func (c *Command) optionsFromEnv() ([]string, []string) {
@@ -156,6 +153,29 @@ func (c *Command) optionsFromEnv() ([]string, []string) {
 	return c.context.ExtraMavenOpts, env
 }
 
+// mvnCmd prepares the maven wrapper on the maven project or just use any other maven command
+// driven by MAVEN_CMD and MAVEN_WRAPPER environment variables configuration.
+func (c *Command) mvnCmd(ctx context.Context) (string, error) {
+	mvnCmd := ""
+	if c, ok := os.LookupEnv("MAVEN_CMD"); ok {
+		mvnCmd = c
+	}
+
+	if mvnCmd == "" {
+		if e, ok := os.LookupEnv("MAVEN_WRAPPER"); (ok && e == "true") || !ok {
+			// Prepare maven wrapper helps when running the builder as Pod as it makes
+			// the builder container, Maven agnostic
+			if err := c.prepareMavenWrapper(ctx); err != nil {
+				return "", err
+			}
+		}
+
+		mvnCmd = "./mvnw"
+	}
+
+	return mvnCmd, nil
+}
+
 func NewContext(buildDir string) Context {
 	return Context{
 		Path:                buildDir,
@@ -200,23 +220,23 @@ func (c *Context) AddSystemProperty(name string, value string) {
 	c.AddArgumentf("-D%s=%s", name, value)
 }
 
-func generateProjectStructure(context Context, project Project) error {
-	if err := util.WriteFileWithBytesMarshallerContent(context.Path, "pom.xml", &project); err != nil {
-		return err
-	}
+// generateProjectPom is in charge to generate the pom.xml of an "in-memory" Project type.
+func generateProjectPom(context Context, project Project) error {
+	return util.WriteFileWithBytesMarshallerContent(context.Path, "pom.xml", &project)
+}
 
+// generateProjectSettings is in charge to generate the settings for any following maven command execution.
+func generateProjectSettings(context Context) error {
 	if context.GlobalSettings != nil {
 		if err := util.WriteFileWithContent(filepath.Join(context.Path, "settings.xml"), context.GlobalSettings); err != nil {
 			return err
 		}
 	}
-
 	if context.UserSettings != nil {
 		if err := util.WriteFileWithContent(filepath.Join(context.Path, "user-settings.xml"), context.UserSettings); err != nil {
 			return err
 		}
 	}
-
 	if context.SettingsSecurity != nil {
 		if err := util.WriteFileWithContent(filepath.Join(context.Path, "settings-security.xml"), context.SettingsSecurity); err != nil {
 			return err

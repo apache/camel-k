@@ -155,6 +155,11 @@ func (in *Integration) IsManagedBuild() bool {
 	return err == nil && isManagedBuild
 }
 
+// IsGitBuild returns true when the Integration requires to be built from a Git repo.
+func (in *Integration) IsGitBuild() bool {
+	return in.Spec.Git != nil
+}
+
 func (in *IntegrationSpec) AddSource(name string, content string, language Language) {
 	in.Sources = append(in.Sources, NewSourceSpec(name, content, language))
 }

@@ -110,6 +110,13 @@ func ComputeForIntegration(integration *v1.Integration, configmapVersions []stri
 		}
 	}
 
+	// Git spec
+	if integration.Spec.Git != nil {
+		if _, err := hash.Write([]byte(integration.Spec.Git.URL + "/" + integration.Spec.Git.Secret)); err != nil {
+			return "", err
+		}
+	}
+
 	// Integration traits
 	// Calculation logic prior to 1.10.0 (the new Traits API schema) is maintained
 	// in order to keep consistency in the digest calculated from the same set of

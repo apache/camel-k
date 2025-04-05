@@ -48,6 +48,16 @@ Notice that you need to perform two operation to let the Kubernetes finalizers r
 
 NOTE: CRDs and Integration will be maintained alive and running.
 
+== Resources created by the operator
+
+During its lifecycle the operator can create ServiceAccounts, Roles and RoleBindings resources in the namespaces where it operates. They are typically labeled as "app=camel-k", so, if you want to uninstall the operator you can identify all those resources created in the namespaces with that label. You can identify those resources by running:
+
+```
+kubectl get sa,role,rolebinding -l 'app=camel-k' --all-namespaces
+```
+
+You can clean these resources accordingly.
+
 == Uninstall CRDs (and running Integration)
 
 In order to remove the CRDs you need to execute:

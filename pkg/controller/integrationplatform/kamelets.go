@@ -151,6 +151,12 @@ func downloadKameletDependency(ctx context.Context, c client.Client, platform *v
 	timeoutCtx, cancel := context.WithTimeout(ctx, platform.Status.Build.GetTimeout().Duration)
 	defer cancel()
 
+	if err := p.Command(mc).DoSettings(ctx); err != nil {
+		return err
+	}
+	if err := p.Command(mc).DoPom(ctx); err != nil {
+		return err
+	}
 	return p.Command(mc).Do(timeoutCtx)
 }
 

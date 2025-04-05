@@ -20,6 +20,7 @@ package cmd
 import (
 	"context"
 	"errors"
+	"path"
 
 	// this is needed to generate an SHA1 sum for Jars
 	// #nosec G501
@@ -115,7 +116,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().String("pod-template", "", "The path of the YAML file containing a PodSpec template to be used for the Integration pods")
 	cmd.Flags().String("service-account", "", "The SA to use to run this Integration")
 	cmd.Flags().Bool("force", false, "Force creation of integration regardless of potential misconfiguration.")
-
+	cmd.Flags().String("git", "", "A Git repository containing the project to build.")
 	cmd.Flags().Bool("save", false, "Save the run parameters into the default kamel configuration file (kamel-config.yaml)")
 
 	// completion support
@@ -136,6 +137,7 @@ type runCmdOptions struct {
 	IntegrationKit     string   `mapstructure:"kit" yaml:",omitempty"`
 	IntegrationName    string   `mapstructure:"name" yaml:",omitempty"`
 	ContainerImage     string   `mapstructure:"image" yaml:",omitempty"`
+	GitRepo            string   `mapstructure:"git" yaml:",omitempty"`
 	Profile            string   `mapstructure:"profile" yaml:",omitempty"`
 	IntegrationProfile string   `mapstructure:"integration-profile" yaml:",omitempty"`
 	OperatorID         string   `mapstructure:"operator-id" yaml:",omitempty"`
@@ -202,7 +204,10 @@ func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	name := o.GetIntegrationName(args)
+	name, err := o.GetIntegrationName(args)
+	if err != nil {
+		return err
+	}
 	if name != "" {
 		// load from kamel.run.integration.$name (2)
 		pathToRoot += ".integration." + name
@@ -332,8 +337,9 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	// We need to make this check at this point, in order to have sources filled during decoding
-	if (len(args) < 1 && len(o.Sources) < 1) && o.ContainerImage == "" {
-		return errors.New("run command expects either an Integration source or the container image (via --image argument)")
+	if (len(args) < 1 && len(o.Sources) < 1) && o.isSourceLess() {
+		return errors.New("run command expects either an Integration source, a container image " +
+			"(via --image argument) or a git repository (via --git argument)")
 	}
 
 	integration, err := o.createOrUpdateIntegration(cmd, c, args)
@@ -414,7 +420,10 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 func (o *runCmdOptions) postRun(cmd *cobra.Command, args []string) error {
 	if o.Save {
 		rootKey := pathToRoot(cmd)
-		name := o.GetIntegrationName(args)
+		name, err := o.GetIntegrationName(args)
+		if err != nil {
+			return err
+		}
 		if name != "" {
 			key := fmt.Sprintf("%s.integration.%s", rootKey, name)
 
@@ -514,8 +523,10 @@ func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sou
 
 func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.Client, sources []string) (*v1.Integration, error) {
 	namespace := o.Namespace
-	name := o.GetIntegrationName(sources)
-
+	name, err := o.GetIntegrationName(sources)
+	if err != nil {
+		return nil, err
+	}
 	if name == "" {
 		return nil, errors.New("unable to determine integration name")
 	}
@@ -544,14 +555,21 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	o.applyLabels(integration)
 	o.applyAnnotations(integration)
 
-	if o.ContainerImage == "" {
+	//nolint:gocritic
+	if o.isSourceLess() {
 		// Resolve resources
 		if err := o.resolveSources(cmd, sources, integration); err != nil {
 			return nil, err
 		}
-	} else {
-		// Source-less Integration as the user provided a container image built externally
+	} else if o.ContainerImage != "" {
+		// Self Managed Integration as the user provided a container image built externally
 		o.Traits = append(o.Traits, fmt.Sprintf("container.image=%s", o.ContainerImage))
+	} else if o.GitRepo != "" {
+		integration.Spec.Git = &v1.GitConfigSpec{
+			URL: o.GitRepo,
+		}
+	} else {
+		return nil, errors.New("you must provide a source, an image or a git repository parameters")
 	}
 
 	if err := resolvePodTemplate(context.Background(), cmd, o.PodTemplate, &integration.Spec); err != nil {
@@ -606,6 +624,10 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	}
 
 	return integration, nil
+}
+
+func (o *runCmdOptions) isSourceLess() bool {
+	return o.ContainerImage == "" && o.GitRepo == ""
 }
 
 func showIntegrationOutput(cmd *cobra.Command, integration *v1.Integration, outputFormat string) error {
@@ -843,7 +865,7 @@ func (o *runCmdOptions) applyDependencies(cmd *cobra.Command, it *v1.Integration
 	return nil
 }
 
-func (o *runCmdOptions) GetIntegrationName(sources []string) string {
+func (o *runCmdOptions) GetIntegrationName(sources []string) (string, error) {
 	name := ""
 	switch {
 	case o.IntegrationName != "":
@@ -852,10 +874,29 @@ func (o *runCmdOptions) GetIntegrationName(sources []string) string {
 	case len(sources) == 1:
 		name = kubernetes.SanitizeName(sources[0])
 	case o.ContainerImage != "":
-		// source-less execution
+		// Self managed build execution
 		name = kubernetes.SanitizeName(strings.ReplaceAll(o.ContainerImage, ":", "-v"))
+	case o.GitRepo != "":
+		gitRepoName, err := getRepoName(o.GitRepo)
+		if err != nil {
+			return "", err
+		}
+		name = kubernetes.SanitizeName(gitRepoName)
 	}
-	return name
+	return name, nil
+}
+
+// getRepoName extracts the repository name from the given Git URL.
+func getRepoName(repoURL string) (string, error) {
+	parsedURL, err := url.Parse(repoURL)
+	if err != nil {
+		return "", fmt.Errorf("invalid URL: %w", err)
+	}
+	repoPath := parsedURL.Path
+	repoName := path.Base(repoPath)
+	repoName = strings.TrimSuffix(repoName, ".git")
+
+	return repoName, nil
 }
 
 func (o *runCmdOptions) mergePropertiesWithPrecedence(c client.Client, items []string) (*properties.Properties, error) {

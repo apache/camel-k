@@ -158,3 +158,35 @@ func buildJibMavenArgs(mavenDir, image, baseImage string, insecureRegistry bool,
 
 	return mavenArgs
 }
+
+// injectJibProfile is in charge to load the pom.xml and inject the profile required eventually
+// for Jib publishing.
+func injectJibProfile(ctx *builderContext) error {
+	pomFile := filepath.Join(ctx.Path, "maven", "pom.xml")
+	originalPom, err := util.ReadFile(pomFile)
+	if err != nil {
+		return err
+	}
+	updatedPom := injectProfilePom(jib.XMLJibProfile, string(originalPom))
+
+	return util.WriteFileWithContent(pomFile, []byte(updatedPom))
+}
+
+// injectedProfilePom will inject the profile into the pom.
+// NOTE: this may fail if the profiles section is commented as it would
+// add the profile in a commented block, hence, won't be taken in account.
+func injectProfilePom(profile, pom string) string {
+	if strings.Contains(pom, "</profiles>") {
+		return strings.ReplaceAll(
+			pom,
+			"</profiles>",
+			fmt.Sprintf("\n\n<!-- Added by Camel K -->\n%s\n<!-- -->\n\n</profiles>", profile),
+		)
+	}
+
+	return strings.ReplaceAll(
+		pom,
+		"</project>",
+		fmt.Sprintf("\n\n<!-- Added by Camel K -->\n<profiles>\n%s\n</profiles>\n<!-- -->\n\n</project>", profile),
+	)
+}

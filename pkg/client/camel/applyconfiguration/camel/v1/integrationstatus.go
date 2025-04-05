@@ -32,6 +32,7 @@ type IntegrationStatusApplyConfiguration struct {
 	Phase                   *camelv1.IntegrationPhase                `json:"phase,omitempty"`
 	Digest                  *string                                  `json:"digest,omitempty"`
 	Image                   *string                                  `json:"image,omitempty"`
+	Jar                     *string                                  `json:"jar,omitempty"`
 	Dependencies            []string                                 `json:"dependencies,omitempty"`
 	Profile                 *camelv1.TraitProfile                    `json:"profile,omitempty"`
 	Traits                  *TraitsApplyConfiguration                `json:"traits,omitempty"`
@@ -85,6 +86,14 @@ func (b *IntegrationStatusApplyConfiguration) WithDigest(value string) *Integrat
 // If called multiple times, the Image field is set to the value of the last call.
 func (b *IntegrationStatusApplyConfiguration) WithImage(value string) *IntegrationStatusApplyConfiguration {
 	b.Image = &value
+	return b
+}
+
+// WithJar sets the Jar field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Jar field is set to the value of the last call.
+func (b *IntegrationStatusApplyConfiguration) WithJar(value string) *IntegrationStatusApplyConfiguration {
+	b.Jar = &value
 	return b
 }
 

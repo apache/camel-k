@@ -18,6 +18,7 @@ limitations under the License.
 package v1
 
 import (
+	"errors"
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
@@ -121,6 +122,18 @@ func SetBuilderConfigurationTasks(tasks []Task, conf *BuildConfiguration) {
 
 func (buildPhase *BuildPhase) String() string {
 	return string(*buildPhase)
+}
+
+// GetRunnable returns the executable jar (if available).
+func (in *BuildStatus) GetRunnable() (*Artifact, error) {
+	if len(in.Artifacts) == 0 {
+		return nil, errors.New("build has no artifact")
+	}
+	if len(in.Artifacts) > 1 {
+		return nil, errors.New("build has more than a single expected artifact")
+	}
+
+	return &in.Artifacts[0], nil
 }
 
 // GetCondition returns the condition with the provided type.
