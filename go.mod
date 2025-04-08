@@ -6,7 +6,7 @@ require (
 	github.com/Masterminds/semver v1.5.0
 	github.com/container-tools/spectrum v0.6.68
 	github.com/evanphx/json-patch v5.9.11+incompatible
-	github.com/fsnotify/fsnotify v1.8.0
+	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gertd/go-pluralize v0.2.1
 	github.com/go-git/go-git/v5 v5.14.0
 	github.com/go-logr/logr v1.4.2
