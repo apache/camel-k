@@ -355,6 +355,33 @@ This Pipe explicitly defines an URI where data is going to be pushed.
 
 NOTE: the `uri` option is also conventionally used in Knative to specify a non-kubernetes destination. To comply with the Knative specifications, in case an "http" or "https" URI is used, Camel will send https://cloudevents.io/[CloudEvents] to the destination.
 
+=== Binding to a Service, Integration or Pipe
+
+You can in general connect any Kubernetes Service or any Camel Integration or Pipe which have a Service associated.
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  name: source-to-service
+spec:
+  source:
+    ...
+  sink:
+    ref:
+      apiVersion: v1
+      kind: Service
+      name: my-svc
+      namespace: my-svc-ns
+    properties:
+      path: /path/to/my/service (optional)
+----
+
+The operator will translate to the related URL. The same mechanism works using `apiVersion:camel.apache.org/v1` and `kind:Integration` or `kind:Pipe` types, assuming these Integrations are exposing any kind of ClusterIP Service. The operator will discover the port to use and you can optionally provide a `path` property if you need to specify a given endpoint to use.
+
+NOTE: this is still available for ClusterIP Service type only.
+
 == Binding with data types
 
 When referencing Kamelets in a binding users may choose from one of the supported input/output data types provided by the Kamelet. The supported data types are declared on the Kamelet itself and give additional information about used header names, content type and content schema.

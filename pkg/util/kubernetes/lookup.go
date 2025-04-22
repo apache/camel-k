@@ -224,3 +224,27 @@ func LookupRoleBinding(ctx context.Context, c client.Client, ns string, name str
 	}
 	return &rb, nil
 }
+
+// LookupService will look for any k8s Service with a given name in a given namespace.
+func LookupService(ctx context.Context, c client.Client, ns string, name string) (*corev1.Service, error) {
+	svc := corev1.Service{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Service",
+			APIVersion: corev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      name,
+		},
+	}
+	key := ctrl.ObjectKey{
+		Namespace: ns,
+		Name:      name,
+	}
+	if err := c.Get(ctx, key, &svc); err != nil && k8serrors.IsNotFound(err) {
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+	return &svc, nil
+}

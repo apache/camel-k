@@ -32,6 +32,6 @@ image::concepts/pipes.png[Camel connector lifecycle, width=640]
 
 **Pipe**: it is used to create the connector binding an event source to an event sink.
 
-**ObjectReference**: this is the reference to any Kubernetes object. The operator is able to transform any Camel URI, Kamelet, Strimzi Kafka resource or Knative resource.
+**ObjectReference**: this is the reference to any Kubernetes object. The operator is able to transform any Camel URI, Kamelet, Strimzi Kafka resource, Knative resource, Service, Integration or Pipe.
 
 **Integration**: it is created from the Pipe translating the source and sinks into a Camel route.
