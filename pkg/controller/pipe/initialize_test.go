@@ -225,22 +225,6 @@ func templateOrFail(template map[string]interface{}) *v1.Template {
 }
 
 func TestNewPipeUnsupportedRef(t *testing.T) {
-	svc := &corev1.Service{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Service",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "my-svc",
-			Namespace: "ns",
-		},
-		Spec: corev1.ServiceSpec{
-			Ports: []corev1.ServicePort{},
-			Selector: map[string]string{
-				v1.IntegrationLabel: "my-pipe",
-			},
-		},
-	}
 	pipe := &v1.Pipe{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1.SchemeGroupVersion.String(),
@@ -256,10 +240,10 @@ func TestNewPipeUnsupportedRef(t *testing.T) {
 			},
 			Sink: v1.Endpoint{
 				Ref: &corev1.ObjectReference{
-					APIVersion: svc.APIVersion,
-					Kind:       svc.Kind,
-					Namespace:  svc.Namespace,
-					Name:       svc.Name,
+					APIVersion: "my-api-version",
+					Kind:       "my-kind",
+					Namespace:  "ns",
+					Name:       "my-kind-name",
 				},
 			},
 		},
@@ -274,15 +258,15 @@ func TestNewPipeUnsupportedRef(t *testing.T) {
 	assert.True(t, a.CanHandle(pipe))
 	handledPipe, err := a.Handle(context.TODO(), pipe)
 	require.Error(t, err)
-	assert.Equal(t, "could not find any suitable binding provider for v1/Service my-svc in namespace ns. "+
-		"Bindings available: [\"kamelet\" \"knative-uri\" \"strimzi\" \"camel-uri\" \"knative-ref\"]", err.Error())
+	assert.Equal(t, "could not find any suitable binding provider for my-api-version/my-kind my-kind-name in namespace ns. "+
+		"Bindings available: [\"kamelet\" \"knative-uri\" \"strimzi\" \"service-ref\" \"camel-uri\" \"knative-ref\"]", err.Error())
 	assert.Equal(t, v1.PipePhaseError, handledPipe.Status.Phase)
 	cond := handledPipe.Status.GetCondition(v1.PipeConditionReady)
 	assert.NotNil(t, cond)
 	assert.Equal(t, corev1.ConditionFalse, cond.Status)
 	assert.Equal(t, "IntegrationError", cond.Reason)
-	assert.Equal(t, "could not find any suitable binding provider for v1/Service my-svc in namespace ns. "+
-		"Bindings available: [\"kamelet\" \"knative-uri\" \"strimzi\" \"camel-uri\" \"knative-ref\"]", cond.Message)
+	assert.Equal(t, "could not find any suitable binding provider for my-api-version/my-kind my-kind-name in namespace ns. "+
+		"Bindings available: [\"kamelet\" \"knative-uri\" \"strimzi\" \"service-ref\" \"camel-uri\" \"knative-ref\"]", cond.Message)
 }
 
 func TestNewPipeKnativeURIBinding(t *testing.T) {
