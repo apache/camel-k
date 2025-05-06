@@ -198,7 +198,7 @@ func (t *mountTrait) configureCamelVolumesAndMounts(e *Environment, vols *[]core
 		}
 		resName := strings.TrimPrefix(s.Name, "/")
 		refName := fmt.Sprintf("i-source-%03d", idx)
-		resPath := filepath.Join(camel.SourcesMountPath, resName)
+		resPath := filepath.Join(camel.SourcesMountPath, fmt.Sprintf("%03d-%s", idx, resName))
 		vol := getVolume(refName, "configmap", cmName, cmKey, resName)
 		mnt := getMount(refName, resPath, resName, true)
 
