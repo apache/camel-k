@@ -21,6 +21,7 @@
 *** xref:installation/advanced/pruning-registry.adoc[Pruning Registry]
 * xref:running/running.adoc[Run an Integration]
 ** xref:running/running-cli.adoc[kamel run CLI]
+** xref:running/build-from-git.adoc[Git hosted Integrations]
 ** xref:running/self-managed.adoc[Self managed Integrations]
 ** xref:running/synthetic.adoc[Synthetic Integrations]
 ** xref:running/promoting.adoc[Promote an Integration]
