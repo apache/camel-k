@@ -3,6 +3,7 @@ module github.com/apache/camel-k/v2
 go 1.24
 
 require (
+	dario.cat/mergo v1.0.2
 	github.com/Masterminds/semver v1.5.0
 	github.com/container-tools/spectrum v0.6.68
 	github.com/evanphx/json-patch v5.9.11+incompatible
@@ -13,7 +14,6 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.2.1
 	github.com/google/go-github/v52 v52.0.0
 	github.com/google/uuid v1.6.0
-	github.com/imdario/mergo v0.3.16
 	github.com/jpillora/backoff v1.0.0
 	github.com/magiconair/properties v1.8.10
 	github.com/mattn/go-shellwords v1.0.12
@@ -60,7 +60,6 @@ require (
 require (
 	contrib.go.opencensus.io/exporter/ocagent v0.7.1-0.20200907061046-05415f1de66d // indirect
 	contrib.go.opencensus.io/exporter/prometheus v0.4.2 // indirect
-	dario.cat/mergo v1.0.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
