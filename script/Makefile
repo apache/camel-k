@@ -261,7 +261,7 @@ endif
 test: do-build
 ifndef NOTEST
 	@echo "####### Running unit test..."
-	go test ./... $(COVERAGE_OPTS)
+	LC_ALL=C go test ./... $(COVERAGE_OPTS)
 else
 	@echo "####### Skipping unit test..."
 endif
