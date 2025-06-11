@@ -1,6 +1,6 @@
 module github.com/apache/camel-k/v2
 
-go 1.24
+go 1.24.0
 
 require (
 	github.com/Masterminds/semver v1.5.0
@@ -52,7 +52,7 @@ require (
 	k8s.io/utils v0.0.0-20250321185631-1f6e0b77f77e
 	knative.dev/eventing v0.45.1
 	knative.dev/pkg v0.0.0-20250415155312-ed3e2158b883
-	knative.dev/serving v0.44.1
+	knative.dev/serving v0.45.1
 	sigs.k8s.io/controller-runtime v0.20.4
 	sigs.k8s.io/structured-merge-diff/v4 v4.7.0
 )
@@ -76,7 +76,7 @@ require (
 	github.com/containerd/stargz-snapshotter/estargz v0.16.3 // indirect
 	github.com/cyphar/filepath-securejoin v0.4.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/docker/cli v27.5.0+incompatible // indirect
+	github.com/docker/cli v27.5.1+incompatible // indirect
 	github.com/docker/distribution v2.8.3+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.8.2 // indirect
 	github.com/emicklei/go-restful/v3 v3.12.1 // indirect
@@ -157,7 +157,7 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20241212222426-2c72e554b1e7 // indirect
-	knative.dev/networking v0.0.0-20250117155906-67d1c274ba6a // indirect
+	knative.dev/networking v0.0.0-20250415164913-6268d931d247 // indirect
 	sigs.k8s.io/json v0.0.0-20241014173422-cfa47c3a1cc8 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
