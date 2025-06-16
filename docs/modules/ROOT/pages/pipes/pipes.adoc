@@ -9,7 +9,8 @@ make sure you're familiar with the concept of xref:kamelets/kamelets.adoc[Kamele
 
 The operator is in charge to transform a binding between a source and a sink and transform into a running Integration taking care to do all the building involved and the transformation required.
 
-```yaml
+[source,yaml,subs="attributes+"]
+----
 apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
@@ -19,31 +20,34 @@ spec:
     uri: log:bar
   source:
     uri: timer:foo
-```
+----
 
 The above example is the simplest example we can use to show how to "connect" a Camel URI source to a Camel URI sink. You can run it executing `kubectl apply -f timer-to-log.yaml`. Once executed, you can check the status of your Pipe:
 
-```
+[source,console,subs="attributes+"]
+----
 kubectl get pipe -w
 
 NAME           PHASE      REPLICAS
 timer-to-log   Creating
 timer-to-log   Ready      0
 timer-to-log   Ready      1
-```
+----
 
 The operator has taken the Pipe and has created an Integration from the Pipe configuration. The Integration is the resource that will run your final application and you can look at it accordingly:
 
-```
+[source,console,subs="attributes+"]
+----
 NAME             PHASE     READY   RUNTIME PROVIDER   RUNTIME VERSION   CATALOG VERSION   KIT                        REPLICAS
 timer-to-log     Running   True    quarkus            3.8.1             3.8.1             kit-crbgrhmn5tgc73cb1tl0   1
-```
+----
 
 == Sources, Sinks and Actions
 
 The development of a Pipe should be limiting the binding between a source and a sink. However sometimes you may need to perform slight transformation when consuming the events. In such case you can include a set of actions that will take care of that.
 
-```yaml
+[source,yaml,subs="attributes+"]
+----
 apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
@@ -55,7 +59,7 @@ spec:
     uri: timer:foo
   steps:
   - uri: https://gist.githubusercontent.com/squakez/48b4ebf24c2579caf6bcb3e8a59fa509/raw/c7d9db6ee5e8851f5dc6a564172d85f00d87219c/gistfile1.txt
-```
+----
 
 In the example above we're making sure to call an intermediate resource in order to fill the content with some value. This **action** is configured in the `.spec.steps` parameter.
 
