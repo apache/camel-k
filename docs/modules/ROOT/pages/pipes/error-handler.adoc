@@ -2,7 +2,8 @@
 
 Pipes offer a mechanism to specify an error policy to adopt in case an event produced by a `source` or consumed by a `sink`. Through the definition of an `errorHandler` you will be able to apply certain logic to the failing event, such as simply logging, ignoring the event or posting the event to another `Sink`.
 
-[source,yaml]
+.my-binding.yaml
+[source,yaml,subs="attributes+"]
 ----
 apiVersion: camel.apache.org/v1
 kind: Pipe
@@ -29,7 +30,8 @@ We have different types of error handler: `none`, `log` and `sink`. The `errorHa
 
 There may be certain cases where you want to just ignore any failure happening on your integration. In this situation just use a `none` error handler.
 
-[source,yaml]
+.my-binding.yaml
+[source,yaml,subs="attributes+"]
 ----
 apiVersion: camel.apache.org/v1
 kind: Pipe
@@ -50,7 +52,8 @@ spec:
 
 Apache Camel offers a default behavior for handling any failure: log to standard output. However you can use the `log` error handler to specify other behaviors such as redelivery or delay policy.
 
-[source,yaml]
+.my-binding.yaml
+[source,yaml,subs="attributes+"]
 ----
 apiVersion: camel.apache.org/v1
 kind: Pipe
@@ -74,7 +77,8 @@ spec:
 
 The `Sink` is probably the most interesting error handler type as it allows you to redirect any failing event to any other component, such as a third party URI, a queue or even another `Kamelet` which will be performing certain logic with the failing event.
 
-[source,yaml]
+.my-binding.yaml
+[source,yaml,subs="attributes+"]
 ----
 apiVersion: camel.apache.org/v1
 kind: Pipe
