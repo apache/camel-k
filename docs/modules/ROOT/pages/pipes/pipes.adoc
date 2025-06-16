@@ -91,7 +91,7 @@ In this example, we've set the `logging` trait to specify certain configuration 
 
 [NOTE]
 ====
-if you need to specify an array of values, the syntax will be `trait.camel.apache.org/trait.conf: "[\"opt1\", \"opt2\", ...]"`
+If you need to specify an array of values, the syntax will be `trait.camel.apache.org/trait.conf: "[\"opt1\", \"opt2\", ...]"`
 ====
 
 == Using Kamel CLI
@@ -538,13 +538,16 @@ This way users may choose the best Kamelet data type for a specific use case whe
 
 Some Kamelets are enhanced with https://keda.sh/[KEDA] metadata to allow users to automatically configure autoscalers on them. Kamelets with KEDA features can be distinguished by the presence of the annotation `camel.apache.org/keda.type`, which is set to the name of a specific KEDA autoscaler.
 
-WARNING: this feature is in an experimental phase.
+[WARNING]
+====
+KEDA enabled Pipes are currently an experimental feature.
+====
 
 A KEDA enabled Kamelet can be used in the same way as any other Kamelet, in a Pipe or in an Integration. KEDA autoscalers are not enabled by default: they need to be manually enabled by the user via the `keda` trait.
 
 [NOTE]
 ====
-KEDA operator is required to run on the cluster.
+The KEDA operator is required to run on the cluster.
 ====
 
 In a Pipe, the KEDA trait can be enabled using annotations:
