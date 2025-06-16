@@ -28,6 +28,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/client"
 
 	"github.com/apache/camel-k/v2/pkg/trait"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
@@ -445,4 +446,97 @@ func integrationAndKitHaveSameTraits(c client.Client, i1 *v1.Integration, i2 *v1
 	}
 
 	return trait.Equals(ikOpts, itOpts), nil
+}
+
+func TestLookupKitForIntegration_GetCorrectKitForRuntime(t *testing.T) {
+	c, err := test.NewFakeClient(
+		&v1.IntegrationPlatform{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: v1.SchemeGroupVersion.String(),
+				Kind:       v1.IntegrationPlatformKind,
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns",
+				Name:      "camel-k",
+			},
+		},
+		&v1.IntegrationKit{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: v1.SchemeGroupVersion.String(),
+				Kind:       v1.IntegrationKitKind,
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns",
+				Name:      "my-kit-1",
+				Labels: map[string]string{
+					v1.IntegrationKitTypeLabel:           v1.IntegrationKitTypePlatform,
+					kubernetes.CamelLabelRuntimeVersion:  "3.2.3",
+					kubernetes.CamelLabelRuntimeProvider: "quarkus",
+				},
+			},
+			Spec: v1.IntegrationKitSpec{
+				Dependencies: []string{
+					"camel-core",
+					"camel-irc",
+				},
+			},
+			Status: v1.IntegrationKitStatus{
+				Phase:           v1.IntegrationKitPhaseReady,
+				RuntimeVersion:  "3.2.3",
+				RuntimeProvider: "quarkus",
+			},
+		},
+		&v1.IntegrationKit{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: v1.SchemeGroupVersion.String(),
+				Kind:       v1.IntegrationKitKind,
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns",
+				Name:      "my-kit-2",
+				Labels: map[string]string{
+					v1.IntegrationKitTypeLabel:           v1.IntegrationKitTypePlatform,
+					kubernetes.CamelLabelRuntimeVersion:  "3.15.3",
+					kubernetes.CamelLabelRuntimeProvider: "quarkus",
+				},
+			},
+			Spec: v1.IntegrationKitSpec{
+				Dependencies: []string{
+					"camel-core",
+					"camel-irc",
+				},
+			},
+			Status: v1.IntegrationKitStatus{
+				Phase:           v1.IntegrationKitPhaseReady,
+				RuntimeVersion:  "3.15.3",
+				RuntimeProvider: "quarkus",
+			},
+		},
+	)
+
+	require.NoError(t, err)
+
+	kits, err := lookupKitsForIntegration(context.TODO(), c, &v1.Integration{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       v1.IntegrationKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "ns",
+			Name:      "my-integration",
+		},
+		Status: v1.IntegrationStatus{
+			Dependencies: []string{
+				"camel-core",
+				"camel-irc",
+			},
+			RuntimeVersion:  "3.15.3",
+			RuntimeProvider: "quarkus",
+		},
+	})
+
+	require.NoError(t, err)
+	assert.NotNil(t, kits)
+	assert.Len(t, kits, 1)
+	assert.Equal(t, "my-kit-2", kits[0].Name)
 }
