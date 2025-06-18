@@ -112,6 +112,7 @@ func downloadKameletDependency(ctx context.Context, c client.Client, platform *v
 	mc.AddArgument("dependency:copy")
 	mc.AddArgument(fmt.Sprintf("-Dartifact=org.apache.camel.kamelets:camel-kamelets:%s:jar", version))
 	mc.AddArgument("-Dmdep.useBaseVersion=true")
+	mc.AddArgument("-Dmaven.repo.local=" + mc.LocalRepository)
 	mc.AddArgument(fmt.Sprintf("-DoutputDirectory=%s", kameletsDir))
 
 	if settings, err := kubernetes.ResolveValueSource(ctx, c, platform.Namespace, &platform.Status.Build.Maven.Settings); err != nil {

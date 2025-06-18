@@ -70,9 +70,11 @@ func (c *Command) DoSettings(ctx context.Context) error {
 	args = append(args, c.context.AdditionalArguments...)
 
 	if c.context.LocalRepository != "" {
-		if _, err := os.Stat(c.context.LocalRepository); err == nil {
-			args = append(args, "-Dmaven.repo.local="+c.context.LocalRepository)
+		if _, err := os.Stat(c.context.LocalRepository); err != nil {
+			return err
 		}
+
+		args = append(args, "-Dmaven.repo.local="+c.context.LocalRepository)
 	}
 
 	settingsPath := filepath.Join(c.context.Path, "settings.xml")
