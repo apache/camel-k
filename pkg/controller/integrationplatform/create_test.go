@@ -118,9 +118,17 @@ func TestCatalogAlreadyPresent(t *testing.T) {
 }
 
 func TestCreateNewCatalog(t *testing.T) {
+	// Set the m2 repo folder
+	m2RepoTmpDir, err := os.MkdirTemp("/tmp", "m2*")
+	assert.NoError(t, err)
 	ip := v1.IntegrationPlatform{}
 	ip.Namespace = "ns"
 	ip.Name = "ck"
+	ip.Spec.Build = v1.IntegrationPlatformBuildSpec{
+		Maven: v1.MavenSpec{
+			LocalRepository: m2RepoTmpDir,
+		},
+	}
 	ip.Status = v1.IntegrationPlatformStatus{
 		IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
 			Build: v1.IntegrationPlatformBuildSpec{
@@ -128,6 +136,9 @@ func TestCreateNewCatalog(t *testing.T) {
 				RuntimeVersion:  defaults.DefaultRuntimeVersion,
 				Timeout: &metav1.Duration{
 					Duration: 1 * time.Minute,
+				},
+				Maven: v1.MavenSpec{
+					LocalRepository: m2RepoTmpDir,
 				},
 			},
 		},
@@ -164,8 +175,8 @@ func TestCreateNewCatalog(t *testing.T) {
 
 	// Set the folder where to install testing kamelets
 	tmpDir, err := os.MkdirTemp("/tmp", "kamelets*")
-	defer os.Unsetenv(kameletDirEnv)
 	assert.NoError(t, err)
+	defer os.Unsetenv(kameletDirEnv)
 	os.Setenv(kameletDirEnv, tmpDir)
 	answer, err := action.Handle(context.TODO(), &ip)
 	require.NoError(t, err)
@@ -194,6 +205,9 @@ func TestCreateNewCatalog(t *testing.T) {
 				RuntimeVersion:  defaults.DefaultRuntimeVersion,
 				Timeout: &metav1.Duration{
 					Duration: 1 * time.Minute,
+				},
+				Maven: v1.MavenSpec{
+					LocalRepository: m2RepoTmpDir,
 				},
 			},
 		},
