@@ -12,7 +12,7 @@ require (
 	github.com/go-git/go-git/v5 v5.16.2
 	github.com/go-logr/logr v1.4.3
 	github.com/go-viper/mapstructure/v2 v2.3.0
-	github.com/google/go-github/v52 v52.0.0
+	github.com/google/go-github/v72 v72.0.0
 	github.com/google/uuid v1.6.0
 	github.com/jpillora/backoff v1.0.0
 	github.com/magiconair/properties v1.8.10
