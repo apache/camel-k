@@ -18,7 +18,7 @@
 - from:
     uri: "cron:tab"
     parameters:
-      schedule: "*/2 * * * ?"
+      schedule: "*/1 * * * ?"
     steps:
       - setHeader:
           name: "m"
@@ -28,7 +28,7 @@
       # Simulate a job workload
       - delay:
           expression:
-            constant: 20000
+            constant: 2000
           asyncDelayed: false
       - to:
           uri: "log:info"
