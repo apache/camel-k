@@ -111,11 +111,6 @@ const ExpectedCRDs = 7
 // camel-k-operator-knative
 const ExpectedKubePromoteRoles = 7
 
-// camel-k-edit
-// camel-k-operator-custom-resource-definitions
-// camel-k-operator-bind-addressable-resolver
-const ExpectedKubeClusterRoles = 3
-
 // camel-k-operator-openshift
 const ExpectedOSPromoteRoles = 1
 

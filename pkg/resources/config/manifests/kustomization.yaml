@@ -31,8 +31,6 @@ resources:
 - ../rbac
 - ../rbac/namespaced
 
-patchesStrategicMerge:
-- patch-delete-user-cluster-role.yaml
 images:
 - name: docker.io/apache/camel-k
   newName: docker.io/apache/camel-k

@@ -33,7 +33,6 @@ import (
 
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/resources"
-	"github.com/apache/camel-k/v2/pkg/util/knative"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -69,30 +68,6 @@ func SetupClusterWideResourcesOrCollect(
 func installClusterRoles(
 	ctx context.Context, c client.Client, collection *kubernetes.Collection, clusterType string,
 ) error {
-	// ClusterRole: camel-k-edit
-	ok, err := isClusterRoleInstalled(ctx, c, "camel-k-edit")
-	if err != nil {
-		return err
-	}
-	if !ok || collection != nil {
-		err := installResource(ctx, c, collection, "/config/rbac/user-cluster-role.yaml")
-		if err != nil {
-			return err
-		}
-	}
-
-	// ClusterRole: camel-k-operator-custom-resource-definitions
-	ok, err = isClusterRoleInstalled(ctx, c, "camel-k-operator-custom-resource-definitions")
-	if err != nil {
-		return err
-	}
-	if !ok {
-		if err := installResource(ctx, c, collection,
-			"/config/rbac/operator-cluster-role-custom-resource-definitions.yaml"); err != nil {
-			return err
-		}
-	}
-
 	// === For OpenShift ===
 	// ClusterRole: camel-k-operator-console-openshift
 	isOpenShift, err := isOpenShift(c, clusterType)
@@ -106,25 +81,6 @@ func installClusterRoles(
 		}
 		if !ok || collection != nil {
 			err := installResource(ctx, c, collection, "/config/rbac/openshift/operator-cluster-role-console-openshift.yaml")
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	// === For Knative ===
-	// ClusterRole: camel-k-operator-bind-addressable-resolver
-	isKnative, err := knative.IsEventingInstalled(c)
-	if err != nil {
-		return err
-	}
-	if isKnative {
-		ok, err := isClusterRoleInstalled(ctx, c, "camel-k-operator-bind-addressable-resolver")
-		if err != nil {
-			return err
-		}
-		if !ok || collection != nil {
-			err := installResource(ctx, c, collection, "/config/rbac/operator-cluster-role-addressable-resolver.yaml")
 			if err != nil {
 				return err
 			}

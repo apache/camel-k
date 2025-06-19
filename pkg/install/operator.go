@@ -315,10 +315,6 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 		fmt.Fprintln(cmd.ErrOrStderr(), "Warning: the operator will not be able to create Leases. Try installing as cluster-admin to allow management of Lease resources.")
 	}
 
-	if err = installClusterRoleBinding(ctx, c, collection, cfg.Namespace, "camel-k-operator-custom-resource-definitions", "/config/rbac/operator-cluster-role-binding-custom-resource-definitions.yaml"); err != nil {
-		fmt.Fprintln(cmd.ErrOrStderr(), "Warning: the operator will not be able to get CustomResourceDefinitions resources and the service-binding trait will fail if used. Try installing the operator as cluster-admin.")
-	}
-
 	if err = installNamespacedRoleBinding(ctx, c, collection, cfg.Namespace, "/config/rbac/operator-role-binding-local-registry.yaml"); err != nil {
 		if !k8serrors.IsAlreadyExists(err) {
 			fmt.Fprintf(cmd.ErrOrStderr(), "Warning: the operator may not be able to detect a local image registry (%s)\n", err.Error())

@@ -22,11 +22,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- user-cluster-role.yaml
-- operator-cluster-role-custom-resource-definitions.yaml
-- operator-cluster-role-binding-custom-resource-definitions.yaml
-- operator-cluster-role-addressable-resolver.yaml
-- operator-cluster-role-binding-addressable-resolver.yaml
 - builder-role.yaml
 - builder-role-openshift.yaml
 - builder-role-binding.yaml
