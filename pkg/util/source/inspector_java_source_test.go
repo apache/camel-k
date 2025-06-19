@@ -172,6 +172,24 @@ func TestJavaReplaceURI(t *testing.T) {
 	assert.Equal(t, "from(\"direct:newURI?hello=world\").to(\"log:info\")", sourceSpec.Content)
 }
 
+func TestJavaReplaceMultiURI(t *testing.T) {
+	inspector := newTestJavaSourceInspector(t)
+
+	sourceSpec := &v1.SourceSpec{
+		DataSpec: v1.DataSpec{
+			Name:    "test.java",
+			Content: "from(\"quartz:trigger?cron=0 0/1 * * * ?\").to(\"direct:d1\");from(\"direct:d1\").to(\"log:info\");",
+		},
+	}
+	replaced, err := inspector.ReplaceFromURI(
+		sourceSpec,
+		"direct:newURI?hello=world",
+	)
+	assert.Nil(t, err)
+	assert.True(t, replaced)
+	assert.Equal(t, "from(\"direct:newURI?hello=world\").to(\"direct:d1\");from(\"direct:d1\").to(\"log:info\");", sourceSpec.Content)
+}
+
 func TestJavaRestOpenapiFirst(t *testing.T) {
 	inspector := newTestJavaSourceInspector(t)
 

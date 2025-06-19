@@ -185,3 +185,21 @@ func TestJavascriptReplaceURI(t *testing.T) {
 	assert.True(t, replaced)
 	assert.Equal(t, "from(\"direct:newURI?hello=world\").to(\"log:info\")", sourceSpec.Content)
 }
+
+func TestJavascriptMultiReplaceURI(t *testing.T) {
+	inspector := newTestJavaScriptInspector(t)
+
+	sourceSpec := &v1.SourceSpec{
+		DataSpec: v1.DataSpec{
+			Name:    "test.js",
+			Content: "from('quartz:trigger?cron=0 0/1 * * * ?').to('direct:d1');from('direct:d1').to('log:info')",
+		},
+	}
+	replaced, err := inspector.ReplaceFromURI(
+		sourceSpec,
+		"direct:newURI?hello=world",
+	)
+	assert.Nil(t, err)
+	assert.True(t, replaced)
+	assert.Equal(t, "from('direct:newURI?hello=world').to('direct:d1');from('direct:d1').to('log:info')", sourceSpec.Content)
+}

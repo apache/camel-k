@@ -238,7 +238,8 @@ func (i YAMLInspector) parseStepsParam(steps []interface{}, meta *Metadata) erro
 	return nil
 }
 
-// ReplaceFromURI parses the source content and replace the `from` URI configuration with the a new URI. Returns true if it applies a replacement.
+// ReplaceFromURI parses the source content and replace the `from` URI configuration with the a new URI.
+// Returns true if it applies a replacement.
 func (i YAMLInspector) ReplaceFromURI(source *v1.SourceSpec, newFromURI string) (bool, error) {
 	definitions := make([]map[string]interface{}, 0)
 
@@ -264,7 +265,10 @@ func (i YAMLInspector) ReplaceFromURI(source *v1.SourceSpec, newFromURI string) 
 			}
 		}
 		delete(from, "parameters")
-		from["uri"] = newFromURI
+		oldURI, ok := from["uri"].(string)
+		if ok && (strings.HasPrefix(oldURI, "timer") || strings.HasPrefix(oldURI, "cron") || strings.HasPrefix(oldURI, "quartz")) {
+			from["uri"] = newFromURI
+		}
 	}
 
 	newContentRaw, err := yaml2.Marshal(definitions)

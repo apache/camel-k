@@ -112,6 +112,50 @@ const xmlJSONEip = `
 </camelContext>
 `
 
+const xmlReplaceURI = `
+<camelContext xmlns="http://camel.apache.org/schema/spring">
+  <route>
+    <from uri="timer:start"/>
+    <to uri="log:info"/>
+  </route>
+</camelContext>
+`
+
+const expectedXmlReplaceURI = `
+<camelContext xmlns="http://camel.apache.org/schema/spring">
+  <route>
+    <from uri="direct:newURI?hello=world"/>
+    <to uri="log:info"/>
+  </route>
+</camelContext>
+`
+
+const xmlReplaceMultiURI = `
+<camelContext xmlns="http://camel.apache.org/schema/spring">
+  <route>
+    <from uri="cron:tab"/>
+    <to uri="direct:d1"/>
+  </route>
+  <route>
+    <from uri="direct:d1"/>
+    <to uri="log:info"/>
+  </route>
+</camelContext>
+`
+
+const expectedXmlReplaceMultiURI = `
+<camelContext xmlns="http://camel.apache.org/schema/spring">
+  <route>
+    <from uri="direct:newURI?hello=world"/>
+    <to uri="direct:d1"/>
+  </route>
+  <route>
+    <from uri="direct:d1"/>
+    <to uri="log:info"/>
+  </route>
+</camelContext>
+`
+
 const xmlJSONJacksonEip = `
 <camelContext xmlns="http://camel.apache.org/schema/spring">
   <route>
@@ -194,7 +238,7 @@ func TestXMLReplaceURI(t *testing.T) {
 	sourceSpec := &v1.SourceSpec{
 		DataSpec: v1.DataSpec{
 			Name:    "test.xml",
-			Content: xmlJSONEip,
+			Content: xmlReplaceURI,
 		},
 	}
 	replaced, err := inspector.ReplaceFromURI(
@@ -203,7 +247,25 @@ func TestXMLReplaceURI(t *testing.T) {
 	)
 	assert.Nil(t, err)
 	assert.True(t, replaced)
-	assert.Contains(t, sourceSpec.Content, "<from uri=\"direct:newURI?hello=world\"/>")
+	assert.Equal(t, expectedXmlReplaceURI, sourceSpec.Content)
+}
+
+func TestXMLReplaceMultiURI(t *testing.T) {
+	inspector := newTestXMLInspector(t)
+
+	sourceSpec := &v1.SourceSpec{
+		DataSpec: v1.DataSpec{
+			Name:    "test.xml",
+			Content: xmlReplaceMultiURI,
+		},
+	}
+	replaced, err := inspector.ReplaceFromURI(
+		sourceSpec,
+		"direct:newURI?hello=world",
+	)
+	assert.Nil(t, err)
+	assert.True(t, replaced)
+	assert.Equal(t, expectedXmlReplaceMultiURI, sourceSpec.Content)
 }
 
 func TestXMLRestOpenapiFirst(t *testing.T) {
