@@ -672,6 +672,37 @@ const yamlFromCronReplacement = `
     - to: "{{url}}"
 `
 
+const yamlFromMultiCronReplacement = `
+- from:
+    uri: "cron:tab"
+    parameters:
+      schedule: "* * * * ?"
+    steps:
+    - to: "direct:hello"
+- from:
+    uri: "direct:hello"
+    steps:
+    - setBody:
+        constant: "Hello Yaml !!!"
+    - transform:
+        simple: "${body.toUpperCase()}"
+    - to: "{{url}}"
+`
+
+const expectedYamlFromMultiCronReplacement = `- from:
+    steps:
+    - to: direct:hello
+    uri: direct:newURI?hello=world
+- from:
+    steps:
+    - setBody:
+        constant: Hello Yaml !!!
+    - transform:
+        simple: ${body.toUpperCase()}
+    - to: '{{url}}'
+    uri: direct:hello
+`
+
 const expectedYamlFromCronReplacement = `from:
     steps:
     - setBody:
@@ -680,16 +711,6 @@ const expectedYamlFromCronReplacement = `from:
         simple: ${body.toUpperCase()}
     - to: '{{url}}'
     uri: direct:newURI?hello=world
-`
-
-const expectedYamlRouteCronReplacement = `from:
-      steps:
-      - setBody:
-          constant: Hello Yaml !!!
-      - transform:
-          simple: ${body.toUpperCase()}
-      - to: '{{url}}'
-      uri: direct:newURI?hello=world
 `
 
 func TestYAMLFromReplaceURI(t *testing.T) {
@@ -717,7 +738,7 @@ func TestYAMLRouteReplaceURI(t *testing.T) {
 	sourceSpec := &v1.SourceSpec{
 		DataSpec: v1.DataSpec{
 			Name:    "test.yaml",
-			Content: yamlRouteCronReplacement,
+			Content: yamlFromCronReplacement,
 		},
 	}
 	replaced, err := inspector.ReplaceFromURI(
@@ -727,7 +748,26 @@ func TestYAMLRouteReplaceURI(t *testing.T) {
 	assert.Nil(t, err)
 	assert.True(t, replaced)
 	// Assert changed uri and removed parameters
-	assert.Contains(t, sourceSpec.Content, expectedYamlRouteCronReplacement)
+	assert.Contains(t, sourceSpec.Content, expectedYamlFromCronReplacement)
+}
+
+func TestYAMLFromWithMultiRouteReplaceURI(t *testing.T) {
+	inspector := newTestYAMLInspector(t)
+
+	sourceSpec := &v1.SourceSpec{
+		DataSpec: v1.DataSpec{
+			Name:    "test.yaml",
+			Content: yamlFromMultiCronReplacement,
+		},
+	}
+	replaced, err := inspector.ReplaceFromURI(
+		sourceSpec,
+		"direct:newURI?hello=world",
+	)
+	assert.Nil(t, err)
+	assert.True(t, replaced)
+	// Assert changed cron uri only
+	assert.Equal(t, expectedYamlFromMultiCronReplacement, sourceSpec.Content)
 }
 
 func TestYAMLRESTContractFirst(t *testing.T) {

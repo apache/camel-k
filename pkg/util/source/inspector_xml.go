@@ -140,7 +140,9 @@ func (i XMLInspector) ReplaceFromURI(source *v1.SourceSpec, newFromURI string) (
 		return false, nil
 	}
 	for _, from := range metadata.FromURIs {
-		newContent = strings.ReplaceAll(newContent, from, newFromURI)
+		if strings.HasPrefix(from, "timer") || strings.HasPrefix(from, "cron") || strings.HasPrefix(from, "quartz") {
+			newContent = strings.ReplaceAll(newContent, from, newFromURI)
+		}
 	}
 	replaced := newContent != source.Content
 
