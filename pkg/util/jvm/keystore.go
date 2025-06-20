@@ -37,8 +37,8 @@ const (
 var (
 	logger = log.WithName("keytool")
 
-	loggerInfo  = func(s string) string { logger.Info(s); return s }
-	loggerError = func(s string) string { logger.Error(nil, s); return s }
+	loggerInfo = func(s string) string { logger.Info(s); return s }
+	loggerNil  = func(s string) string { return s }
 )
 
 func GenerateKeystore(ctx context.Context, keystoreDir, keystoreName, keystorePass string, data [][]byte) error {
@@ -47,9 +47,8 @@ func GenerateKeystore(ctx context.Context, keystoreDir, keystoreName, keystorePa
 		cmd := exec.CommandContext(ctx, "keytool", args...)
 		cmd.Dir = keystoreDir
 		cmd.Stdin = bytes.NewReader(data)
-		// keytool logs info messages to stderr, as stdout is used to output results,
-		// otherwise it logs error messages to stdout.
-		err := util.RunAndLog(ctx, cmd, loggerInfo, loggerError)
+		// keytool logs info messages to stderr, as stdout is used to output results, we just skip the printout.
+		err := util.RunAndLog(ctx, cmd, loggerInfo, loggerNil)
 		if err != nil {
 			return err
 		}
@@ -64,9 +63,8 @@ func GenerateKeystore(ctx context.Context, keystoreDir, keystoreName, keystorePa
 		args := strings.Fields(fmt.Sprintf("-importkeystore -noprompt -srckeystore %s -srcstorepass %s -destkeystore %s -deststorepass %s", caCertsPath, "changeit", keystoreName, keystorePass))
 		cmd := exec.CommandContext(ctx, "keytool", args...)
 		cmd.Dir = keystoreDir
-		// keytool logs info messages to stderr, as stdout is used to output results,
-		// otherwise it logs error messages to stdout.
-		err := util.RunAndLog(ctx, cmd, loggerInfo, loggerError)
+		// keytool logs info messages to stderr, as stdout is used to output results, we just skip the printout.
+		err := util.RunAndLog(ctx, cmd, loggerInfo, loggerNil)
 		if err != nil {
 			return err
 		}
