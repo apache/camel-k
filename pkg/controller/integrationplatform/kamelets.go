@@ -98,8 +98,9 @@ func prepareKameletDirectory() (string, error) {
 	if err := os.RemoveAll(kameletDir); err != nil {
 		return kameletDirEnv, err
 	}
+	err := os.MkdirAll(kameletDir, os.ModePerm)
 
-	return kameletDir, nil
+	return kameletDir, err
 }
 
 func downloadKameletDependency(ctx context.Context, c client.Client, platform *v1.IntegrationPlatform, version, kameletsDir string) error {
@@ -112,6 +113,8 @@ func downloadKameletDependency(ctx context.Context, c client.Client, platform *v
 	mc.AddArgument("dependency:copy")
 	mc.AddArgument(fmt.Sprintf("-Dartifact=org.apache.camel.kamelets:camel-kamelets:%s:jar", version))
 	mc.AddArgument("-Dmdep.useBaseVersion=true")
+	// TODO: this one should be already managed during the command execution
+	// This workaround is fixing temporarily the problem
 	mc.AddArgument("-Dmaven.repo.local=" + mc.LocalRepository)
 	mc.AddArgument(fmt.Sprintf("-DoutputDirectory=%s", kameletsDir))
 
@@ -147,6 +150,10 @@ func downloadKameletDependency(ctx context.Context, c client.Client, platform *v
 			"-Djavax.net.ssl.trustStore="+trustStoreName,
 			"-Djavax.net.ssl.trustStorePassword="+trustStorePass,
 		)
+		// TODO: this one should be already managed during the command execution
+		// This workaround is fixing temporarily the problem
+		mc.AddArgument("-Djavax.net.ssl.trustStore=" + trustStoreName)
+		mc.AddArgument("-Djavax.net.ssl.trustStorePassword=" + trustStorePass)
 	}
 
 	timeoutCtx, cancel := context.WithTimeout(ctx, platform.Status.Build.GetTimeout().Duration)

@@ -73,7 +73,6 @@ func (c *Command) DoSettings(ctx context.Context) error {
 		if _, err := os.Stat(c.context.LocalRepository); err != nil {
 			return err
 		}
-
 		args = append(args, "-Dmaven.repo.local="+c.context.LocalRepository)
 	}
 

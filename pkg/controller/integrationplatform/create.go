@@ -29,6 +29,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/resources"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -176,6 +177,7 @@ func installKamelets(ctx context.Context, c client.Client, platform *v1.Integrat
 				"IntegrationPlatformKameletCatalogAvailable",
 				fmt.Sprintf("kamelet catalog %s not available. Error: %v", camelVersion, err),
 			)
+			log.Errorf(err, "A failure happened while loading Kamelet catalog %s", camelVersion)
 		} else {
 			message := fmt.Sprintf("successfully installed Kamelet catalog version %s: success %d Kamelets, failed %d Kamelets",
 				camelVersion, installedKam, erroredKam)
