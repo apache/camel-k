@@ -371,7 +371,6 @@ func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfigurati
 	}
 
 	if t.Strategy != "" {
-		t.L.Infof("User defined build strategy %s", t.Strategy)
 		found := false
 		for _, s := range v1.BuildStrategies {
 			if string(s) == t.Strategy {
@@ -390,7 +389,6 @@ func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfigurati
 	}
 
 	if t.OrderStrategy != "" {
-		t.L.Infof("User defined build order strategy %s", t.OrderStrategy)
 		found := false
 		for _, s := range v1.BuildOrderStrategies {
 			if string(s) == t.OrderStrategy {

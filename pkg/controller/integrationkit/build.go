@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -38,7 +39,7 @@ import (
 )
 
 const (
-	buildTimeout = 10 * time.Minute
+	minNativeBuildTimeout = 10 * time.Minute
 )
 
 // NewBuildAction creates a new build request handling action for the kit.
@@ -129,14 +130,6 @@ func (action *buildAction) createBuild(ctx context.Context, kit *v1.IntegrationK
 		annotations[v1.OperatorIDAnnotation] = operatorID
 	}
 
-	timeout := env.Platform.Status.Build.GetTimeout()
-	if layout := labels[v1.IntegrationKitLayoutLabel]; env.Platform.Spec.Build.Timeout == nil && layout == v1.IntegrationKitLayoutNativeSources {
-		// Increase the timeout to a sensible default
-		timeout = metav1.Duration{
-			Duration: buildTimeout,
-		}
-	}
-
 	// We may need to change certain builder configuration values
 	operatorNamespace := platform.GetOperatorNamespace()
 	buildConfig := v1.ConfigurationTasksByName(env.Pipeline, "builder")
@@ -173,10 +166,22 @@ func (action *buildAction) createBuild(ctx context.Context, kit *v1.IntegrationK
 			Annotations: annotations,
 		},
 		Spec: v1.BuildSpec{
-			Tasks:   env.Pipeline,
-			Timeout: timeout,
+			Tasks: env.Pipeline,
 		},
 	}
+
+	timeout := env.Platform.Status.Build.GetTimeout()
+	if layout := labels[v1.IntegrationKitLayoutLabel]; env.Platform.Spec.Build.Timeout == nil && layout == v1.IntegrationKitLayoutNativeSources {
+		if timeout.Duration < minNativeBuildTimeout {
+			log.Infof("Forcing the Build %s/%s with a timeout of %s as the platform value of %s is considered too low for a Quarkus native build. "+
+				"Adjust the platform settings accordingly as you may even need a higher timeout value.",
+				build.Namespace, build.Name, minNativeBuildTimeout, &timeout.Duration)
+			timeout = metav1.Duration{
+				Duration: minNativeBuildTimeout,
+			}
+		}
+	}
+	build.Spec.Timeout = timeout
 
 	// Set the integration kit instance as the owner and controller
 	if err := controllerutil.SetControllerReference(kit, build, action.client.GetScheme()); err != nil {

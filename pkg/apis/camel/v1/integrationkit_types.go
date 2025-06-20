@@ -165,6 +165,7 @@ const (
 	// IntegrationKitLayoutFastJar labels a kit using the Quarkus fast-jar packaging.
 	IntegrationKitLayoutFastJar = "fast-jar"
 	// IntegrationKitLayoutNative labels a kit using the Quarkus native packaging.
+	// Deprecated: no longer in use.
 	IntegrationKitLayoutNative = "native"
 	// IntegrationKitLayoutNativeSources labels a kit using the Quarkus native-sources packaging.
 	IntegrationKitLayoutNativeSources = "native-sources"
