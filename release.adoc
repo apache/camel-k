@@ -65,10 +65,12 @@ NOTE: you can run the script with -d option to dry run and evaluate the changes 
 ```
 git checkout release.x.y.z
 make bump VERSION=<new-version>
-make release-staging
+make release-staging (*)
 ```
 
 A docker image `camelk/camel-k:<version>` will be pushed to the https://hub.docker.com/r/camelk/camel-k/tags[staging organization] (`camelk`, not `apache`). Binary files (CLIs) will be generated as well and put in the project root directory. Also the OLM staging bundle is going to be published as `camelk/camel-k-bundle:<version>` to the https://hub.docker.com/r/camelk/camel-k/tags[staging organization].
+
+* you can skip unit testing prepending `NOTEST=1` if the last build was successfull.
 
 [[testing]]
 === Do some testing
