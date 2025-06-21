@@ -63,6 +63,7 @@ NOTE: you can run the script with -d option to dry run and evaluate the changes 
 === Release Camel K Operator and CLI
 
 ```
+git checkout release.x.y.z
 make bump VERSION=<new-version>
 make release-staging
 ```
