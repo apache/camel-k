@@ -18,24 +18,24 @@
 apiVersion: camel.apache.org/v1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-3.15.2
+  name: camel-catalog-3.15.3
   labels:
     app: camel-k
-    camel.apache.org/catalog.loader.version: 4.8.3
-    camel.apache.org/catalog.version: 4.8.3
-    camel.apache.org/runtime.version: 3.15.2
+    camel.apache.org/catalog.loader.version: 4.8.5
+    camel.apache.org/catalog.version: 4.8.5
+    camel.apache.org/runtime.version: 3.15.3
 spec:
   runtime:
-    version: 3.15.2
+    version: 3.15.3
     provider: quarkus
     applicationClass: io.quarkus.bootstrap.runner.QuarkusEntryPoint
     metadata:
-      camel-quarkus.version: 3.15.2
-      camel.version: 4.8.3
+      camel-quarkus.version: 3.15.3
+      camel.version: 4.8.5
       jib.layer-filter-extension-maven.version: 0.3.0
       jib.maven-plugin.version: 3.4.3
       quarkus.native-builder-image: quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-21
-      quarkus.version: 3.15.3
+      quarkus.version: 3.15.4
     dependencies:
     - groupId: org.apache.camel.k
       artifactId: camel-k-runtime

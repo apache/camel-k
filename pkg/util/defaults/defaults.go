@@ -26,7 +26,7 @@ const (
 	Version = "2.7.0-SNAPSHOT"
 
 	// DefaultRuntimeVersion --
-	DefaultRuntimeVersion = "3.15.2"
+	DefaultRuntimeVersion = "3.15.3"
 
 	// baseImage --
 	baseImage = "eclipse-temurin:17-jdk"
