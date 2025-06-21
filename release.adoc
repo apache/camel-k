@@ -186,7 +186,7 @@ The script is in charge to clone a fork you had to do have available on with you
 
 === Helm
 
-An Helm chart was generated during the staging procedure. Use the commit ID to cherry pick the commit which created the chart to the `main` branch. It should be 2 files, the tar.gz file that have been generated in `/docs/charts` and the updated `Chart.yaml`.
+An Helm chart was generated during the staging procedure. Use the commit ID to cherry pick the commit which created the chart to the `main` branch. It should be 2 files, the tar.gz file that have been generated in `/docs/charts` and the updated `Chart.yaml`. The commit message should be like `chore(release): Helm chart for 2.7.0`
 
 After this is done, wait for them to be available on https://hub.helm.sh/ (generally within some hour after the cherry-pick).
 
