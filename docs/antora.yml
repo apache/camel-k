@@ -29,13 +29,13 @@ asciidoc:
     requires: "'util=camel-website-util,ck=xref:js/ck.js'"
     prerelease: true
     last-released-version: 2.6.0
-    camel-k-runtime-version: 3.15.2
+    camel-k-runtime-version: 3.15.3
     camel-api-versions: camel.apache.org/v1 camel.apache.org/v1alpha1 # from Makefile BUNDLE_CAMEL_APIS
-    camel-version: 4.8.3
+    camel-version: 4.8.5
     camel-docs-version: 4.8.x
-    camel-quarkus-version: 3.15.2
+    camel-quarkus-version: 3.15.3
     camel-quarkus-docs-version: 3.15.x
-    quarkus-version: 3.15.3
+    quarkus-version: 3.15.4
     kustomize-version: 4.5.4
     kubernetes-api-version: 0.32.3
     operator-fwk-api-version: 0.31.0
