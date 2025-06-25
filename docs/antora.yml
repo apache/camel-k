@@ -28,7 +28,7 @@ asciidoc:
   attributes:
     requires: "'util=camel-website-util,ck=xref:js/ck.js'"
     prerelease: true
-    last-released-version: 2.6.0
+    last-released-version: 2.7.0
     camel-k-runtime-version: 3.15.3
     camel-api-versions: camel.apache.org/v1 camel.apache.org/v1alpha1 # from Makefile BUNDLE_CAMEL_APIS
     camel-version: 4.8.5
