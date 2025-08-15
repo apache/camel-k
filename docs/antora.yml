@@ -37,7 +37,7 @@ asciidoc:
     camel-quarkus-docs-version: 3.15.x
     quarkus-version: 3.15.4
     kustomize-version: 4.5.4
-    kubernetes-api-version: 0.32.3
+    kubernetes-api-version: 0.33.4
     operator-fwk-api-version: 0.31.0
     knative-api-version: 0.45.2
     service-binding-op-version: ""
