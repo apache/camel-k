@@ -193,7 +193,7 @@ func TestOnlySomeTraitsArePlatform(t *testing.T) {
 	c := NewTraitTestCatalog()
 	platformTraits := []string{
 		"builder", "camel", "jvm", "runtime", "container", "security-context", "mount", "dependencies", "deployer",
-		"deployment", "environment", "error-handler", "kamelets", "openapi", "owner", "platform", "quarkus",
+		"deployment", "environment", "error-handler", "init-containers", "kamelets", "openapi", "owner", "platform", "quarkus",
 	}
 
 	for _, trait := range c.AllTraits() {

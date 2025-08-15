@@ -59,6 +59,7 @@
 ** xref:traits:hashicorp-vault.adoc[Hashicorp Vault]
 ** xref:traits:health.adoc[Health]
 ** xref:traits:ingress.adoc[Ingress]
+** xref:traits:init-containers.adoc[Init Containers]
 ** xref:traits:istio.adoc[Istio]
 ** xref:traits:jolokia.adoc[Jolokia]
 ** xref:traits:jvm.adoc[Jvm]

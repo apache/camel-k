@@ -7597,6 +7597,34 @@ spec:
                             description: To configure tls secret name
                             type: string
                         type: object
+                      init-containers:
+                        description: The configuration of Init Containers trait
+                        properties:
+                          auto:
+                            description: To automatically enable the trait
+                            type: boolean
+                          configuration:
+                            description: |-
+                              Legacy trait configuration parameters.
+                              Deprecated: for backward compatibility.
+                            type: object
+                            x-kubernetes-preserve-unknown-fields: true
+                          enabled:
+                            description: 'Deprecated: no longer in use.'
+                            type: boolean
+                          initTasks:
+                            description: A list of init tasks to be executed with
+                              format `<name>;<container-image>;<container-command>`.
+                            items:
+                              type: string
+                            type: array
+                          sideCarTasks:
+                            description: A list of sidecar tasks to be executed with
+                              format `<name>;<container-image>;<container-command>`.
+                            items:
+                              type: string
+                            type: array
+                        type: object
                       istio:
                         description: The configuration of Istio trait
                         properties:

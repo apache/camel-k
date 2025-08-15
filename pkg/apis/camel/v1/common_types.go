@@ -207,6 +207,8 @@ type Traits struct {
 	Health *trait.HealthTrait `property:"health" json:"health,omitempty"`
 	// The configuration of Ingress trait
 	Ingress *trait.IngressTrait `property:"ingress" json:"ingress,omitempty"`
+	// The configuration of Init Containers trait
+	InitContainers *trait.InitContainersTrait `property:"init-containers" json:"init-containers,omitempty"`
 	// The configuration of Istio trait
 	Istio *trait.IstioTrait `property:"istio" json:"istio,omitempty"`
 	// The configuration of Jolokia trait

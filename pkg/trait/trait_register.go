@@ -32,6 +32,7 @@ func init() {
 	AddToTraits(newGCTrait)
 	AddToTraits(newGitTrait)
 	AddToTraits(newHealthTrait)
+	AddToTraits(newInitContainersTrait)
 	AddToTraits(NewInitTrait)
 	AddToTraits(newIngressTrait)
 	AddToTraits(newIstioTrait)
