@@ -44,7 +44,7 @@ import (
 
 const (
 	mountTraitID    = "mount"
-	mountTraitOrder = 1610
+	mountTraitOrder = 1620
 )
 
 type mountTrait struct {
@@ -54,7 +54,7 @@ type mountTrait struct {
 
 func newMountTrait() Trait {
 	return &mountTrait{
-		// Must follow immediately the container trait
+		// Must follow immediately the container and init-containers trait
 		BasePlatformTrait: NewBasePlatformTrait(mountTraitID, mountTraitOrder),
 	}
 }
@@ -86,11 +86,13 @@ func (t *mountTrait) Apply(e *Environment) error {
 	}
 
 	var volumes *[]corev1.Volume
+	var initContainers *[]corev1.Container
 	visited := false
 
 	// Deployment
 	if err := e.Resources.VisitDeploymentE(func(deployment *appsv1.Deployment) error {
 		volumes = &deployment.Spec.Template.Spec.Volumes
+		initContainers = &deployment.Spec.Template.Spec.InitContainers
 		visited = true
 		return nil
 	}); err != nil {
@@ -100,6 +102,7 @@ func (t *mountTrait) Apply(e *Environment) error {
 	// Knative Service
 	if err := e.Resources.VisitKnativeServiceE(func(service *serving.Service) error {
 		volumes = &service.Spec.ConfigurationSpec.Template.Spec.Volumes
+		initContainers = &service.Spec.ConfigurationSpec.Template.Spec.InitContainers
 		visited = true
 		return nil
 	}); err != nil {
@@ -109,6 +112,7 @@ func (t *mountTrait) Apply(e *Environment) error {
 	// CronJob
 	if err := e.Resources.VisitCronJobE(func(cron *batchv1.CronJob) error {
 		volumes = &cron.Spec.JobTemplate.Spec.Template.Spec.Volumes
+		initContainers = &cron.Spec.JobTemplate.Spec.Template.Spec.InitContainers
 		visited = true
 		return nil
 	}); err != nil {
@@ -119,7 +123,7 @@ func (t *mountTrait) Apply(e *Environment) error {
 		// Volumes declared in the trait config/resource options
 		// as this func influences the application.properties
 		// must be set as the first one to execute
-		err := t.configureVolumesAndMounts(e, volumes, &container.VolumeMounts)
+		err := t.configureVolumesAndMounts(e, volumes, &container.VolumeMounts, initContainers)
 		if err != nil {
 			return err
 		}
@@ -138,7 +142,13 @@ func (t *mountTrait) Apply(e *Environment) error {
 }
 
 // configureVolumesAndMounts is in charge to mount volumes and mounts coming from the trait configuration.
-func (t *mountTrait) configureVolumesAndMounts(e *Environment, vols *[]corev1.Volume, mnts *[]corev1.VolumeMount) error {
+// icnts holds the InitContainers which also require to be mounted with the shared volumes.
+func (t *mountTrait) configureVolumesAndMounts(
+	e *Environment,
+	vols *[]corev1.Volume,
+	mnts *[]corev1.VolumeMount,
+	icnts *[]corev1.Container,
+) error {
 	for _, c := range t.Configs {
 		if conf, parseErr := utilResource.ParseConfig(c); parseErr == nil {
 			// Let Camel parse these resources as properties
@@ -162,6 +172,9 @@ func (t *mountTrait) configureVolumesAndMounts(e *Environment, vols *[]corev1.Vo
 		}
 		*vols = append(*vols, *volume)
 		*mnts = append(*mnts, *volumeMount)
+		for i := range *icnts {
+			(*icnts)[i].VolumeMounts = append((*icnts)[i].VolumeMounts, *volumeMount)
+		}
 	}
 	for _, v := range t.EmptyDirs {
 		volume, volumeMount, parseErr := ParseEmptyDirVolume(v)
@@ -170,6 +183,9 @@ func (t *mountTrait) configureVolumesAndMounts(e *Environment, vols *[]corev1.Vo
 		}
 		*vols = append(*vols, *volume)
 		*mnts = append(*mnts, *volumeMount)
+		for i := range *icnts {
+			(*icnts)[i].VolumeMounts = append((*icnts)[i].VolumeMounts, *volumeMount)
+		}
 	}
 
 	return nil

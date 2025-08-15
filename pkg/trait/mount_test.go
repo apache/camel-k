@@ -558,3 +558,37 @@ func TestConfigureVolumesAndMountsSourcesInNativeMode(t *testing.T) {
 	m = findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == v.Name })
 	assert.NotNil(t, m)
 }
+
+func TestMountVolumesInitContainers(t *testing.T) {
+	traitCatalog := NewCatalog(nil)
+	environment := getNominalEnv(t, traitCatalog)
+	// We must provide some init container
+	environment.Integration.Spec.Traits.InitContainers = &traitv1.InitContainersTrait{
+		InitTasks: []string{"init;my-init-image:1.2.3;echo hello"},
+	}
+	environment.Platform.ResyncStatusFullConfig()
+	conditions, traits, err := traitCatalog.apply(environment)
+
+	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
+	assert.NotEmpty(t, conditions)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("mount"))
+
+	s := environment.Resources.GetDeployment(func(service *appsv1.Deployment) bool {
+		return service.Name == "hello"
+	})
+	assert.NotNil(t, s)
+	spec := s.Spec.Template.Spec
+
+	assert.Len(t, spec.InitContainers[0].VolumeMounts, 1)
+
+	assert.Condition(t, func() bool {
+		for _, v := range spec.InitContainers[0].VolumeMounts {
+			if v.Name == "my-pvc" {
+				return true
+			}
+		}
+		return false
+	})
+}

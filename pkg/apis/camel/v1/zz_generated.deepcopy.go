@@ -3228,6 +3228,11 @@ func (in *Traits) DeepCopyInto(out *Traits) {
 		*out = new(trait.IngressTrait)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.InitContainers != nil {
+		in, out := &in.InitContainers, &out.InitContainers
+		*out = new(trait.InitContainersTrait)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Istio != nil {
 		in, out := &in.Istio, &out.Istio
 		*out = new(trait.IstioTrait)

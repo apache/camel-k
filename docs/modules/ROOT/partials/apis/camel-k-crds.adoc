@@ -5980,6 +5980,13 @@ The configuration of Health trait
 
 The configuration of Ingress trait
 
+|`init-containers` +
+*xref:#_camel_apache_org_v1_trait_InitContainersTrait[InitContainersTrait]*
+|
+
+
+The configuration of Init Containers trait
+
 |`istio` +
 *xref:#_camel_apache_org_v1_trait_IstioTrait[IstioTrait]*
 |
@@ -7435,6 +7442,52 @@ To configure tls secret name
 
 |===
 
+[#_camel_apache_org_v1_trait_InitContainersTrait]
+=== InitContainersTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The InitContainersTrait trait can be used to configure `init containers` or `sidecar containers`.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`PlatformBaseTrait` +
+*xref:#_camel_apache_org_v1_trait_PlatformBaseTrait[PlatformBaseTrait]*
+|(Members of `PlatformBaseTrait` are embedded into this type.)
+
+
+
+
+|`auto` +
+bool
+|
+
+
+To automatically enable the trait
+
+|`initTasks` +
+[]string
+|
+
+
+A list of init tasks to be executed with format `<name>;<container-image>;<container-command>`.
+
+|`sideCarTasks` +
+[]string
+|
+
+
+A list of sidecar tasks to be executed with format `<name>;<container-image>;<container-command>`.
+
+
+|===
+
 [#_camel_apache_org_v1_trait_IstioTrait]
 === IstioTrait
 
@@ -8318,6 +8371,7 @@ Only one of `max-unavailable` and `min-available` can be specified.
 * <<#_camel_apache_org_v1_trait_DeploymentTrait, DeploymentTrait>>
 * <<#_camel_apache_org_v1_trait_EnvironmentTrait, EnvironmentTrait>>
 * <<#_camel_apache_org_v1_trait_ErrorHandlerTrait, ErrorHandlerTrait>>
+* <<#_camel_apache_org_v1_trait_InitContainersTrait, InitContainersTrait>>
 * <<#_camel_apache_org_v1_trait_MountTrait, MountTrait>>
 * <<#_camel_apache_org_v1_trait_OpenAPITrait, OpenAPITrait>>
 * <<#_camel_apache_org_v1_trait_PlatformTrait, PlatformTrait>>

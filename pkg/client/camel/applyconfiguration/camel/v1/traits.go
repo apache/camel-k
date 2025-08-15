@@ -39,6 +39,7 @@ type TraitsApplyConfiguration struct {
 	GC              *trait.GCTrait                          `json:"gc,omitempty"`
 	Health          *trait.HealthTrait                      `json:"health,omitempty"`
 	Ingress         *trait.IngressTrait                     `json:"ingress,omitempty"`
+	InitContainers  *trait.InitContainersTrait              `json:"init-containers,omitempty"`
 	Istio           *trait.IstioTrait                       `json:"istio,omitempty"`
 	Jolokia         *trait.JolokiaTrait                     `json:"jolokia,omitempty"`
 	JVM             *trait.JVMTrait                         `json:"jvm,omitempty"`
@@ -177,6 +178,14 @@ func (b *TraitsApplyConfiguration) WithHealth(value trait.HealthTrait) *TraitsAp
 // If called multiple times, the Ingress field is set to the value of the last call.
 func (b *TraitsApplyConfiguration) WithIngress(value trait.IngressTrait) *TraitsApplyConfiguration {
 	b.Ingress = &value
+	return b
+}
+
+// WithInitContainers sets the InitContainers field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the InitContainers field is set to the value of the last call.
+func (b *TraitsApplyConfiguration) WithInitContainers(value trait.InitContainersTrait) *TraitsApplyConfiguration {
+	b.InitContainers = &value
 	return b
 }
 
