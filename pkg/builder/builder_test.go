@@ -137,35 +137,3 @@ func TestJibPublishingFailure(t *testing.T) {
 	assert.Equal(t, "base-image", status.BaseImage)
 	assert.Equal(t, "root-image", status.RootImage)
 }
-
-func TestSpectrumPublishingFailure(t *testing.T) {
-	c, err := internal.NewFakeClient()
-	require.NoError(t, err)
-	b := New(c)
-	build := &v1.Build{
-		Spec: v1.BuildSpec{
-			Tasks: []v1.Task{
-				{
-					Spectrum: &v1.SpectrumTask{
-						BaseTask: v1.BaseTask{
-							Name: "spectrum",
-						},
-						PublishTask: v1.PublishTask{
-							BaseImage: "base-image",
-						},
-					},
-				},
-			},
-		},
-		Status: v1.BuildStatus{
-			RootImage: "root-image",
-		},
-	}
-
-	ctx := newContext()
-	status := b.Build(build).TaskByName("spectrum").Do(ctx)
-	assert.Equal(t, v1.BuildPhaseFailed, status.Phase)
-	assert.NotEmpty(t, status.Error)
-	assert.Equal(t, "base-image", status.BaseImage)
-	assert.Equal(t, "root-image", status.RootImage)
-}

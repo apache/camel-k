@@ -88,14 +88,9 @@ func (t *builderTrait) Matches(trait Trait) bool {
 	return slices.Equal(srtThisTasks, srtOtheTasks)
 }
 
-//nolint:nestif
 func (t *builderTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.IntegrationKit != nil || e.IntegrationInPhase(v1.IntegrationPhaseBuildSubmitted) {
 		condition := t.adaptDeprecatedFields()
-		if e.Platform.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategySpectrum {
-			condition = newOrAppend(condition, "Spectrum publishing strategy is deprecated and may be removed in future releases. "+
-				"Make sure to use any supported publishing strategy instead.")
-		}
 		t.setPlatform(e)
 		if e.IntegrationKit != nil && !e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) {
 			return false, condition, nil
@@ -264,18 +259,6 @@ func (t *builderTrait) Apply(e *Environment) error {
 	// Publishing task
 	tag := getTag(e)
 	switch e.Platform.Status.Build.PublishStrategy {
-	case v1.IntegrationPlatformBuildPublishStrategySpectrum:
-		pipelineTasks = append(pipelineTasks, v1.Task{Spectrum: &v1.SpectrumTask{
-			BaseTask: v1.BaseTask{
-				Name:          "spectrum",
-				Configuration: *taskConfOrDefault(tasksConf, "spectrum"),
-			},
-			PublishTask: v1.PublishTask{
-				BaseImage: t.getBaseImage(e),
-				Image:     imageName,
-				Registry:  e.Platform.Status.Build.Registry,
-			},
-		}})
 
 	case v1.IntegrationPlatformBuildPublishStrategyJib:
 		jibTask := v1.Task{Jib: &v1.JibTask{
@@ -664,9 +647,6 @@ func filter(tasks []v1.Task, filterTasks []string) ([]v1.Task, error) {
 			case t.Package != nil && t.Package.Name == f:
 				filteredTasks = append(filteredTasks, t)
 				found = true
-			case t.Spectrum != nil && t.Spectrum.Name == f:
-				filteredTasks = append(filteredTasks, t)
-				found = true
 			case t.S2i != nil && t.S2i.Name == f:
 				filteredTasks = append(filteredTasks, t)
 				found = true
@@ -692,8 +672,6 @@ func filter(tasks []v1.Task, filterTasks []string) ([]v1.Task, error) {
 func publishingOrUserTask(t v1.Task) bool {
 	switch {
 	case t.Custom != nil:
-		return true
-	case t.Spectrum != nil:
 		return true
 	case t.Jib != nil:
 		return true

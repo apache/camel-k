@@ -358,8 +358,6 @@ func publishTaskName(tasks []v1.Task) string {
 	switch {
 	case t.Custom != nil:
 		return t.Custom.Name
-	case t.Spectrum != nil:
-		return t.Spectrum.Name
 	case t.Jib != nil:
 		return t.Jib.Name
 	case t.S2i != nil:
@@ -382,5 +380,5 @@ func publishTaskDigest(tasks []v1.Task, cntStates []corev1.ContainerStatus) stri
 
 func operatorSupportedPublishingStrategy(tasks []v1.Task) bool {
 	taskName := publishTaskName(tasks)
-	return taskName == "jib" || taskName == "spectrum" || taskName == "s2i"
+	return taskName == "jib" || taskName == "s2i"
 }

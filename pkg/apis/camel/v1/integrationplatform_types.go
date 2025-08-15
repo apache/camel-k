@@ -155,10 +155,6 @@ const (
 	// provided by an OpenShift cluster in order to create and push the images to the registry. It is the default choice on OpenShift cluster.
 	// Deprecated: use jib or a custom publishing strategy instead.
 	IntegrationPlatformBuildPublishStrategyS2I IntegrationPlatformBuildPublishStrategy = "S2I"
-	// IntegrationPlatformBuildPublishStrategySpectrum uses Spectrum project (https://github.com/container-tools/spectrum)
-	// in order to push the incremental images to the image repository. It is the default choice on vanilla Kubernetes cluster.
-	// Deprecated: use jib or a custom publishing strategy instead.
-	IntegrationPlatformBuildPublishStrategySpectrum IntegrationPlatformBuildPublishStrategy = "Spectrum"
 	// IntegrationPlatformBuildPublishStrategyJib uses Jib maven plugin (https://github.com/GoogleContainerTools/jib)
 	// in order to push the incremental images to the image repository.
 	IntegrationPlatformBuildPublishStrategyJib IntegrationPlatformBuildPublishStrategy = "Jib"
@@ -167,7 +163,6 @@ const (
 // IntegrationPlatformBuildPublishStrategies the list of all available publish strategies.
 var IntegrationPlatformBuildPublishStrategies = []IntegrationPlatformBuildPublishStrategy{
 	IntegrationPlatformBuildPublishStrategyS2I,
-	IntegrationPlatformBuildPublishStrategySpectrum,
 	IntegrationPlatformBuildPublishStrategyJib,
 }
 

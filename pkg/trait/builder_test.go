@@ -176,7 +176,7 @@ func createNominalBuilderTraitTest() *builderTrait {
 }
 
 func TestCustomTaskBuilderTrait(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategySpectrum, v1.BuildStrategyPod)
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyPod)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
 
@@ -186,7 +186,7 @@ func TestCustomTaskBuilderTrait(t *testing.T) {
 	builderTask := findCustomTaskByName(env.Pipeline, "builder")
 	customTask := findCustomTaskByName(env.Pipeline, "test")
 	packageTask := findCustomTaskByName(env.Pipeline, "package")
-	publisherTask := findCustomTaskByName(env.Pipeline, "spectrum")
+	publisherTask := findCustomTaskByName(env.Pipeline, "jib")
 
 	assert.NotNil(t, builderTask)
 	assert.NotNil(t, customTask)
@@ -199,7 +199,7 @@ func TestCustomTaskBuilderTrait(t *testing.T) {
 }
 
 func TestCustomTaskBuilderTraitValidStrategyOverride(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategySpectrum, v1.BuildStrategyRoutine)
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
 	builderTrait.Strategy = "pod"
@@ -217,7 +217,7 @@ func TestCustomTaskBuilderTraitValidStrategyOverride(t *testing.T) {
 }
 
 func TestCustomTaskBuilderTraitInvalidStrategy(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategySpectrum, v1.BuildStrategyRoutine)
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
 
@@ -231,7 +231,7 @@ func TestCustomTaskBuilderTraitInvalidStrategy(t *testing.T) {
 }
 
 func TestCustomTaskBuilderTraitInvalidStrategyOverride(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategySpectrum, v1.BuildStrategyPod)
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyPod)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
 	builderTrait.Strategy = "routine"
@@ -351,7 +351,7 @@ func TestBuilderCustomTasksConfiguration(t *testing.T) {
 	builderTrait.TasksRequestCPU = append(builderTrait.TasksRequestCPU, "builder:1000m")
 	builderTrait.TasksLimitCPU = append(builderTrait.TasksLimitCPU, "custom1:500m")
 	builderTrait.TasksRequestMemory = append(builderTrait.TasksRequestMemory, "package:8Gi")
-	builderTrait.TasksLimitMemory = append(builderTrait.TasksLimitMemory, "spectrum:4Gi")
+	builderTrait.TasksLimitMemory = append(builderTrait.TasksLimitMemory, "jib:4Gi")
 
 	tasksConf, err := builderTrait.parseTasksConf(&v1.BuildConfiguration{})
 
@@ -360,7 +360,7 @@ func TestBuilderCustomTasksConfiguration(t *testing.T) {
 	assert.Equal(t, "1000m", tasksConf["builder"].RequestCPU)
 	assert.Equal(t, "500m", tasksConf["custom1"].LimitCPU)
 	assert.Equal(t, "8Gi", tasksConf["package"].RequestMemory)
-	assert.Equal(t, "4Gi", tasksConf["spectrum"].LimitMemory)
+	assert.Equal(t, "4Gi", tasksConf["jib"].LimitMemory)
 }
 
 func TestBuilderCustomTasksConfigurationError(t *testing.T) {
@@ -595,9 +595,6 @@ func tasksByName(tasks []v1.Task) []string {
 		}
 		if t.S2i != nil {
 			pipelineTasks[i] = t.S2i.Name
-		}
-		if t.Spectrum != nil {
-			pipelineTasks[i] = t.Spectrum.Name
 		}
 		if t.Jib != nil {
 			pipelineTasks[i] = t.Jib.Name

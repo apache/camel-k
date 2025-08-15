@@ -144,12 +144,6 @@ tasks:
 					break tasks
 				}
 				t.BuildDir = buildDir
-			} else if t := task.Spectrum; t != nil && t.ContextDir == "" {
-				if buildDir == "" {
-					status.Failed(fmt.Errorf("cannot determine context directory for task %s", t.Name))
-					break tasks
-				}
-				t.ContextDir = filepath.Join(buildDir, builder.ContextDir)
 			} else if t := task.S2i; t != nil && t.ContextDir == "" {
 				if buildDir == "" {
 					status.Failed(fmt.Errorf("cannot determine context directory for task %s", t.Name))
