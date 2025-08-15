@@ -183,6 +183,7 @@ type JibTask struct {
 }
 
 // SpectrumTask is used to configure Spectrum.
+// Deprecated: no longer in use.
 type SpectrumTask struct {
 	BaseTask    `json:",inline"`
 	PublishTask `json:",inline"`

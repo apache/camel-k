@@ -37,7 +37,7 @@ spec:
       command: cat maven/pom.xml
       image: alpine
       name: custom2
-  - spectrum:
+  - jib:
       ...
 ```
 The custom tasks will be executed in the directory where the Camel K runtime Maven project was generated. In this example we're creating 2 tasks to retrieve certain values from the project just for the scope of illustrating the feature. For each task you need to specify a name, the container image which you want to use to run, the command to execute and (optionally) the user ID that has to run in the container.

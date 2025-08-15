@@ -5656,6 +5656,7 @@ SourceType represents an available source type.
 * <<#_camel_apache_org_v1_Task, Task>>
 
 SpectrumTask is used to configure Spectrum.
+Deprecated: no longer in use.
 
 [cols="2,2a",options="header"]
 |===

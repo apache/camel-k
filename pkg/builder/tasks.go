@@ -55,12 +55,6 @@ func (b *Build) Task(task v1.Task) Task {
 			build: b.build,
 			task:  task.Package,
 		}
-	case task.Spectrum != nil:
-		return &spectrumTask{
-			c:     b.builder.client,
-			build: b.build,
-			task:  task.Spectrum,
-		}
 	case task.S2i != nil:
 		return &s2iTask{
 			c:     b.builder.client,
@@ -139,12 +133,6 @@ func (b *Build) TaskByName(name string) Task {
 				log:   b.builder.log,
 				build: b.build,
 				task:  task.Package,
-			}
-		case task.Spectrum != nil && task.Spectrum.Name == name:
-			return &spectrumTask{
-				c:     b.builder.client,
-				build: b.build,
-				task:  task.Spectrum,
 			}
 		case task.S2i != nil && task.S2i.Name == name:
 			return &s2iTask{

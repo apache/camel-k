@@ -93,8 +93,6 @@ func newBuildPod(ctx context.Context, client client.Client, build *v1.Build) *co
 			addBuildTaskToPod(ctx, client, build, task.Package.Name, pod)
 		case task.S2i != nil:
 			addBuildTaskToPod(ctx, client, build, task.S2i.Name, pod)
-		case task.Spectrum != nil:
-			addBuildTaskToPod(ctx, client, build, task.Spectrum.Name, pod)
 		case task.Jib != nil:
 			addBuildTaskToPod(ctx, client, build, task.Jib.Name, pod)
 		}
