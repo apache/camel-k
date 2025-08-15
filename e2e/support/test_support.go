@@ -436,6 +436,25 @@ func IntegrationLogs(t *testing.T, ctx context.Context, ns, name string) func() 
 	}
 }
 
+func LastIntegrationCronLogs(t *testing.T, ctx context.Context, ns, name string) func() string {
+	return func() string {
+		pod := LastIntegrationCronPod(t, ctx, ns, name)()
+		if pod == nil {
+			return ""
+		}
+
+		options := corev1.PodLogOptions{
+			TailLines: ptr.To(int64(100)),
+		}
+
+		if len(pod.Spec.Containers) > 1 {
+			options.Container = pod.Spec.Containers[0].Name
+		}
+
+		return Logs(t, ctx, ns, pod.Name, options)()
+	}
+}
+
 func OperatorLogs(t *testing.T, ctx context.Context, ns string) func() string {
 	return func() string {
 		pod := OperatorPod(t, ctx, ns)()
@@ -577,6 +596,20 @@ func IntegrationPod(t *testing.T, ctx context.Context, ns string, name string) f
 	}
 }
 
+func LastIntegrationCronPod(t *testing.T, ctx context.Context, ns string, name string) func() *corev1.Pod {
+	return func() *corev1.Pod {
+		pods := IntegrationPodsSucceeded(t, ctx, ns, name)()
+		if len(pods) == 0 {
+			return nil
+		}
+
+		sort.SliceStable(pods, func(i, j int) bool {
+			return pods[i].GetCreationTimestamp().Time.After(pods[j].GetCreationTimestamp().Time)
+		})
+		return &pods[0]
+	}
+}
+
 func IntegrationPodHas(t *testing.T, ctx context.Context, ns string, name string, predicate func(pod *corev1.Pod) bool) func() bool {
 	return func() bool {
 		pod := IntegrationPod(t, ctx, ns, name)()
@@ -604,6 +637,21 @@ func IntegrationPods(t *testing.T, ctx context.Context, ns string, name string) 
 			failTest(t, err)
 		}
 		return lst.Items
+	}
+}
+
+func IntegrationPodsSucceeded(t *testing.T, ctx context.Context, ns string, name string) func() []corev1.Pod {
+	return func() []corev1.Pod {
+		pods := IntegrationPods(t, ctx, ns, name)
+
+		completedPods := []corev1.Pod{}
+		for _, pod := range pods() {
+			if pod.Status.Phase == corev1.PodSucceeded || pod.Status.Phase == corev1.PodFailed {
+				completedPods = append(completedPods, pod)
+			}
+		}
+
+		return completedPods
 	}
 }
 
