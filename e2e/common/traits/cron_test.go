@@ -38,6 +38,18 @@ func TestRunCronExample(t *testing.T) {
 	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 
+		t.Run("cron-fallback", func(t *testing.T) {
+			g.Expect(KamelRun(t, ctx, ns, "files/cron-fallback.yaml").Execute()).To(Succeed())
+			g.Eventually(IntegrationCronJob(t, ctx, ns, "cron-fallback"), TestTimeoutLong).Should(BeNil())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "cron-fallback", v1.IntegrationConditionReady), TestTimeoutShort).Should(
+				Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "cron-fallback", v1.IntegrationConditionCronJobAvailable),
+				TestTimeoutMedium).Should(Equal(corev1.ConditionFalse))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "cron-fallback")).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, "cron-fallback"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Eventually(DeleteIntegrations(t, ctx, ns)).Should(Equal(0))
+		})
+
 		t.Run("cron-timer", func(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "files/cron-timer.yaml").Execute()).To(Succeed())
 			g.Eventually(IntegrationCronJob(t, ctx, ns, "cron-timer"), TestTimeoutLong).ShouldNot(BeNil())
@@ -48,8 +60,8 @@ func TestRunCronExample(t *testing.T) {
 			// As it's a cron, we expect it's triggered, executed and turned off
 			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, "cron-timer"), TestTimeoutMedium).Should(Equal(ptr.To(int32(1))))
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "cron-timer")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "cron-timer")).Should(ContainSubstring("Magicstring!"))
 			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, "cron-timer")).Should(Equal(ptr.To(int32(0))))
+			g.Eventually(LastIntegrationCronLogs(t, ctx, ns, "cron-timer")).Should(ContainSubstring("Magicstring!"))
 			g.Eventually(DeleteIntegrations(t, ctx, ns)).Should(Equal(0))
 		})
 
@@ -63,8 +75,8 @@ func TestRunCronExample(t *testing.T) {
 			// As it's a cron, we expect it's triggered, executed and turned off
 			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, "cron-java"), TestTimeoutMedium).Should(Equal(ptr.To(int32(1))))
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "cron-java")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "cron-java")).Should(ContainSubstring("Magicstring!"))
 			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, "cron-java")).Should(Equal(ptr.To(int32(0))))
+			g.Eventually(LastIntegrationCronLogs(t, ctx, ns, "cron-java")).Should(ContainSubstring("Magicstring!"))
 			g.Eventually(DeleteIntegrations(t, ctx, ns)).Should(Equal(0))
 		})
 
@@ -78,8 +90,8 @@ func TestRunCronExample(t *testing.T) {
 			// As it's a cron, we expect it's triggered, executed and turned off
 			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, "cron-tab"), TestTimeoutMedium).Should(Equal(ptr.To(int32(1))))
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "cron-tab")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "cron-tab")).Should(ContainSubstring("Magicstring!"))
 			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, "cron-tab")).Should(Equal(ptr.To(int32(0))))
+			g.Eventually(LastIntegrationCronLogs(t, ctx, ns, "cron-tab")).Should(ContainSubstring("Magicstring!"))
 			g.Eventually(DeleteIntegrations(t, ctx, ns)).Should(Equal(0))
 		})
 
@@ -93,20 +105,8 @@ func TestRunCronExample(t *testing.T) {
 			// As it's a cron, we expect it's triggered, executed and turned off
 			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, "cron-quartz"), TestTimeoutMedium).Should(Equal(ptr.To(int32(1))))
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "cron-quartz")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "cron-quartz")).Should(ContainSubstring("Magicstring!"))
 			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, "cron-quartz")).Should(Equal(ptr.To(int32(0))))
-			g.Eventually(DeleteIntegrations(t, ctx, ns)).Should(Equal(0))
-		})
-
-		t.Run("cron-fallback", func(t *testing.T) {
-			g.Expect(KamelRun(t, ctx, ns, "files/cron-fallback.yaml").Execute()).To(Succeed())
-			g.Eventually(IntegrationCronJob(t, ctx, ns, "cron-fallback"), TestTimeoutLong).Should(BeNil())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "cron-fallback", v1.IntegrationConditionReady), TestTimeoutShort).Should(
-				Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "cron-fallback", v1.IntegrationConditionCronJobAvailable),
-				TestTimeoutMedium).Should(Equal(corev1.ConditionFalse))
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "cron-fallback")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "cron-fallback"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Eventually(LastIntegrationCronLogs(t, ctx, ns, "cron-quartz")).Should(ContainSubstring("Magicstring!"))
 			g.Eventually(DeleteIntegrations(t, ctx, ns)).Should(Equal(0))
 		})
 

@@ -18,6 +18,8 @@
 - from:
     uri: "cron:tab"
     parameters:
+      # as it runs every second, won't be creating a
+      # Kubernetes CronJob
       schedule: "0/1 * * * * ?"
     steps:
       - setHeader:
