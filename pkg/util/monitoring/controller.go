@@ -92,7 +92,7 @@ func resultLabelFor(res reconcile.Result, err error) string {
 	switch {
 	case err != nil:
 		label = errored
-	case res.Requeue || res.RequeueAfter > 0:
+	case res.RequeueAfter > 0:
 		label = requeued
 	default:
 		label = reconciled
