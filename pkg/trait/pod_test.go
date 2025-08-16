@@ -40,13 +40,13 @@ func TestConfigurePodTraitDoesSucceed(t *testing.T) {
 	configured, condition, err := trait.Configure(environment)
 
 	assert.True(t, configured)
-	assert.Nil(t, condition)
+	assert.NotNil(t, condition)
 	require.NoError(t, err)
 
 	configured, condition, err = trait.Configure(environment)
 
 	assert.True(t, configured)
-	assert.Nil(t, condition)
+	assert.NotNil(t, condition)
 	require.NoError(t, err)
 }
 
@@ -216,7 +216,7 @@ func testPodTemplateSpec(t *testing.T, template string) corev1.PodTemplateSpec {
 
 	_, condition, err := trait.Configure(environment)
 	require.NoError(t, err)
-	assert.Nil(t, condition)
+	assert.NotNil(t, condition)
 
 	err = trait.Apply(environment)
 	require.NoError(t, err)

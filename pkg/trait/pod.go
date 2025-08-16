@@ -57,7 +57,15 @@ func (t *podTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		return false, nil, nil
 	}
 
-	return e.IntegrationInRunningPhases(), nil, nil
+	condition := NewIntegrationCondition(
+		"Pod",
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		TraitConfigurationReason,
+		"Pod trait is deprecated in favour of InitContainers. It may be removed in future version.",
+	)
+
+	return e.IntegrationInRunningPhases(), condition, nil
 }
 
 func (t *podTrait) Apply(e *Environment) error {

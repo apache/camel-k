@@ -17,6 +17,9 @@ limitations under the License.
 
 package trait
 
+// WARNING: The Pod trait is **deprecated** and will removed in future release versions:
+// use InitContainers trait istead.
+//
 // The pod trait allows the customization of the Integration pods.
 // It applies the `PodSpecTemplate` struct contained in the Integration `.spec.podTemplate` field,
 // into the Integration deployment Pods template, using strategic merge patch.
@@ -25,6 +28,7 @@ package trait
 // by using the `integration` container name.
 //
 // +camel-k:trait=pod.
+// +camel-k:deprecated=2.8.0.
 type PodTrait struct {
 	Trait `property:",squash" json:",inline"`
 }
