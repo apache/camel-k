@@ -117,7 +117,7 @@ $ kubectl create secret generic maven-ca-certs --from-file=ca.crt
 
 The Secret can contain X.509 certificates, and PKCS#7 formatted certificate chains. A JKS formatted keystore is automatically created to store the CA certificate(s), and configured to be used as a trusted certificate(s) by the Maven commands. The root CA certificates are also imported into the created keystore.
 
-The created Secret can then be referenced in the IntegrationPlatform resource, from the `spec.build.maven.caSecret` field, e.g.:
+The created Secret can then be referenced in the IntegrationPlatform resource, from the `spec.build.maven.caSecrets` field, e.g.:
 
 [source,yaml]
 ----
@@ -126,11 +126,11 @@ kind: IntegrationPlatform
 metadata:
   name: camel-k
 spec:
-  pipeline:
+  build:
     maven:
-      caSecret:
-        key: tls.crt
-        name: tls-secret
+      caSecrets:
+        - name: maven-ca-certs
+          key: ca.crt
 ----
 
 [[maven-extensions]]
