@@ -16,7 +16,7 @@ From Camel K version 2 onward you will be able to use any Camel K Runtime. Each 
 |===
 
 //cannot use top level index.adoc as the page with the query is always omitted.
-indexTable::[version="*",relative="running/running.adoc",cellformats="util.ckRef(pageComponentDisplayVersion, pageComponentVersion)|lastReleasedVersion|camelKRuntimeVersion|util.camelQuarkusRef(camelQuarkusVersion, camelQuarkusDocsVersion)|util.camelRef(camelVersion, camelDocsVersion)|util.quarkusRef(quarkusVersion)|ck.branch(pageComponentVersion)", requires={requires},transform=util.sortCompatibilityItems]
+indexTable::[version="*",relative="running/running.adoc",cellformats="util.ckRef(pageComponentDisplayVersion, pageComponentVersion)|lastReleasedVersion|camelKRuntimeVersion|camelQuarkusVersion|camelVersion|quarkusVersion|ck.branch(pageComponentVersion)", requires={requires},transform=util.sortCompatibilityItems]
 
 == Other APIs version matrix
 
