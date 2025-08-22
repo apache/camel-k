@@ -221,8 +221,8 @@ github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRI
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/prashantv/gostub v1.1.0 h1:BTyx3RfQjRHnUWaGF9oQos79AlQ5k8WNktv7VGvVH4g=
 github.com/prashantv/gostub v1.1.0/go.mod h1:A5zLQHz7ieHGG7is6LLXLz7I8+3LZzsrV0P1IAHhP5U=
-github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.82.2 h1:XXoaK87apyXqLm7xVEQ63pk8+GDupbVtHaBiW8IxPow=
-github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.82.2/go.mod h1:hY5yoQsoIalncoxYqXXCDL5y7f+GGYYlW9Bi2IdU5KY=
+github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.85.0 h1:oY+F5FZFmCjCyzkHWPjVQpzvnvEB/0FP+iyzDUUlqFc=
+github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.85.0/go.mod h1:VB7wtBmDT6W2RJHzsvPZlBId+EnmeQA0d33fFTXvraM=
 github.com/prometheus/client_golang v1.23.0 h1:ust4zpdl9r4trLY/gSjlm07PuiBq2ynaXXlptpfy8Uc=
 github.com/prometheus/client_golang v1.23.0/go.mod h1:i/o0R9ByOnHX0McrTMTyhYvKE4haaf2mW08I+jGAjEE=
 github.com/prometheus/client_model v0.6.2 h1:oBsgwpGs7iVziMvrGhE53c/GrLUsZdHnqNwqPLxwZyk=
@@ -464,8 +464,8 @@ k8s.io/kube-openapi v0.0.0-20250318190949-c8a335a9a2ff h1:/usPimJzUKKu+m+TE36gUy
 k8s.io/kube-openapi v0.0.0-20250318190949-c8a335a9a2ff/go.mod h1:5jIi+8yX4RIb8wk3XwBo5Pq2ccx4FP10ohkbSKCZoK8=
 k8s.io/kubectl v0.33.4 h1:nXEI6Vi+oB9hXxoAHyHisXolm/l1qutK3oZQMak4N98=
 k8s.io/kubectl v0.33.4/go.mod h1:Xe7P9X4DfILvKmlBsVqUtzktkI56lEj22SJW7cFy6nE=
-k8s.io/utils v0.0.0-20250321185631-1f6e0b77f77e h1:KqK5c/ghOm8xkHYhlodbp6i6+r+ChV2vuAuVRdFbLro=
-k8s.io/utils v0.0.0-20250321185631-1f6e0b77f77e/go.mod h1:OLgZIPagt7ERELqWJFomSt595RzquPNLL48iOWgYOg0=
+k8s.io/utils v0.0.0-20250604170112-4c0f3b243397 h1:hwvWFiBzdWw1FhfY1FooPn3kzWuJ8tmbZBHi4zVsl1Y=
+k8s.io/utils v0.0.0-20250604170112-4c0f3b243397/go.mod h1:OLgZIPagt7ERELqWJFomSt595RzquPNLL48iOWgYOg0=
 knative.dev/eventing v0.46.1 h1:c/Cxqa12MUIRtbJzvHyI8S5v04MZlEz7auidF5Q8OIY=
 knative.dev/eventing v0.46.1/go.mod h1:tBmI283bb0l9HWPOdog97ZOkoJgivqHTA/XFjpRgTYE=
 knative.dev/networking v0.0.0-20250716125000-edb1a4a0c863 h1:CYX6QidA9ab5KqvFiV+Dow8D94+kGelccOie9rmt/bA=
