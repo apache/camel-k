@@ -3144,3 +3144,17 @@ func DeleteCIProcessID() {
 func RandomizedSuffixName(name string) string {
 	return name + strings.ToLower(v2util.RandomString(5))
 }
+
+// DefaultOperatorSecurityContext to ensure a container with low privilege and limited permissions.
+func DefaultOperatorSecurityContext() *corev1.SecurityContext {
+	sc := corev1.SecurityContext{
+		RunAsNonRoot: ptr.To(true),
+		SeccompProfile: &corev1.SeccompProfile{
+			Type: corev1.SeccompProfileTypeRuntimeDefault,
+		},
+		AllowPrivilegeEscalation: ptr.To(false),
+		Capabilities:             &corev1.Capabilities{Drop: []corev1.Capability{"ALL"}},
+	}
+
+	return &sc
+}

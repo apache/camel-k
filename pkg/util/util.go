@@ -163,12 +163,7 @@ func RandomString(n int) string {
 	return sb.String()
 }
 
-func EncodeXMLWithoutHeader(content interface{}) ([]byte, error) {
-	return encodeXML(content, "")
-}
-
 func EncodeXML(content interface{}) ([]byte, error) {
-
 	return encodeXML(content, xml.Header)
 }
 

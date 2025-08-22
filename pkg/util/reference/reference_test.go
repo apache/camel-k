@@ -173,16 +173,12 @@ func TestExpressions(t *testing.T) {
 			if tc.error {
 				require.Error(t, err)
 			} else {
-				asString, err2 := converter.ToString(ref)
-				require.NoError(t, err2)
-
 				props, err3 := converter.PropertiesFromString(tc.name)
 				require.NoError(t, err3)
 				assert.Equal(t, tc.properties, props)
 
 				require.NoError(t, err)
 				assert.Equal(t, tc.ref, ref)
-				assert.Equal(t, tc.stringRef, asString)
 			}
 		})
 	}

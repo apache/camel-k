@@ -18,7 +18,6 @@ limitations under the License.
 package reference
 
 import (
-	"errors"
 	"fmt"
 	"net/url"
 	"regexp"
@@ -160,23 +159,4 @@ func (c *Converter) simpleDecodeString(str string) (corev1.ObjectReference, erro
 		return corev1.ObjectReference{}, fmt.Errorf(`name %q does not match either "[[apigroup/]version:]kind:[namespace/]name" or "[namespace/]name"`, str)
 	}
 	return corev1.ObjectReference{}, fmt.Errorf(`name %q does not match format "[[apigroup/]version:]kind:[namespace/]name"`, str)
-}
-
-func (c *Converter) ToString(ref corev1.ObjectReference) (string, error) {
-	if ref.Kind == "" {
-		return "", errors.New(`object reference is missing the "kind" field`)
-	}
-	if ref.Name == "" {
-		return "", errors.New(`object reference is missing the "name" field`)
-	}
-	res := ""
-	if ref.APIVersion != "" {
-		res += ref.APIVersion + ":"
-	}
-	res += ref.Kind + ":"
-	if ref.Namespace != "" {
-		res += ref.Namespace + "/"
-	}
-	res += ref.Name
-	return res, nil
 }

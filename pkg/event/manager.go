@@ -174,18 +174,6 @@ func NotifyIntegrationPlatformError(ctx context.Context, c client.Client, record
 	recorder.Eventf(p, corev1.EventTypeWarning, ReasonIntegrationPlatformError, "Cannot reconcile Integration Platform %s: %v", p.Name, err)
 }
 
-// NotifyIntegrationProfileError automatically generates error events when the integration Platform reconcile cycle phase has an error.
-func NotifyIntegrationProfileError(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1.IntegrationProfile, err error) {
-	p := old
-	if newResource != nil {
-		p = newResource
-	}
-	if p == nil {
-		return
-	}
-	recorder.Eventf(p, corev1.EventTypeWarning, ReasonIntegrationProfileError, "Cannot reconcile Integration Profile %s: %v", p.Name, err)
-}
-
 // NotifyCamelCatalogUpdated automatically generates events when a CamelCatalog changes.
 func NotifyCamelCatalogUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1.CamelCatalog) {
 	if newResource == nil {

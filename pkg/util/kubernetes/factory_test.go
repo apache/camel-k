@@ -18,13 +18,11 @@ limitations under the License.
 package kubernetes
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 func TestValidTolerations(t *testing.T) {
@@ -97,79 +95,6 @@ func TestValueTolerations(t *testing.T) {
 	assert.Equal(t, "", toleration[3].Value)
 	assert.Equal(t, v1.TaintEffectNoSchedule, toleration[3].Effect)
 	assert.Equal(t, int64(120), *toleration[3].TolerationSeconds)
-}
-
-func TestValidNodeSelectors(t *testing.T) {
-	validNodeSelectors := [][]string{
-		{"key1=value"},
-		{"kubernetes.io/hostname=worker0"},
-		{"disktype=ssd"},
-		{"key=path-to-value"},
-		{"keyNum=123"},
-	}
-	for _, vds := range validNodeSelectors {
-		_, err := NewNodeSelectors(vds)
-		require.NoError(t, err)
-	}
-}
-
-func TestInvalidNodeSelectors(t *testing.T) {
-	validNodeSelectors := [][]string{
-		{"key1"},
-		{"kubernetes.io@hostname=worker0"},
-		{"key=path/to/value"},
-	}
-	for _, vds := range validNodeSelectors {
-		_, err := NewNodeSelectors(vds)
-		require.Error(t, err)
-	}
-}
-
-func TestValueNodeSelectors(t *testing.T) {
-	nodeSelectorsArray := []string{
-		"key=value",
-		"kubernetes.io/hostname=worker0",
-	}
-	nodeSelectors, err := NewNodeSelectors(nodeSelectorsArray)
-	require.NoError(t, err)
-	assert.Equal(t, 2, len(nodeSelectors))
-
-	assert.Equal(t, "value", nodeSelectors["key"])
-	assert.Equal(t, "worker0", nodeSelectors["kubernetes.io/hostname"])
-}
-
-func TestAllResourceRequirements(t *testing.T) {
-	resReq := "limits.memory=256Mi,requests.memory=128Mi,limits.cpu=1000m,requests.cpu=500m"
-	resourceRequirements, err := NewResourceRequirements(strings.Split(resReq, ","))
-	require.NoError(t, err)
-
-	assert.Equal(t, resource.MustParse("256Mi"), *resourceRequirements.Limits.Memory())
-	assert.Equal(t, resource.MustParse("128Mi"), *resourceRequirements.Requests.Memory())
-	assert.Equal(t, resource.MustParse("1000m"), *resourceRequirements.Limits.Cpu())
-	assert.Equal(t, resource.MustParse("500m"), *resourceRequirements.Requests.Cpu())
-}
-
-func TestSomeResourceRequirements(t *testing.T) {
-	resReq := "limits.memory=128Mi,requests.cpu=500m"
-	resourceRequirements, err := NewResourceRequirements(strings.Split(resReq, ","))
-	require.NoError(t, err)
-
-	assert.Equal(t, resource.MustParse("128Mi"), *resourceRequirements.Limits.Memory())
-	assert.True(t, resourceRequirements.Requests.Memory().IsZero())
-	assert.True(t, resourceRequirements.Limits.Cpu().IsZero())
-	assert.Equal(t, resource.MustParse("500m"), *resourceRequirements.Requests.Cpu())
-}
-
-func TestErrorResourceRequirements(t *testing.T) {
-	resReq := "limits.memory=expectSomeError!"
-	_, err := NewResourceRequirements(strings.Split(resReq, ","))
-	require.Error(t, err)
-}
-
-func TestMissingResourceRequirements(t *testing.T) {
-	resReq := ""
-	_, err := NewResourceRequirements(strings.Split(resReq, ","))
-	require.Error(t, err)
 }
 
 func TestConfigureResources(t *testing.T) {

@@ -139,8 +139,6 @@ func addKamelSubcommands(cmd *cobra.Command, options *RootCmdOptions) {
 	cmd.AddCommand(cmdOnly(newCmdRun(options)))
 	cmd.AddCommand(cmdOnly(newCmdGet(options)))
 	cmd.AddCommand(cmdOnly(newCmdDelete(options)))
-	cmd.AddCommand(cmdOnly(newCmdInstall(options)))
-	cmd.AddCommand(cmdOnly(newCmdUninstall(options)))
 	cmd.AddCommand(cmdOnly(newCmdLog(options)))
 	cmd.AddCommand(newCmdKit(options))
 	cmd.AddCommand(cmdOnly(newCmdReset(options)))
@@ -201,7 +199,7 @@ func (command *RootCmdOptions) preRun(cmd *cobra.Command, _ []string) error {
 		// reconciled. Hence the compatibility check is skipped for the install and the operator command.
 		// Furthermore, there can be any incompatibilities, as the install command deploys
 		// the operator version it's compatible with.
-		if cmd.Use != builderCommand && cmd.Use != installCommand && cmd.Use != operatorCommand {
+		if cmd.Use != builderCommand && cmd.Use != operatorCommand {
 			checkAndShowCompatibilityWarning(command.Context, cmd, c, command.Namespace)
 		}
 	}

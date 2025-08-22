@@ -28,9 +28,7 @@ import (
 )
 
 var (
-	validTaintRegexp                = regexp.MustCompile(`^([\w\/_\-\.]+)(=)?([\w_\-\.]+)?:(NoSchedule|NoExecute|PreferNoSchedule):?(\d*)?$`)
-	validNodeSelectorRegexp         = regexp.MustCompile(`^([\w\/_\-\.]+)=([\w_\-\.]+)$`)
-	validResourceRequirementsRegexp = regexp.MustCompile(`^(requests|limits)\.(memory|cpu)=([\w\.]+)$`)
+	validTaintRegexp = regexp.MustCompile(`^([\w\/_\-\.]+)(=)?([\w_\-\.]+)?:(NoSchedule|NoExecute|PreferNoSchedule):?(\d*)?$`)
 )
 
 // ConfigMapAutogenLabel -- .
@@ -74,55 +72,6 @@ func NewTolerations(taints []string) ([]corev1.Toleration, error) {
 	}
 
 	return tolerations, nil
-}
-
-// NewNodeSelectors build a map of NodeSelectors from an array of string.
-func NewNodeSelectors(nsArray []string) (map[string]string, error) {
-	nodeSelectors := make(map[string]string)
-	for _, ns := range nsArray {
-		if !validNodeSelectorRegexp.MatchString(ns) {
-			return nil, fmt.Errorf("could not match node selector %v", ns)
-		}
-		// Parse the regexp groups
-		groups := validNodeSelectorRegexp.FindStringSubmatch(ns)
-		nodeSelectors[groups[1]] = groups[2]
-	}
-	return nodeSelectors, nil
-}
-
-// NewResourceRequirements will build a CPU and memory requirements from an array of requests
-// matching <requestType.requestResource=value> (ie, limits.memory=256Mi).
-func NewResourceRequirements(reqs []string) (corev1.ResourceRequirements, error) {
-	resReq := corev1.ResourceRequirements{
-		Requests: corev1.ResourceList{},
-		Limits:   corev1.ResourceList{},
-	}
-
-	for _, s := range reqs {
-		if !validResourceRequirementsRegexp.MatchString(s) {
-			return resReq, fmt.Errorf("could not match resource requirement %v", s)
-		}
-
-		resGroups := validResourceRequirementsRegexp.FindStringSubmatch(s)
-
-		reqType := resGroups[1]
-		reqRes := resGroups[2]
-		reqQuantity, err := resource.ParseQuantity(resGroups[3])
-		if err != nil {
-			return resReq, err
-		}
-		switch reqType {
-		case "requests":
-			resReq.Requests[corev1.ResourceName(reqRes)] = reqQuantity
-		case "limits":
-			resReq.Limits[corev1.ResourceName(reqRes)] = reqQuantity
-		default:
-			return resReq, fmt.Errorf("unknown resource requirements %v", reqType)
-		}
-
-	}
-
-	return resReq, nil
 }
 
 // NewPersistentVolumeClaim will create a NewPersistentVolumeClaim based on a StorageClass.
