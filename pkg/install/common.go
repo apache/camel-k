@@ -15,16 +15,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-//nolint:goconst
 package install
 
 import (
 	"context"
-	"strings"
 
 	networking "k8s.io/api/networking/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
-	k8s "k8s.io/client-go/kubernetes"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -32,10 +29,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/resources"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
-
-const serviceAccountName = "camel-k-operator"
 
 // ResourceCustomizer can be used to inject code that changes the objects before they are created.
 type ResourceCustomizer func(object ctrl.Object) ctrl.Object
@@ -59,16 +53,6 @@ var RemoveIngressRoleCustomizer = func(object ctrl.Object) ctrl.Object {
 		}
 	}
 	return object
-}
-
-func ResourcesOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection,
-	force bool, customizer ResourceCustomizer, names ...string) error {
-	for _, name := range names {
-		if err := ResourceOrCollect(ctx, c, namespace, collection, force, customizer, name); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 // Resource installs a single named resource from the project resource directory.
@@ -118,18 +102,4 @@ func ObjectOrCollect(ctx context.Context, c client.Client, namespace string, col
 
 	// Just try to create them
 	return c.Create(ctx, obj)
-}
-
-func isOpenShift(c k8s.Interface, clusterType string) (bool, error) {
-	var res bool
-	var err error
-	if clusterType != "" {
-		res = strings.EqualFold(clusterType, string(v1.IntegrationPlatformClusterOpenShift))
-	} else {
-		res, err = openshift.IsOpenShift(c)
-		if err != nil {
-			return false, err
-		}
-	}
-	return res, nil
 }

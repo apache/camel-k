@@ -46,20 +46,6 @@ func (iw *Writer) Writef(indentLevel int, format string, i ...interface{}) {
 	fmt.Fprintf(iw.out, format, i...)
 }
 
-// Writelnf --.
-func (iw *Writer) Writelnf(indentLevel int, format string, i ...interface{}) {
-	fmt.Fprint(iw.out, strings.Repeat("  ", indentLevel))
-	fmt.Fprintf(iw.out, format, i...)
-	fmt.Fprint(iw.out, "\n")
-}
-
-// Flush --.
-func (iw *Writer) Flush() {
-	if f, ok := iw.out.(Flusher); ok {
-		f.Flush()
-	}
-}
-
 // IndentedString --.
 func IndentedString(f func(io.Writer) error) (string, error) {
 	var out tabwriter.Writer

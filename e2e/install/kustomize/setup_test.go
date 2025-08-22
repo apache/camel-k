@@ -34,7 +34,6 @@ import (
 	. "github.com/apache/camel-k/v2/e2e/support"
 	testutil "github.com/apache/camel-k/v2/e2e/support/util"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 
 	. "github.com/onsi/gomega"
 )
@@ -83,16 +82,16 @@ func TestKustomizeNamespaced(t *testing.T) {
 		// Check if restricted security context has been applied
 		operatorPod := OperatorPod(t, ctx, ns)()
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.RunAsNonRoot).To(
-			Equal(kubernetes.DefaultOperatorSecurityContext().RunAsNonRoot),
+			Equal(DefaultOperatorSecurityContext().RunAsNonRoot),
 		)
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.Capabilities).To(
-			Equal(kubernetes.DefaultOperatorSecurityContext().Capabilities),
+			Equal(DefaultOperatorSecurityContext().Capabilities),
 		)
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.SeccompProfile).To(
-			Equal(kubernetes.DefaultOperatorSecurityContext().SeccompProfile),
+			Equal(DefaultOperatorSecurityContext().SeccompProfile),
 		)
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation).To(
-			Equal(kubernetes.DefaultOperatorSecurityContext().AllowPrivilegeEscalation),
+			Equal(DefaultOperatorSecurityContext().AllowPrivilegeEscalation),
 		)
 		g.Eventually(Platform(t, ctx, ns)).ShouldNot(BeNil())
 		g.Eventually(PlatformHas(t, ctx, ns, func(pl *v1.IntegrationPlatform) bool {
@@ -185,16 +184,16 @@ func TestKustomizeDescoped(t *testing.T) {
 		// Check if restricted security context has been applied
 		operatorPod := OperatorPod(t, ctx, ns)()
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.RunAsNonRoot).To(
-			Equal(kubernetes.DefaultOperatorSecurityContext().RunAsNonRoot),
+			Equal(DefaultOperatorSecurityContext().RunAsNonRoot),
 		)
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.Capabilities).To(
-			Equal(kubernetes.DefaultOperatorSecurityContext().Capabilities),
+			Equal(DefaultOperatorSecurityContext().Capabilities),
 		)
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.SeccompProfile).To(
-			Equal(kubernetes.DefaultOperatorSecurityContext().SeccompProfile),
+			Equal(DefaultOperatorSecurityContext().SeccompProfile),
 		)
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation).To(
-			Equal(kubernetes.DefaultOperatorSecurityContext().AllowPrivilegeEscalation),
+			Equal(DefaultOperatorSecurityContext().AllowPrivilegeEscalation),
 		)
 		g.Eventually(Platform(t, ctx, ns)).ShouldNot(BeNil())
 

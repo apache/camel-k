@@ -57,33 +57,6 @@ func (n *NativeSourcesAdapter) NativeMavenProperty() string {
 	return "quarkus.native.sources-only"
 }
 
-// NativeAdapter used for Camel Quarkus runtime < 3.5.0.
-// Deprecated: use NativeSourcesAdapter instead.
-type NativeAdapter struct {
-}
-
-// BuildCommands -- .
-func (n *NativeAdapter) BuildCommands() string {
-	// We must override the local repo as it's not shared from the builder container
-	return "cd " + n.Directory() + " && ./mvnw $(cat MAVEN_CONTEXT) package -Dmaven.repo.local=./repo"
-}
-
-// Directory -- .
-func (n *NativeAdapter) Directory() string {
-	return "maven"
-}
-
-// TargetDirectory -- .
-func (n *NativeAdapter) TargetDirectory(ctxPath, runner string) string {
-	return filepath.Join(ctxPath, "maven", "target", runner)
-}
-
-// NativeMavenProperty -- .
-func (n *NativeAdapter) NativeMavenProperty() string {
-	// Empty on purpose.
-	return ""
-}
-
 // QuarkusRuntimeSupport is used to get the proper native configuration based on the Camel Quarkus version.
 func QuarkusRuntimeSupport(version string) QuarkusRuntimeNativeAdapter {
 	return &NativeSourcesAdapter{}

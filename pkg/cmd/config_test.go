@@ -130,9 +130,4 @@ func TestConfigDefaultNamespace(t *testing.T) {
 	output, err := ExecuteCommand(rootCmd, cmdConfig, "--list")
 	require.NoError(t, err)
 	assert.True(t, strings.Contains(output, "foo"), "The output is unexpected: "+output)
-	_, rootCmd, _ = initializeInstallCmdOptions(t)
-	_, err = ExecuteCommand(rootCmd, cmdInstall)
-	require.NoError(t, err)
-	// Check default namespace is set
-	assert.Equal(t, "foo", rootCmd.Flag("namespace").Value.String())
 }
