@@ -38,7 +38,7 @@ asciidoc:
     quarkus-version: 3.15.4
     kustomize-version: 4.5.4
     kubernetes-api-version: 0.33.4
-    operator-fwk-api-version: 0.31.0
+    operator-fwk-api-version: 0.33.0
     knative-api-version: 0.46.1
     service-binding-op-version: ""
-    prometheus-op-version: 0.82.2
+    prometheus-op-version: 0.85.0
