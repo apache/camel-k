@@ -16,7 +16,7 @@ require (
 	github.com/jpillora/backoff v1.0.0
 	github.com/magiconair/properties v1.8.10
 	github.com/mattn/go-shellwords v1.0.12
-	github.com/onsi/gomega v1.38.1
+	github.com/onsi/gomega v1.38.2
 	// go get github.com/openshift/api@release-4.21
 	github.com/openshift/api v0.0.0-20250820105013-6282350d0c39
 	github.com/operator-framework/api v0.33.0
@@ -47,7 +47,6 @@ require (
 	k8s.io/client-go v0.33.4
 	k8s.io/gengo v0.0.0-20240404160639-a0386bf69313
 	k8s.io/klog/v2 v2.130.1
-	k8s.io/kubectl v0.33.4
 	k8s.io/utils v0.0.0-20250604170112-4c0f3b243397
 	knative.dev/eventing v0.46.1
 	knative.dev/pkg v0.0.0-20250817152444-53ed1d53d232
