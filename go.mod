@@ -50,7 +50,7 @@ require (
 	k8s.io/utils v0.0.0-20250604170112-4c0f3b243397
 	knative.dev/eventing v0.46.2
 	knative.dev/pkg v0.0.0-20250821143151-4ffdcf6b3fa5
-	knative.dev/serving v0.46.1
+	knative.dev/serving v0.46.2
 	sigs.k8s.io/controller-runtime v0.21.0
 	sigs.k8s.io/structured-merge-diff/v4 v4.7.0
 )
@@ -141,7 +141,7 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20250610211856-8b98d1ed966a // indirect
-	knative.dev/networking v0.0.0-20250716125000-edb1a4a0c863 // indirect
+	knative.dev/networking v0.0.0-20250821144952-042b64d7bbde // indirect
 	sigs.k8s.io/json v0.0.0-20241014173422-cfa47c3a1cc8 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
