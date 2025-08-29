@@ -104,8 +104,7 @@ func TestLoadCamelQuarkusCatalogOk(t *testing.T) {
 }
 
 func TestGenerateQuarkusProjectWithBuildTimeProperties(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "go-test-camel-k-quarkus-with-props")
-	require.NoError(t, err)
+	tmpDir := t.TempDir()
 	defaultCatalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
@@ -167,8 +166,7 @@ func TestGenerateQuarkusProjectWithBuildTimeProperties(t *testing.T) {
 }
 
 func TestGenerateQuarkusProjectWithNativeSources(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "go-test-camel-k-quarkus-native")
-	require.NoError(t, err)
+	tmpDir := t.TempDir()
 	defaultCatalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
@@ -227,8 +225,7 @@ func TestGenerateQuarkusProjectWithNativeSources(t *testing.T) {
 }
 
 func TestBuildQuarkusRunner(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "go-test-camel-k-quarkus")
-	require.NoError(t, err)
+	tmpDir := t.TempDir()
 	defaultCatalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 	c, err := internal.NewFakeClient(&v1.CamelCatalog{

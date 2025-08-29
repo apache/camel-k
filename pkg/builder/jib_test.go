@@ -20,7 +20,6 @@ package builder
 import (
 	"context"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -32,8 +31,7 @@ import (
 )
 
 func TestJibBuildMavenArgs(t *testing.T) {
-	tmpMvnCtxDir, err := os.MkdirTemp("", "my-build-test")
-	require.NoError(t, err)
+	tmpMvnCtxDir := t.TempDir()
 	args := buildJibMavenArgs(tmpMvnCtxDir, "my-image", "my-base-image", true, nil)
 	expectedParams := strings.Split(
 		fmt.Sprintf("jib:build -Djib.disableUpdateChecks=true -P jib -Djib.to.image=my-image "+
@@ -43,8 +41,7 @@ func TestJibBuildMavenArgs(t *testing.T) {
 }
 
 func TestJibBuildMavenArgsWithPlatforms(t *testing.T) {
-	tmpMvnCtxDir, err := os.MkdirTemp("", "my-build-test")
-	require.NoError(t, err)
+	tmpMvnCtxDir := t.TempDir()
 	args := buildJibMavenArgs(tmpMvnCtxDir, "my-image", "my-base-image", true, []string{"amd64", "arm64"})
 	expectedParams := strings.Split(
 		fmt.Sprintf("jib:build -Djib.disableUpdateChecks=true -P jib -Djib.to.image=my-image "+
@@ -55,13 +52,12 @@ func TestJibBuildMavenArgsWithPlatforms(t *testing.T) {
 }
 
 func TestInjectJibProfileMissingPom(t *testing.T) {
-	tmpMvnCtxDir, err := os.MkdirTemp("", "ck-jib-profile-test")
-	require.NoError(t, err)
+	tmpMvnCtxDir := t.TempDir()
 	builderContext := builderContext{
 		C:    context.TODO(),
 		Path: tmpMvnCtxDir,
 	}
-	err = injectJibProfile(&builderContext)
+	err := injectJibProfile(&builderContext)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "no such file or directory")
 }
@@ -73,8 +69,7 @@ var poms = []string{
 }
 
 func TestInjectJibProfiles(t *testing.T) {
-	tmpMvnCtxDir, err := os.MkdirTemp("", "ck-jib-profile-test")
-	require.NoError(t, err)
+	tmpMvnCtxDir := t.TempDir()
 	builderContext := builderContext{
 		C:    context.TODO(),
 		Path: tmpMvnCtxDir,
@@ -82,7 +77,7 @@ func TestInjectJibProfiles(t *testing.T) {
 
 	for _, p := range poms {
 		pom := filepath.Join(tmpMvnCtxDir, "maven", "pom.xml")
-		err = util.WriteFileWithContent(pom, []byte(p))
+		err := util.WriteFileWithContent(pom, []byte(p))
 		require.NoError(t, err)
 		err = injectJibProfile(&builderContext)
 		require.NoError(t, err)

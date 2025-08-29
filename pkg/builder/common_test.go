@@ -28,8 +28,7 @@ import (
 )
 
 func TestProcessDependenciesSkipNested(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "ck-deps-dir")
-	require.NoError(t, err)
+	tmpDir := t.TempDir()
 	tmpDirNested, err := os.MkdirTemp(tmpDir, "nested")
 	require.NoError(t, err)
 	err = util.WriteFileWithContent(path.Join(tmpDir, "deps.jar"), []byte("bogus"))
@@ -48,8 +47,7 @@ func TestProcessDependenciesSkipNested(t *testing.T) {
 }
 
 func TestProcessDependenciesIncludeNested(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "ck-deps-dir")
-	require.NoError(t, err)
+	tmpDir := t.TempDir()
 	tmpDirNested, err := os.MkdirTemp(tmpDir, "nested")
 	require.NoError(t, err)
 	err = util.WriteFileWithContent(path.Join(tmpDir, "deps.jar"), []byte("bogus"))

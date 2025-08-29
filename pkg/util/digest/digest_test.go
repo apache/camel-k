@@ -53,7 +53,8 @@ func TestDigestUsesAnnotations(t *testing.T) {
 func TestDigestSHA1FromTempFile(t *testing.T) {
 	var tmpFile *os.File
 	var err error
-	if tmpFile, err = os.CreateTemp("", "camel-k-"); err != nil {
+	tempDir := t.TempDir()
+	if tmpFile, err = os.CreateTemp(tempDir, "camel-k-"); err != nil {
 		t.Error(err)
 	}
 

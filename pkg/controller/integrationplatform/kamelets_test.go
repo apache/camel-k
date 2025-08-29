@@ -42,7 +42,8 @@ func TestLoadKamelet(t *testing.T) {
 	itp := v1.NewIntegrationPlatform("itp-ns", "my-itp")
 	var tmpKameletFile *os.File
 	var err error
-	tmpKameletFile, err = os.CreateTemp("/tmp", "timer-source-*.kamelet.yaml")
+	tempDir := t.TempDir()
+	tmpKameletFile, err = os.CreateTemp(tempDir, "timer-source-*.kamelet.yaml")
 	require.NoError(t, err)
 	require.NoError(t, tmpKameletFile.Close())
 	require.NoError(t, os.WriteFile(tmpKameletFile.Name(), []byte(`apiVersion: camel.apache.org/v1
@@ -136,8 +137,7 @@ func TestDownloadKameletDependencyAndExtract(t *testing.T) {
 		t.Setenv("MAVEN_CMD", "mvn")
 	}
 
-	tmpDir, err := os.MkdirTemp("/tmp", "kamelets*")
-	assert.NoError(t, err)
+	tmpDir := t.TempDir()
 	// Load default catalog in order to get the default Camel version
 	c, err := camel.DefaultCatalog()
 	assert.NoError(t, err)

@@ -267,7 +267,8 @@ func TestBindServiceAccountName(t *testing.T) {
 }
 
 func TestBindOutputWithoutKubernetesCluster(t *testing.T) {
-	tmpFile, err := os.CreateTemp("", "camel-k-kubeconfig-*")
+	tempDir := t.TempDir()
+	tmpFile, err := os.CreateTemp(tempDir, "camel-k-kubeconfig-*")
 	require.NoError(t, err)
 
 	bindCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
