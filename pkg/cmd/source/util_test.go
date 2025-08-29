@@ -48,8 +48,11 @@ func TestPermissionDenied(t *testing.T) {
 		t.Skip("Test not reliably producing a result on a windows OS")
 	}
 
-	dir, err := os.MkdirTemp("/tmp", "camel-k-")
+	dir := t.TempDir()
+
+	fileInfo, err := os.Stat(dir)
 	require.NoError(t, err)
+	originalDirMode := fileInfo.Mode()
 
 	filename := filepath.Join(dir, "file.txt")
 	f, err := os.Create(filename)
@@ -63,6 +66,10 @@ func TestPermissionDenied(t *testing.T) {
 	// must not panic because a permission error
 	require.Error(t, err)
 	assert.False(t, value)
+
+	// restore original directory permissions, so that the Golang test framework can delete it
+	err = os.Chmod(dir, originalDirMode)
+	require.NoError(t, err)
 }
 
 func TestSupportedScheme(t *testing.T) {

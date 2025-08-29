@@ -32,8 +32,7 @@ import (
 )
 
 func TestGitPublicRepo(t *testing.T) {
-	tmpGitDir, err := os.MkdirTemp("", "ck-git-dir")
-	require.NoError(t, err)
+	tmpGitDir := t.TempDir()
 
 	ctx := &builderContext{
 		C:    context.TODO(),
@@ -45,7 +44,7 @@ func TestGitPublicRepo(t *testing.T) {
 		},
 	}
 
-	err = cloneProject(ctx)
+	err := cloneProject(ctx)
 	require.NoError(t, err)
 	f, err := os.Stat(path.Join(tmpGitDir, "maven", "pom.xml"))
 	require.NoError(t, err)
@@ -75,8 +74,7 @@ func TestGitPublicRepo(t *testing.T) {
 }
 
 func TestGitPrivateRepoFail(t *testing.T) {
-	tmpGitDir, err := os.MkdirTemp("", "ck-git-dir")
-	require.NoError(t, err)
+	tmpGitDir := t.TempDir()
 
 	ctx := &builderContext{
 		Path: tmpGitDir,
@@ -87,7 +85,7 @@ func TestGitPrivateRepoFail(t *testing.T) {
 		},
 	}
 
-	err = cloneProject(ctx)
+	err := cloneProject(ctx)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "authentication required")
 	_, err = os.Stat(path.Join(tmpGitDir, "maven", "pom.xml"))

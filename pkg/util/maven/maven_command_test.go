@@ -42,9 +42,8 @@ func TestGetMavenContext(t *testing.T) {
 }
 
 func TestGenerateMavenContext(t *testing.T) {
-	dir, err := os.MkdirTemp("", "ck-mvnconfig-*")
-	require.NoError(t, err)
-	err = generateMavenContext(dir, []string{"hello"}, nil)
+	dir := t.TempDir()
+	err := generateMavenContext(dir, []string{"hello"}, nil)
 	require.NoError(t, err)
 	f, err := os.Stat(path.Join(dir, ".mvn", "maven.config"))
 	require.NoError(t, err)
@@ -79,8 +78,7 @@ var expectPom = `<?xml version="1.0" encoding="UTF-8"?>
 </project>`
 
 func TestGenerateMavenPom(t *testing.T) {
-	dir, err := os.MkdirTemp("", "ck-mvnpom-*")
-	require.NoError(t, err)
+	dir := t.TempDir()
 	context := NewContext(dir)
 	project := NewProject()
 	project.GroupID = "gid"
@@ -92,7 +90,7 @@ func TestGenerateMavenPom(t *testing.T) {
 		NewDependency("mgid", "maid", "1.0.0"),
 	}
 
-	err = generateProjectPom(context, project)
+	err := generateProjectPom(context, project)
 	require.NoError(t, err)
 
 	p := path.Join(dir, "pom.xml")
@@ -105,8 +103,7 @@ func TestGenerateMavenPom(t *testing.T) {
 }
 
 func TestDoSettings(t *testing.T) {
-	dir, err := os.MkdirTemp("", "ck-mvnsettings-*")
-	require.NoError(t, err)
+	dir := t.TempDir()
 	// Required to simulate an existing maven local repo existing directory
 	localRepo, err := os.MkdirTemp(dir, "repo")
 	require.NoError(t, err)

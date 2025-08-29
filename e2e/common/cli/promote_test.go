@@ -24,7 +24,6 @@ package common
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
@@ -47,10 +46,7 @@ func TestKamelPromoteGitOps(t *testing.T) {
 		})
 		WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsTarget string) {
 			// Export to GitOps directory structure
-			tmpDir, err := os.MkdirTemp("", "ck-promote-it-*")
-			if err != nil {
-				t.Error(err)
-			}
+			tmpDir := t.TempDir()
 			g.Expect(Kamel(t, ctx, "promote", "yaml", "-n", ns, "--to", nsTarget, "--export-gitops-dir", tmpDir).Execute()).To(Succeed())
 			// Run the exported Integration as it would be any CICD
 			ExpectExecSucceed(t, g, Kubectl("apply", "-k", tmpDir+"/yaml/overlays/"+nsTarget))

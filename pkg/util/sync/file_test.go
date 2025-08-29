@@ -29,7 +29,8 @@ import (
 )
 
 func TestFile(t *testing.T) {
-	file, err := os.CreateTemp("", "camel-k-test-*")
+	tempDir := t.TempDir()
+	file, err := os.CreateTemp(tempDir, "camel-k-test-*")
 	require.NoError(t, err)
 	defer func() {
 		_ = os.Remove(file.Name())

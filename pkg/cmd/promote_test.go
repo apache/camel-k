@@ -595,10 +595,7 @@ func TestIntegrationGitOps(t *testing.T) {
 	srcCatalog := createTestCamelCatalog(srcPlatform)
 	dstCatalog := createTestCamelCatalog(dstPlatform)
 
-	tmpDir, err := os.MkdirTemp("", "ck-promote-it-*")
-	if err != nil {
-		t.Error(err)
-	}
+	tmpDir := t.TempDir()
 
 	_, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
 	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "--export-gitops-dir", tmpDir, "-n", "default")
@@ -702,10 +699,7 @@ func TestPipeGitOps(t *testing.T) {
 	srcCatalog := createTestCamelCatalog(srcPlatform)
 	dstCatalog := createTestCamelCatalog(dstPlatform)
 
-	tmpDir, err := os.MkdirTemp("", "ck-promote-pipe-*")
-	if err != nil {
-		t.Error(err)
-	}
+	tmpDir := t.TempDir()
 
 	_, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultKB, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
 	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-pipe-test", "--to", "prod-namespace", "--export-gitops-dir", tmpDir, "-n", "default")

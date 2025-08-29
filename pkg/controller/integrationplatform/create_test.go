@@ -119,8 +119,7 @@ func TestCatalogAlreadyPresent(t *testing.T) {
 
 func TestCreateNewCatalog(t *testing.T) {
 	// Set the m2 repo folder
-	m2RepoTmpDir, err := os.MkdirTemp("/tmp", "m2*")
-	assert.NoError(t, err)
+	m2RepoTmpDir := t.TempDir()
 	ip := v1.IntegrationPlatform{}
 	ip.Namespace = "ns"
 	ip.Name = "ck"
@@ -174,8 +173,7 @@ func TestCreateNewCatalog(t *testing.T) {
 	action.InjectClient(c)
 
 	// Set the folder where to install testing kamelets
-	tmpDir, err := os.MkdirTemp("/tmp", "kamelets*")
-	assert.NoError(t, err)
+	tmpDir := t.TempDir()
 	defer os.Unsetenv(kameletDirEnv)
 	os.Setenv(kameletDirEnv, tmpDir)
 	answer, err := action.Handle(context.TODO(), &ip)
