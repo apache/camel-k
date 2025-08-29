@@ -300,7 +300,8 @@ func TestExtractProperties_SingleKeyValue(t *testing.T) {
 func TestExtractProperties_FromFile(t *testing.T) {
 	var tmpFile1 *os.File
 	var err error
-	if tmpFile1, err = os.CreateTemp("", "camel-k-*.properties"); err != nil {
+	tempDir := t.TempDir()
+	if tmpFile1, err = os.CreateTemp(tempDir, "camel-k-*.properties"); err != nil {
 		t.Error(err)
 	}
 
@@ -324,7 +325,8 @@ func TestExtractProperties_FromFile(t *testing.T) {
 func TestExtractPropertiesFromFileAndSingleValue(t *testing.T) {
 	var tmpFile1 *os.File
 	var err error
-	if tmpFile1, err = os.CreateTemp("", "camel-k-*.properties"); err != nil {
+	tempDir := t.TempDir()
+	if tmpFile1, err = os.CreateTemp(tempDir, "camel-k-*.properties"); err != nil {
 		t.Error(err)
 	}
 
@@ -351,7 +353,8 @@ func TestExtractPropertiesFromFileAndSingleValue(t *testing.T) {
 func TestAddPropertyFile(t *testing.T) {
 	var tmpFile *os.File
 	var err error
-	if tmpFile, err = os.CreateTemp("", "camel-k-"); err != nil {
+	tempDir := t.TempDir()
+	if tmpFile, err = os.CreateTemp(tempDir, "camel-k-"); err != nil {
 		t.Error(err)
 	}
 
@@ -582,7 +585,8 @@ public class Sample extends RouteBuilder {
 func TestOutputYaml(t *testing.T) {
 	var tmpFile *os.File
 	var err error
-	if tmpFile, err = os.CreateTemp("", "camel-k-"); err != nil {
+	tempDir := t.TempDir()
+	if tmpFile, err = os.CreateTemp(tempDir, "camel-k-"); err != nil {
 		t.Error(err)
 	}
 
@@ -616,7 +620,8 @@ status: {}
 func TestTrait(t *testing.T) {
 	var tmpFile *os.File
 	var err error
-	if tmpFile, err = os.CreateTemp("", "camel-k-"); err != nil {
+	tempDir := t.TempDir()
+	if tmpFile, err = os.CreateTemp(tempDir, "camel-k-"); err != nil {
 		t.Error(err)
 	}
 
@@ -653,7 +658,8 @@ status: {}
 func TestMissingTrait(t *testing.T) {
 	var tmpFile *os.File
 	var err error
-	if tmpFile, err = os.CreateTemp("", "camel-k-"); err != nil {
+	tempDir := t.TempDir()
+	if tmpFile, err = os.CreateTemp(tempDir, "camel-k-"); err != nil {
 		t.Error(err)
 	}
 
@@ -703,7 +709,8 @@ func TestResolveJsonPodTemplateWithSupplementalGroups(t *testing.T) {
 func TestIntegrationServiceAccountName(t *testing.T) {
 	var tmpFile *os.File
 	var err error
-	if tmpFile, err = os.CreateTemp("", "camel-k-"); err != nil {
+	tempDir := t.TempDir()
+	if tmpFile, err = os.CreateTemp(tempDir, "camel-k-"); err != nil {
 		t.Error(err)
 	}
 
@@ -720,7 +727,8 @@ func TestIntegrationServiceAccountName(t *testing.T) {
 func TestFileProperties(t *testing.T) {
 	var tmpFile1 *os.File
 	var err error
-	if tmpFile1, err = os.CreateTemp("", "camel-k-*.properties"); err != nil {
+	tempDir := t.TempDir()
+	if tmpFile1, err = os.CreateTemp(tempDir, "camel-k-*.properties"); err != nil {
 		t.Error(err)
 	}
 
@@ -732,7 +740,7 @@ func TestFileProperties(t *testing.T) {
 	`), 0o400))
 
 	var tmpFile *os.File
-	if tmpFile, err = os.CreateTemp("", "camel-k-"); err != nil {
+	if tmpFile, err = os.CreateTemp(tempDir, "camel-k-"); err != nil {
 		t.Error(err)
 	}
 
@@ -752,7 +760,8 @@ func TestFileProperties(t *testing.T) {
 func TestPropertyShouldNotExpand(t *testing.T) {
 	var tmpFile1 *os.File
 	var err error
-	if tmpFile1, err = os.CreateTemp("", "camel-k-*.properties"); err != nil {
+	tempDir := t.TempDir()
+	if tmpFile1, err = os.CreateTemp(tempDir, "camel-k-*.properties"); err != nil {
 		t.Error(err)
 	}
 
@@ -762,7 +771,7 @@ func TestPropertyShouldNotExpand(t *testing.T) {
 	`), 0o400))
 
 	var tmpFile *os.File
-	if tmpFile, err = os.CreateTemp("", "camel-k-"); err != nil {
+	if tmpFile, err = os.CreateTemp(tempDir, "camel-k-"); err != nil {
 		t.Error(err)
 	}
 
@@ -784,7 +793,8 @@ func TestPropertyShouldNotExpand(t *testing.T) {
 func TestRunOutput(t *testing.T) {
 	var tmpFile1 *os.File
 	var err error
-	if tmpFile1, err = os.CreateTemp("", "camel-k-*.yaml"); err != nil {
+	tempDir := t.TempDir()
+	if tmpFile1, err = os.CreateTemp(tempDir, "camel-k-*.yaml"); err != nil {
 		t.Error(err)
 	}
 	defer tmpFile1.Close()
@@ -811,10 +821,7 @@ func TestRunOutput(t *testing.T) {
 }
 
 func TestRunGlob(t *testing.T) {
-	dir, err := os.MkdirTemp("", "camel-k-TestRunGlob-*")
-	if err != nil {
-		t.Error(err)
-	}
+	dir := t.TempDir()
 
 	pattern := "camel-k-*.yaml"
 
@@ -846,10 +853,7 @@ func TestRunGlob(t *testing.T) {
 }
 
 func TestRunGlobAllFiles(t *testing.T) {
-	dir, err := os.MkdirTemp("", "camel-k-TestRunGlobAllFiles-*")
-	if err != nil {
-		t.Error(err)
-	}
+	dir := t.TempDir()
 
 	pattern := "camel-k-*.yaml"
 
@@ -881,10 +885,7 @@ func TestRunGlobAllFiles(t *testing.T) {
 }
 
 func TestRunGlobChange(t *testing.T) {
-	dir, err := os.MkdirTemp("", "camel-k-TestRunGlobChange-*")
-	if err != nil {
-		t.Error(err)
-	}
+	dir := t.TempDir()
 
 	pattern := "camel-k-*.yaml"
 
@@ -924,7 +925,8 @@ func TestRunGlobChange(t *testing.T) {
 }
 
 func TestRunOutputWithoutKubernetesCluster(t *testing.T) {
-	tmpFile, err := os.CreateTemp("", "camel-k-kubeconfig-*")
+	tempDir := t.TempDir()
+	tmpFile, err := os.CreateTemp(tempDir, "camel-k-kubeconfig-*")
 	require.NoError(t, err)
 
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
