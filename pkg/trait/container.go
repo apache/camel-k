@@ -20,6 +20,8 @@ package trait
 import (
 	"fmt"
 	"path/filepath"
+	"strconv"
+	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -61,6 +63,14 @@ const (
 type containerTrait struct {
 	BasePlatformTrait
 	traitv1.ContainerTrait `property:",squash"`
+	containerPorts         []containerPort
+}
+
+// containerPort is supporting port parsing.
+type containerPort struct {
+	name     string
+	port     int32
+	protocol string
 }
 
 func newContainerTrait() Trait {
@@ -89,6 +99,11 @@ func (t *containerTrait) Configure(e *Environment) (bool, *TraitCondition, error
 	if !isValidPullPolicy(t.ImagePullPolicy) {
 		return false, nil, fmt.Errorf("unsupported pull policy %s", t.ImagePullPolicy)
 	}
+	containerPorts, err := t.parseContainerPorts()
+	if err != nil {
+		return false, nil, err
+	}
+	t.containerPorts = containerPorts
 
 	return true, nil, nil
 }
@@ -189,6 +204,10 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 		return err
 	}
 	t.configureResources(&container)
+	if !knative {
+		// Knative does not like anybody touching the container ports
+		t.configurePorts(&container)
+	}
 	if knative || ptr.Deref(t.Expose, false) {
 		t.configureService(e, &container, knative)
 	}
@@ -202,6 +221,43 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	}
 
 	return nil
+}
+
+func (t *containerTrait) configurePorts(container *corev1.Container) {
+	for _, cp := range t.containerPorts {
+		containerPort := corev1.ContainerPort{
+			Name:          cp.name,
+			ContainerPort: cp.port,
+			Protocol:      corev1.Protocol(cp.protocol),
+		}
+		container.Ports = append(container.Ports, containerPort)
+	}
+}
+
+func (t *containerTrait) parseContainerPorts() ([]containerPort, error) {
+	containerPorts := make([]containerPort, 0, len(t.Ports))
+	for _, port := range t.Ports {
+		portSplit := strings.Split(port, ";")
+		if len(portSplit) < 2 {
+			return nil, fmt.Errorf("could not parse container port %s properly: expected format \"port-name;port-number[;port-protocol]\"", port)
+		}
+		portInt32, err := strconv.ParseInt(portSplit[1], 10, 32)
+		if err != nil {
+			return nil, fmt.Errorf("could not parse container port number in %s properly: expected port-number as a number", port)
+		}
+		cp := containerPort{
+			name: portSplit[0],
+			port: int32(portInt32),
+		}
+		if len(portSplit) > 2 {
+			cp.protocol = portSplit[2]
+		} else {
+			cp.protocol = "TCP"
+		}
+		containerPorts = append(containerPorts, cp)
+	}
+
+	return containerPorts, nil
 }
 
 func (t *containerTrait) configureService(e *Environment, container *corev1.Container, isKnative bool) {

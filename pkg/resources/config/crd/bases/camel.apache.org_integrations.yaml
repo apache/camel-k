@@ -7071,8 +7071,8 @@ spec:
                         description: 'Deprecated: no longer in use.'
                         type: boolean
                       expose:
-                        description: Can be used to enable/disable exposure via kubernetes
-                          Service.
+                        description: Can be used to enable/disable http exposure via
+                          kubernetes Service.
                         type: boolean
                       image:
                         description: |-
@@ -7100,15 +7100,24 @@ spec:
                           by default.
                         type: string
                       port:
-                        description: To configure a different port exposed by the
-                          container (default `8080`).
+                        description: To configure a different http port exposed by
+                          the container (default `8080`).
                         format: int32
                         type: integer
                       portName:
-                        description: To configure a different port name for the port
-                          exposed by the container. It defaults to `http` only when
-                          the `expose` parameter is true.
+                        description: |-
+                          To configure a different http port name for the port exposed by the container.
+                          It defaults to `http` only when the `expose` parameter is true.
                         type: string
+                      ports:
+                        description: |-
+                          List of container ports available in the container (syntax: <port-name>;<port-number>[;port-protocol]).
+                          When omitted, `port-protocol` (admitted values `TCP`, `UDP` or `SCTP`) is `TCP`.
+                          Don't use this for the primary http managed port (for which case you need to use `portName` and `port`).
+                          Don't use in Knative based environments.
+                        items:
+                          type: string
+                        type: array
                       requestCPU:
                         description: The minimum amount of CPU required (default 125
                           millicores).
@@ -7135,13 +7144,13 @@ spec:
                         - RuntimeDefault
                         type: string
                       servicePort:
-                        description: To configure under which service port the container
-                          port is to be exposed (default `80`).
+                        description: To configure under which service port the http
+                          container port is to be exposed (default `80`).
                         format: int32
                         type: integer
                       servicePortName:
                         description: To configure under which service port name the
-                          container port is to be exposed (default `http`).
+                          http container port is to be exposed (default `http`).
                         type: string
                     type: object
                   cron:
@@ -8465,6 +8474,16 @@ spec:
                           Enable Service to be exposed as NodePort (default `false`).
                           Deprecated: Use service type instead.
                         type: boolean
+                      ports:
+                        description: |-
+                          List of container ports available in the container to expose
+                          (syntax: <port-name>;<port-number>;<container-port-number>[;<port-protocol]).
+                          When omitted, `port-protocol` (admitted values `TCP`, `UDP` or `SCTP`) is `TCP`.
+                          Don't use this for the primary http managed port (which is managed by container trait).
+                          Don't use in Knative based environments.
+                        items:
+                          type: string
+                        type: array
                       type:
                         description: The type of service to be used, either 'ClusterIP',
                           'NodePort' or 'LoadBalancer'.
@@ -9131,8 +9150,8 @@ spec:
                         description: 'Deprecated: no longer in use.'
                         type: boolean
                       expose:
-                        description: Can be used to enable/disable exposure via kubernetes
-                          Service.
+                        description: Can be used to enable/disable http exposure via
+                          kubernetes Service.
                         type: boolean
                       image:
                         description: |-
@@ -9160,15 +9179,24 @@ spec:
                           by default.
                         type: string
                       port:
-                        description: To configure a different port exposed by the
-                          container (default `8080`).
+                        description: To configure a different http port exposed by
+                          the container (default `8080`).
                         format: int32
                         type: integer
                       portName:
-                        description: To configure a different port name for the port
-                          exposed by the container. It defaults to `http` only when
-                          the `expose` parameter is true.
+                        description: |-
+                          To configure a different http port name for the port exposed by the container.
+                          It defaults to `http` only when the `expose` parameter is true.
                         type: string
+                      ports:
+                        description: |-
+                          List of container ports available in the container (syntax: <port-name>;<port-number>[;port-protocol]).
+                          When omitted, `port-protocol` (admitted values `TCP`, `UDP` or `SCTP`) is `TCP`.
+                          Don't use this for the primary http managed port (for which case you need to use `portName` and `port`).
+                          Don't use in Knative based environments.
+                        items:
+                          type: string
+                        type: array
                       requestCPU:
                         description: The minimum amount of CPU required (default 125
                           millicores).
@@ -9195,13 +9223,13 @@ spec:
                         - RuntimeDefault
                         type: string
                       servicePort:
-                        description: To configure under which service port the container
-                          port is to be exposed (default `80`).
+                        description: To configure under which service port the http
+                          container port is to be exposed (default `80`).
                         format: int32
                         type: integer
                       servicePortName:
                         description: To configure under which service port name the
-                          container port is to be exposed (default `http`).
+                          http container port is to be exposed (default `http`).
                         type: string
                     type: object
                   cron:
@@ -10525,6 +10553,16 @@ spec:
                           Enable Service to be exposed as NodePort (default `false`).
                           Deprecated: Use service type instead.
                         type: boolean
+                      ports:
+                        description: |-
+                          List of container ports available in the container to expose
+                          (syntax: <port-name>;<port-number>;<container-port-number>[;<port-protocol]).
+                          When omitted, `port-protocol` (admitted values `TCP`, `UDP` or `SCTP`) is `TCP`.
+                          Don't use this for the primary http managed port (which is managed by container trait).
+                          Don't use in Knative based environments.
+                        items:
+                          type: string
+                        type: array
                       type:
                         description: The type of service to be used, either 'ClusterIP',
                           'NodePort' or 'LoadBalancer'.

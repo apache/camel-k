@@ -26,6 +26,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -830,4 +831,95 @@ func TestServiceAnnotationsAndLables(t *testing.T) {
 	assert.Equal(t, "v1", s.Labels["label-1"])
 	assert.Equal(t, "v2", s.Labels["label-2"])
 	assert.Equal(t, ServiceTestName, s.Labels[v1.IntegrationLabel])
+}
+
+func TestServicePorts(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	client, _ := internal.NewFakeClient()
+	traitCatalog := NewCatalog(nil)
+
+	compressedRoute, err := gzip.CompressBase64([]byte(`from("timer:test").log("hello")`))
+	require.NoError(t, err)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Client:       client,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      ServiceTestName,
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKubernetes,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:        "routes.js",
+							Content:     string(compressedRoute),
+							Compression: true,
+						},
+						Language: v1.LanguageJavaScript,
+					},
+				},
+				Traits: v1.Traits{
+					Service: &traitv1.ServiceTrait{
+						Ports: []string{"my-port-1;1;8001", "my-port-udp;2;8002;UDP"},
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
+				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      kubernetes.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	_, _, err = traitCatalog.apply(&environment)
+
+	require.NoError(t, err)
+	s := environment.Resources.GetService(func(service *corev1.Service) bool {
+		return service.Name == ServiceTestName
+	})
+	assert.NotNil(t, s)
+	// TODO: while we don't deprecate the usage of container.port
+	// we must assume that the default port is exposed as there is no way to
+	// know if the managed port is available or not
+	//assert.Len(t, s.Spec.Ports, 2)
+	assert.Len(t, s.Spec.Ports, 3)
+	assert.Contains(t, s.Spec.Ports, corev1.ServicePort{
+		Name:       "my-port-1",
+		Port:       1,
+		TargetPort: intstr.FromInt32(8001),
+		Protocol:   corev1.ProtocolTCP,
+	})
+	assert.Contains(t, s.Spec.Ports, corev1.ServicePort{
+		Name:       "my-port-udp",
+		Port:       2,
+		TargetPort: intstr.FromInt32(8002),
+		Protocol:   corev1.ProtocolUDP,
+	})
 }

@@ -17,8 +17,8 @@ limitations under the License.
 
 package trait
 
-// The Service trait exposes the integration with a Service resource so that it can be accessed by other applications
-// (or integrations) in the same namespace.
+// The Service trait exposes the Integration with a Service resource so that it can be accessed by other applications
+// (or Integrations) in the same namespace.
 //
 // NOTE: this trait is automatically disabled if the Knative Service trait is enabled.
 //
@@ -39,6 +39,12 @@ type ServiceTrait struct {
 	Annotations map[string]string `property:"annotations" json:"annotations,omitempty"`
 	// The labels added to the Service object.
 	Labels map[string]string `property:"labels" json:"labels,omitempty"`
+	// List of container ports available in the container to expose
+	// (syntax: <port-name>;<port-number>;<container-port-number>[;<port-protocol]).
+	// When omitted, `port-protocol` (admitted values `TCP`, `UDP` or `SCTP`) is `TCP`.
+	// Don't use this for the primary http managed port (which is managed by container trait).
+	// Don't use in Knative based environments.
+	Ports []string `property:"ports" json:"ports,omitempty"`
 }
 
 type ServiceType string

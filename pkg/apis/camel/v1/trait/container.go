@@ -36,15 +36,21 @@ type ContainerTrait struct {
 	LimitCPU string `property:"limit-cpu" json:"limitCPU,omitempty"`
 	// The maximum amount of memory to be provided (default 512 Mi).
 	LimitMemory string `property:"limit-memory" json:"limitMemory,omitempty"`
-	// Can be used to enable/disable exposure via kubernetes Service.
+	// List of container ports available in the container (syntax: <port-name>;<port-number>[;port-protocol]).
+	// When omitted, `port-protocol` (admitted values `TCP`, `UDP` or `SCTP`) is `TCP`.
+	// Don't use this for the primary http managed port (for which case you need to use `portName` and `port`).
+	// Don't use in Knative based environments.
+	Ports []string `property:"ports" json:"ports,omitempty"`
+	// Can be used to enable/disable http exposure via kubernetes Service.
 	Expose *bool `property:"expose" json:"expose,omitempty"`
-	// To configure a different port exposed by the container (default `8080`).
+	// To configure a different http port exposed by the container (default `8080`).
 	Port int32 `property:"port" json:"port,omitempty"`
-	// To configure a different port name for the port exposed by the container. It defaults to `http` only when the `expose` parameter is true.
+	// To configure a different http port name for the port exposed by the container.
+	// It defaults to `http` only when the `expose` parameter is true.
 	PortName string `property:"port-name" json:"portName,omitempty"`
-	// To configure under which service port the container port is to be exposed (default `80`).
+	// To configure under which service port the http container port is to be exposed (default `80`).
 	ServicePort int32 `property:"service-port" json:"servicePort,omitempty"`
-	// To configure under which service port name the container port is to be exposed (default `http`).
+	// To configure under which service port name the http container port is to be exposed (default `http`).
 	ServicePortName string `property:"service-port-name" json:"servicePortName,omitempty"`
 	// The main container name. It's named `integration` by default.
 	Name string `property:"name" json:"name,omitempty"`
