@@ -211,8 +211,8 @@ github.com/opencontainers/go-digest v1.0.0 h1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8
 github.com/opencontainers/go-digest v1.0.0/go.mod h1:0JzlMkj0TRzQZfJkVvzbP0HBR3IKzErnv2BNG4W4MAM=
 github.com/openshift/api v0.0.0-20250820105013-6282350d0c39 h1:X42iTyo3AAHS36BkiBkU8FvxfK8NEDmnBi3QrnaCIlA=
 github.com/openshift/api v0.0.0-20250820105013-6282350d0c39/go.mod h1:SPLf21TYPipzCO67BURkCfK6dcIIxx0oNRVWaOyRcXM=
-github.com/operator-framework/api v0.33.0 h1:Tdu9doXz6Key2riIiP3/JPahHEgFBXAqyWQN4kOITS8=
-github.com/operator-framework/api v0.33.0/go.mod h1:sEh1VqwQCJUj+l/rKNWPDEJdFNAbdTu8QcM+x+wdYYo=
+github.com/operator-framework/api v0.34.0 h1:REiEaYhG1CWmDoajdcAdZqtgoljWG+ixMY59vUX5pFI=
+github.com/operator-framework/api v0.34.0/go.mod h1:eGncUNIYvWtfGCCKmLzGXvoi3P0TDf3Yd/Z0Sn9E6SQ=
 github.com/pelletier/go-toml/v2 v2.2.3 h1:YmeHyLY8mFWbdkNWwpr+qIL2bEqT0o95WSdkNHvL12M=
 github.com/pelletier/go-toml/v2 v2.2.3/go.mod h1:MfCQTFTvCcUyyvvwm1+G6H/jORL20Xlb6rzQu9GuUkc=
 github.com/pjbgf/sha1cd v0.3.2 h1:a9wb0bp1oC2TGwStyn0Umc/IGKQnEgF0vVaZ8QF8eo4=
