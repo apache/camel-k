@@ -181,6 +181,11 @@ func (in *ContainerTrait) DeepCopyInto(out *ContainerTrait) {
 		*out = new(bool)
 		**out = **in
 	}
+	if in.Ports != nil {
+		in, out := &in.Ports, &out.Ports
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	if in.Expose != nil {
 		in, out := &in.Expose, &out.Expose
 		*out = new(bool)
@@ -1251,6 +1256,11 @@ func (in *ServiceTrait) DeepCopyInto(out *ServiceTrait) {
 		for key, val := range *in {
 			(*out)[key] = val
 		}
+	}
+	if in.Ports != nil {
+		in, out := &in.Ports, &out.Ports
+		*out = make([]string, len(*in))
+		copy(*out, *in)
 	}
 }
 

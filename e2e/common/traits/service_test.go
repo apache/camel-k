@@ -24,13 +24,16 @@ package common
 
 import (
 	"context"
+	"fmt"
 	"testing"
+	"time"
 
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 func TestServiceTrait(t *testing.T) {
@@ -95,5 +98,35 @@ func TestServiceTrait(t *testing.T) {
 			//
 			g.Eventually(ServicesByType(t, ctx, ns, corev1.ServiceTypeLoadBalancer), TestTimeoutLong).ShouldNot(BeEmpty())
 		})
+	})
+}
+
+func TestPortsServiceTrait(t *testing.T) {
+	t.Parallel()
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		t.Run("Service on port 8085", func(t *testing.T) {
+			name := RandomizedSuffixName("svc")
+			g.Expect(KamelRun(t, ctx, ns, "files/PlatformHttpServer.java",
+				"-p", "quarkus.http.port=8085",
+				"-t", "container.ports=hello;8085",
+				"-t", "service.ports=hello;85;8085",
+				"--name", name,
+			).Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady)).
+				Should(Equal(corev1.ConditionTrue))
+			// We cannot use the health trait to make sure the application is ready to
+			// get requests as we're sharing the service port.
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutMedium).Should(ContainSubstring("Listening on: http://0.0.0.0:8085"))
+
+			response, err := TestClient(t).CoreV1().RESTClient().Get().
+				AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/services/%s:%d/proxy/hello/", ns, name, 85)).
+				SetHeader("name", "service-test").
+				Timeout(30 * time.Second).
+				DoRaw(ctx)
+
+			g.Expect(err).ToNot(HaveOccurred())
+			g.Expect(string(response)).To(Equal("Hello service-test"))
+		})
+
 	})
 }

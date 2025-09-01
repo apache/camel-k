@@ -676,6 +676,71 @@ func TestUserDefaultResources(t *testing.T) {
 	assert.Equal(t, resource.MustParse("128Mi"), *d.Spec.Template.Spec.Containers[0].Resources.Requests.Memory())
 }
 
+func TestContainerPorts(t *testing.T) {
+	environment := createSettingContextEnvironment(t, v1.TraitProfileKubernetes)
+	environment.Integration.Spec.Traits = v1.Traits{
+		Container: &traitv1.ContainerTrait{
+			Ports: []string{"aPort;1234", "anotherPort;12345;UDP"},
+		},
+	}
+	traitCatalog := NewCatalog(nil)
+
+	conditions, traits, err := traitCatalog.apply(environment)
+
+	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
+	assert.NotEmpty(t, conditions)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("deployment"))
+	assert.NotNil(t, environment.GetTrait("container"))
+
+	d := environment.Resources.GetDeploymentForIntegration(environment.Integration)
+
+	assert.NotNil(t, d)
+	assert.Len(t, d.Spec.Template.Spec.Containers, 1)
+	assert.Len(t, d.Spec.Template.Spec.Containers[0].Ports, 2)
+	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Ports, corev1.ContainerPort{
+		Name:          "aPort",
+		ContainerPort: 1234,
+		Protocol:      corev1.ProtocolTCP,
+	})
+	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Ports, corev1.ContainerPort{
+		Name:          "anotherPort",
+		ContainerPort: 12345,
+		Protocol:      corev1.ProtocolUDP,
+	})
+}
+
+func TestContainerPortsSyntaxError(t *testing.T) {
+	environment := createSettingContextEnvironment(t, v1.TraitProfileKubernetes)
+	environment.Integration.Spec.Traits = v1.Traits{
+		Container: &traitv1.ContainerTrait{
+			Ports: []string{"aPort;notAnInt"},
+		},
+	}
+	traitCatalog := NewCatalog(nil)
+	_, _, err := traitCatalog.apply(environment)
+
+	require.Error(t, err)
+	assert.Equal(t,
+		"container trait configuration failed: could not parse container port number in aPort;notAnInt properly: "+
+			"expected port-number as a number",
+		err.Error())
+
+	environment.Integration.Spec.Traits = v1.Traits{
+		Container: &traitv1.ContainerTrait{
+			Ports: []string{"wrong"},
+		},
+	}
+	_, _, err = traitCatalog.apply(environment)
+
+	require.Error(t, err)
+	assert.Equal(t,
+		"container trait configuration failed: could not parse container port wrong properly: "+
+			"expected format \"port-name;port-number[;port-protocol]\"",
+		err.Error())
+}
+
 func createSettingContextEnvironment(t *testing.T, profile v1.TraitProfile) *Environment {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)

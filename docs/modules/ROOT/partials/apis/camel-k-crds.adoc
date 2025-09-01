@@ -6670,40 +6670,51 @@ string
 
 The maximum amount of memory to be provided (default 512 Mi).
 
+|`ports` +
+[]string
+|
+
+
+List of container ports available in the container (syntax: <port-name>;<port-number>[;port-protocol]).
+When omitted, `port-protocol` (admitted values `TCP`, `UDP` or `SCTP`) is `TCP`.
+Don't use this for the primary http managed port (for which case you need to use `portName` and `port`).
+Don't use in Knative based environments.
+
 |`expose` +
 bool
 |
 
 
-Can be used to enable/disable exposure via kubernetes Service.
+Can be used to enable/disable http exposure via kubernetes Service.
 
 |`port` +
 int32
 |
 
 
-To configure a different port exposed by the container (default `8080`).
+To configure a different http port exposed by the container (default `8080`).
 
 |`portName` +
 string
 |
 
 
-To configure a different port name for the port exposed by the container. It defaults to `http` only when the `expose` parameter is true.
+To configure a different http port name for the port exposed by the container.
+It defaults to `http` only when the `expose` parameter is true.
 
 |`servicePort` +
 int32
 |
 
 
-To configure under which service port the container port is to be exposed (default `80`).
+To configure under which service port the http container port is to be exposed (default `80`).
 
 |`servicePortName` +
 string
 |
 
 
-To configure under which service port name the container port is to be exposed (default `http`).
+To configure under which service port name the http container port is to be exposed (default `http`).
 
 |`name` +
 string
@@ -8957,8 +8968,8 @@ List of Services in the form [[apigroup/]version:]kind:[namespace/]name
 
 * <<#_camel_apache_org_v1_Traits, Traits>>
 
-The Service trait exposes the integration with a Service resource so that it can be accessed by other applications
-(or integrations) in the same namespace.
+The Service trait exposes the Integration with a Service resource so that it can be accessed by other applications
+(or Integrations) in the same namespace.
 
 NOTE: this trait is automatically disabled if the Knative Service trait is enabled.
 
@@ -9012,6 +9023,17 @@ map[string]string
 
 
 The labels added to the Service object.
+
+|`ports` +
+[]string
+|
+
+
+List of container ports available in the container to expose
+(syntax: <port-name>;<port-number>;<container-port-number>[;<port-protocol]).
+When omitted, `port-protocol` (admitted values `TCP`, `UDP` or `SCTP`) is `TCP`.
+Don't use this for the primary http managed port (which is managed by container trait).
+Don't use in Knative based environments.
 
 
 |===

@@ -19,9 +19,12 @@ package trait
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -37,6 +40,15 @@ const (
 type serviceTrait struct {
 	BaseTrait
 	traitv1.ServiceTrait `property:",squash"`
+	servicePorts         []servicePort
+}
+
+// servicePort is supporting port parsing.
+type servicePort struct {
+	name          string
+	containerPort int32
+	port          int32
+	protocol      string
 }
 
 func newServiceTrait() Trait {
@@ -90,7 +102,13 @@ func (t *serviceTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 		t.Enabled = ptr.To(exposeHTTPServices)
 	}
 
-	return ptr.Deref(t.Enabled, false), nil, nil
+	servicePorts, err := t.parseServicePorts()
+	if err != nil {
+		return false, nil, err
+	}
+	t.servicePorts = servicePorts
+
+	return ptr.Deref(t.Enabled, false) || len(t.servicePorts) > 0, nil, nil
 }
 
 func (t *serviceTrait) Apply(e *Environment) error {
@@ -128,6 +146,7 @@ func (t *serviceTrait) getServiceFor(itName, itNamespace string) *corev1.Service
 	for k, v := range t.Labels {
 		labels[k] = v
 	}
+	ports := t.getServicePorts()
 	return &corev1.Service{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Service",
@@ -140,10 +159,58 @@ func (t *serviceTrait) getServiceFor(itName, itNamespace string) *corev1.Service
 			Annotations: t.Annotations,
 		},
 		Spec: corev1.ServiceSpec{
-			Ports: []corev1.ServicePort{},
+			Ports: ports,
 			Selector: map[string]string{
 				v1.IntegrationLabel: itName,
 			},
 		},
 	}
+}
+
+func (t *serviceTrait) parseServicePorts() ([]servicePort, error) {
+	servicePorts := make([]servicePort, 0, len(t.Ports))
+	for _, port := range t.Ports {
+		portSplit := strings.Split(port, ";")
+		if len(portSplit) < 3 {
+			return nil, fmt.Errorf("could not parse service port %s properly: expected format "+
+				"\"port-name;port-number;container-port-number[;port-protocol]\"", port)
+		}
+		servicePortInt32, err := strconv.ParseInt(portSplit[1], 10, 32)
+		if err != nil {
+			return nil, fmt.Errorf("could not parse port number in %s properly: expected port-number as a number", port)
+		}
+		containerPortInt32, err := strconv.ParseInt(portSplit[2], 10, 32)
+		if err != nil {
+			return nil, fmt.Errorf("could not parse container port number in %s properly: expected container-port-number as a number", port)
+		}
+		sp := servicePort{
+			name:          portSplit[0],
+			containerPort: int32(containerPortInt32),
+			port:          int32(servicePortInt32),
+		}
+		protocol := "TCP"
+		if len(portSplit) > 3 {
+			protocol = portSplit[3]
+		}
+		sp.protocol = protocol
+		servicePorts = append(servicePorts, sp)
+	}
+
+	return servicePorts, nil
+}
+
+func (t *serviceTrait) getServicePorts() []corev1.ServicePort {
+	ports := make([]corev1.ServicePort, 0, len(t.servicePorts))
+	for _, port := range t.servicePorts {
+		p := corev1.ServicePort{
+			Name: port.name,
+			Port: port.port,
+			TargetPort: intstr.IntOrString{
+				IntVal: port.containerPort,
+			},
+			Protocol: corev1.Protocol(port.protocol),
+		}
+		ports = append(ports, p)
+	}
+	return ports
 }
