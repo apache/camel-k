@@ -48,8 +48,9 @@ func TestHealthTrait(t *testing.T) {
 			name := RandomizedSuffixName("java")
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java",
 				"-t", "health.enabled=true",
-				"-t", "jolokia.enabled=true", "-t", "jolokia.use-ssl-client-authentication=false",
-				"-t", "jolokia.protocol=http",
+				"-t", "jvm.agents=jolokia;https://repo1.maven.org/maven2/org/jolokia/jolokia-agent-jvm/2.3.0/jolokia-agent-jvm-2.3.0-javaagent.jar;host=*",
+				"-t", "container.ports=jolokia;8778",
+				"-d", "camel:management",
 				"--name", name).Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -145,8 +146,9 @@ func TestHealthTrait(t *testing.T) {
 			name := RandomizedSuffixName("java")
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java",
 				"-t", "health.enabled=true",
-				"-t", "jolokia.enabled=true", "-t", "jolokia.use-ssl-client-authentication=false",
-				"-t", "jolokia.protocol=http",
+				"-t", "jvm.agents=jolokia;https://repo1.maven.org/maven2/org/jolokia/jolokia-agent-jvm/2.3.0/jolokia-agent-jvm-2.3.0-javaagent.jar;host=*",
+				"-t", "container.ports=jolokia;8778",
+				"-d", "camel:management",
 				"--name", name).Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -230,7 +232,7 @@ func TestHealthTrait(t *testing.T) {
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
 		})
 
-		t.Run("Readiness condition with stopped binding", func(t *testing.T) {
+		t.Run("Readiness condition with stopped pipe", func(t *testing.T) {
 			name := RandomizedSuffixName("stopped-binding")
 			source := RandomizedSuffixName("my-health-timer-source")
 			sink := RandomizedSuffixName("my-health-log-sink")
@@ -405,7 +407,9 @@ func TestHealthTrait(t *testing.T) {
 
 			g.Expect(KamelRun(t, ctx, ns, "files/NeverReady.java", "--name", name,
 				"-t", "health.enabled=true",
-				"-t", "health.startup-probe-enabled=true", "-t", "health.startup-timeout=60").Execute()).To(Succeed())
+				"-t", "health.startup-probe-enabled=true",
+				"-t", "health.startup-timeout=60",
+			).Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
@@ -455,7 +459,9 @@ func TestHealthTrait(t *testing.T) {
 
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name,
 				"-t", "health.enabled=true",
-				"-t", "health.startup-probe-enabled=true", "-t", "health.startup-timeout=60").Execute()).To(Succeed())
+				"-t", "health.startup-probe-enabled=true",
+				"-t", "health.startup-timeout=60",
+			).Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))

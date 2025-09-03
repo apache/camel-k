@@ -7625,9 +7625,6 @@ spec:
                       init-containers:
                         description: The configuration of Init Containers trait
                         properties:
-                          auto:
-                            description: To automatically enable the trait
-                            type: boolean
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
@@ -7635,7 +7632,8 @@ spec:
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
                           enabled:
-                            description: 'Deprecated: no longer in use.'
+                            description: Can be used to enable or disable a trait.
+                              All traits share this common property.
                             type: boolean
                           initTasks:
                             description: A list of init tasks to be executed with
@@ -7746,6 +7744,12 @@ spec:
                       jvm:
                         description: The configuration of JVM trait
                         properties:
+                          agents:
+                            description: A list of JVM agents to download and execute
+                              with format `<agent-name>;<agent-url>[;<jvm-agent-options>]`.
+                            items:
+                              type: string
+                            type: array
                           classpath:
                             description: Additional JVM classpath (use `Linux` classpath
                               separator)

@@ -52,6 +52,8 @@ const (
 type jvmTrait struct {
 	BaseTrait
 	traitv1.JVMTrait `property:",squash"`
+
+	jvmAgentArgs []string
 }
 
 func newJvmTrait() Trait {
@@ -93,6 +95,14 @@ func (t *jvmTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		t.Jar = e.Integration.Status.Jar
 	}
 
+	if t.Agents != nil {
+		jvmAgentArgs, err := t.parseJvmAgentsArgs()
+		if err != nil {
+			return false, nil, err
+		}
+		t.jvmAgentArgs = jvmAgentArgs
+	}
+
 	return true, nil, nil
 }
 
@@ -109,6 +119,11 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	if ptr.Deref(t.Debug, false) {
 		debugArgs := t.enableDebug(e)
 		args = append(args, debugArgs)
+	}
+
+	// JVM agents: they should have been parsed during configuration phase
+	if t.jvmAgentArgs != nil {
+		args = append(args, t.jvmAgentArgs...)
 	}
 
 	hasHeapSizeOption := false

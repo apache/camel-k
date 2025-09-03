@@ -7469,19 +7469,12 @@ The InitContainersTrait trait can be used to configure `init containers` or `sid
 |Field
 |Description
 
-|`PlatformBaseTrait` +
-*xref:#_camel_apache_org_v1_trait_PlatformBaseTrait[PlatformBaseTrait]*
-|(Members of `PlatformBaseTrait` are embedded into this type.)
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
 
 
 
-
-|`auto` +
-bool
-|
-
-
-To automatically enable the trait
 
 |`initTasks` +
 []string
@@ -7613,6 +7606,13 @@ string
 
 
 The Jar dependency which will run the application. Leave it empty for managed Integrations.
+
+|`agents` +
+[]string
+|
+
+
+A list of JVM agents to download and execute with format `<agent-name>;<agent-url>[;<jvm-agent-options>]`.
 
 
 |===
@@ -8383,7 +8383,6 @@ Only one of `max-unavailable` and `min-available` can be specified.
 * <<#_camel_apache_org_v1_trait_DeploymentTrait, DeploymentTrait>>
 * <<#_camel_apache_org_v1_trait_EnvironmentTrait, EnvironmentTrait>>
 * <<#_camel_apache_org_v1_trait_ErrorHandlerTrait, ErrorHandlerTrait>>
-* <<#_camel_apache_org_v1_trait_InitContainersTrait, InitContainersTrait>>
 * <<#_camel_apache_org_v1_trait_MountTrait, MountTrait>>
 * <<#_camel_apache_org_v1_trait_OpenAPITrait, OpenAPITrait>>
 * <<#_camel_apache_org_v1_trait_PlatformTrait, PlatformTrait>>
@@ -9174,6 +9173,7 @@ The list of taints to tolerate, in the form `Key[=Value]:Effect[:Seconds]`
 * <<#_camel_apache_org_v1_trait_GCTrait, GCTrait>>
 * <<#_camel_apache_org_v1_trait_HealthTrait, HealthTrait>>
 * <<#_camel_apache_org_v1_trait_IngressTrait, IngressTrait>>
+* <<#_camel_apache_org_v1_trait_InitContainersTrait, InitContainersTrait>>
 * <<#_camel_apache_org_v1_trait_IstioTrait, IstioTrait>>
 * <<#_camel_apache_org_v1_trait_JVMTrait, JVMTrait>>
 * <<#_camel_apache_org_v1_trait_JolokiaTrait, JolokiaTrait>>

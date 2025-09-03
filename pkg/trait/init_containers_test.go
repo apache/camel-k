@@ -22,6 +22,9 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/internal"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -67,6 +70,7 @@ func TestParseInitContainerShouldFail(t *testing.T) {
 
 func TestParseInitContainerOK(t *testing.T) {
 	environment := Environment{
+		Catalog:   NewCatalog(nil),
 		Resources: kubernetes.NewCollection(),
 		Integration: &v1.Integration{
 			Status: v1.IntegrationStatus{
@@ -97,6 +101,7 @@ func TestParseInitContainerOK(t *testing.T) {
 
 func TestParseInitContainerDefault(t *testing.T) {
 	environment := Environment{
+		Catalog:   NewCatalog(nil),
 		Resources: kubernetes.NewCollection(),
 		Integration: &v1.Integration{
 			Status: v1.IntegrationStatus{
@@ -113,6 +118,7 @@ func TestParseInitContainerDefault(t *testing.T) {
 
 func TestApplyInitContainerOK(t *testing.T) {
 	environment := Environment{
+		Catalog:   NewCatalog(nil),
 		Resources: kubernetes.NewCollection(),
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
@@ -160,6 +166,7 @@ func TestApplyInitContainerOK(t *testing.T) {
 
 func TestApplyInitContainerSidecarOK(t *testing.T) {
 	environment := Environment{
+		Catalog:   NewCatalog(nil),
 		Resources: kubernetes.NewCollection(),
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
@@ -207,6 +214,7 @@ func TestApplyInitContainerSidecarOK(t *testing.T) {
 
 func TestApplyInitContainerAndSidecarOK(t *testing.T) {
 	environment := Environment{
+		Catalog:   NewCatalog(nil),
 		Resources: kubernetes.NewCollection(),
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
@@ -284,4 +292,74 @@ func TestParseTasks(t *testing.T) {
 		command:   "sidecar-command;done",
 		isSidecar: true,
 	})
+}
+
+func TestApplyInitContainerWithAgents(t *testing.T) {
+	deployment := &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "my-it",
+			Labels: map[string]string{
+				v1.IntegrationLabel: "my-it",
+			},
+		},
+		Spec: appsv1.DeploymentSpec{
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{},
+			},
+		},
+	}
+	catalog, _ := camel.DefaultCatalog()
+	traitCatalog := NewCatalog(nil)
+	fakeClient, _ := internal.NewFakeClient(deployment)
+	environment := Environment{
+		Client:       fakeClient,
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Resources:    kubernetes.NewCollection(),
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "my-it",
+			},
+			Spec: v1.IntegrationSpec{
+				Traits: v1.Traits{
+					JVM: &trait.JVMTrait{
+						Agents: []string{"my-agent;my-url", "my-agent-2;my-url-2;k=v"},
+					},
+				},
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseRunning,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
+				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+	}
+	environment.Resources.Add(deployment)
+	environment.Platform.ResyncStatusFullConfig()
+	_, _, err := traitCatalog.apply(&environment)
+
+	require.NoError(t, err)
+
+	require.Nil(t, err)
+	deploy := environment.Resources.GetDeploymentForIntegration(environment.Integration)
+	require.NotNil(t, deploy)
+
+	require.Len(t, deploy.Spec.Template.Spec.InitContainers, 1)
+	assert.Equal(t, defaultAgentInitContainerName, deploy.Spec.Template.Spec.InitContainers[0].Name)
+	assert.Equal(t, defaults.BaseImage(), deploy.Spec.Template.Spec.InitContainers[0].Image)
+	assert.Equal(t, []string{
+		"/bin/bash", "-c", "curl -o /agents/my-agent.jar my-url && curl -o /agents/my-agent-2.jar my-url-2"},
+		deploy.Spec.Template.Spec.InitContainers[0].Command)
+	assert.NotEqual(t, ptr.To(corev1.ContainerRestartPolicyAlways), deploy.Spec.Template.Spec.InitContainers[0].RestartPolicy)
 }
