@@ -592,3 +592,53 @@ func TestMountVolumesInitContainers(t *testing.T) {
 		return false
 	})
 }
+
+func TestAgentVolume(t *testing.T) {
+	traitCatalog := NewCatalog(nil)
+
+	environment := getNominalEnv(t, traitCatalog)
+	// Reset nominal test value
+	environment.Integration.Spec.Traits.Mount = &traitv1.MountTrait{}
+	environment.Integration.Spec.Traits.JVM = &traitv1.JVMTrait{
+		Agents: []string{"my-agent;my-url"},
+	}
+	environment.Platform.ResyncStatusFullConfig()
+	conditions, traits, err := traitCatalog.apply(environment)
+
+	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
+	assert.NotEmpty(t, conditions)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("mount"))
+
+	deployment := environment.Resources.GetDeployment(func(service *appsv1.Deployment) bool {
+		return service.Name == "hello"
+	})
+	assert.NotNil(t, deployment)
+	spec := deployment.Spec.Template.Spec
+
+	assert.Len(t, spec.Containers[0].VolumeMounts, 3)
+	assert.Len(t, spec.Volumes, 3)
+
+	var emptyDirVolume *corev1.Volume
+	for _, v := range spec.Volumes {
+		if v.Name == defaultAgentVolume {
+			emptyDirVolume = &v
+			break
+		}
+	}
+	assert.NotNil(t, emptyDirVolume)
+
+	assert.Condition(t, func() bool {
+		for _, container := range spec.Containers {
+			if container.Name == "integration" {
+				for _, volumeMount := range container.VolumeMounts {
+					if volumeMount.Name == defaultAgentVolume {
+						return true
+					}
+				}
+			}
+		}
+		return false
+	})
+}

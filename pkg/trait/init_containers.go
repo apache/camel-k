@@ -28,6 +28,7 @@ import (
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"k8s.io/utils/ptr"
 )
 
@@ -44,7 +45,7 @@ type containerTask struct {
 }
 
 type initContainersTrait struct {
-	BasePlatformTrait
+	BaseTrait
 	traitv1.InitContainersTrait `property:",squash"`
 
 	tasks []containerTask
@@ -52,7 +53,7 @@ type initContainersTrait struct {
 
 func newInitContainersTrait() Trait {
 	return &initContainersTrait{
-		BasePlatformTrait: NewBasePlatformTrait(initContainerTraitID, initContainerTraitOrder),
+		BaseTrait: NewBaseTrait(initContainerTraitID, initContainerTraitOrder),
 	}
 }
 
@@ -61,7 +62,37 @@ func (t *initContainersTrait) Configure(e *Environment) (bool, *TraitCondition, 
 		return false, nil, nil
 	}
 
-	return t.parseTasks()
+	if ok, err := t.parseTasks(); err != nil {
+		return ok, nil, err
+	}
+
+	// Set the agent init container if any agent exists
+	trait := e.Catalog.GetTrait(jvmTraitID)
+	//nolint: nestif
+	if trait != nil {
+		jvm, ok := trait.(*jvmTrait)
+		if ok && jvm.hasJavaAgents() {
+			jvmAgents, err := jvm.parseJvmAgents()
+			if err != nil {
+				return false, nil, err
+			}
+			curlDownloadAgents := ""
+			for _, agent := range jvmAgents {
+				if curlDownloadAgents != "" {
+					curlDownloadAgents += " && "
+				}
+				curlDownloadAgents += fmt.Sprintf("curl -o %s/%s.jar %s", defaultAgentDir, agent.name, agent.url)
+			}
+			agentDownloadTask := containerTask{
+				name:    defaultAgentInitContainerName,
+				image:   defaults.BaseImage(),
+				command: fmt.Sprintf("/bin/bash -c \"%s\"", curlDownloadAgents),
+			}
+			t.tasks = append(t.tasks, agentDownloadTask)
+		}
+	}
+
+	return len(t.tasks) > 0, nil, nil
 }
 
 func (t *initContainersTrait) Apply(e *Environment) error {
@@ -109,16 +140,16 @@ func (t *initContainersTrait) configureContainers(containers *[]corev1.Container
 	}
 }
 
-func (t *initContainersTrait) parseTasks() (bool, *TraitCondition, error) {
+func (t *initContainersTrait) parseTasks() (bool, error) {
 	if t.InitTasks == nil && t.SidecarTasks == nil {
-		return false, nil, nil
+		return false, nil
 	}
 	t.tasks = make([]containerTask, len(t.InitTasks)+len(t.SidecarTasks))
 	i := 0
 	for _, task := range t.InitTasks {
 		split := strings.SplitN(task, ";", 3)
 		if len(split) != 3 {
-			return false, nil, fmt.Errorf(`could not parse init container task "%s": format expected "name;container-image;command"`, task)
+			return false, fmt.Errorf(`could not parse init container task "%s": format expected "name;container-image;command"`, task)
 		}
 		t.tasks[i] = containerTask{
 			name:      split[0],
@@ -131,7 +162,7 @@ func (t *initContainersTrait) parseTasks() (bool, *TraitCondition, error) {
 	for _, task := range t.SidecarTasks {
 		split := strings.SplitN(task, ";", 3)
 		if len(split) != 3 {
-			return false, nil, fmt.Errorf(`could not parse sidecar container task "%s": format expected "name;container-image;command"`, task)
+			return false, fmt.Errorf(`could not parse sidecar container task "%s": format expected "name;container-image;command"`, task)
 		}
 		t.tasks[i] = containerTask{
 			name:      split[0],
@@ -142,5 +173,5 @@ func (t *initContainersTrait) parseTasks() (bool, *TraitCondition, error) {
 		i++
 	}
 
-	return true, nil, nil
+	return true, nil
 }

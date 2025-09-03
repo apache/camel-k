@@ -187,6 +187,22 @@ func (t *mountTrait) configureVolumesAndMounts(
 			(*icnts)[i].VolumeMounts = append((*icnts)[i].VolumeMounts, *volumeMount)
 		}
 	}
+	// Mount the agent volume if any agent exists
+	trait := e.Catalog.GetTrait(jvmTraitID)
+	if trait != nil {
+		jvm, ok := trait.(*jvmTrait)
+		if ok && jvm.hasJavaAgents() {
+			volume, volumeMount, parseErr := ParseEmptyDirVolume(fmt.Sprintf("%s:%s", defaultAgentVolume, defaultAgentDir))
+			if parseErr != nil {
+				return parseErr
+			}
+			*vols = append(*vols, *volume)
+			*mnts = append(*mnts, *volumeMount)
+			for i := range *icnts {
+				(*icnts)[i].VolumeMounts = append((*icnts)[i].VolumeMounts, *volumeMount)
+			}
+		}
+	}
 
 	return nil
 }

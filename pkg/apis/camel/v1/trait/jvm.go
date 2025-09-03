@@ -39,4 +39,6 @@ type JVMTrait struct {
 	Classpath string `property:"classpath" json:"classpath,omitempty"`
 	// The Jar dependency which will run the application. Leave it empty for managed Integrations.
 	Jar string `property:"jar" json:"jar,omitempty"`
+	// A list of JVM agents to download and execute with format `<agent-name>;<agent-url>[;<jvm-agent-options>]`.
+	Agents []string `property:"agents" json:"agents,omitempty"`
 }

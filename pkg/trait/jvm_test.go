@@ -633,3 +633,89 @@ func createNominalJvmTest(kitType string) (*jvmTrait, *Environment) {
 
 	return trait, environment
 }
+
+func TestApplyJvmTraitAgent(t *testing.T) {
+	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+	d := appsv1.Deployment{
+		Spec: appsv1.DeploymentSpec{
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name: defaultContainerName,
+						},
+					},
+				},
+			},
+		},
+	}
+	environment.Resources.Add(&d)
+
+	trait.Agents = []string{"my-agent;url"}
+	ok, cond, err := trait.Configure(environment)
+	require.True(t, ok)
+	require.Nil(t, cond)
+	require.NoError(t, err)
+
+	err = trait.Apply(environment)
+	require.NoError(t, err)
+	// The other args are coming by default
+	assert.Len(t, d.Spec.Template.Spec.Containers[0].Args, 4)
+	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Args, "-javaagent:/agents/my-agent.jar")
+}
+
+func TestApplyJvmTraitAgents(t *testing.T) {
+	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+	d := appsv1.Deployment{
+		Spec: appsv1.DeploymentSpec{
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name: defaultContainerName,
+						},
+					},
+				},
+			},
+		},
+	}
+	environment.Resources.Add(&d)
+
+	trait.Agents = []string{"my-agent;url", "another-agent;another-url;hello=world,my=test"}
+	ok, cond, err := trait.Configure(environment)
+	require.True(t, ok)
+	require.Nil(t, cond)
+	require.NoError(t, err)
+
+	err = trait.Apply(environment)
+	require.NoError(t, err)
+	// The other args are coming by default
+	assert.Len(t, d.Spec.Template.Spec.Containers[0].Args, 5)
+	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Args, "-javaagent:/agents/my-agent.jar")
+	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Args, "-javaagent:/agents/another-agent.jar=hello=world,my=test")
+}
+
+func TestApplyJvmTraitAgentFail(t *testing.T) {
+	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+	d := appsv1.Deployment{
+		Spec: appsv1.DeploymentSpec{
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name: defaultContainerName,
+						},
+					},
+				},
+			},
+		},
+	}
+	environment.Resources.Add(&d)
+
+	trait.Agents = []string{"my-agent:url"}
+	ok, cond, err := trait.Configure(environment)
+	require.False(t, ok)
+	require.Nil(t, cond)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "could not parse JVM agent")
+}

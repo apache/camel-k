@@ -21,9 +21,7 @@ package trait
 //
 // +camel-k:trait=init-containers.
 type InitContainersTrait struct {
-	PlatformBaseTrait `property:",squash" json:",inline"`
-	// To automatically enable the trait
-	Auto *bool `property:"auto" json:"auto,omitempty"`
+	Trait `property:",squash" json:",inline"`
 	// A list of init tasks to be executed with format `<name>;<container-image>;<container-command>`.
 	InitTasks []string `property:"init-tasks" json:"initTasks,omitempty"`
 	// A list of sidecar tasks to be executed with format `<name>;<container-image>;<container-command>`.
