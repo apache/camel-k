@@ -23,7 +23,11 @@ package trait
 //
 // See https://jolokia.org/reference/html/manual/agents.html
 //
+// WARNING: The Jolokia trait is **deprecated** and will removed in future release versions:
+// use `jvm.agents` configuration instead.
+//
 // +camel-k:trait=jolokia.
+// +camel-k:deprecated=2.8.0.
 type JolokiaTrait struct {
 	Trait `property:",squash" json:",inline"`
 	// The PEM encoded CA certification file path, used to verify client certificates,

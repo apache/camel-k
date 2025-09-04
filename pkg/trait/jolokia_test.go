@@ -39,7 +39,7 @@ func TestConfigureJolokiaTraitInRunningPhaseDoesSucceed(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.True(t, configured)
-	assert.Nil(t, condition)
+	assert.NotNil(t, condition)
 }
 
 func TestApplyJolokiaTraitNominalShouldSucceed(t *testing.T) {

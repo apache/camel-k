@@ -7630,6 +7630,9 @@ Make sure you have the right privileges to perform such an action on the cluster
 
 See https://jolokia.org/reference/html/manual/agents.html
 
+WARNING: The Jolokia trait is **deprecated** and will removed in future release versions:
+use `jvm.agents` configuration instead.
+
 
 [cols="2,2a",options="header"]
 |===

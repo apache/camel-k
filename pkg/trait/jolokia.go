@@ -54,7 +54,15 @@ func (t *jolokiaTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 		return false, nil, nil
 	}
 
-	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization) || e.IntegrationInRunningPhases(), nil, nil
+	condition := NewIntegrationCondition(
+		"Jolokia",
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		TraitConfigurationReason,
+		"Jolokia trait is deprecated in favour of jvm.agents. It may be removed in future version.",
+	)
+
+	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization) || e.IntegrationInRunningPhases(), condition, nil
 }
 
 func (t *jolokiaTrait) Apply(e *Environment) error {
