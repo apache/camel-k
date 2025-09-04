@@ -70,6 +70,12 @@ spec:
           spec:
             description: the specification of a Pipe
             properties:
+              dependencies:
+                description: the list of Camel or Maven dependencies required by the
+                  Pipe
+                items:
+                  type: string
+                type: array
               errorHandler:
                 description: ErrorHandler is an optional handler called upon an error
                   occurring in the integration

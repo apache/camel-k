@@ -60,6 +60,8 @@ type PipeSpec struct {
 	Replicas *int32 `json:"replicas,omitempty"`
 	// Custom SA to use for the Pipe
 	ServiceAccountName string `json:"serviceAccountName,omitempty"`
+	// the list of Camel or Maven dependencies required by the Pipe
+	Dependencies []string `json:"dependencies,omitempty"`
 }
 
 // Endpoint represents a source/sink external entity (could be any Kubernetes resource or Camel URI).

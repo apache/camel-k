@@ -185,6 +185,7 @@ func TestNewPipe(t *testing.T) {
 					Name:       "my-sink",
 				},
 			},
+			Dependencies: []string{"camel:management", "mvn:org.acme:jdbc-driver:1.0.0"},
 		},
 	}
 	c, err := internal.NewFakeClient(pipe, &source, &sink)
@@ -204,6 +205,8 @@ func TestNewPipe(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, pipe.Name, expectedIT.Name)
 	assert.Equal(t, v1.IntegrationPhaseNone, expectedIT.Status.Phase)
+	assert.Contains(t, expectedIT.Spec.Dependencies, "camel:management")
+	assert.Contains(t, expectedIT.Spec.Dependencies, "mvn:org.acme:jdbc-driver:1.0.0")
 	assert.Equal(t, "Pipe", expectedIT.Labels[kubernetes.CamelCreatorLabelKind])
 	assert.Equal(t, "my-pipe", expectedIT.Labels[kubernetes.CamelCreatorLabelName])
 	flow, err := json.Marshal(expectedIT.Spec.Flows[0].RawMessage)

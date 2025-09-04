@@ -4814,6 +4814,13 @@ string
 
 Custom SA to use for the Pipe
 
+|`dependencies` +
+[]string
+|
+
+
+the list of Camel or Maven dependencies required by the Pipe
+
 
 |===
 
