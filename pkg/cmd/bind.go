@@ -65,6 +65,7 @@ func newCmdBind(rootCmdOptions *RootCmdOptions) (*cobra.Command, *bindCmdOptions
 	cmd.Flags().StringArray("annotation", nil, "Add an annotation to the Pipe. E.g. \"--annotation my.company=hello\"")
 	cmd.Flags().Bool("force", false, "Force creation of Pipe regardless of potential misconfiguration.")
 	cmd.Flags().String("service-account", "", "The SA to use to run this binding")
+	cmd.Flags().StringArrayP("dependency", "d", nil, `A dependency that should be included, e.g., "camel:mail" for a Camel component, "mvn:org.my:app:1.0" for a Maven dependency`)
 
 	return &cmd, &options
 }
@@ -89,6 +90,7 @@ type bindCmdOptions struct {
 	Annotations    []string `mapstructure:"annotations" yaml:",omitempty"`
 	Force          bool     `mapstructure:"force" yaml:",omitempty"`
 	ServiceAccount string   `mapstructure:"service-account" yaml:",omitempty"`
+	Dependencies   []string `mapstructure:"dependencies" yaml:",omitempty"`
 }
 
 func (o *bindCmdOptions) preRunE(cmd *cobra.Command, args []string) error {
@@ -194,7 +196,7 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 	name := o.nameFor(source, sink)
 
-	binding := v1.Pipe{
+	pipe := v1.Pipe{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: o.Namespace,
 			Name:      name,
@@ -205,16 +207,20 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 		},
 	}
 
+	if o.Dependencies != nil {
+		pipe.Spec.Dependencies = o.Dependencies
+	}
+
 	if o.ErrorHandler != "" {
 		if errorHandler, err := o.parseErrorHandler(); err == nil {
-			binding.Spec.ErrorHandler = errorHandler
+			pipe.Spec.ErrorHandler = errorHandler
 		} else {
 			return err
 		}
 	}
 
 	if len(o.Steps) > 0 {
-		binding.Spec.Steps = make([]v1.Endpoint, 0)
+		pipe.Spec.Steps = make([]v1.Endpoint, 0)
 		for idx, stepDesc := range o.Steps {
 			stepIndex := idx + 1
 			stepKey := fmt.Sprintf("%s%d", stepKeyPrefix, stepIndex)
@@ -222,13 +228,13 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 			if err != nil {
 				return err
 			}
-			binding.Spec.Steps = append(binding.Spec.Steps, step)
+			pipe.Spec.Steps = append(pipe.Spec.Steps, step)
 		}
 	}
 
 	if len(o.Traits) > 0 {
-		if binding.Annotations == nil {
-			binding.Annotations = make(map[string]string)
+		if pipe.Annotations == nil {
+			pipe.Annotations = make(map[string]string)
 		}
 
 		for _, t := range o.Traits {
@@ -236,30 +242,30 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 			if len(kv) != 2 {
 				return fmt.Errorf("could not parse trait configuration %s, expected format 'trait.property=value'", t)
 			}
-			value := maybeBuildArrayNotation(binding.Annotations[v1.TraitAnnotationPrefix+kv[0]], kv[1])
-			binding.Annotations[v1.TraitAnnotationPrefix+kv[0]] = value
+			value := maybeBuildArrayNotation(pipe.Annotations[v1.TraitAnnotationPrefix+kv[0]], kv[1])
+			pipe.Annotations[v1.TraitAnnotationPrefix+kv[0]] = value
 		}
 	}
 
 	if o.ServiceAccount != "" {
-		binding.Spec.ServiceAccountName = o.ServiceAccount
+		pipe.Spec.ServiceAccountName = o.ServiceAccount
 	}
 
 	// --operator-id={id} is a syntax sugar for '--annotation camel.apache.org/operator.id={id}'
-	binding.SetOperatorID(strings.TrimSpace(o.OperatorID))
+	pipe.SetOperatorID(strings.TrimSpace(o.OperatorID))
 
 	for _, annotation := range o.Annotations {
 		parts := strings.SplitN(annotation, "=", 2)
 		if len(parts) == 2 {
-			binding.Annotations[parts[0]] = parts[1]
+			pipe.Annotations[parts[0]] = parts[1]
 		}
 	}
 
 	if o.OutputFormat != "" {
-		return showPipeOutput(cmd, &binding, o.OutputFormat, client.GetScheme())
+		return showPipeOutput(cmd, &pipe, o.OutputFormat, client.GetScheme())
 	}
 
-	replaced, err := kubernetes.ReplaceResource(o.Context, client, &binding)
+	replaced, err := kubernetes.ReplaceResource(o.Context, client, &pipe)
 	if err != nil {
 		return err
 	}

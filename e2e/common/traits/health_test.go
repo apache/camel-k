@@ -29,11 +29,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/onsi/gomega/gstruct"
-
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/gstruct"
 
 	corev1 "k8s.io/api/core/v1"
 
@@ -44,6 +43,7 @@ import (
 func TestHealthTrait(t *testing.T) {
 	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+
 		t.Run("Readiness condition with stopped route scaled", func(t *testing.T) {
 			name := RandomizedSuffixName("java")
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java",
@@ -240,12 +240,13 @@ func TestHealthTrait(t *testing.T) {
 			g.Expect(CreateTimerKamelet(t, ctx, ns, source)()).To(Succeed())
 			g.Expect(CreateLogKamelet(t, ctx, ns, sink)()).To(Succeed())
 
-			g.Expect(KamelBind(t, ctx, ns, source, sink, "-p",
-				"source.message=Magicstring!", "-p", "sink.loggerName=binding",
-				"--trait", "health.enabled=true",
-				"--trait", "jolokia.enabled=true",
-				"--trait", "jolokia.use-ssl-client-authentication=false",
-				"--trait", "jolokia.protocol=http",
+			g.Expect(KamelBind(t, ctx, ns, source, sink,
+				"-p", "source.message=Magicstring!",
+				"-p", "sink.loggerName=binding",
+				"-t", "health.enabled=true",
+				"-t", "jvm.agents=jolokia;https://repo1.maven.org/maven2/org/jolokia/jolokia-agent-jvm/2.3.0/jolokia-agent-jvm-2.3.0-javaagent.jar;host=*",
+				"-t", "container.ports=jolokia;8778",
+				"-d", "camel:management",
 				"--name", name).Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -470,5 +471,6 @@ func TestHealthTrait(t *testing.T) {
 				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionDeploymentReadyReason)),
 				WithTransform(IntegrationConditionMessage, Equal("1/1 ready replicas"))))
 		})
+
 	})
 }

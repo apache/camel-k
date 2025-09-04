@@ -44,10 +44,10 @@ var (
 )
 
 // CreateIntegrationFor creates and Integration from a Pipe.
-func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Pipe) (*v1.Integration, error) {
+func CreateIntegrationFor(ctx context.Context, c client.Client, pipe *v1.Pipe) (*v1.Integration, error) {
 	controller := true
 	blockOwnerDeletion := true
-	annotations := util.CopyMap(binding.Annotations)
+	annotations := util.CopyMap(pipe.Annotations)
 	// avoid propagating the icon to the integration as it's heavyweight and not needed
 	delete(annotations, v1.AnnotationIcon)
 	traits, err := extractAndDeleteTraits(c, annotations)
@@ -57,16 +57,16 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Pipe
 
 	it := v1.Integration{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace:   binding.Namespace,
-			Name:        binding.Name,
+			Namespace:   pipe.Namespace,
+			Name:        pipe.Name,
 			Annotations: annotations,
-			Labels:      util.CopyMap(binding.Labels),
+			Labels:      util.CopyMap(pipe.Labels),
 			OwnerReferences: []metav1.OwnerReference{
 				{
-					APIVersion:         binding.APIVersion,
-					Kind:               binding.Kind,
-					Name:               binding.Name,
-					UID:                binding.UID,
+					APIVersion:         pipe.APIVersion,
+					Kind:               pipe.Kind,
+					Name:               pipe.Name,
+					UID:                pipe.UID,
 					Controller:         &controller,
 					BlockOwnerDeletion: &blockOwnerDeletion,
 				},
@@ -78,27 +78,31 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Pipe
 	if it.GetLabels() == nil {
 		it.SetLabels(make(map[string]string))
 	}
-	it.GetLabels()[kubernetes.CamelCreatorLabelKind] = binding.Kind
-	it.GetLabels()[kubernetes.CamelCreatorLabelName] = binding.Name
+	it.GetLabels()[kubernetes.CamelCreatorLabelKind] = pipe.Kind
+	it.GetLabels()[kubernetes.CamelCreatorLabelName] = pipe.Name
 
 	if traits != nil {
 		it.Spec.Traits = *traits
 	}
 
+	if pipe.Spec.Dependencies != nil {
+		it.Spec.Dependencies = pipe.Spec.Dependencies
+	}
+
 	// Set replicas (or override podspecable value) if present
-	if binding.Spec.Replicas != nil {
-		replicas := *binding.Spec.Replicas
+	if pipe.Spec.Replicas != nil {
+		replicas := *pipe.Spec.Replicas
 		it.Spec.Replicas = &replicas
 	}
 
-	profile, err := determineTraitProfile(ctx, c, binding)
+	profile, err := determineTraitProfile(ctx, c, pipe)
 	if err != nil {
 		return nil, err
 	}
 	it.Spec.Profile = profile
 
-	if binding.Spec.ServiceAccountName != "" {
-		it.Spec.ServiceAccountName = binding.Spec.ServiceAccountName
+	if pipe.Spec.ServiceAccountName != "" {
+		it.Spec.ServiceAccountName = pipe.Spec.ServiceAccountName
 	}
 
 	bindingContext := bindings.BindingContext{
@@ -109,22 +113,22 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Pipe
 		Metadata:  it.Annotations,
 	}
 
-	from, err := bindings.Translate(bindingContext, endpointTypeSourceContext, binding.Spec.Source)
+	from, err := bindings.Translate(bindingContext, endpointTypeSourceContext, pipe.Spec.Source)
 	if err != nil {
 		return nil, err
 	}
-	to, err := bindings.Translate(bindingContext, endpointTypeSinkContext, binding.Spec.Sink)
+	to, err := bindings.Translate(bindingContext, endpointTypeSinkContext, pipe.Spec.Sink)
 	if err != nil {
 		return nil, err
 	}
 	// error handler is optional
-	errorHandler, err := maybeErrorHandler(binding.Spec.ErrorHandler, bindingContext)
+	errorHandler, err := maybeErrorHandler(pipe.Spec.ErrorHandler, bindingContext)
 	if err != nil {
 		return nil, err
 	}
 
-	steps := make([]*bindings.Binding, 0, len(binding.Spec.Steps))
-	for idx, step := range binding.Spec.Steps {
+	steps := make([]*bindings.Binding, 0, len(pipe.Spec.Steps))
+	for idx, step := range pipe.Spec.Steps {
 		position := idx
 		stepBinding, err := bindings.Translate(bindingContext, bindings.EndpointContext{
 			Type:     v1.EndpointTypeAction,

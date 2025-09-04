@@ -29,6 +29,7 @@ type PipeSpecApplyConfiguration struct {
 	Steps              []EndpointApplyConfiguration        `json:"steps,omitempty"`
 	Replicas           *int32                              `json:"replicas,omitempty"`
 	ServiceAccountName *string                             `json:"serviceAccountName,omitempty"`
+	Dependencies       []string                            `json:"dependencies,omitempty"`
 }
 
 // PipeSpecApplyConfiguration constructs a declarative configuration of the PipeSpec type for use with
@@ -95,5 +96,15 @@ func (b *PipeSpecApplyConfiguration) WithReplicas(value int32) *PipeSpecApplyCon
 // If called multiple times, the ServiceAccountName field is set to the value of the last call.
 func (b *PipeSpecApplyConfiguration) WithServiceAccountName(value string) *PipeSpecApplyConfiguration {
 	b.ServiceAccountName = &value
+	return b
+}
+
+// WithDependencies adds the given value to the Dependencies field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, values provided by each call will be appended to the Dependencies field.
+func (b *PipeSpecApplyConfiguration) WithDependencies(values ...string) *PipeSpecApplyConfiguration {
+	for i := range values {
+		b.Dependencies = append(b.Dependencies, values[i])
+	}
 	return b
 }

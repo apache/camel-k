@@ -44,10 +44,10 @@ func (action *monitorAction) Name() string {
 	return "monitor"
 }
 
-func (action *monitorAction) CanHandle(binding *v1.Pipe) bool {
-	return binding.Status.Phase == v1.PipePhaseCreating ||
-		binding.Status.Phase == v1.PipePhaseError ||
-		binding.Status.Phase == v1.PipePhaseReady
+func (action *monitorAction) CanHandle(pipe *v1.Pipe) bool {
+	return pipe.Status.Phase == v1.PipePhaseCreating ||
+		pipe.Status.Phase == v1.PipePhaseError ||
+		pipe.Status.Phase == v1.PipePhaseReady
 }
 
 func (action *monitorAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.Pipe, error) {

@@ -277,3 +277,28 @@ func TestBindOutputWithoutKubernetesCluster(t *testing.T) {
 	_, err = ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml")
 	require.NoError(t, err)
 }
+
+func TestBindOutputWithDependencies(t *testing.T) {
+	buildCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
+	output, err := ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml", "-d", "camel:my-comp", "-d", "mvn:my-dep")
+	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
+
+	require.NoError(t, err)
+	assert.Equal(t, `apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  annotations:
+    camel.apache.org/operator.id: camel-k
+  creationTimestamp: null
+  name: my-to-my
+spec:
+  dependencies:
+  - camel:my-comp
+  - mvn:my-dep
+  sink:
+    uri: my:dst
+  source:
+    uri: my:src
+status: {}
+`, output)
+}
