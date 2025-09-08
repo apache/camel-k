@@ -98,7 +98,6 @@ linters:
     - gocyclo
     - godox
     - err113
-    - gomnd
     - ireturn
     - nilnil
     - nlreturn
@@ -112,3 +111,4 @@ linters:
     # TODO: too much work at this stage as many files are impacted by the lint suggestions, however the reported
     #       lint violation make a lot of sense so we should re-enable the lints below and work to fix the findings
     - perfsprint
+    - tenv  # the functionality provided by 'usetesting'
