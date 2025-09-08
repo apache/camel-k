@@ -18,9 +18,11 @@ limitations under the License.
 package builder
 
 import (
+	"errors"
 	"path/filepath"
 
 	git "github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -57,8 +59,31 @@ var Git = gitSteps{
 }
 
 func cloneProject(ctx *builderContext) error {
+	depth := 1
+	if ctx.Build.Git.Commit != "" {
+		// only the commit checkout requires full git project history
+		depth = 0
+	}
 	gitCloneOptions := &git.CloneOptions{
-		URL: ctx.Build.Git.URL,
+		URL:   ctx.Build.Git.URL,
+		Depth: depth,
+	}
+
+	if ctx.Build.Git.Branch != "" {
+		if ctx.Build.Git.Tag != "" {
+			return errors.New("illegal arguments: cannot specify both git branch and tag")
+		}
+		if ctx.Build.Git.Commit != "" {
+			return errors.New("illegal arguments: cannot specify both git branch and commit")
+		}
+		gitCloneOptions.ReferenceName = plumbing.NewBranchReferenceName(ctx.Build.Git.Branch)
+		gitCloneOptions.SingleBranch = true
+	} else if ctx.Build.Git.Tag != "" {
+		if ctx.Build.Git.Commit != "" {
+			return errors.New("illegal arguments: cannot specify both git tag and commit")
+		}
+		gitCloneOptions.ReferenceName = plumbing.NewTagReferenceName(ctx.Build.Git.Tag)
+		gitCloneOptions.SingleBranch = true
 	}
 
 	if ctx.Build.Git.Secret != "" {
@@ -78,7 +103,25 @@ func cloneProject(ctx *builderContext) error {
 		}
 	}
 
-	_, err := git.PlainClone(filepath.Join(ctx.Path, "maven"), false, gitCloneOptions)
+	repo, err := git.PlainClone(filepath.Join(ctx.Path, "maven"), false, gitCloneOptions)
 
-	return err
+	if err != nil {
+		return err
+	}
+
+	if ctx.Build.Git.Commit != "" {
+		worktree, err := repo.Worktree()
+		if err != nil {
+			return err
+		}
+		commitHash := plumbing.NewHash(ctx.Build.Git.Commit)
+		err = worktree.Checkout(&git.CheckoutOptions{
+			Hash: commitHash,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

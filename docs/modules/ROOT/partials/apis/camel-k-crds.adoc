@@ -2262,6 +2262,27 @@ string
 
 the Kubernetes secret where token is stored
 
+|`branch` +
+string
+|
+
+
+the git branch to check out
+
+|`tag` +
+string
+|
+
+
+the git tag to check out
+
+|`commit` +
+string
+|
+
+
+the git commit (full SHA) to check out
+
 
 |===
 

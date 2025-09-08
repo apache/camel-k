@@ -92,3 +92,84 @@ func TestGitPrivateRepoFail(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "no such file or directory")
 }
+
+func TestGitCloneBranch(t *testing.T) {
+	tmpGitDir := t.TempDir()
+
+	ctx := &builderContext{
+		C:    context.TODO(),
+		Path: tmpGitDir,
+		Build: v1.BuilderTask{
+			Git: &v1.GitConfigSpec{
+				// the project URL for the https://github.com/squakez/sample.git fork
+				URL: "https://github.com/michalvavrik/sample.git",
+				// only difference between the main branch and this branch is the 'this_is_expected_branch' empty file
+				Branch: "feature/branch-checkout-test",
+			},
+		},
+	}
+
+	err := cloneProject(ctx)
+	require.NoError(t, err)
+	f, err := os.Stat(path.Join(tmpGitDir, "maven", "pom.xml"))
+	require.NoError(t, err)
+	assert.Contains(t, f.Name(), "pom.xml")
+
+	f, err = os.Stat(path.Join(tmpGitDir, "maven", "this_is_expected_branch"))
+	require.NoError(t, err)
+	assert.Contains(t, f.Name(), "this_is_expected_branch")
+}
+
+func TestGitCloneTag(t *testing.T) {
+	tmpGitDir := t.TempDir()
+
+	ctx := &builderContext{
+		C:    context.TODO(),
+		Path: tmpGitDir,
+		Build: v1.BuilderTask{
+			Git: &v1.GitConfigSpec{
+				// the project URL for the https://github.com/squakez/sample.git fork
+				URL: "https://github.com/michalvavrik/sample.git",
+				// only difference between the main branch and this tag is the 'this_is_expected_tag' empty file
+				Tag: "v1.2.3",
+			},
+		},
+	}
+
+	err := cloneProject(ctx)
+	require.NoError(t, err)
+	f, err := os.Stat(path.Join(tmpGitDir, "maven", "pom.xml"))
+	require.NoError(t, err)
+	assert.Contains(t, f.Name(), "pom.xml")
+
+	f, err = os.Stat(path.Join(tmpGitDir, "maven", "this_is_expected_tag"))
+	require.NoError(t, err)
+	assert.Contains(t, f.Name(), "this_is_expected_tag")
+}
+
+func TestGitCloneCommit(t *testing.T) {
+	tmpGitDir := t.TempDir()
+
+	ctx := &builderContext{
+		C:    context.TODO(),
+		Path: tmpGitDir,
+		Build: v1.BuilderTask{
+			Git: &v1.GitConfigSpec{
+				// the project URL for the https://github.com/squakez/sample.git fork
+				URL: "https://github.com/michalvavrik/sample.git",
+				// only difference between the main branch and this commit is the 'this_is_expected_commit' empty file
+				Commit: "f2b9bd064a62263ab53b3bfe6ac2b71e68dba45b",
+			},
+		},
+	}
+
+	err := cloneProject(ctx)
+	require.NoError(t, err)
+	f, err := os.Stat(path.Join(tmpGitDir, "maven", "pom.xml"))
+	require.NoError(t, err)
+	assert.Contains(t, f.Name(), "pom.xml")
+
+	f, err = os.Stat(path.Join(tmpGitDir, "maven", "this_is_expected_commit"))
+	require.NoError(t, err)
+	assert.Contains(t, f.Name(), "this_is_expected_commit")
+}

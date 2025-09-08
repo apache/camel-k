@@ -117,6 +117,9 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().String("service-account", "", "The SA to use to run this Integration")
 	cmd.Flags().Bool("force", false, "Force creation of integration regardless of potential misconfiguration.")
 	cmd.Flags().String("git", "", "A Git repository containing the project to build.")
+	cmd.Flags().String("git-branch", "", "Git branch to checkout when using --git option")
+	cmd.Flags().String("git-tag", "", "Git tag to checkout when using --git option")
+	cmd.Flags().String("git-commit", "", "Git commit (full SHA) to checkout when using --git option")
 	cmd.Flags().Bool("save", false, "Save the run parameters into the default kamel configuration file (kamel-config.yaml)")
 
 	// completion support
@@ -138,6 +141,9 @@ type runCmdOptions struct {
 	IntegrationName    string   `mapstructure:"name" yaml:",omitempty"`
 	ContainerImage     string   `mapstructure:"image" yaml:",omitempty"`
 	GitRepo            string   `mapstructure:"git" yaml:",omitempty"`
+	GitBranch          string   `mapstructure:"git-branch" yaml:",omitempty"`
+	GitTag             string   `mapstructure:"git-tag" yaml:",omitempty"`
+	GitCommit          string   `mapstructure:"git-commit" yaml:",omitempty"`
 	Profile            string   `mapstructure:"profile" yaml:",omitempty"`
 	IntegrationProfile string   `mapstructure:"integration-profile" yaml:",omitempty"`
 	OperatorID         string   `mapstructure:"operator-id" yaml:",omitempty"`
@@ -565,8 +571,23 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 		// Self Managed Integration as the user provided a container image built externally
 		o.Traits = append(o.Traits, fmt.Sprintf("container.image=%s", o.ContainerImage))
 	} else if o.GitRepo != "" {
+		if o.GitBranch != "" && o.GitTag != "" {
+			err := errors.New("illegal arguments: cannot specify both git branch and tag")
+			return nil, err
+		}
+		if o.GitBranch != "" && o.GitCommit != "" {
+			err := errors.New("illegal arguments: cannot specify both git branch and commit")
+			return nil, err
+		}
+		if o.GitTag != "" && o.GitCommit != "" {
+			err := errors.New("illegal arguments: cannot specify both git tag and commit")
+			return nil, err
+		}
 		integration.Spec.Git = &v1.GitConfigSpec{
-			URL: o.GitRepo,
+			URL:    o.GitRepo,
+			Tag:    o.GitTag,
+			Branch: o.GitBranch,
+			Commit: o.GitCommit,
 		}
 	} else {
 		return nil, errors.New("you must provide a source, an image or a git repository parameters")
