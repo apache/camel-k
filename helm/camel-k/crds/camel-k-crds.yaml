@@ -349,8 +349,17 @@ spec:
                           description: the configuration of the project to build on
                             Git
                           properties:
+                            branch:
+                              description: the git branch to check out
+                              type: string
+                            commit:
+                              description: the git commit (full SHA) to check out
+                              type: string
                             secret:
                               description: the Kubernetes secret where token is stored
+                              type: string
+                            tag:
+                              description: the git tag to check out
                               type: string
                             url:
                               description: the URL of the project
@@ -1262,8 +1271,17 @@ spec:
                           description: the configuration of the project to build on
                             Git
                           properties:
+                            branch:
+                              description: the git branch to check out
+                              type: string
+                            commit:
+                              description: the git commit (full SHA) to check out
+                              type: string
                             secret:
                               description: the Kubernetes secret where token is stored
+                              type: string
+                            tag:
+                              description: the git tag to check out
                               type: string
                             url:
                               description: the URL of the project
@@ -12195,8 +12213,17 @@ spec:
               git:
                 description: the configuration of the project to build on Git
                 properties:
+                  branch:
+                    description: the git branch to check out
+                    type: string
+                  commit:
+                    description: the git commit (full SHA) to check out
+                    type: string
                   secret:
                     description: the Kubernetes secret where token is stored
+                    type: string
+                  tag:
+                    description: the git tag to check out
                     type: string
                   url:
                     description: the URL of the project
@@ -24168,8 +24195,17 @@ spec:
                   git:
                     description: the configuration of the project to build on Git
                     properties:
+                      branch:
+                        description: the git branch to check out
+                        type: string
+                      commit:
+                        description: the git commit (full SHA) to check out
+                        type: string
                       secret:
                         description: the Kubernetes secret where token is stored
+                        type: string
+                      tag:
+                        description: the git tag to check out
                         type: string
                       url:
                         description: the URL of the project

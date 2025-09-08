@@ -112,7 +112,16 @@ func ComputeForIntegration(integration *v1.Integration, configmapVersions []stri
 
 	// Git spec
 	if integration.Spec.Git != nil {
-		if _, err := hash.Write([]byte(integration.Spec.Git.URL + "/" + integration.Spec.Git.Secret)); err != nil {
+		gitSpec := integration.Spec.Git.URL + "/" + integration.Spec.Git.Secret
+		switch {
+		case integration.Spec.Git.Tag != "":
+			gitSpec = gitSpec + "/" + integration.Spec.Git.Tag
+		case integration.Spec.Git.Branch != "":
+			gitSpec = gitSpec + "/" + integration.Spec.Git.Branch
+		case integration.Spec.Git.Commit != "":
+			gitSpec = gitSpec + "/" + integration.Spec.Git.Commit
+		}
+		if _, err := hash.Write([]byte(gitSpec)); err != nil {
 			return "", err
 		}
 	}

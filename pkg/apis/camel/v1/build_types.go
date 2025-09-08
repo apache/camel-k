@@ -117,6 +117,12 @@ type GitConfigSpec struct {
 	URL string `json:"url,omitempty"`
 	// the Kubernetes secret where token is stored
 	Secret string `json:"secret,omitempty"`
+	// the git branch to check out
+	Branch string `json:"branch,omitempty"`
+	// the git tag to check out
+	Tag string `json:"tag,omitempty"`
+	// the git commit (full SHA) to check out
+	Commit string `json:"commit,omitempty"`
 }
 
 // MavenBuildSpec defines the Maven configuration plus additional repositories to use.

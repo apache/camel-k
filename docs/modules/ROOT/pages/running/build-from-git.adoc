@@ -33,6 +33,38 @@ The operator will start a Build custom resource, whose goal is to build and pack
 
 The `kamel` CLI is equipped with a `--git` option that you can use to provide the project repository.
 
+== Specifying Branch, Tag or Commit
+
+By default, Camel K clones the repository's default branch (usually `main`). You can specify a different branch, tag, or specific commit using either CLI options or YAML configuration:
+
+=== Using CLI Options
+
+```bash
+# Clone specific branch
+kamel run --git https://github.com/michalvavrik/sample.git --git-branch feature/xyz
+
+# Clone specific tag
+kamel run --git https://github.com/michalvavrik/sample.git --git-tag v1.2.3
+
+# Clone the project and checkout specific commit (full SHA)
+kamel run --git https://github.com/michalvavrik/sample.git --git-commit f2b9bd064a62263ab53b3bfe6ac2b71e68dba45b
+```
+
+=== Using YAML Configuration
+
+```yaml
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: sample
+spec:
+  git:
+    url: https://github.com/michalvavrik/sample.git
+    branch: feature/xyz    # Use specific branch
+    # tag: v1.2.3         # Or use specific tag
+    # commit: f2b9bd064a62263ab53b3bfe6ac2b71e68dba45b  # Or use specific commit
+```
+
 == Rebuild
 
 In order to trigger a rebuild of an Integration you will need to `kamel reset` or to wipe off the Integration `status` as it normally happens for any other regular Integration.

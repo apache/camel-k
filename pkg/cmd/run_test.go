@@ -980,3 +980,69 @@ spec:
 status: {}
 `, output)
 }
+
+func TestGitTagIntegration(t *testing.T) {
+	runCmdOptions, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
+	output, err := ExecuteCommand(runCmd, cmdRun, "--git", "http://my-git/my-org/my-it.git", "--git-tag", "my-tag", "-o", "yaml")
+	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
+
+	require.NoError(t, err)
+	assert.Equal(t, `apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  annotations:
+    camel.apache.org/operator.id: camel-k
+  creationTimestamp: null
+  name: my-it
+spec:
+  git:
+    tag: my-tag
+    url: http://my-git/my-org/my-it.git
+  traits: {}
+status: {}
+`, output)
+}
+
+func TestGitBranchIntegration(t *testing.T) {
+	runCmdOptions, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
+	output, err := ExecuteCommand(runCmd, cmdRun, "--git", "http://my-git/my-org/my-it.git", "--git-branch", "my-branch", "-o", "yaml")
+	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
+
+	require.NoError(t, err)
+	assert.Equal(t, `apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  annotations:
+    camel.apache.org/operator.id: camel-k
+  creationTimestamp: null
+  name: my-it
+spec:
+  git:
+    branch: my-branch
+    url: http://my-git/my-org/my-it.git
+  traits: {}
+status: {}
+`, output)
+}
+
+func TestGitCommitIntegration(t *testing.T) {
+	runCmdOptions, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
+	output, err := ExecuteCommand(runCmd, cmdRun, "--git", "http://my-git/my-org/my-it.git", "--git-commit", "my-commit", "-o", "yaml")
+	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
+
+	require.NoError(t, err)
+	assert.Equal(t, `apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  annotations:
+    camel.apache.org/operator.id: camel-k
+  creationTimestamp: null
+  name: my-it
+spec:
+  git:
+    commit: my-commit
+    url: http://my-git/my-org/my-it.git
+  traits: {}
+status: {}
+`, output)
+}
