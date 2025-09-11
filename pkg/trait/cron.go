@@ -19,6 +19,7 @@ package trait
 
 import (
 	"fmt"
+	"maps"
 	"regexp"
 	"strconv"
 	"strings"
@@ -246,6 +247,10 @@ func (t *cronTrait) getCronJobFor(e *Environment) *batchv1.CronJob {
 	if t.BackoffLimit != nil {
 		backoffLimit = *t.BackoffLimit
 	}
+	podSpecLabels := map[string]string{
+		v1.IntegrationLabel: e.Integration.Name,
+	}
+	maps.Copy(podSpecLabels, e.Integration.GetPodSpecLabels())
 	cronjob := batchv1.CronJob{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "CronJob",
@@ -270,9 +275,7 @@ func (t *cronTrait) getCronJobFor(e *Environment) *batchv1.CronJob {
 					BackoffLimit:          &backoffLimit,
 					Template: corev1.PodTemplateSpec{
 						ObjectMeta: metav1.ObjectMeta{
-							Labels: map[string]string{
-								v1.IntegrationLabel: e.Integration.Name,
-							},
+							Labels:      podSpecLabels,
 							Annotations: annotations,
 						},
 						Spec: corev1.PodSpec{

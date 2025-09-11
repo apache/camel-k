@@ -19,6 +19,7 @@ package trait
 
 import (
 	"fmt"
+	"maps"
 
 	"k8s.io/apimachinery/pkg/util/intstr"
 
@@ -123,6 +124,11 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 		deadline = *t.ProgressDeadlineSeconds
 	}
 
+	podSpecLabels := map[string]string{
+		v1.IntegrationLabel: e.Integration.Name,
+	}
+	maps.Copy(podSpecLabels, e.Integration.GetPodSpecLabels())
+
 	deployment := appsv1.Deployment{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Deployment",
@@ -146,9 +152,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: map[string]string{
-						v1.IntegrationLabel: e.Integration.Name,
-					},
+					Labels:      podSpecLabels,
 					Annotations: annotations,
 				},
 				Spec: corev1.PodSpec{

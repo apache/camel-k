@@ -19,6 +19,7 @@ package trait
 
 import (
 	"fmt"
+	"maps"
 	"strconv"
 
 	corev1 "k8s.io/api/core/v1"
@@ -224,6 +225,10 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 		serviceLabels[knativeServingVisibilityLabel] = t.Visibility
 	}
 
+	podSpecLabels := map[string]string{
+		v1.IntegrationLabel: e.Integration.Name,
+	}
+	maps.Copy(podSpecLabels, e.Integration.GetPodSpecLabels())
 	svc := serving.Service{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Service",
@@ -239,9 +244,7 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 			ConfigurationSpec: serving.ConfigurationSpec{
 				Template: serving.RevisionTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
-						Labels: map[string]string{
-							v1.IntegrationLabel: e.Integration.Name,
-						},
+						Labels:      podSpecLabels,
 						Annotations: revisionAnnotations,
 					},
 					Spec: serving.RevisionSpec{

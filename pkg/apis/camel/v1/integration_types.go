@@ -70,9 +70,10 @@ type IntegrationSpec struct {
 	// the profile needed to run this Integration
 	Profile TraitProfile `json:"profile,omitempty"`
 	// the traits needed to run this Integration
-	Traits Traits `json:"traits,omitempty"`
-	// Pod template customization
+	Traits      Traits           `json:"traits,omitempty"`
 	PodTemplate *PodSpecTemplate `json:"template,omitempty"`
+
+	//PodTemplate *PodTemplateSpec `json:"template,omitempty"`
 	// Deprecated:
 	// Use camel trait (camel.properties) to manage properties
 	// Use mount trait (mount.configs) to manage configs
@@ -293,6 +294,9 @@ type IntegrationCondition struct {
 
 // PodSpecTemplate represent a template used to deploy an Integration `Pod`.
 type PodSpecTemplate struct {
+	// labels to be added to the pods
+	Labels map[string]string `json:"labels,omitempty"`
+
 	// the specification
 	Spec PodSpec `json:"spec,omitempty"`
 }

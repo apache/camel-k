@@ -71,6 +71,13 @@ func TestKnativeService(t *testing.T) {
 			},
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileKnative,
+				PodTemplate: &v1.PodSpecTemplate{
+					Labels: map[string]string{
+						"environment": "production",
+					},
+					Spec: v1.PodSpec{
+						Containers: make([]corev1.Container, 0),
+					}},
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
@@ -188,6 +195,11 @@ func TestKnativeService(t *testing.T) {
 	assert.Equal(t, boolean.TrueString, environment.ApplicationProperties["camel.k.sources[0].compressed"])
 	envVarHasValue(t, spec.Containers[0].Env, "CAMEL_K_CONF", filepath.FromSlash("/etc/camel/application.properties"))
 	envVarHasValue(t, spec.Containers[0].Env, "CAMEL_K_CONF_D", filepath.FromSlash("/etc/camel/conf.d"))
+
+	assert.NotNil(t, s.Spec.Template.Labels)
+	assert.Equal(t, 2, len(s.Spec.Template.Labels))
+	assert.Equal(t, "production", s.Spec.Template.Labels["environment"])
+	assert.Equal(t, KnativeServiceTestName, s.Spec.Template.Labels["camel.apache.org/integration"])
 }
 
 // envVarHasValue --.

@@ -103,6 +103,11 @@ func TestApplyDeploymentTraitWhileDeployingIntegrationDoesSucceed(t *testing.T) 
 	assert.Len(t, conditions, 1)
 	assert.Equal(t, v1.IntegrationConditionDeploymentAvailable, conditions[0].Type)
 	assert.Equal(t, "deployment name is integration-name", conditions[0].Message)
+
+	assert.NotNil(t, deployment.Spec.Template.Labels)
+	assert.Equal(t, 2, len(deployment.Spec.Template.Labels))
+	assert.Equal(t, "production", deployment.Spec.Template.Labels["environment"])
+	assert.Equal(t, "integration-name", deployment.Spec.Template.Labels["camel.apache.org/integration"])
 }
 
 func TestApplyDeploymentTraitWhileRunningIntegrationDoesSucceed(t *testing.T) {
@@ -297,6 +302,13 @@ func createNominalDeploymentTest() (*deploymentTrait, *Environment) {
 			Spec: v1.IntegrationSpec{
 				Replicas: &replicas,
 				Traits:   v1.Traits{},
+				PodTemplate: &v1.PodSpecTemplate{
+					Labels: map[string]string{
+						"environment": "production",
+					},
+					Spec: v1.PodSpec{
+						Containers: make([]corev1.Container, 0),
+					}},
 			},
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseDeploying,

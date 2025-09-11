@@ -551,6 +551,105 @@ func TestCronWithActiveDeadline(t *testing.T) {
 
 	assert.NotNil(t, cronJob.Spec.JobTemplate.Spec.BackoffLimit)
 	assert.EqualValues(t, *cronJob.Spec.JobTemplate.Spec.BackoffLimit, 2)
+
+	assert.NotNil(t, cronJob.Spec.JobTemplate.Spec.Template.Labels)
+	assert.Equal(t, 1, len(cronJob.Spec.JobTemplate.Spec.Template.Labels))
+	assert.Equal(t, "test", cronJob.Spec.JobTemplate.Spec.Template.Labels["camel.apache.org/integration"])
+}
+
+func TestCronWithPodSpecLabels(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	client, _ := internal.NewFakeClient()
+	traitCatalog := NewCatalog(nil)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Client:       client,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:    "routes.java",
+							Content: `from("cron:tab?schedule=0 0/2 * * ?").to("log:test")`,
+						},
+						Language: v1.LanguageJavaSource,
+					},
+				},
+				PodTemplate: &v1.PodSpecTemplate{
+					Labels: map[string]string{
+						"environment": "production",
+					},
+					Spec: v1.PodSpec{
+						Containers: make([]corev1.Container, 0),
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Build: v1.IntegrationPlatformBuildSpec{
+					RuntimeVersion: catalog.Runtime.Version,
+				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      kubernetes.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	c, err := newFakeClient("ns")
+	require.NoError(t, err)
+
+	tc := NewCatalog(c)
+
+	expectedCondition := NewIntegrationCondition(
+		"Deployment",
+		v1.IntegrationConditionDeploymentAvailable,
+		corev1.ConditionFalse,
+		"DeploymentAvailable",
+		"controller strategy: cron-job",
+	)
+	conditions, traits, err := tc.apply(&environment)
+	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
+	assert.Contains(t, conditions, expectedCondition)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+
+	ct, _ := environment.GetTrait("cron").(*cronTrait)
+	assert.NotNil(t, ct)
+	assert.Nil(t, ct.Fallback)
+
+	cronJob := environment.Resources.GetCronJob(func(job *batchv1.CronJob) bool { return true })
+	assert.NotNil(t, cronJob)
+
+	assert.NotNil(t, cronJob.Spec.JobTemplate.Spec.BackoffLimit)
+	assert.EqualValues(t, *cronJob.Spec.JobTemplate.Spec.BackoffLimit, 2)
+
+	assert.NotNil(t, cronJob.Spec.JobTemplate.Spec.Template.Labels)
+	assert.Equal(t, 2, len(cronJob.Spec.JobTemplate.Spec.Template.Labels))
+	assert.Equal(t, "production", cronJob.Spec.JobTemplate.Spec.Template.Labels["environment"])
+	assert.Equal(t, "test", cronJob.Spec.JobTemplate.Spec.Template.Labels["camel.apache.org/integration"])
+
 }
 
 func TestCronWithBackoffLimit(t *testing.T) {

@@ -525,3 +525,13 @@ func ToYamlDSL(flows []Flow) ([]byte, error) {
 
 	return yamldata, nil
 }
+
+func (integration *Integration) GetPodSpecLabels() map[string]string {
+	if integration.Spec.PodTemplate == nil {
+		return map[string]string{}
+	}
+	if integration.Spec.PodTemplate.Labels == nil {
+		return map[string]string{}
+	}
+	return integration.Spec.PodTemplate.Labels
+}
