@@ -3515,6 +3515,8 @@ the traits needed to run this Integration
 
 
 Pod template customization
+Deprecated:
+Use container, init-containers or owner traits instead
 
 |`configuration` +
 *xref:#_camel_apache_org_v1_ConfigurationSpec[[\]ConfigurationSpec]*
