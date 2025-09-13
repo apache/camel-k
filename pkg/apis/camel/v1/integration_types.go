@@ -72,6 +72,8 @@ type IntegrationSpec struct {
 	// the traits needed to run this Integration
 	Traits Traits `json:"traits,omitempty"`
 	// Pod template customization
+	// Deprecated:
+	// Use container, init-containers or owner traits instead
 	PodTemplate *PodSpecTemplate `json:"template,omitempty"`
 	// Deprecated:
 	// Use camel trait (camel.properties) to manage properties
