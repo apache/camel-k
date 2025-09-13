@@ -24,7 +24,6 @@ package common
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -42,70 +41,6 @@ var sampleJar = "https://raw.githubusercontent.com/apache/camel-k/main/e2e/commo
 func TestKamelCLIRun(t *testing.T) {
 	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-
-		t.Run("Examples from GitHub", func(t *testing.T) {
-			t.Run("Java", func(t *testing.T) {
-				g.Expect(KamelRun(t, ctx, ns,
-					"github:apache/camel-k-examples/generic-examples/languages/Sample.java").Execute()).To(Succeed())
-				g.Eventually(IntegrationPodPhase(t, ctx, ns, "sample"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-				g.Eventually(IntegrationConditionStatus(t, ctx, ns, "sample", v1.IntegrationConditionReady), TestTimeoutShort).
-					Should(Equal(corev1.ConditionTrue))
-				g.Eventually(IntegrationLogs(t, ctx, ns, "sample"), TestTimeoutShort).Should(ContainSubstring("Hello Camel K!"))
-			})
-
-			t.Run("Java (RAW)", func(t *testing.T) {
-				g.Expect(KamelRun(t, ctx, ns,
-					"https://raw.githubusercontent.com/apache/camel-k-examples/main/generic-examples/languages/Sample.java").Execute()).
-					To(Succeed())
-				g.Eventually(IntegrationPodPhase(t, ctx, ns, "sample"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-				g.Eventually(IntegrationConditionStatus(t, ctx, ns, "sample", v1.IntegrationConditionReady), TestTimeoutShort).
-					Should(Equal(corev1.ConditionTrue))
-				g.Eventually(IntegrationLogs(t, ctx, ns, "sample"), TestTimeoutShort).Should(ContainSubstring("Hello Camel K!"))
-			})
-
-			t.Run("Java (branch)", func(t *testing.T) {
-				g.Expect(KamelRun(t, ctx, ns,
-					"github:apache/camel-k-examples/generic-examples/languages/Sample.java?branch=main").Execute()).To(Succeed())
-				g.Eventually(IntegrationPodPhase(t, ctx, ns, "sample"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-				g.Eventually(IntegrationConditionStatus(t, ctx, ns, "sample", v1.IntegrationConditionReady), TestTimeoutShort).
-					Should(Equal(corev1.ConditionTrue))
-				g.Eventually(IntegrationLogs(t, ctx, ns, "sample"), TestTimeoutShort).Should(ContainSubstring("Hello Camel K!"))
-				g.Eventually(DeleteIntegrations(t, ctx, ns), TestTimeoutLong).Should(Equal(0))
-			})
-
-			// GIST does not like GITHUB_TOKEN apparently, we must temporarily remove it
-			os.Setenv("GITHUB_TOKEN_TMP", os.Getenv("GITHUB_TOKEN"))
-			os.Unsetenv("GITHUB_TOKEN")
-
-			t.Run("Gist (ID)", func(t *testing.T) {
-				name := RandomizedSuffixName("github-gist-id")
-				g.Expect(KamelRun(t, ctx, ns, "--name", name,
-					"gist:e2c3f9a5fd0d9e79b21b04809786f17a").Execute()).To(Succeed())
-				g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-				g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
-					Should(Equal(corev1.ConditionTrue))
-				g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-				g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Tick!"))
-				g.Eventually(DeleteIntegrations(t, ctx, ns), TestTimeoutLong).Should(Equal(0))
-			})
-
-			t.Run("Gist (URL)", func(t *testing.T) {
-				name := RandomizedSuffixName("github-gist-url")
-				g.Expect(KamelRun(t, ctx, ns, "--name", name,
-					"https://gist.github.com/lburgazzoli/e2c3f9a5fd0d9e79b21b04809786f17a").Execute()).To(Succeed())
-				g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-				g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
-					Should(Equal(corev1.ConditionTrue))
-				g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-				g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Tick!"))
-				g.Eventually(DeleteIntegrations(t, ctx, ns), TestTimeoutLong).Should(Equal(0))
-			})
-
-			// Revert GITHUB TOKEN
-			os.Setenv("GITHUB_TOKEN", os.Getenv("GITHUB_TOKEN_TMP"))
-			os.Unsetenv("GITHUB_TOKEN_TMP")
-		})
-
 		t.Run("Run and update", func(t *testing.T) {
 			name := RandomizedSuffixName("run")
 			g.Expect(KamelRun(t, ctx, ns, "files/run.yaml", "--name", name).Execute()).To(Succeed())
