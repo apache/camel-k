@@ -264,49 +264,6 @@ Deprecated: no longer in use.
 
 |===
 
-[#_camel_apache_org_v1_Kamelet]
-=== Kamelet
-
-Kamelet is the Schema for the kamelets API.
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`apiVersion` +
-string
-|`camel.apache.org/v1`
-
-|`kind` +
-string
-|`Kamelet`
-|`metadata` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.33/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
-|
-
-
-
-
-Refer to the Kubernetes API documentation for the fields of the `metadata` field.
-|`spec` +
-*xref:#_camel_apache_org_v1_KameletSpec[KameletSpec]*
-|
-
-
-the desired specification
-
-|`status` +
-*xref:#_camel_apache_org_v1_KameletStatus[KameletStatus]*
-|
-
-
-the actual status of the resource
-Deprecated no longer in use
-
-
-|===
-
 [#_camel_apache_org_v1_Pipe]
 === Pipe
 
@@ -1661,141 +1618,6 @@ if the content is compressed (base64 encrypted)
 
 |===
 
-[#_camel_apache_org_v1_DataTypeReference]
-=== DataTypeReference
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_Endpoint, Endpoint>>
-
-DataTypeReference references to the specification of a data type by its scheme and format name.
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`scheme` +
-string
-|
-
-
-the data type component scheme
-
-|`format` +
-string
-|
-
-
-the data type format name
-
-
-|===
-
-[#_camel_apache_org_v1_DataTypeSpec]
-=== DataTypeSpec
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_DataTypesSpec, DataTypesSpec>>
-
-DataTypeSpec represents the specification for a data type.
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`scheme` +
-string
-|
-
-
-the data type component scheme
-
-|`format` +
-string
-|
-
-
-the data type format name
-
-|`description` +
-string
-|
-
-
-optional description
-
-|`mediaType` +
-string
-|
-
-
-media type as expected for HTTP media types (ie, application/json)
-
-|`dependencies` +
-[]string
-|
-
-
-the list of Camel or Maven dependencies required by the data type
-
-|`headers` +
-*xref:#_camel_apache_org_v1_HeaderSpec[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.HeaderSpec]*
-|
-
-
-one to many header specifications
-
-|`schema` +
-*xref:#_camel_apache_org_v1_JSONSchemaProps[JSONSchemaProps]*
-|
-
-
-the expected schema for the data type
-
-
-|===
-
-[#_camel_apache_org_v1_DataTypesSpec]
-=== DataTypesSpec
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_KameletSpecBase, KameletSpecBase>>
-
-DataTypesSpec represents the specification for a set of data types.
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`default` +
-string
-|
-
-
-the default data type for this Kamelet
-
-|`types` +
-*xref:#_camel_apache_org_v1_DataTypeSpec[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.DataTypeSpec]*
-|
-
-
-one to many data type specifications
-
-|`headers` +
-*xref:#_camel_apache_org_v1_HeaderSpec[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.HeaderSpec]*
-|
-
-
-one to many header specifications
-
-
-|===
-
 [#_camel_apache_org_v1_Endpoint]
 === Endpoint
 
@@ -1833,7 +1655,7 @@ URI can be used to specify the (Camel) endpoint explicitly
 Properties are a key value representation of endpoint properties
 
 |`dataTypes` +
-*xref:#_camel_apache_org_v1_DataTypeReference[map[github.com/apache/camel-k/v2/pkg/apis/camel/v1.TypeSlot\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.DataTypeReference]*
+map[github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1.TypeSlot]github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1.DataTypeReference
 |
 
 
@@ -2006,38 +1828,6 @@ ErrorHandlerSpec represents an unstructured object for an error handler.
 
 ErrorHandlerType a type of error handler (ie, sink).
 
-
-[#_camel_apache_org_v1_EventTypeSpec]
-=== EventTypeSpec
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_KameletSpecBase, KameletSpecBase>>
-
-EventTypeSpec represents a specification for an event type.
-Deprecated: In favor of using DataTypeSpec.
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`mediaType` +
-string
-|
-
-
-media type as expected for HTTP media types (ie, application/json)
-
-|`schema` +
-*xref:#_camel_apache_org_v1_JSONSchemaProps[JSONSchemaProps]*
-|
-
-
-the expected schema for the event
-
-
-|===
 
 [#_camel_apache_org_v1_ExternalDocumentation]
 === ExternalDocumentation
@@ -2261,59 +2051,6 @@ string
 
 
 the Kubernetes secret where token is stored
-
-
-|===
-
-[#_camel_apache_org_v1_HeaderSpec]
-=== HeaderSpec
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_DataTypeSpec, DataTypeSpec>>
-* <<#_camel_apache_org_v1_DataTypesSpec, DataTypesSpec>>
-
-HeaderSpec represents the specification for a header used in the Kamelet.
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`type` +
-string
-|
-
-
-
-
-|`title` +
-string
-|
-
-
-
-
-|`description` +
-string
-|
-
-
-
-
-|`required` +
-bool
-|
-
-
-
-
-|`default` +
-string
-|
-
-
-
 
 
 |===
@@ -3927,12 +3664,6 @@ XDescriptors is a list of extended properties that trigger a custom behavior in 
 [#_camel_apache_org_v1_JSONSchemaProps]
 === JSONSchemaProps
 
-*Appears on:*
-
-* <<#_camel_apache_org_v1_DataTypeSpec, DataTypeSpec>>
-* <<#_camel_apache_org_v1_EventTypeSpec, EventTypeSpec>>
-* <<#_camel_apache_org_v1_KameletSpecBase, KameletSpecBase>>
-
 JSONSchemaProps is a JSON-Schema following Specification Draft 4 (http://json-schema.org/).
 
 [cols="2,2a",options="header"]
@@ -4047,116 +3778,6 @@ JibTask is used to configure Jib.
 
 |===
 
-[#_camel_apache_org_v1_KameletCondition]
-=== KameletCondition
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_KameletStatus, KameletStatus>>
-
-KameletCondition describes the state of a resource at a certain point.
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`type` +
-*xref:#_camel_apache_org_v1_KameletConditionType[KameletConditionType]*
-|
-
-
-Type of kamelet condition.
-
-|`status` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.33/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
-|
-
-
-Status of the condition, one of True, False, Unknown.
-
-|`lastUpdateTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.33/#time-v1-meta[Kubernetes meta/v1.Time]*
-|
-
-
-The last time this condition was updated.
-
-|`lastTransitionTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.33/#time-v1-meta[Kubernetes meta/v1.Time]*
-|
-
-
-Last time the condition transitioned from one status to another.
-
-|`reason` +
-string
-|
-
-
-The reason for the condition's last transition.
-
-|`message` +
-string
-|
-
-
-A human-readable message indicating details about the transition.
-
-
-|===
-
-[#_camel_apache_org_v1_KameletConditionType]
-=== KameletConditionType(`string` alias)
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_KameletCondition, KameletCondition>>
-
-KameletConditionType --.
-
-
-[#_camel_apache_org_v1_KameletPhase]
-=== KameletPhase(`string` alias)
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_KameletStatus, KameletStatus>>
-
-KameletPhase --.
-
-
-[#_camel_apache_org_v1_KameletProperty]
-=== KameletProperty
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_KameletStatus, KameletStatus>>
-
-KameletProperty specify the behavior of a property in a Kamelet.
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`name` +
-string
-|
-
-
-the name of the property
-
-|`default` +
-string
-|
-
-
-the default value of the property (if any)
-
-
-|===
-
 [#_camel_apache_org_v1_KameletRepositorySpec]
 === KameletRepositorySpec
 
@@ -4178,144 +3799,6 @@ string
 
 
 the remote repository in the format github:ORG/REPO/PATH_TO_KAMELETS_FOLDER
-
-
-|===
-
-[#_camel_apache_org_v1_KameletSpec]
-=== KameletSpec
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_Kamelet, Kamelet>>
-
-KameletSpec specifies the configuration required to execute a Kamelet.
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`KameletSpecBase` +
-*xref:#_camel_apache_org_v1_KameletSpecBase[KameletSpecBase]*
-|(Members of `KameletSpecBase` are embedded into this type.)
-
-
-
-
-|`versions` +
-*xref:#_camel_apache_org_v1_KameletSpecBase[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.KameletSpecBase]*
-|
-
-
-the optional versions available for this Kamelet. This field may not be taken in account by Camel core and is meant to support
-any user defined versioning model on cluster only. If the user wants to use any given version, she must materialize a file with the given version spec
-as the `main` Kamelet spec on the runtime.
-
-
-|===
-
-[#_camel_apache_org_v1_KameletSpecBase]
-=== KameletSpecBase
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_KameletSpec, KameletSpec>>
-
-KameletSpecBase specifies the base configuration of a Kamelet.
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`definition` +
-*xref:#_camel_apache_org_v1_JSONSchemaProps[JSONSchemaProps]*
-|
-
-
-defines the formal configuration of the Kamelet
-
-|`sources` +
-*xref:#_camel_apache_org_v1_SourceSpec[[\]SourceSpec]*
-|
-
-
-sources in any Camel DSL supported
-
-|`template` +
-*xref:#_camel_apache_org_v1_Template[Template]*
-|
-
-
-the main source in YAML DSL
-
-|`types` +
-*xref:#_camel_apache_org_v1_EventTypeSpec[map[github.com/apache/camel-k/v2/pkg/apis/camel/v1.TypeSlot\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.EventTypeSpec]*
-|
-
-
-data specification types for the events consumed/produced by the Kamelet
-Deprecated: In favor of using DataTypes
-
-|`dataTypes` +
-*xref:#_camel_apache_org_v1_DataTypesSpec[map[github.com/apache/camel-k/v2/pkg/apis/camel/v1.TypeSlot\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.DataTypesSpec]*
-|
-
-
-data specification types for the events consumed/produced by the Kamelet
-
-|`dependencies` +
-[]string
-|
-
-
-Camel dependencies needed by the Kamelet
-
-
-|===
-
-[#_camel_apache_org_v1_KameletStatus]
-=== KameletStatus
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_Kamelet, Kamelet>>
-
-KameletStatus defines the observed state of Kamelet.
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`observedGeneration` +
-int64
-|
-
-
-ObservedGeneration is the most recent generation observed for this Kamelet.
-
-|`phase` +
-*xref:#_camel_apache_org_v1_KameletPhase[KameletPhase]*
-|
-
-
-Phase --
-
-|`conditions` +
-*xref:#_camel_apache_org_v1_KameletCondition[[\]KameletCondition]*
-|
-
-
-Conditions --
-
-|`properties` +
-*xref:#_camel_apache_org_v1_KameletProperty[[\]KameletProperty]*
-|
-
-
-Properties --
 
 
 |===
@@ -5239,7 +4722,6 @@ where to publish the final image
 * <<#_camel_apache_org_v1_Flow, Flow>>
 * <<#_camel_apache_org_v1_HealthCheckResponse, HealthCheckResponse>>
 * <<#_camel_apache_org_v1_JSON, JSON>>
-* <<#_camel_apache_org_v1_Template, Template>>
 * <<#_camel_apache_org_v1_TraitConfiguration, TraitConfiguration>>
 
 RawMessage is a raw encoded JSON value.
@@ -5574,7 +5056,6 @@ string
 * <<#_camel_apache_org_v1_IntegrationKitSpec, IntegrationKitSpec>>
 * <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
 * <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
-* <<#_camel_apache_org_v1_KameletSpecBase, KameletSpecBase>>
 
 SourceSpec defines the configuration for one or more routes to be executed in a certain Camel DSL language.
 
@@ -5781,30 +5262,6 @@ Deprecated: use jib or a custom publishing strategy instead
 
 
 a JibTask, for Jib strategy
-
-
-|===
-
-[#_camel_apache_org_v1_Template]
-=== Template
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_KameletSpecBase, KameletSpecBase>>
-
-Template is an unstructured object representing a Kamelet template in YAML/JSON DSL.
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`RawMessage` +
-*xref:#_camel_apache_org_v1_RawMessage[RawMessage]*
-|(Members of `RawMessage` are embedded into this type.)
-
-
-an unstructured raw message
 
 
 |===
@@ -6195,12 +5652,6 @@ Deprecated: for backward compatibility.
 
 
 |===
-
-[#_camel_apache_org_v1_TypeSlot]
-=== TypeSlot(`string` alias)
-
-TypeSlot represent a kind of data (ie, input, output, ...).
-
 
 [#_camel_apache_org_v1_UserTask]
 === UserTask

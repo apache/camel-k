@@ -26,6 +26,14 @@ $(go env GOPATH)/bin/controller-gen crd \
   output:crd:artifacts:config=../../../pkg/resources/config/crd/bases \
   output:crd:dir=../../../pkg/resources/config/crd/bases
 
+# This one is required to generate Kamelets CRD from the dependency.
+# It takes the proper version reading the project go.mod, so, it is good enough
+# to update the go.mod with kamelets project version when a bump is needed.
+$(go env GOPATH)/bin/controller-gen crd \
+  paths=github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1 \
+  output:crd:artifacts:config=../../../pkg/resources/config/crd/bases \
+  output:crd:dir=../../../pkg/resources/config/crd/bases
+
 # cleanup working directory in $apidir
 rm -rf ./config
 

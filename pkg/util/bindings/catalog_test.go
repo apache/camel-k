@@ -24,6 +24,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/internal"
+	kameletsv1 "github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1"
 	corev1 "k8s.io/api/core/v1"
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1"
 
@@ -42,7 +43,7 @@ func TestValidateEndpoint(t *testing.T) {
 			namespace: "test",
 			endpoint: v1.Endpoint{
 				Ref: &corev1.ObjectReference{
-					Kind:       v1.KameletKind,
+					Kind:       kameletsv1.KameletKind,
 					APIVersion: v1.SchemeGroupVersion.String(),
 					Name:       "foo-kamelet",
 				},
@@ -53,7 +54,7 @@ func TestValidateEndpoint(t *testing.T) {
 			namespace: "test",
 			endpoint: v1.Endpoint{
 				Ref: &corev1.ObjectReference{
-					Kind:       v1.KameletKind,
+					Kind:       kameletsv1.KameletKind,
 					Namespace:  "test",
 					APIVersion: v1.SchemeGroupVersion.String(),
 					Name:       "foo-kamelet",
@@ -66,7 +67,7 @@ func TestValidateEndpoint(t *testing.T) {
 			operatorNamespace: "global",
 			endpoint: v1.Endpoint{
 				Ref: &corev1.ObjectReference{
-					Kind:       v1.KameletKind,
+					Kind:       kameletsv1.KameletKind,
 					Namespace:  "global",
 					APIVersion: v1.SchemeGroupVersion.String(),
 					Name:       "foo-kamelet",
@@ -138,7 +139,7 @@ func TestValidateEndpointError(t *testing.T) {
 			endpoint: v1.Endpoint{
 				URI: &uri,
 				Ref: &corev1.ObjectReference{
-					Kind:       v1.KameletKind,
+					Kind:       kameletsv1.KameletKind,
 					APIVersion: v1.SchemeGroupVersion.String(),
 					Name:       "foo-kamelet",
 				},
@@ -149,7 +150,7 @@ func TestValidateEndpointError(t *testing.T) {
 			namespace: "test",
 			endpoint: v1.Endpoint{
 				Ref: &corev1.ObjectReference{
-					Kind:       v1.KameletKind,
+					Kind:       kameletsv1.KameletKind,
 					Namespace:  "other",
 					APIVersion: v1.SchemeGroupVersion.String(),
 					Name:       "foo-kamelet",

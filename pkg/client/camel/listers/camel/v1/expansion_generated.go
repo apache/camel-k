@@ -67,14 +67,6 @@ type IntegrationProfileListerExpansion interface{}
 // IntegrationProfileNamespaceLister.
 type IntegrationProfileNamespaceListerExpansion interface{}
 
-// KameletListerExpansion allows custom methods to be added to
-// KameletLister.
-type KameletListerExpansion interface{}
-
-// KameletNamespaceListerExpansion allows custom methods to be added to
-// KameletNamespaceLister.
-type KameletNamespaceListerExpansion interface{}
-
 // PipeListerExpansion allows custom methods to be added to
 // PipeLister.
 type PipeListerExpansion interface{}

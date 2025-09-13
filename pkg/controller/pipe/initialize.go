@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	kameletsv1 "github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1"
 
 	"github.com/apache/camel-k/v2/pkg/kamelet/repository"
 	"github.com/apache/camel-k/v2/pkg/platform"
@@ -123,7 +124,7 @@ func findIcon(ctx context.Context, c client.Client, pipe *v1.Pipe) (string, erro
 		return "", nil
 	}
 
-	return kamelet.Annotations[v1.AnnotationIcon], nil
+	return kamelet.Annotations[kameletsv1.AnnotationIcon], nil
 }
 
 func patchPipeIconAnnotations(ctx context.Context, c client.Client, pipe *v1.Pipe, icon string) error {
@@ -132,8 +133,8 @@ func patchPipeIconAnnotations(ctx context.Context, c client.Client, pipe *v1.Pip
 	for k, v := range pipe.Annotations {
 		clone.Annotations[k] = v
 	}
-	if _, ok := clone.Annotations[v1.AnnotationIcon]; !ok {
-		clone.Annotations[v1.AnnotationIcon] = icon
+	if _, ok := clone.Annotations[kameletsv1.AnnotationIcon]; !ok {
+		clone.Annotations[kameletsv1.AnnotationIcon] = icon
 	}
 	p, err := patch.MergePatch(pipe, clone)
 	if err != nil {

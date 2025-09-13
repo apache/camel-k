@@ -37,8 +37,6 @@ type Interface interface {
 	IntegrationPlatforms() IntegrationPlatformInformer
 	// IntegrationProfiles returns a IntegrationProfileInformer.
 	IntegrationProfiles() IntegrationProfileInformer
-	// Kamelets returns a KameletInformer.
-	Kamelets() KameletInformer
 	// Pipes returns a PipeInformer.
 	Pipes() PipeInformer
 }
@@ -82,11 +80,6 @@ func (v *version) IntegrationPlatforms() IntegrationPlatformInformer {
 // IntegrationProfiles returns a IntegrationProfileInformer.
 func (v *version) IntegrationProfiles() IntegrationProfileInformer {
 	return &integrationProfileInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
-}
-
-// Kamelets returns a KameletInformer.
-func (v *version) Kamelets() KameletInformer {
-	return &kameletInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // Pipes returns a PipeInformer.

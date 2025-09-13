@@ -21,8 +21,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	v1 "github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1"
 
 	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
@@ -329,23 +330,23 @@ func TestMultipleKamelets(t *testing.T) {
 
 	assert.Len(t, environment.Integration.Status.GeneratedSources, 2)
 
-	expectedFlowSourceTimerV1 := v1.SourceSpec{
-		DataSpec: v1.DataSpec{
+	expectedFlowSourceTimerV1 := camelv1.SourceSpec{
+		DataSpec: camelv1.DataSpec{
 			Name:       "support.groovy",
 			ContentRef: "it-kamelet-timer-000",
 			ContentKey: "content",
 		},
-		Language:    v1.LanguageGroovy,
+		Language:    camelv1.LanguageGroovy,
 		FromKamelet: true,
 	}
 
-	expectedFlowSinkLoggerMain := v1.SourceSpec{
-		DataSpec: v1.DataSpec{
+	expectedFlowSinkLoggerMain := camelv1.SourceSpec{
+		DataSpec: camelv1.DataSpec{
 			Name:       "logger.yaml",
 			ContentRef: "it-kamelet-logger-template",
 			ContentKey: "content",
 		},
-		Language:    v1.LanguageYaml,
+		Language:    camelv1.LanguageYaml,
 		FromKamelet: true,
 	}
 
@@ -504,9 +505,9 @@ func TestKameletConditionFalse(t *testing.T) {
 	require.Error(t, err)
 	assert.Len(t, environment.Integration.Status.Conditions, 1)
 
-	cond := environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable)
+	cond := environment.Integration.Status.GetCondition(camelv1.IntegrationConditionKameletsAvailable)
 	assert.Equal(t, corev1.ConditionFalse, cond.Status)
-	assert.Equal(t, v1.IntegrationConditionKameletsAvailableReason, cond.Reason)
+	assert.Equal(t, camelv1.IntegrationConditionKameletsAvailableReason, cond.Reason)
 	assert.Contains(t, cond.Message, "kamelets [none] not found")
 }
 
@@ -559,9 +560,9 @@ func TestKameletConditionTrue(t *testing.T) {
 	require.NoError(t, err)
 	assert.Len(t, environment.Integration.Status.Conditions, 1)
 
-	cond := environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable)
+	cond := environment.Integration.Status.GetCondition(camelv1.IntegrationConditionKameletsAvailable)
 	assert.Equal(t, corev1.ConditionTrue, cond.Status)
-	assert.Equal(t, v1.IntegrationConditionKameletsAvailableReason, cond.Reason)
+	assert.Equal(t, camelv1.IntegrationConditionKameletsAvailableReason, cond.Reason)
 	assert.Contains(t, cond.Message, "[none,timer] found")
 
 	kameletsBundle := environment.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool {
@@ -582,24 +583,24 @@ func createKameletsTestEnvironment(flow string, objects ...runtime.Object) (*kam
 		Catalog:      NewCatalog(client),
 		Client:       client,
 		CamelCatalog: catalog,
-		Integration: &v1.Integration{
+		Integration: &camelv1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "test",
 				Name:      "it",
 			},
-			Spec: v1.IntegrationSpec{
-				Sources: []v1.SourceSpec{
+			Spec: camelv1.IntegrationSpec{
+				Sources: []camelv1.SourceSpec{
 					{
-						DataSpec: v1.DataSpec{
+						DataSpec: camelv1.DataSpec{
 							Name:    "flow.yaml",
 							Content: flow,
 						},
-						Language: v1.LanguageYaml,
+						Language: camelv1.LanguageYaml,
 					},
 				},
 			},
-			Status: v1.IntegrationStatus{
-				Phase: v1.IntegrationPhaseInitialization,
+			Status: camelv1.IntegrationStatus{
+				Phase: camelv1.IntegrationPhaseInitialization,
 			},
 		},
 		Resources: kubernetes.NewCollection(),
@@ -649,10 +650,10 @@ func TestKameletSyntheticKitConditionTrue(t *testing.T) {
 	require.NoError(t, err)
 	assert.Len(t, environment.Integration.Status.Conditions, 1)
 
-	cond := environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable)
+	cond := environment.Integration.Status.GetCondition(camelv1.IntegrationConditionKameletsAvailable)
 	assert.NotNil(t, cond)
 	assert.Equal(t, corev1.ConditionTrue, cond.Status)
-	assert.Equal(t, v1.IntegrationConditionKameletsAvailableReason, cond.Reason)
+	assert.Equal(t, camelv1.IntegrationConditionKameletsAvailableReason, cond.Reason)
 	assert.Contains(t, cond.Message, "[timer-source] found")
 
 	kameletsBundle := environment.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool {

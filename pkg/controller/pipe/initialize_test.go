@@ -27,6 +27,7 @@ import (
 	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	kameletsv1 "github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1"
 
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
@@ -111,16 +112,16 @@ func TestNewPipeCamelURIBinding(t *testing.T) {
 	// Verify icon propagation (nothing should be present), this is a value patched by the operator
 	err = c.Get(context.Background(), ctrl.ObjectKeyFromObject(pipe), pipe)
 	require.NoError(t, err)
-	assert.Equal(t, "", pipe.Annotations[v1.AnnotationIcon])
+	assert.Equal(t, "", pipe.Annotations[kameletsv1.AnnotationIcon])
 }
 
 func TestNewPipe(t *testing.T) {
-	source := v1.NewKamelet("ns", "my-source")
+	source := kameletsv1.NewKamelet("ns", "my-source")
 	source.Annotations = map[string]string{
-		v1.AnnotationIcon: "my-source-icon-base64",
+		kameletsv1.AnnotationIcon: "my-source-icon-base64",
 	}
-	source.Spec = v1.KameletSpec{
-		KameletSpecBase: v1.KameletSpecBase{
+	source.Spec = kameletsv1.KameletSpec{
+		KameletSpecBase: kameletsv1.KameletSpecBase{
 			Template: templateOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
@@ -136,12 +137,12 @@ func TestNewPipe(t *testing.T) {
 			},
 		},
 	}
-	sink := v1.NewKamelet("ns", "my-sink")
+	sink := kameletsv1.NewKamelet("ns", "my-sink")
 	sink.Annotations = map[string]string{
-		v1.AnnotationIcon: "my-sink-icon-base64",
+		kameletsv1.AnnotationIcon: "my-sink-icon-base64",
 	}
-	sink.Spec = v1.KameletSpec{
-		KameletSpecBase: v1.KameletSpecBase{
+	sink.Spec = kameletsv1.KameletSpec{
+		KameletSpecBase: kameletsv1.KameletSpecBase{
 			Template: templateOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "kamelet:source",
@@ -172,7 +173,7 @@ func TestNewPipe(t *testing.T) {
 			Source: v1.Endpoint{
 				Ref: &corev1.ObjectReference{
 					APIVersion: v1.SchemeGroupVersion.String(),
-					Kind:       v1.KameletKind,
+					Kind:       kameletsv1.KameletKind,
 					Namespace:  "ns",
 					Name:       "my-source",
 				},
@@ -180,7 +181,7 @@ func TestNewPipe(t *testing.T) {
 			Sink: v1.Endpoint{
 				Ref: &corev1.ObjectReference{
 					APIVersion: v1.SchemeGroupVersion.String(),
-					Kind:       v1.KameletKind,
+					Kind:       kameletsv1.KameletKind,
 					Namespace:  "ns",
 					Name:       "my-sink",
 				},
@@ -212,15 +213,15 @@ func TestNewPipe(t *testing.T) {
 	// Verify icon propagation, this is a value patched by the operator
 	err = c.Get(context.Background(), ctrl.ObjectKeyFromObject(pipe), pipe)
 	require.NoError(t, err)
-	assert.Equal(t, "my-source-icon-base64", pipe.Annotations[v1.AnnotationIcon])
+	assert.Equal(t, "my-source-icon-base64", pipe.Annotations[kameletsv1.AnnotationIcon])
 }
 
-func templateOrFail(template map[string]interface{}) *v1.Template {
+func templateOrFail(template map[string]interface{}) *kameletsv1.Template {
 	data, err := json.Marshal(template)
 	if err != nil {
 		panic(err)
 	}
-	t := v1.Template{RawMessage: data}
+	t := kameletsv1.Template{RawMessage: data}
 	return &t
 }
 

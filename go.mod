@@ -5,6 +5,8 @@ go 1.24.6
 require (
 	dario.cat/mergo v1.0.2
 	github.com/Masterminds/semver v1.5.0
+	// TODO: use a fixed tag as soon as 4.15.0 is available
+	github.com/apache/camel-kamelets/crds v0.0.0-20250908083023-effbf2e34acb
 	github.com/evanphx/json-patch v5.9.11+incompatible
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gertd/go-pluralize v0.2.1

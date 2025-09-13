@@ -85,6 +85,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/log"
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
 	"github.com/apache/camel-k/v2/pkg/util/patch"
+	kameletsv1 "github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1"
 	configv1 "github.com/openshift/api/config/v1"
 	projectv1 "github.com/openshift/api/project/v1"
 	routev1 "github.com/openshift/api/route/v1"
@@ -2272,7 +2273,7 @@ func CRDs(t *testing.T) func() []metav1.APIResource {
 			reflect.TypeOf(v1.IntegrationKit{}).Name(),
 			reflect.TypeOf(v1.IntegrationPlatform{}).Name(),
 			reflect.TypeOf(v1.IntegrationProfile{}).Name(),
-			reflect.TypeOf(v1.Kamelet{}).Name(),
+			reflect.TypeOf(kameletsv1.Kamelet{}).Name(),
 			reflect.TypeOf(v1.Pipe{}).Name(),
 		}
 
@@ -2504,9 +2505,9 @@ func ServiceAccount(t *testing.T, ctx context.Context, ns, name string) func() *
 	}
 }
 
-func KameletList(t *testing.T, ctx context.Context, ns string) func() []v1.Kamelet {
-	return func() []v1.Kamelet {
-		lst := v1.NewKameletList()
+func KameletList(t *testing.T, ctx context.Context, ns string) func() []kameletsv1.Kamelet {
+	return func() []kameletsv1.Kamelet {
+		lst := kameletsv1.NewKameletList()
 		if err := TestClient(t).List(ctx, &lst, ctrl.InNamespace(ns)); err != nil {
 			failTest(t, err)
 		}
@@ -2514,9 +2515,9 @@ func KameletList(t *testing.T, ctx context.Context, ns string) func() []v1.Kamel
 	}
 }
 
-func Kamelet(t *testing.T, ctx context.Context, name string, ns string) func() *v1.Kamelet {
-	return func() *v1.Kamelet {
-		it := v1.NewKamelet(ns, name)
+func Kamelet(t *testing.T, ctx context.Context, name string, ns string) func() *kameletsv1.Kamelet {
+	return func() *kameletsv1.Kamelet {
+		it := kameletsv1.NewKamelet(ns, name)
 		key := ctrl.ObjectKey{
 			Namespace: ns,
 			Name:      name,
@@ -2530,7 +2531,7 @@ func Kamelet(t *testing.T, ctx context.Context, name string, ns string) func() *
 	}
 }
 
-func KameletLabels(kamelet *v1.Kamelet) map[string]string {
+func KameletLabels(kamelet *kameletsv1.Kamelet) map[string]string {
 	if kamelet == nil {
 		return map[string]string{}
 	}
@@ -2701,21 +2702,21 @@ func CreateKnativeBroker(t *testing.T, ctx context.Context, ns string, name stri
 	Kamelets
 */
 
-func CreateKamelet(t *testing.T, ctx context.Context, ns string, name string, template map[string]interface{}, properties map[string]v1.JSONSchemaProp, labels map[string]string) func() error {
+func CreateKamelet(t *testing.T, ctx context.Context, ns string, name string, template map[string]interface{}, properties map[string]kameletsv1.JSONSchemaProp, labels map[string]string) func() error {
 	return CreateKameletWithID(t, platform.DefaultPlatformName, ctx, ns, name, template, properties, labels)
 }
 
-func CreateKameletWithID(t *testing.T, operatorID string, ctx context.Context, ns string, name string, template map[string]interface{}, properties map[string]v1.JSONSchemaProp, labels map[string]string) func() error {
+func CreateKameletWithID(t *testing.T, operatorID string, ctx context.Context, ns string, name string, template map[string]interface{}, properties map[string]kameletsv1.JSONSchemaProp, labels map[string]string) func() error {
 	return func() error {
-		kamelet := v1.Kamelet{
+		kamelet := kameletsv1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: ns,
 				Name:      name,
 				Labels:    labels,
 			},
-			Spec: v1.KameletSpec{
-				KameletSpecBase: v1.KameletSpecBase{
-					Definition: &v1.JSONSchemaProps{
+			Spec: kameletsv1.KameletSpec{
+				KameletSpecBase: kameletsv1.KameletSpecBase{
+					Definition: &kameletsv1.JSONSchemaProps{
 						Properties: properties,
 					},
 					Template: asTemplate(t, template),
@@ -2723,7 +2724,6 @@ func CreateKameletWithID(t *testing.T, operatorID string, ctx context.Context, n
 			},
 		}
 
-		kamelet.SetOperatorID(operatorID)
 		return TestClient(t).Create(ctx, &kamelet)
 	}
 }
@@ -2733,7 +2733,7 @@ func CreateTimerKamelet(t *testing.T, ctx context.Context, ns string, name strin
 }
 
 func CreateTimerKameletWithID(t *testing.T, ctx context.Context, operatorID string, ns string, name string) func() error {
-	props := map[string]v1.JSONSchemaProp{
+	props := map[string]kameletsv1.JSONSchemaProp{
 		"message": {
 			Type: "string",
 		},
@@ -2759,7 +2759,7 @@ func CreateTimerKameletWithID(t *testing.T, ctx context.Context, operatorID stri
 }
 
 func DeleteKamelet(t *testing.T, ctx context.Context, ns string, name string) error {
-	kamelet := v1.Kamelet{
+	kamelet := kameletsv1.Kamelet{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: ns,
 			Name:      name,
@@ -2768,12 +2768,12 @@ func DeleteKamelet(t *testing.T, ctx context.Context, ns string, name string) er
 	return TestClient(t).Delete(ctx, &kamelet)
 }
 
-func asTemplate(t *testing.T, source map[string]interface{}) *v1.Template {
+func asTemplate(t *testing.T, source map[string]interface{}) *kameletsv1.Template {
 	bytes, err := json.Marshal(source)
 	if err != nil {
 		failTest(t, err)
 	}
-	return &v1.Template{
+	return &kameletsv1.Template{
 		RawMessage: bytes,
 	}
 }
@@ -3110,7 +3110,7 @@ func CreateLogKamelet(t *testing.T, ctx context.Context, ns string, name string)
 		},
 	}
 
-	props := map[string]v1.JSONSchemaProp{
+	props := map[string]kameletsv1.JSONSchemaProp{
 		"loggerName": {
 			Type: "string",
 		},

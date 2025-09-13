@@ -31,6 +31,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/install"
 	"github.com/apache/camel-k/v2/pkg/platform"
+	kameletsv1 "github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1"
 	"knative.dev/pkg/ptr"
 
 	"github.com/apache/camel-k/v2/pkg/client"
@@ -214,7 +215,7 @@ func applyKamelets(ctx context.Context, c client.Client, platform *v1.Integratio
 	return appliedKam, erroredKam, nil
 }
 
-func loadKamelet(path string, platform *v1.IntegrationPlatform) (*v1.Kamelet, error) {
+func loadKamelet(path string, platform *v1.IntegrationPlatform) (*kameletsv1.Kamelet, error) {
 	yamlContent, err := util.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -225,7 +226,7 @@ func loadKamelet(path string, platform *v1.IntegrationPlatform) (*v1.Kamelet, er
 	if err != nil {
 		return nil, err
 	}
-	var kamelet *v1.Kamelet
+	var kamelet *kameletsv1.Kamelet
 	if err = json.Unmarshal(jsonContent, &kamelet); err != nil {
 		return nil, err
 	}
@@ -240,8 +241,8 @@ func loadKamelet(path string, platform *v1.IntegrationPlatform) (*v1.Kamelet, er
 	if labels == nil {
 		labels = make(map[string]string)
 	}
-	labels[v1.KameletBundledLabel] = "true"
-	labels[v1.KameletReadOnlyLabel] = "true"
+	labels[kameletsv1.KameletBundledLabel] = "true"
+	labels[kameletsv1.KameletReadOnlyLabel] = "true"
 
 	// The Kamelet will be owned by the IntegrationPlatform
 	references := []metav1.OwnerReference{

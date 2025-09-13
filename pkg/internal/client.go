@@ -28,6 +28,8 @@ import (
 	fakecamelclientset "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/fake"
 	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util"
+	fakecamelkameletsclientset "github.com/apache/camel-kamelets/crds/pkg/client/camel/clientset/versioned/fake"
+	camelkameletsv1 "github.com/apache/camel-kamelets/crds/pkg/client/camel/clientset/versioned/typed/camel/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -75,6 +77,9 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 	camelClientset := fakecamelclientset.NewSimpleClientset(filterObjects(scheme, initObjs, func(gvk schema.GroupVersionKind) bool {
 		return strings.Contains(gvk.Group, "camel")
 	})...)
+	camelKameletsClientset := fakecamelkameletsclientset.NewSimpleClientset(filterObjects(scheme, initObjs, func(gvk schema.GroupVersionKind) bool {
+		return strings.Contains(gvk.Group, "camel") && gvk.Kind == "Kamelet"
+	})...)
 	clientset := fakeclientset.NewSimpleClientset(filterObjects(scheme, initObjs, func(gvk schema.GroupVersionKind) bool {
 		return !strings.Contains(gvk.Group, "camel") && !strings.Contains(gvk.Group, "knative")
 	})...)
@@ -121,6 +126,7 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 		Client:                 c,
 		Interface:              clientset,
 		camel:                  camelClientset,
+		camelKamelets:          camelKameletsClientset,
 		scales:                 &fakescaleclient,
 		enabledKnativeServing:  true,
 		enabledKnativeEventing: true,
@@ -146,6 +152,7 @@ type FakeClient struct {
 	controller.Client
 	kubernetes.Interface
 	camel                  *fakecamelclientset.Clientset
+	camelKamelets          *fakecamelkameletsclientset.Clientset
 	scales                 *fakescale.FakeScaleClient
 	disabledGroups         []string
 	enabledOpenshift       bool
@@ -165,6 +172,10 @@ func (c *FakeClient) AddReactor(verb, resource string, reaction testing.Reaction
 
 func (c *FakeClient) CamelV1() camelv1.CamelV1Interface {
 	return c.camel.CamelV1()
+}
+
+func (c *FakeClient) KameletsCamelV1() camelkameletsv1.CamelV1Interface {
+	return c.camelKamelets.CamelV1()
 }
 
 // GetScheme ---.

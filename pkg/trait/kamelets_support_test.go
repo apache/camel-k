@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	kameletsv1 "github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -83,13 +84,13 @@ func TestKameletBundleMultiKameletsMultiConfigmap(t *testing.T) {
 	assert.NotNil(t, cmBundle[1].Data["test1999.kamelet.yaml"])
 }
 
-func kamelet(ns, name string) *v1.Kamelet {
-	kamelet := v1.NewKamelet(ns, name)
-	kamelet.Spec = v1.KameletSpec{
-		KameletSpecBase: v1.KameletSpecBase{
-			Sources: []v1.SourceSpec{
+func kamelet(ns, name string) *kameletsv1.Kamelet {
+	kamelet := kameletsv1.NewKamelet(ns, name)
+	kamelet.Spec = kameletsv1.KameletSpec{
+		KameletSpecBase: kameletsv1.KameletSpecBase{
+			Sources: []kameletsv1.SourceSpec{
 				{
-					DataSpec: v1.DataSpec{
+					DataSpec: kameletsv1.DataSpec{
 						Name: "mykamelet.groovy",
 						Content: `from("timer1").to("log:info")
 						from("timer2").to("log:info")
@@ -109,12 +110,12 @@ func kamelet(ns, name string) *v1.Kamelet {
 						from("timer16").to("log:info")
 						from("timer17").to("log:info")`,
 					},
-					Type: v1.SourceTypeTemplate,
+					Type: kameletsv1.SourceTypeTemplate,
 				},
 			},
 		},
 	}
-	kamelet.Status = v1.KameletStatus{Phase: v1.KameletPhaseReady}
+	kamelet.Status = kameletsv1.KameletStatus{Phase: kameletsv1.KameletPhaseReady}
 
 	return &kamelet
 }

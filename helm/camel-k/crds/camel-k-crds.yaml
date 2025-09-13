@@ -23194,7 +23194,7 @@ spec:
                       description: the confimap reference holding the source content
                       type: string
                     contentType:
-                      description: the content type (tipically text or binary)
+                      description: the content type (typically text or binary)
                       type: string
                     from-kamelet:
                       description: True if the spec is generated from a Kamelet
@@ -23203,7 +23203,6 @@ spec:
                       description: |-
                         Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
                         uses to pre/post process sources
-                        Deprecated: no longer in use.
                       items:
                         type: string
                       type: array
@@ -23775,7 +23774,7 @@ spec:
                               content
                             type: string
                           contentType:
-                            description: the content type (tipically text or binary)
+                            description: the content type (typically text or binary)
                             type: string
                           from-kamelet:
                             description: True if the spec is generated from a Kamelet
@@ -23784,7 +23783,6 @@ spec:
                             description: |-
                               Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
                               uses to pre/post process sources
-                              Deprecated: no longer in use.
                             items:
                               type: string
                             type: array

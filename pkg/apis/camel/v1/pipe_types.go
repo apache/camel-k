@@ -18,6 +18,7 @@ limitations under the License.
 package v1
 
 import (
+	kameletsv1 "github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -71,7 +72,7 @@ type Endpoint struct {
 	// Properties are a key value representation of endpoint properties
 	Properties *EndpointProperties `json:"properties,omitempty"`
 	// DataTypes defines the data type of the data produced/consumed by the endpoint and references a given data type specification.
-	DataTypes map[TypeSlot]DataTypeReference `json:"dataTypes,omitempty"`
+	DataTypes map[kameletsv1.TypeSlot]kameletsv1.DataTypeReference `json:"dataTypes,omitempty"`
 }
 
 // EndpointType represents the type (ie, source or sink).

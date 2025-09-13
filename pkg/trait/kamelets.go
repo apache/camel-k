@@ -39,6 +39,8 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/digest"
 	"github.com/apache/camel-k/v2/pkg/util/dsl"
+	"github.com/apache/camel-k/v2/pkg/util/source"
+	kameletsv1 "github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1"
 )
 
 const (
@@ -51,7 +53,7 @@ const (
 	kameletMountPointAnnotation = "camel.apache.org/kamelet.mount-point"
 )
 
-var kameletVersionProperty = fmt.Sprintf("?%s=", v1.KameletVersionProperty)
+var kameletVersionProperty = fmt.Sprintf("?%s=", kameletsv1.KameletVersionProperty)
 
 type kameletsTrait struct {
 	BaseTrait
@@ -102,20 +104,20 @@ func (t *kameletsTrait) Apply(e *Environment) error {
 }
 
 // collectKamelets load a Kamelet specification setting the specific version specification.
-func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet, error) {
+func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*kameletsv1.Kamelet, error) {
 	repo, err := repository.NewForPlatform(e.Ctx, e.Client, e.Platform, e.Integration.Namespace, platform.GetOperatorNamespace())
 	if err != nil {
 		return nil, err
 	}
 
-	kamelets := make(map[string]*v1.Kamelet)
+	kamelets := make(map[string]*kameletsv1.Kamelet)
 	missingKamelets := make([]string, 0)
 	availableKamelets := make([]string, 0)
 	bundledKamelets := make([]string, 0)
 
 	for _, kml := range strings.Split(t.List, ",") {
 		name := getKameletKey(kml, false)
-		if !v1.ValidKameletName(name) {
+		if !kameletsv1.ValidKameletName(name) {
 			// Skip kamelet sink and source id
 			continue
 		}
@@ -234,7 +236,7 @@ func (t *kameletsTrait) addKamelets(e *Environment) error {
 // This func will add a Kamelet as a generated Integration source. The source included here is going to be used in order to parse the Kamelet
 // for any component or capability (ie, rest) which is included in the Kamelet spec itself. However, the generated source is marked as coming `FromKamelet`.
 // When mounting the sources, these generated sources won't be mounted as sources but as Kamelet instead.
-func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1.Kamelet) error {
+func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *kameletsv1.Kamelet) error {
 	sources := make([]v1.SourceSpec, 0)
 
 	if kamelet.Spec.Template != nil {
@@ -257,7 +259,8 @@ func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1.Kamelet) 
 	}
 
 	for idx, s := range kamelet.Spec.Sources {
-		intSource, err := integrationSourceFromKameletSource(e, kamelet, s, fmt.Sprintf("%s-kamelet-%s-%03d", e.Integration.Name, kamelet.Name, idx))
+		itSource := source.ToIntegrationSource(s)
+		intSource, err := integrationSourceFromKameletSource(e, kamelet, itSource, fmt.Sprintf("%s-kamelet-%s-%03d", e.Integration.Name, kamelet.Name, idx))
 		if err != nil {
 			return err
 		}
@@ -284,7 +287,7 @@ func (t *kameletsTrait) getKameletKeys(withVersion bool) []string {
 	answer := make([]string, 0)
 	for _, item := range strings.Split(t.List, ",") {
 		i := getKameletKey(item, withVersion)
-		if i != "" && v1.ValidKameletName(i) {
+		if i != "" && kameletsv1.ValidKameletName(i) {
 			util.StringSliceUniqueAdd(&answer, i)
 		}
 	}
@@ -317,14 +320,14 @@ func getKameletKey(item string, withVersion bool) string {
 }
 
 func getKameletVersion(item string) string {
-	if strings.Contains(item, fmt.Sprintf("?%s=", v1.KameletVersionProperty)) {
+	if strings.Contains(item, fmt.Sprintf("?%s=", kameletsv1.KameletVersionProperty)) {
 		versionedKamelet := strings.SplitN(item, kameletVersionProperty, 2)
 		return versionedKamelet[1]
 	}
 	return ""
 }
 
-func integrationSourceFromKameletSource(e *Environment, kamelet *v1.Kamelet, source v1.SourceSpec, name string) (v1.SourceSpec, error) {
+func integrationSourceFromKameletSource(e *Environment, kamelet *kameletsv1.Kamelet, source v1.SourceSpec, name string) (v1.SourceSpec, error) {
 	if source.Type == v1.SourceTypeTemplate {
 		// Kamelets must be named "<kamelet-name>.extension"
 		language := source.InferLanguage()

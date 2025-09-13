@@ -33,6 +33,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	kameletsv1 "github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -95,8 +96,8 @@ spec:
 	assert.Equal(t, "timer-source", kamelet.GetName())
 	assert.Equal(t, "itp-ns", kamelet.GetNamespace())
 	assert.Len(t, kamelet.GetLabels(), 3)
-	assert.Equal(t, "true", kamelet.GetLabels()[v1.KameletBundledLabel])
-	assert.Equal(t, "true", kamelet.GetLabels()[v1.KameletReadOnlyLabel])
+	assert.Equal(t, "true", kamelet.GetLabels()[kameletsv1.KameletBundledLabel])
+	assert.Equal(t, "true", kamelet.GetLabels()[kameletsv1.KameletReadOnlyLabel])
 	assert.Len(t, kamelet.GetAnnotations(), 2)
 	assert.NotNil(t, kamelet.GetAnnotations()[kamelVersionAnnotation])
 	assert.Equal(t, "my-itp", kamelet.GetOwnerReferences()[0].Name)

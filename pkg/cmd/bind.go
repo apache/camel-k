@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	kameletsv1 "github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1"
 
 	cclient "github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/trait"
@@ -458,7 +459,7 @@ func (o *bindCmdOptions) checkCompliance(cmd *cobra.Command, endpoint v1.Endpoin
 			Namespace: endpoint.Ref.Namespace,
 			Name:      endpoint.Ref.Name,
 		}
-		kamelet := v1.Kamelet{}
+		kamelet := kameletsv1.Kamelet{}
 		if err := c.Get(o.Context, key, &kamelet); err != nil {
 			if k8serrors.IsNotFound(err) {
 				// Kamelet may be in the operator namespace, but we currently don't have a way to determine it: we just warn

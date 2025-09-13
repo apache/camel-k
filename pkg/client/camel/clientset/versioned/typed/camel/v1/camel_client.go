@@ -35,7 +35,6 @@ type CamelV1Interface interface {
 	IntegrationKitsGetter
 	IntegrationPlatformsGetter
 	IntegrationProfilesGetter
-	KameletsGetter
 	PipesGetter
 }
 
@@ -66,10 +65,6 @@ func (c *CamelV1Client) IntegrationPlatforms(namespace string) IntegrationPlatfo
 
 func (c *CamelV1Client) IntegrationProfiles(namespace string) IntegrationProfileInterface {
 	return newIntegrationProfiles(c, namespace)
-}
-
-func (c *CamelV1Client) Kamelets(namespace string) KameletInterface {
-	return newKamelets(c, namespace)
 }
 
 func (c *CamelV1Client) Pipes(namespace string) PipeInterface {

@@ -24,6 +24,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/cmd/source"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	kameletsv1 "github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -31,16 +32,16 @@ import (
 const KameletBundleType = "kamelets-bundle"
 
 type kameletBundle struct {
-	kamelets []*v1.Kamelet
+	kamelets []*kameletsv1.Kamelet
 }
 
 func newKameletBundle() *kameletBundle {
 	return &kameletBundle{
-		kamelets: make([]*v1.Kamelet, 0),
+		kamelets: make([]*kameletsv1.Kamelet, 0),
 	}
 }
 
-func (kb *kameletBundle) add(k *v1.Kamelet) {
+func (kb *kameletBundle) add(k *kameletsv1.Kamelet) {
 	kb.kamelets = append(kb.kamelets, k)
 }
 

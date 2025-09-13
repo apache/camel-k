@@ -22,10 +22,11 @@ import (
 	"regexp"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	kameletsv1 "github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1"
 )
 
 var kameletNameRegexp = regexp.MustCompile("kamelet:(?://)?([a-z0-9-.]+(/[a-z0-9-.]+)?)(?:$|[^a-z0-9-.].*)")
-var kameletVersionRegexp = regexp.MustCompile(v1.KameletVersionProperty + "=([a-z0-9-.]+)")
+var kameletVersionRegexp = regexp.MustCompile(kameletsv1.KameletVersionProperty + "=([a-z0-9-.]+)")
 
 func ExtractKamelet(uri string) string {
 	matches := kameletNameRegexp.FindStringSubmatch(uri)
@@ -43,4 +44,28 @@ func AddKamelet(meta *Metadata, content string) {
 	if maybeKamelet := ExtractKamelet(content); maybeKamelet != "" {
 		meta.Kamelets = append(meta.Kamelets, maybeKamelet)
 	}
+}
+
+// ToIntegrationSource converts the Kamelet source spec to an Integration source spec.
+func ToIntegrationSource(source kameletsv1.SourceSpec) v1.SourceSpec {
+	itSource := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
+			Name:        source.DataSpec.Name,
+			Path:        source.DataSpec.Path,
+			Content:     source.DataSpec.Content,
+			RawContent:  source.DataSpec.RawContent,
+			ContentRef:  source.DataSpec.ContentRef,
+			ContentKey:  source.DataSpec.ContentKey,
+			ContentType: source.DataSpec.ContentType,
+			Compression: source.DataSpec.Compression,
+		},
+		Language:      v1.Language(string(source.Language)),
+		Loader:        source.Loader,
+		Interceptors:  source.Interceptors,
+		Type:          v1.SourceType(string(source.Type)),
+		PropertyNames: source.PropertyNames,
+		FromKamelet:   source.FromKamelet,
+	}
+
+	return itSource
 }

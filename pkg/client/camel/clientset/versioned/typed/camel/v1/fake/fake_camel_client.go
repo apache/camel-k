@@ -53,10 +53,6 @@ func (c *FakeCamelV1) IntegrationProfiles(namespace string) v1.IntegrationProfil
 	return newFakeIntegrationProfiles(c, namespace)
 }
 
-func (c *FakeCamelV1) Kamelets(namespace string) v1.KameletInterface {
-	return newFakeKamelets(c, namespace)
-}
-
 func (c *FakeCamelV1) Pipes(namespace string) v1.PipeInterface {
 	return newFakePipes(c, namespace)
 }

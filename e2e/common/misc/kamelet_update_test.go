@@ -30,7 +30,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1"
 )
 
 const customLabel = "custom-label"
