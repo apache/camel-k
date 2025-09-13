@@ -20,7 +20,7 @@ package repository
 import (
 	"context"
 
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	kameletsv1 "github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1"
 )
 
 type emptyKameletRepository struct {
@@ -37,7 +37,7 @@ func (e *emptyKameletRepository) List(_ context.Context) ([]string, error) {
 	return nil, nil
 }
 
-func (e *emptyKameletRepository) Get(_ context.Context, _ string) (*v1.Kamelet, error) {
+func (e *emptyKameletRepository) Get(_ context.Context, _ string) (*kameletsv1.Kamelet, error) {
 	return nil, nil
 }
 

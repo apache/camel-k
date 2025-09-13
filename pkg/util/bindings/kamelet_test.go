@@ -26,6 +26,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/internal"
+	kameletsv1 "github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -258,16 +259,16 @@ func TestBindingConverterWithDataTypes(t *testing.T) {
 				endpoint.Properties = asEndpointProperties(tc.endpointProperties)
 			}
 
-			endpoint.DataTypes = make(map[v1.TypeSlot]v1.DataTypeReference)
+			endpoint.DataTypes = make(map[kameletsv1.TypeSlot]kameletsv1.DataTypeReference)
 			if tc.inputFormat != "" {
-				endpoint.DataTypes[v1.TypeSlotIn] = v1.DataTypeReference{
+				endpoint.DataTypes[kameletsv1.TypeSlotIn] = kameletsv1.DataTypeReference{
 					Scheme: tc.inputScheme,
 					Format: tc.inputFormat,
 				}
 			}
 
 			if tc.outputFormat != "" {
-				endpoint.DataTypes[v1.TypeSlotOut] = v1.DataTypeReference{
+				endpoint.DataTypes[kameletsv1.TypeSlotOut] = kameletsv1.DataTypeReference{
 					Scheme: tc.outputScheme,
 					Format: tc.outputFormat,
 				}
@@ -351,16 +352,16 @@ func TestBindingConverterWithDataTypesOverridden(t *testing.T) {
 				endpoint.Properties = asEndpointProperties(tc.endpointProperties)
 			}
 
-			endpoint.DataTypes = make(map[v1.TypeSlot]v1.DataTypeReference)
+			endpoint.DataTypes = make(map[kameletsv1.TypeSlot]kameletsv1.DataTypeReference)
 			if tc.inputFormat != "" {
-				endpoint.DataTypes[v1.TypeSlotIn] = v1.DataTypeReference{
+				endpoint.DataTypes[kameletsv1.TypeSlotIn] = kameletsv1.DataTypeReference{
 					Scheme: tc.inputScheme,
 					Format: tc.inputFormat,
 				}
 			}
 
 			if tc.outputFormat != "" {
-				endpoint.DataTypes[v1.TypeSlotOut] = v1.DataTypeReference{
+				endpoint.DataTypes[kameletsv1.TypeSlotOut] = kameletsv1.DataTypeReference{
 					Scheme: tc.outputScheme,
 					Format: tc.outputFormat,
 				}
@@ -374,7 +375,7 @@ func TestBindingConverterWithDataTypesOverridden(t *testing.T) {
 					Namespace: "test",
 					Profile:   v1.TraitProfileKubernetes,
 					Metadata: map[string]string{
-						v1.KameletDataTypeLabel: "data-type-action-v2",
+						kameletsv1.KameletDataTypeLabel: "data-type-action-v2",
 					},
 				},
 				EndpointContext{

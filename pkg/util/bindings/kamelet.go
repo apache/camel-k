@@ -22,7 +22,8 @@ import (
 	"net/url"
 	"strings"
 
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1"
 
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -40,7 +41,7 @@ func (k BindingConverter) ID() string {
 }
 
 // Translate --.
-func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointContext, e v1.Endpoint) (*Binding, error) {
+func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointContext, e camelv1.Endpoint) (*Binding, error) {
 	if e.Ref == nil {
 		// works only on refs
 		return nil, nil
@@ -88,7 +89,7 @@ func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointCont
 	}
 
 	switch endpointCtx.Type {
-	case v1.EndpointTypeAction:
+	case camelv1.EndpointTypeAction:
 		steps := make([]map[string]interface{}, 0)
 
 		if in, applicationProperties := k.DataTypeStep(e, id, v1.TypeSlotIn, dataTypeActionKamelet); in != nil {
@@ -121,7 +122,7 @@ func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointCont
 		} else if len(steps) == 1 {
 			binding.Step = steps[0]
 		}
-	case v1.EndpointTypeSource:
+	case camelv1.EndpointTypeSource:
 		if out, applicationProperties := k.DataTypeStep(e, id, v1.TypeSlotOut, dataTypeActionKamelet); out != nil {
 			binding.Step = out
 			for k, v := range applicationProperties {
@@ -130,7 +131,7 @@ func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointCont
 		}
 
 		binding.URI = fmt.Sprintf("kamelet:%s", kameletTranslated)
-	case v1.EndpointTypeSink:
+	case camelv1.EndpointTypeSink:
 		if in, applicationProperties := k.DataTypeStep(e, id, v1.TypeSlotIn, dataTypeActionKamelet); in != nil {
 			binding.Step = in
 			for k, v := range applicationProperties {
@@ -155,7 +156,7 @@ func getKameletName(name, id, version string) string {
 }
 
 // DataTypeStep --.
-func (k BindingConverter) DataTypeStep(e v1.Endpoint, id string, typeSlot v1.TypeSlot, dataTypeActionKamelet string) (map[string]interface{}, map[string]string) {
+func (k BindingConverter) DataTypeStep(e camelv1.Endpoint, id string, typeSlot v1.TypeSlot, dataTypeActionKamelet string) (map[string]interface{}, map[string]string) {
 	if e.DataTypes == nil {
 		return nil, nil
 	}

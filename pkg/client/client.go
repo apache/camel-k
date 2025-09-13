@@ -47,6 +47,8 @@ import (
 	camel "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
 	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util"
+	kameletscamel "github.com/apache/camel-kamelets/crds/pkg/client/camel/clientset/versioned"
+	kameletscamelv1 "github.com/apache/camel-kamelets/crds/pkg/client/camel/clientset/versioned/typed/camel/v1"
 )
 
 const (
@@ -61,6 +63,7 @@ type Client interface {
 	ctrl.Client
 	kubernetes.Interface
 	CamelV1() camelv1.CamelV1Interface
+	KameletsCamelV1() kameletscamelv1.CamelV1Interface
 	GetScheme() *runtime.Scheme
 	GetConfig() *rest.Config
 	GetCurrentNamespace(kubeConfig string) (string, error)
@@ -81,9 +84,10 @@ type Provider struct {
 type defaultClient struct {
 	ctrl.Client
 	kubernetes.Interface
-	camel  camel.Interface
-	scheme *runtime.Scheme
-	config *rest.Config
+	camel         camel.Interface
+	kameletsCamel kameletscamel.Interface
+	scheme        *runtime.Scheme
+	config        *rest.Config
 }
 
 // Check interface compliance.
@@ -91,6 +95,10 @@ var _ Client = &defaultClient{}
 
 func (c *defaultClient) CamelV1() camelv1.CamelV1Interface {
 	return c.camel.CamelV1()
+}
+
+func (c *defaultClient) KameletsCamelV1() kameletscamelv1.CamelV1Interface {
+	return c.kameletsCamel.CamelV1()
 }
 
 func (c *defaultClient) GetScheme() *runtime.Scheme {

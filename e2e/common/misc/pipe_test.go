@@ -37,6 +37,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	kameletsv1 "github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1"
 )
 
 func TestPipe(t *testing.T) {
@@ -257,7 +258,7 @@ func TestPipeScale(t *testing.T) {
 }
 
 func createErrorProducerKamelet(t *testing.T, ctx context.Context, ns string, name string) func() error {
-	props := map[string]v1.JSONSchemaProp{
+	props := map[string]kameletsv1.JSONSchemaProp{
 		"message": {
 			Type: "string",
 		},

@@ -37,6 +37,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/property"
 	"github.com/apache/camel-k/v2/pkg/util/source"
 	"github.com/apache/camel-k/v2/pkg/util/uri"
+	camelkameletsv1 "github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1"
 
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	v1 "k8s.io/api/core/v1"
@@ -317,7 +318,7 @@ func (t *kedaTrait) populateTriggersFromKamelets(e *trait.Environment) error {
 	kameletURIs := make(map[string][]string)
 	_, err := e.ConsumeMeta(false, func(meta metadata.IntegrationMetadata) bool {
 		for _, kameletURI := range meta.FromURIs {
-			if kameletStr := source.ExtractKamelet(kameletURI); kameletStr != "" && camelv1.ValidKameletName(kameletStr) {
+			if kameletStr := source.ExtractKamelet(kameletURI); kameletStr != "" && camelkameletsv1.ValidKameletName(kameletStr) {
 				kamelet := kameletStr
 				if strings.Contains(kamelet, "/") {
 					kamelet = kamelet[0:strings.Index(kamelet, "/")]
@@ -400,7 +401,7 @@ func (t *kedaTrait) populateTriggersFromKamelet(e *trait.Environment, repo repos
 	return nil
 }
 
-func (t *kedaTrait) populateTriggersFromKameletURI(e *trait.Environment, kamelet *camelv1.Kamelet, triggerType string, kedaParamToProperty map[string]string, requiredKEDAParam map[string]bool, authenticationParams map[string]bool, kameletURI string) error {
+func (t *kedaTrait) populateTriggersFromKameletURI(e *trait.Environment, kamelet *camelkameletsv1.Kamelet, triggerType string, kedaParamToProperty map[string]string, requiredKEDAParam map[string]bool, authenticationParams map[string]bool, kameletURI string) error {
 	metaValues := make(map[string]string, len(kedaParamToProperty))
 	for metaParam, prop := range kedaParamToProperty {
 		v, err := t.getKameletPropertyValue(e, kamelet, kameletURI, prop)
@@ -449,7 +450,7 @@ func (t *kedaTrait) populateTriggersFromKameletURI(e *trait.Environment, kamelet
 	return nil
 }
 
-func (t *kedaTrait) evaluateTemplateParameters(e *trait.Environment, kamelet *camelv1.Kamelet, kameletURI string) (map[string]string, map[string]bool, error) {
+func (t *kedaTrait) evaluateTemplateParameters(e *trait.Environment, kamelet *camelkameletsv1.Kamelet, kameletURI string) (map[string]string, map[string]bool, error) {
 	paramTemplates := make(map[string]string)
 	authenticationParam := make(map[string]bool)
 	for annotation, expr := range kamelet.Annotations {
@@ -491,7 +492,7 @@ func (t *kedaTrait) evaluateTemplateParameters(e *trait.Environment, kamelet *ca
 	return paramValues, authenticationParam, nil
 }
 
-func (t *kedaTrait) getKameletPropertyValue(e *trait.Environment, kamelet *camelv1.Kamelet, kameletURI, prop string) (string, error) {
+func (t *kedaTrait) getKameletPropertyValue(e *trait.Environment, kamelet *camelkameletsv1.Kamelet, kameletURI, prop string) (string, error) {
 	// From top priority to lowest
 	if v := uri.GetQueryParameter(kameletURI, prop); v != "" {
 		return v, nil

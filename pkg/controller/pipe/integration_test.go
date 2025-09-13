@@ -23,6 +23,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/internal"
+	kameletsv1 "github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
@@ -187,8 +188,8 @@ func TestCreateIntegrationForPipeDataType(t *testing.T) {
 	require.NoError(t, err)
 
 	pipe := nominalPipe("my-pipe-data-type")
-	pipe.Spec.Sink.DataTypes = map[v1.TypeSlot]v1.DataTypeReference{
-		v1.TypeSlotIn: {
+	pipe.Spec.Sink.DataTypes = map[kameletsv1.TypeSlot]kameletsv1.DataTypeReference{
+		kameletsv1.TypeSlotIn: {
 			Format: "string",
 		},
 	}
@@ -204,13 +205,13 @@ func TestCreateIntegrationForPipeDataTypeOverridden(t *testing.T) {
 	require.NoError(t, err)
 
 	pipe := nominalPipe("my-pipe-data-type")
-	pipe.Spec.Sink.DataTypes = map[v1.TypeSlot]v1.DataTypeReference{
-		v1.TypeSlotIn: {
+	pipe.Spec.Sink.DataTypes = map[kameletsv1.TypeSlot]kameletsv1.DataTypeReference{
+		kameletsv1.TypeSlotIn: {
 			Format: "string",
 		},
 	}
 	newDataTypeKameletAction := "data-type-action-v4-2"
-	pipe.Annotations[v1.KameletDataTypeLabel] = newDataTypeKameletAction
+	pipe.Annotations[kameletsv1.KameletDataTypeLabel] = newDataTypeKameletAction
 	it, err := CreateIntegrationFor(context.TODO(), client, &pipe)
 	require.NoError(t, err)
 	dsl, err := v1.ToYamlDSL(it.Spec.Flows)

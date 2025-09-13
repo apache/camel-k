@@ -29,6 +29,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	camelkameletsv1 "github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -119,7 +120,7 @@ func TestKameletAutoDetection(t *testing.T) {
 	keda, _ := NewKedaTrait().(*kedaTrait)
 	keda.Enabled = ptr.To(true)
 	env := createBasicTestEnvironment(
-		&camelv1.Kamelet{
+		&camelkameletsv1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "test",
 				Name:      "my-kamelet",
@@ -127,10 +128,10 @@ func TestKameletAutoDetection(t *testing.T) {
 					"camel.apache.org/keda.type": "my-scaler",
 				},
 			},
-			Spec: camelv1.KameletSpec{
-				KameletSpecBase: camelv1.KameletSpecBase{
-					Definition: &camelv1.JSONSchemaProps{
-						Properties: map[string]camelv1.JSONSchemaProp{
+			Spec: camelkameletsv1.KameletSpec{
+				KameletSpecBase: camelkameletsv1.KameletSpecBase{
+					Definition: &camelkameletsv1.JSONSchemaProps{
+						Properties: map[string]camelkameletsv1.JSONSchemaProp{
 							"a": {
 								XDescriptors: []string{
 									"urn:keda:metadata:a",
@@ -237,7 +238,7 @@ func TestPipeAutoDetection(t *testing.T) {
 	}
 
 	env := createBasicTestEnvironment(
-		&camelv1.Kamelet{
+		&camelkameletsv1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "test",
 				Name:      "my-kamelet",
@@ -245,10 +246,10 @@ func TestPipeAutoDetection(t *testing.T) {
 					"camel.apache.org/keda.type": "my-scaler",
 				},
 			},
-			Spec: camelv1.KameletSpec{
-				KameletSpecBase: camelv1.KameletSpecBase{
-					Definition: &camelv1.JSONSchemaProps{
-						Properties: map[string]camelv1.JSONSchemaProp{
+			Spec: camelkameletsv1.KameletSpec{
+				KameletSpecBase: camelkameletsv1.KameletSpecBase{
+					Definition: &camelkameletsv1.JSONSchemaProps{
+						Properties: map[string]camelkameletsv1.JSONSchemaProp{
 							"a": {
 								XDescriptors: []string{
 									"urn:keda:metadata:a",

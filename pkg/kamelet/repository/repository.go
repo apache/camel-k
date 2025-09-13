@@ -23,7 +23,9 @@ import (
 	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/client"
 	camel "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
+	kameletsv1 "github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -41,7 +43,7 @@ type KameletRepository interface {
 	List(ctx context.Context) ([]string, error)
 
 	// Get the Kamelet corresponding to the given name, or nil if not found
-	Get(ctx context.Context, name string) (*v1.Kamelet, error)
+	Get(ctx context.Context, name string) (*kameletsv1.Kamelet, error)
 
 	// String information about the repository
 	String() string
@@ -51,24 +53,24 @@ type KameletRepository interface {
 // Kamelets are first looked up in all the given namespaces, in the order they appear.
 // If one namespace defines an IntegrationPlatform (only the first IntegrationPlatform in state "Ready" found),
 // then all kamelet repository URIs defined in the IntegrationPlatform are included.
-func New(ctx context.Context, client camel.Interface, namespaces ...string) (KameletRepository, error) {
+func New(ctx context.Context, c client.Client, namespaces ...string) (KameletRepository, error) {
 	namespaces = makeDistinctNonEmpty(namespaces)
-	platform, err := lookupPlatform(ctx, client, namespaces...)
+	platform, err := lookupPlatform(ctx, c, namespaces...)
 	if err != nil {
 		return nil, err
 	}
-	return NewForPlatform(ctx, client, platform, namespaces...)
+	return NewForPlatform(ctx, c, platform, namespaces...)
 }
 
 // NewForPlatform creates a KameletRepository for the given namespaces and platform.
 // Kamelets are first looked up in all the given namespaces, in the order they appear,
 // then repositories defined in the platform are looked up.
-func NewForPlatform(ctx context.Context, client camel.Interface, platform *v1.IntegrationPlatform, namespaces ...string) (KameletRepository, error) {
+func NewForPlatform(ctx context.Context, c client.Client, platform *v1.IntegrationPlatform, namespaces ...string) (KameletRepository, error) {
 	namespaces = makeDistinctNonEmpty(namespaces)
 	repoImpls := make([]KameletRepository, 0)
 	for _, namespace := range namespaces {
 		// Add first a namespace local repository for each namespace
-		repoImpls = append(repoImpls, newKubernetesKameletRepository(client, namespace))
+		repoImpls = append(repoImpls, newKubernetesKameletRepository(c, namespace))
 	}
 	if platform != nil {
 		repos := getRepositoriesFromPlatform(platform)

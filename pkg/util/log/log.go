@@ -144,16 +144,6 @@ func (l Logger) ForIntegrationProfile(target *v1.IntegrationProfile) Logger {
 	)
 }
 
-// ForKamelet --.
-func (l Logger) ForKamelet(target *v1.Kamelet) Logger {
-	return l.WithValues(
-		"api-version", target.APIVersion,
-		"kind", target.Kind,
-		"ns", target.Namespace,
-		"name", target.Name,
-	)
-}
-
 // ForPipe --.
 func (l Logger) ForPipe(target *v1.Pipe) Logger {
 	return l.WithValues(

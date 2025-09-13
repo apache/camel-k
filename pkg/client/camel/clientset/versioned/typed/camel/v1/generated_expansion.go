@@ -31,6 +31,4 @@ type IntegrationPlatformExpansion interface{}
 
 type IntegrationProfileExpansion interface{}
 
-type KameletExpansion interface{}
-
 type PipeExpansion interface{}

@@ -30,6 +30,8 @@ import (
 	fakecamelclientset "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/fake"
 	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util"
+	fakekameletscamelclientset "github.com/apache/camel-kamelets/crds/pkg/client/camel/clientset/versioned/fake"
+	kameletscamelv1 "github.com/apache/camel-kamelets/crds/pkg/client/camel/clientset/versioned/typed/camel/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -75,6 +77,9 @@ func newFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 		Build()
 
 	camelClientset := fakecamelclientset.NewSimpleClientset(filterObjects(scheme, initObjs, func(gvk schema.GroupVersionKind) bool {
+		return strings.Contains(gvk.Group, "camel")
+	})...)
+	kameletsCamelClientset := fakekameletscamelclientset.NewSimpleClientset(filterObjects(scheme, initObjs, func(gvk schema.GroupVersionKind) bool {
 		return strings.Contains(gvk.Group, "camel")
 	})...)
 	clientset := fakeclientset.NewSimpleClientset(filterObjects(scheme, initObjs, func(gvk schema.GroupVersionKind) bool {
@@ -123,6 +128,7 @@ func newFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 		Client:                 c,
 		Interface:              clientset,
 		camel:                  camelClientset,
+		kameletsCamel:          kameletsCamelClientset,
 		scales:                 &fakescaleclient,
 		enabledKnativeServing:  true,
 		enabledKnativeEventing: true,
@@ -148,6 +154,7 @@ type FakeClient struct {
 	controller.Client
 	kubernetes.Interface
 	camel                  *fakecamelclientset.Clientset
+	kameletsCamel          *fakekameletscamelclientset.Clientset
 	scales                 *fakescale.FakeScaleClient
 	disabledGroups         []string
 	enabledOpenshift       bool
@@ -167,6 +174,10 @@ func (c *FakeClient) AddReactor(verb, resource string, reaction testing.Reaction
 
 func (c *FakeClient) CamelV1() camelv1.CamelV1Interface {
 	return c.camel.CamelV1()
+}
+
+func (c *FakeClient) KameletsCamelV1() kameletscamelv1.CamelV1Interface {
+	return c.kameletsCamel.CamelV1()
 }
 
 // GetScheme ---.

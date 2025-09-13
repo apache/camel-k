@@ -24,6 +24,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/platform"
+	kameletsv1 "github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1"
 	"k8s.io/utils/ptr"
 )
 
@@ -74,7 +75,7 @@ func validateEndpoint(ctx BindingContext, e v1.Endpoint) error {
 	}
 	if e.Ref != nil && e.Ref.Namespace != "" && e.Ref.Namespace != ctx.Namespace {
 		// referencing default Kamelets in operator namespace is allowed
-		if e.Ref.Kind == v1.KameletKind && e.Ref.Namespace == platform.GetOperatorNamespace() {
+		if e.Ref.Kind == kameletsv1.KameletKind && e.Ref.Namespace == platform.GetOperatorNamespace() {
 			return nil
 		}
 

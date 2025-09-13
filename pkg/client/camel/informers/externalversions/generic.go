@@ -66,8 +66,6 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Camel().V1().IntegrationPlatforms().Informer()}, nil
 	case v1.SchemeGroupVersion.WithResource("integrationprofiles"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Camel().V1().IntegrationProfiles().Informer()}, nil
-	case v1.SchemeGroupVersion.WithResource("kamelets"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Camel().V1().Kamelets().Informer()}, nil
 	case v1.SchemeGroupVersion.WithResource("pipes"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Camel().V1().Pipes().Informer()}, nil
 

@@ -23,7 +23,8 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/fake"
+	"github.com/apache/camel-k/v2/pkg/internal"
+	kameletsv1 "github.com/apache/camel-kamelets/crds/pkg/apis/camel/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -128,7 +129,7 @@ func TestURIParse(t *testing.T) {
 
 func TestNewRepository(t *testing.T) {
 	ctx := context.Background()
-	fakeClient := fake.NewSimpleClientset(createTestContext("none")...)
+	fakeClient, _ := internal.NewFakeClient(createTestContext("none")...)
 	repo, err := New(ctx, fakeClient, "test")
 	require.NoError(t, err)
 	list, err := repo.List(ctx)
@@ -144,7 +145,7 @@ func TestNewRepository(t *testing.T) {
 
 func TestNewRepositoryWithCamelKamelets(t *testing.T) {
 	ctx := context.Background()
-	fakeClient := fake.NewSimpleClientset(createTestContext("github:apache/camel-kamelets/kamelets")...)
+	fakeClient, _ := internal.NewFakeClient(createTestContext("github:apache/camel-kamelets/kamelets")...)
 	repo, err := New(ctx, fakeClient, "test")
 	require.NoError(t, err)
 	list, err := repo.List(ctx)
@@ -160,7 +161,7 @@ func TestNewRepositoryWithCamelKamelets(t *testing.T) {
 
 func TestNewRepositoryWithDefault(t *testing.T) {
 	ctx := context.Background()
-	fakeClient := fake.NewSimpleClientset(createTestContext()...)
+	fakeClient, _ := internal.NewFakeClient(createTestContext()...)
 	repo, err := New(ctx, fakeClient, "test")
 	require.NoError(t, err)
 	list, err := repo.List(ctx)
@@ -176,13 +177,13 @@ func TestNewRepositoryWithDefault(t *testing.T) {
 
 func createTestContext(uris ...string) []runtime.Object {
 	res := []runtime.Object{
-		&v1.Kamelet{
+		&kameletsv1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "test",
 				Name:      "kamelet1",
 			},
 		},
-		&v1.Kamelet{
+		&kameletsv1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "test",
 				Name:      "kamelet2",
