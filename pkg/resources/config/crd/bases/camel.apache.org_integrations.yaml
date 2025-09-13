@@ -271,7 +271,10 @@ spec:
                   type: object
                 type: array
               template:
-                description: Pod template customization
+                description: |-
+                  Pod template customization
+                  Deprecated:
+                  Use container, init-containers or owner traits instead
                 properties:
                   spec:
                     description: the specification
