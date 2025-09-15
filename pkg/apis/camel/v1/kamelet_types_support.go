@@ -15,6 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// DO NOT EDIT: this file was automatically copied from apache/camel-kamelets/crds project
 package v1
 
 import (
@@ -209,11 +210,6 @@ func NewKameletList() KameletList {
 			Kind:       KameletKind,
 		},
 	}
-}
-
-// SetOperatorID sets the given operator id as an annotation.
-func (k *Kamelet) SetOperatorID(operatorID string) {
-	SetAnnotation(&k.ObjectMeta, OperatorIDAnnotation, operatorID)
 }
 
 // CloneWithVersion clones a Kamelet and set the main specification with any version provided.

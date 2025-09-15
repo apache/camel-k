@@ -218,6 +218,7 @@ codegen:
 generate: codegen-tools-install
 	@# We better force the developer to generate all the resources everytime as
 	@# it happens we tend to forget some code generation in the past
+	./script/clone_kamelets.sh
 	./script/gen_client.sh
 	./script/gen_crd.sh
 	./script/gen_doc.sh

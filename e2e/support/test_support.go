@@ -2723,7 +2723,7 @@ func CreateKameletWithID(t *testing.T, operatorID string, ctx context.Context, n
 			},
 		}
 
-		kamelet.SetOperatorID(operatorID)
+		v1.SetAnnotation(&kamelet.ObjectMeta, v1.OperatorIDAnnotation, operatorID)
 		return TestClient(t).Create(ctx, &kamelet)
 	}
 }
