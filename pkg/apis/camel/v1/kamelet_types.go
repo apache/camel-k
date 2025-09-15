@@ -15,6 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// DO NOT EDIT: this file was automatically copied from apache/camel-kamelets/crds project
 package v1
 
 import (
