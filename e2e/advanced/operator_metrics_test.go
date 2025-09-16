@@ -43,6 +43,7 @@ import (
 	. "github.com/apache/camel-k/v2/e2e/support/util"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/prometheus/common/model"
 )
 
 func TestMetrics(t *testing.T) {
@@ -582,7 +583,7 @@ func buckets(value float64, upperBounds []float64) []*prometheus.Bucket {
 
 // https://prometheus.io/docs/instrumenting/exposition_formats/
 func parsePrometheusData(data []byte) (map[string]*prometheus.MetricFamily, error) {
-	var parser expfmt.TextParser
+	parser := expfmt.NewTextParser(model.UTF8Validation)
 	return parser.TextToMetricFamilies(bytes.NewReader(data))
 }
 
