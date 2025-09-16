@@ -103,22 +103,22 @@ You can start a **draft** release from the tag created in the previous steps (ie
 
 You should also manually add some text to explain how to test the staging artifacts. You can copy the following text to add to the top of the release note just changing the release version:
 
-```
+----
 This release is on vote. It is using a **staging** operator image published as `docker.io/camelk/camel-k:<version>`. The available platforms are AMD64 and ARM64. You can test it following these instructions:
 ### Kubectl
-\`\`\`
+```
 kustomize build github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v<version> | sed 's#apache/camel-k#camelk/camel-k#g' | kubectl apply -f - --server-side
-\`\`\`
+```
 ### Helm
-\`\`\`
+```
 helm install camel-k https://github.com/apache/camel-k/raw/v<version>/docs/charts/camel-k-<version>.tgz
-\`\`\`
+```
 ### OLM
 Use the `operator-sdk` tool and run the bundle via:
-\`\`\`
-operator-sdk run bundle docker.io/camelk/camel-k-bundle:<version>
-\`\`\`
 ```
+operator-sdk run bundle docker.io/camelk/camel-k-bundle:<version>
+```
+----
 
 [[voting]]
 == Voting
