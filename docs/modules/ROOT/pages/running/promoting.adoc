@@ -146,3 +146,47 @@ The CLI will add a patch configuration for any of the following trait configurat
 * Toleration configuration
 
 NOTE: feel free to ask to add any further configuration you require.
+
+=== Automated GitOps with GitHub Integration
+
+The `--push-gitops-dir` flag extends the GitOps directory export functionality by automatically committing base overlay
+files to a new git branch and creating a GitHub Pull Request against the git branch that was checked out when the `promote` command was executed:
+
+```
+$ kamel promote promote-server -n development --to production --export-gitops-dir /home/user/your-git-repository --push-gitops-dir
+```
+
+==== Prerequisites
+
+Before using `--push-gitops-dir`, ensure the following requirements are met:
+
+* The GitOps directory must be within a git repository
+* The currently checked out branch must exist on the remote repository
+
+==== Authentication
+
+===== GitHub Token
+
+Set the `GITHUB_TOKEN` environment variable for GitHub PR creation and git push authentication with HTTPS URLs:
+
+```
+export GITHUB_TOKEN=ghp_your_token_here
+```
+
+===== Git Authentication
+
+**HTTPS URLs (Recommended):**
+
+When the `origin` remote has an HTTPS git URL (e.g., `https://github.com/owner/repo.git`), authentication is handled automatically using the `GITHUB_TOKEN`.
+
+**SSH URLs:**
+
+When the `origin` remote has an SSH git URL (e.g., `git@github.com:owner/repo.git`) and you have multiple SSH keys, you may need to specify which key to use:
+
+```
+export KAMEL_SSH_KEY_PATH=/home/user/.ssh/id_ed25519
+export KAMEL_SSH_KEY_PASSPHRASE=your_passphrase <1>
+```
+<1> If your SSH key is encrypted, you must also specify a passphrase.
+
+NOTE: When SSH authentication is used, you must also add the GitHub host to your `known_hosts`. For example, on Linux you can execute the command `ssh-keyscan -t ecdsa github.com >> ~/.ssh/known_hosts` in your terminal.
