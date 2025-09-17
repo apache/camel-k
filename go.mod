@@ -48,8 +48,8 @@ require (
 	k8s.io/gengo v0.0.0-20240404160639-a0386bf69313
 	k8s.io/klog/v2 v2.130.1
 	k8s.io/utils v0.0.0-20250604170112-4c0f3b243397
-	knative.dev/eventing v0.46.4
-	knative.dev/pkg v0.0.0-20250821143151-4ffdcf6b3fa5
+	knative.dev/eventing v0.46.5
+	knative.dev/pkg v0.0.0-20250909011231-077dcf0d00e8
 	knative.dev/serving v0.46.4
 	sigs.k8s.io/controller-runtime v0.21.0
 	sigs.k8s.io/structured-merge-diff/v4 v4.7.0
