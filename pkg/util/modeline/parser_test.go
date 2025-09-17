@@ -24,38 +24,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestParseGroovyFile(t *testing.T) {
-	it := `
-		//     camel-k: pippo=pluto     paperino ciao=1
-		// camel-k : ciao
-
-		from("timer:tick").log("Ciao")
-    `
-	opts, err := Parse("simple.groovy", it)
-	require.NoError(t, err)
-	assert.Len(t, opts, 4)
-	assert.Contains(t, opts, Option{Name: "pippo", Value: "pluto"})
-	assert.Contains(t, opts, Option{Name: "paperino"})
-	assert.Contains(t, opts, Option{Name: "ciao", Value: "1"})
-	assert.Contains(t, opts, Option{Name: "ciao"})
-}
-
-func TestParseKotlinFile(t *testing.T) {
-	it := `
-		//     camel-k: pippo=pluto     paperino ciao=1
-		// camel-k : ciao
-
-		from("timer:tick").log("Ciao")
-    `
-	opts, err := Parse("example.kts", it)
-	require.NoError(t, err)
-	assert.Len(t, opts, 4)
-	assert.Contains(t, opts, Option{Name: "pippo", Value: "pluto"})
-	assert.Contains(t, opts, Option{Name: "paperino"})
-	assert.Contains(t, opts, Option{Name: "ciao", Value: "1"})
-	assert.Contains(t, opts, Option{Name: "ciao"})
-}
-
 func TestParseJavaFile(t *testing.T) {
 	it := `
 		//     camel-k: pippo=pluto     paperino ciao=1
@@ -78,26 +46,6 @@ func TestParseJavaFile(t *testing.T) {
 		}
     `
 	opts, err := Parse("Example.java", it)
-	require.NoError(t, err)
-	assert.Len(t, opts, 4)
-	assert.Contains(t, opts, Option{Name: "pippo", Value: "pluto"})
-	assert.Contains(t, opts, Option{Name: "paperino"})
-	assert.Contains(t, opts, Option{Name: "ciao", Value: "1"})
-	assert.Contains(t, opts, Option{Name: "ciao"})
-}
-
-func TestParseJSFile(t *testing.T) {
-	it := `
-		//     camel-k: pippo=pluto     paperino ciao=1
-		// camel-k : ciao
-		// Write your routes here, for example:
-		from('timer:js?period=1000')
-			.routeId('js')
-			.setBody()
-			  .simple('Hello Camel K from ${routeId}')
-			.to('log:info')
-    `
-	opts, err := Parse("example.js", it)
 	require.NoError(t, err)
 	assert.Len(t, opts, 4)
 	assert.Contains(t, opts, Option{Name: "pippo", Value: "pluto"})

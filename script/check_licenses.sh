@@ -54,10 +54,7 @@ check_licenses() {
 
 
 check_licenses *.go ./script/headers/default.txt
-check_licenses *.groovy ./script/headers/default-jvm.txt
 check_licenses *.java ./script/headers/default-jvm.txt
-check_licenses *.kts ./script/headers/default-jvm.txt
-check_licenses *.js ./script/headers/js.txt
 check_licenses *.xml ./script/headers/xml.txt
 check_licenses *.yaml ./script/headers/yaml.txt
 check_licenses *.yml ./script/headers/yaml.txt

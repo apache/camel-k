@@ -18,8 +18,16 @@ limitations under the License.
 package source
 
 import (
+	"fmt"
+	"regexp"
+
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util"
+)
+
+var (
+	replaceURIDoubleQuotedFrom  = regexp.MustCompile(`from\s*\(\s*"(?:timer|cron|quartz)[^"]*"\s*\)`)
+	replaceURIDoubleQuotedFromF = regexp.MustCompile(`fromF\s*\(\s*"(?:timer|cron|quartz)[^"]*"\s*\)`)
 )
 
 // JavaScriptInspector inspects Java DSL spec.
@@ -43,7 +51,6 @@ func (i JavaSourceInspector) Extract(source v1.SourceSpec, meta *Metadata) error
 	)
 	kameletEips := util.FindAllDistinctStringSubmatch(
 		source.Content,
-		singleQuotedKameletEip,
 		doubleQuotedKameletEip)
 
 	hasRest := restRegexp.MatchString(source.Content)
@@ -54,4 +61,13 @@ func (i JavaSourceInspector) Extract(source v1.SourceSpec, meta *Metadata) error
 // ReplaceFromURI parses the source content and replace the `from` URI configuration with the a new URI. Returns true if it applies a replacement.
 func (i JavaSourceInspector) ReplaceFromURI(source *v1.SourceSpec, newFromURI string) (bool, error) {
 	return replaceFromURIDoubleQuotesOnly(source, newFromURI)
+}
+
+func replaceFromURIDoubleQuotesOnly(source *v1.SourceSpec, newFromURI string) (bool, error) {
+	originalContent := source.Content
+
+	source.Content = replaceURIDoubleQuotedFrom.ReplaceAllString(source.Content, fmt.Sprintf(`from("%s")`, newFromURI))
+	source.Content = replaceURIDoubleQuotedFromF.ReplaceAllString(source.Content, fmt.Sprintf(`fromF('%s')`, newFromURI))
+
+	return originalContent != source.Content, nil
 }

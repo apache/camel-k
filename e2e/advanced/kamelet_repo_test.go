@@ -42,16 +42,23 @@ func TestKameletFromCustomRepository(t *testing.T) {
 		kameletName := "timer-custom-source"
 		removeKamelet(t, ctx, kameletName, ns)
 		g.Eventually(Kamelet(t, ctx, kameletName, ns)).Should(BeNil())
-		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutShort).Should(Equal(v1.IntegrationPlatformPhaseReady))
+
+		g.Eventually(Platform(t, ctx, ns)).ShouldNot(BeNil())
+		pl := Platform(t, ctx, ns)()
+		pl.Spec.Kamelet.Repositories = []v1.KameletRepositorySpec{
+			{URI: "github:squakez/ck-kamelet-test-repo/kamelets"},
+		}
+		TestClient(t).Update(ctx, pl)
+		g.Eventually(Platform(t, ctx, ns)).ShouldNot(BeNil())
+		g.Eventually(PlatformHas(t, ctx, ns, func(pl *v1.IntegrationPlatform) bool {
+			return len(pl.Status.Kamelet.Repositories) > 0 && pl.Status.Kamelet.Repositories[0].URI == "github:squakez/ck-kamelet-test-repo/kamelets"
+		}), TestTimeoutShort).Should(BeTrue())
+
 		// Add the custom repository
-		g.Expect(Kamel(t, ctx, "kamelet", "add-repo", "github:squakez/ck-kamelet-test-repo/kamelets", "-n", ns).Execute()).To(Succeed())
 		g.Expect(KamelRun(t, ctx, ns, "files/TimerCustomKameletIntegration.java").Execute()).To(Succeed())
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, "timer-custom-kamelet-integration"), TestTimeoutMedium).
 			Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationLogs(t, ctx, ns, "timer-custom-kamelet-integration")).Should(ContainSubstring("hello world"))
-
-		// Remove the custom repository
-		g.Expect(Kamel(t, ctx, "kamelet", "remove-repo", "github:squakez/ck-kamelet-test-repo/kamelets", "-n", ns).Execute()).To(Succeed())
 	})
 }
 

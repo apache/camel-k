@@ -62,75 +62,6 @@ func TestDependenciesJavaSource(t *testing.T) {
 		meta.Dependencies.List())
 }
 
-func TestDependenciesJavaScript(t *testing.T) {
-	code := v1.SourceSpec{
-		DataSpec: v1.DataSpec{
-			Name: "source.js",
-			Content: `
-			    var component = Java.type("org.apache.camel.component.kafka.KafkaComponent");
-
-			    from('telegram:bots/cippa').to("log:stash");
-			    from('timer:tick').to("amqp:queue");
-			    '"'
-		    `,
-		},
-		Language: v1.LanguageJavaScript,
-	}
-
-	catalog, err := camel.DefaultCatalog()
-	require.NoError(t, err)
-
-	meta, err := extract(catalog, code)
-	require.NoError(t, err)
-
-	assert.ElementsMatch(
-		t,
-		[]string{
-			"camel:kafka",
-			"camel:amqp",
-			"camel:log",
-			"camel:telegram",
-			"camel:timer",
-		},
-		meta.Dependencies.List())
-}
-
-func TestDependenciesGroovy(t *testing.T) {
-	code := v1.SourceSpec{
-		DataSpec: v1.DataSpec{
-			Name: "source.groovy",
-			Content: `
-			    import org.apache.camel.component.kafka.KafkaComponent;
-
-			    from('telegram:bots/cippa').to("log:stash");
-			    from('timer:tick').to("amqp:queue");
-				from('twitter-search:{{twitterKeywords}}'
-                    + '?delay={{twitterDelayMs}}');
-			    '"
-		    `,
-		},
-		Language: v1.LanguageGroovy,
-	}
-
-	catalog, err := camel.DefaultCatalog()
-	require.NoError(t, err)
-
-	meta, err := extract(catalog, code)
-	require.NoError(t, err)
-
-	assert.ElementsMatch(
-		t,
-		[]string{
-			"camel:kafka",
-			"camel:amqp",
-			"camel:log",
-			"camel:telegram",
-			"camel:timer",
-			"camel:twitter",
-		},
-		meta.Dependencies.List())
-}
-
 func TestDependencies(t *testing.T) {
 	code := v1.SourceSpec{
 		DataSpec: v1.DataSpec{
@@ -249,14 +180,14 @@ func TestJacksonDependency(t *testing.T) {
 func TestJacksonImplicitDependency(t *testing.T) {
 	code := v1.SourceSpec{
 		DataSpec: v1.DataSpec{
-			Name: "Request.groovy",
+			Name: "Request.java",
 			Content: `
 			    from("http:test")
 					.unmarshal().json()
 					.to("log:end")
 		    `,
 		},
-		Language: v1.LanguageGroovy,
+		Language: v1.LanguageJavaSource,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -348,7 +279,7 @@ func TestLanguageDependenciesTransformExpression(t *testing.T) {
 func TestCircuitBreakerDependency(t *testing.T) {
 	code := v1.SourceSpec{
 		DataSpec: v1.DataSpec{
-			Name: "Request.groovy",
+			Name: "Request.java",
 			Content: `
 			    from("http:test")
 					.circuitBreaker()
@@ -357,7 +288,7 @@ func TestCircuitBreakerDependency(t *testing.T) {
 						.to("log:fallback")
 		    `,
 		},
-		Language: v1.LanguageGroovy,
+		Language: v1.LanguageJavaSource,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -379,7 +310,7 @@ func TestCircuitBreakerDependency(t *testing.T) {
 func TestRestDependency(t *testing.T) {
 	code := v1.SourceSpec{
 		DataSpec: v1.DataSpec{
-			Name: "Request.groovy",
+			Name: "Request.java",
 			Content: `
                 rest()
                     .get("/api")
@@ -388,7 +319,7 @@ func TestRestDependency(t *testing.T) {
                     .to("log:info")
 		    `,
 		},
-		Language: v1.LanguageGroovy,
+		Language: v1.LanguageJavaSource,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -412,7 +343,7 @@ func TestRestDependency(t *testing.T) {
 func TestRestWithPathDependency(t *testing.T) {
 	code := v1.SourceSpec{
 		DataSpec: v1.DataSpec{
-			Name: "Request.groovy",
+			Name: "Request.java",
 			Content: `
                 rest("/test")
                     .get("/api")
@@ -421,7 +352,7 @@ func TestRestWithPathDependency(t *testing.T) {
                     .to("log:info")
 		    `,
 		},
-		Language: v1.LanguageGroovy,
+		Language: v1.LanguageJavaSource,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -444,7 +375,7 @@ func TestRestWithPathDependency(t *testing.T) {
 func TestRestConfigurationDependency(t *testing.T) {
 	code := v1.SourceSpec{
 		DataSpec: v1.DataSpec{
-			Name: "Request.groovy",
+			Name: "Request.java",
 			Content: `
                 restConfiguration()
                     .component("netty-http")
@@ -452,7 +383,7 @@ func TestRestConfigurationDependency(t *testing.T) {
                     .to("log:info")
 		    `,
 		},
-		Language: v1.LanguageGroovy,
+		Language: v1.LanguageJavaSource,
 	}
 
 	catalog, err := camel.DefaultCatalog()
@@ -463,68 +394,6 @@ func TestRestConfigurationDependency(t *testing.T) {
 
 	assert.ElementsMatch(
 		t, []string{
-			"camel:http",
-			"camel:log",
-			"mvn:org.apache.camel.quarkus:camel-quarkus-rest",
-			"mvn:org.apache.camel.quarkus:camel-quarkus-platform-http",
-		},
-		meta.Dependencies.List())
-}
-
-func TestRestClosureDependencyGroovy(t *testing.T) {
-	code := v1.SourceSpec{
-		DataSpec: v1.DataSpec{
-			Name: "Request.groovy",
-			Content: `
-                rest {
-                }
-			    from("http:test")
-                    .to("log:info")
-		    `,
-		},
-		Language: v1.LanguageGroovy,
-	}
-
-	catalog, err := camel.DefaultCatalog()
-	require.NoError(t, err)
-
-	meta, err := extract(catalog, code)
-	require.NoError(t, err)
-
-	assert.ElementsMatch(
-		t,
-		[]string{
-			"camel:http",
-			"camel:log",
-			"mvn:org.apache.camel.quarkus:camel-quarkus-rest",
-			"mvn:org.apache.camel.quarkus:camel-quarkus-platform-http",
-		},
-		meta.Dependencies.List())
-}
-
-func TestRestClosureDependencyKotlin(t *testing.T) {
-	code := v1.SourceSpec{
-		DataSpec: v1.DataSpec{
-			Name: "Request.groovy",
-			Content: `
-                rest {
-                }
-			    from("http:test")
-                    .to("log:info")
-		    `,
-		},
-		Language: v1.LanguageKotlin,
-	}
-
-	catalog, err := camel.DefaultCatalog()
-	require.NoError(t, err)
-
-	meta, err := extract(catalog, code)
-	require.NoError(t, err)
-
-	assert.ElementsMatch(
-		t,
-		[]string{
 			"camel:http",
 			"camel:log",
 			"mvn:org.apache.camel.quarkus:camel-quarkus-rest",

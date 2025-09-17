@@ -139,10 +139,10 @@ func TestKameletSecondarySourcesLookup(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:    "support.groovy",
+							Name:    "support.java",
 							Content: "from('xxx:xxx').('to:log:info')",
 						},
-						Language: v1.LanguageGroovy,
+						Language: v1.LanguageJavaSource,
 					},
 				},
 			},
@@ -170,7 +170,7 @@ func TestKameletSecondarySourcesLookup(t *testing.T) {
 	assert.Equal(t, "content", flowSource.ContentKey)
 
 	supportSource := environment.Integration.Status.GeneratedSources[1]
-	assert.Equal(t, "support.groovy", supportSource.Name)
+	assert.Equal(t, "support.java", supportSource.Name)
 	assert.Equal(t, "", string(supportSource.Type))
 	assert.Equal(t, "it-kamelet-timer-000", supportSource.ContentRef)
 	assert.Equal(t, "content", supportSource.ContentKey)
@@ -192,8 +192,8 @@ func TestNonYAMLKameletLookup(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:    "mykamelet.groovy",
-							Content: `from("timer").to("log:info")`,
+							Name:    "mykamelet.java",
+							Content: `from("timer").to("log:info");`,
 						},
 						Type: v1.SourceTypeTemplate,
 					},
@@ -216,7 +216,7 @@ func TestNonYAMLKameletLookup(t *testing.T) {
 
 	assert.Len(t, environment.Integration.Status.GeneratedSources, 1)
 	source := environment.Integration.Status.GeneratedSources[0]
-	assert.Equal(t, "timer.groovy", source.Name)
+	assert.Equal(t, "timer.java", source.Name)
 	assert.Equal(t, "template", string(source.Type))
 }
 
@@ -248,10 +248,10 @@ func TestMultipleKamelets(t *testing.T) {
 					Sources: []v1.SourceSpec{
 						{
 							DataSpec: v1.DataSpec{
-								Name:    "support.groovy",
+								Name:    "support.java",
 								Content: "from('xxx:xxx').('to:log:info')",
 							},
-							Language: v1.LanguageGroovy,
+							Language: v1.LanguageJavaSource,
 						},
 					},
 					Dependencies: []string{
@@ -331,11 +331,11 @@ func TestMultipleKamelets(t *testing.T) {
 
 	expectedFlowSourceTimerV1 := v1.SourceSpec{
 		DataSpec: v1.DataSpec{
-			Name:       "support.groovy",
+			Name:       "support.java",
 			ContentRef: "it-kamelet-timer-000",
 			ContentKey: "content",
 		},
-		Language:    v1.LanguageGroovy,
+		Language:    v1.LanguageJavaSource,
 		FromKamelet: true,
 	}
 

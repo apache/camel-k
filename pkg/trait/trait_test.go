@@ -47,7 +47,7 @@ const (
 )
 
 func TestOpenShiftTraits(t *testing.T) {
-	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "from('timer:my-timer').to('log:info')")
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, `from("timer:my-timer").to("log:info");`)
 	res := processTestEnv(t, env)
 
 	assert.NotEmpty(t, env.ExecutedTraits)
@@ -61,7 +61,7 @@ func TestOpenShiftTraits(t *testing.T) {
 }
 
 func TestOpenShiftTraitsWithWeb(t *testing.T) {
-	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "from('netty-http:http').to('log:info')")
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, `from("netty-http:http").to("log:info");`)
 	res := processTestEnv(t, env)
 	assert.NotNil(t, env.GetTrait("deployment"))
 	assert.NotNil(t, env.GetTrait("service"))
@@ -79,7 +79,7 @@ func TestOpenShiftTraitsWithWeb(t *testing.T) {
 }
 
 func TestOpenShiftTraitsWithWebAndConfig(t *testing.T) {
-	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "from('netty-http:http').to('log:info')")
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, `from("netty-http:http").to("log:info");`)
 	res := processTestEnv(t, env)
 	assert.NotNil(t, env.GetTrait("service"))
 	assert.NotNil(t, env.GetTrait("route"))
@@ -89,7 +89,7 @@ func TestOpenShiftTraitsWithWebAndConfig(t *testing.T) {
 }
 
 func TestOpenShiftTraitsWithWebAndDisabledTrait(t *testing.T) {
-	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "from('netty-http:http').to('log:info')")
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, `from("netty-http:http").to("log:info");`)
 	env.Integration.Spec.Traits.Service = &traitv1.ServiceTrait{
 		Trait: traitv1.Trait{
 			Enabled: ptr.To(false),
@@ -104,7 +104,7 @@ func TestOpenShiftTraitsWithWebAndDisabledTrait(t *testing.T) {
 }
 
 func TestKubernetesTraits(t *testing.T) {
-	env := createTestEnv(t, v1.IntegrationPlatformClusterKubernetes, "from('timer:tick').to('log:info')")
+	env := createTestEnv(t, v1.IntegrationPlatformClusterKubernetes, `from("timer:tick").to("log:info");`)
 	res := processTestEnv(t, env)
 	assert.NotNil(t, env.GetTrait("deployment"))
 	assert.Nil(t, env.GetTrait("service"))
@@ -116,7 +116,7 @@ func TestKubernetesTraits(t *testing.T) {
 }
 
 func TestKubernetesTraitsWithWeb(t *testing.T) {
-	env := createTestEnv(t, v1.IntegrationPlatformClusterKubernetes, "from('servlet:http').to('log:info')")
+	env := createTestEnv(t, v1.IntegrationPlatformClusterKubernetes, `from("servlet:http").to("log:info");`)
 	res := processTestEnv(t, env)
 	assert.NotNil(t, env.GetTrait("deployment"))
 	assert.NotNil(t, env.GetTrait("service"))
@@ -269,10 +269,10 @@ func createTestEnv(t *testing.T, cluster v1.IntegrationPlatformCluster, script s
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:    "file.groovy",
+							Name:    "file.java",
 							Content: script,
 						},
-						Language: v1.LanguageGroovy,
+						Language: v1.LanguageJavaSource,
 					},
 				},
 			},
@@ -334,10 +334,10 @@ func testDefaultIntegrationPhaseTraitsSetting(t *testing.T, phase v1.Integration
 			Sources: []v1.SourceSpec{
 				{
 					DataSpec: v1.DataSpec{
-						Name:    "file.groovy",
-						Content: "from('timer:test').to('log:info')",
+						Name:    "file.java",
+						Content: `from("timer:test").to("log:info")`,
 					},
-					Language: v1.LanguageGroovy,
+					Language: v1.LanguageJavaSource,
 				},
 			},
 		},
@@ -425,10 +425,10 @@ func TestIntegrationTraitsSetting(t *testing.T) {
 			Sources: []v1.SourceSpec{
 				{
 					DataSpec: v1.DataSpec{
-						Name:    "file.groovy",
-						Content: "from('timer:test').to('log:info')",
+						Name:    "file.java",
+						Content: `from("timer:test").to("log:info")`,
 					},
-					Language: v1.LanguageGroovy,
+					Language: v1.LanguageJavaSource,
 				},
 			},
 			Traits: v1.Traits{

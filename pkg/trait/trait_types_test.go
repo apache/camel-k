@@ -219,10 +219,10 @@ func createTestEnvironment(t *testing.T, profile v1.TraitProfile) *Environment {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:    "routes.js",
-							Content: `from("direct:test").log("hello")`,
+							Name:    "routes.java",
+							Content: `from("direct:test").log("hello");`,
 						},
-						Language: v1.LanguageJavaScript,
+						Language: v1.LanguageJavaSource,
 					},
 					{
 						DataSpec: v1.DataSpec{

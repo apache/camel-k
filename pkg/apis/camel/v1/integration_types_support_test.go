@@ -30,9 +30,6 @@ import (
 
 func TestAllLanguages(t *testing.T) {
 	assert.Contains(t, Languages, LanguageJavaSource)
-	assert.Contains(t, Languages, LanguageJavaScript)
-	assert.Contains(t, Languages, LanguageGroovy)
-	assert.Contains(t, Languages, LanguageKotlin)
 	assert.Contains(t, Languages, LanguageXML)
 	assert.Contains(t, Languages, LanguageYaml)
 }
@@ -59,9 +56,9 @@ func TestLanguageAlreadySet(t *testing.T) {
 		DataSpec: DataSpec{
 			Name: "Request.java",
 		},
-		Language: LanguageJavaScript,
+		Language: LanguageJavaSource,
 	}
-	assert.Equal(t, LanguageJavaScript, code.InferLanguage())
+	assert.Equal(t, LanguageJavaSource, code.InferLanguage())
 }
 
 func TestAddDependency(t *testing.T) {

@@ -505,34 +505,18 @@ type Language string
 const (
 	// LanguageJavaSource used for Java.
 	LanguageJavaSource Language = "java"
-	// LanguageGroovy used for Groovy.
-	// Deprecated: language no longer supported.
-	LanguageGroovy Language = "groovy"
-	// LanguageJavaScript  used for Javascript.
-	// Deprecated: language no longer supported.
-	LanguageJavaScript Language = "js"
 	// LanguageXML used for XML.
 	LanguageXML Language = "xml"
-	// LanguageKotlin used for Kotlin.
-	// Deprecated: language no longer supported.
-	LanguageKotlin Language = "kts"
 	// LanguageYaml used for YAML.
 	LanguageYaml Language = "yaml"
 	// LanguageKamelet used for Kamelets.
 	LanguageKamelet Language = "kamelet"
-	// LanguageJavaShell used for Java Shell.
-	// Deprecated: language no longer supported.
-	LanguageJavaShell Language = "jsh"
 )
 
 // Languages is the list of all supported languages.
 var Languages = []Language{
 	LanguageJavaSource,
-	LanguageGroovy,
-	LanguageJavaScript,
 	LanguageXML,
-	LanguageKotlin,
 	LanguageYaml,
 	LanguageKamelet,
-	LanguageJavaShell,
 }

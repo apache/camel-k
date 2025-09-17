@@ -59,11 +59,6 @@ func LoadConfiguration() (*Config, error) {
 	return loadConfiguration(viper.ConfigFileUsed())
 }
 
-// LoadConfigurationFrom loads a kamel configuration file from a specific location.
-func LoadConfigurationFrom(location string) (*Config, error) {
-	return loadConfiguration(location)
-}
-
 func loadConfiguration(location string) (*Config, error) {
 	config := Config{
 		location: location,

@@ -246,7 +246,7 @@ func getNominalEnv(t *testing.T, traitCatalog *Catalog) *Environment {
 	}
 	fakeClient, _ := internal.NewFakeClient(&pvc)
 	catalog, _ := camel.DefaultCatalog()
-	compressedRoute, _ := gzip.CompressBase64([]byte(`from("platform-http:test").log("hello")`))
+	compressedRoute, _ := gzip.CompressBase64([]byte(`from("platform-http:test").log("hello");`))
 
 	return &Environment{
 		CamelCatalog: catalog,
@@ -265,11 +265,11 @@ func getNominalEnv(t *testing.T, traitCatalog *Catalog) *Environment {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:        "routes.js",
+							Name:        "routes.java",
 							Content:     string(compressedRoute),
 							Compression: true,
 						},
-						Language: v1.LanguageJavaScript,
+						Language: v1.LanguageJavaSource,
 					},
 				},
 				Traits: v1.Traits{

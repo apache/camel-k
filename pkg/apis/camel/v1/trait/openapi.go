@@ -17,13 +17,15 @@ limitations under the License.
 
 package trait
 
+// WARNING: The OpenAPI trait was deprecated in version 2.5.0 and is no longer active since version 2.9.0.
+//
 // The OpenAPI DSL trait is internally used to allow creating integrations from a OpenAPI specs.
 //
 // WARNING: The Openapi trait is **deprecated** and will removed in future release versions:
 // use Camel REST contract first instead (see Camel core documentation).
 //
 // +camel-k:trait=openapi.
-// +camel-k:deprecated=2.5.0.
+// +camel-k:internal.
 type OpenAPITrait struct {
 	PlatformBaseTrait `property:",squash" json:",inline"`
 	// The configmaps holding the spec of the OpenAPI (compatible with > 3.0 spec only).
