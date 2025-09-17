@@ -38,7 +38,7 @@ require (
 	golang.org/x/sync v0.17.0
 	golang.org/x/term v0.34.0
 	golang.org/x/text v0.28.0
-	golang.org/x/time v0.12.0
+	golang.org/x/time v0.13.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.33.4
 	k8s.io/apiextensions-apiserver v0.33.4
