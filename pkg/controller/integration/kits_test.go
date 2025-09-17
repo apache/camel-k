@@ -341,7 +341,7 @@ func TestHasMatchingSources(t *testing.T) {
 	integration := &v1.Integration{
 		Spec: v1.IntegrationSpec{
 			Sources: []v1.SourceSpec{
-				v1.NewSourceSpec("test", "some content", v1.LanguageJavaShell),
+				v1.NewSourceSpec("test", "some content", v1.LanguageJavaSource),
 			},
 		},
 	}
@@ -349,7 +349,7 @@ func TestHasMatchingSources(t *testing.T) {
 	kit := &v1.IntegrationKit{
 		Spec: v1.IntegrationKitSpec{
 			Sources: []v1.SourceSpec{
-				v1.NewSourceSpec("test", "some content", v1.LanguageJavaShell),
+				v1.NewSourceSpec("test", "some content", v1.LanguageJavaSource),
 			},
 		},
 	}
@@ -360,8 +360,8 @@ func TestHasMatchingSources(t *testing.T) {
 	kit2 := &v1.IntegrationKit{
 		Spec: v1.IntegrationKitSpec{
 			Sources: []v1.SourceSpec{
-				v1.NewSourceSpec("test", "some content 2", v1.LanguageJavaShell),
-				v1.NewSourceSpec("test", "some content", v1.LanguageJavaShell),
+				v1.NewSourceSpec("test", "some content 2", v1.LanguageJavaSource),
+				v1.NewSourceSpec("test", "some content", v1.LanguageJavaSource),
 			},
 		},
 	}
@@ -374,8 +374,8 @@ func TestHasMatchingMultipleSources(t *testing.T) {
 	integration := &v1.Integration{
 		Spec: v1.IntegrationSpec{
 			Sources: []v1.SourceSpec{
-				v1.NewSourceSpec("test", "some content", v1.LanguageJavaShell),
-				v1.NewSourceSpec("test", "some content 2", v1.LanguageJavaShell),
+				v1.NewSourceSpec("test", "some content", v1.LanguageJavaSource),
+				v1.NewSourceSpec("test", "some content 2", v1.LanguageJavaSource),
 			},
 		},
 	}
@@ -383,8 +383,8 @@ func TestHasMatchingMultipleSources(t *testing.T) {
 	kit := &v1.IntegrationKit{
 		Spec: v1.IntegrationKitSpec{
 			Sources: []v1.SourceSpec{
-				v1.NewSourceSpec("test", "some content 2", v1.LanguageJavaShell),
-				v1.NewSourceSpec("test", "some content", v1.LanguageJavaShell),
+				v1.NewSourceSpec("test", "some content 2", v1.LanguageJavaSource),
+				v1.NewSourceSpec("test", "some content", v1.LanguageJavaSource),
 			},
 		},
 	}
@@ -395,7 +395,7 @@ func TestHasMatchingMultipleSources(t *testing.T) {
 	integration2 := &v1.Integration{
 		Spec: v1.IntegrationSpec{
 			Sources: []v1.SourceSpec{
-				v1.NewSourceSpec("test", "some content", v1.LanguageJavaShell),
+				v1.NewSourceSpec("test", "some content", v1.LanguageJavaSource),
 			},
 		},
 	}
@@ -408,7 +408,7 @@ func TestHasNotMatchingSources(t *testing.T) {
 	integration := &v1.Integration{
 		Spec: v1.IntegrationSpec{
 			Sources: []v1.SourceSpec{
-				v1.NewSourceSpec("test", "some content", v1.LanguageJavaShell),
+				v1.NewSourceSpec("test", "some content", v1.LanguageJavaSource),
 			},
 		},
 	}
@@ -416,7 +416,7 @@ func TestHasNotMatchingSources(t *testing.T) {
 	kit := &v1.IntegrationKit{
 		Spec: v1.IntegrationKitSpec{
 			Sources: []v1.SourceSpec{
-				v1.NewSourceSpec("test", "some content 2", v1.LanguageJavaShell),
+				v1.NewSourceSpec("test", "some content 2", v1.LanguageJavaSource),
 			},
 		},
 	}

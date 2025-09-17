@@ -54,7 +54,7 @@ func TestKnativeService(t *testing.T) {
 	client, _ := internal.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
-	compressedRoute, err := gzip.CompressBase64([]byte(`from("platform-http:test").log("hello")`))
+	compressedRoute, err := gzip.CompressBase64([]byte(`from("platform-http:test").log("hello");`))
 	require.NoError(t, err)
 
 	environment := Environment{
@@ -74,11 +74,11 @@ func TestKnativeService(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:        "routes.js",
+							Name:        "routes.java",
 							Content:     string(compressedRoute),
 							Compression: true,
 						},
-						Language: v1.LanguageJavaScript,
+						Language: v1.LanguageJavaSource,
 					},
 				},
 				Traits: v1.Traits{
@@ -183,8 +183,8 @@ func TestKnativeService(t *testing.T) {
 		}
 	})
 
-	assert.Equal(t, "file:/etc/camel/sources/routes.js", environment.ApplicationProperties["camel.k.sources[0].location"])
-	assert.Equal(t, "js", environment.ApplicationProperties["camel.k.sources[0].language"])
+	assert.Equal(t, "file:/etc/camel/sources/routes.java", environment.ApplicationProperties["camel.k.sources[0].location"])
+	assert.Equal(t, "java", environment.ApplicationProperties["camel.k.sources[0].language"])
 	assert.Equal(t, boolean.TrueString, environment.ApplicationProperties["camel.k.sources[0].compressed"])
 	envVarHasValue(t, spec.Containers[0].Env, "CAMEL_K_CONF", filepath.FromSlash("/etc/camel/application.properties"))
 	envVarHasValue(t, spec.Containers[0].Env, "CAMEL_K_CONF_D", filepath.FromSlash("/etc/camel/conf.d"))
@@ -307,10 +307,10 @@ func TestKnativeServiceWithRest(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:    "routes.js",
-							Content: `from("direct:test").log("hello")`,
+							Name:    "routes.java",
+							Content: `from("direct:test").log("hello");`,
 						},
-						Language: v1.LanguageJavaScript,
+						Language: v1.LanguageJavaSource,
 					},
 					{
 						DataSpec: v1.DataSpec{
@@ -382,10 +382,10 @@ func TestKnativeServiceNotApplicable(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:    "routes.js",
-							Content: `from("timer:tick").log("hello")`,
+							Name:    "routes.java",
+							Content: `from("timer:tick").log("hello");`,
 						},
-						Language: v1.LanguageJavaScript,
+						Language: v1.LanguageJavaSource,
 					},
 				},
 			},
@@ -457,10 +457,10 @@ func TestKnativeServiceNoServingAvailable(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:    "routes.js",
-							Content: `from("platform-http:test").log("hello")`,
+							Name:    "routes.java",
+							Content: `from("platform-http:test").log("hello");`,
 						},
-						Language: v1.LanguageJavaScript,
+						Language: v1.LanguageJavaSource,
 					},
 				},
 			},
@@ -575,10 +575,10 @@ func createKnativeServiceTestEnvironment(t *testing.T, trait *traitv1.KnativeSer
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:    "routes.js",
-							Content: `from("direct:test").log("hello")`,
+							Name:    "routes.java",
+							Content: `from("direct:test").log("hello");`,
 						},
-						Language: v1.LanguageJavaScript,
+						Language: v1.LanguageJavaSource,
 					},
 					{
 						DataSpec: v1.DataSpec{
@@ -668,11 +668,11 @@ func TestKnativeServiceAuto(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:        "routes.js",
+							Name:        "routes.java",
 							Content:     string(compressedRoute),
 							Compression: true,
 						},
-						Language: v1.LanguageJavaScript,
+						Language: v1.LanguageJavaSource,
 					},
 				},
 			},

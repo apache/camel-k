@@ -35,7 +35,7 @@ func TestModelineRunSimple(t *testing.T) {
 		file := `
 		// camel-k: dependency=mvn:org.my:lib:1.0
 	`
-		fileName := filepath.Join(dir, "simple.groovy")
+		fileName := filepath.Join(dir, "simple.java")
 		err := os.WriteFile(fileName, []byte(file), 0o400)
 		require.NoError(t, err)
 
@@ -53,7 +53,7 @@ func TestModelineRunSimple(t *testing.T) {
 func TestModelineRunHelp(t *testing.T) {
 	err := util.WithTempDir("camel-k-test-", func(dir string) error {
 		// no file created
-		fileName := filepath.Join(dir, "simple.groovy")
+		fileName := filepath.Join(dir, "simple.java")
 
 		cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName, "--help"})
 		require.NoError(t, err)
@@ -71,7 +71,7 @@ func TestModelineRunChain(t *testing.T) {
 		file := `
 		// camel-k: dependency=mvn:org.my:lib:2.0
 	`
-		fileName := filepath.Join(dir, "simple.groovy")
+		fileName := filepath.Join(dir, "simple.java")
 		err := os.WriteFile(fileName, []byte(file), 0o400)
 		require.NoError(t, err)
 
@@ -91,14 +91,14 @@ func TestModelineRunMultipleFiles(t *testing.T) {
 		file := `
 		// camel-k: dependency=mvn:org.my:lib1:3.0
 	`
-		fileName := filepath.Join(dir, "simple.groovy")
+		fileName := filepath.Join(dir, "simple.java")
 		err := os.WriteFile(fileName, []byte(file), 0o400)
 		require.NoError(t, err)
 
 		file2 := `
 		// camel-k: dependency=mvn:org.my:lib2:3.0
 	`
-		fileName2 := filepath.Join(dir, "ext.groovy")
+		fileName2 := filepath.Join(dir, "ext.java")
 		err = os.WriteFile(fileName2, []byte(file2), 0o400)
 		require.NoError(t, err)
 
@@ -122,7 +122,7 @@ func TestModelineRunProperty(t *testing.T) {
 		file := `
 		// camel-k: property=my-prop=my-val
 	`
-		fileName := filepath.Join(subDir, "simple.groovy")
+		fileName := filepath.Join(subDir, "simple.java")
 		err = os.WriteFile(fileName, []byte(file), 0o400)
 		require.NoError(t, err)
 
@@ -148,7 +148,7 @@ func TestModelineRunDuplicatedProperties(t *testing.T) {
 		// camel-k: property=prop2=false
 		// camel-k: property=foo=bar
 	`
-		fileName := filepath.Join(subDir, "simple.groovy")
+		fileName := filepath.Join(subDir, "simple.java")
 		err = os.WriteFile(fileName, []byte(file), 0o400)
 		require.NoError(t, err)
 
@@ -174,7 +174,7 @@ func TestModelineRunDuplicatedBuildProperties(t *testing.T) {
 		// camel-k: build-property=prop2=false
 		// camel-k: build-property=foo=bar
 	`
-		fileName := filepath.Join(subDir, "simple.groovy")
+		fileName := filepath.Join(subDir, "simple.java")
 		err = os.WriteFile(fileName, []byte(file), 0o400)
 		require.NoError(t, err)
 
@@ -204,7 +204,7 @@ func TestModelineRunPropertyFiles(t *testing.T) {
 		file := `
 		// camel-k: property=file:application.properties
 	`
-		fileName := filepath.Join(subDir, "simple.groovy")
+		fileName := filepath.Join(subDir, "simple.java")
 		err = os.WriteFile(fileName, []byte(file), 0o400)
 		require.NoError(t, err)
 
@@ -235,7 +235,7 @@ func TestModelineRunBuildProperty(t *testing.T) {
 		file := `
 		// camel-k: build-property=my-build-prop=my-val
 	`
-		fileName := filepath.Join(subDir, "simple.groovy")
+		fileName := filepath.Join(subDir, "simple.java")
 		err = os.WriteFile(fileName, []byte(file), 0o400)
 		require.NoError(t, err)
 
@@ -259,7 +259,7 @@ func TestModelineRunBuildPropertyFiles(t *testing.T) {
 		file := `
 		// camel-k: build-property=file:application.properties
 	`
-		fileName := filepath.Join(subDir, "simple.groovy")
+		fileName := filepath.Join(subDir, "simple.java")
 		err = os.WriteFile(fileName, []byte(file), 0o400)
 		require.NoError(t, err)
 
@@ -292,7 +292,7 @@ func TestModelineRunDuplicateTraits(t *testing.T) {
 		// camel-k: trait=trait2=false
 		// camel-k: trait=foo=bar
 	`
-		fileName := filepath.Join(subDir, "simple.groovy")
+		fileName := filepath.Join(subDir, "simple.java")
 		err = os.WriteFile(fileName, []byte(file), 0o400)
 		require.NoError(t, err)
 
@@ -316,7 +316,7 @@ func TestModelineRunConfigConfigmap(t *testing.T) {
 		file := `
 		// camel-k: config=configmap:my-cm
 	`
-		fileName := filepath.Join(subDir, "simple.groovy")
+		fileName := filepath.Join(subDir, "simple.java")
 		err = os.WriteFile(fileName, []byte(file), 0o400)
 		require.NoError(t, err)
 
@@ -340,7 +340,7 @@ func TestModelineRunConfigSecret(t *testing.T) {
 		file := `
 		// camel-k: config=secret:my-secret
 	`
-		fileName := filepath.Join(subDir, "simple.groovy")
+		fileName := filepath.Join(subDir, "simple.java")
 		err = os.WriteFile(fileName, []byte(file), 0o400)
 		require.NoError(t, err)
 
@@ -364,7 +364,7 @@ func TestModelineRunResourceConfigmap(t *testing.T) {
 		file := `
 		// camel-k: resource=configmap:my-cm
 	`
-		fileName := filepath.Join(subDir, "simple.groovy")
+		fileName := filepath.Join(subDir, "simple.java")
 		err = os.WriteFile(fileName, []byte(file), 0o400)
 		require.NoError(t, err)
 
@@ -388,7 +388,7 @@ func TestModelineRunResourceSecret(t *testing.T) {
 		file := `
 		// camel-k: resource=secret:my-secret
 	`
-		fileName := filepath.Join(subDir, "simple.groovy")
+		fileName := filepath.Join(subDir, "simple.java")
 		err = os.WriteFile(fileName, []byte(file), 0o400)
 		require.NoError(t, err)
 
@@ -409,7 +409,7 @@ func TestModelineQuotedPodTemplate(t *testing.T) {
 		file := `
 		// camel-k: pod-template='{ "containers": [], "securityContext": { "supplementalGroups": [ 553 ] }, "volumes": [] } }'
 	`
-		fileName := filepath.Join(dir, "simple.groovy")
+		fileName := filepath.Join(dir, "simple.java")
 		err := os.WriteFile(fileName, []byte(file), 0o400)
 		require.NoError(t, err)
 

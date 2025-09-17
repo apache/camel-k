@@ -28,7 +28,7 @@ func TestSanitizeName(t *testing.T) {
 		{"input": "/path/to/abc.js", "expect": "abc"},
 		{"input": "abc.xml", "expect": "abc"},
 		{"input": "./path/to/abc.kts", "expect": "abc"},
-		{"input": "fooToBar.groovy", "expect": "foo-to-bar"},
+		{"input": "fooToBar.java", "expect": "foo-to-bar"},
 		{"input": "foo-to-bar", "expect": "foo-to-bar"},
 		{"input": "http://foo.bar.com/cheese/wine/beer/abc.java", "expect": "abc"},
 		{"input": "http://foo.bar.com/cheese", "expect": "cheese"},

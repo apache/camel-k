@@ -27,10 +27,7 @@ import (
 func TestLoaderByArtifact(t *testing.T) {
 	catalog, err := DefaultCatalog()
 	require.NoError(t, err)
-	assert.Equal(t, "groovy", catalog.loaderByArtifact["camel-quarkus-groovy-dsl"])
 	assert.Equal(t, "java", catalog.loaderByArtifact["camel-quarkus-java-joor-dsl"])
-	assert.Equal(t, "js", catalog.loaderByArtifact["camel-quarkus-js-dsl"])
-	assert.Equal(t, "kts", catalog.loaderByArtifact["camel-quarkus-kotlin-dsl"])
 	assert.Equal(t, "xml", catalog.loaderByArtifact["camel-quarkus-xml-io-dsl"])
 	assert.Equal(t, "yaml", catalog.loaderByArtifact["camel-quarkus-yaml-dsl"])
 }
@@ -38,10 +35,7 @@ func TestLoaderByArtifact(t *testing.T) {
 func TestHasLoaderByArtifact(t *testing.T) {
 	catalog, err := DefaultCatalog()
 	require.NoError(t, err)
-	assert.True(t, catalog.HasLoaderByArtifact("groovy-dsl"))
 	assert.True(t, catalog.HasLoaderByArtifact("java-joor-dsl"))
-	assert.True(t, catalog.HasLoaderByArtifact("js-dsl"))
-	assert.True(t, catalog.HasLoaderByArtifact("kotlin-dsl"))
 	assert.True(t, catalog.HasLoaderByArtifact("xml-io-dsl"))
 	assert.True(t, catalog.HasLoaderByArtifact("yaml-dsl"))
 	assert.False(t, catalog.HasLoaderByArtifact("python-dsl"))

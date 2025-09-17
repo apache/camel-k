@@ -49,7 +49,7 @@ func TestServiceWithDefaults(t *testing.T) {
 	client, _ := internal.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
-	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
+	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello");`))
 	require.NoError(t, err)
 
 	environment := Environment{
@@ -69,11 +69,11 @@ func TestServiceWithDefaults(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:        "routes.js",
+							Name:        "routes.java",
 							Content:     string(compressedRoute),
 							Compression: true,
 						},
-						Language: v1.LanguageJavaScript,
+						Language: v1.LanguageJavaSource,
 					},
 				},
 				Traits: v1.Traits{
@@ -168,11 +168,11 @@ func TestService(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:        "routes.js",
+							Name:        "routes.java",
 							Content:     string(compressedRoute),
 							Compression: true,
 						},
-						Language: v1.LanguageJavaScript,
+						Language: v1.LanguageJavaSource,
 					},
 				},
 				Traits: v1.Traits{
@@ -353,11 +353,11 @@ func TestServiceWithNodePort(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:        "routes.js",
+							Name:        "routes.java",
 							Content:     string(compressedRoute),
 							Compression: true,
 						},
-						Language: v1.LanguageJavaScript,
+						Language: v1.LanguageJavaSource,
 					},
 				},
 				Traits: v1.Traits{
@@ -449,11 +449,11 @@ func TestServiceWithKnativeServiceEnabled(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:        "routes.js",
+							Name:        "routes.java",
 							Content:     string(compressedRoute),
 							Compression: true,
 						},
-						Language: v1.LanguageJavaScript,
+						Language: v1.LanguageJavaSource,
 					},
 				},
 				Traits: v1.Traits{
@@ -543,11 +543,11 @@ func TestServicesWithKnativeProfile(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:        "routes.js",
+							Name:        "routes.java",
 							Content:     string(compressedRoute),
 							Compression: true,
 						},
-						Language: v1.LanguageJavaScript,
+						Language: v1.LanguageJavaSource,
 					},
 				},
 			},
@@ -625,11 +625,11 @@ func TestServiceWithKnativeServiceDisabledInIntegrationPlatform(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:        "routes.js",
+							Name:        "routes.java",
 							Content:     string(compressedRoute),
 							Compression: true,
 						},
-						Language: v1.LanguageJavaScript,
+						Language: v1.LanguageJavaSource,
 					},
 				},
 			},
@@ -704,11 +704,11 @@ func TestServiceAutoConfiguration(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:        "routes.js",
+							Name:        "routes.java",
 							Content:     string(compressedRoute),
 							Compression: true,
 						},
-						Language: v1.LanguageJavaScript,
+						Language: v1.LanguageJavaSource,
 					},
 				},
 			},
@@ -769,11 +769,11 @@ func TestServiceAnnotationsAndLables(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:        "routes.js",
+							Name:        "routes.java",
 							Content:     string(compressedRoute),
 							Compression: true,
 						},
-						Language: v1.LanguageJavaScript,
+						Language: v1.LanguageJavaSource,
 					},
 				},
 				Traits: v1.Traits{
@@ -860,11 +860,11 @@ func TestServicePorts(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:        "routes.js",
+							Name:        "routes.java",
 							Content:     string(compressedRoute),
 							Compression: true,
 						},
-						Language: v1.LanguageJavaScript,
+						Language: v1.LanguageJavaSource,
 					},
 				},
 				Traits: v1.Traits{

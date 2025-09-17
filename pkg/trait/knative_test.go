@@ -1146,24 +1146,24 @@ func TestKnativePlatformHttpConfig(t *testing.T) {
 	sources := []v1.SourceSpec{
 		{
 			DataSpec: v1.DataSpec{
-				Name:    "source-endpoint.groovy",
-				Content: `from('knative:endpoint/ep').log('${body}')`,
+				Name:    "source-endpoint.java",
+				Content: `from("knative:endpoint/ep").log("${body}");`,
 			},
-			Language: v1.LanguageGroovy,
+			Language: v1.LanguageJavaSource,
 		},
 		{
 			DataSpec: v1.DataSpec{
-				Name:    "source-channel.groovy",
-				Content: `from('knative:channel/channel-source-1').log('${body}')`,
+				Name:    "source-channel.java",
+				Content: `from("knative:channel/channel-source-1").log("${body}");`,
 			},
-			Language: v1.LanguageGroovy,
+			Language: v1.LanguageJavaSource,
 		},
 		{
 			DataSpec: v1.DataSpec{
-				Name:    "source-event.groovy",
-				Content: `from('knative:event/event-source-1').log('${body}')`,
+				Name:    "source-event.java",
+				Content: `from("knative:event/event-source-1").log("${body}")`,
 			},
-			Language: v1.LanguageGroovy,
+			Language: v1.LanguageJavaSource,
 		},
 	}
 
@@ -1191,24 +1191,24 @@ func TestKnativePlatformHttpDependencies(t *testing.T) {
 	sources := []v1.SourceSpec{
 		{
 			DataSpec: v1.DataSpec{
-				Name:    "source-endpoint.groovy",
-				Content: `from('knative:endpoint/ep').log('${body}')`,
+				Name:    "source-endpoint.java",
+				Content: `from("knative:endpoint/ep").log("${body}");`,
 			},
-			Language: v1.LanguageGroovy,
+			Language: v1.LanguageJavaSource,
 		},
 		{
 			DataSpec: v1.DataSpec{
-				Name:    "source-channel.groovy",
-				Content: `from('knative:channel/channel-source-1').log('${body}')`,
+				Name:    "source-channel.java",
+				Content: `from("knative:channel/channel-source-1").log("${body}");`,
 			},
-			Language: v1.LanguageGroovy,
+			Language: v1.LanguageJavaSource,
 		},
 		{
 			DataSpec: v1.DataSpec{
-				Name:    "source-event.groovy",
-				Content: `from('knative:event/event-source-1').log('${body}')`,
+				Name:    "source-event.java",
+				Content: `from("knative:event/event-source-1").log("${body}")`,
 			},
-			Language: v1.LanguageGroovy,
+			Language: v1.LanguageJavaSource,
 		},
 	}
 
@@ -1261,10 +1261,10 @@ func TestKnativeEnabled(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:    "route.groovy",
-							Content: `from('timer:foo').to('knative:channel/channel-source-1')`,
+							Name:    "route.java",
+							Content: `from("timer:foo").to("knative:channel/channel-source-1")`,
 						},
-						Language: v1.LanguageGroovy,
+						Language: v1.LanguageJavaSource,
 					},
 				},
 			},
@@ -1332,10 +1332,10 @@ func TestKnativeNotEnabled(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:    "route.groovy",
-							Content: `from('timer:foo').to('log:info')`,
+							Name:    "route.java",
+							Content: `from("timer:foo").to("log:info");`,
 						},
-						Language: v1.LanguageGroovy,
+						Language: v1.LanguageJavaSource,
 					},
 				},
 			},
@@ -1637,10 +1637,10 @@ func newFakeClient(namespace string) (client.Client, error) {
 func TestKnativeSinkBinding(t *testing.T) {
 	source := v1.SourceSpec{
 		DataSpec: v1.DataSpec{
-			Name:    "sink.groovy",
-			Content: `from('timer:foo').to('knative:channel/channel-sink-1?apiVersion=messaging.knative.dev%2Fv1&kind=Channel')`,
+			Name:    "sink.java",
+			Content: `from("timer:foo").to("knative:channel/channel-sink-1?apiVersion=messaging.knative.dev%2Fv1&kind=Channel");`,
 		},
-		Language: v1.LanguageGroovy,
+		Language: v1.LanguageJavaSource,
 	}
 
 	environment := NewFakeEnvironment(t, source)

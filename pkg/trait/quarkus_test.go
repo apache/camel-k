@@ -59,7 +59,7 @@ func TestConfigureQuarkusTraitBuildSubmitted(t *testing.T) {
 func TestConfigureQuarkusTraitNativeNotSupported(t *testing.T) {
 	quarkusTrait, environment := createNominalQuarkusTest()
 	// Set a source not supporting Quarkus native
-	environment.Integration.Spec.Sources[0].Language = v1.LanguageJavaScript
+	environment.Integration.Spec.Sources[0].Language = v1.Language("js")
 	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
 	quarkusTrait.Modes = []traitv1.QuarkusMode{traitv1.NativeQuarkusMode}
 
@@ -148,10 +148,6 @@ func TestGetLanguageSettingsWithoutLoaders(t *testing.T) {
 		},
 	}
 	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaSource))
-	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageGroovy))
-	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaScript))
-	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageKotlin))
-	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaShell))
 	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageKamelet))
 	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageXML))
 	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageYaml))
@@ -163,10 +159,6 @@ func TestGetLanguageSettingsWithoutMetadata(t *testing.T) {
 			CamelCatalogSpec: v1.CamelCatalogSpec{
 				Loaders: map[string]v1.CamelLoader{
 					"java":    {},
-					"groovy":  {},
-					"js":      {},
-					"kts":     {},
-					"jsh":     {},
 					"kamelet": {},
 					"xml":     {},
 					"yaml":    {},
@@ -175,10 +167,6 @@ func TestGetLanguageSettingsWithoutMetadata(t *testing.T) {
 		},
 	}
 	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaSource))
-	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageGroovy))
-	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaScript))
-	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageKotlin))
-	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaShell))
 	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageKamelet))
 	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageXML))
 	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageYaml))
@@ -195,38 +183,11 @@ func TestGetLanguageSettingsWithLoaders(t *testing.T) {
 							"sources-required-at-build-time": boolean.TrueString,
 						},
 					},
-					"groovy": {
-						Metadata: map[string]string{
-							"native":                         boolean.FalseString,
-							"sources-required-at-build-time": boolean.FalseString,
-						},
-					},
-					"js": {
-						Metadata: map[string]string{
-							"native":                         boolean.TrueString,
-							"sources-required-at-build-time": boolean.FalseString,
-						},
-					},
-					"kts": {
-						Metadata: map[string]string{
-							"native":                         boolean.FalseString,
-							"sources-required-at-build-time": boolean.TrueString,
-						},
-					},
-					"jsh": {
-						Metadata: map[string]string{
-							"native": boolean.TrueString,
-						},
-					},
 				},
 			},
 		},
 	}
 	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: true}, getLanguageSettings(environment, v1.LanguageJavaSource))
-	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageGroovy))
-	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaScript))
-	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: true}, getLanguageSettings(environment, v1.LanguageKotlin))
-	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaShell))
 }
 
 func TestQuarkusMatches(t *testing.T) {

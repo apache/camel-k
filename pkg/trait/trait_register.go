@@ -44,7 +44,6 @@ func init() {
 	AddToTraits(newLoggingTraitTrait)
 	AddToTraits(NewMasterTrait)
 	AddToTraits(newMountTrait)
-	AddToTraits(newOpenAPITrait)
 	AddToTraits(newOwnerTrait)
 	AddToTraits(newPdbTrait)
 	AddToTraits(newPlatformTrait)

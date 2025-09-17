@@ -35,14 +35,8 @@ const (
 )
 
 var (
-	singleQuotedFrom        = regexp.MustCompile(`from\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
-	singleQuotedFromF       = regexp.MustCompile(`fromF\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
 	doubleQuotedFrom        = regexp.MustCompile(`from\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
 	doubleQuotedFromF       = regexp.MustCompile(`fromF\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
-	singleQuotedTo          = regexp.MustCompile(`\.to\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
-	singleQuotedToD         = regexp.MustCompile(`\.toD\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
-	singleQuotedToF         = regexp.MustCompile(`\.toF\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
-	singleQuotedWireTap     = regexp.MustCompile(`\.wireTap\s*\(\s*'([a-zA-Z0-9-]+:[^']+)'`)
 	doubleQuotedTo          = regexp.MustCompile(`\.to\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
 	doubleQuotedToD         = regexp.MustCompile(`\.toD\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
 	doubleQuotedToF         = regexp.MustCompile(`\.toF\s*\(\s*"([a-zA-Z0-9-]+:[^"]+)"`)
@@ -65,7 +59,6 @@ var (
 	xqueryRegexp            = regexp.MustCompile(`.*\.xquery\s*\(.*\).*`)
 	xpathRegexp             = regexp.MustCompile(`.*\.?xpath\s*\(.*\).*`)
 	xtokenizeRegexp         = regexp.MustCompile(`.*\.xtokenize\s*\(.*\).*`)
-	singleQuotedKameletEip  = regexp.MustCompile(`kamelet\s*\(\s*'(?://)?([a-z0-9-.]+(/[a-z0-9-.]+)?)(?:$|[^a-z0-9-.].*)'`)
 	doubleQuotedKameletEip  = regexp.MustCompile(`kamelet\s*\(\s*"(?://)?([a-z0-9-.]+(/[a-z0-9-.]+)?)(?:$|[^a-z0-9-.].*)"`)
 
 	sourceCapabilities = map[*regexp.Regexp][]string{
@@ -203,32 +196,8 @@ func InspectorForLanguage(catalog *camel.RuntimeCatalog, language v1.Language) I
 				catalog: catalog,
 			},
 		}
-	case v1.LanguageGroovy:
-		return &GroovyInspector{
-			baseInspector: baseInspector{
-				catalog: catalog,
-			},
-		}
-	case v1.LanguageJavaScript:
-		return &JavaScriptInspector{
-			baseInspector: baseInspector{
-				catalog: catalog,
-			},
-		}
-	case v1.LanguageKotlin:
-		return &KotlinInspector{
-			baseInspector: baseInspector{
-				catalog: catalog,
-			},
-		}
 	case v1.LanguageYaml:
 		return &YAMLInspector{
-			baseInspector: baseInspector{
-				catalog: catalog,
-			},
-		}
-	case v1.LanguageJavaShell:
-		return &JavaSourceInspector{
 			baseInspector: baseInspector{
 				catalog: catalog,
 			},

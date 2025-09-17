@@ -118,52 +118,6 @@ func TestHttpOnlyJavaSourceRest2(t *testing.T) {
 	assert.True(t, meta.PassiveEndpoints)
 }
 
-func TestNoHttpGroovySource(t *testing.T) {
-	code := v1.SourceSpec{
-		DataSpec: v1.DataSpec{
-			Name: "Request.groovy",
-			Content: `
-			from('direct:bots/cippa').to("log:stash");
-			from('telegram:uri').to("log:stash");
-			from('seda:path').to("log:stash");
-		`,
-		},
-		Language: v1.LanguageGroovy,
-	}
-
-	catalog, err := camel.DefaultCatalog()
-	require.NoError(t, err)
-
-	meta, err := extract(catalog, code)
-	require.NoError(t, err)
-
-	assert.False(t, meta.ExposesHTTPServices)
-	assert.False(t, meta.PassiveEndpoints)
-}
-
-func TestHttpOnlyGroovySource(t *testing.T) {
-	code := v1.SourceSpec{
-		DataSpec: v1.DataSpec{
-			Name: "Request.groovy",
-			Content: `
-			from('direct:bots/cippa').to("log:stash");
-			from('netty-http:uri').to("log:stash");
-			from('seda:path').to("log:stash");
-		`,
-		},
-		Language: v1.LanguageGroovy,
-	}
-
-	catalog, err := camel.DefaultCatalog()
-	require.NoError(t, err)
-
-	meta, err := extract(catalog, code)
-	require.NoError(t, err)
-
-	assert.True(t, meta.ExposesHTTPServices)
-	assert.True(t, meta.PassiveEndpoints)
-}
-
 func TestHttpXMLSource(t *testing.T) {
 	code := v1.SourceSpec{
 		DataSpec: v1.DataSpec{
@@ -227,12 +181,12 @@ func TestMultilangHTTPOnlySource(t *testing.T) {
 		{
 
 			DataSpec: v1.DataSpec{
-				Name: "routes2.groovy",
+				Name: "routes2.java",
 				Content: `
-				from('seda:in').to('seda:out')
+				from("seda:in").to("seda:out");
 			`,
 			},
-			Language: v1.LanguageGroovy,
+			Language: v1.LanguageJavaSource,
 		},
 	}
 
@@ -263,13 +217,13 @@ func TestMultilangHTTPSource(t *testing.T) {
 		{
 
 			DataSpec: v1.DataSpec{
-				Name: "routes2.groovy",
+				Name: "routes2.java",
 				Content: `
-				from('seda:in').to('seda:out')
-				from('timer:tick').to('log:info')
+				from("seda:in").to("seda:out")
+				from("timer:tick").to("log:info")
 			`,
 			},
-			Language: v1.LanguageGroovy,
+			Language: v1.LanguageJavaSource,
 		},
 	}
 

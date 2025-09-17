@@ -8292,6 +8292,8 @@ Deprecated: no longer available since version 2.5.
 
 * <<#_camel_apache_org_v1_Traits, Traits>>
 
+WARNING: The OpenAPI trait was deprecated in version 2.5.0 and is no longer active since version 2.9.0.
+
 The OpenAPI DSL trait is internally used to allow creating integrations from a OpenAPI specs.
 
 WARNING: The Openapi trait is **deprecated** and will removed in future release versions:

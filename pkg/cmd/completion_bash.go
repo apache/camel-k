@@ -71,7 +71,7 @@ __kamel_dependency_type() {
 }
 
 __kamel_languages() {
-    local type_list="js groovy kotlin java xml"
+    local type_list="java xml yaml"
     COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
 }
 
