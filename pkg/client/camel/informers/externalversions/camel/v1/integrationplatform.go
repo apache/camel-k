@@ -63,13 +63,25 @@ func NewFilteredIntegrationPlatformInformer(client versioned.Interface, namespac
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.CamelV1().IntegrationPlatforms(namespace).List(context.TODO(), options)
+				return client.CamelV1().IntegrationPlatforms(namespace).List(context.Background(), options)
 			},
 			WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.CamelV1().IntegrationPlatforms(namespace).Watch(context.TODO(), options)
+				return client.CamelV1().IntegrationPlatforms(namespace).Watch(context.Background(), options)
+			},
+			ListWithContextFunc: func(ctx context.Context, options metav1.ListOptions) (runtime.Object, error) {
+				if tweakListOptions != nil {
+					tweakListOptions(&options)
+				}
+				return client.CamelV1().IntegrationPlatforms(namespace).List(ctx, options)
+			},
+			WatchFuncWithContext: func(ctx context.Context, options metav1.ListOptions) (watch.Interface, error) {
+				if tweakListOptions != nil {
+					tweakListOptions(&options)
+				}
+				return client.CamelV1().IntegrationPlatforms(namespace).Watch(ctx, options)
 			},
 		},
 		&apiscamelv1.IntegrationPlatform{},

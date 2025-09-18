@@ -1,1 +1,0 @@
-../kamel/main.go

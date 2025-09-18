@@ -59,7 +59,7 @@ func TestBindOutputJSON(t *testing.T) {
 	assert.Equal(t, "json", buildCmdOptions.OutputFormat)
 
 	require.NoError(t, err)
-	assert.Equal(t, `{"kind":"Pipe","apiVersion":"camel.apache.org/v1","metadata":{"name":"my-to-my","creationTimestamp":null,"annotations":{"camel.apache.org/operator.id":"camel-k"}},"spec":{"source":{"uri":"my:src"},"sink":{"uri":"my:dst"}},"status":{}}`, output)
+	assert.Equal(t, `{"kind":"Pipe","apiVersion":"camel.apache.org/v1","metadata":{"name":"my-to-my","annotations":{"camel.apache.org/operator.id":"camel-k"}},"spec":{"source":{"uri":"my:src"},"sink":{"uri":"my:dst"}},"status":{}}`, output)
 }
 
 func TestBindOutputYAML(t *testing.T) {
@@ -73,7 +73,6 @@ kind: Pipe
 metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
-  creationTimestamp: null
   name: my-to-my
 spec:
   sink:
@@ -104,7 +103,6 @@ kind: Pipe
 metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
-  creationTimestamp: null
   name: my-to-my
 spec:
   errorHandler:
@@ -136,7 +134,6 @@ kind: Pipe
 metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
-  creationTimestamp: null
   name: my-to-my
 spec:
   errorHandler:
@@ -161,7 +158,6 @@ kind: Pipe
 metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
-  creationTimestamp: null
   name: my-to-my
 spec:
   errorHandler:
@@ -187,7 +183,6 @@ metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
     trait.camel.apache.org/mount.configs: configmap:my-cm
-  creationTimestamp: null
   name: my-to-my
 spec:
   sink:
@@ -211,7 +206,6 @@ metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
     trait.camel.apache.org/camel.properties: '[a=1,b=2]'
-  creationTimestamp: null
   name: my-to-my
 spec:
   sink:
@@ -236,7 +230,6 @@ kind: Pipe
 metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
-  creationTimestamp: null
   name: my-to-my
 spec:
   sink:
@@ -289,7 +282,6 @@ kind: Pipe
 metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
-  creationTimestamp: null
   name: my-to-my
 spec:
   dependencies:
