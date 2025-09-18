@@ -18,12 +18,17 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	netHttp "net/http"
+	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -31,7 +36,16 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/io"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/sets"
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/config"
+	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v5/plumbing/transport"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
+	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
+	"github.com/google/go-github/v72/github"
 	"github.com/spf13/cobra"
+	"golang.org/x/oauth2"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -55,17 +69,19 @@ func newCmdPromote(rootCmdOptions *RootCmdOptions) (*cobra.Command, *promoteCmdO
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
 	cmd.Flags().BoolP("image", "i", false, "Output the container image only")
 	cmd.Flags().String("export-gitops-dir", "", "Export to a Kustomize GitOps overlay structure")
+	cmd.Flags().Bool("push-gitops-dir", false, "Commit and push GitOps export directory to git, then create GitHub PR automatically")
 
 	return &cmd, &options
 }
 
 type promoteCmdOptions struct {
 	*RootCmdOptions
-	To           string `mapstructure:"to" yaml:",omitempty"`
-	ToOperator   string `mapstructure:"to-operator" yaml:",omitempty"`
-	OutputFormat string `mapstructure:"output" yaml:",omitempty"`
-	Image        bool   `mapstructure:"image" yaml:",omitempty"`
-	ToGitOpsDir  string `mapstructure:"export-gitops-dir" yaml:",omitempty"`
+	To            string `mapstructure:"to" yaml:",omitempty"`
+	ToOperator    string `mapstructure:"to-operator" yaml:",omitempty"`
+	OutputFormat  string `mapstructure:"output" yaml:",omitempty"`
+	Image         bool   `mapstructure:"image" yaml:",omitempty"`
+	ToGitOpsDir   string `mapstructure:"export-gitops-dir" yaml:",omitempty"`
+	PushGitOpsDir bool   `mapstructure:"push-gitops-dir" yaml:",omitempty"`
 }
 
 func (o *promoteCmdOptions) validate(_ *cobra.Command, args []string) error {
@@ -79,6 +95,10 @@ func (o *promoteCmdOptions) validate(_ *cobra.Command, args []string) error {
 		return errors.New("source and destination namespaces must be different in order to avoid promoted Integration/Pipe " +
 			"clashes with the source Integration/Pipe")
 	}
+	if o.PushGitOpsDir && o.ToGitOpsDir == "" {
+		return errors.New("--push-gitops-dir requires --export-gitops-dir to specify the GitOps directory")
+	}
+
 	return nil
 }
 
@@ -151,6 +171,10 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 				return err
 			}
 			fmt.Fprintln(cmd.OutOrStdout(), `Exported a Kustomize based Gitops directory to `+o.ToGitOpsDir+` for "`+name+`" Pipe`)
+			if o.PushGitOpsDir {
+				err = pushGitOpsDirAndOpenPr(destPipe.Name, o.ToGitOpsDir, `"`+name+`" Pipe`, cmd)
+				return err
+			}
 			return nil
 		}
 		replaced, err := o.replaceResource(destPipe)
@@ -176,6 +200,10 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 		fmt.Fprintln(cmd.OutOrStdout(), `Exported a Kustomize based Gitops directory to `+o.ToGitOpsDir+` for "`+name+`" Integration`)
+		if o.PushGitOpsDir {
+			err = pushGitOpsDirAndOpenPr(destIntegration.Name, o.ToGitOpsDir, `"`+name+`" Integration`, cmd)
+			return err
+		}
 		return nil
 	}
 
@@ -406,6 +434,8 @@ kind: Kustomization
 resources:
 `
 
+const baseOverlayDirName = "base"
+
 // appendKustomizeIntegration creates a Kustomize GitOps based directory structure for the chosen Integration.
 func appendKustomizeIntegration(dstIt *v1.Integration, destinationDir string) error {
 	namespaceDest := dstIt.Namespace
@@ -433,7 +463,7 @@ func appendKustomizeIntegration(dstIt *v1.Integration, destinationDir string) er
 		}
 	}
 
-	newpath = filepath.Join(destinationDir, appFolderName, "base")
+	newpath = filepath.Join(destinationDir, appFolderName, baseOverlayDirName)
 	err = os.MkdirAll(newpath, io.FilePerm755)
 	if err != nil {
 		return err
@@ -548,7 +578,7 @@ func appendKustomizePipe(dstPipe *v1.Pipe, destinationDir string) error {
 	}
 	appFolderName := strings.ToLower(basePipe.Name)
 
-	newpath := filepath.Join(destinationDir, appFolderName, "base")
+	newpath := filepath.Join(destinationDir, appFolderName, baseOverlayDirName)
 	err := os.MkdirAll(newpath, io.FilePerm755)
 	if err != nil {
 		return err
@@ -641,4 +671,302 @@ func isPipeTraitPatch(keyAnnotation string) bool {
 	}
 
 	return false
+}
+
+func pushGitOpsDirAndOpenPr(promotionName, destinationDir, printName string, cmd *cobra.Command) error {
+	appFolderName := strings.ToLower(promotionName)
+	basePath := filepath.Join(destinationDir, appFolderName, baseOverlayDirName)
+	if _, err := os.Stat(basePath); err != nil {
+		return err
+	}
+
+	repo, worktree, err := getGitRepoAndWorktree(basePath)
+	if err != nil {
+		return err
+	}
+
+	// Stage changed files in the base overlay directory and detect whether the files are updated or created
+	detectedFileChanges, containsNewFiles, err := stageChangedFiles(worktree, appFolderName)
+	if err != nil {
+		return err
+	}
+	if !detectedFileChanges {
+		_, err = fmt.Fprintln(cmd.OutOrStdout(), `GitOps export for "`+promotionName+`" is already up to date`)
+		return err
+	}
+
+	// Validate current HEAD reference is a branch
+	if err = validateHeadReference(repo, destinationDir); err != nil {
+		return err
+	}
+
+	// Create and checkout a new git branch used for the GitOps export
+	var prBranch string   // the branch where we push changes
+	var baseBranch string // target branch
+	// reference won't be found for example if there is no initial commit and the git repo is on the default branch
+	headRef, err := repo.Head()
+	headRefNotAvailable := err != nil
+	if !headRefNotAvailable {
+		baseBranch = headRef.Name().Short()
+		prBranch, err = createBranchForGitOpsExportPush(worktree)
+		if err != nil {
+			return err
+		}
+	}
+
+	if err = commitGitChanges(containsNewFiles, worktree, cmd, printName); err != nil {
+		return err
+	}
+
+	if headRefNotAvailable {
+		// we had to defer the creating of a new branch until there was initial commit
+		prBranch, err = createBranchForGitOpsExportPush(worktree)
+		if err != nil {
+			return err
+		}
+		if headRef, err = repo.Head(); err != nil {
+			return err
+		} else {
+			baseBranch = headRef.Name().Short()
+		}
+	}
+
+	remote, err := findTargetRepoRemote(repo, cmd)
+	if err != nil || remote == nil {
+		return err
+	}
+
+	if err = pushGitCommit(remote, repo, prBranch); err != nil {
+		return err
+	}
+
+	return createGitHubPr(remote, cmd, containsNewFiles, printName, baseBranch, prBranch)
+}
+
+func createBranchForGitOpsExportPush(worktree *git.Worktree) (string, error) {
+	newBranch := fmt.Sprintf("camel-k-gitops-export-%d", time.Now().UnixNano())
+	err := worktree.Checkout(&git.CheckoutOptions{
+		Branch: plumbing.NewBranchReferenceName(newBranch),
+		Create: true,
+		Keep:   true,
+	})
+	return newBranch, err
+}
+
+func commitGitChanges(containsNewFiles bool, worktree *git.Worktree, cmd *cobra.Command, printName string) error {
+	var commitMsg string
+	if containsNewFiles {
+		commitMsg = fmt.Sprintf("chore: add GitOps base overlay for %s\n\nGenerated by Camel K promote command", printName)
+	} else {
+		commitMsg = fmt.Sprintf("chore: update GitOps base overlay for %s\n\nGenerated by Camel K promote command", printName)
+	}
+	_, err := worktree.Commit(commitMsg, &git.CommitOptions{
+		AllowEmptyCommits: false,
+		Author: &object.Signature{
+			Name: "Camel K",
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("failed to commit git changes: %w", err)
+	}
+	_, err = fmt.Fprintln(cmd.OutOrStdout(), "Created git commit with the GitOps base overlay")
+	return err
+}
+
+func findTargetRepoRemote(repo *git.Repository, cmd *cobra.Command) (*git.Remote, error) {
+	var remote *git.Remote
+	remotes, err := repo.Remotes()
+	if err != nil {
+		err = fmt.Errorf("failed to get git remotes: %w", err)
+	} else {
+		for _, thatRemote := range remotes {
+			// prefer the "origin" remote, but fallback to any remote
+			if remote == nil || thatRemote.Config().Name == "origin" {
+				remote = thatRemote
+			}
+		}
+		if remote == nil {
+			_, err = fmt.Fprintln(cmd.OutOrStdout(), "Cannot push changes to git: no git remote configured")
+		}
+	}
+	return remote, err
+}
+
+func validateHeadReference(repo *git.Repository, destinationDir string) error {
+	headRef, err := repo.Storer.Reference(plumbing.HEAD)
+	if err != nil {
+		return fmt.Errorf("cannot determine current git branch: %w", err)
+	}
+	if !headRef.Target().IsBranch() {
+		return fmt.Errorf(`git repository "%s" HEAD must be a branch, but is: %s`, destinationDir, headRef.Target())
+	}
+	return nil
+}
+
+func stageChangedFiles(worktree *git.Worktree, appFolderName string) (bool, bool, error) {
+	var containsNewFiles, detectedFileChanges bool
+	status, err := worktree.Status()
+	if err != nil {
+		err = fmt.Errorf("failed to get git status: %w", err)
+	} else {
+		baseSubPath := filepath.Join(appFolderName, baseOverlayDirName)
+		for file, fileStatus := range status {
+			if strings.Contains(file, baseSubPath) && (fileStatus.Worktree == git.Untracked || fileStatus.Worktree == git.Modified) {
+				if _, err = worktree.Add(file); err != nil {
+					err = fmt.Errorf(`failed to add file "%s" to git repository: %w`, file, err)
+					return false, false, err
+				}
+				if fileStatus.Worktree == git.Untracked {
+					containsNewFiles = true
+				}
+				detectedFileChanges = true
+			}
+		}
+	}
+	return detectedFileChanges, containsNewFiles, err
+}
+
+func getGitRepoAndWorktree(basePath string) (*git.Repository, *git.Worktree, error) {
+	var worktree *git.Worktree
+	repo, err := git.PlainOpenWithOptions(basePath, &git.PlainOpenOptions{
+		DetectDotGit: true,
+	})
+	if err != nil {
+		err = errors.New(`failed to open git repository at path "` + basePath + `": ` + err.Error())
+	} else {
+		worktree, err = repo.Worktree()
+		if err != nil {
+			err = fmt.Errorf("failed to get git worktree: %w", err)
+		}
+	}
+	return repo, worktree, err
+}
+
+func createGitHubPr(remote *git.Remote, cmd *cobra.Command, containsNewFiles bool, printName string, baseBranch string,
+	prBranch string) error {
+	owner, repoName, err := parseGitHubURL(remote)
+	if err != nil {
+		fmt.Fprintf(cmd.OutOrStderr(), "Warning: Could not create GitHub PR: %v\n", err)
+		return nil
+	}
+	gitHubClient, err := newGitHubClient(cmd.Context())
+	if err != nil {
+		fmt.Fprintf(cmd.OutOrStderr(), "Warning: Could not create GitHub PR: %v\n", err)
+		return nil
+	}
+
+	var prTitle string
+	var prBody string
+	if containsNewFiles {
+		prTitle = fmt.Sprintf("chore: add GitOps base overlay for %s", printName)
+		prBody = fmt.Sprintf("Adds GitOps base overlay for %s. Generated by Camel K promote command.", printName)
+	} else {
+		prTitle = fmt.Sprintf("chore: update GitOps base overlay for %s", printName)
+		prBody = fmt.Sprintf("Updates GitOps base overlay for %s. Generated by Camel K promote command.", printName)
+	}
+	newPR := &github.NewPullRequest{
+		Title:               github.Ptr(prTitle),
+		Head:                github.Ptr(prBranch),
+		Base:                github.Ptr(baseBranch),
+		Body:                github.Ptr(prBody),
+		MaintainerCanModify: github.Ptr(true),
+	}
+
+	pr, _, err := gitHubClient.PullRequests.Create(cmd.Context(), owner, repoName, newPR)
+	if err != nil {
+		return fmt.Errorf("cannot create a new GitHub PR: %w", err)
+	}
+	_, err = fmt.Fprintf(cmd.OutOrStdout(), "Created GitHub PR with the base overlay from exported GitOps directory: %s\n", pr.GetHTMLURL())
+	return err
+}
+
+func parseGitHubURL(remote *git.Remote) (string, string, error) {
+	repoURL := remote.Config().URLs[0]
+	if !strings.Contains(repoURL, "github.com") {
+		return "", "", fmt.Errorf("automatic PR creation requires a GitHub repository, but found: %s", repoURL)
+	}
+	if hasHTTPSGitURLFormat(repoURL) {
+		parsedURL, err := url.Parse(repoURL)
+		if err != nil {
+			return "", "", fmt.Errorf("failed to parse HTTPS URL: %w", err)
+		}
+		parts := strings.Split(strings.Trim(parsedURL.Path, "/"), "/")
+		if len(parts) < 2 {
+			return "", "", fmt.Errorf("invalid GitHub HTTPS URL format: %s", repoURL)
+		}
+		return parts[0], strings.TrimSuffix(parts[1], ".git"), nil
+	}
+	if hasSSHGitURLFormat(repoURL) {
+		pathParts := strings.SplitN(repoURL, ":", 2)
+		if len(pathParts) < 2 {
+			return "", "", fmt.Errorf("invalid GitHub SSH URL format: %s", repoURL)
+		}
+
+		cleanPath := strings.TrimSuffix(path.Clean(pathParts[1]), ".git")
+		parts := strings.Split(cleanPath, "/")
+		if len(parts) < 2 {
+			return "", "", fmt.Errorf("invalid GitHub SSH URL path: %s", cleanPath)
+		}
+		return parts[0], parts[1], nil
+	}
+	return "", "", fmt.Errorf("unsupported remote URL format: %s", repoURL)
+}
+
+func newGitHubClient(ctx context.Context) (*github.Client, error) {
+	if token, ok := os.LookupEnv("GITHUB_TOKEN"); ok {
+		httpClient := &netHttp.Client{}
+		ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
+		ctx := context.WithValue(ctx, oauth2.HTTPClient, httpClient)
+		httpClient = oauth2.NewClient(ctx, ts)
+		return github.NewClient(httpClient), nil
+	}
+	return nil, errors.New(`cannot create GitHub PR, because the "GITHUB_TOKEN" environment variable is not set`)
+}
+
+func hasSSHGitURLFormat(repoURL string) bool {
+	return strings.HasPrefix(repoURL, "git@")
+}
+
+func hasHTTPSGitURLFormat(repoURL string) bool {
+	return strings.HasPrefix(repoURL, "https://")
+}
+
+func pushGitCommit(remote *git.Remote, repo *git.Repository, prBranch string) error {
+	var auth transport.AuthMethod
+	var err error
+	if hasSSHGitURLFormat(remote.Config().URLs[0]) {
+		if keyPath := os.Getenv("KAMEL_SSH_KEY_PATH"); keyPath != "" {
+			auth, err = ssh.NewPublicKeysFromFile("git", keyPath, os.Getenv("KAMEL_SSH_KEY_PASSPHRASE"))
+			if err != nil {
+				return fmt.Errorf(`failed to load SSH key from "%s": %w`, keyPath, err)
+			}
+		} else {
+			// if there are multiple SSH keys, there is no guarantee which key is used
+			auth, err = ssh.NewSSHAgentAuth("git")
+			if err != nil {
+				return fmt.Errorf("failed to create git SSH agent: %w", err)
+			}
+		}
+	} else if hasHTTPSGitURLFormat(remote.Config().URLs[0]) {
+		if token := os.Getenv("GITHUB_TOKEN"); token != "" {
+			auth = &http.BasicAuth{
+				Username: "camel-k", // this can be anything except an empty string
+				Password: token,
+			}
+		} else {
+			return fmt.Errorf("HTTPS git push requires GITHUB_TOKEN environment variable")
+		}
+	}
+
+	err = repo.Push(&git.PushOptions{
+		RemoteName: remote.Config().Name,
+		Auth:       auth,
+		RefSpecs: []config.RefSpec{
+			config.RefSpec(fmt.Sprintf("+%s:%s", plumbing.NewBranchReferenceName(prBranch), plumbing.NewBranchReferenceName(prBranch))),
+		},
+	})
+	if err != nil {
+		err = fmt.Errorf(`failed to push branch "%s" to remote "%s": %w`, prBranch, remote.Config().Name, err)
+	}
+	return err
 }
