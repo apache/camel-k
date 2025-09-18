@@ -100,7 +100,6 @@ func TestIntegrationDryRun(t *testing.T) {
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:
-  creationTimestamp: null
   name: my-it-test
   namespace: prod-namespace
 spec:
@@ -160,7 +159,6 @@ metadata:
     trait.camel.apache.org/camel.runtime-version: 1.2.3
     trait.camel.apache.org/container.image: my-special-image
     trait.camel.apache.org/jvm.classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
-  creationTimestamp: null
   name: my-pipe-test
   namespace: prod-namespace
 spec:
@@ -211,7 +209,6 @@ kind: Integration
 metadata:
   annotations:
     my-annotation: my-value
-  creationTimestamp: null
   labels:
     my-label: my-value
   name: my-it-test
@@ -261,7 +258,6 @@ metadata:
     trait.camel.apache.org/camel.runtime-version: 1.2.3
     trait.camel.apache.org/container.image: my-special-image
     trait.camel.apache.org/jvm.classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
-  creationTimestamp: null
   labels:
     my-label: my-value
   name: my-pipe-test
@@ -335,7 +331,6 @@ kind: Integration
 metadata:
   annotations:
     camel.apache.org/operator.id: my-prod-operator
-  creationTimestamp: null
   name: my-it-test
   namespace: prod
 spec:
@@ -361,7 +356,6 @@ kind: Integration
 metadata:
   annotations:
     camel.apache.org/operator.id: my-prod-operator
-  creationTimestamp: null
   name: my-it-test
   namespace: prod
 spec:
@@ -403,7 +397,6 @@ func TestIntegrationWithSavedTraitsDryRun(t *testing.T) {
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:
-  creationTimestamp: null
   name: my-it-test
   namespace: prod-namespace
 spec:
@@ -453,7 +446,6 @@ metadata:
     trait.camel.apache.org/camel.runtime-version: 1.2.3
     trait.camel.apache.org/container.image: my-special-image
     trait.camel.apache.org/jvm.classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
-  creationTimestamp: null
   labels:
     my-label: my-value
   name: my-pipe-test
@@ -468,7 +460,6 @@ status: {}
 const expectedGitOpsIt = `apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:
-  creationTimestamp: null
   name: my-it-test
 spec:
   traits:
@@ -513,7 +504,6 @@ status: {}
 const expectedGitOpsItPatch = `apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:
-  creationTimestamp: null
   name: my-it-test
 spec:
   traits:
@@ -632,7 +622,6 @@ metadata:
     trait.camel.apache.org/mount.resources: '[configmap:my-cm,secret:my-sec/my-key@/tmp/file.txt]'
     trait.camel.apache.org/service.auto: "false"
     trait.camel.apache.org/toleration.taints: '[mytaints:true]'
-  creationTimestamp: null
   labels:
     my-label: my-value
   name: my-pipe-test
@@ -657,7 +646,6 @@ metadata:
     trait.camel.apache.org/jvm.options: '[-XMX 123]'
     trait.camel.apache.org/mount.resources: '[configmap:my-cm,secret:my-sec/my-key@/tmp/file.txt]'
     trait.camel.apache.org/toleration.taints: '[mytaints:true]'
-  creationTimestamp: null
   name: my-pipe-test
 spec:
   sink: {}

@@ -604,7 +604,6 @@ kind: Integration
 metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
-  creationTimestamp: null
   name: %s
 spec:
   sources:
@@ -639,7 +638,6 @@ kind: Integration
 metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
-  creationTimestamp: null
   name: %s
 spec:
   sources:
@@ -947,7 +945,6 @@ kind: Integration
 metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
-  creationTimestamp: null
   name: my-app-v1
 spec:
   traits:
@@ -971,7 +968,6 @@ kind: Integration
 metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
-  creationTimestamp: null
   name: my-it
 spec:
   git:
@@ -992,7 +988,6 @@ kind: Integration
 metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
-  creationTimestamp: null
   name: my-it
 spec:
   git:
@@ -1014,7 +1009,6 @@ kind: Integration
 metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
-  creationTimestamp: null
   name: my-it
 spec:
   git:
@@ -1036,7 +1030,6 @@ kind: Integration
 metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
-  creationTimestamp: null
   name: my-it
 spec:
   git:

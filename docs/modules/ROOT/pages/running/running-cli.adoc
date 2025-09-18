@@ -100,7 +100,6 @@ kind: Integration
 metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
-  creationTimestamp: null
   name: test
 spec:
   flows:

@@ -29,9 +29,9 @@ LAST_RELEASED_IMAGE_NAME := camel-k-operator
 LAST_RELEASED_VERSION ?= 2.7.0
 DEFAULT_RUNTIME_VERSION := 3.15.3
 # Kubernetes tooling
-CONTROLLER_GEN_VERSION := v0.17.2
+CONTROLLER_GEN_VERSION := v0.19.0
 CONTROLLER_GEN=$(GOBIN)/controller-gen
-CODEGEN_VERSION := v0.32.3
+CODEGEN_VERSION := v0.34.1
 OPERATOR_SDK_VERSION := v1.30.0
 KUSTOMIZE_VERSION := v4.5.4
 OPM_VERSION := v1.24.0
@@ -242,10 +242,7 @@ build-platform: build build-kamel-platform
 
 ci-build: clean codegen set-version check-licenses dir-licenses build-kamel cross-compile
 
-check_jdk_version:
-	@go run ./cmd/util/check_jdk_version
-
-do-build: gotestfmt-install check_jdk_version
+do-build: gotestfmt-install
 ifeq ($(DO_TEST_PREBUILD),true)
 TEST_PREBUILD = build
 else

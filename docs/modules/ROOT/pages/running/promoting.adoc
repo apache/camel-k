@@ -107,7 +107,6 @@ $ cat /tmp/integrations/promote-server/overlays/production/patch-integration.yam
 apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:
-  creationTimestamp: null
   name: promote-server
 spec:
   traits:

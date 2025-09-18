@@ -68,7 +68,6 @@ metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
     trait.camel.apache.org/camel.runtime-version: 3.6.0
-  creationTimestamp: null
   name: timer-source-to-log-sink
   namespace: camel-k
 spec:
