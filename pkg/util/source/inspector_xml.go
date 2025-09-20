@@ -49,8 +49,7 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 
 		if se, ok := t.(xml.StartElement); ok {
 			switch se.Name.Local {
-			//nolint: goconst
-			case "rest", "restConfiguration":
+			case rest, "restConfiguration":
 				meta.ExposesHTTPServices = true
 				meta.RequiredCapabilities.Add(v1.CapabilityRest)
 			case "openApi":

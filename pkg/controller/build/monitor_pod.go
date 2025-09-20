@@ -48,6 +48,7 @@ func newMonitorPodAction(reader ctrl.Reader) Action {
 
 type monitorPodAction struct {
 	baseAction
+
 	reader ctrl.Reader
 }
 

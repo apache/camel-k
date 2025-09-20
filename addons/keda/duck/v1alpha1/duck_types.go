@@ -79,7 +79,8 @@ type ScaledObjectAuthRef struct {
 type ScaledObjectList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []ScaledObject `json:"items"`
+
+	Items []ScaledObject `json:"items"`
 }
 
 // +genclient
@@ -114,5 +115,6 @@ type AuthSecretTargetRef struct {
 type TriggerAuthenticationList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata"`
-	Items           []TriggerAuthentication `json:"items"`
+
+	Items []TriggerAuthentication `json:"items"`
 }

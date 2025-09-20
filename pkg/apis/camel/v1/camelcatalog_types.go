@@ -54,7 +54,8 @@ type CamelCatalog struct {
 type CamelCatalogList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []CamelCatalog `json:"items"`
+
+	Items []CamelCatalog `json:"items"`
 }
 
 // CamelCatalogSpec specify what features a Camel runtime provides.
@@ -147,6 +148,7 @@ type CamelArtifactExclusion struct {
 type CamelArtifactDependency struct {
 	// the maven dependency
 	MavenArtifact `json:",inline" yaml:",inline"`
+
 	// provide a list of artifacts to exclude for this dependency
 	Exclusions []CamelArtifactExclusion `json:"exclusions,omitempty" yaml:"exclusions,omitempty"`
 }
@@ -155,6 +157,7 @@ type CamelArtifactDependency struct {
 type CamelArtifact struct {
 	// Base Camel Artifact dependency
 	CamelArtifactDependency `json:",inline" yaml:",inline"`
+
 	// accepted URI schemes
 	Schemes []CamelScheme `json:"schemes,omitempty" yaml:"schemes,omitempty"`
 	// accepted languages
@@ -171,6 +174,7 @@ type CamelArtifact struct {
 type CamelLoader struct {
 	// the base Maven artifact required
 	MavenArtifact `json:",inline" yaml:",inline"`
+
 	// a list of DSLs supported
 	Languages []string `json:"languages,omitempty" yaml:"languages,omitempty"`
 	// a list of additional dependencies required beside the base one

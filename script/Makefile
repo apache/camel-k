@@ -40,7 +40,7 @@ LINTER ?= $(LOCALBIN)/golangci-lint
 DEADCODE ?= $(LOCALBIN)/deadcode
 GOVULNCHECK ?= $(LOCALBIN)/govulncheck
 GOIMPORT ?= $(LOCALBIN)/goimports
-LINTER_VERSION ?= v1.64.5
+LINTER_VERSION ?= v2.4.0
 GOVULNCHECK_VERSION ?= latest
 LINT_GOGC ?= 20
 LINT_DEADLINE ?= 10m
@@ -403,11 +403,11 @@ check: lint vuln
 
 .PHONY: lint
 lint: golangci-lint
-	GOGC=$(LINT_GOGC) $(LINTER) run --config .golangci.yml --out-format colored-tab --timeout $(LINT_DEADLINE) --verbose
+	GOGC=$(LINT_GOGC) $(LINTER) run --config .golangci.yml --timeout $(LINT_DEADLINE) --verbose
 
 .PHONY: lint-fix
 lint-fix: golangci-lint
-	GOGC=$(LINT_GOGC) $(LINTER) run --config .golangci.yml --out-format colored-tab --timeout $(LINT_DEADLINE) --fix
+	GOGC=$(LINT_GOGC) $(LINTER) run --config .golangci.yml --timeout $(LINT_DEADLINE) --fix
 
 .PHONY: vuln
 vuln: govulncheck
@@ -737,7 +737,7 @@ $(LOCALBIN):
 
 .PHONY: golangci-lint
 golangci-lint:
-	GOBIN=$(LOCALBIN) go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(LINTER_VERSION)
+	GOBIN=$(LOCALBIN) go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(LINTER_VERSION)
 
 .PHONY: govulncheck
 govulncheck:

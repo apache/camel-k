@@ -409,7 +409,7 @@ func NewSpecTraitsOptionsForIntegrationAndPlatform(
 	// IMPORTANT: when we remove this we'll need to remove the client.Client from the func,
 	// which will bring to more cascade removal. It had to be introduced to support the deprecated feature
 	// in a properly manner (ie, comparing the spec.traits with annotations in a proper way).
-	return newTraitsOptions(c, options, i.ObjectMeta.Annotations)
+	return newTraitsOptions(c, options, i.Annotations)
 }
 
 func NewSpecTraitsOptionsForIntegration(c client.Client, i *v1.Integration) (Options, error) {
@@ -422,7 +422,7 @@ func NewSpecTraitsOptionsForIntegration(c client.Client, i *v1.Integration) (Opt
 	// IMPORTANT: when we remove this we'll need to remove the client.Client from the func,
 	// which will bring to more cascade removal. It had to be introduced to support the deprecated feature
 	// in a properly manner (ie, comparing the spec.traits with annotations in a proper way).
-	return newTraitsOptions(c, m1, i.ObjectMeta.Annotations)
+	return newTraitsOptions(c, m1, i.Annotations)
 }
 
 func newTraitsOptionsForIntegrationKit(c client.Client, i *v1.IntegrationKit, traits v1.IntegrationKitTraits) (Options, error) {
@@ -435,7 +435,7 @@ func newTraitsOptionsForIntegrationKit(c client.Client, i *v1.IntegrationKit, tr
 	// IMPORTANT: when we remove this we'll need to remove the client.Client from the func,
 	// which will bring to more cascade removal. It had to be introduced to support the deprecated feature
 	// in a properly manner (ie, comparing the spec.traits with annotations in a proper way).
-	return newTraitsOptions(c, m1, i.ObjectMeta.Annotations)
+	return newTraitsOptions(c, m1, i.Annotations)
 }
 
 func NewSpecTraitsOptionsForIntegrationKit(c client.Client, i *v1.IntegrationKit) (Options, error) {
@@ -445,7 +445,7 @@ func NewSpecTraitsOptionsForIntegrationKit(c client.Client, i *v1.IntegrationKit
 func NewTraitsOptionsForPipe(c client.Client, pipe *v1.Pipe) (Options, error) {
 	options := Options{}
 
-	return newTraitsOptions(c, options, pipe.ObjectMeta.Annotations)
+	return newTraitsOptions(c, options, pipe.Annotations)
 }
 
 // HasMatchingTraits verifies if two traits options match.

@@ -141,9 +141,10 @@ func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 func filterMetaItems(meta metadata.IntegrationMetadata, cst knativeapi.CamelServiceType, uriType string) []string {
 	items := make([]string, 0)
 	var uris []string
-	if uriType == "from" {
+	switch uriType {
+	case "from":
 		uris = meta.FromURIs
-	} else if uriType == "to" {
+	case "to":
 		uris = meta.ToURIs
 	}
 	items = append(items, knativeutil.FilterURIs(uris, cst)...)

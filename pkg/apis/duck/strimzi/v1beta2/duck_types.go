@@ -40,7 +40,8 @@ const (
 type KafkaTopic struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Status            KafkaTopicStatus `json:"status,omitempty"`
+
+	Status KafkaTopicStatus `json:"status,omitempty"`
 }
 
 // KafkaTopicStatus is the duck of a KafkaTopic status.
@@ -54,7 +55,8 @@ type KafkaTopicStatus struct {
 type KafkaTopicList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []KafkaTopic `json:"items"`
+
+	Items []KafkaTopic `json:"items"`
 }
 
 // +genclient
@@ -87,5 +89,6 @@ type KafkaStatusListener struct {
 type KafkaList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Kafka `json:"items"`
+
+	Items []Kafka `json:"items"`
 }

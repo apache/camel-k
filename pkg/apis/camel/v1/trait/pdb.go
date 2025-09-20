@@ -22,6 +22,7 @@ package trait
 // +camel-k:trait=pdb.
 type PDBTrait struct {
 	Trait `property:",squash" json:",inline"`
+
 	// The number of pods for the Integration that must still be available after an eviction.
 	// It can be either an absolute number or a percentage.
 	// Only one of `min-available` and `max-unavailable` can be specified.

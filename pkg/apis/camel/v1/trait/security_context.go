@@ -24,6 +24,7 @@ import corev1 "k8s.io/api/core/v1"
 // +camel-k:trait=security-context.
 type SecurityContextTrait struct {
 	PlatformBaseTrait `property:",squash" json:",inline"`
+
 	// Security Context RunAsUser configuration (default none): this value is automatically retrieved in Openshift clusters when not explicitly set.
 	RunAsUser *int64 `property:"run-as-user" json:"runAsUser,omitempty"`
 	// Security Context RunAsNonRoot configuration (default false).

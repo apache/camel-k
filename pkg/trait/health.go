@@ -191,7 +191,7 @@ func (t *healthTrait) newLivenessProbe(port *intstr.IntOrString, path string) *c
 	}
 
 	if port != nil {
-		p.ProbeHandler.HTTPGet.Port = *port
+		p.HTTPGet.Port = *port
 	}
 
 	return &p
@@ -213,7 +213,7 @@ func (t *healthTrait) newReadinessProbe(port *intstr.IntOrString, path string) *
 	}
 
 	if port != nil {
-		p.ProbeHandler.HTTPGet.Port = *port
+		p.HTTPGet.Port = *port
 	}
 
 	return &p
@@ -235,7 +235,7 @@ func (t *healthTrait) newStartupProbe(port *intstr.IntOrString, path string) *co
 	}
 
 	if port != nil {
-		p.ProbeHandler.HTTPGet.Port = *port
+		p.HTTPGet.Port = *port
 	}
 
 	return &p

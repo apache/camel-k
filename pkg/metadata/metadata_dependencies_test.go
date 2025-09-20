@@ -474,7 +474,7 @@ func TestXMLRestDependency(t *testing.T) {
 		},
 		meta.Dependencies.List())
 
-	assert.True(t, meta.RequiredCapabilities.Has("rest"))
+	assert.True(t, meta.RequiredCapabilities.Has(v1.CapabilityRest))
 }
 
 func TestXMLLanguageDependencies(t *testing.T) {
@@ -604,7 +604,7 @@ func TestYAMLRestDependency(t *testing.T) {
 		},
 		meta.Dependencies.List())
 
-	assert.True(t, meta.RequiredCapabilities.Has("rest"))
+	assert.True(t, meta.RequiredCapabilities.Has(v1.CapabilityRest))
 }
 
 func TestYAMLCircuitBreakerDependency(t *testing.T) {

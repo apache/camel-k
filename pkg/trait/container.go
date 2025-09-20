@@ -63,7 +63,8 @@ const (
 type containerTrait struct {
 	BasePlatformTrait
 	traitv1.ContainerTrait `property:",squash"`
-	containerPorts         []containerPort
+
+	containerPorts []containerPort
 }
 
 // containerPort is supporting port parsing.
@@ -185,7 +186,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 				envvar.SetVar(&container.Env, env)
 			}
 		}
-		containers = &service.Spec.ConfigurationSpec.Template.Spec.Containers
+		containers = &service.Spec.Template.Spec.Containers
 		visited = true
 		knative = true
 		return nil

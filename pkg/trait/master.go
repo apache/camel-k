@@ -36,7 +36,8 @@ import (
 
 type masterTrait struct {
 	BaseTrait
-	traitv1.MasterTrait  `property:",squash"`
+	traitv1.MasterTrait `property:",squash"`
+
 	delegateDependencies []string
 }
 

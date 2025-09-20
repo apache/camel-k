@@ -56,6 +56,7 @@ func newKitGetCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kitGetComman
 
 type kitGetCommandOptions struct {
 	*RootCmdOptions
+
 	User     bool `mapstructure:"user"`
 	External bool `mapstructure:"external"`
 	Platform bool `mapstructure:"platform"`

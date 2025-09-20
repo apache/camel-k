@@ -138,7 +138,7 @@ func (c *Collection) GetDeploymentForIntegration(integration *v1.Integration) *a
 	}
 
 	return c.GetDeployment(func(d *appsv1.Deployment) bool {
-		return d.ObjectMeta.Labels[v1.IntegrationLabel] == integration.Name
+		return d.Labels[v1.IntegrationLabel] == integration.Name
 	})
 }
 
@@ -251,9 +251,9 @@ func (c *Collection) GetUserServiceForIntegration(integration *v1.Integration) *
 		return nil
 	}
 	return c.GetService(func(s *corev1.Service) bool {
-		return s.ObjectMeta.Labels != nil &&
-			s.ObjectMeta.Labels[v1.IntegrationLabel] == integration.Name &&
-			s.ObjectMeta.Labels["camel.apache.org/service.type"] == v1.ServiceTypeUser
+		return s.Labels != nil &&
+			s.Labels[v1.IntegrationLabel] == integration.Name &&
+			s.Labels["camel.apache.org/service.type"] == v1.ServiceTypeUser
 	})
 }
 
@@ -263,7 +263,7 @@ func (c *Collection) GetServiceForIntegration(integration *v1.Integration) *core
 		return nil
 	}
 	return c.GetService(func(s *corev1.Service) bool {
-		return s.ObjectMeta.Labels != nil && s.ObjectMeta.Labels[v1.IntegrationLabel] == integration.Name
+		return s.Labels != nil && s.Labels[v1.IntegrationLabel] == integration.Name
 	})
 }
 
