@@ -27,6 +27,7 @@ import networkingv1 "k8s.io/api/networking/v1"
 // +camel-k:trait=ingress.
 type IngressTrait struct {
 	Trait `property:",squash" json:",inline"`
+
 	// The Ingress class name as defined by the Ingress spec
 	// See https://kubernetes.io/docs/concepts/services-networking/ingress/
 	IngressClassName string `property:"ingress-class-name" json:"ingressClassName,omitempty"`

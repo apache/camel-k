@@ -186,7 +186,7 @@ func applyKamelets(ctx context.Context, c client.Client, platform *v1.Integratio
 		if err != nil {
 			return err
 		}
-		if !(strings.HasSuffix(f.Name(), ".yaml") || strings.HasSuffix(f.Name(), ".yml")) {
+		if !strings.HasSuffix(f.Name(), ".yaml") && !strings.HasSuffix(f.Name(), ".yml") {
 			return nil
 		}
 		kamelet, err := loadKamelet(filepath.Join(dir, f.Name()), platform)

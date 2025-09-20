@@ -450,6 +450,7 @@ func (rt RuntimeProvider) IsQuarkusBased() bool {
 type SourceSpec struct {
 	// contains configuration related to the source code
 	DataSpec `json:",inline"`
+
 	// specify which is the language (Camel DSL) used to interpret this source code
 	Language Language `json:"language,omitempty"`
 	// Loader is an optional id of the org.apache.camel.k.RoutesLoader that will

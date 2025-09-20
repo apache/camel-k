@@ -1,6 +1,6 @@
 module github.com/apache/camel-k/v2
 
-go 1.24.6
+go 1.25.1
 
 require (
 	dario.cat/mergo v1.0.2

@@ -92,7 +92,7 @@ func integrationUpdateFunc(c client.Client, old *v1.Integration, it *v1.Integrat
 	previous := old.Status.GetCondition(v1.IntegrationConditionReady)
 	next := it.Status.GetCondition(v1.IntegrationConditionReady)
 	if isIntegrationUpdated(it, previous, next) {
-		duration := next.FirstTruthyTime.Time.Sub(it.Status.InitializationTimestamp.Time)
+		duration := next.FirstTruthyTime.Sub(it.Status.InitializationTimestamp.Time)
 		Log.WithValues("request-namespace", it.Namespace, "request-name", it.Name, "ready-after", duration.Seconds()).
 			ForIntegration(it).Infof("First readiness after %s", duration)
 		timeToFirstReadiness.Observe(duration.Seconds())

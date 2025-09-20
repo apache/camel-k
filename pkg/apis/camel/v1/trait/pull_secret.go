@@ -31,6 +31,7 @@ package trait
 // +camel-k:trait=pull-secret.
 type PullSecretTrait struct {
 	Trait `property:",squash" json:",inline"`
+
 	// The pull secret name to set on the Pod. If left empty this is automatically taken from the `IntegrationPlatform` registry configuration.
 	SecretName string `property:"secret-name" json:"secretName,omitempty"`
 	// When using a global operator with a shared platform, this enables delegation of the `system:image-puller` cluster role on the operator namespace to the integration service account.

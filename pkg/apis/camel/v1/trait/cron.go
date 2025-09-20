@@ -39,6 +39,7 @@ package trait
 // +camel-k:trait=cron.
 type CronTrait struct {
 	Trait `property:",squash" json:",inline"`
+
 	// The CronJob schedule for the whole integration. If multiple routes are declared, they must have the same schedule for this
 	// mechanism to work correctly.
 	Schedule string `property:"schedule" json:"schedule,omitempty"`

@@ -15,100 +15,89 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-linters-settings:
-  lll:
-    line-length: 170
-  mnd:
-    checks:
-      - argument
-      - case
-      - operation
-      - return
-      - assign
-    ignored-functions:
-      - '^len\.'
-      - '^strings\.SplitN$'
-      - '^matchOrEmpty$'
-      - '^make$'
-    ignored-files:
-      # ignore install files that are part of features being deprecated
-      # such ass install anc the kamel cli
-      #
-      # files are individually listed as if any new file is added or those not listed here are amended
-      # then best practices must be followed
-      - 'pkg/install/cluster.go'
-      - 'pkg/cmd/install.go'
-      - 'pkg/cmd/debug.go'
-      - 'pkg/cmd/describe.go'
-      - 'pkg/cmd/describe_integration.go'
-      - 'pkg/cmd/describe_kamelet.go'
-      - 'pkg/cmd/dump.go'
-      - 'pkg/cmd/get.go'
-      - 'pkg/cmd/install.go'
-      - 'pkg/cmd/log.go'
-      - 'pkg/cmd/kamelet_get.go'
-      - 'pkg/cmd/kit_get.go'
-      - 'pkg/cmd/uninstall.go'
-      - 'pkg/cmd/run_support.go'
-      # seems to be used only by the "kamel cli" command
-      - 'pkg/util/kubernetes/log/pod_scraper.go'
-      - 'pkg/util/indentedwriter/writer.go'
+version: "2"
 run:
   tests: false
-issues:
-  exclude-files:
-    - test_support.go
-  exclude-rules:
-    # Exclude some linters from running on deprecated code.
-    - path: pkg/cmd
-      linters:
-        - nestif
-    - path: pkg/install
-      linters:
-        - nestif
-    - path: pkg/util/olm
-      linters:
-        - nestif
 linters:
-  enable-all: true
+  default: all
   disable:
-    # this linter checks for unnecessary newlines at the start and end of functions, etc.,
-    # however sometimes spaces helps readability
-    - whitespace
-    # this linter checks the struct tags but does not handle struct embedding which causes
-    # a large number of false finding
-    - tagliatelle
-    # this linter reports long lines but since there is no standard way to split then,
-    # then we will disable it for now
-    - lll
-    # this linter enforces a stricter format than gofmt but since it is a non-standard tool,
-    # then we will disable it as it would require yet another tool to install and configure
-    - gofumpt
-    # https://github.com/apache/camel-k/issues/5486
     - cyclop
     - depguard
+    - err113
     - exhaustive
     - exhaustruct
     - forbidigo
+    - funcorder
     - funlen
-    - gci
     - gochecknoglobals
     - gochecknoinits
     - gocognit
     - gocyclo
     - godox
-    - err113
     - ireturn
+    - lll
     - nilnil
     - nlreturn
+    - noinlineerr
     - paralleltest
+    - perfsprint
     - revive
     - tagalign
+    - tagliatelle
     - testpackage
     - varnamelen
+    - whitespace
     - wrapcheck
     - wsl
-    # TODO: too much work at this stage as many files are impacted by the lint suggestions, however the reported
-    #       lint violation make a lot of sense so we should re-enable the lints below and work to fix the findings
-    - perfsprint
-    - tenv  # the functionality provided by 'usetesting'
+    - wsl_v5
+  settings:
+    lll:
+      line-length: 170
+    mnd:
+      checks:
+        - argument
+        - case
+        - operation
+        - return
+        - assign
+      ignored-files:
+        - pkg/cmd/debug.go
+        - pkg/cmd/dump.go
+        - pkg/cmd/get.go
+        - pkg/cmd/log.go
+        - pkg/cmd/kit_get.go
+        - pkg/cmd/run_support.go
+        - pkg/util/kubernetes/log/pod_scraper.go
+        - pkg/util/indentedwriter/writer.go
+      ignored-functions:
+        - ^len\.
+        - ^strings\.SplitN$
+        - ^matchOrEmpty$
+        - ^make$
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - nestif
+        path: pkg/cmd
+    paths:
+      - test_support.go
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - test_support.go
+      - third_party$
+      - builtin$
+      - examples$

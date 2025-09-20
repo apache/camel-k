@@ -23,6 +23,7 @@ package trait
 // +camel-k:trait=builder.
 type BuilderTrait struct {
 	PlatformBaseTrait `property:",squash" json:",inline"`
+
 	// Enable verbose logging on build components that support it (e.g. Kaniko build pod).
 	// Deprecated no longer in use
 	Verbose *bool `property:"verbose" json:"verbose,omitempty"`

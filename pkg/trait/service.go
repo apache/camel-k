@@ -40,7 +40,8 @@ const (
 type serviceTrait struct {
 	BaseTrait
 	traitv1.ServiceTrait `property:",squash"`
-	servicePorts         []servicePort
+
+	servicePorts []servicePort
 }
 
 // servicePort is supporting port parsing.

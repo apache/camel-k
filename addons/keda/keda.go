@@ -78,6 +78,7 @@ const (
 // +camel-k:deprecated=2.5.0.
 type Trait struct {
 	traitv1.Trait `property:",squash" json:",inline"`
+
 	// Enables automatic configuration of the trait. Allows the trait to infer KEDA triggers from the Kamelets.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// Set the spec->replicas field on the top level controller to an explicit value if missing, to allow KEDA to recognize it as a scalable resource.
@@ -281,13 +282,13 @@ func (t *kedaTrait) hackControllerReplicas(e *trait.Environment) error {
 		return err
 	}
 	if ctrlRef.Kind == camelv1.PipeKind {
-		scale.ObjectMeta.Name = ctrlRef.Name
+		scale.Name = ctrlRef.Name
 		_, err = scalesClient.Scales(e.Integration.Namespace).Update(e.Ctx, camelv1.SchemeGroupVersion.WithResource("pipes").GroupResource(), &scale, metav1.UpdateOptions{})
 		if err != nil {
 			return err
 		}
 	} else if e.Integration.Spec.Replicas == nil {
-		scale.ObjectMeta.Name = e.Integration.Name
+		scale.Name = e.Integration.Name
 		_, err = scalesClient.Scales(e.Integration.Namespace).Update(e.Ctx, camelv1.SchemeGroupVersion.WithResource("integrations").GroupResource(), &scale, metav1.UpdateOptions{})
 		if err != nil {
 			return err

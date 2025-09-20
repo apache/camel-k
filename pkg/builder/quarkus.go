@@ -275,7 +275,7 @@ func computeApplicationProperties(appPropertiesPath string, applicationPropertie
 	}
 	// Fill with properties coming from user configuration
 	for k, v := range applicationProperties {
-		if _, err := f.WriteString(fmt.Sprintf("%s=%s\n", k, v)); err != nil {
+		if _, err := fmt.Fprintf(f, "%s=%s\n", k, v); err != nil {
 			return err
 		}
 	}

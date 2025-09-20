@@ -65,6 +65,7 @@ func newCmdVersion(rootCmdOptions *RootCmdOptions) (*cobra.Command, *versionCmdO
 
 type versionCmdOptions struct {
 	*RootCmdOptions
+
 	Operator bool `mapstructure:"operator"`
 	Verbose  bool `mapstructure:"verbose"`
 	All      bool `mapstructure:"all"`
@@ -75,7 +76,7 @@ func (o *versionCmdOptions) preRunE(cmd *cobra.Command, args []string) error {
 		// let the command to work in offline mode
 		cmd.Annotations[offlineCommandLabel] = "true"
 	}
-	return o.RootCmdOptions.preRun(cmd, args)
+	return o.preRun(cmd, args)
 }
 
 func (o *versionCmdOptions) run(cmd *cobra.Command, _ []string) error {
@@ -153,9 +154,9 @@ func operatorInfo(ctx context.Context, c client.Client, namespace string) (map[s
 		return nil, err
 	}
 	if catalog != nil {
-		infos["Camel Quarkus version"] = catalog.CamelCatalogSpec.GetCamelQuarkusVersion()
-		infos["Camel version"] = catalog.CamelCatalogSpec.GetCamelVersion()
-		infos["Quarkus version"] = catalog.CamelCatalogSpec.GetQuarkusVersion()
+		infos["Camel Quarkus version"] = catalog.GetCamelQuarkusVersion()
+		infos["Camel version"] = catalog.GetCamelVersion()
+		infos["Quarkus version"] = catalog.GetQuarkusVersion()
 	}
 
 	return infos, nil

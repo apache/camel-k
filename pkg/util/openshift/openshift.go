@@ -51,12 +51,12 @@ func GetOpenshiftPodSecurityContextRestricted(ctx context.Context, client kubern
 		return nil, fmt.Errorf("failed to get namespace %q: %w", namespace, err)
 	}
 
-	uidRange, ok := ns.ObjectMeta.Annotations["openshift.io/sa.scc.uid-range"]
+	uidRange, ok := ns.Annotations["openshift.io/sa.scc.uid-range"]
 	if !ok {
 		return nil, errors.New("annotation 'openshift.io/sa.scc.uid-range' not found")
 	}
 
-	supplementalGroups, ok := ns.ObjectMeta.Annotations["openshift.io/sa.scc.supplemental-groups"]
+	supplementalGroups, ok := ns.Annotations["openshift.io/sa.scc.supplemental-groups"]
 	if !ok {
 		supplementalGroups = uidRange
 	}
@@ -106,7 +106,7 @@ func GetOpenshiftUser(ctx context.Context, client kubernetes.Interface, namespac
 	if err != nil {
 		return nil, fmt.Errorf("failed to get namespace %q: %w", namespace, err)
 	}
-	uidRange, ok := ns.ObjectMeta.Annotations["openshift.io/sa.scc.uid-range"]
+	uidRange, ok := ns.Annotations["openshift.io/sa.scc.uid-range"]
 	if !ok {
 		return nil, errors.New("annotation 'openshift.io/sa.scc.uid-range' not found")
 	}

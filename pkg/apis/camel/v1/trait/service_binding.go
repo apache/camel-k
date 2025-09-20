@@ -28,6 +28,7 @@ package trait
 // +camel-k:internal.
 type ServiceBindingTrait struct {
 	Trait `property:",squash" json:",inline"`
+
 	// List of Services in the form [[apigroup/]version:]kind:[namespace/]name
 	Services []string `property:"services" json:"services,omitempty"`
 }

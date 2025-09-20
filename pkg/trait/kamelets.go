@@ -333,7 +333,7 @@ func integrationSourceFromKameletSource(e *Environment, kamelet *v1.Kamelet, sou
 
 	source.FromKamelet = true
 
-	if source.DataSpec.ContentRef != "" {
+	if source.ContentRef != "" {
 		return source, nil
 	}
 

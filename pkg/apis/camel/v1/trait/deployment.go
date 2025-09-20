@@ -28,6 +28,7 @@ import (
 // +camel-k:trait=deployment.
 type DeploymentTrait struct {
 	PlatformBaseTrait `property:",squash" json:",inline"`
+
 	// The maximum time in seconds for the deployment to make progress before it
 	// is considered to be failed. It defaults to `60s`.
 	ProgressDeadlineSeconds *int32 `property:"progress-deadline-seconds" json:"progressDeadlineSeconds,omitempty"`

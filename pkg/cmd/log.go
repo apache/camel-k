@@ -56,6 +56,7 @@ func newCmdLog(rootCmdOptions *RootCmdOptions) (*cobra.Command, *logCmdOptions) 
 
 type logCmdOptions struct {
 	*RootCmdOptions
+
 	Tail int64 `mapstructure:"tail"`
 }
 

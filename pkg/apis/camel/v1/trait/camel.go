@@ -22,6 +22,7 @@ package trait
 // +camel-k:trait=camel.
 type CamelTrait struct {
 	PlatformBaseTrait `property:",squash" json:",inline"`
+
 	// The runtime provider to use for the integration. (Default, Camel K Runtime).
 	// +kubebuilder:validation:Enum=quarkus;plain-quarkus
 	RuntimeProvider string `property:"runtime-provider" json:"runtimeProvider,omitempty"`

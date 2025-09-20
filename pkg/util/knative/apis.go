@@ -137,6 +137,7 @@ var (
 // GroupVersionKindResource --.
 type GroupVersionKindResource struct {
 	schema.GroupVersionKind
+
 	Resource string
 }
 

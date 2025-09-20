@@ -49,6 +49,7 @@ func newErrorRecoveryAction() Action {
 
 type errorRecoveryAction struct {
 	baseAction
+
 	backOff backoff.Backoff
 }
 

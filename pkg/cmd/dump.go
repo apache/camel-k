@@ -59,6 +59,7 @@ func newCmdDump(rootCmdOptions *RootCmdOptions) (*cobra.Command, *dumpCmdOptions
 
 type dumpCmdOptions struct {
 	*RootCmdOptions
+
 	LogLines   int  `mapstructure:"logLines"`
 	Compressed bool `mapstructure:"compressed" yaml:",omitempty"`
 }

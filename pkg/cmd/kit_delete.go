@@ -54,6 +54,7 @@ func newKitDeleteCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kitDelete
 
 type kitDeleteCommandOptions struct {
 	*RootCmdOptions
+
 	All bool `mapstructure:"all"`
 }
 

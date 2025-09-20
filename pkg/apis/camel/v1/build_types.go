@@ -93,6 +93,7 @@ type BaseTask struct {
 // BuilderTask is the generic task in charge of building the application image.
 type BuilderTask struct {
 	BaseTask `json:",inline"`
+
 	// the base image layer
 	BaseImage string `json:"baseImage,omitempty"`
 	// the configuration required for the runtime application
@@ -129,6 +130,7 @@ type GitConfigSpec struct {
 type MavenBuildSpec struct {
 	// base Maven specification
 	MavenSpec `json:",inline"`
+
 	// additional repositories
 	Repositories []Repository `json:"repositories,omitempty"`
 	// Servers (auth)
@@ -152,6 +154,7 @@ type PublishTask struct {
 type BuildahTask struct {
 	BaseTask    `json:",inline"`
 	PublishTask `json:",inline"`
+
 	// The platform of build image
 	Platform string `json:"platform,omitempty"`
 	// log more information
@@ -165,6 +168,7 @@ type BuildahTask struct {
 type KanikoTask struct {
 	BaseTask    `json:",inline"`
 	PublishTask `json:",inline"`
+
 	// log more information
 	Verbose *bool `json:"verbose,omitempty"`
 	// use a cache
@@ -199,6 +203,7 @@ type SpectrumTask struct {
 type S2iTask struct {
 	BaseTask    `json:",inline"`
 	PublishTask `json:",inline"`
+
 	// used by the ImageStream
 	Tag string `json:"tag,omitempty"`
 }
@@ -206,6 +211,7 @@ type S2iTask struct {
 // UserTask is used to execute any generic custom operation.
 type UserTask struct {
 	BaseTask `json:",inline"`
+
 	// the container image to use
 	ContainerImage string `json:"image,omitempty"`
 	// the user id used to run the container
@@ -314,7 +320,8 @@ type Build struct {
 type BuildList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Build `json:"items"`
+
+	Items []Build `json:"items"`
 }
 
 // BuildCondition describes the state of a resource at a certain point.

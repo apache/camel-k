@@ -28,6 +28,7 @@ package trait
 // +camel-k:internal.
 type OpenAPITrait struct {
 	PlatformBaseTrait `property:",squash" json:",inline"`
+
 	// The configmaps holding the spec of the OpenAPI (compatible with > 3.0 spec only).
 	Configmaps []string `property:"configmaps" json:"configmaps,omitempty"`
 }

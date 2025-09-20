@@ -33,6 +33,7 @@ package trait
 // +camel-k:trait=toleration.
 type TolerationTrait struct {
 	Trait `property:",squash" json:",inline"`
+
 	// The list of taints to tolerate, in the form `Key[=Value]:Effect[:Seconds]`
 	Taints []string `property:"taints" json:"taints,omitempty"`
 }

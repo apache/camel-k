@@ -25,6 +25,7 @@ package trait
 // +camel-k:trait=affinity.
 type AffinityTrait struct {
 	Trait `property:",squash" json:",inline"`
+
 	// Always co-locates multiple replicas of the integration in the same node (default `false`).
 	PodAffinity *bool `property:"pod-affinity" json:"podAffinity,omitempty"`
 	// Never co-locates multiple replicas of the integration in the same node (default `false`).

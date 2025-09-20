@@ -204,7 +204,7 @@ func listPublishedImages(context *builderContext) ([]v1.IntegrationKitStatus, er
 	}
 
 	list := v1.NewIntegrationKitList()
-	err = context.Client.List(context.C, &list, options...)
+	err = context.List(context.C, &list, options...)
 	if err != nil {
 		return nil, err
 	}

@@ -62,10 +62,10 @@ func (action *buildAction) CanHandle(kit *v1.IntegrationKit) bool {
 }
 
 func (action *buildAction) Handle(ctx context.Context, kit *v1.IntegrationKit) (*v1.IntegrationKit, error) {
-	if kit.Status.Phase == v1.IntegrationKitPhaseBuildSubmitted ||
-		kit.Status.Phase == v1.IntegrationKitPhaseWaitingForCatalog {
+	switch kit.Status.Phase {
+	case v1.IntegrationKitPhaseBuildSubmitted, v1.IntegrationKitPhaseWaitingForCatalog:
 		return action.handleBuildSubmitted(ctx, kit)
-	} else if kit.Status.Phase == v1.IntegrationKitPhaseBuildRunning {
+	case v1.IntegrationKitPhaseBuildRunning:
 		return action.handleBuildRunning(ctx, kit)
 	}
 

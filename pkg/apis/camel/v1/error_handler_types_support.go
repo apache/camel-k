@@ -74,6 +74,7 @@ func (e *ErrorHandlerNone) Configuration() (map[string]interface{}, error) {
 // ErrorHandlerLog represent a default (log) error handler type.
 type ErrorHandlerLog struct {
 	ErrorHandlerNone
+
 	Parameters *ErrorHandlerParameters `json:"parameters,omitempty"`
 }
 
@@ -102,6 +103,7 @@ func (e *ErrorHandlerLog) Configuration() (map[string]interface{}, error) {
 // ErrorHandlerSink represents a sink error handler type which behave like a dead letter channel.
 type ErrorHandlerSink struct {
 	ErrorHandlerLog
+
 	DLCEndpoint *Endpoint `json:"endpoint,omitempty"`
 }
 

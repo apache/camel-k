@@ -129,7 +129,8 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 }
 
 type runCmdOptions struct {
-	*RootCmdOptions    `json:"-"`
+	*RootCmdOptions `json:"-"`
+
 	Compression        bool     `mapstructure:"compression" yaml:",omitempty"`
 	Wait               bool     `mapstructure:"wait" yaml:",omitempty"`
 	Logs               bool     `mapstructure:"logs" yaml:",omitempty"`
@@ -193,6 +194,7 @@ func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	//nolint:goconst
 	if o.OutputFormat != "" {
 		// let the command work in offline mode
 		cmd.Annotations[offlineCommandLabel] = "true"
@@ -405,7 +407,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 				return err
 			}
 
-			integration.ObjectMeta.ResourceVersion = existing.ObjectMeta.ResourceVersion
+			integration.ResourceVersion = existing.ResourceVersion
 		}
 	}
 	if o.Logs || o.Dev {

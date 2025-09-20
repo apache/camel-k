@@ -106,7 +106,7 @@ func (t *initContainersTrait) Apply(e *Environment) error {
 		return err
 	} else if err := e.Resources.VisitKnativeServiceE(func(service *serving.Service) error {
 		// Knative Service
-		initContainers = &service.Spec.ConfigurationSpec.Template.Spec.InitContainers
+		initContainers = &service.Spec.Template.Spec.InitContainers
 		return nil
 	}); err != nil {
 		return err

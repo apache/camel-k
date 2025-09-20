@@ -104,7 +104,7 @@ func (t *ownerTrait) Apply(e *Environment) error {
 	})
 
 	e.Resources.VisitKnativeService(func(service *serving.Service) {
-		t.propagateLabelAndAnnotations(&service.Spec.ConfigurationSpec.Template, targetLabels, targetAnnotations)
+		t.propagateLabelAndAnnotations(&service.Spec.Template, targetLabels, targetAnnotations)
 	})
 
 	return nil

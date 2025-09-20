@@ -34,7 +34,7 @@ func HandleIntegrationStateChanges(ctx context.Context, c client.Client, integra
 	handler func(integration *v1.Integration) bool) (*v1.IntegrationPhase, error) {
 	watcher, err := c.CamelV1().Integrations(integration.Namespace).Watch(ctx, metav1.ListOptions{
 		FieldSelector:   "metadata.name=" + integration.Name,
-		ResourceVersion: integration.ObjectMeta.ResourceVersion,
+		ResourceVersion: integration.ResourceVersion,
 	})
 	if err != nil {
 		return nil, err

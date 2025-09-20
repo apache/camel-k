@@ -295,8 +295,8 @@ func ParseGAV(gav string) (Dependency, error) {
 	}
 	dep.GroupID = res[0]
 	dep.ArtifactID = res[1]
-	switch {
-	case count == 3:
+	switch count {
+	case 3:
 		// gav is: org:artifact:<type:version>
 		numeric := regexp.MustCompile(`\d`)
 		if numeric.MatchString(res[2]) {
@@ -304,11 +304,11 @@ func ParseGAV(gav string) (Dependency, error) {
 		} else {
 			dep.Type = res[2]
 		}
-	case count == 4:
+	case 4:
 		// gav is: org:artifact:type:version
 		dep.Type = res[2]
 		dep.Version = res[3]
-	case count == 5:
+	case 5:
 		// gav is: org:artifact:<type>:<version>:classifier
 		dep.Type = res[2]
 		dep.Version = res[3]

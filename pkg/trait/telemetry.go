@@ -131,13 +131,13 @@ func (t *telemetryTrait) Configure(e *Environment) (bool, *TraitCondition, error
 func (t *telemetryTrait) Apply(e *Environment) error {
 	util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityTelemetry)
 
-	if e.CamelCatalog.CamelCatalogSpec.Runtime.Provider.IsQuarkusBased() {
+	if e.CamelCatalog.Runtime.Provider.IsQuarkusBased() {
 		// Hack for camel-k-runtime >= 3.15.0
 		ck315, err := semver.NewVersion("3.15.0")
 		if err != nil {
 			return err
 		}
-		qv, err := semver.NewVersion(e.CamelCatalog.CamelCatalogSpec.Runtime.Version)
+		qv, err := semver.NewVersion(e.CamelCatalog.Runtime.Version)
 		if err != nil {
 			return err
 		}
@@ -187,7 +187,7 @@ func (t *telemetryTrait) setCatalogConfiguration(e *Environment) {
 
 // Deprecated: to be removed in future release in favor of func setCatalogConfiguration().
 func (t *telemetryTrait) setRuntimeProviderProperties(e *Environment) {
-	provider := e.CamelCatalog.CamelCatalogSpec.Runtime.Provider
+	provider := e.CamelCatalog.Runtime.Provider
 	properties := telemetryProperties[provider]
 	if appPropEnabled := properties[propEnabled]; appPropEnabled != "" {
 		e.ApplicationProperties[appPropEnabled] = boolean.TrueString

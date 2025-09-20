@@ -81,6 +81,7 @@ type Provider struct {
 type defaultClient struct {
 	ctrl.Client
 	kubernetes.Interface
+
 	camel  camel.Interface
 	scheme *runtime.Scheme
 	config *rest.Config

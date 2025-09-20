@@ -101,8 +101,8 @@ func (t *mountTrait) Apply(e *Environment) error {
 
 	// Knative Service
 	if err := e.Resources.VisitKnativeServiceE(func(service *serving.Service) error {
-		volumes = &service.Spec.ConfigurationSpec.Template.Spec.Volumes
-		initContainers = &service.Spec.ConfigurationSpec.Template.Spec.InitContainers
+		volumes = &service.Spec.Template.Spec.Volumes
+		initContainers = &service.Spec.Template.Spec.InitContainers
 		visited = true
 		return nil
 	}); err != nil {
@@ -296,10 +296,8 @@ func (t *mountTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.VolumeM
 	}
 	vol := getVolume(refName, string(conf.StorageType()), conf.Name(), conf.Key(), dstFile)
 	mntPath := getMountPoint(conf.Name(), dstDir, string(conf.StorageType()), string(conf.ContentType()))
-	readOnly := true
-	if conf.StorageType() == utilResource.StorageTypePVC {
-		readOnly = false
-	}
+	readOnly := (conf.StorageType() != utilResource.StorageTypePVC)
+
 	mnt := getMount(refName, mntPath, dstFile, readOnly)
 
 	*vols = append(*vols, *vol)

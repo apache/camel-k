@@ -31,6 +31,7 @@ import (
 // traitMetaDataGen produces YAML documentation about trait descriptions.
 type traitMetaDataGen struct {
 	generator.DefaultGen
+
 	arguments *args.GeneratorArgs
 	Root      *traitMetaDataRoot
 }

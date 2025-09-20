@@ -26,6 +26,7 @@ import corev1 "k8s.io/api/core/v1"
 // +camel-k:trait=container.
 type ContainerTrait struct {
 	PlatformBaseTrait `property:",squash" json:",inline"`
+
 	// To automatically enable the trait
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// The minimum amount of CPU required (default 125 millicores).

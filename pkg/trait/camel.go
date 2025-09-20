@@ -43,6 +43,7 @@ const (
 type camelTrait struct {
 	BasePlatformTrait
 	traitv1.CamelTrait `property:",squash"`
+
 	// private configuration used only internally
 	runtimeVersion  string
 	runtimeProvider string

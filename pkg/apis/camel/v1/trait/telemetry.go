@@ -28,6 +28,7 @@ package trait
 // +camel-k:trait=telemetry.
 type TelemetryTrait struct {
 	Trait `property:",squash" json:",inline"`
+
 	// Enables automatic configuration of the trait, including automatic discovery of the telemetry endpoint.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// The name of the service that publishes telemetry data (defaults to the integration name)

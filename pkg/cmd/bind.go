@@ -15,7 +15,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-//nolint:goconst
 package cmd
 
 import (
@@ -79,6 +78,7 @@ const (
 
 type bindCmdOptions struct {
 	*RootCmdOptions
+
 	ErrorHandler   string   `mapstructure:"error-handler" yaml:",omitempty"`
 	Name           string   `mapstructure:"name" yaml:",omitempty"`
 	OutputFormat   string   `mapstructure:"output" yaml:",omitempty"`
@@ -98,7 +98,7 @@ func (o *bindCmdOptions) preRunE(cmd *cobra.Command, args []string) error {
 		// let the command work in offline mode
 		cmd.Annotations[offlineCommandLabel] = "true"
 	}
-	return o.RootCmdOptions.preRun(cmd, args)
+	return o.preRun(cmd, args)
 }
 
 func (o *bindCmdOptions) runE(cmd *cobra.Command, args []string) error {

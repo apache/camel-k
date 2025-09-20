@@ -56,6 +56,8 @@ var (
 )
 
 // OpenShiftConsoleDownloadLink installs the download link for the OpenShift console.
+//
+//nolint:nestif
 func OpenShiftConsoleDownloadLink(ctx context.Context, c client.Client) error {
 	// Check the ConsoleCLIDownload CRD is present, which should be starting OpenShift version 4.2.
 	// That check is also enough to exclude Kubernetes clusters.

@@ -67,7 +67,7 @@ func ComputeForIntegration(integration *v1.Integration, configmapVersions []stri
 
 	// Integration Kit is relevant
 	if integration.Spec.IntegrationKit != nil {
-		if _, err := hash.Write([]byte(fmt.Sprintf("%s/%s", integration.Spec.IntegrationKit.Namespace, integration.Spec.IntegrationKit.Name))); err != nil {
+		if _, err := fmt.Fprintf(hash, "%s/%s", integration.Spec.IntegrationKit.Namespace, integration.Spec.IntegrationKit.Name); err != nil {
 			return "", err
 		}
 	}
@@ -137,7 +137,7 @@ func ComputeForIntegration(integration *v1.Integration, configmapVersions []stri
 	// Integration traits as annotations
 	for _, k := range sortedTraitAnnotationsKeys(integration) {
 		v := integration.Annotations[k]
-		if _, err := hash.Write([]byte(fmt.Sprintf("%s=%v,", k, v))); err != nil {
+		if _, err := fmt.Fprintf(hash, "%s=%v,", k, v); err != nil {
 			return "", err
 		}
 	}
@@ -217,7 +217,7 @@ func computeForTrait(hash hash.Hash, name string, trait map[string]interface{}) 
 func computeForTraitProps(hash hash.Hash, props map[string]interface{}) error {
 	for _, prop := range util.SortedMapKeys(props) {
 		val := props[prop]
-		if _, err := hash.Write([]byte(fmt.Sprintf("%s=%v,", prop, val))); err != nil {
+		if _, err := fmt.Fprintf(hash, "%s=%v,", prop, val); err != nil {
 			return err
 		}
 	}

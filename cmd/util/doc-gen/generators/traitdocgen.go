@@ -67,6 +67,7 @@ var tagDeprecatedRegex = regexp.MustCompile(fmt.Sprintf("%s=(0|[1-9]\\d*)\\.(0|[
 // traitDocGen produces documentation about traits.
 type traitDocGen struct {
 	generator.DefaultGen
+
 	arguments           *args.GeneratorArgs
 	generatedTraitFiles []string
 }

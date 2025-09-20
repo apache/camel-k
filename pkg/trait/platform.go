@@ -38,6 +38,7 @@ const (
 type platformTrait struct {
 	BasePlatformTrait
 	traitv1.PlatformTrait `property:",squash"`
+
 	// Parameters to be used internally
 	createDefault *bool
 	global        *bool

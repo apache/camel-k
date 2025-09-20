@@ -424,19 +424,19 @@ func getVolume(volName, storageType, storageName, filterKey, filterValue string)
 	}
 	switch storageType {
 	case configmapStorageType:
-		volume.VolumeSource.ConfigMap = &corev1.ConfigMapVolumeSource{
+		volume.ConfigMap = &corev1.ConfigMapVolumeSource{
 			LocalObjectReference: corev1.LocalObjectReference{
 				Name: storageName,
 			},
 			Items: items,
 		}
 	case secretStorageType:
-		volume.VolumeSource.Secret = &corev1.SecretVolumeSource{
+		volume.Secret = &corev1.SecretVolumeSource{
 			SecretName: storageName,
 			Items:      items,
 		}
 	case pvcStorageType:
-		volume.VolumeSource.PersistentVolumeClaim = &corev1.PersistentVolumeClaimVolumeSource{
+		volume.PersistentVolumeClaim = &corev1.PersistentVolumeClaimVolumeSource{
 			ClaimName: storageName,
 		}
 	}

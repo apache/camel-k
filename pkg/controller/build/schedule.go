@@ -38,6 +38,7 @@ func newScheduleAction(reader ctrl.Reader, buildMonitor Monitor) Action {
 
 type scheduleAction struct {
 	baseAction
+
 	lock         sync.Mutex
 	reader       ctrl.Reader
 	buildMonitor Monitor

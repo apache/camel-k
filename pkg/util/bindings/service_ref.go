@@ -36,7 +36,7 @@ func (k ServiceRefBindingProvider) ID() string {
 
 // Translate will check the endpoint reference being either a Service or an Integration and Pipe which have a Service associated.
 func (k ServiceRefBindingProvider) Translate(ctx BindingContext, endpointCtx EndpointContext, e v1.Endpoint) (*Binding, error) {
-	if e.Ref == nil || !(isService(e.Ref) || isIntegration(e.Ref) || isPipe(e.Ref)) {
+	if e.Ref == nil || (!isService(e.Ref) && !isIntegration(e.Ref) && !isPipe(e.Ref)) {
 		// works only on Service refs
 		return nil, nil
 	}

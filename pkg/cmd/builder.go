@@ -45,6 +45,7 @@ func newCmdBuilder(rootCmdOptions *RootCmdOptions) (*cobra.Command, *builderCmdO
 
 type builderCmdOptions struct {
 	*RootCmdOptions
+
 	BuildName string `mapstructure:"build-name"`
 	TaskName  string `mapstructure:"task-name"`
 }

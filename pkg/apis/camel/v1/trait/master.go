@@ -28,6 +28,7 @@ package trait
 // +camel-k:trait=master.
 type MasterTrait struct {
 	Trait `property:",squash" json:",inline"`
+
 	// Enables automatic configuration of the trait.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// When this flag is active, the operator analyzes the source code to add dependencies required by delegate endpoints.

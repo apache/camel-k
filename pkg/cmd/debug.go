@@ -62,9 +62,10 @@ func newCmdDebug(rootCmdOptions *RootCmdOptions) (*cobra.Command, *debugCmdOptio
 
 type debugCmdOptions struct {
 	*RootCmdOptions `json:"-"`
-	Suspend         bool `mapstructure:"suspend" yaml:",omitempty"`
-	Port            uint `mapstructure:"port" yaml:",omitempty"`
-	RemotePort      uint `mapstructure:"remote-port" yaml:",omitempty"`
+
+	Suspend    bool `mapstructure:"suspend" yaml:",omitempty"`
+	Port       uint `mapstructure:"port" yaml:",omitempty"`
+	RemotePort uint `mapstructure:"remote-port" yaml:",omitempty"`
 }
 
 func (o *debugCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
