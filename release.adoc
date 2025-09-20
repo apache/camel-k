@@ -131,32 +131,33 @@ An email should be sent to dev@camel.apache.org asking to test the staged artifa
 After the voting is complete with success, the artifacts can be released. Republish docker image in the Apache org on Docker Hub:
 
 ```
-docker pull camelk/camel-k:2.6.0-amd64
-docker tag camelk/camel-k:2.6.0-amd64 apache/camel-k:2.6.0-amd64
-docker push apache/camel-k:2.6.0-amd64
-docker pull camelk/camel-k:2.6.0-arm64
-docker tag camelk/camel-k:2.6.0-arm64 apache/camel-k:2.6.0-arm64
-docker push apache/camel-k:2.6.0-arm64
-docker manifest create apache/camel-k:2.6.0 --amend apache/camel-k:2.6.0-amd64 --amend apache/camel-k:2.6.0-arm64
-docker manifest push --purge apache/camel-k:2.6.0
+export CK_VERSION=2.8.0
+docker pull camelk/camel-k:$CK_VERSION-amd64
+docker tag camelk/camel-k:$CK_VERSION-amd64 apache/camel-k:2.6.0-amd64
+docker push apache/camel-k:$CK_VERSION-amd64
+docker pull camelk/camel-k:$CK_VERSION-arm64
+docker tag camelk/camel-k:$CK_VERSION-arm64 apache/camel-k:2.6.0-arm64
+docker push apache/camel-k:$CK_VERSION-arm64
+docker manifest create apache/camel-k:$CK_VERSION --amend apache/camel-k:$CK_VERSION-amd64 --amend apache/camel-k:$CK_VERSION-arm64
+docker manifest push --purge apache/camel-k:$CK_VERSION
 
-docker pull camelk/camel-k:2.6.0-17-jdk-amd64
-docker tag camelk/camel-k:2.6.0-17-jdk-amd64 apache/camel-k:2.6.0-17-jdk-amd64
-docker push apache/camel-k:2.6.0-17-jdk-amd64
-docker pull camelk/camel-k:2.6.0-17-jdk-arm64
-docker tag camelk/camel-k:2.6.0-17-jdk-arm64 apache/camel-k:2.6.0-17-jdk-arm64
-docker push apache/camel-k:2.6.0-17-jdk-arm64
-docker manifest create apache/camel-k:2.6.0-17-jdk --amend apache/camel-k:2.6.0-17-jdk-amd64 --amend apache/camel-k:2.6.0-17-jdk-arm64
-docker manifest push --purge apache/camel-k:2.6.0-17-jdk
+docker pull camelk/camel-k:$CK_VERSION-17-jdk-amd64
+docker tag camelk/camel-k:$CK_VERSION-17-jdk-amd64 apache/camel-k:$CK_VERSION-17-jdk-amd64
+docker push apache/camel-k:$CK_VERSION-17-jdk-amd64
+docker pull camelk/camel-k:$CK_VERSION-17-jdk-arm64
+docker tag camelk/camel-k:$CK_VERSION-17-jdk-arm64 apache/camel-k:$CK_VERSION-17-jdk-arm64
+docker push apache/camel-k:$CK_VERSION-17-jdk-arm64
+docker manifest create apache/camel-k:$CK_VERSION-17-jdk --amend apache/camel-k:$CK_VERSION-17-jdk-amd64 --amend apache/camel-k:$CK_VERSION-17-jdk-arm64
+docker manifest push --purge apache/camel-k:$CK_VERSION-17-jdk
 
-docker pull camelk/camel-k:2.6.0-21-jdk-amd64
-docker tag camelk/camel-k:2.6.0-21-jdk-amd64 apache/camel-k:2.6.0-21-jdk-amd64
-docker push apache/camel-k:2.6.0-21-jdk-amd64
-docker pull camelk/camel-k:2.6.0-21-jdk-arm64
-docker tag camelk/camel-k:2.6.0-21-jdk-arm64 apache/camel-k:2.6.0-21-jdk-arm64
-docker push apache/camel-k:2.6.0-21-jdk-arm64
-docker manifest create apache/camel-k:2.6.0-21-jdk --amend apache/camel-k:2.6.0-21-jdk-amd64 --amend apache/camel-k:2.6.0-21-jdk-arm64
-docker manifest push --purge apache/camel-k:2.6.0-21-jdk
+docker pull camelk/camel-k:$CK_VERSION-21-jdk-amd64
+docker tag camelk/camel-k:$CK_VERSION-21-jdk-amd64 apache/camel-k:$CK_VERSION-21-jdk-amd64
+docker push apache/camel-k:$CK_VERSION-21-jdk-amd64
+docker pull camelk/camel-k:$CK_VERSION-21-jdk-arm64
+docker tag camelk/camel-k:$CK_VERSION-jdk-arm64 apache/camel-k:$CK_VERSION-21-jdk-arm64
+docker push apache/camel-k:$CK_VERSION-21-jdk-arm64
+docker manifest create apache/camel-k:$CK_VERSION-21-jdk --amend apache/camel-k:$CK_VERSION-21-jdk-amd64 --amend apache/camel-k:$CK_VERSION-21-jdk-arm64
+docker manifest push --purge apache/camel-k:$CK_VERSION-21-jdk
 ```
 
 Artifacts committed on https://dist.apache.org/repos/dist/dev/ before the voting process need to be copied to the Apache dist repository on: https://dist.apache.org/repos/dist/release/camel.
