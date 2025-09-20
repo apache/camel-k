@@ -38,6 +38,7 @@ type IntegrationProfileSpec struct {
 // IntegrationProfileStatus defines the observed state of IntegrationProfile.
 type IntegrationProfileStatus struct {
 	IntegrationProfileSpec `json:",inline"`
+
 	// ObservedGeneration is the most recent generation observed for this IntegrationProfile.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 	// defines in what phase the IntegrationProfile is found
@@ -71,7 +72,8 @@ type IntegrationProfile struct {
 type IntegrationProfileList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []IntegrationProfile `json:"items"`
+
+	Items []IntegrationProfile `json:"items"`
 }
 
 // IntegrationProfileBuildSpec contains profile related build information.

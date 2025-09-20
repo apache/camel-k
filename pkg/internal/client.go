@@ -145,6 +145,7 @@ func filterObjects(scheme *runtime.Scheme, input []runtime.Object, filter func(g
 type FakeClient struct {
 	controller.Client
 	kubernetes.Interface
+
 	camel                  *fakecamelclientset.Clientset
 	scales                 *fakescale.FakeScaleClient
 	disabledGroups         []string
@@ -235,6 +236,7 @@ func (c *FakeClient) ScalesClient() (scale.ScalesGetter, error) {
 
 type FakeAuthorization struct {
 	authorizationv1.AuthorizationV1Interface
+
 	disabledGroups   []string
 	enabledOpenshift bool
 }
@@ -245,6 +247,7 @@ func (f *FakeAuthorization) SelfSubjectRulesReviews() authorizationv1.SelfSubjec
 
 type FakeDiscovery struct {
 	discovery.DiscoveryInterface
+
 	disabledGroups         []string
 	enabledOpenshift       bool
 	enabledKnativeServing  bool

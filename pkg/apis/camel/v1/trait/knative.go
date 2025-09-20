@@ -27,6 +27,7 @@ package trait
 // +camel-k:trait=knative.
 type KnativeTrait struct {
 	Trait `property:",squash" json:",inline"`
+
 	// Can be used to inject a Knative complete configuration in JSON format.
 	Configuration string `property:"configuration" json:"config,omitempty"`
 	// List of channels used as source of integration routes.

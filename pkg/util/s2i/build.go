@@ -64,11 +64,10 @@ func WaitForS2iBuildCompletion(ctx context.Context, c client.Client, build *buil
 				return err
 			}
 
-			if build.Status.Phase == buildv1.BuildPhaseComplete {
+			switch build.Status.Phase {
+			case buildv1.BuildPhaseComplete:
 				return nil
-			} else if build.Status.Phase == buildv1.BuildPhaseCancelled ||
-				build.Status.Phase == buildv1.BuildPhaseFailed ||
-				build.Status.Phase == buildv1.BuildPhaseError {
+			case buildv1.BuildPhaseCancelled, buildv1.BuildPhaseFailed, buildv1.BuildPhaseError:
 				return errors.New("build failed")
 			}
 		}

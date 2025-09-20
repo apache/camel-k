@@ -68,7 +68,7 @@ func (i YAMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 //nolint:nestif
 func (i YAMLInspector) parseDefinition(def map[string]interface{}, meta *Metadata) error {
 	for k, v := range def {
-		if k == "rest" {
+		if k == rest {
 			meta.ExposesHTTPServices = true
 			meta.RequiredCapabilities.Add(v1.CapabilityRest)
 			// support contract first openapi
@@ -92,7 +92,7 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 		if bean := i.catalog.GetArtifactByScheme("bean"); bean != nil {
 			meta.AddDependency(bean.GetDependencyID())
 		}
-	case "rest":
+	case rest:
 		meta.ExposesHTTPServices = true
 		meta.RequiredCapabilities.Add(v1.CapabilityRest)
 	case "circuitBreaker":

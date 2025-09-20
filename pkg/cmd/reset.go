@@ -49,6 +49,7 @@ func newCmdReset(rootCmdOptions *RootCmdOptions) (*cobra.Command, *resetCmdOptio
 
 type resetCmdOptions struct {
 	*RootCmdOptions
+
 	SkipKits         bool `mapstructure:"skip-kits"`
 	SkipIntegrations bool `mapstructure:"skip-integrations"`
 	SkipBindings     bool `mapstructure:"skip-bindings"`

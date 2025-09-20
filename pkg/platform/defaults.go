@@ -305,7 +305,7 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 			Duration: defaultBuildTimeout,
 		}
 	} else {
-		d := p.Status.Build.GetTimeout().Duration.Truncate(time.Second)
+		d := p.Status.Build.GetTimeout().Truncate(time.Second)
 
 		if verbose && p.Status.Build.GetTimeout().Duration != d {
 			log.Log.Infof("Build timeout minimum unit is sec (configured: %s, truncated: %s)", p.Status.Build.GetTimeout().Duration, d)
@@ -319,9 +319,10 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 
 	if p.Status.Build.MaxRunningBuilds <= 0 {
 		log.Debugf("Integration Platform %s [%s]: setting max running builds", p.Name, p.Namespace)
-		if p.Status.Build.BuildConfiguration.Strategy == v1.BuildStrategyRoutine {
+		switch p.Status.Build.BuildConfiguration.Strategy {
+		case v1.BuildStrategyRoutine:
 			p.Status.Build.MaxRunningBuilds = 3
-		} else if p.Status.Build.BuildConfiguration.Strategy == v1.BuildStrategyPod {
+		case v1.BuildStrategyPod:
 			p.Status.Build.MaxRunningBuilds = 10
 		}
 	}

@@ -255,7 +255,7 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 	}
 
 	if t.TimeoutSeconds != nil {
-		svc.Spec.ConfigurationSpec.Template.Spec.TimeoutSeconds = t.TimeoutSeconds
+		svc.Spec.Template.Spec.TimeoutSeconds = t.TimeoutSeconds
 	}
 	replicas := e.Integration.Spec.Replicas
 

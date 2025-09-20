@@ -207,9 +207,10 @@ func (action *monitorRoutineAction) updateBuildStatus(ctx context.Context, build
 		event.NotifyBuildError(ctx, action.client, action.recorder, build, target, err)
 		return err
 	}
-	if target.Status.Phase == v1.BuildPhaseFailed {
+	switch target.Status.Phase {
+	case v1.BuildPhaseFailed:
 		action.L.Errorf(nil, "Build %s failed: %s", build.Name, target.Status.Error)
-	} else if target.Status.Phase == v1.BuildPhaseError {
+	case v1.BuildPhaseError:
 		action.L.Errorf(nil, "Build %s errored: %s", build.Name, target.Status.Error)
 	}
 

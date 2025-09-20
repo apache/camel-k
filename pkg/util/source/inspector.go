@@ -32,6 +32,7 @@ type catalog2deps func(*camel.RuntimeCatalog) []string
 const (
 	defaultJSONDataFormat = "jackson"
 	kamelet               = "kamelet"
+	rest                  = "rest"
 )
 
 var (
@@ -89,7 +90,7 @@ var (
 		},
 		restConfigurationRegexp: func(catalog *camel.RuntimeCatalog) []string {
 			deps := make([]string, 0)
-			if c, ok := catalog.CamelCatalogSpec.Runtime.Capabilities[v1.CapabilityRest]; ok {
+			if c, ok := catalog.Runtime.Capabilities[v1.CapabilityRest]; ok {
 				for _, d := range c.Dependencies {
 					deps = append(deps, d.GetDependencyID())
 				}
@@ -98,7 +99,7 @@ var (
 		},
 		restRegexp: func(catalog *camel.RuntimeCatalog) []string {
 			deps := make([]string, 0)
-			if c, ok := catalog.CamelCatalogSpec.Runtime.Capabilities[v1.CapabilityRest]; ok {
+			if c, ok := catalog.Runtime.Capabilities[v1.CapabilityRest]; ok {
 				for _, d := range c.Dependencies {
 					deps = append(deps, d.GetDependencyID())
 				}
@@ -107,7 +108,7 @@ var (
 		},
 		restClosureRegexp: func(catalog *camel.RuntimeCatalog) []string {
 			deps := make([]string, 0)
-			if c, ok := catalog.CamelCatalogSpec.Runtime.Capabilities[v1.CapabilityRest]; ok {
+			if c, ok := catalog.Runtime.Capabilities[v1.CapabilityRest]; ok {
 				for _, d := range c.Dependencies {
 					deps = append(deps, d.GetDependencyID())
 				}

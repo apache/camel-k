@@ -53,6 +53,7 @@ func newCmdRebuild(rootCmdOptions *RootCmdOptions) (*cobra.Command, *rebuildCmdO
 
 type rebuildCmdOptions struct {
 	*RootCmdOptions
+
 	RebuildAll bool `mapstructure:"all"`
 }
 

@@ -42,7 +42,8 @@ const (
 type routeTrait struct {
 	BaseTrait
 	traitv1.RouteTrait `property:",squash"`
-	service            *corev1.Service
+
+	service *corev1.Service
 }
 
 func newRouteTrait() Trait {

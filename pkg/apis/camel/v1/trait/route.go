@@ -33,6 +33,7 @@ package trait
 // +camel-k:deprecated=2.6.0.
 type RouteTrait struct {
 	Trait `property:",squash" json:",inline"`
+
 	// The annotations added to route.
 	// This can be used to set route specific annotations
 	// For annotations options see https://docs.openshift.com/container-platform/3.11/architecture/networking/routes.html#route-specific-annotations

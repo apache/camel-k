@@ -75,6 +75,7 @@ type resource struct {
 //nolint:containedctx
 type builderContext struct {
 	client.Client
+
 	C                 context.Context
 	Catalog           *camel.RuntimeCatalog
 	Build             v1.BuilderTask

@@ -34,6 +34,7 @@ func newInitializePodAction(reader ctrl.Reader) Action {
 
 type initializePodAction struct {
 	baseAction
+
 	reader ctrl.Reader
 }
 

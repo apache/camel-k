@@ -30,6 +30,7 @@ package trait
 // +camel-k:deprecated=2.8.0.
 type JolokiaTrait struct {
 	Trait `property:",squash" json:",inline"`
+
 	// The PEM encoded CA certification file path, used to verify client certificates,
 	// applicable when `protocol` is `https` and `use-ssl-client-authentication` is `true`
 	// (default `/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt` for OpenShift).

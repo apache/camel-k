@@ -55,9 +55,10 @@ func (action *buildAction) CanHandle(kit *v1.Integration) bool {
 }
 
 func (action *buildAction) Handle(ctx context.Context, it *v1.Integration) (*v1.Integration, error) {
-	if it.Status.Phase == v1.IntegrationPhaseBuildSubmitted {
+	switch it.Status.Phase {
+	case v1.IntegrationPhaseBuildSubmitted:
 		return action.handleBuildSubmitted(ctx, it)
-	} else if it.Status.Phase == v1.IntegrationPhaseBuildRunning {
+	case v1.IntegrationPhaseBuildRunning:
 		return action.handleBuildRunning(ctx, it)
 	}
 

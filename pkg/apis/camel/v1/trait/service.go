@@ -27,6 +27,7 @@ package trait
 // +camel-k:trait=service.
 type ServiceTrait struct {
 	Trait `property:",squash" json:",inline"`
+
 	// To automatically detect from the code if a Service needs to be created.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// Enable Service to be exposed as NodePort (default `false`).

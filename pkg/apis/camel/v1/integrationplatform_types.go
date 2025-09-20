@@ -50,6 +50,7 @@ type IntegrationPlatformSpec struct {
 // IntegrationPlatformStatus defines the observed state of IntegrationPlatform.
 type IntegrationPlatformStatus struct {
 	IntegrationPlatformSpec `json:",inline"`
+
 	// ObservedGeneration is the most recent generation observed for this IntegrationPlatform.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 	// defines in what phase the IntegrationPlatform is found
@@ -92,7 +93,8 @@ type IntegrationPlatform struct {
 type IntegrationPlatformList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []IntegrationPlatform `json:"items"`
+
+	Items []IntegrationPlatform `json:"items"`
 }
 
 // IntegrationPlatformCluster is the kind of orchestration cluster the platform is installed into.
