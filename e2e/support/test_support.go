@@ -3008,7 +3008,7 @@ func NewNamedTestNamespace(t *testing.T, ctx context.Context, name string, injec
 			failTest(t, err)
 		}
 		rest, err := apiutil.RESTClientForGVK(
-			schema.GroupVersionKind{Group: projectv1.GroupName, Version: projectv1.GroupVersion.Version}, false,
+			schema.GroupVersionKind{Group: projectv1.GroupName, Version: projectv1.GroupVersion.Version}, false, false,
 			c.GetConfig(), serializer.NewCodecFactory(c.GetScheme()), httpCli)
 		if err != nil {
 			failTest(t, err)
