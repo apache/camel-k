@@ -160,7 +160,7 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 			return err
 		}
 		restClient, err := apiutil.RESTClientForGVK(
-			schema.GroupVersionKind{Group: "build.openshift.io", Version: "v1"}, false,
+			schema.GroupVersionKind{Group: "build.openshift.io", Version: "v1"}, false, false,
 			t.c.GetConfig(), serializer.NewCodecFactory(t.c.GetScheme()), httpCli)
 		if err != nil {
 			return err
