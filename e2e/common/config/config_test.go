@@ -106,11 +106,31 @@ func TestRunConfigConfigmaps(t *testing.T) {
 		err = CreatePlainTextConfigmap(t, ctx, ns, "my-cm-multi", cmDataMulti)
 		g.Expect(err).To(BeNil())
 
+		// Store a configmap that mocks the '--from-file' functionality
+		// kubectl create configmap my-cm-properties-file --from-file=./files/my.properties"
+
+		err = CreateFromFileConfigmap(t, ctx, ns, "my-cm-properties-file", "./files/my.properties")
+		g.Expect(err).To(BeNil())
+
 		t.Run("Config configmap", func(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "./files/config-configmap-route.yaml", "--config", "configmap:my-cm").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "config-configmap-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "config-configmap-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, "config-configmap-route"), TestTimeoutShort).Should(ContainSubstring(cmData["my-configmap-key"]))
+		})
+
+		t.Run("Config configmap from properties file", func(t *testing.T) {
+			g.Expect(KamelRun(t, ctx, ns, "./files/config-configmap-properties-route.yaml", "--config", "configmap:my-cm-properties-file").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "config-configmap-properties-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "config-configmap-properties-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, "config-configmap-properties-route"), TestTimeoutShort).Should(ContainSubstring("hello world"))
+		})
+
+		t.Run("Config configmap from properties file (interpolated)", func(t *testing.T) {
+			g.Expect(KamelRun(t, ctx, ns, "./files/config-configmap-properties-interpolation-route.yaml", "--config", "configmap:my-cm-properties-file").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "config-configmap-properties-interpolation-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "config-configmap-properties-interpolation-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, "config-configmap-properties-interpolation-route"), TestTimeoutShort).Should(ContainSubstring("hello world"))
 		})
 
 		t.Run("Resource configmap", func(t *testing.T) {
