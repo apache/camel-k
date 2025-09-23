@@ -35,3 +35,6 @@ images:
 - name: docker.io/apache/camel-k
   newName: docker.io/apache/camel-k
   newTag: 2.7.1-SNAPSHOT
+- name: docker.io/testcamelk/camel-k
+  newName: docker.io/testcamelk/camel-k
+  newTag: 2.7.1-nightly
