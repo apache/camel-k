@@ -35,7 +35,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ref-branch: [main, release-2.5.x]
+        # We want to check this on latest development branch only
+        ref-branch: [main]
 
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-latest
