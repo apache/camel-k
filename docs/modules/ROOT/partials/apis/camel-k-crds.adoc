@@ -7273,6 +7273,13 @@ string
 
 The liveness probe path to use (default provided by the Catalog runtime used).
 
+|`livenessPort` +
+int32
+|
+
+
+The liveness port to use (default 8080).
+
 |`readinessProbeEnabled` +
 bool
 |
@@ -7329,6 +7336,13 @@ string
 
 The readiness probe path to use (default provided by the Catalog runtime used).
 
+|`readinessPort` +
+int32
+|
+
+
+The readiness port to use (default 8080).
+
 |`startupProbeEnabled` +
 bool
 |
@@ -7384,6 +7398,13 @@ string
 
 
 The startup probe path to use (default provided by the Catalog runtime used).
+
+|`startupPort` +
+int32
+|
+
+
+The startup port to use (default 8080).
 
 
 |===

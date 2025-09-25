@@ -61,6 +61,10 @@ The following configuration options are available:
 | string
 | The liveness probe path to use (default provided by the Catalog runtime used).
 
+| health.liveness-port
+| int32
+| The liveness port to use (default 8080).
+
 | health.readiness-probe-enabled
 | bool
 | Configures the readiness probe for the integration container (default `true`).
@@ -93,6 +97,10 @@ The following configuration options are available:
 | string
 | The readiness probe path to use (default provided by the Catalog runtime used).
 
+| health.readiness-port
+| int32
+| The readiness port to use (default 8080).
+
 | health.startup-probe-enabled
 | bool
 | Configures the startup probe for the integration container (default `false`).
@@ -124,6 +132,10 @@ The following configuration options are available:
 | health.startup-probe
 | string
 | The startup probe path to use (default provided by the Catalog runtime used).
+
+| health.startup-port
+| int32
+| The startup port to use (default 8080).
 
 |===
 

@@ -181,6 +181,7 @@ func (t *healthTrait) newLivenessProbe(port *intstr.IntOrString, path string) *c
 			HTTPGet: &corev1.HTTPGetAction{
 				Path:   path,
 				Scheme: t.getLivenessScheme(),
+				Port:   *t.getLivenessPort(port),
 			},
 		},
 		InitialDelaySeconds: t.LivenessInitialDelay,
@@ -188,10 +189,6 @@ func (t *healthTrait) newLivenessProbe(port *intstr.IntOrString, path string) *c
 		PeriodSeconds:       t.LivenessPeriod,
 		SuccessThreshold:    t.LivenessSuccessThreshold,
 		FailureThreshold:    t.LivenessFailureThreshold,
-	}
-
-	if port != nil {
-		p.HTTPGet.Port = *port
 	}
 
 	return &p
@@ -203,6 +200,7 @@ func (t *healthTrait) newReadinessProbe(port *intstr.IntOrString, path string) *
 			HTTPGet: &corev1.HTTPGetAction{
 				Path:   path,
 				Scheme: t.getReadinessScheme(),
+				Port:   *t.getReadinessPort(port),
 			},
 		},
 		InitialDelaySeconds: t.ReadinessInitialDelay,
@@ -210,10 +208,6 @@ func (t *healthTrait) newReadinessProbe(port *intstr.IntOrString, path string) *
 		PeriodSeconds:       t.ReadinessPeriod,
 		SuccessThreshold:    t.ReadinessSuccessThreshold,
 		FailureThreshold:    t.ReadinessFailureThreshold,
-	}
-
-	if port != nil {
-		p.HTTPGet.Port = *port
 	}
 
 	return &p
@@ -225,6 +219,7 @@ func (t *healthTrait) newStartupProbe(port *intstr.IntOrString, path string) *co
 			HTTPGet: &corev1.HTTPGetAction{
 				Path:   path,
 				Scheme: t.getStartupScheme(),
+				Port:   *t.getStartupPort(port),
 			},
 		},
 		InitialDelaySeconds: t.StartupInitialDelay,
@@ -234,9 +229,32 @@ func (t *healthTrait) newStartupProbe(port *intstr.IntOrString, path string) *co
 		FailureThreshold:    t.StartupFailureThreshold,
 	}
 
-	if port != nil {
-		p.HTTPGet.Port = *port
+	return &p
+}
+
+func (t *healthTrait) getLivenessPort(port *intstr.IntOrString) *intstr.IntOrString {
+	if t.LivenessPort != 0 {
+		livenessPort := intstr.FromInt32(t.LivenessPort)
+		return &livenessPort
 	}
 
-	return &p
+	return port
+}
+
+func (t *healthTrait) getReadinessPort(port *intstr.IntOrString) *intstr.IntOrString {
+	if t.ReadinessPort != 0 {
+		readinessPort := intstr.FromInt32(t.ReadinessPort)
+		return &readinessPort
+	}
+
+	return port
+}
+
+func (t *healthTrait) getStartupPort(port *intstr.IntOrString) *intstr.IntOrString {
+	if t.StartupPort != 0 {
+		startupPort := intstr.FromInt32(t.StartupPort)
+		return &startupPort
+	}
+
+	return port
 }
