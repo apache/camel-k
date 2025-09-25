@@ -4360,6 +4360,10 @@ spec:
                         description: How often to perform the liveness probe.
                         format: int32
                         type: integer
+                      livenessPort:
+                        description: The liveness port to use (default 8080).
+                        format: int32
+                        type: integer
                       livenessProbe:
                         description: The liveness probe path to use (default provided
                           by the Catalog runtime used).
@@ -4396,6 +4400,10 @@ spec:
                         description: How often to perform the readiness probe.
                         format: int32
                         type: integer
+                      readinessPort:
+                        description: The readiness port to use (default 8080).
+                        format: int32
+                        type: integer
                       readinessProbe:
                         description: The readiness probe path to use (default provided
                           by the Catalog runtime used).
@@ -4430,6 +4438,10 @@ spec:
                         type: integer
                       startupPeriod:
                         description: How often to perform the startup probe.
+                        format: int32
+                        type: integer
+                      startupPort:
+                        description: The startup port to use (default 8080).
                         format: int32
                         type: integer
                       startupProbe:
@@ -6615,6 +6627,10 @@ spec:
                         description: How often to perform the liveness probe.
                         format: int32
                         type: integer
+                      livenessPort:
+                        description: The liveness port to use (default 8080).
+                        format: int32
+                        type: integer
                       livenessProbe:
                         description: The liveness probe path to use (default provided
                           by the Catalog runtime used).
@@ -6651,6 +6667,10 @@ spec:
                         description: How often to perform the readiness probe.
                         format: int32
                         type: integer
+                      readinessPort:
+                        description: The readiness port to use (default 8080).
+                        format: int32
+                        type: integer
                       readinessProbe:
                         description: The readiness probe path to use (default provided
                           by the Catalog runtime used).
@@ -6685,6 +6705,10 @@ spec:
                         type: integer
                       startupPeriod:
                         description: How often to perform the startup probe.
+                        format: int32
+                        type: integer
+                      startupPort:
+                        description: The startup port to use (default 8080).
                         format: int32
                         type: integer
                       startupProbe:
@@ -8772,6 +8796,10 @@ spec:
                         description: How often to perform the liveness probe.
                         format: int32
                         type: integer
+                      livenessPort:
+                        description: The liveness port to use (default 8080).
+                        format: int32
+                        type: integer
                       livenessProbe:
                         description: The liveness probe path to use (default provided
                           by the Catalog runtime used).
@@ -8808,6 +8836,10 @@ spec:
                         description: How often to perform the readiness probe.
                         format: int32
                         type: integer
+                      readinessPort:
+                        description: The readiness port to use (default 8080).
+                        format: int32
+                        type: integer
                       readinessProbe:
                         description: The readiness probe path to use (default provided
                           by the Catalog runtime used).
@@ -8842,6 +8874,10 @@ spec:
                         type: integer
                       startupPeriod:
                         description: How often to perform the startup probe.
+                        format: int32
+                        type: integer
+                      startupPort:
+                        description: The startup port to use (default 8080).
                         format: int32
                         type: integer
                       startupProbe:
@@ -10906,6 +10942,10 @@ spec:
                         description: How often to perform the liveness probe.
                         format: int32
                         type: integer
+                      livenessPort:
+                        description: The liveness port to use (default 8080).
+                        format: int32
+                        type: integer
                       livenessProbe:
                         description: The liveness probe path to use (default provided
                           by the Catalog runtime used).
@@ -10942,6 +10982,10 @@ spec:
                         description: How often to perform the readiness probe.
                         format: int32
                         type: integer
+                      readinessPort:
+                        description: The readiness port to use (default 8080).
+                        format: int32
+                        type: integer
                       readinessProbe:
                         description: The readiness probe path to use (default provided
                           by the Catalog runtime used).
@@ -10976,6 +11020,10 @@ spec:
                         type: integer
                       startupPeriod:
                         description: How often to perform the startup probe.
+                        format: int32
+                        type: integer
+                      startupPort:
+                        description: The startup port to use (default 8080).
                         format: int32
                         type: integer
                       startupProbe:
@@ -19873,6 +19921,10 @@ spec:
                         description: How often to perform the liveness probe.
                         format: int32
                         type: integer
+                      livenessPort:
+                        description: The liveness port to use (default 8080).
+                        format: int32
+                        type: integer
                       livenessProbe:
                         description: The liveness probe path to use (default provided
                           by the Catalog runtime used).
@@ -19909,6 +19961,10 @@ spec:
                         description: How often to perform the readiness probe.
                         format: int32
                         type: integer
+                      readinessPort:
+                        description: The readiness port to use (default 8080).
+                        format: int32
+                        type: integer
                       readinessProbe:
                         description: The readiness probe path to use (default provided
                           by the Catalog runtime used).
@@ -19943,6 +19999,10 @@ spec:
                         type: integer
                       startupPeriod:
                         description: How often to perform the startup probe.
+                        format: int32
+                        type: integer
+                      startupPort:
+                        description: The startup port to use (default 8080).
                         format: int32
                         type: integer
                       startupProbe:
@@ -21956,6 +22016,10 @@ spec:
                         description: How often to perform the liveness probe.
                         format: int32
                         type: integer
+                      livenessPort:
+                        description: The liveness port to use (default 8080).
+                        format: int32
+                        type: integer
                       livenessProbe:
                         description: The liveness probe path to use (default provided
                           by the Catalog runtime used).
@@ -21992,6 +22056,10 @@ spec:
                         description: How often to perform the readiness probe.
                         format: int32
                         type: integer
+                      readinessPort:
+                        description: The readiness port to use (default 8080).
+                        format: int32
+                        type: integer
                       readinessProbe:
                         description: The readiness probe path to use (default provided
                           by the Catalog runtime used).
@@ -22026,6 +22094,10 @@ spec:
                         type: integer
                       startupPeriod:
                         description: How often to perform the startup probe.
+                        format: int32
+                        type: integer
+                      startupPort:
+                        description: The startup port to use (default 8080).
                         format: int32
                         type: integer
                       startupProbe:
@@ -32284,6 +32356,10 @@ spec:
                             description: How often to perform the liveness probe.
                             format: int32
                             type: integer
+                          livenessPort:
+                            description: The liveness port to use (default 8080).
+                            format: int32
+                            type: integer
                           livenessProbe:
                             description: The liveness probe path to use (default provided
                               by the Catalog runtime used).
@@ -32320,6 +32396,10 @@ spec:
                             description: How often to perform the readiness probe.
                             format: int32
                             type: integer
+                          readinessPort:
+                            description: The readiness port to use (default 8080).
+                            format: int32
+                            type: integer
                           readinessProbe:
                             description: The readiness probe path to use (default
                               provided by the Catalog runtime used).
@@ -32354,6 +32434,10 @@ spec:
                             type: integer
                           startupPeriod:
                             description: How often to perform the startup probe.
+                            format: int32
+                            type: integer
+                          startupPort:
+                            description: The startup port to use (default 8080).
                             format: int32
                             type: integer
                           startupProbe:
