@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -334,4 +335,25 @@ func TestCreateIntegrationTraitsForPipeWithTraitAnnotations(t *testing.T) {
 		"my-annotation": "my-annotation-val",
 	}, it.Annotations)
 	assert.Equal(t, ptr.To(true), it.Spec.Traits.Service.Enabled)
+}
+
+func TestCreateIntegrationTraitsForPipeWithTraitSpec(t *testing.T) {
+	client, err := internal.NewFakeClient()
+	require.NoError(t, err)
+
+	pipe := nominalPipe("my-pipe")
+	pipe.Annotations[v1.TraitAnnotationPrefix+"service.enabled"] = "true"
+	pipe.Spec.Traits = &v1.Traits{
+		Affinity: &trait.AffinityTrait{
+			PodAffinityLabels: []string{"my-test-affinity"},
+		},
+	}
+
+	it, err := CreateIntegrationFor(context.TODO(), client, &pipe)
+	require.NoError(t, err)
+	assert.Equal(t, "my-pipe", it.Name)
+	assert.Equal(t, "default", it.Namespace)
+	// We don't allow both annotations based and spec based traits
+	assert.Nil(t, it.Spec.Traits.Service)
+	assert.Equal(t, []string{"my-test-affinity"}, it.Spec.Traits.Affinity.PodAffinityLabels)
 }
