@@ -54,6 +54,8 @@ type PipeSpec struct {
 	Sink Endpoint `json:"sink,omitempty"`
 	// ErrorHandler is an optional handler called upon an error occurring in the integration
 	ErrorHandler *ErrorHandlerSpec `json:"errorHandler,omitempty"`
+	// the traits needed to customize the depending Integration
+	Traits *Traits `json:"traits,omitempty"`
 	// Steps contains an optional list of intermediate steps that are executed between the Source and the Sink
 	Steps []Endpoint `json:"steps,omitempty"`
 	// Replicas is the number of desired replicas for the Pipe

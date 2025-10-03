@@ -50,9 +50,13 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, pipe *v1.Pipe) (
 	annotations := util.CopyMap(pipe.Annotations)
 	// avoid propagating the icon to the integration as it's heavyweight and not needed
 	delete(annotations, v1.AnnotationIcon)
-	traits, err := extractAndDeleteTraits(c, annotations)
-	if err != nil {
-		return nil, fmt.Errorf("could not marshal trait annotations %w", err)
+	traits := pipe.Spec.Traits
+	if traits == nil {
+		var err error
+		traits, err = extractAndDeleteTraits(c, annotations)
+		if err != nil {
+			return nil, fmt.Errorf("could not marshal trait annotations %w", err)
+		}
 	}
 
 	it := v1.Integration{

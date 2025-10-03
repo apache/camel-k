@@ -2553,6 +2553,11 @@ func (in *PipeSpec) DeepCopyInto(out *PipeSpec) {
 		*out = new(ErrorHandlerSpec)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.Traits != nil {
+		in, out := &in.Traits, &out.Traits
+		*out = new(Traits)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Steps != nil {
 		in, out := &in.Steps, &out.Steps
 		*out = make([]Endpoint, len(*in))

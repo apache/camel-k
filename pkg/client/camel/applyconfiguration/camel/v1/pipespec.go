@@ -26,6 +26,7 @@ type PipeSpecApplyConfiguration struct {
 	Source             *EndpointApplyConfiguration         `json:"source,omitempty"`
 	Sink               *EndpointApplyConfiguration         `json:"sink,omitempty"`
 	ErrorHandler       *ErrorHandlerSpecApplyConfiguration `json:"errorHandler,omitempty"`
+	Traits             *TraitsApplyConfiguration           `json:"traits,omitempty"`
 	Steps              []EndpointApplyConfiguration        `json:"steps,omitempty"`
 	Replicas           *int32                              `json:"replicas,omitempty"`
 	ServiceAccountName *string                             `json:"serviceAccountName,omitempty"`
@@ -67,6 +68,14 @@ func (b *PipeSpecApplyConfiguration) WithSink(value *EndpointApplyConfiguration)
 // If called multiple times, the ErrorHandler field is set to the value of the last call.
 func (b *PipeSpecApplyConfiguration) WithErrorHandler(value *ErrorHandlerSpecApplyConfiguration) *PipeSpecApplyConfiguration {
 	b.ErrorHandler = value
+	return b
+}
+
+// WithTraits sets the Traits field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Traits field is set to the value of the last call.
+func (b *PipeSpecApplyConfiguration) WithTraits(value *TraitsApplyConfiguration) *PipeSpecApplyConfiguration {
+	b.Traits = value
 	return b
 }
 

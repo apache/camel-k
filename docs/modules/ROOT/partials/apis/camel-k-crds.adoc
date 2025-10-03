@@ -4816,6 +4816,13 @@ Sink is the destination of the integration defined by this Pipe
 
 ErrorHandler is an optional handler called upon an error occurring in the integration
 
+|`traits` +
+*xref:#_camel_apache_org_v1_Traits[Traits]*
+|
+
+
+the traits needed to customize the depending Integration
+
 |`steps` +
 *xref:#_camel_apache_org_v1_Endpoint[[\]Endpoint]*
 |
@@ -5911,6 +5918,7 @@ TraitConfiguration parameters configuration
 * <<#_camel_apache_org_v1_IntegrationProfileSpec, IntegrationProfileSpec>>
 * <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
 * <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
+* <<#_camel_apache_org_v1_PipeSpec, PipeSpec>>
 
 Traits represents the collection of trait configurations.
 

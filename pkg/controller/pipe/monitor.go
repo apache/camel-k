@@ -20,6 +20,7 @@ package pipe
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
@@ -149,6 +150,8 @@ func (action *monitorAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.Pip
 	target.Status.Replicas = it.Status.Replicas
 	target.Status.Selector = it.Status.Selector
 
+	action.checkTraitAnnotationsDeprecatedNotice(target)
+
 	return target, nil
 }
 
@@ -180,5 +183,26 @@ func setPipeReadyCondition(kb *v1.Pipe, it *v1.Integration) {
 			"",
 			fmt.Sprintf("Integration %q does not have a readiness condition", it.GetName()),
 		)
+	}
+}
+
+// Deprecated: to be removed in future versions, when we won't support any longer trait annotations into Pipes.
+func (action *monitorAction) checkTraitAnnotationsDeprecatedNotice(pipe *v1.Pipe) {
+	if pipe.Annotations != nil {
+		for k := range pipe.Annotations {
+			if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
+				pipe.Status.SetCondition(
+					v1.PipeConditionType("AnnotationTraitsDeprecated"),
+					corev1.ConditionTrue,
+					"DeprecationNotice",
+					"Annotation traits configuration is deprecated and will be removed soon. Use .spec.traits configuration instead.",
+				)
+				action.L.Infof(
+					"WARN: annotation traits configuration is deprecated and will be removed soon. Use .spec.traits configuration for %s pipe instead.",
+					pipe.Name,
+				)
+				return
+			}
+		}
 	}
 }
