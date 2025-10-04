@@ -445,11 +445,6 @@ func TestIntegrationTraitsSetting(t *testing.T) {
 				Container: &traitv1.ContainerTrait{
 					Name: "my-container-name",
 				},
-				Addons: map[string]v1.AddonTrait{
-					"master": toAddonTrait(t, map[string]interface{}{
-						"resourceName": "test-lock",
-					}),
-				},
 			},
 		},
 		Status: v1.IntegrationStatus{
@@ -504,11 +499,6 @@ func TestIntegrationTraitsSetting(t *testing.T) {
 		},
 		Container: &traitv1.ContainerTrait{
 			Name: "my-container-name",
-		},
-		Addons: map[string]v1.AddonTrait{
-			"master": toAddonTrait(t, map[string]interface{}{
-				"resourceName": "test-lock",
-			}),
 		},
 	}, env.Integration.Status.Traits)
 }

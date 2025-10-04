@@ -27,3 +27,5 @@ spec:
       kind: KafkaTopic
       apiVersion: kafka.strimzi.io/v1beta2
       name: my-topic
+    properties:
+      groupId: group-1

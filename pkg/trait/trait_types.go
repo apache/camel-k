@@ -105,7 +105,7 @@ type ComparableTrait interface {
 	Comparable
 }
 
-// A list of named orders, useful for correctly binding addons.
+// A list of named orders, useful for traits sorting.
 const (
 	// TraitOrderBeforeControllerCreation can be used to inject configuration such as properties and environment variables
 	// into the running integration, before the actual controller is created.

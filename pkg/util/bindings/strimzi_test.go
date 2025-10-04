@@ -23,7 +23,7 @@ import (
 
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/duck/strimzi/v1beta2"
-	"github.com/apache/camel-k/v2/pkg/client/duck/strimzi/clientset/internalclientset/fake"
+	"github.com/apache/camel-k/v2/pkg/client/strimzi/clientset/internalclientset/fake"
 	"github.com/apache/camel-k/v2/pkg/internal"
 
 	"github.com/stretchr/testify/assert"

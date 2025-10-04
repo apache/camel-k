@@ -27,6 +27,11 @@ kubectl create namespace kafka
 kubectl create -f 'https://strimzi.io/install/latest?namespace=kafka' -n kafka
 kubectl rollout status deployment strimzi-cluster-operator -n kafka --timeout=180s
 
+#### Setup Keda operator
+# it creates by default a keda namespace
+kubectl apply -f https://github.com/kedacore/keda/releases/download/v2.17.2/keda-2.17.2.yaml
+kubectl rollout status deployment keda-operator -n keda --timeout=180s
+
 #### Setup a Kafka cluster which we'll use for testing
 kubectl apply -f ./e2e/kafka/setup/kafka-ephemeral.yaml
 kubectl wait kafka/my-cluster --for=condition=Ready --timeout=300s -n kafka

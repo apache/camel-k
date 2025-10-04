@@ -91,7 +91,7 @@ type IntegrationKitTraits struct {
 	// The Registry trait sets up Maven to use the Image registry as a Maven repository (support removed since version 2.5.0).
 	// Deprecated: use jvm trait or read documentation.
 	Registry *trait.RegistryTrait `property:"registry" json:"registry,omitempty"`
-	// The collection of addon trait configurations
+	// Deprecated: no longer in use.
 	Addons map[string]AddonTrait `json:"addons,omitempty"`
 }
 

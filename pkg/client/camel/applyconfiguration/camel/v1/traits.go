@@ -44,6 +44,7 @@ type TraitsApplyConfiguration struct {
 	Jolokia         *trait.JolokiaTrait                     `json:"jolokia,omitempty"`
 	JVM             *trait.JVMTrait                         `json:"jvm,omitempty"`
 	Kamelets        *trait.KameletsTrait                    `json:"kamelets,omitempty"`
+	Keda            *trait.KedaTrait                        `json:"keda,omitempty"`
 	Knative         *trait.KnativeTrait                     `json:"knative,omitempty"`
 	KnativeService  *trait.KnativeServiceTrait              `json:"knative-service,omitempty"`
 	Logging         *trait.LoggingTrait                     `json:"logging,omitempty"`
@@ -65,7 +66,6 @@ type TraitsApplyConfiguration struct {
 	Telemetry       *trait.TelemetryTrait                   `json:"telemetry,omitempty"`
 	Toleration      *trait.TolerationTrait                  `json:"toleration,omitempty"`
 	Addons          map[string]AddonTraitApplyConfiguration `json:"addons,omitempty"`
-	Keda            *TraitSpecApplyConfiguration            `json:"keda,omitempty"`
 	Strimzi         *TraitSpecApplyConfiguration            `json:"strimzi,omitempty"`
 	ThreeScale      *TraitSpecApplyConfiguration            `json:"3scale,omitempty"`
 	Tracing         *TraitSpecApplyConfiguration            `json:"tracing,omitempty"`
@@ -218,6 +218,14 @@ func (b *TraitsApplyConfiguration) WithJVM(value trait.JVMTrait) *TraitsApplyCon
 // If called multiple times, the Kamelets field is set to the value of the last call.
 func (b *TraitsApplyConfiguration) WithKamelets(value trait.KameletsTrait) *TraitsApplyConfiguration {
 	b.Kamelets = &value
+	return b
+}
+
+// WithKeda sets the Keda field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Keda field is set to the value of the last call.
+func (b *TraitsApplyConfiguration) WithKeda(value trait.KedaTrait) *TraitsApplyConfiguration {
+	b.Keda = &value
 	return b
 }
 
@@ -392,14 +400,6 @@ func (b *TraitsApplyConfiguration) WithAddons(entries map[string]AddonTraitApply
 	for k, v := range entries {
 		b.Addons[k] = v
 	}
-	return b
-}
-
-// WithKeda sets the Keda field in the declarative configuration to the given value
-// and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Keda field is set to the value of the last call.
-func (b *TraitsApplyConfiguration) WithKeda(value *TraitSpecApplyConfiguration) *TraitsApplyConfiguration {
-	b.Keda = value
 	return b
 }
 

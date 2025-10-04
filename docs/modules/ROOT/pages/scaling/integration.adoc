@@ -24,6 +24,53 @@ The Integration also reports its number of replicas in the `.status.replicas` fi
 $ kubectl get it <integration_name> -o jsonpath='{.status.replicas}'
 ----
 
+== Autoscaling with Keda
+
+If you have Keda operator you can leverage scaling (and serverless if you need to) on those services such as queues and databases which can be watched by Keda (see a list of https://keda.sh/docs/2.17/scalers/[available scalers]). Each scaler has a different configuration, we will use here `kafka` as a reference. Let's consider the following consumer:
+
+[source,yaml]
+----
+  - route:
+      from:
+        steps:
+        - to: log:info
+        uri: kafka:my-topic?brokers=my-cluster-kafka-bootstrap.strimzi.svc%3A9092&groupId=group-1
+----
+
+We can include a Keda trait configuration to scale it down to 0 when there is no traffic on the topic:
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: keda-kafkatopic-to-log
+  namespace: kafka
+spec:
+  flows:
+  - route:
+      from:
+        steps:
+        - to: log:info
+        uri: kafka:my-topic?brokers=my-cluster-kafka-bootstrap.strimzi.svc%3A9092&groupId=group-1
+  traits:
+    keda:
+      enabled: true
+      minReplicaCount: 0
+      maxReplicaCount: 1
+      cooldownPeriod:  20
+      pollingInterval: 10
+      triggers:
+        - type: kafka
+          metadata:
+            bootstrapServers: my-cluster-kafka-bootstrap.strimzi.svc:9092
+            consumerGroup: group-1
+            topic: my-topic
+            lagThreshold: "10"
+----
+
+We have instructed the Integration to have max one replica running and 0 (serverless), when there are no events (`lagThreshold: "10"`) on the given topic.
+
 == Autoscaling with Knative
 
 An Integration that deploys as a Knative Service can automatically scale based on _incoming_ traffic, including scaling to zero.

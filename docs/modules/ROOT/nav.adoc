@@ -6,6 +6,7 @@
 ** xref:installation/integrationplatform.adoc[Configure IntegrationPlatform]
 ** xref:installation/registry/registry.adoc[Configure Registry]
 ** xref:installation/advanced/maven.adoc[Configure Maven]
+** xref:installation/keda.adoc[Configure Keda]
 ** xref:installation/knative.adoc[Configure Knative]
 ** xref:installation/upgrade.adoc[Upgrade]
 ** xref:installation/uninstalling.adoc[Uninstalling]
@@ -81,12 +82,11 @@
 * xref:kamelets/kamelets.adoc[Kamelets]
 ** xref:kamelets/kamelets-distribution.adoc[Distribution]
 ** xref:kamelets/kamelets-user.adoc[Configuration]
-** xref:kamelets/keda.adoc[KEDA]
 * xref:pipeline/pipeline.adoc[Pipelines]
 ** xref:pipeline/external.adoc[External CICD]
 * Scaling
 ** xref:scaling/integration.adoc[Integrations]
-** xref:scaling/binding.adoc[Pipes]
+** xref:scaling/pipe.adoc[Pipes]
 * Observability
 ** xref:observability/logging.adoc[Logging]
 *** xref:observability/logging/operator.adoc[Operator]
