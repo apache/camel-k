@@ -39,6 +39,7 @@ func init() {
 	AddToTraits(newJolokiaTrait)
 	AddToTraits(newJvmTrait)
 	AddToTraits(newKameletsTrait)
+	AddToTraits(newKedaTrait)
 	AddToTraits(newKnativeTrait)
 	AddToTraits(newKnativeServiceTrait)
 	AddToTraits(newLoggingTraitTrait)

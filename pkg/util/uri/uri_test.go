@@ -19,10 +19,14 @@ package uri
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+var pathExtractorRegexp = regexp.MustCompile(`^[a-z0-9+][a-zA-Z0-9-+]*:(?://){0,1}[^/?]+/([^?]+)(?:[?].*){0,1}$`)
 
 func TestQueryParameter(t *testing.T) {
 	tests := []struct {
@@ -242,8 +246,21 @@ func TestPathSegment(t *testing.T) {
 	for _, test := range tests {
 		thetest := test
 		t.Run(thetest.uri, func(t *testing.T) {
-			param := GetPathSegment(thetest.uri, thetest.pos)
+			param := getPathSegment(thetest.uri, thetest.pos)
 			assert.Equal(t, thetest.expected, param)
 		})
 	}
+}
+
+// getPathSegment returns the path segment of the URI corresponding to the given position (0 based), if present.
+func getPathSegment(uri string, pos int) string {
+	match := pathExtractorRegexp.FindStringSubmatch(uri)
+	if len(match) > 1 {
+		fullPath := match[1]
+		parts := strings.Split(fullPath, "/")
+		if pos >= 0 && pos < len(parts) {
+			return parts[pos]
+		}
+	}
+	return ""
 }

@@ -57,14 +57,6 @@ func TestSetTraits(t *testing.T) {
 			},
 			PodAffinity: ptr.To(true),
 		},
-		Addons: map[string]AddonTrait{
-			"master": toAddonTrait(t, map[string]interface{}{
-				"enabled":      true,
-				"resourceName": "test-lock",
-				"labelKey":     "test-label",
-				"labelValue":   "test-value",
-			}),
-		},
 		Knative: &trait.KnativeTrait{
 			Trait: trait.Trait{
 				Enabled: ptr.To(true),
@@ -80,10 +72,6 @@ func TestSetTraits(t *testing.T) {
 		"trait.camel.apache.org/affinity.pod-affinity":   "true",
 		"trait.camel.apache.org/knative.channel-sources": "[channel-a channel-b]",
 		"trait.camel.apache.org/knative.enabled":         "true",
-		"trait.camel.apache.org/master.enabled":          "true",
-		"trait.camel.apache.org/master.label-key":        "test-label",
-		"trait.camel.apache.org/master.label-value":      "test-value",
-		"trait.camel.apache.org/master.resource-name":    "test-lock",
 	})
 
 	pipe := NewPipe("my-pipe", "my-ns")

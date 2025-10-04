@@ -208,7 +208,7 @@ spec:
                         trait.
                       type: object
                       x-kubernetes-preserve-unknown-fields: true
-                    description: The collection of addon trait configurations
+                    description: 'Deprecated: no longer in use.'
                     type: object
                   builder:
                     description: The builder trait is internally used to determine

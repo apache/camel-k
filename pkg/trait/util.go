@@ -43,14 +43,6 @@ func (u Options) Get(id string) (map[string]interface{}, bool) {
 		return t, true
 	}
 
-	if addons, ok := u["addons"]; ok {
-		if addon, ok := addons[id]; ok {
-			if t, ok := addon.(map[string]interface{}); ok {
-				return t, true
-			}
-		}
-	}
-
 	return nil, false
 }
 

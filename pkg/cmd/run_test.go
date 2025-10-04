@@ -458,7 +458,6 @@ func TestConfigureTraits(t *testing.T) {
 	require.NoError(t, err)
 	traitMap, err := trait.ToTraitMap(traits)
 	require.NoError(t, err)
-	assert.Len(t, traits.Addons, 0)
 	assert.Len(t, traitMap, 4)
 	assertTraitConfiguration(t, traits.Affinity, &traitv1.AffinityTrait{PodAffinity: ptr.To(false)})
 	assertTraitConfiguration(t, traits.Environment, &traitv1.EnvironmentTrait{ContainerMeta: ptr.To(false)})

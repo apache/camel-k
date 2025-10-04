@@ -18,7 +18,6 @@ limitations under the License.
 package v1
 
 import (
-	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -40,14 +39,6 @@ func TestTraitsMerge(t *testing.T) {
 			Color: ptr.To(false),
 			Level: "INFO",
 		},
-		Addons: map[string]AddonTrait{
-			"master": toAddonTrait(t, map[string]interface{}{
-				"resourceName": "test-lock",
-			}),
-			"telemetry": toAddonTrait(t, map[string]interface{}{
-				"enabled": true,
-			}),
-		},
 	}
 	t2 := Traits{
 		Container: &trait.ContainerTrait{
@@ -57,11 +48,6 @@ func TestTraitsMerge(t *testing.T) {
 		Logging: &trait.LoggingTrait{
 			Color: ptr.To(true),
 			Level: "DEBUG",
-		},
-		Addons: map[string]AddonTrait{
-			"telemetry": toAddonTrait(t, map[string]interface{}{
-				"serviceName": "test-integration",
-			}),
 		},
 	}
 
@@ -78,19 +64,6 @@ func TestTraitsMerge(t *testing.T) {
 	assert.NotNil(t, t1.Logging)
 	assert.True(t, ptr.Deref(t1.Logging.Color, false))
 	assert.Equal(t, "DEBUG", t1.Logging.Level)
-
-	assert.NotNil(t, t1.Addons)
-	assert.Equal(t,
-		toAddonTrait(t, map[string]interface{}{
-			"resourceName": "test-lock",
-		}),
-		t1.Addons["master"])
-	assert.Equal(t,
-		toAddonTrait(t, map[string]interface{}{
-			"enabled":     true,
-			"serviceName": "test-integration",
-		}),
-		t1.Addons["telemetry"])
 }
 
 func TestIntegrationKitTraitsMerge(t *testing.T) {
@@ -106,14 +79,6 @@ func TestIntegrationKitTraitsMerge(t *testing.T) {
 				"c1=value_c1",
 			},
 		},
-		Addons: map[string]AddonTrait{
-			"master": toAddonTrait(t, map[string]interface{}{
-				"resourceName": "test-lock",
-			}),
-			"telemetry": toAddonTrait(t, map[string]interface{}{
-				"enabled": true,
-			}),
-		},
 	}
 	t2 := IntegrationKitTraits{
 		Builder: &trait.BuilderTrait{
@@ -123,11 +88,6 @@ func TestIntegrationKitTraitsMerge(t *testing.T) {
 		},
 		Quarkus: &trait.QuarkusTrait{
 			NativeBaseImage: "quay.io/quarkus/quarkus-micro-image:2.0",
-		},
-		Addons: map[string]AddonTrait{
-			"telemetry": toAddonTrait(t, map[string]interface{}{
-				"serviceName": "test-integration",
-			}),
 		},
 	}
 
@@ -146,19 +106,6 @@ func TestIntegrationKitTraitsMerge(t *testing.T) {
 
 	assert.NotNil(t, t1.Quarkus)
 	assert.Equal(t, "quay.io/quarkus/quarkus-micro-image:2.0", t1.Quarkus.NativeBaseImage)
-
-	assert.NotNil(t, t1.Addons)
-	assert.Equal(t,
-		toAddonTrait(t, map[string]interface{}{
-			"resourceName": "test-lock",
-		}),
-		t1.Addons["master"])
-	assert.Equal(t,
-		toAddonTrait(t, map[string]interface{}{
-			"enabled":     true,
-			"serviceName": "test-integration",
-		}),
-		t1.Addons["telemetry"])
 }
 
 func TestDecodeValueSourceValid(t *testing.T) {
@@ -242,17 +189,4 @@ func TestDecodeValueSourceInvalid(t *testing.T) {
 		})
 	}
 
-}
-
-func toAddonTrait(t *testing.T, config map[string]interface{}) AddonTrait {
-	t.Helper()
-
-	data, err := json.Marshal(config)
-	require.NoError(t, err)
-
-	var addon AddonTrait
-	err = json.Unmarshal(data, &addon)
-	require.NoError(t, err)
-
-	return addon
 }
