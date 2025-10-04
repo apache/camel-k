@@ -196,6 +196,7 @@ spec:
                 description: the profile needed to run this Integration
                 type: string
               replicas:
+                default: 1
                 description: the number of `Pods` needed for the running Integration
                 format: int32
                 type: integer
@@ -7208,7 +7209,7 @@ spec:
                         trait.
                       type: object
                       x-kubernetes-preserve-unknown-fields: true
-                    description: The extension point with addon traits
+                    description: 'Deprecated: no longer in use.'
                     type: object
                   affinity:
                     description: The configuration of Affinity trait
@@ -8156,14 +8157,75 @@ spec:
                         type: string
                     type: object
                   keda:
-                    description: 'Deprecated: for backward compatibility.'
+                    description: The configuration of Keda trait
                     properties:
                       configuration:
-                        description: TraitConfiguration parameters configuration
+                        description: |-
+                          Legacy trait configuration parameters.
+                          Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
-                    required:
-                    - configuration
+                      cooldownPeriod:
+                        description: The wait period between the last active trigger
+                          reported and scaling the resource back to 0.
+                        format: int32
+                        type: integer
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                      idleReplicaCount:
+                        description: Enabling this property allows KEDA to scale the
+                          resource down to the specified number of replicas.
+                        format: int32
+                        type: integer
+                      maxReplicaCount:
+                        description: Maximum number of replicas.
+                        format: int32
+                        type: integer
+                      minReplicaCount:
+                        description: Minimum number of replicas.
+                        format: int32
+                        type: integer
+                      pollingInterval:
+                        description: Interval (seconds) to check each trigger on.
+                        format: int32
+                        type: integer
+                      triggers:
+                        description: |-
+                          Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
+                          to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options
+                          and optionally a mapping of secrets, used by Keda operator to poll resources according to the autoscaler type.
+                        items:
+                          properties:
+                            metadata:
+                              additionalProperties:
+                                type: string
+                              description: The trigger metadata (see Keda documentation
+                                to learn how to fill for each type).
+                              type: object
+                            secrets:
+                              description: The secrets mapping to use. Keda allows
+                                the possibility to use values coming from different
+                                secrets.
+                              items:
+                                properties:
+                                  mapping:
+                                    additionalProperties:
+                                      type: string
+                                    description: The mapping to use for this secret
+                                      (eg, `database-secret-key:keda-secret-key`)
+                                    type: object
+                                  name:
+                                    description: The name of the secret to use.
+                                    type: string
+                                type: object
+                              type: array
+                            type:
+                              description: The autoscaler type.
+                              type: string
+                          type: object
+                        type: array
                     type: object
                   knative:
                     description: The configuration of Knative trait
@@ -9303,7 +9365,7 @@ spec:
                         trait.
                       type: object
                       x-kubernetes-preserve-unknown-fields: true
-                    description: The extension point with addon traits
+                    description: 'Deprecated: no longer in use.'
                     type: object
                   affinity:
                     description: The configuration of Affinity trait
@@ -10251,14 +10313,75 @@ spec:
                         type: string
                     type: object
                   keda:
-                    description: 'Deprecated: for backward compatibility.'
+                    description: The configuration of Keda trait
                     properties:
                       configuration:
-                        description: TraitConfiguration parameters configuration
+                        description: |-
+                          Legacy trait configuration parameters.
+                          Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
-                    required:
-                    - configuration
+                      cooldownPeriod:
+                        description: The wait period between the last active trigger
+                          reported and scaling the resource back to 0.
+                        format: int32
+                        type: integer
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                      idleReplicaCount:
+                        description: Enabling this property allows KEDA to scale the
+                          resource down to the specified number of replicas.
+                        format: int32
+                        type: integer
+                      maxReplicaCount:
+                        description: Maximum number of replicas.
+                        format: int32
+                        type: integer
+                      minReplicaCount:
+                        description: Minimum number of replicas.
+                        format: int32
+                        type: integer
+                      pollingInterval:
+                        description: Interval (seconds) to check each trigger on.
+                        format: int32
+                        type: integer
+                      triggers:
+                        description: |-
+                          Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
+                          to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options
+                          and optionally a mapping of secrets, used by Keda operator to poll resources according to the autoscaler type.
+                        items:
+                          properties:
+                            metadata:
+                              additionalProperties:
+                                type: string
+                              description: The trigger metadata (see Keda documentation
+                                to learn how to fill for each type).
+                              type: object
+                            secrets:
+                              description: The secrets mapping to use. Keda allows
+                                the possibility to use values coming from different
+                                secrets.
+                              items:
+                                properties:
+                                  mapping:
+                                    additionalProperties:
+                                      type: string
+                                    description: The mapping to use for this secret
+                                      (eg, `database-secret-key:keda-secret-key`)
+                                    type: object
+                                  name:
+                                    description: The name of the secret to use.
+                                    type: string
+                                type: object
+                              type: array
+                            type:
+                              description: The autoscaler type.
+                              type: string
+                          type: object
+                        type: array
                     type: object
                   knative:
                     description: The configuration of Knative trait

@@ -311,19 +311,19 @@ func propagateKitTraits(e *Environment) v1.IntegrationKitTraits {
 	kitTraits := v1.IntegrationKitTraits{}
 
 	if e.Platform != nil {
-		propagate(fmt.Sprintf("platform %q", e.Platform.Name), e.Platform.Status.Traits, &kitTraits, e)
+		propagate(fmt.Sprintf("platform %q", e.Platform.Name), e.Platform.Status.Traits, &kitTraits)
 	}
 
 	if e.IntegrationProfile != nil {
-		propagate(fmt.Sprintf("integration profile %q", e.IntegrationProfile.Name), e.IntegrationProfile.Spec.Traits, &kitTraits, e)
+		propagate(fmt.Sprintf("integration profile %q", e.IntegrationProfile.Name), e.IntegrationProfile.Spec.Traits, &kitTraits)
 	}
 
-	propagate(fmt.Sprintf("integration %q", e.Integration.Name), e.Integration.Spec.Traits, &kitTraits, e)
+	propagate(fmt.Sprintf("integration %q", e.Integration.Name), e.Integration.Spec.Traits, &kitTraits)
 
 	return kitTraits
 }
 
-func propagate(traitSource string, traits v1.Traits, kitTraits *v1.IntegrationKitTraits, e *Environment) {
+func propagate(traitSource string, traits v1.Traits, kitTraits *v1.IntegrationKitTraits) {
 	ikt := v1.IntegrationKitTraits{
 		Builder: traits.Builder.DeepCopy(),
 		Camel:   traits.Camel.DeepCopy(),
@@ -332,19 +332,6 @@ func propagate(traitSource string, traits v1.Traits, kitTraits *v1.IntegrationKi
 
 	if err := kitTraits.Merge(ikt); err != nil {
 		log.Errorf(err, "Unable to propagate traits from %s to the integration kit", traitSource)
-	}
-
-	// propagate addons that influence kits too
-	if len(traits.Addons) > 0 {
-		if kitTraits.Addons == nil {
-			kitTraits.Addons = make(map[string]v1.AddonTrait)
-		}
-
-		for id, addon := range traits.Addons {
-			if t := e.Catalog.GetTrait(id); t != nil && t.InfluencesKit() {
-				kitTraits.Addons[id] = *addon.DeepCopy()
-			}
-		}
 	}
 }
 

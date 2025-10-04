@@ -64,7 +64,6 @@ runs:
         # Remove mock and generated code from account
         grep -v "github.com/apache/camel-k/v2/pkg/client" coverage.out \
           | grep -v "zz_generated" \
-          | grep -v "github.com/apache/camel-k/v2/addons/keda/duck/" \
           | grep -v "github.com/apache/camel-k/v2/cmd/util"  > coverage.mod.out
         go tool cover -func=coverage.mod.out -o=coverage.mod.out
         grep -o -P '(?<=\(statements\))(.+)(?=%)' coverage.mod.out | xargs > coverage

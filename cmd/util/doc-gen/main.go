@@ -23,8 +23,6 @@ import (
 	"k8s.io/gengo/args"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-
-	_ "github.com/apache/camel-k/v2/addons"
 )
 
 func main() {

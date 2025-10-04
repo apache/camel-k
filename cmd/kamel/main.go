@@ -21,7 +21,6 @@ import (
 	"context"
 	"os"
 
-	_ "github.com/apache/camel-k/v2/addons"
 	_ "github.com/apache/camel-k/v2/pkg/builder"
 	"github.com/apache/camel-k/v2/pkg/cmd"
 

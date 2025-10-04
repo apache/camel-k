@@ -1,0 +1,10 @@
+= Keda configuration
+
+"https://keda.sh[Keda] is a Kubernetes-based Event Driven Autoscaler. With KEDA, you can drive the scaling of any container in Kubernetes based on the number of events needing to be processed.". The effort done in this project is also a complement to Camel K, which can leverage the features offered by Keda to scale up and down integrations based on the traffic generated on the endpoints. In particular, Camel K will be able to leverage "scale to 0" (hence, serverless) feature when those endpoints are idle.
+
+NOTE: Keda is an optional configuration. It is not required to run Camel K.
+
+[[install-keda]]
+== Keda privileges
+
+Camel K needs to have certain privileges to use the resources used by Keda. However, the installation procedure should take care of all the privileges aspects regardless the installation methodology you're using.

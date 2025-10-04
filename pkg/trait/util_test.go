@@ -48,11 +48,6 @@ func TestToTraitMap(t *testing.T) {
 				Enabled: ptr.To(true),
 			},
 		},
-		Addons: map[string]v1.AddonTrait{
-			"telemetry": toAddonTrait(t, map[string]interface{}{
-				"enabled": true,
-			}),
-		},
 	}
 	expected := Options{
 		"container": {
@@ -66,11 +61,6 @@ func TestToTraitMap(t *testing.T) {
 		},
 		"service": {
 			"enabled": true,
-		},
-		"addons": {
-			"telemetry": map[string]interface{}{
-				"enabled": true,
-			},
 		},
 	}
 

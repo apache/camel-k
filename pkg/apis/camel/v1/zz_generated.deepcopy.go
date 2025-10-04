@@ -3263,6 +3263,11 @@ func (in *Traits) DeepCopyInto(out *Traits) {
 		*out = new(trait.KameletsTrait)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.Keda != nil {
+		in, out := &in.Keda, &out.Keda
+		*out = new(trait.KedaTrait)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Knative != nil {
 		in, out := &in.Knative, &out.Knative
 		*out = new(trait.KnativeTrait)
@@ -3369,11 +3374,6 @@ func (in *Traits) DeepCopyInto(out *Traits) {
 		for key, val := range *in {
 			(*out)[key] = *val.DeepCopy()
 		}
-	}
-	if in.Keda != nil {
-		in, out := &in.Keda, &out.Keda
-		*out = new(TraitSpec)
-		(*in).DeepCopyInto(*out)
 	}
 	if in.Strimzi != nil {
 		in, out := &in.Strimzi, &out.Strimzi

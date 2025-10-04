@@ -159,13 +159,7 @@ func (c *Catalog) executedTraitCondition(executedTrait []Trait) (*TraitCondition
 			return nil, traits, err
 		}
 		if len(traitIDMap) > 0 {
-			if isAddon(string(trait.ID())) {
-				traitMap["addons"] = map[string]interface{}{
-					string(trait.ID()): traitIDMap,
-				}
-			} else {
-				traitMap[string(trait.ID())] = traitIDMap
-			}
+			traitMap[string(trait.ID())] = traitIDMap
 		}
 
 		traitIds = append(traitIds, string(trait.ID()))
@@ -183,14 +177,6 @@ func (c *Catalog) executedTraitCondition(executedTrait []Trait) (*TraitCondition
 	c.L.Debug(message)
 
 	return NewIntegrationCondition("", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, TraitConfigurationReason, message), traits, nil
-}
-
-// Deprecated: remove this check when we include the addons traits into regular traits
-// see https://github.com/apache/camel-k/issues/5787
-// isAddon returns true if the trait is an addon.
-func isAddon(id string) bool {
-	return id == "master" || id == "keda" || id == "3scale" || id == "tracing" ||
-		id == "aws-secrets-manager" || id == "azure-key-vault" || id == "gcp-secret-manager" || id == "hashicorp-vault"
 }
 
 // GetTrait returns the trait with the given ID.

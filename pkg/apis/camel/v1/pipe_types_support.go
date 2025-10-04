@@ -83,22 +83,11 @@ func (in *Pipe) SetTraits(traits *Traits) error {
 		return err
 	}
 
-	addons := mappedTraits["addons"]
-	delete(mappedTraits, "addons")
-	if in.Annotations == nil && (len(mappedTraits) > 0 || len(addons) > 0) {
+	if in.Annotations == nil && (len(mappedTraits) > 0) {
 		in.Annotations = make(map[string]string)
 	}
 	for id, trait := range mappedTraits {
 		for k, v := range trait {
-			in.Annotations[fmt.Sprintf("%s%s.%s", TraitAnnotationPrefix, id, scase.KebabCase(k))] = fmt.Sprintf("%v", v)
-		}
-	}
-	for id, trait := range addons {
-		castedMap, ok := trait.(map[string]interface{})
-		if !ok {
-			return fmt.Errorf("could not cast trait addon %v", trait)
-		}
-		for k, v := range castedMap {
 			in.Annotations[fmt.Sprintf("%s%s.%s", TraitAnnotationPrefix, id, scase.KebabCase(k))] = fmt.Sprintf("%v", v)
 		}
 	}

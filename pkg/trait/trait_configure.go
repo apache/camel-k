@@ -75,21 +75,8 @@ func (c *Catalog) configureTraits(traits interface{}) error {
 	}
 
 	for id, trait := range traitMap {
-		if id == "addons" {
-			// Handle addons later so that the configurations on the new API
-			// take precedence over the legacy addon configurations
-			continue
-		}
 		if err := c.configureTrait(id, trait); err != nil {
 			return err
-		}
-	}
-	// Addons
-	for id, trait := range traitMap["addons"] {
-		if addons, ok := trait.(map[string]interface{}); ok {
-			if err := c.configureTrait(id, addons); err != nil {
-				return err
-			}
 		}
 	}
 

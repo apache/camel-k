@@ -59,6 +59,7 @@ type PipeSpec struct {
 	// Steps contains an optional list of intermediate steps that are executed between the Source and the Sink
 	Steps []Endpoint `json:"steps,omitempty"`
 	// Replicas is the number of desired replicas for the Pipe
+	// +kubebuilder:default=1
 	Replicas *int32 `json:"replicas,omitempty"`
 	// Custom SA to use for the Pipe
 	ServiceAccountName string `json:"serviceAccountName,omitempty"`

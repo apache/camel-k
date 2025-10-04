@@ -77,17 +77,6 @@ func (t *telemetryTrait) Configure(e *Environment) (bool, *TraitCondition, error
 
 	var condition *TraitCondition
 
-	// Deprecated
-	if _, isAddon := e.Integration.Spec.Traits.Addons["telemetry"]; isAddon {
-		condition = NewIntegrationCondition(
-			"Telemetry",
-			v1.IntegrationConditionTraitInfo,
-			corev1.ConditionTrue,
-			TraitConfigurationReason,
-			"Telemetry addon configuration is deprecated and may be removed in future releases. Make sure to use Telemetry trait configuration instead.",
-		)
-	}
-
 	if !ptr.Deref(t.Auto, true) {
 		return true, condition, nil
 	}

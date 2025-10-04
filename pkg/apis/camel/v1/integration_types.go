@@ -56,6 +56,7 @@ type Integration struct {
 // The Integration will be watched by the operator which will be in charge to run the related application, according to the configuration specified.
 type IntegrationSpec struct {
 	// the number of `Pods` needed for the running Integration
+	// +kubebuilder:default=1
 	Replicas *int32 `json:"replicas,omitempty"`
 	// the sources which contain the Camel routes to run
 	Sources []SourceSpec `json:"sources,omitempty"`

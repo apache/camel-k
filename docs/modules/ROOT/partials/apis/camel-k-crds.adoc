@@ -2821,7 +2821,7 @@ Deprecated: use jvm trait or read documentation.
 |
 
 
-The collection of addon trait configurations
+Deprecated: no longer in use.
 
 
 |===
@@ -6054,6 +6054,13 @@ The configuration of JVM trait
 
 The configuration of Kamelets trait
 
+|`keda` +
+*xref:#_camel_apache_org_v1_trait_KedaTrait[KedaTrait]*
+|
+
+
+The configuration of Keda trait
+
 |`knative` +
 *xref:#_camel_apache_org_v1_trait_KnativeTrait[KnativeTrait]*
 |
@@ -6201,14 +6208,7 @@ The configuration of Toleration trait
 |
 
 
-The extension point with addon traits
-
-|`keda` +
-*xref:#_camel_apache_org_v1_TraitSpec[TraitSpec]*
-|
-
-
-Deprecated: for backward compatibility.
+Deprecated: no longer in use.
 
 |`strimzi` +
 *xref:#_camel_apache_org_v1_TraitSpec[TraitSpec]*
@@ -7839,6 +7839,144 @@ The directory where the application mounts and reads Kamelet spec (default `/etc
 
 |===
 
+[#_camel_apache_org_v1_trait_KedaSecret]
+=== KedaSecret
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_trait_KedaTrigger, KedaTrigger>>
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`name` +
+string
+|
+
+
+The name of the secret to use.
+
+|`mapping` +
+map[string]string
+|
+
+
+The mapping to use for this secret (eg, `database-secret-key:keda-secret-key`)
+
+
+|===
+
+[#_camel_apache_org_v1_trait_KedaTrait]
+=== KedaTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The KEDA trait allows you to configure KEDA autoscalers to scale up and down based of events.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`pollingInterval` +
+int32
+|
+
+
+Interval (seconds) to check each trigger on.
+
+|`cooldownPeriod` +
+int32
+|
+
+
+The wait period between the last active trigger reported and scaling the resource back to 0.
+
+|`idleReplicaCount` +
+int32
+|
+
+
+Enabling this property allows KEDA to scale the resource down to the specified number of replicas.
+
+|`minReplicaCount` +
+int32
+|
+
+
+Minimum number of replicas.
+
+|`maxReplicaCount` +
+int32
+|
+
+
+Maximum number of replicas.
+
+|`triggers` +
+*xref:#_camel_apache_org_v1_trait_KedaTrigger[[\]KedaTrigger]*
+|
+
+
+Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
+to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options
+and optionally a mapping of secrets, used by Keda operator to poll resources according to the autoscaler type.
+
+
+|===
+
+[#_camel_apache_org_v1_trait_KedaTrigger]
+=== KedaTrigger
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_trait_KedaTrait, KedaTrait>>
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`type` +
+string
+|
+
+
+The autoscaler type.
+
+|`metadata` +
+map[string]string
+|
+
+
+The trigger metadata (see Keda documentation to learn how to fill for each type).
+
+|`secrets` +
+*xref:#_camel_apache_org_v1_trait_KedaSecret[[\]KedaSecret]*
+|
+
+
+The secrets mapping to use. Keda allows the possibility to use values coming from different secrets.
+
+
+|===
+
 [#_camel_apache_org_v1_trait_KnativeServiceTrait]
 === KnativeServiceTrait
 
@@ -9242,6 +9380,7 @@ The list of taints to tolerate, in the form `Key[=Value]:Effect[:Seconds]`
 * <<#_camel_apache_org_v1_trait_JVMTrait, JVMTrait>>
 * <<#_camel_apache_org_v1_trait_JolokiaTrait, JolokiaTrait>>
 * <<#_camel_apache_org_v1_trait_KameletsTrait, KameletsTrait>>
+* <<#_camel_apache_org_v1_trait_KedaTrait, KedaTrait>>
 * <<#_camel_apache_org_v1_trait_KnativeServiceTrait, KnativeServiceTrait>>
 * <<#_camel_apache_org_v1_trait_KnativeTrait, KnativeTrait>>
 * <<#_camel_apache_org_v1_trait_LoggingTrait, LoggingTrait>>

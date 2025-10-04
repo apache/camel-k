@@ -217,6 +217,8 @@ type Traits struct {
 	JVM *trait.JVMTrait `property:"jvm" json:"jvm,omitempty"`
 	// The configuration of Kamelets trait
 	Kamelets *trait.KameletsTrait `property:"kamelets" json:"kamelets,omitempty"`
+	// The configuration of Keda trait
+	Keda *trait.KedaTrait `property:"keda" json:"keda,omitempty"`
 	// The configuration of Knative trait
 	Knative *trait.KnativeTrait `property:"knative" json:"knative,omitempty"`
 	// The configuration of Knative Service trait
@@ -260,11 +262,9 @@ type Traits struct {
 	// The configuration of Toleration trait
 	Toleration *trait.TolerationTrait `property:"toleration" json:"toleration,omitempty"`
 
-	// The extension point with addon traits
+	// Deprecated: no longer in use.
 	Addons map[string]AddonTrait `json:"addons,omitempty"`
 
-	// Deprecated: for backward compatibility.
-	Keda *TraitSpec `property:"keda" json:"keda,omitempty"`
 	// Deprecated: for backward compatibility.
 	Strimzi *TraitSpec `property:"strimzi" json:"strimzi,omitempty"`
 	// Deprecated: for backward compatibility.

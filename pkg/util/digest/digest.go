@@ -165,27 +165,14 @@ func ComputeForIntegration(integration *v1.Integration, configmapVersions []stri
 	return digest, nil
 }
 
-//nolint:nestif
 func computeForTraits(hash hash.Hash, traits v1.Traits) error {
 	specTraitsMap, err := toMap(traits)
 	if err != nil {
 		return err
 	}
 	for _, name := range sortedTraitsMapKeys(specTraitsMap) {
-		if name != "addons" {
-			if err := computeForTrait(hash, name, specTraitsMap[name]); err != nil {
-				return err
-			}
-		} else {
-			// Addons
-			addons := specTraitsMap["addons"]
-			for _, name := range util.SortedMapKeys(addons) {
-				if addon, ok := addons[name].(map[string]interface{}); ok {
-					if err := computeForTrait(hash, name, addon); err != nil {
-						return err
-					}
-				}
-			}
+		if err := computeForTrait(hash, name, specTraitsMap[name]); err != nil {
+			return err
 		}
 	}
 	return nil

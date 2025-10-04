@@ -66,35 +66,3 @@ func TestTelemetryTrait(t *testing.T) {
 		g.Eventually(TailedLogs(t, ctx, pod.Namespace, pod.Name, 100), TestTimeoutLong).Should(ContainSubstring("http.route: Str(/customers/:name)"))
 	})
 }
-
-func TestTelemetryAddon(t *testing.T) {
-	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		// Check service is available
-		g.Eventually(ServicesByType(t, ctx, "otlp", corev1.ServiceTypeClusterIP), TestTimeoutLong).ShouldNot(BeEmpty())
-
-		// Create integration and activate traces by telemetry trait
-		ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/int-rest-consumer-addon.yaml", "-n", ns))
-		g.Eventually(IntegrationPodPhase(t, ctx, ns, "rest-consumer-addon"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		g.Eventually(IntegrationCondition(t, ctx, ns, "rest-consumer-addon", "TelemetryTraitInfo"), TestTimeoutShort).Should(
-			WithTransform(IntegrationConditionMessage, ContainSubstring("Telemetry addon configuration is deprecated")))
-
-		name := "Alice"
-		serviceName := fmt.Sprintf("rest-consumer-addon.%s", ns)
-		g.Expect(KamelRun(t, ctx, ns, "files/rest-producer.yaml",
-			"-p", fmt.Sprintf("serviceName=%s", serviceName),
-			"-p", "name="+name,
-			"--name", "rest-producer-addon").Execute()).To(Succeed())
-		g.Eventually(IntegrationPodPhase(t, ctx, ns, "rest-producer-addon"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		g.Eventually(IntegrationLogs(t, ctx, ns, "rest-consumer-addon"), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("get %s", name)))
-		g.Eventually(IntegrationLogs(t, ctx, ns, "rest-producer-addon"), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("%s Doe", name)))
-
-		// Find opentelemetry collector pod : the exporter is configured to log traces with detailed verbosity.
-		pod, err := Pod(t, ctx, "otlp", "opentelemetrycollector")()
-		g.Expect(err).To(BeNil())
-		g.Expect(pod).NotTo(BeNil())
-
-		// Ensured logs in opentelemetry collector pod are present
-		g.Eventually(TailedLogs(t, ctx, pod.Namespace, pod.Name, 100), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("url.path: Str(/customers/%s)", name)))
-		g.Eventually(TailedLogs(t, ctx, pod.Namespace, pod.Name, 100), TestTimeoutLong).Should(ContainSubstring("http.route: Str(/customers/:name)"))
-	})
-}

@@ -22,7 +22,7 @@ import (
 
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/duck/strimzi/v1beta2"
-	"github.com/apache/camel-k/v2/pkg/client/duck/strimzi/clientset/internalclientset"
+	"github.com/apache/camel-k/v2/pkg/client/strimzi/clientset/internalclientset"
 	"github.com/apache/camel-k/v2/pkg/util/uri"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"

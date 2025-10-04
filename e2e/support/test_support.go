@@ -89,9 +89,6 @@ import (
 	projectv1 "github.com/openshift/api/project/v1"
 	routev1 "github.com/openshift/api/route/v1"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-
-	// let's enable addons in all tests
-	_ "github.com/apache/camel-k/v2/addons"
 )
 
 const kubeConfigEnvVar = "KUBECONFIG"
