@@ -286,23 +286,16 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 		isUpdateRequired = true
 	}
 
-	//nolint:nestif
 	if isUpdateRequired {
-		if replicas == nil {
-			if t.MinScale != nil && *t.MinScale > 0 {
-				svc.Spec.Template.Annotations[knativeServingMinScaleAnnotation] = strconv.Itoa(*t.MinScale)
-			} else {
-				delete(svc.Spec.Template.Annotations, knativeServingMinScaleAnnotation)
-			}
-			if t.MaxScale != nil && *t.MaxScale > 0 {
-				svc.Spec.Template.Annotations[knativeServingMaxScaleAnnotation] = strconv.Itoa(*t.MaxScale)
-			} else {
-				delete(svc.Spec.Template.Annotations, knativeServingMaxScaleAnnotation)
-			}
+		if t.MinScale != nil && *t.MinScale > 0 {
+			svc.Spec.Template.Annotations[knativeServingMinScaleAnnotation] = strconv.Itoa(*t.MinScale)
 		} else {
-			scale := strconv.Itoa(int(*replicas))
-			svc.Spec.Template.Annotations[knativeServingMinScaleAnnotation] = scale
-			svc.Spec.Template.Annotations[knativeServingMaxScaleAnnotation] = scale
+			delete(svc.Spec.Template.Annotations, knativeServingMinScaleAnnotation)
+		}
+		if t.MaxScale != nil && *t.MaxScale > 0 {
+			svc.Spec.Template.Annotations[knativeServingMaxScaleAnnotation] = strconv.Itoa(*t.MaxScale)
+		} else {
+			delete(svc.Spec.Template.Annotations, knativeServingMaxScaleAnnotation)
 		}
 	}
 
