@@ -531,4 +531,5 @@ spec:
 <4> Optional Json schema describing the `application/cloudevents+json` data type
 <5> Optional list of additional dependencies that are required by the data type.
 
+[[kamelet-keda-user]]
 This way users may choose the best Kamelet data type for a specific use case when referencing Kamelets in a binding.
