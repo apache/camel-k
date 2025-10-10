@@ -1,6 +1,6 @@
 = Self Managed Build Integrations
 
-Camel K operator is traditionally in charge to perform a build from a Camel DSL source. The resulting Integration depends directly on an xref:architecture/cr/integration-kit.adoc[IntegrationKit], which is a reusable custom resource backing the final container image that your application will run. The only runtime the operator can build is Camel Quarkus (via Camel K Runtime project).
+Camel K operator is traditionally in charge to perform a build from a Camel DSL source. The resulting Integration depends directly on an xref:architecture/cr/integration-kit.adoc[IntegrationKit], which is a reusable custom resource backing the final container image that your application will run.
 
 However Camel K can run any runtime available in Apache Camel. This is possible only when the Camel application was previously built and packaged into a container image externally. Mind that if you run through this option, some of the features offered by the operator may not be available. For example, you won't be able to discover Camel capabilities because the source is not available to the operator but embedded in the container image.
 
