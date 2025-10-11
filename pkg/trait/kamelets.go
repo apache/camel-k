@@ -20,6 +20,7 @@ package trait
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -50,8 +51,6 @@ const (
 	KameletErrorHandler         = "camel.component.kamelet.no-error-handler"
 	kameletMountPointAnnotation = "camel.apache.org/kamelet.mount-point"
 )
-
-var kameletVersionProperty = fmt.Sprintf("?%s=", v1.KameletVersionProperty)
 
 type kameletsTrait struct {
 	BaseTrait
@@ -89,7 +88,7 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 		}
 	}
 
-	return len(t.getKameletKeys(false)) > 0, nil, nil
+	return len(t.getKameletKeys()) > 0, nil, nil
 }
 
 func (t *kameletsTrait) Apply(e *Environment) error {
@@ -103,18 +102,22 @@ func (t *kameletsTrait) Apply(e *Environment) error {
 
 // collectKamelets load a Kamelet specification setting the specific version specification.
 func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet, error) {
-	repo, err := repository.NewForPlatform(e.Ctx, e.Client, e.Platform, e.Integration.Namespace, platform.GetOperatorNamespace())
+	namespaces, err := t.calculateNamespaces(e.Integration.Namespace, platform.GetOperatorNamespace())
+	if err != nil {
+		return nil, err
+	}
+	repo, err := repository.NewForPlatform(e.Ctx, e.Client, e.Platform, namespaces...)
 	if err != nil {
 		return nil, err
 	}
 
 	kamelets := make(map[string]*v1.Kamelet)
-	missingKamelets := make([]string, 0)
-	availableKamelets := make([]string, 0)
-	bundledKamelets := make([]string, 0)
+	var missingKamelets []string
+	var availableKamelets []string
+	var bundledKamelets []string
 
 	for _, kml := range strings.Split(t.List, ",") {
-		name := getKameletKey(kml, false)
+		name := getKameletKey(kml)
 		if !v1.ValidKameletName(name) {
 			// Skip kamelet sink and source id
 			continue
@@ -133,7 +136,11 @@ func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet,
 			bundledKamelets = append(bundledKamelets, name)
 		}
 		// We control which version to use (if any is specified)
-		clonedKamelet, err := kamelet.CloneWithVersion(getKameletVersion(kml))
+		version, err := getKameletVersion(kml)
+		if err != nil {
+			return nil, fmt.Errorf("could not parse kamelet version: %w", err)
+		}
+		clonedKamelet, err := kamelet.CloneWithVersion(version)
 		if err != nil {
 			return nil, err
 		}
@@ -186,8 +193,38 @@ func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet,
 	return kamelets, nil
 }
 
+// calculateNamespaces is in charge to scan the kamelets specification and provide a list of
+// namespaces where to look for Kamelets.
+func (t *kameletsTrait) calculateNamespaces(defaultNamespaces ...string) ([]string, error) {
+	return calculateNamespaces(strings.Split(t.List, ","), defaultNamespaces...)
+}
+
+func calculateNamespaces(kamelets []string, defaultNamespaces ...string) ([]string, error) {
+	namespaces := defaultNamespaces
+	for _, kml := range kamelets {
+		ns, err := getKameletNamespace(kml)
+		if err != nil {
+			return nil, fmt.Errorf("could not parse kamelet namespace: %w", err)
+		}
+		if ns != "" {
+			addNs := true
+		loop:
+			for _, addedNs := range namespaces {
+				if addedNs == ns {
+					addNs = false
+					break loop
+				}
+			}
+			if addNs {
+				namespaces = append(namespaces, ns)
+			}
+		}
+	}
+	return namespaces, nil
+}
+
 func (t *kameletsTrait) addKamelets(e *Environment) error {
-	if len(t.getKameletKeys(false)) == 0 {
+	if len(t.getKameletKeys()) == 0 {
 		return nil
 	}
 	kamelets, err := t.collectKamelets(e)
@@ -280,10 +317,10 @@ func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1.Kamelet) 
 	return nil
 }
 
-func (t *kameletsTrait) getKameletKeys(withVersion bool) []string {
+func (t *kameletsTrait) getKameletKeys() []string {
 	answer := make([]string, 0)
 	for _, item := range strings.Split(t.List, ",") {
-		i := getKameletKey(item, withVersion)
+		i := getKameletKey(item)
 		if i != "" && v1.ValidKameletName(i) {
 			util.StringSliceUniqueAdd(&answer, i)
 		}
@@ -300,28 +337,35 @@ func (t *kameletsTrait) getMountPoint() string {
 	return t.MountPoint
 }
 
-func getKameletKey(item string, withVersion bool) string {
-	i := strings.Trim(item, " \t\"")
-	if strings.Contains(i, "/") {
-		i = strings.SplitN(i, "/", 2)[0]
+// getKameletKey remove any params from the kamelet, eg my-kamelet/abc?param1=1 will return the uri path filtered (my-kamelet).
+func getKameletKey(item string) string {
+	parsedURL, err := url.Parse(item)
+	if err != nil {
+		return ""
 	}
-	if strings.Contains(i, kameletVersionProperty) {
-		versionedKamelet := strings.SplitN(i, kameletVersionProperty, 2)
-		if withVersion {
-			i = fmt.Sprintf("%s-%s", versionedKamelet[0], versionedKamelet[1])
-		} else {
-			i = versionedKamelet[0]
-		}
-	}
-	return i
-}
-
-func getKameletVersion(item string) string {
-	if strings.Contains(item, fmt.Sprintf("?%s=", v1.KameletVersionProperty)) {
-		versionedKamelet := strings.SplitN(item, kameletVersionProperty, 2)
-		return versionedKamelet[1]
+	parts := strings.Split(parsedURL.Path, "/")
+	if len(parts) > 0 {
+		return parts[0]
 	}
 	return ""
+}
+
+func getKameletVersion(item string) (string, error) {
+	return getKameletParam(item, v1.KameletVersionProperty)
+}
+
+func getKameletNamespace(item string) (string, error) {
+	return getKameletParam(item, v1.KameletNamespaceProperty)
+}
+
+func getKameletParam(uri, param string) (string, error) {
+	parsedURL, err := url.Parse(uri)
+	if err != nil {
+		return "", err
+	}
+
+	queryParams := parsedURL.Query()
+	return queryParams.Get(param), nil
 }
 
 func integrationSourceFromKameletSource(e *Environment, kamelet *v1.Kamelet, source v1.SourceSpec, name string) (v1.SourceSpec, error) {

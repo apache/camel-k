@@ -19,20 +19,32 @@ package source
 
 import (
 	"fmt"
+	"net/url"
 	"regexp"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 var kameletNameRegexp = regexp.MustCompile("kamelet:(?://)?([a-z0-9-.]+(/[a-z0-9-.]+)?)(?:$|[^a-z0-9-.].*)")
-var kameletVersionRegexp = regexp.MustCompile(v1.KameletVersionProperty + "=([a-z0-9-.]+)")
 
+//nolint:nestif
 func ExtractKamelet(uri string) string {
 	matches := kameletNameRegexp.FindStringSubmatch(uri)
 	if len(matches) > 1 {
-		version := kameletVersionRegexp.FindString(uri)
-		if version != "" {
-			return fmt.Sprintf("%s?%s", matches[1], version)
+		version := getKameletParam(uri, v1.KameletVersionProperty)
+		namespace := getKameletParam(uri, v1.KameletNamespaceProperty)
+		if version != "" || namespace != "" {
+			var querystring string
+			if version != "" {
+				querystring = v1.KameletVersionProperty + "=" + version
+			}
+			if namespace != "" {
+				if querystring != "" {
+					querystring += "&"
+				}
+				querystring += v1.KameletNamespaceProperty + "=" + namespace
+			}
+			return fmt.Sprintf("%s?%s", matches[1], querystring)
 		}
 		return matches[1]
 	}
@@ -43,4 +55,15 @@ func AddKamelet(meta *Metadata, content string) {
 	if maybeKamelet := ExtractKamelet(content); maybeKamelet != "" {
 		meta.Kamelets = append(meta.Kamelets, maybeKamelet)
 	}
+}
+
+// getKameletParam parses the URI and return the query parameter or an empty value if not found.
+func getKameletParam(uri, param string) string {
+	parsedURL, err := url.Parse(uri)
+	if err != nil {
+		return ""
+	}
+
+	queryParams := parsedURL.Query()
+	return queryParams.Get(param)
 }

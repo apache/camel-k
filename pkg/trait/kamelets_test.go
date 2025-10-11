@@ -68,8 +68,7 @@ func TestConfigurationWithKamelets(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, enabled)
 	assert.Nil(t, condition)
-	assert.Equal(t, []string{"c0", "c1", "c2", "c3", "complex-.-.-1a", "complex-.-.-1b", "complex-.-.-1c"}, trait.getKameletKeys(false))
-	assert.Equal(t, []string{"c0", "c1", "c2", "c3-v1", "complex-.-.-1a", "complex-.-.-1b", "complex-.-.-1c"}, trait.getKameletKeys(true))
+	assert.Equal(t, []string{"c0", "c1", "c2", "c3", "complex-.-.-1a", "complex-.-.-1b", "complex-.-.-1c"}, trait.getKameletKeys())
 }
 
 func TestKameletLookup(t *testing.T) {
@@ -101,7 +100,7 @@ func TestKameletLookup(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, enabled)
 	assert.Nil(t, condition)
-	assert.Equal(t, []string{"timer"}, trait.getKameletKeys(false))
+	assert.Equal(t, []string{"timer"}, trait.getKameletKeys())
 
 	err = trait.Apply(environment)
 	require.NoError(t, err)
@@ -152,7 +151,7 @@ func TestKameletSecondarySourcesLookup(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, enabled)
 	assert.Nil(t, condition)
-	assert.Equal(t, []string{"timer"}, trait.getKameletKeys(false))
+	assert.Equal(t, []string{"timer"}, trait.getKameletKeys())
 
 	err = trait.Apply(environment)
 	require.NoError(t, err)
@@ -205,7 +204,7 @@ func TestNonYAMLKameletLookup(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, enabled)
 	assert.Nil(t, condition)
-	assert.Equal(t, []string{"timer"}, trait.getKameletKeys(false))
+	assert.Equal(t, []string{"timer"}, trait.getKameletKeys())
 
 	err = trait.Apply(environment)
 	require.NoError(t, err)
@@ -312,8 +311,7 @@ func TestMultipleKamelets(t *testing.T) {
 	assert.True(t, enabled)
 	assert.Nil(t, condition)
 	assert.Equal(t, "logger,timer?kameletVersion=v1", trait.List)
-	assert.Equal(t, []string{"logger", "timer"}, trait.getKameletKeys(false))
-	assert.Equal(t, []string{"logger", "timer-v1"}, trait.getKameletKeys(true))
+	assert.Equal(t, []string{"logger", "timer"}, trait.getKameletKeys())
 
 	err = trait.Apply(environment)
 	require.NoError(t, err)
@@ -409,7 +407,7 @@ func TestKameletConfigLookup(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, enabled)
 	assert.Nil(t, condition)
-	assert.Equal(t, []string{"timer"}, trait.getKameletKeys(false))
+	assert.Equal(t, []string{"timer"}, trait.getKameletKeys())
 }
 
 func TestKameletNamedConfigLookup(t *testing.T) {
@@ -467,7 +465,7 @@ func TestKameletNamedConfigLookup(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, enabled)
 	assert.Nil(t, condition)
-	assert.Equal(t, []string{"timer"}, trait.getKameletKeys(false))
+	assert.Equal(t, []string{"timer"}, trait.getKameletKeys())
 }
 
 func TestKameletConditionFalse(t *testing.T) {
@@ -752,4 +750,147 @@ func TestKameletAuto(t *testing.T) {
 		environment.ApplicationProperties[KameletLocationProperty],
 	)
 	assert.Equal(t, "false", environment.ApplicationProperties[KameletErrorHandler])
+}
+
+func TestKameletVersionParameter(t *testing.T) {
+	v1, err := getKameletVersion("my-kamelet?kameletVersion=v2")
+	require.NoError(t, err)
+	assert.Equal(t, "v2", v1)
+	v2, err := getKameletVersion("my-kamelet?prop1=1&kameletVersion=v2")
+	require.NoError(t, err)
+	assert.Equal(t, "v2", v2)
+	v3, err := getKameletVersion("my-kamelet")
+	require.NoError(t, err)
+	assert.Equal(t, "", v3)
+}
+
+func TestKameletNamespaceParameter(t *testing.T) {
+	v2, err := getKameletNamespace("my-kamelet?prop1=1&kameletNamespace=my-ns")
+	require.NoError(t, err)
+	assert.Equal(t, "my-ns", v2)
+}
+
+func TestCalculateKameletNamespaces(t *testing.T) {
+	namespaces, err := calculateNamespaces(
+		[]string{"my-kamelet", "my-kamelet?kameletNamespace=ns1", "my-kamelet?kameletVersion=v2&kameletNamespace=ns2"},
+		"default", "camel-k",
+	)
+	require.NoError(t, err)
+	assert.Len(t, namespaces, 4)
+	assert.Contains(t, namespaces, "ns1")
+	assert.Contains(t, namespaces, "ns2")
+	assert.Contains(t, namespaces, "default")
+	assert.Contains(t, namespaces, "camel-k")
+}
+
+func TestKameletMultiNamespace(t *testing.T) {
+	flow := `
+- from:
+    uri: kamelet:timer
+    steps:
+    - to: kamelet:extra?kameletNamespace=ns1
+`
+	trait, environment := createKameletsTestEnvironment(
+		flow,
+		&v1.Kamelet{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "test",
+				Name:      "timer",
+			},
+			Spec: v1.KameletSpec{
+				KameletSpecBase: v1.KameletSpecBase{
+					Template: templateOrFail(map[string]interface{}{
+						"from": map[string]interface{}{
+							"uri": "timer:tick",
+						},
+					}),
+				},
+			},
+		},
+		&v1.Kamelet{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns1",
+				Name:      "extra",
+			},
+			Spec: v1.KameletSpec{
+				KameletSpecBase: v1.KameletSpecBase{
+					Template: templateOrFail(map[string]interface{}{
+						"from": map[string]interface{}{
+							"uri": "timer:tick",
+						},
+					}),
+				},
+			},
+		})
+
+	enabled, condition, err := trait.Configure(environment)
+	require.NoError(t, err)
+	assert.True(t, enabled)
+	assert.Nil(t, condition)
+
+	err = trait.Apply(environment)
+	require.NoError(t, err)
+	assert.Equal(t, "extra?kameletNamespace=ns1,timer", trait.List)
+	assert.Equal(t,
+		corev1.ConditionTrue,
+		environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable).Status)
+	assert.Equal(t,
+		"kamelets [extra,timer] found in (Kubernetes[namespace=test], Kubernetes[namespace=ns1], Empty[]) repositories",
+		environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable).Message)
+}
+
+func TestKameletMultiNamespaceMissing(t *testing.T) {
+	flow := `
+- from:
+    uri: kamelet:timer
+    steps:
+    - to: kamelet:missing?kameletNamespace=ns1
+`
+	trait, environment := createKameletsTestEnvironment(
+		flow,
+		&v1.Kamelet{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "test",
+				Name:      "timer",
+			},
+			Spec: v1.KameletSpec{
+				KameletSpecBase: v1.KameletSpecBase{
+					Template: templateOrFail(map[string]interface{}{
+						"from": map[string]interface{}{
+							"uri": "timer:tick",
+						},
+					}),
+				},
+			},
+		},
+		&v1.Kamelet{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "another-namespace",
+				Name:      "missing",
+			},
+			Spec: v1.KameletSpec{
+				KameletSpecBase: v1.KameletSpecBase{
+					Template: templateOrFail(map[string]interface{}{
+						"from": map[string]interface{}{
+							"uri": "timer:tick",
+						},
+					}),
+				},
+			},
+		})
+
+	enabled, condition, err := trait.Configure(environment)
+	require.NoError(t, err)
+	assert.True(t, enabled)
+	assert.Nil(t, condition)
+	assert.Equal(t, "missing?kameletNamespace=ns1,timer", trait.List)
+
+	err = trait.Apply(environment)
+	require.Error(t, err)
+	assert.Equal(t,
+		corev1.ConditionFalse,
+		environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable).Status)
+	assert.Equal(t,
+		"kamelets [missing] not found in (Kubernetes[namespace=test], Kubernetes[namespace=ns1], Empty[]) repositories",
+		err.Error())
 }
