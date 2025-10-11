@@ -29,4 +29,4 @@ Kamelets are also expected to be **rendered on visual tools** that will provide 
 They are generic connectors that can be used in multiples ways, depending on the context, so each UIs can use them
 for its own purpose.
 
-Have a look at the xref:kamelets/kamelets-user.adoc[Kamelets User Guide] to learn how to immediately use Kamelets in Camel K or check xref:kamelets/kamelets-distribution.adoc[how to use your own Kamelet catalog].
+Have a look at the xref:kamelets/configuration.adoc[Kamelets User Guide] to learn how to immediately use Kamelets in Camel K or check xref:kamelets/distribution.adoc[how to use your own Kamelet catalog].

@@ -7,6 +7,12 @@ NOTE: the version we bundle depends directly on the default Camel version used. 
 
 As development of Kamelet is very fast, make sure to use some version which is compatible with the Camel runtime you're going to use.
 
+== Release Kamelets on the cluster
+
+Since Kamelets are Kubernetes custom resources, the Camel K opinionated way of Kamelets distribution is to expect them available on the cluster. You tipically develop a Kamelet and then release it in the Integration namespace or the operator namespace. Alternatively you can also deliver them into any other namespace.
+
+There is not a prescribed way how to release the Kamelets on the cluster. It can vary based on each company process. What's important for the operator, is that they are available when running the Integrations.
+
 [[kamelets-own-catalog]]
 == Provide your own catalog
 
@@ -25,7 +31,7 @@ With this approach you can dynamically include any repository where your Kamelet
 [[kamelets-as-dependency]]
 == Kamelets as a dependency
 
-The Camel K has an opinionated way to use Kamelets which is the one exposed above. Here the Kamelet spec resource is expected to be available in the cluster.
+The Camel K has an opinionated way to use Kamelets which is the usage of cluster custom resources. Here the Kamelet spec resource is expected to be available in the cluster.
 
 However, you may find situations where you want to bundle a Kamelet in a dependency (ie, some external catalog containing all Kamelets spec). As Kamelets are a Camel thing, then, you can use such dependency and let the runtime use the Kamelets available in the classpath.
 
