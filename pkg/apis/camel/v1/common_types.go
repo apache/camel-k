@@ -212,6 +212,7 @@ type Traits struct {
 	// The configuration of Istio trait
 	Istio *trait.IstioTrait `property:"istio" json:"istio,omitempty"`
 	// The configuration of Jolokia trait
+	// Deprecated: use jvm.agent instead.
 	Jolokia *trait.JolokiaTrait `property:"jolokia" json:"jolokia,omitempty"`
 	// The configuration of JVM trait
 	JVM *trait.JVMTrait `property:"jvm" json:"jvm,omitempty"`
@@ -230,6 +231,7 @@ type Traits struct {
 	// The configuration of Mount trait
 	Mount *trait.MountTrait `property:"mount" json:"mount,omitempty"`
 	// The configuration of OpenAPI trait
+	// Deprecated: no longer in use.
 	OpenAPI *trait.OpenAPITrait `property:"openapi" json:"openapi,omitempty"`
 	// The configuration of Owner trait
 	Owner *trait.OwnerTrait `property:"owner" json:"owner,omitempty"`
@@ -238,6 +240,7 @@ type Traits struct {
 	// The configuration of Platform trait
 	Platform *trait.PlatformTrait `property:"platform" json:"platform,omitempty"`
 	// The configuration of Pod trait
+	// Deprecated: use init-containers instead.
 	Pod *trait.PodTrait `property:"pod" json:"pod,omitempty"`
 	// The configuration of Prometheus trait
 	Prometheus *trait.PrometheusTrait `property:"prometheus" json:"prometheus,omitempty"`
@@ -249,6 +252,7 @@ type Traits struct {
 	// Deprecated: use jvm trait or read documentation.
 	Registry *trait.RegistryTrait `property:"registry" json:"registry,omitempty"`
 	// The configuration of Route trait
+	// Deprecated: use ingress instead.
 	Route *trait.RouteTrait `property:"route" json:"route,omitempty"`
 	// The configuration of Security Context trait
 	SecurityContext *trait.SecurityContextTrait `property:"security-context" json:"security-context,omitempty"`
@@ -265,11 +269,11 @@ type Traits struct {
 	// Deprecated: no longer in use.
 	Addons map[string]AddonTrait `json:"addons,omitempty"`
 
-	// Deprecated: for backward compatibility.
+	// Deprecated: no longer in use.
 	Strimzi *TraitSpec `property:"strimzi" json:"strimzi,omitempty"`
-	// Deprecated: for backward compatibility.
+	// Deprecated: no longer in use.
 	ThreeScale *TraitSpec `property:"3scale" json:"3scale,omitempty"`
-	// Deprecated: for backward compatibility.
+	// Deprecated: no longer in use.
 	Tracing *TraitSpec `property:"tracing" json:"tracing,omitempty"`
 }
 
