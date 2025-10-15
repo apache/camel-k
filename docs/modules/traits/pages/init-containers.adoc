@@ -94,8 +94,6 @@ When creating the Integration, then, it should include the sidecar container:
 
 [source,console]
 ----
-kamel run route.yaml -t mount.empty-dirs=common:/tmp -t init-containers.init-tasks="init;alpine;/bin/sh -c \"echo hello >> /tmp/init\""
-
 kamel run route.yaml -t mount.empty-dirs=common:/tmp -t init-containers.sidecar-tasks="sidecar;alpine;/bin/sh -c \"for i in $(seq 1 10); do echo helloSidecar$i > /tmp/sidecar_$i.txt; sleep 1; done\""
 ----
 

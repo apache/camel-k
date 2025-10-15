@@ -21,8 +21,6 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/platform"
-	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 
 	"github.com/stretchr/testify/assert"
@@ -30,7 +28,6 @@ import (
 
 	"github.com/apache/camel-k/v2/pkg/internal"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/ptr"
 )
 
 func TestPlatformTraitChangeStatus(t *testing.T) {
@@ -61,7 +58,6 @@ func TestPlatformTraitChangeStatus(t *testing.T) {
 			}
 
 			trait, _ := newPlatformTrait().(*platformTrait)
-			trait.CreateDefault = ptr.To(false)
 
 			var err error
 			trait.Client, err = internal.NewFakeClient()
@@ -79,42 +75,6 @@ func TestPlatformTraitChangeStatus(t *testing.T) {
 			assert.Empty(t, e.Resources.Items())
 		})
 	}
-}
-
-func TestPlatformTraitCreatesDefaultPlatform(t *testing.T) {
-	e := Environment{
-		Resources: kubernetes.NewCollection(),
-		Integration: &v1.Integration{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "ns1",
-				Name:      "xx",
-			},
-			Status: v1.IntegrationStatus{
-				Phase: v1.IntegrationPhaseNone,
-			},
-		},
-	}
-
-	trait, _ := newPlatformTrait().(*platformTrait)
-	trait.CreateDefault = ptr.To(true)
-
-	var err error
-	trait.Client, err = internal.NewFakeClient()
-	require.NoError(t, err)
-
-	enabled, condition, err := trait.Configure(&e)
-	require.NoError(t, err)
-	assert.True(t, enabled)
-	assert.Nil(t, condition)
-
-	err = trait.Apply(&e)
-	require.NoError(t, err)
-
-	assert.Equal(t, v1.IntegrationPhaseWaitingForPlatform, e.Integration.Status.Phase)
-	assert.Equal(t, 1, len(e.Resources.Items()))
-	defPlatform := v1.NewIntegrationPlatform("ns1", platform.DefaultPlatformName)
-	defPlatform.Labels = map[string]string{"app": "camel-k", "camel.apache.org/platform.generated": boolean.TrueString}
-	assert.Contains(t, e.Resources.Items(), &defPlatform)
 }
 
 func TestPlatformTraitExisting(t *testing.T) {
@@ -152,7 +112,6 @@ func TestPlatformTraitExisting(t *testing.T) {
 			}
 
 			trait, _ := newPlatformTrait().(*platformTrait)
-			trait.CreateDefault = ptr.To(true)
 
 			var err error
 			existingPlatform := v1.NewIntegrationPlatform("ns1", "existing")
