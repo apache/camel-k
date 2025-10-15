@@ -96,6 +96,28 @@ func TestValidateEndpoint(t *testing.T) {
 				},
 			},
 		},
+		{
+			name:      "it-ref",
+			namespace: "test",
+			endpoint: v1.Endpoint{
+				Ref: &corev1.ObjectReference{
+					Kind:       v1.IntegrationKind,
+					APIVersion: v1.SchemeGroupVersion.String(),
+					Name:       "foo-it",
+				},
+			},
+		},
+		{
+			name:      "pipe-ref",
+			namespace: "test",
+			endpoint: v1.Endpoint{
+				Ref: &corev1.ObjectReference{
+					Kind:       v1.PipeKind,
+					APIVersion: v1.SchemeGroupVersion.String(),
+					Name:       "foo-pipe",
+				},
+			},
+		},
 	}
 
 	for i, tc := range testcases {
@@ -123,75 +145,60 @@ func TestValidateEndpoint(t *testing.T) {
 	}
 }
 
-func TestValidateEndpointError(t *testing.T) {
+func TestValidateEndpointErrorRefURI(t *testing.T) {
 	uri := "log:info"
 
-	testcases := []struct {
-		name              string
-		namespace         string
-		operatorNamespace string
-		endpoint          v1.Endpoint
-	}{
-		{
-			name:      "kamelet-ref-and-uri",
-			namespace: "test",
-			endpoint: v1.Endpoint{
-				URI: &uri,
-				Ref: &corev1.ObjectReference{
-					Kind:       v1.KameletKind,
-					APIVersion: v1.SchemeGroupVersion.String(),
-					Name:       "foo-kamelet",
-				},
-			},
-		},
-		{
-			name:      "kamelet-ref-cross-namespace",
-			namespace: "test",
-			endpoint: v1.Endpoint{
-				Ref: &corev1.ObjectReference{
-					Kind:       v1.KameletKind,
-					Namespace:  "other",
-					APIVersion: v1.SchemeGroupVersion.String(),
-					Name:       "foo-kamelet",
-				},
-			},
-		},
-		{
-			name:              "knative-broker-ref-in-operator-namespace",
-			namespace:         "test",
-			operatorNamespace: "global",
-			endpoint: v1.Endpoint{
-				Ref: &corev1.ObjectReference{
-					Kind:       "Broker",
-					Namespace:  "global",
-					APIVersion: eventing.SchemeGroupVersion.String(),
-					Name:       "foo-broker",
-				},
-			},
+	endpoint := v1.Endpoint{
+		URI: &uri,
+		Ref: &corev1.ObjectReference{
+			Kind:       v1.KameletKind,
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Name:       "foo-kamelet",
 		},
 	}
 
-	for i, tc := range testcases {
-		t.Run(fmt.Sprintf("test-%d-%s", i, tc.name), func(t *testing.T) {
-			if tc.operatorNamespace != "" {
-				t.Setenv("NAMESPACE", tc.operatorNamespace)
-			}
-
-			ctx, cancel := context.WithCancel(context.Background())
-			defer cancel()
-
-			client, err := internal.NewFakeClient()
-			require.NoError(t, err)
-
-			bindingContext := BindingContext{
-				Ctx:       ctx,
-				Client:    client,
-				Namespace: tc.namespace,
-				Profile:   v1.DefaultTraitProfile,
-			}
-
-			err = validateEndpoint(bindingContext, tc.endpoint)
-			require.Error(t, err, "cross-namespace references are not allowed in Pipe")
-		})
+	bindingContext := BindingContext{
+		Namespace: "default",
 	}
+
+	err := validateEndpoint(bindingContext, endpoint)
+	require.Error(t, err)
+	require.Equal(t, "cannot use both ref and URI to specify an endpoint: only one of them should be used", err.Error())
+}
+
+func TestValidateEndpointKameletCrossNS(t *testing.T) {
+	endpoint := v1.Endpoint{
+		Ref: &corev1.ObjectReference{
+			Kind:       v1.KameletKind,
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Name:       "foo-kamelet",
+			Namespace:  "kamelet-ns",
+		},
+	}
+
+	bindingContext := BindingContext{
+		Namespace: "default",
+	}
+
+	err := validateEndpoint(bindingContext, endpoint)
+	require.NoError(t, err)
+}
+
+func TestValidateEndpointErrorKnativeCrossNS(t *testing.T) {
+	endpoint := v1.Endpoint{
+		Ref: &corev1.ObjectReference{
+			Kind:       "Broker",
+			Namespace:  "knative-ns",
+			APIVersion: eventing.SchemeGroupVersion.String(),
+			Name:       "foo-broker",
+		},
+	}
+
+	bindingContext := BindingContext{
+		Namespace: "default",
+	}
+
+	err := validateEndpoint(bindingContext, endpoint)
+	require.Error(t, err)
+	require.Equal(t, "cross-namespace Pipe references are not allowed for Knative", err.Error())
 }

@@ -23,7 +23,6 @@ import (
 	"sort"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/platform"
 	"k8s.io/utils/ptr"
 )
 
@@ -73,12 +72,13 @@ func validateEndpoint(ctx BindingContext, e v1.Endpoint) error {
 		return errors.New("cannot use both ref and URI to specify an endpoint: only one of them should be used")
 	}
 	if e.Ref != nil && e.Ref.Namespace != "" && e.Ref.Namespace != ctx.Namespace {
-		// referencing default Kamelets in operator namespace is allowed
-		if e.Ref.Kind == v1.KameletKind && e.Ref.Namespace == platform.GetOperatorNamespace() {
-			return nil
+		if ok, err := isKnownKnativeResource(e.Ref); ok {
+			if err != nil {
+				return err
+			}
+			return errors.New("cross-namespace Pipe references are not allowed for Knative")
 		}
 
-		return errors.New("cross-namespace references are not allowed in Pipe")
 	}
 	return nil
 }
