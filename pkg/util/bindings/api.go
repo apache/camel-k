@@ -39,6 +39,7 @@ type Binding struct {
 	// Step is to support complex mapping such as Camel's EIPs
 	Step map[string]interface{}
 	// Traits is a partial trait specification that should be merged into the integration
+	// Deprecated: will be removed in future releases
 	Traits v1.Traits
 	// ApplicationProperties contain properties that should be set on the integration for the binding to work
 	ApplicationProperties map[string]string

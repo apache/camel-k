@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util/source"
 
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -62,18 +63,26 @@ func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointCont
 		return nil, err
 	}
 
+	// Set id, if specified
 	id, idPresent := props[v1.KameletIDProperty]
 	if idPresent {
 		delete(props, v1.KameletIDProperty)
 	} else {
 		id = endpointCtx.GenerateID()
 	}
+	// Set version, if specified
 	version, versionPresent := props[v1.KameletVersionProperty]
 	if versionPresent {
 		delete(props, v1.KameletVersionProperty)
 	}
 
-	kameletTranslated := getKameletName(kameletName, id, version)
+	// Set namespace, if specified and different from the actual context
+	namespace := ""
+	if e.Ref.Namespace != "" && e.Ref.Namespace != ctx.Namespace {
+		namespace = e.Ref.Namespace
+	}
+
+	kameletTranslated := getKameletName(kameletName, id, version, namespace)
 
 	binding := Binding{}
 	binding.ApplicationProperties = make(map[string]string)
@@ -146,12 +155,10 @@ func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointCont
 	return &binding, nil
 }
 
-func getKameletName(name, id, version string) string {
+// getKameletName returns the kamelet with it's name and querystring attached.
+func getKameletName(name, id, version, namespace string) string {
 	kamelet := fmt.Sprintf("%s/%s", name, url.PathEscape(id))
-	if version != "" {
-		kamelet = fmt.Sprintf("%s?%s=%s", kamelet, v1.KameletVersionProperty, version)
-	}
-	return kamelet
+	return source.GetKameletQuerystring(kamelet, version, namespace)
 }
 
 // DataTypeStep --.

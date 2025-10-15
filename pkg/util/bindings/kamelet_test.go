@@ -429,3 +429,67 @@ func getExpectedStep(withIn bool, withOut bool, dataTypeActionKamelet string) ma
 		},
 	}
 }
+
+func TestBindingCrossNamespacedKamelets(t *testing.T) {
+	client, err := internal.NewFakeClient()
+	require.NoError(t, err)
+
+	endpoint := v1.Endpoint{
+		Ref: &corev1.ObjectReference{
+			Kind:       "Kamelet",
+			APIVersion: "camel.apache.org/v1any1",
+			Name:       "mykamelet",
+			Namespace:  "extra",
+		},
+	}
+
+	binding, err := BindingConverter{}.Translate(
+		BindingContext{
+			Ctx:       context.Background(),
+			Client:    client,
+			Namespace: "test",
+			Profile:   v1.TraitProfileKubernetes,
+		},
+		EndpointContext{
+			Type: v1.EndpointTypeSource,
+		},
+		endpoint)
+
+	require.NoError(t, err)
+	assert.NotNil(t, binding)
+	assert.Equal(t, "kamelet:mykamelet/source?kameletNamespace=extra", binding.URI)
+}
+
+func TestBindingCrossNamespacedAndVersionedKamelets(t *testing.T) {
+	client, err := internal.NewFakeClient()
+	require.NoError(t, err)
+
+	endpoint := v1.Endpoint{
+		Ref: &corev1.ObjectReference{
+			Kind:       "Kamelet",
+			APIVersion: "camel.apache.org/v1any1",
+			Name:       "mykamelet",
+			Namespace:  "extra",
+		},
+		Properties: asEndpointProperties(
+			map[string]string{"kameletVersion": "v1"},
+		),
+	}
+
+	binding, err := BindingConverter{}.Translate(
+		BindingContext{
+			Ctx:       context.Background(),
+			Client:    client,
+			Namespace: "test",
+			Profile:   v1.TraitProfileKubernetes,
+		},
+		EndpointContext{
+			Type: v1.EndpointTypeSource,
+		},
+		endpoint)
+
+	require.NoError(t, err)
+	assert.NotNil(t, binding)
+	assert.Equal(t, "kamelet:mykamelet/source?kameletVersion=v1&kameletNamespace=extra", binding.URI)
+	assert.Empty(t, binding.ApplicationProperties)
+}

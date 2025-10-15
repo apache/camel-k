@@ -27,26 +27,12 @@ import (
 
 var kameletNameRegexp = regexp.MustCompile("kamelet:(?://)?([a-z0-9-.]+(/[a-z0-9-.]+)?)(?:$|[^a-z0-9-.].*)")
 
-//nolint:nestif
 func ExtractKamelet(uri string) string {
 	matches := kameletNameRegexp.FindStringSubmatch(uri)
 	if len(matches) > 1 {
 		version := getKameletParam(uri, v1.KameletVersionProperty)
 		namespace := getKameletParam(uri, v1.KameletNamespaceProperty)
-		if version != "" || namespace != "" {
-			var querystring string
-			if version != "" {
-				querystring = v1.KameletVersionProperty + "=" + version
-			}
-			if namespace != "" {
-				if querystring != "" {
-					querystring += "&"
-				}
-				querystring += v1.KameletNamespaceProperty + "=" + namespace
-			}
-			return fmt.Sprintf("%s?%s", matches[1], querystring)
-		}
-		return matches[1]
+		return GetKameletQuerystring(matches[1], version, namespace)
 	}
 	return ""
 }
@@ -66,4 +52,23 @@ func getKameletParam(uri, param string) string {
 
 	queryParams := parsedURL.Query()
 	return queryParams.Get(param)
+}
+
+// GetKameletQuerystring returns a kamelet name appended with its version and namespace (if provided).
+func GetKameletQuerystring(name, version, namespace string) string {
+	if version != "" || namespace != "" {
+		var querystring string
+		if version != "" {
+			querystring = v1.KameletVersionProperty + "=" + version
+		}
+		if namespace != "" {
+			if querystring != "" {
+				querystring += "&"
+			}
+			querystring += v1.KameletNamespaceProperty + "=" + namespace
+		}
+		return fmt.Sprintf("%s?%s", name, querystring)
+	}
+
+	return name
 }
