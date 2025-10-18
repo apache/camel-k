@@ -23,6 +23,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
+// Deprecated: to be removed in the future.
 type emptyKameletRepository struct {
 }
 

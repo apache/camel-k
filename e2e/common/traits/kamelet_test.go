@@ -107,6 +107,24 @@ func TestKameletNamespaced(t *testing.T) {
 	})
 }
 
+func TestKameletExternalCatalog(t *testing.T) {
+	t.Parallel()
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		t.Run("external kamelet catalog", func(t *testing.T) {
+			name := RandomizedSuffixName("external-catalog")
+			g.Expect(KamelBind(t, ctx, ns,
+				"my-source", "log-sink",
+				// The Kamelet spec (my-source) is provided into this catalog
+				"-d", "github:squakez/acme-kamelets-catalog",
+				"-d", "camel:timer",
+				"--name", name).Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("ACME"))
+		})
+	})
+}
+
 // cloneAndReplaceNamespace clones and replace the content marked as %%% with the namespace passed as parameter.
 func cloneAndReplaceNamespace(t *testing.T, srcPath, namespace string) string {
 	t.Helper()

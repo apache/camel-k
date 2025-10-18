@@ -35,6 +35,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
+// Deprecated: to be removed in the future.
 type githubKameletRepository struct {
 	httpClient *http.Client
 	owner      string
