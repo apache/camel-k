@@ -499,13 +499,13 @@ func TestKameletConditionFalse(t *testing.T) {
 	assert.Nil(t, condition)
 
 	err = trait.Apply(environment)
-	require.Error(t, err)
+	require.NoError(t, err)
 	assert.Len(t, environment.Integration.Status.Conditions, 1)
 
 	cond := environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable)
-	assert.Equal(t, corev1.ConditionFalse, cond.Status)
+	assert.Equal(t, corev1.ConditionUnknown, cond.Status)
 	assert.Equal(t, v1.IntegrationConditionKameletsAvailableReason, cond.Reason)
-	assert.Contains(t, cond.Message, "kamelets [none] not found")
+	assert.Contains(t, cond.Message, "Kamelets [none] not found")
 }
 
 func TestKameletConditionTrue(t *testing.T) {
@@ -834,9 +834,9 @@ func TestKameletMultiNamespace(t *testing.T) {
 	assert.Equal(t,
 		corev1.ConditionTrue,
 		environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable).Status)
-	assert.Equal(t,
-		"kamelets [extra,timer] found in (Kubernetes[namespace=test], Kubernetes[namespace=ns1], Empty[]) repositories",
-		environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable).Message)
+	assert.Contains(t,
+		environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable).Message,
+		"Kamelets [extra,timer] found in cluster")
 }
 
 func TestKameletMultiNamespaceMissing(t *testing.T) {
@@ -886,11 +886,11 @@ func TestKameletMultiNamespaceMissing(t *testing.T) {
 	assert.Equal(t, "missing?kameletNamespace=ns1,timer", trait.List)
 
 	err = trait.Apply(environment)
-	require.Error(t, err)
+	require.NoError(t, err)
 	assert.Equal(t,
-		corev1.ConditionFalse,
+		corev1.ConditionUnknown,
 		environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable).Status)
-	assert.Equal(t,
-		"kamelets [missing] not found in (Kubernetes[namespace=test], Kubernetes[namespace=ns1], Empty[]) repositories",
-		err.Error())
+	assert.Contains(t,
+		environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable).Message,
+		"Kamelets [missing] not found in cluster")
 }

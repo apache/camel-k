@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"errors"
 	"fmt"
 	"net/url"
 	"path/filepath"
@@ -151,29 +150,11 @@ func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet,
 	sort.Strings(missingKamelets)
 	sort.Strings(bundledKamelets)
 
-	if len(missingKamelets) > 0 {
-		message := fmt.Sprintf("kamelets [%s] not found in %s repositories",
-			strings.Join(missingKamelets, ","),
-			repo.String())
-		e.Integration.Status.SetCondition(
-			v1.IntegrationConditionKameletsAvailable,
-			corev1.ConditionFalse,
-			v1.IntegrationConditionKameletsAvailableReason,
-			message,
-		)
-
-		return nil, errors.New(message)
-	}
-
-	// TODO:
 	// We list the Kamelets coming from a bundle. We want to warn the user
-	// that in the future we'll use the specification coming from the dependency runtime
-	// instead of using the one installed in the cluster.
-	// It may be a good idea in the future to let the user specify the catalog dependency to use
-	// in order to override the one coming from Apache catalog
+	// that in the future we won't use any longer bundled Kamelets.
 	if len(bundledKamelets) > 0 {
-		message := fmt.Sprintf("using bundled kamelets [%s]: make sure the Kamelet specifications is compatible with this Integration runtime."+
-			" This feature is deprecated as in the future we will use directly the specification coming from the Kamelet catalog dependency jar.",
+		message := fmt.Sprintf("using bundled Kamelets [%s]: make sure the Kamelet specifications is compatible with this Integration runtime."+
+			" This feature is deprecated as in the future we will use directly the Kamelets provided in the dependencies provided.",
 			strings.Join(bundledKamelets, ","))
 		e.Integration.Status.SetCondition(
 			v1.IntegrationConditionType("KameletsDeprecationNotice"),
@@ -183,11 +164,24 @@ func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet,
 		)
 	}
 
+	kameletsAvailabilityMessage := ""
+	cond := corev1.ConditionTrue
+	if len(missingKamelets) > 0 {
+		kameletsAvailabilityMessage = fmt.Sprintf("Kamelets [%s] not found in cluster. Make sure to include the Kamelets dependency in the Integration.",
+			strings.Join(missingKamelets, ","))
+		cond = corev1.ConditionUnknown
+	}
+	if len(availableKamelets) > 0 {
+		if kameletsAvailabilityMessage != "" {
+			kameletsAvailabilityMessage += "; "
+		}
+		kameletsAvailabilityMessage += fmt.Sprintf("Kamelets [%s] found in cluster", strings.Join(availableKamelets, ","))
+	}
 	e.Integration.Status.SetCondition(
 		v1.IntegrationConditionKameletsAvailable,
-		corev1.ConditionTrue,
+		cond,
 		v1.IntegrationConditionKameletsAvailableReason,
-		fmt.Sprintf("kamelets [%s] found in %s repositories", strings.Join(availableKamelets, ","), repo.String()),
+		kameletsAvailabilityMessage,
 	)
 
 	return kamelets, nil

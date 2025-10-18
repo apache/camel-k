@@ -1,38 +1,26 @@
 [[kamelets-distribution]]
 = Kamelets Distribution
 
-When you install Camel K, you typically got bundled a series of Kamelets which are coming from the xref:camel-kamelets::index.adoc[Apache Kamelet Catalog]. This is a facility that will let you immediately use a wide set of connector-style resources to interact with any event source and sink.
-
-NOTE: the version we bundle depends directly on the default Camel version used. For instance, in Camel K version 2, the default runtime we use is Camel K Runtime 2.16.0 which depends on Camel version 3.20.1. The Kamelet version we use is the one distributed as link:https://github.com/apache/camel-kamelets/releases/tag/v3.20.1.1[v3.20.1].
-
-As development of Kamelet is very fast, make sure to use some version which is compatible with the Camel runtime you're going to use.
-
-== Release Kamelets on the cluster
-
-Since Kamelets are Kubernetes custom resources, the Camel K opinionated way of Kamelets distribution is to expect them available on the cluster. You tipically develop a Kamelet and then release it in the Integration namespace or the operator namespace. Alternatively you can also deliver them into any other namespace.
+The Camel K opinionated way of Kamelets distribution is to expect them available on the cluster. You typically develop a Kamelet and then release it in the Integration namespace or the operator namespace. Alternatively you can also deliver them into any other namespace.
 
 There is not a prescribed way how to release the Kamelets on the cluster. It can vary based on each company process. What's important for the operator, is that they are available when running the Integrations.
 
-[[kamelets-own-catalog]]
-== Provide your own catalog
+[[kamelets-catalog]]
+== Apache Kamelets catalog
 
-An alternative to the catalog we bundle is to include a repository containing your own catalog. You need to specify it in the IntegrationPlatform `.spec.kamelet.repository`.
+When you install Camel K, you typically got bundled a series of Kamelets which are coming from the xref:camel-kamelets::index.adoc[Apache Kamelet Catalog]. This is a facility that will let you immediately use a wide set of connector-style resources to interact with any event source and sink.
 
-```yaml
-  spec:
-    kamelet:
-      repositories:
-      - uri: <git-platform>:<owner>/<repo>[/path_to_kamelets_folder][@version]
-```
-Mind that `<git-platform>` is the repository of your choice, for instance `github` and `[@version]` is the tag to use (by default it will use `main` branch).
-
-With this approach you can dynamically include any repository where your Kamelets are hosted. They will be lazily initialized as soon as they are required by any of the Integration or Pipes which will make use of them.
+NOTE: the version we bundle depends directly on the default Camel version used. To avoid potential breaking compatibility issues, Apache Kamelets catalog bundling is deprecated and may disappear in future releases
 
 [[kamelets-as-dependency]]
 == Kamelets as a dependency
 
-The Camel K has an opinionated way to use Kamelets which is the usage of cluster custom resources. Here the Kamelet spec resource is expected to be available in the cluster.
+You may find situations where you want to bundle a Kamelet in a dependency (ie, one or more external catalog containing the Kamelets spec) and use the same approach of distributing Kamelets as done in Camel core. As Kamelets are a Camel thing, then, you can use such dependency and let the runtime use the Kamelets available in the classpath. As an example, you will be able to run:
 
-However, you may find situations where you want to bundle a Kamelet in a dependency (ie, some external catalog containing all Kamelets spec). As Kamelets are a Camel thing, then, you can use such dependency and let the runtime use the Kamelets available in the classpath.
+```bash
+kamel bind my-source log-sink -d github:squakez/acme-kamelets-catalog -d camel:timer
+```
 
-If you're using such an approach, then, you will need to make sure to skip the Kamelet trait (which is in charge to discover them and get required dependencies), and provide all the dependencies which may be required by your Kamelet. Additionally, you may need to specify a Camel property to tell the runtime where to expect to find the Kamelets, `camel.component.kamelet.location` (default `classpath:/kamelets`).
+If you use this approach you will need to provide the Integration all the dependencies used in your Kamelet spec as the operator is not (yet) able to scan the Kamelet spec.
+
+NOTE: this dependency limitation is likely to disappear in future versions.

@@ -128,6 +128,7 @@ func (action *monitorAction) Handle(ctx context.Context, platform *v1.Integratio
 	}
 	action.checkTraitAnnotationsDeprecatedNotice(platform)
 	action.checkMavenSettings(platform)
+	action.checkKameletsCatalogRepoDeprecatedNotice(platform)
 	if err = action.addPlainQuarkusCatalog(ctx, catalog); err != nil {
 		// Only warn the user, we don't want to fail
 		action.L.Infof(
@@ -157,6 +158,21 @@ func (action *monitorAction) checkTraitAnnotationsDeprecatedNotice(platform *v1.
 				return
 			}
 		}
+	}
+}
+
+// Deprecated: to be removed in future versions, when we won't support any longer Kamelets catalog into IntegrationPlatforms.
+func (action *monitorAction) checkKameletsCatalogRepoDeprecatedNotice(platform *v1.IntegrationPlatform) {
+	if platform.Status.Kamelet.Repositories != nil {
+		platform.Status.SetCondition(
+			v1.IntegrationPlatformConditionType("KameletsCatalogRepositoryDeprecated"),
+			corev1.ConditionTrue,
+			"DeprecationNotice",
+			"Kamelets Catalog Repository is deprecated and will be removed soon. Bundle Kamelets into a Maven dependency instead.",
+		)
+		action.L.Infof(
+			"Kamelets Catalog Repository is deprecated and will be removed soon from IntegrationPlatform configuration. " +
+				"Bundle Kamelets into a Maven dependency instead")
 	}
 }
 
