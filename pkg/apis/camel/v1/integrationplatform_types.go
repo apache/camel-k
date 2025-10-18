@@ -143,6 +143,7 @@ type IntegrationPlatformBuildSpec struct {
 }
 
 // IntegrationPlatformKameletSpec define the behavior for all the Kamelets controller by the IntegrationPlatform.
+// Deprecated: to be removed in future versions.
 type IntegrationPlatformKameletSpec struct {
 	// remote repository used to retrieve Kamelet catalog
 	Repositories []KameletRepositorySpec `json:"repositories,omitempty"`
