@@ -93,12 +93,22 @@ func TestKedaAuthentication(t *testing.T) {
 	assert.Equal(t, "ns", triggerAuths[0].Namespace)
 	assert.NotNil(t, triggerAuths[0].Spec.SecretTargetRef)
 	assert.Len(t, triggerAuths[0].Spec.SecretTargetRef, 2)
-	assert.Equal(t, "my-secret", triggerAuths[0].Spec.SecretTargetRef[0].Name)
-	assert.Equal(t, "secret-name", triggerAuths[0].Spec.SecretTargetRef[0].Key)
-	assert.Equal(t, "kafka-name", triggerAuths[0].Spec.SecretTargetRef[0].Parameter)
-	assert.Equal(t, "my-secret", triggerAuths[0].Spec.SecretTargetRef[1].Name)
-	assert.Equal(t, "secret-password", triggerAuths[0].Spec.SecretTargetRef[1].Key)
-	assert.Equal(t, "kafka-password", triggerAuths[0].Spec.SecretTargetRef[1].Parameter)
+
+	assert.ElementsMatch(
+		t,
+		[]v1alpha1.AuthSecretTargetRef{
+			{
+				Name:      "my-secret",
+				Key:       "secret-name",
+				Parameter: "kafka-name",
+			},
+			{
+				Name:      "my-secret",
+				Key:       "secret-password",
+				Parameter: "kafka-password",
+			},
+		},
+		triggerAuths[0].Spec.SecretTargetRef)
 }
 
 func getKedaScaledObject(c *kubernetes.Collection) *v1alpha1.ScaledObject {
