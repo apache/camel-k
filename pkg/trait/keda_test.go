@@ -93,7 +93,6 @@ func TestKedaAuthentication(t *testing.T) {
 	assert.Equal(t, "ns", triggerAuths[0].Namespace)
 	assert.NotNil(t, triggerAuths[0].Spec.SecretTargetRef)
 	assert.Len(t, triggerAuths[0].Spec.SecretTargetRef, 2)
-
 	assert.ElementsMatch(
 		t,
 		[]v1alpha1.AuthSecretTargetRef{
