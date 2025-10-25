@@ -164,9 +164,11 @@ const (
 	// IntegrationPhaseBuildingKit if building from a Camel route.
 	IntegrationPhaseBuildingKit IntegrationPhase = "Building Kit"
 	// IntegrationPhaseBuildSubmitted if building from a Git repository.
-	IntegrationPhaseBuildSubmitted IntegrationPhase = "BuildSubmitted"
+	IntegrationPhaseBuildSubmitted IntegrationPhase = "Build Submitted"
 	// IntegrationPhaseBuildRunning if building from a Git repository.
-	IntegrationPhaseBuildRunning IntegrationPhase = "BuildRunning"
+	IntegrationPhaseBuildRunning IntegrationPhase = "Build Running"
+	// IntegrationPhaseBuildComplete --.
+	IntegrationPhaseBuildComplete IntegrationPhase = "Build Complete"
 	// IntegrationPhaseDeploying --.
 	IntegrationPhaseDeploying IntegrationPhase = "Deploying"
 	// IntegrationPhaseRunning --.

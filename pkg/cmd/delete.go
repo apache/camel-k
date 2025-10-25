@@ -88,7 +88,7 @@ func (command *deleteCmdOptions) run(cmd *cobra.Command, args []string) error {
 					return err
 				}
 			} else {
-				err := deleteIntegration(command.Context, cmd, c, integration)
+				err := deletePipeOrIntegration(command.Context, cmd, c, integration)
 				if err != nil {
 					return err
 				}
@@ -109,7 +109,7 @@ func (command *deleteCmdOptions) run(cmd *cobra.Command, args []string) error {
 		}
 		for i := range integrationList.Items {
 			integration := integrationList.Items[i]
-			err := deleteIntegration(command.Context, cmd, c, &integration)
+			err := deletePipeOrIntegration(command.Context, cmd, c, &integration)
 			if err != nil {
 				return err
 			}
@@ -124,19 +124,7 @@ func (command *deleteCmdOptions) run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func getIntegration(ctx context.Context, c client.Client, name string, namespace string) (*v1.Integration, error) {
-	key := k8sclient.ObjectKey{
-		Name:      name,
-		Namespace: namespace,
-	}
-	answer := v1.NewIntegration(namespace, name)
-	if err := c.Get(ctx, key, &answer); err != nil {
-		return nil, err
-	}
-	return &answer, nil
-}
-
-func deleteIntegration(ctx context.Context, cmd *cobra.Command, c client.Client, integration *v1.Integration) error {
+func deletePipeOrIntegration(ctx context.Context, cmd *cobra.Command, c client.Client, integration *v1.Integration) error {
 	deletedPipes, pipe, err := deletePipeIfExists(ctx, c, integration)
 	if err != nil {
 		return err

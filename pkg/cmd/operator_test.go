@@ -28,7 +28,6 @@ import (
 
 const cmdOperator = "operator"
 
-// nolint: unparam
 func initializeOperatorCmdOptions(t *testing.T) (*operatorCmdOptions, *cobra.Command, RootCmdOptions) {
 	t.Helper()
 
@@ -39,7 +38,6 @@ func initializeOperatorCmdOptions(t *testing.T) (*operatorCmdOptions, *cobra.Com
 	return operatorCmdOptions, rootCmd, *options
 }
 
-// nolint: unparam
 func addTestOperatorCmd(options RootCmdOptions, rootCmd *cobra.Command) *operatorCmdOptions {
 	// add a testing version of operator Command
 	operatorCmd, operatorOptions := newCmdOperator(&options)

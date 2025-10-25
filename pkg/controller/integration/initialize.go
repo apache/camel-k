@@ -71,7 +71,11 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1.Inte
 	}
 
 	if integration.Status.Image != "" {
-		integration.Status.Phase = v1.IntegrationPhaseDeploying
+		if integration.Annotations[v1.IntegrationDontRunAfterBuildAnnotation] == v1.IntegrationDontRunAfterBuildAnnotationTrueValue {
+			integration.Status.Phase = v1.IntegrationPhaseBuildComplete
+		} else {
+			integration.Status.Phase = v1.IntegrationPhaseDeploying
+		}
 		return integration, nil
 	}
 

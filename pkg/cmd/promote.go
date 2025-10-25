@@ -120,11 +120,12 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 	if sourcePipe != nil {
 		promotePipe = true
 	}
-	sourceIntegration, err = o.getIntegration(c, name)
+	sourceIntegration, err = getIntegration(o.Context, c, name, o.Namespace)
 	if err != nil {
 		return fmt.Errorf("could not get Integration "+name+": %w", err)
 	}
-	if sourceIntegration.Status.Phase != v1.IntegrationPhaseRunning {
+	if sourceIntegration.Status.Phase != v1.IntegrationPhaseRunning &&
+		sourceIntegration.Status.Phase != v1.IntegrationPhaseBuildComplete {
 		return fmt.Errorf("could not promote an Integration in %s status", sourceIntegration.Status.Phase)
 	}
 	sourceKit, err := o.getIntegrationKit(c, sourceIntegration.Status.IntegrationKit)
@@ -208,19 +209,6 @@ func checkOpsCompatibility(cmd *cobra.Command, source, dest map[string]string) e
 
 func (o *promoteCmdOptions) getPipe(c client.Client, name string) (*v1.Pipe, error) {
 	it := v1.NewPipe(o.Namespace, name)
-	key := k8sclient.ObjectKey{
-		Name:      name,
-		Namespace: o.Namespace,
-	}
-	if err := c.Get(o.Context, key, &it); err != nil {
-		return nil, err
-	}
-
-	return &it, nil
-}
-
-func (o *promoteCmdOptions) getIntegration(c client.Client, name string) (*v1.Integration, error) {
-	it := v1.NewIntegration(o.Namespace, name)
 	key := k8sclient.ObjectKey{
 		Name:      name,
 		Namespace: o.Namespace,

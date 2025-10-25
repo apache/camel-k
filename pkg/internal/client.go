@@ -190,6 +190,10 @@ func (c *FakeClient) Patch(ctx context.Context, obj controller.Object, patch con
 	return nil
 }
 
+func (c *FakeClient) Status() controller.SubResourceWriter {
+	return &FakeStatusWriter{client: c}
+}
+
 func (c *FakeClient) DisableAPIGroupDiscovery(group string) {
 	c.disabledGroups = append(c.disabledGroups, group)
 }

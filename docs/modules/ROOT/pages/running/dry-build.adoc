@@ -1,0 +1,40 @@
+= Dry Build
+
+Camel K have been originally designed to immediately execute an Integration. However, since version 2.9 you can split the **build** phase and the **deployment** phase performing a **dry build**.
+
+When you build an Integration, you can add a new annotation, `camel.apache.org/dont-run-after-build: "true"`. This is telling the operator to perform a regular build but not to deploy the application (neither to create any resource associated to it). It basically just compile the application and push the container image to be eventually run later.
+
+This feature enables you the possibility to separate the build from the execution phase giving you a powerful flexibility to accommodate your development process (which may require also testing, performance, security audits, ...). You may have a cluster dedicated for building images, and another cluster (maybe private with no access to the internet) for running the applications.
+
+As the `kamel run` command can be helpful for this operation, we've added a flag which will take care to add that annotation for you: `kamel run my-app.yaml --dont-run-after-build`.
+
+[[deploy]]
+== Deploy an application
+
+The presence of this feature will let you build the application without the need to run it. At any point you can decide to **deploy** the application by turning its phase to `Deploying`. The operator will be in charge to do the deployment as it used to do before.
+
+It would be something like:
+
+```bash
+kubectl patch it my-app --type=merge --subresource=status   -p '{"status":{"phase":"Deploying"}}'
+```
+
+As the patching on an Integration custom resource can be boring, we've introduced a new CLI `kamel deploy` command. You can provide to it the name(s) of the Integration(s) you want to deploy and it will take care to patch their status for you. The `kamel deploy` and the patch to "Deploying" are equivalent.
+
+[[undeploy]]
+== Undeploy an application
+
+Specular to that, we have the **undeploy** operation. If at any point in time you want to bring the Integration back to its original status, then just patch its phase to an empty string (which represent the `Initialization` phase). The operator will take care to revert it and to clean all the resources associated.
+
+It would be something like:
+
+```bash
+kubectl patch it my-app --type=merge --subresource=status   -p '{"status":{"phase":""}}'
+```
+
+Also here, you will find handy the `kamel undeploy` CLI command. It also expects one ore more Integration names you want to undeploy. The `kamel undeploy` and the patch to "" are equivalent.
+
+[[references]]
+== Complement to other features
+
+This feature will fit into the rest of build features such as xref:running/build-from-git.adoc[Git hosted Integrations], xref:running/self-managed.adoc[self managed Integrations] and xref:running/promoting.adoc[environment promotions].

@@ -31,7 +31,6 @@ import (
 
 const cmdBind = "bind"
 
-// nolint: unparam
 func initializeBindCmdOptions(t *testing.T) (*bindCmdOptions, *cobra.Command, RootCmdOptions) {
 	t.Helper()
 

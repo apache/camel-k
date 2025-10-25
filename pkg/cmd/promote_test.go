@@ -38,7 +38,6 @@ import (
 
 const cmdPromote = "promote"
 
-// nolint: unparam
 func initializePromoteCmdOptions(t *testing.T, initObjs ...runtime.Object) (*promoteCmdOptions, *cobra.Command, RootCmdOptions) {
 	t.Helper()
 	fakeClient, err := internal.NewFakeClient(initObjs...)

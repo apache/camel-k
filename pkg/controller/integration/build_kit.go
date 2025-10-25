@@ -135,13 +135,18 @@ kits:
 		}
 	}
 
+	//nolint:nestif
 	if integrationKit != nil {
 		action.L.Debug("Setting integration kit for integration", "integration", integration.Name, "namespace", integration.Namespace, "integration kit", integrationKit.Name)
 		// Set the kit name so the next handle loop, will fall through the
 		// same path as integration with a user defined kit
 		integration.SetIntegrationKit(integrationKit)
 		if integrationKit.Status.Phase == v1.IntegrationKitPhaseReady {
-			integration.Status.Phase = v1.IntegrationPhaseDeploying
+			if integration.Annotations[v1.IntegrationDontRunAfterBuildAnnotation] == v1.IntegrationDontRunAfterBuildAnnotationTrueValue {
+				integration.Status.Phase = v1.IntegrationPhaseBuildComplete
+			} else {
+				integration.Status.Phase = v1.IntegrationPhaseDeploying
+			}
 		}
 	} else {
 		action.L.Debug("Not yet able to assign an integration kit to integration",
@@ -199,7 +204,11 @@ func (action *buildKitAction) checkIntegrationKit(ctx context.Context, integrati
 	}
 
 	if kit.Status.Phase == v1.IntegrationKitPhaseReady {
-		integration.Status.Phase = v1.IntegrationPhaseDeploying
+		if integration.Annotations[v1.IntegrationDontRunAfterBuildAnnotation] == v1.IntegrationDontRunAfterBuildAnnotationTrueValue {
+			integration.Status.Phase = v1.IntegrationPhaseBuildComplete
+		} else {
+			integration.Status.Phase = v1.IntegrationPhaseDeploying
+		}
 		integration.SetIntegrationKit(kit)
 		return integration, nil
 	}

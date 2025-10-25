@@ -34,7 +34,6 @@ import (
 
 const cmdVersion = "version"
 
-// nolint: unparam
 func initializeVersionCmdOptions(t *testing.T, initObjs ...runtime.Object) (*versionCmdOptions, *cobra.Command, RootCmdOptions) {
 	t.Helper()
 
