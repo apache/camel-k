@@ -79,7 +79,7 @@ func (o *rebuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 	} else if len(args) > 0 {
-		if integrations, err = o.getIntegrations(c, args); err != nil {
+		if integrations, err = getIntegrations(o.Context, c, args, o.Namespace); err != nil {
 			return err
 		}
 	}
@@ -98,22 +98,6 @@ func (o *rebuildCmdOptions) listAllIntegrations(c client.Client) ([]v1.Integrati
 		return nil, fmt.Errorf("could not retrieve integrations from namespace %s: %w", o.Namespace, err)
 	}
 	return list.Items, nil
-}
-
-func (o *rebuildCmdOptions) getIntegrations(c client.Client, names []string) ([]v1.Integration, error) {
-	ints := make([]v1.Integration, 0, len(names))
-	for _, n := range names {
-		it := v1.NewIntegration(o.Namespace, n)
-		key := k8sclient.ObjectKey{
-			Name:      n,
-			Namespace: o.Namespace,
-		}
-		if err := c.Get(o.Context, key, &it); err != nil {
-			return nil, fmt.Errorf("could not find integration %s in namespace %s: %w", it.Name, o.Namespace, err)
-		}
-		ints = append(ints, it)
-	}
-	return ints, nil
 }
 
 func (o *rebuildCmdOptions) rebuildIntegrations(c k8sclient.StatusClient, integrations []v1.Integration) error {

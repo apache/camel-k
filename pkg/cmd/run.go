@@ -19,19 +19,13 @@ package cmd
 
 import (
 	"context"
-	"errors"
-	"path"
-
-	// this is needed to generate an SHA1 sum for Jars
-	// #nosec G501
-
-	// #nosec G505
-
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
 	"os/signal"
+	"path"
 	"reflect"
 	"strings"
 	"syscall"
@@ -71,8 +65,8 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 
 	cmd := cobra.Command{
 		Use:               "run [file to run]",
-		Short:             "Run a integration on Kubernetes",
-		Long:              `Deploys and execute a integration pod on Kubernetes.`,
+		Short:             "Build and run the Integration on Kubernetes.",
+		Long:              `Build and run the Integration on Kubernetes.`,
 		Args:              options.validateArgs,
 		PersistentPreRunE: options.decode,
 		PreRunE:           options.preRun,
@@ -83,7 +77,8 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 
 	cmd.Flags().String("name", "", "The integration name")
 	cmd.Flags().String("image", "", "An image built externally (ie, via CICD). Enabling it will skip the Integration build phase.")
-	cmd.Flags().StringArrayP("dependency", "d", nil, `A dependency that should be included, e.g., "camel:mail" for a Camel component, "mvn:org.my:app:1.0" for a Maven dependency`)
+	cmd.Flags().StringArrayP("dependency", "d", nil, "A dependency that should be included, e.g., \"camel:mail\" for a Camel component, "+
+		"\"mvn:org.my:app:1.0\" for a Maven dependency")
 	cmd.Flags().BoolP("wait", "w", false, "Wait for the integration to be running")
 	cmd.Flags().StringP("kit", "k", "", "The kit used to run the integration")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a runtime property or a local properties file from a path "+
@@ -112,7 +107,8 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringArrayP("env", "e", nil, "Set an environment variable in the integration container. E.g \"-e MY_VAR=my-value\"")
 	cmd.Flags().StringArray("annotation", nil, "Add an annotation to the integration. E.g. \"--annotation my.company=hello\"")
 	cmd.Flags().StringArray("label", nil, "Add a label to the integration. E.g. \"--label my.company=hello\"")
-	cmd.Flags().StringArray("source", nil, "Add source file to your integration, this is added to the list of files listed as arguments of the command")
+	cmd.Flags().StringArray("source", nil, "Add source file to your integration, "+
+		"this is added to the list of files listed as arguments of the command")
 	cmd.Flags().String("pod-template", "", "The path of the YAML file containing a PodSpec template to be used for the Integration pods")
 	cmd.Flags().String("service-account", "", "The SA to use to run this Integration")
 	cmd.Flags().Bool("force", false, "Force creation of integration regardless of potential misconfiguration.")
@@ -121,6 +117,8 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().String("git-tag", "", "Git tag to checkout when using --git option")
 	cmd.Flags().String("git-commit", "", "Git commit (full SHA) to checkout when using --git option")
 	cmd.Flags().Bool("save", false, "Save the run parameters into the default kamel configuration file (kamel-config.yaml)")
+	cmd.Flags().Bool("dont-run-after-build", false, "Only build, don't run the application. "+
+		"You can run \"kamel deploy\" to run a built Integration.")
 
 	// completion support
 	configureKnownCompletions(&cmd)
@@ -166,8 +164,9 @@ type runCmdOptions struct {
 	Annotations     []string `mapstructure:"annotations" yaml:",omitempty"`
 	Sources         []string `mapstructure:"sources" yaml:",omitempty"`
 	// Deprecated: registry parameter no longer in use.
-	RegistryOptions url.Values
-	Force           bool `mapstructure:"force" yaml:",omitempty"`
+	RegistryOptions   url.Values
+	Force             bool `mapstructure:"force" yaml:",omitempty"`
+	DontRunAfterBuild bool `mapstructure:"dont-run-after-build" yaml:",omitempty"`
 }
 
 func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
@@ -345,7 +344,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	// We need to make this check at this point, in order to have sources filled during decoding
-	if (len(args) < 1 && len(o.Sources) < 1) && o.isSourceLess() {
+	if (len(args) < 1 && len(o.Sources) < 1) && o.isManaged() {
 		return errors.New("run command expects either an Integration source, a container image " +
 			"(via --image argument) or a git repository (via --git argument)")
 	}
@@ -564,7 +563,7 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	o.applyAnnotations(integration)
 
 	//nolint:gocritic
-	if o.isSourceLess() {
+	if o.isManaged() {
 		// Resolve resources
 		if err := o.resolveSources(cmd, sources, integration); err != nil {
 			return nil, err
@@ -649,7 +648,7 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	return integration, nil
 }
 
-func (o *runCmdOptions) isSourceLess() bool {
+func (o *runCmdOptions) isManaged() bool {
 	return o.ContainerImage == "" && o.GitRepo == ""
 }
 
@@ -725,6 +724,9 @@ func (o *runCmdOptions) applyAnnotations(it *v1.Integration) {
 		if len(parts) == 2 {
 			it.Annotations[parts[0]] = parts[1]
 		}
+	}
+	if o.DontRunAfterBuild {
+		it.Annotations[v1.IntegrationDontRunAfterBuildAnnotation] = "true"
 	}
 }
 
@@ -974,6 +976,7 @@ func loadPropertyFile(fileName string) (*properties.Properties, error) {
 	return p, nil
 }
 
+// Deprecated: to be removed in future releases.
 func resolvePodTemplate(ctx context.Context, cmd *cobra.Command, templateSrc string, spec *v1.IntegrationSpec) error {
 	// check if template is set
 	if templateSrc == "" {

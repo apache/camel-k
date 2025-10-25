@@ -27,7 +27,6 @@ import (
 
 const cmdRebuild = "rebuild"
 
-// nolint: unparam
 func initializeRebuildCmdOptions(t *testing.T) (*rebuildCmdOptions, *cobra.Command, RootCmdOptions) {
 	t.Helper()
 
@@ -56,6 +55,7 @@ func TestRebuildNonExistingFlag(t *testing.T) {
 	_, rootCmd, _ := initializeRebuildCmdOptions(t)
 	_, err := ExecuteCommand(rootCmd, cmdRebuild, "--nonExistingFlag")
 	require.Error(t, err)
+	assert.Equal(t, "unknown flag: --nonExistingFlag", err.Error())
 }
 
 func TestRebuildAllFlag(t *testing.T) {

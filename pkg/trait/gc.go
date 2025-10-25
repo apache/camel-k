@@ -115,11 +115,11 @@ func (t *gcTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 
 	// We need to execute this trait only when all resources have been created and
 	// deployed with a new generation if there is was any change during the Integration drift.
-	return e.IntegrationInRunningPhases(), nil, nil
+	return e.IntegrationInRunningPhases() || e.IntegrationInPhase(v1.IntegrationPhaseBuildComplete), nil, nil
 }
 
 func (t *gcTrait) Apply(e *Environment) error {
-	if e.Integration.GetGeneration() > 1 {
+	if e.Integration.GetGeneration() > 1 || e.IntegrationInPhase(v1.IntegrationPhaseBuildComplete) {
 		// Register a post action that deletes the existing resources that are labelled
 		// with the previous integration generation(s).
 		// We make the assumption generation is a monotonically increasing strictly positive integer,
@@ -187,8 +187,12 @@ func (t *gcTrait) garbageCollectResources(e *Environment) error {
 		return fmt.Errorf("cannot determine generation requirement: %w", err)
 	}
 	selector := labels.NewSelector().
-		Add(*integration).
-		Add(*generation)
+		Add(*integration)
+
+	// Skip the generation checking when we undeploy (which requires therefore to remove all dependent resources)
+	if !e.IntegrationInPhase(v1.IntegrationPhaseBuildComplete) {
+		selector = selector.Add(*generation)
+	}
 
 	return t.deleteEachOf(e.Ctx, deletableGVKs, e, selector)
 }

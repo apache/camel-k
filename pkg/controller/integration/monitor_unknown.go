@@ -53,7 +53,11 @@ func (action *monitorUnknownAction) Handle(ctx context.Context, integration *v1.
 	}
 	// We're good to monitor this again
 	if environment.Platform != nil && environment.Platform.Status.Phase == v1.IntegrationPlatformPhaseReady {
-		integration.Status.Phase = v1.IntegrationPhaseRunning
+		if integration.Annotations[v1.IntegrationDontRunAfterBuildAnnotation] == v1.IntegrationDontRunAfterBuildAnnotationTrueValue {
+			integration.Status.Phase = v1.IntegrationPhaseBuildComplete
+		} else {
+			integration.Status.Phase = v1.IntegrationPhaseRunning
+		}
 		integration.Status.SetCondition(
 			v1.IntegrationConditionPlatformAvailable,
 			corev1.ConditionTrue,

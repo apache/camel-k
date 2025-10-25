@@ -27,7 +27,6 @@ import (
 
 const cmdBuilder = "builder"
 
-// nolint: unparam
 func initializeBuilderCmdOptions(t *testing.T) (*builderCmdOptions, *cobra.Command, RootCmdOptions) {
 	t.Helper()
 

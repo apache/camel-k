@@ -26,6 +26,7 @@
 ** xref:running/self-managed.adoc[Self managed Integrations]
 ** xref:running/synthetic.adoc[Synthetic Integrations]
 ** xref:running/promoting.adoc[Promote an Integration]
+** xref:running/dry-build.adoc[Dry build]
 * xref:pipes/pipes.adoc[Run an Pipe]
 ** xref:pipes/bind-cli.adoc[kamel bind CLI]
 ** xref:pipes/error-handler.adoc[Error Handler]

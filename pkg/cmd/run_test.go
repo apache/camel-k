@@ -54,7 +54,6 @@ const (
 `
 )
 
-// nolint: unparam
 func initializeRunCmdOptions(t *testing.T) (*runCmdOptions, *cobra.Command, RootCmdOptions) {
 	t.Helper()
 
@@ -65,7 +64,6 @@ func initializeRunCmdOptions(t *testing.T) (*runCmdOptions, *cobra.Command, Root
 	return runCmdOptions, rootCmd, *options
 }
 
-// nolint: unparam
 func initializeRunCmdOptionsWithOutput(t *testing.T) (*runCmdOptions, *cobra.Command, RootCmdOptions) {
 	t.Helper()
 	defaultIntegrationPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)

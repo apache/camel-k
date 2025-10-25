@@ -226,7 +226,11 @@ func (action *buildAction) handleBuildRunning(ctx context.Context, it *v1.Integr
 			}
 			it.Status.Image = fmt.Sprintf("%s@%s", image, build.Status.Digest)
 		}
-		it.Status.Phase = v1.IntegrationPhaseDeploying
+		if it.Annotations[v1.IntegrationDontRunAfterBuildAnnotation] == v1.IntegrationDontRunAfterBuildAnnotationTrueValue {
+			it.Status.Phase = v1.IntegrationPhaseBuildComplete
+		} else {
+			it.Status.Phase = v1.IntegrationPhaseDeploying
+		}
 	case v1.BuildPhaseError, v1.BuildPhaseInterrupted, v1.BuildPhaseFailed:
 		it.Status.Phase = v1.IntegrationPhaseError
 		reason := fmt.Sprintf("Build%s", build.Status.Phase)

@@ -34,6 +34,10 @@ const (
 	IntegrationProfileAnnotation = "camel.apache.org/integration-profile.id"
 	// IntegrationProfileNamespaceAnnotation integration profile id annotation label.
 	IntegrationProfileNamespaceAnnotation = "camel.apache.org/integration-profile.namespace"
+	// IntegrationDontRunAfterBuildAnnotation -- .
+	IntegrationDontRunAfterBuildAnnotation = "camel.apache.org/dont-run-after-build"
+	// IntegrationDontRunAfterBuildAnnotationTrueValue -- .
+	IntegrationDontRunAfterBuildAnnotationTrueValue = "true"
 )
 
 // BuildConfiguration represent the configuration required to build the runtime.

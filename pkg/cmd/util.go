@@ -27,6 +27,7 @@ import (
 	"strings"
 
 	"github.com/go-viper/mapstructure/v2"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
@@ -235,4 +236,33 @@ func fieldByMapstructureTagName(target reflect.Value, tagName string) (reflect.S
 	}
 
 	return reflect.StructField{}, false
+}
+
+func getIntegration(ctx context.Context, c client.Client, name, namespace string) (*v1.Integration, error) {
+	it := v1.NewIntegration(namespace, name)
+	key := k8sclient.ObjectKey{
+		Name:      name,
+		Namespace: namespace,
+	}
+	if err := c.Get(ctx, key, &it); err != nil {
+		return nil, err
+	}
+
+	return &it, nil
+}
+
+func getIntegrations(ctx context.Context, c client.Client, names []string, namespace string) ([]v1.Integration, error) {
+	ints := make([]v1.Integration, 0, len(names))
+	for _, n := range names {
+		it := v1.NewIntegration(namespace, n)
+		key := k8sclient.ObjectKey{
+			Name:      n,
+			Namespace: namespace,
+		}
+		if err := c.Get(ctx, key, &it); err != nil {
+			return nil, fmt.Errorf("could not find integration %s in namespace %s: %w", it.Name, namespace, err)
+		}
+		ints = append(ints, it)
+	}
+	return ints, nil
 }

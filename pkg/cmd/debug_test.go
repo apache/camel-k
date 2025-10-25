@@ -32,7 +32,6 @@ import (
 
 const cmdDebug = "debug"
 
-// nolint: unparam
 func initializeDebugCmdOptions(t *testing.T, initObjs ...runtime.Object) (*cobra.Command, *debugCmdOptions) {
 	t.Helper()
 	fakeClient, err := internal.NewFakeClient(initObjs...)

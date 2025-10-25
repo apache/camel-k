@@ -146,7 +146,7 @@ func TestGarbageCollectPreserveResourcesWithSameGeneration(t *testing.T) {
 	environment.Client = gcTrait.Client
 
 	resourceDeleted := false
-	fakeClient := gcTrait.Client.(*internal.FakeClient) //nolint
+	fakeClient := gcTrait.Client.(*internal.FakeClient)
 	fakeClient.Intercept(&interceptor.Funcs{
 		Delete: func(ctx context.Context, client ctrl.WithWatch, obj ctrl.Object, opts ...ctrl.DeleteOption) error {
 			resourceDeleted = true
@@ -157,6 +157,29 @@ func TestGarbageCollectPreserveResourcesWithSameGeneration(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.False(t, resourceDeleted)
+}
+
+func TestGarbageCollectUndeploying(t *testing.T) {
+	gcTrait, environment := createNominalGCTest()
+	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildComplete
+
+	deployment := getIntegrationDeployment(environment.Integration)
+	gcTrait.Client, _ = internal.NewFakeClient(deployment)
+
+	environment.Client = gcTrait.Client
+
+	resourceDeleted := false
+	fakeClient := gcTrait.Client.(*internal.FakeClient)
+	fakeClient.Intercept(&interceptor.Funcs{
+		Delete: func(ctx context.Context, client ctrl.WithWatch, obj ctrl.Object, opts ...ctrl.DeleteOption) error {
+			resourceDeleted = true
+			return nil
+		},
+	})
+	err := gcTrait.garbageCollectResources(environment)
+
+	require.NoError(t, err)
+	assert.True(t, resourceDeleted)
 }
 
 func TestGarbageCollectPreserveResourcesOwnerReferenceMismatch(t *testing.T) {

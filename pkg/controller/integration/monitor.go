@@ -63,7 +63,8 @@ func (action *monitorAction) Name() string {
 func (action *monitorAction) CanHandle(integration *v1.Integration) bool {
 	return integration.Status.Phase == v1.IntegrationPhaseDeploying ||
 		integration.Status.Phase == v1.IntegrationPhaseRunning ||
-		integration.Status.Phase == v1.IntegrationPhaseError
+		integration.Status.Phase == v1.IntegrationPhaseError ||
+		integration.Status.Phase == v1.IntegrationPhaseBuildComplete
 }
 
 //nolint:nestif
@@ -153,6 +154,14 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 	}
 	action.checkTraitAnnotationsDeprecatedNotice(integration)
 
+	if integration.Status.Phase == v1.IntegrationPhaseBuildComplete {
+		// The following status fields are only filled during execution.
+		// We must remove them to clear any previous execution status.
+		integration.Status.Replicas = nil
+		integration.Status.RemoveCondition(v1.IntegrationConditionReady)
+		return integration, nil
+	}
+
 	return action.monitorPods(ctx, environment, integration)
 }
 
@@ -196,7 +205,8 @@ func (action *monitorAction) monitorPods(ctx context.Context, environment *trait
 				Status: corev1.ConditionFalse,
 				Reason: v1.IntegrationConditionMonitoringPodsAvailableReason,
 				Message: fmt.Sprintf(
-					"Could not find `camel.apache.org/integration: %s` label in the %s template. Make sure to include this label in the template for Pod monitoring purposes.",
+					"Could not find `camel.apache.org/integration: %s` label in the %s template. "+
+						"Make sure to include this label in the template for Pod monitoring purposes.",
 					integration.GetName(),
 					controller.getControllerName(),
 				),
