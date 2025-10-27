@@ -3038,6 +3038,7 @@ IntegrationPlatformConditionType defines the type of condition.
 * <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
 
 IntegrationPlatformKameletSpec define the behavior for all the Kamelets controller by the IntegrationPlatform.
+Deprecated: to be removed in future versions.
 
 [cols="2,2a",options="header"]
 |===
