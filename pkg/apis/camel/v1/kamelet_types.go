@@ -50,8 +50,12 @@ var (
 	reservedKameletNames = map[string]bool{"source": true, "sink": true}
 	// KameletIDProperty used to identify.
 	KameletIDProperty = "id"
-	// KameletVersionProperty used to specify the version to use.
+	// KameletVersionProperty used to specify the version to use. NOTE: this parameter is exclusive use of the operator
+	// and should not be used by final users.
 	KameletVersionProperty = "kameletVersion"
+	// KameletNamespaceProperty used to specify the namespace to use. NOTE: this parameter is exclusive use of the operator
+	// and should not be used by final users.
+	KameletNamespaceProperty = "kameletNamespace"
 )
 
 // +genclient
