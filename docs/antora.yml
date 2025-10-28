@@ -39,6 +39,6 @@ asciidoc:
     kustomize-version: 4.5.4
     kubernetes-api-version: 0.34.1
     operator-fwk-api-version: 0.35.0
-    knative-api-version: 0.46.6
+    knative-api-version: 0.46.7
     service-binding-op-version: ""
     prometheus-op-version: 0.86.1
