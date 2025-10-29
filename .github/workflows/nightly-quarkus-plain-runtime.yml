@@ -58,7 +58,7 @@ jobs:
         kubectl create ns camel-k
         make install-k8s-global
         kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=60s
-        kubectl patch itp camel-k -n camel-k -p '{"spec":{"traits":{"camel":{"runtimeProvider":"plain-quarkus"}}}}' --type=merge
+        kubectl patch itp camel-k -n camel-k -p '{"spec":{"traits":{"camel":{"runtimeProvider":"plain-quarkus", "runtimeVersion":"3.29.0"}}}}' --type=merge
         kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=60s
 
     - name: Run test
@@ -92,7 +92,7 @@ jobs:
         kubectl create ns camel-k
         make install-k8s-global
         kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=60s
-        kubectl patch itp camel-k -n camel-k -p '{"spec":{"traits":{"camel":{"runtimeProvider":"plain-quarkus"}}}}' --type=merge
+        kubectl patch itp camel-k -n camel-k -p '{"spec":{"traits":{"camel":{"runtimeProvider":"plain-quarkus", "runtimeVersion":"3.29.0"}}}}' --type=merge
         kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=60s
 
     - name: Run test
@@ -131,7 +131,7 @@ jobs:
         kubectl create ns camel-k
         make install-k8s-global
         kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=60s
-        kubectl patch itp camel-k -n camel-k -p '{"spec":{"traits":{"camel":{"runtimeProvider":"plain-quarkus"}}}}' --type=merge
+        kubectl patch itp camel-k -n camel-k -p '{"spec":{"traits":{"camel":{"runtimeProvider":"plain-quarkus", "runtimeVersion":"3.29.0"}}}}' --type=merge
         kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=60s
 
     - name: Run test
