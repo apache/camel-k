@@ -123,34 +123,67 @@ runs:
         git tag v${{ env.VERSION }} $(git rev-parse HEAD)
         git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" tag v${{ env.VERSION }} -f || echo "No nightly release updates changes to push"
 
-    - name: Create Release
-      id: create_release
-      uses: ncipollo/release-action@1e3e9c6637e5566e185b7ab66f187539c5a76da7
-      with:
-        artifacts: "./camel-k-client*.tar.gz,sbom.json"
-        body: |
-          ```
-          NOTE: last updated on ${{ env.UPD_DATE }}
-          ```
-          Apache Camel K ${{ env.VERSION }} build for testing purposese only (unstable). This nightly release is using an **unsupported** operator image published as `${{ env.IMAGE_NAME }}:${{ env.VERSION }}`. The available platforms are AMD64 and ARM64.
+    - name: Delete existing release
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        TAG=v${{ env.VERSION }}
+        echo "Checking for existing release for tag $TAG..."
 
-          ## Kubectl
-          ```
-          kubectl apply -k github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v${{ env.VERSION }}
-          ```
-          ## Helm
-          ```
-          helm install camel-k https://github.com/apache/camel-k/raw/v${{ env.VERSION }}/docs/charts/camel-k-${{ env.VERSION }}.tgz
-          ```
-          ## OLM
-          Use the `operator-sdk` tool and run the bundle via:
-          ```
-          operator-sdk run bundle docker.io/testcamelk/camel-k-bundle:${{ env.VERSION }}
-          ```
-        token: ${{ inputs.secretGithubToken }}
-        draft: false
-        prerelease: true
-        allowUpdates: true
-        replacesArtifacts: true
-        tag: v${{ env.VERSION }}
-        commit: ${{ env.COMMIT_ID }}
+        RELEASE_RESPONSE=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+          -H "Accept: application/vnd.github+json" \
+          "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/$TAG")
+
+        RELEASE_ID=$(echo "$RELEASE_RESPONSE" | jq -r '.id // empty')
+
+        if [ -n "$RELEASE_ID" ]; then
+          echo "Release exists (ID=$RELEASE_ID). Deleting release and tag..."
+          curl -X DELETE -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/$RELEASE_ID"
+
+          git push --delete origin "$TAG"
+          echo "Deleted existing release and tag $TAG."
+        else
+          echo "No existing release found for tag $TAG."
+        fi
+
+    - name: Create release and upload artifacts
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        TAG=v${{ env.VERSION }}
+        FILES="./camel-k-client*.tar.gz sbom.json"
+        echo "Creating new release for tag $TAG..."
+
+        RELEASE_DATA=$(jq -n \
+          --arg tag "$TAG" \
+          --arg name "Release $TAG" \
+          --arg body "Release notes go here" \
+          '{ tag_name: $tag, name: $name, body: $body, draft: false, prerelease: true }')
+
+        RELEASE_RESPONSE=$(curl -s -X POST \
+          -H "Authorization: token $GITHUB_TOKEN" \
+          -H "Accept: application/vnd.github+json" \
+          https://api.github.com/repos/${GITHUB_REPOSITORY}/releases \
+          -d "$RELEASE_DATA")
+
+        UPLOAD_URL=$(echo "$RELEASE_RESPONSE" | jq -r .upload_url | sed -e "s/{?name,label}//")
+
+        for FILE in $FILES; do
+          if [ -f "$FILE" ]; then
+            FILE_NAME=$(basename "$FILE")
+            echo "Uploading $FILE_NAME..."
+            curl -s -X POST \
+              -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Content-Type: application/octet-stream" \
+              --data-binary @"$FILE" \
+              "$UPLOAD_URL?name=$FILE_NAME"
+          else
+            echo "File $FILE not found, skipping."
+          fi
+        done
+
+        echo "Release $TAG created successfully with artifacts."
