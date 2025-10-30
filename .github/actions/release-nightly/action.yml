@@ -148,7 +148,7 @@ runs:
           git config --local user.email "$CI_EMAIL"
           git config --local user.name "$CI_USER"
           # git push --delete origin "$TAG"
-          git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" --delete origin "$TAG"
+          git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" --delete "$TAG"
           echo "Deleted existing release and tag $TAG."
         else
           echo "No existing release found for tag $TAG."
