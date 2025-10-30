@@ -126,7 +126,7 @@ runs:
     - name: Delete existing release
       shell: bash
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.secretGithubToken }}
       run: |
         TAG=v${{ env.VERSION }}
         echo "Checking for existing release for tag $TAG..."
@@ -152,7 +152,7 @@ runs:
     - name: Create release and upload artifacts
       shell: bash
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.secretGithubToken }}
       run: |
         TAG=v${{ env.VERSION }}
         FILES="./camel-k-client*.tar.gz sbom.json"
