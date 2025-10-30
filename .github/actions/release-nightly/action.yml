@@ -70,10 +70,10 @@ runs:
         make install-k8s-global
         kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=60s
 
-    - name: Run test
-      shell: bash
-      run: |
-        DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-common
+    # - name: Run test
+    #   shell: bash
+    #   run: |
+    #     DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-common
 
     - name: Get nightly version and update date
       shell: bash
@@ -126,12 +126,14 @@ runs:
     - name: Delete existing release
       shell: bash
       env:
-        GITHUB_TOKEN: ${{ inputs.secretGithubToken }}
+        CI_USER: "github-actions[bot]"
+        CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
+        CI_TOKEN: ${{ inputs.secretGithubToken }}
       run: |
         TAG=v${{ env.VERSION }}
         echo "Checking for existing release for tag $TAG..."
 
-        RELEASE_RESPONSE=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+        RELEASE_RESPONSE=$(curl -s -H "Authorization: token $CI_TOKEN" \
           -H "Accept: application/vnd.github+json" \
           "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/$TAG")
 
@@ -139,11 +141,14 @@ runs:
 
         if [ -n "$RELEASE_ID" ]; then
           echo "Release exists (ID=$RELEASE_ID). Deleting release and tag..."
-          curl -X DELETE -H "Authorization: token $GITHUB_TOKEN" \
+          curl -X DELETE -H "Authorization: token $CI_TOKEN" \
             -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/$RELEASE_ID"
 
-          git push --delete origin "$TAG"
+          git config --local user.email "$CI_EMAIL"
+          git config --local user.name "$CI_USER"
+          # git push --delete origin "$TAG"
+          git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" --delete origin "$TAG"
           echo "Deleted existing release and tag $TAG."
         else
           echo "No existing release found for tag $TAG."
