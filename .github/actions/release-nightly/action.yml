@@ -159,21 +159,24 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.secretGithubToken }}
       run: |
-        RELEASE_NOTES=$(cat << 'EOF'
-Apache Camel K ${{ env.VERSION }} build for testing purposese only (unstable). This nightly release is using an **unsupported** operator image published as `${{ env.IMAGE_NAME }}:${{ env.VERSION }}`. The available platforms are AMD64 and ARM64.
-```
-kubectl apply -k github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v${{ env.VERSION }}
-```
-```
-helm install camel-k https://github.com/apache/camel-k/raw/v${{ env.VERSION }}/docs/charts/camel-k-${{ env.VERSION }}.tgz
-```
-Use the `operator-sdk` tool and run the bundle via:
-```
-operator-sdk run bundle docker.io/testcamelk/camel-k-bundle:${{ env.VERSION }}
-```
-EOF
-)
         TAG=v${{ env.VERSION }}
+        RELEASE_NOTES=$(cat << 'EOF'
+        Apache Camel K ${{ env.VERSION }} build for testing purposese only (unstable). This nightly release is using an **unsupported** operator image published as `${{ env.IMAGE_NAME }}:${{ env.VERSION }}`. The available platforms are AMD64 and ARM64.
+        ## Kubectl
+        ```
+        kubectl apply -k github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=$TAG
+        ```
+        ## Helm
+        ```
+        helm install camel-k https://github.com/apache/camel-k/raw/$TAG/docs/charts/camel-k-${{ env.VERSION }}.tgz
+        ```
+        ## OLM
+        Use the `operator-sdk` tool and run the bundle via:
+        ```
+        operator-sdk run bundle docker.io/testcamelk/camel-k-bundle:${{ env.VERSION }}
+        ```
+        EOF
+        )        
         FILES="./camel-k-client*.tar.gz sbom.json"
         echo "Creating new release for tag $TAG..."
 
