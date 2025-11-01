@@ -50,12 +50,12 @@ func TestOperatorIDFiltering(t *testing.T) {
 				g.Eventually(PlatformPhase(t, ctx, nsop2), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 				t.Run("Operators ignore non-scoped integrations", func(t *testing.T) {
-					g.Expect(KamelRunWithID(t, ctx, "operator-x", ns, "files/yaml.yaml", "--name", "untouched", "--force").Execute()).To(Succeed())
+					g.Expect(KamelRunWithID(t, ctx, "operator-x", ns, "files/yaml.yaml", "--name", "untouched").Execute()).To(Succeed())
 					g.Consistently(IntegrationPhase(t, ctx, ns, "untouched"), 10*time.Second).Should(BeEmpty())
 				})
 
 				t.Run("Operators run scoped integrations", func(t *testing.T) {
-					g.Expect(KamelRunWithID(t, ctx, "operator-x", ns, "files/yaml.yaml", "--name", "moving", "--force").Execute()).To(Succeed())
+					g.Expect(KamelRunWithID(t, ctx, "operator-x", ns, "files/yaml.yaml", "--name", "moving").Execute()).To(Succeed())
 					g.Expect(AssignIntegrationToOperator(t, ctx, ns, "moving", operator1)).To(Succeed())
 					g.Eventually(IntegrationPhase(t, ctx, ns, "moving"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
 					g.Eventually(IntegrationPodPhase(t, ctx, ns, "moving"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -101,7 +101,7 @@ func TestOperatorIDFiltering(t *testing.T) {
 						},
 					}
 					g.Expect(TestClient(t).Create(ctx, &externalKit)).Should(BeNil())
-					g.Expect(KamelRunWithID(t, ctx, operator2, ns, "files/yaml.yaml", "--name", "pre-built", "--kit", "external", "--force").Execute()).To(Succeed())
+					g.Expect(KamelRunWithID(t, ctx, operator2, ns, "files/yaml.yaml", "--name", "pre-built", "--kit", "external").Execute()).To(Succeed())
 					g.Consistently(IntegrationPhase(t, ctx, ns, "pre-built"), 10*time.Second).ShouldNot(Equal(v1.IntegrationPhaseBuildingKit))
 					g.Eventually(IntegrationPhase(t, ctx, ns, "pre-built"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
 					g.Eventually(IntegrationStatusImage(t, ctx, ns, "pre-built"), TestTimeoutShort).Should(Equal(kitImage))
@@ -111,7 +111,7 @@ func TestOperatorIDFiltering(t *testing.T) {
 				})
 
 				t.Run("Operators can run scoped Pipes", func(t *testing.T) {
-					g.Expect(KamelBindWithID(t, ctx, "operator-x", ns, "timer-source?message=Hello", "log-sink", "--name", "klb", "--force").Execute()).To(Succeed())
+					g.Expect(KamelBindWithID(t, ctx, "operator-x", ns, "timer-source?message=Hello", "log-sink", "--name", "klb").Execute()).To(Succeed())
 					g.Consistently(Integration(t, ctx, ns, "klb"), 10*time.Second).Should(BeNil())
 					g.Expect(AssignPipeToOperator(t, ctx, ns, "klb", operator1)).To(Succeed())
 					g.Eventually(Integration(t, ctx, ns, "klb"), TestTimeoutShort).ShouldNot(BeNil())
