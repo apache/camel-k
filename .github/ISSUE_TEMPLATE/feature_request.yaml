@@ -21,8 +21,10 @@ body:
   - type: markdown
     attributes:
       value: |
-        Welcome to Apache Camel K! 👋🎉 Thanks for taking the time to fill out this feature request.
+        👋 Welcome to Apache Camel K! Thanks for taking the time to fill out this feature request.
+        
         Before you post:
+        
         - Please search for existing issues to avoid creating duplicate bugs/feature requests.
         - Please be respectful and considerate of others (see [Apache Code of Conduct](https://www.apache.org/foundation/policies/conduct)).
         - If you only have a question, you may get a faster response by asking in [our Zulip chat room](https://camel.zulipchat.com/login/) or [mailing list](https://camel.apache.org/community/mailing-list/).
