@@ -31,8 +31,8 @@ body:
         Additional information helps us troubleshoot the issue faster.
   - type: textarea
     id: requirement
-    label: Requirement
     attributes:
+      label: Requirement
       description: What kind of business use case ore feature would your like to propose?
     validations:
       required: true
