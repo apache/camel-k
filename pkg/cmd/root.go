@@ -77,12 +77,11 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 
 func kamelPreAddCommandInit(options *RootCmdOptions) *cobra.Command {
 	cmd := cobra.Command{
-		BashCompletionFunction: bashCompletionFunction,
-		PersistentPreRunE:      options.preRun,
-		Use:                    "kamel",
-		Short:                  "Kamel is a awesome client tool for running Apache Camel integrations natively on Kubernetes",
-		Long:                   kamelCommandLongDescription,
-		SilenceUsage:           true,
+		PersistentPreRunE: options.preRun,
+		Use:               "kamel",
+		Short:             "Kamel is a awesome client tool for running Apache Camel integrations natively on Kubernetes",
+		Long:              kamelCommandLongDescription,
+		SilenceUsage:      true,
 	}
 
 	cmd.PersistentFlags().StringVar(&options.KubeConfig, "kube-config", os.Getenv("KUBECONFIG"), "Path to the kube config file to use for CLI requests")
@@ -134,7 +133,6 @@ func kamelPostAddCommandInit(cmd *cobra.Command, v *viper.Viper) error {
 }
 
 func addKamelSubcommands(cmd *cobra.Command, options *RootCmdOptions) {
-	cmd.AddCommand(newCmdCompletion(cmd))
 	cmd.AddCommand(cmdOnly(newCmdVersion(options)))
 	cmd.AddCommand(cmdOnly(newCmdRun(options)))
 	cmd.AddCommand(cmdOnly(newCmdDeploy(options)))

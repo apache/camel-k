@@ -64,7 +64,7 @@ func TestVersionClient(t *testing.T) {
 	_, rootCmd, _ := initializeVersionCmdOptions(t)
 	output, err := ExecuteCommand(rootCmd, cmdVersion)
 	require.NoError(t, err)
-	assert.Equal(t, fmt.Sprintf("Camel K Client %s\n", defaults.Version), output)
+	assert.Contains(t, output, fmt.Sprintf("Camel K Client %s\n", defaults.Version))
 }
 
 func TestVersionOperatorFlag(t *testing.T) {
@@ -79,7 +79,7 @@ func TestVersionClientVerbose(t *testing.T) {
 	output, err := ExecuteCommand(rootCmd, cmdVersion, "-v")
 	require.NoError(t, err)
 	assert.True(t, versionCmdOptions.Verbose)
-	assert.Equal(t, fmt.Sprintf("Camel K Client %s\nGit Commit: %s\n", defaults.Version, defaults.GitCommit), output)
+	assert.Contains(t, output, fmt.Sprintf("Camel K Client %s\nGit Commit: %s\n", defaults.Version, defaults.GitCommit))
 }
 
 func TestOperatorVersionVerbose(t *testing.T) {

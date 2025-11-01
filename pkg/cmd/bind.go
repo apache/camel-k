@@ -62,7 +62,6 @@ func newCmdBind(rootCmdOptions *RootCmdOptions) (*cobra.Command, *bindCmdOptions
 	cmd.Flags().StringArrayP("trait", "t", nil, `Add a trait to the corresponding Integration.`)
 	cmd.Flags().StringP("operator-id", "x", "camel-k", "Operator id selected to manage this Pipe.")
 	cmd.Flags().StringArray("annotation", nil, "Add an annotation to the Pipe. E.g. \"--annotation my.company=hello\"")
-	cmd.Flags().Bool("force", false, "Force creation of Pipe regardless of potential misconfiguration.")
 	cmd.Flags().String("service-account", "", "The SA to use to run this binding")
 	cmd.Flags().StringArrayP("dependency", "d", nil, `A dependency that should be included, e.g., "camel:mail" for a Camel component, "mvn:org.my:app:1.0" for a Maven dependency`)
 
@@ -88,7 +87,6 @@ type bindCmdOptions struct {
 	Traits         []string `mapstructure:"traits" yaml:",omitempty"`
 	OperatorID     string   `mapstructure:"operator-id" yaml:",omitempty"`
 	Annotations    []string `mapstructure:"annotations" yaml:",omitempty"`
-	Force          bool     `mapstructure:"force" yaml:",omitempty"`
 	ServiceAccount string   `mapstructure:"service-account" yaml:",omitempty"`
 	Dependencies   []string `mapstructure:"dependencies" yaml:",omitempty"`
 }

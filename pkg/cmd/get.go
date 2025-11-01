@@ -39,11 +39,12 @@ func newCmdGet(rootCmdOptions *RootCmdOptions) (*cobra.Command, *getCmdOptions) 
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:     "get [integration]",
-		Short:   "Get integrations deployed on Kubernetes",
-		Long:    `Get the status of integrations deployed on Kubernetes.`,
-		PreRunE: decode(&options, options.Flags),
-		RunE:    options.run,
+		Use:        "get [integration]",
+		Short:      "Get integrations deployed on Kubernetes",
+		Long:       `Get the status of integrations deployed on Kubernetes.`,
+		Deprecated: "Warning: this command is deprecated and will be removed in the future. Use kubectl instead.",
+		PreRunE:    decode(&options, options.Flags),
+		RunE:       options.run,
 	}
 
 	return &cmd, &options
