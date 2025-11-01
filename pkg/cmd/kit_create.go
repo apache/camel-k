@@ -56,9 +56,6 @@ func newKitCreateCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kitCreate
 	cmd.Flags().StringP("operator-id", "x", "camel-k", "Operator id selected to manage this kit")
 	cmd.Flags().StringArrayP("trait", "t", nil, "Configure a trait. E.g. \"-t service.enabled=false\"")
 
-	// completion support
-	configureKnownCompletions(&cmd)
-
 	return &cmd, &options
 }
 

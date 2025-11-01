@@ -23,9 +23,10 @@ import (
 
 func newCmdKit(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd := cobra.Command{
-		Use:   "kit",
-		Short: "Configure an Integration Kit",
-		Long:  `Configure an Integration Kit.`,
+		Use:        "kit",
+		Short:      "Configure an Integration Kit",
+		Long:       `Configure an Integration Kit.`,
+		Deprecated: "Warning: this command is deprecated and will be removed in the future",
 	}
 
 	cmd.AddCommand(cmdOnly(newKitCreateCmd(rootCmdOptions)))

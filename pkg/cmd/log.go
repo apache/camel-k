@@ -48,9 +48,6 @@ func newCmdLog(rootCmdOptions *RootCmdOptions) (*cobra.Command, *logCmdOptions) 
 
 	cmd.Flags().Int64("tail", -1, "The number of lines from the end of the logs to show. Defaults to -1 to show all the lines.")
 
-	// completion support
-	configureKnownCompletions(&cmd)
-
 	return &cmd, &options
 }
 

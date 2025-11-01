@@ -39,9 +39,10 @@ func newCmdDelete(rootCmdOptions *RootCmdOptions) (*cobra.Command, *deleteCmdOpt
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:     "delete [integration1] [integration2] ...",
-		Short:   "Delete integrations deployed on Kubernetes",
-		PreRunE: decode(&options, options.Flags),
+		Use:        "delete [integration1] [integration2] ...",
+		Short:      "Delete integrations deployed on Kubernetes",
+		Deprecated: "Warning: this command is deprecated and will be removed in the future. Use kubectl instead.",
+		PreRunE:    decode(&options, options.Flags),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(args); err != nil {
 				return err

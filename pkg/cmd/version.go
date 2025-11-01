@@ -56,9 +56,9 @@ func newCmdVersion(rootCmdOptions *RootCmdOptions) (*cobra.Command, *versionCmdO
 		Annotations:       make(map[string]string),
 	}
 
-	cmd.Flags().Bool("operator", false, "Display Operator version")
+	cmd.Flags().Bool("operator", false, "Display Operator version. Deprecated option.")
 	cmd.Flags().BoolP("verbose", "v", false, "Display all available extra information")
-	cmd.Flags().BoolP("all", "a", false, "Display both Client and Operator version")
+	cmd.Flags().BoolP("all", "a", false, "Display both Client and Operator version. Deprecated option.")
 
 	return &cmd, &options
 }
@@ -66,15 +66,18 @@ func newCmdVersion(rootCmdOptions *RootCmdOptions) (*cobra.Command, *versionCmdO
 type versionCmdOptions struct {
 	*RootCmdOptions
 
+	// Deprecated: to be removed in future versions.
 	Operator bool `mapstructure:"operator"`
 	Verbose  bool `mapstructure:"verbose"`
-	All      bool `mapstructure:"all"`
+	// Deprecated: to be removed in future versions.
+	All bool `mapstructure:"all"`
 }
 
 func (o *versionCmdOptions) preRunE(cmd *cobra.Command, args []string) error {
 	if !o.Operator && !o.All {
 		// let the command to work in offline mode
 		cmd.Annotations[offlineCommandLabel] = "true"
+		fmt.Fprintf(cmd.OutOrStdout(), "Operator version discovery is deprecated. It will be removed from future releases.\n")
 	}
 	return o.preRun(cmd, args)
 }
@@ -128,6 +131,7 @@ func (o *versionCmdOptions) displayOperatorVersion(cmd *cobra.Command, c client.
 	}
 }
 
+// Deprecated: to be removed in future versions.
 func operatorInfo(ctx context.Context, c client.Client, namespace string) (map[string]string, error) {
 	infos := make(map[string]string)
 	platform, err := platformutil.GetOrFindLocal(ctx, c, namespace)
