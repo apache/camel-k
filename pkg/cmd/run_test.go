@@ -225,25 +225,6 @@ func TestRunNameFlag(t *testing.T) {
 	assert.Equal(t, "myIntegration", runCmdOptions.IntegrationName)
 }
 
-func TestRunOpenApiFlag(t *testing.T) {
-	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := ExecuteCommand(rootCmd, cmdRun,
-		"--open-api", "configmap:oapi2",
-		integrationSource)
-	require.NoError(t, err)
-	assert.Len(t, runCmdOptions.OpenAPIs, 1)
-	assert.Equal(t, "configmap:oapi2", runCmdOptions.OpenAPIs[0])
-}
-
-func TestRunOpenApiInvalidFlag(t *testing.T) {
-	_, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := ExecuteCommand(rootCmd, cmdRun,
-		"--open-api", "secret:oapi1",
-		"--open-api", "oapi2",
-		integrationSource)
-	require.Error(t, err)
-}
-
 func TestRunOutputFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := ExecuteCommand(rootCmd, cmdRun, "-o", "yaml", integrationSource)

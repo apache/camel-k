@@ -102,7 +102,6 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringArrayP("trait", "t", nil, "Configure a trait. E.g. \"-t service.enabled=false\"")
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
 	cmd.Flags().Bool("compression", false, "Enable storage of sources and resources as a compressed binary blobs")
-	cmd.Flags().StringArray("open-api", nil, "Add an OpenAPI spec (syntax: [configmap|file]:name)")
 	cmd.Flags().StringArrayP("volume", "v", nil, "Mount a volume into the integration container. E.g \"-v pvcname:/container/path\"")
 	cmd.Flags().StringArrayP("env", "e", nil, "Set an environment variable in the integration container. E.g \"-e MY_VAR=my-value\"")
 	cmd.Flags().StringArray("annotation", nil, "Add an annotation to the integration. E.g. \"--annotation my.company=hello\"")
@@ -111,7 +110,6 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 		"this is added to the list of files listed as arguments of the command")
 	cmd.Flags().String("pod-template", "", "The path of the YAML file containing a PodSpec template to be used for the Integration pods")
 	cmd.Flags().String("service-account", "", "The SA to use to run this Integration")
-	cmd.Flags().Bool("force", false, "Force creation of integration regardless of potential misconfiguration.")
 	cmd.Flags().String("git", "", "A Git repository containing the project to build.")
 	cmd.Flags().String("git-branch", "", "Git branch to checkout when using --git option")
 	cmd.Flags().String("git-tag", "", "Git tag to checkout when using --git option")
@@ -120,53 +118,51 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().Bool("dont-run-after-build", false, "Only build, don't run the application. "+
 		"You can run \"kamel deploy\" to run a built Integration.")
 
-	// completion support
-	configureKnownCompletions(&cmd)
-
 	return &cmd, &options
 }
 
 type runCmdOptions struct {
 	*RootCmdOptions `json:"-"`
 
-	Compression        bool     `mapstructure:"compression" yaml:",omitempty"`
-	Wait               bool     `mapstructure:"wait" yaml:",omitempty"`
-	Logs               bool     `mapstructure:"logs" yaml:",omitempty"`
-	Sync               bool     `mapstructure:"sync" yaml:",omitempty"`
-	Dev                bool     `mapstructure:"dev" yaml:",omitempty"`
-	UseFlows           bool     `mapstructure:"use-flows" yaml:",omitempty"`
-	Save               bool     `mapstructure:"save" yaml:",omitempty" kamel:"omitsave"`
-	IntegrationKit     string   `mapstructure:"kit" yaml:",omitempty"`
-	IntegrationName    string   `mapstructure:"name" yaml:",omitempty"`
-	ContainerImage     string   `mapstructure:"image" yaml:",omitempty"`
-	GitRepo            string   `mapstructure:"git" yaml:",omitempty"`
-	GitBranch          string   `mapstructure:"git-branch" yaml:",omitempty"`
-	GitTag             string   `mapstructure:"git-tag" yaml:",omitempty"`
-	GitCommit          string   `mapstructure:"git-commit" yaml:",omitempty"`
-	Profile            string   `mapstructure:"profile" yaml:",omitempty"`
-	IntegrationProfile string   `mapstructure:"integration-profile" yaml:",omitempty"`
-	OperatorID         string   `mapstructure:"operator-id" yaml:",omitempty"`
-	OutputFormat       string   `mapstructure:"output" yaml:",omitempty"`
-	PodTemplate        string   `mapstructure:"pod-template" yaml:",omitempty"`
-	ServiceAccount     string   `mapstructure:"service-account" yaml:",omitempty"`
-	Resources          []string `mapstructure:"resources" yaml:",omitempty"`
-	// Deprecated: openapi parameter won't be supported in future releases.
-	OpenAPIs        []string `mapstructure:"open-apis" yaml:",omitempty"`
-	Dependencies    []string `mapstructure:"dependencies" yaml:",omitempty"`
-	Properties      []string `mapstructure:"properties" yaml:",omitempty"`
+	// Deprecated: won't be supported in the future
+	Compression bool `mapstructure:"compression" yaml:",omitempty"`
+	Wait        bool `mapstructure:"wait" yaml:",omitempty"`
+	Logs        bool `mapstructure:"logs" yaml:",omitempty"`
+	Sync        bool `mapstructure:"sync" yaml:",omitempty"`
+	Dev         bool `mapstructure:"dev" yaml:",omitempty"`
+	UseFlows    bool `mapstructure:"use-flows" yaml:",omitempty"`
+	Save        bool `mapstructure:"save" yaml:",omitempty" kamel:"omitsave"`
+	// Deprecated: won't be supported in the future
+	IntegrationKit     string `mapstructure:"kit" yaml:",omitempty"`
+	IntegrationName    string `mapstructure:"name" yaml:",omitempty"`
+	ContainerImage     string `mapstructure:"image" yaml:",omitempty"`
+	GitRepo            string `mapstructure:"git" yaml:",omitempty"`
+	GitBranch          string `mapstructure:"git-branch" yaml:",omitempty"`
+	GitTag             string `mapstructure:"git-tag" yaml:",omitempty"`
+	GitCommit          string `mapstructure:"git-commit" yaml:",omitempty"`
+	Profile            string `mapstructure:"profile" yaml:",omitempty"`
+	IntegrationProfile string `mapstructure:"integration-profile" yaml:",omitempty"`
+	OperatorID         string `mapstructure:"operator-id" yaml:",omitempty"`
+	OutputFormat       string `mapstructure:"output" yaml:",omitempty"`
+	// Deprecated: won't be supported in the future
+	PodTemplate    string   `mapstructure:"pod-template" yaml:",omitempty"`
+	ServiceAccount string   `mapstructure:"service-account" yaml:",omitempty"`
+	Resources      []string `mapstructure:"resources" yaml:",omitempty"`
+	Dependencies   []string `mapstructure:"dependencies" yaml:",omitempty"`
+	// Deprecated: won't be supported in the future
+	Properties []string `mapstructure:"properties" yaml:",omitempty"`
+	// Deprecated: won't be supported in the future
 	BuildProperties []string `mapstructure:"build-properties" yaml:",omitempty"`
 	Configs         []string `mapstructure:"configs" yaml:",omitempty"`
 	Repositories    []string `mapstructure:"maven-repositories" yaml:",omitempty"`
 	Traits          []string `mapstructure:"traits" yaml:",omitempty"`
 	Volumes         []string `mapstructure:"volumes" yaml:",omitempty"`
-	EnvVars         []string `mapstructure:"envs" yaml:",omitempty"`
-	Labels          []string `mapstructure:"labels" yaml:",omitempty"`
-	Annotations     []string `mapstructure:"annotations" yaml:",omitempty"`
-	Sources         []string `mapstructure:"sources" yaml:",omitempty"`
-	// Deprecated: registry parameter no longer in use.
-	RegistryOptions   url.Values
-	Force             bool `mapstructure:"force" yaml:",omitempty"`
-	DontRunAfterBuild bool `mapstructure:"dont-run-after-build" yaml:",omitempty"`
+	// Deprecated: won't be supported in the future
+	EnvVars           []string `mapstructure:"envs" yaml:",omitempty"`
+	Labels            []string `mapstructure:"labels" yaml:",omitempty"`
+	Annotations       []string `mapstructure:"annotations" yaml:",omitempty"`
+	Sources           []string `mapstructure:"sources" yaml:",omitempty"`
+	DontRunAfterBuild bool     `mapstructure:"dont-run-after-build" yaml:",omitempty"`
 }
 
 func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
@@ -197,10 +193,6 @@ func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
 	if o.OutputFormat != "" {
 		// let the command work in offline mode
 		cmd.Annotations[offlineCommandLabel] = "true"
-	}
-
-	if err := o.validate(cmd); err != nil {
-		return err
 	}
 
 	// backup the values from values belonging to kamel.run by coping the
@@ -286,13 +278,6 @@ func (o *runCmdOptions) validate(cmd *cobra.Command) error {
 		}
 	}
 
-	for _, openapi := range o.OpenAPIs {
-		// We support only cluster configmaps
-		if !(strings.HasPrefix(openapi, "configmap:")) {
-			return fmt.Errorf(`invalid openapi specification "%s". It supports only configmaps`, openapi)
-		}
-	}
-
 	for i, property := range o.Properties {
 		// We support only --config
 		if strings.HasPrefix(property, "configmap:") || strings.HasPrefix(property, "secret:") {
@@ -308,6 +293,11 @@ func (o *runCmdOptions) validate(cmd *cobra.Command) error {
 		if strings.HasPrefix(bp, "configmap:") || strings.HasPrefix(bp, "secret:") {
 			fmt.Fprintf(cmd.OutOrStdout(), "Build property %s is deprecated. It will be removed from future releases.\n", bp)
 		}
+	}
+
+	// Deprecated: to be removed
+	if o.Compression {
+		fmt.Fprintf(cmd.OutOrStdout(), "Compression property is deprecated. It will be removed from future releases.\n")
 	}
 
 	var client client.Client
@@ -475,7 +465,6 @@ func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sou
 	files = append(files, filterFileLocation(o.Configs)...)
 	files = append(files, filterFileLocation(o.Properties)...)
 	files = append(files, filterFileLocation(o.BuildProperties)...)
-	files = append(files, filterFileLocation(o.OpenAPIs)...)
 
 	for _, s := range files {
 		ok, err := source.IsLocalAndFileExists(s)
@@ -770,11 +759,6 @@ func (o *runCmdOptions) convertOptionsToTraits(cmd *cobra.Command, c client.Clie
 	if err := o.parseAndConvertToTrait(cmd, c, it, o.Configs, resource.ParseConfig,
 		func(c *resource.Config) string { return c.String() },
 		"mount.configs"); err != nil {
-		return err
-	}
-	if err := o.parseAndConvertToTrait(cmd, c, it, o.OpenAPIs, resource.ParseConfig,
-		func(c *resource.Config) string { return c.Name() },
-		"openapi.configmaps"); err != nil {
 		return err
 	}
 
