@@ -38,7 +38,7 @@ import (
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	knativeapi "github.com/apache/camel-k/v2/pkg/apis/camel/v1/knative"
+	knativeapi "github.com/apache/camel-k/v2/pkg/internal/knative"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/internal"
