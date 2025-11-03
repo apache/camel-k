@@ -22,7 +22,7 @@ import (
 	"net/url"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	knativeapis "github.com/apache/camel-k/v2/pkg/apis/camel/v1/knative"
+	knativeapis "github.com/apache/camel-k/v2/pkg/internal/knative"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/property"
 	corev1 "k8s.io/api/core/v1"
