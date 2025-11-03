@@ -22,7 +22,7 @@ import (
 	"net/url"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	knativeapis "github.com/apache/camel-k/v2/pkg/apis/camel/v1/knative"
+	knativeapis "github.com/apache/camel-k/v2/pkg/internal/knative"
 )
 
 func asEndpointProperties(props map[string]string) *v1.EndpointProperties {
