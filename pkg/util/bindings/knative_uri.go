@@ -22,8 +22,8 @@ import (
 	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	knativeapis "github.com/apache/camel-k/v2/pkg/internal/knative"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	knativeapis "github.com/apache/camel-k/v2/pkg/internal/knative"
 	"k8s.io/utils/ptr"
 
 	"github.com/apache/camel-k/v2/pkg/util/uri"
