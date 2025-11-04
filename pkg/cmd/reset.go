@@ -44,7 +44,7 @@ func newCmdReset(rootCmdOptions *RootCmdOptions) (*cobra.Command, *resetCmdOptio
 	cmd.Flags().Bool("skip-kits", false, "Do not delete the integration kits")
 	cmd.Flags().Bool("skip-integrations", false, "Do not delete the integrations")
 	cmd.Flags().Bool("skip-bindings", false, "Do not delete the bindings/pipes")
-	cmd.Flags().BoolVarP(&options.Force, "force", "f", false, "Force reset without confirmation")
+	cmd.Flags().Bool("force", false, "Force reset without confirmation")
 
 	return &cmd, &options
 }
