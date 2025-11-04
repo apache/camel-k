@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
@@ -43,6 +44,7 @@ func newCmdReset(rootCmdOptions *RootCmdOptions) (*cobra.Command, *resetCmdOptio
 	cmd.Flags().Bool("skip-kits", false, "Do not delete the integration kits")
 	cmd.Flags().Bool("skip-integrations", false, "Do not delete the integrations")
 	cmd.Flags().Bool("skip-bindings", false, "Do not delete the bindings/pipes")
+	cmd.Flags().BoolVarP(&options.Force, "force", "f", false, "Force reset without confirmation")
 
 	return &cmd, &options
 }
@@ -53,9 +55,25 @@ type resetCmdOptions struct {
 	SkipKits         bool `mapstructure:"skip-kits"`
 	SkipIntegrations bool `mapstructure:"skip-integrations"`
 	SkipBindings     bool `mapstructure:"skip-bindings"`
+	Force            bool `mapstructure:"force"`
 }
 
 func (o *resetCmdOptions) reset(cmd *cobra.Command, _ []string) {
+	if !o.Force {
+		fmt.Printf("Reset will delete Camel K resources in namespace '%s'.\n", o.Namespace)
+		fmt.Fprint(cmd.OutOrStdout(), "Type the namespace to confirm: ")
+
+		var input string
+		if _, err := fmt.Fscan(os.Stdin, &input); err != nil {
+			fmt.Fprint(cmd.ErrOrStderr(), err)
+			return
+		}
+		if input != o.Namespace {
+			fmt.Fprintln(cmd.OutOrStdout(), "confirmation failed. aborting.")
+			return
+		}
+	}
+
 	c, err := o.GetCmdClient()
 	if err != nil {
 		fmt.Fprint(cmd.ErrOrStderr(), err)
