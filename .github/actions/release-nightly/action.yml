@@ -123,7 +123,7 @@ runs:
         git tag v${{ env.VERSION }} $(git rev-parse HEAD)
         git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" tag v${{ env.VERSION }} -f || echo "No nightly release updates changes to push"
 
-    - name: Delete existing release
+    - name: Create release first time
       shell: bash
       env:
         CI_USER: "github-actions[bot]"
@@ -138,61 +138,78 @@ runs:
           "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/$TAG")
 
         RELEASE_ID=$(echo "$RELEASE_RESPONSE" | jq -r '.id // empty')
+        echo "RELEASE_ID=$RELEASE_ID" >> $GITHUB_ENV
 
-        if [ -n "$RELEASE_ID" ]; then
-          echo "Release exists (ID=$RELEASE_ID). Deleting release and tag..."
-          curl -X DELETE -H "Authorization: token $CI_TOKEN" \
+        if [ -z "$RELEASE_ID" ]; then
+          RELEASE_DATA=$(jq -n \
+            --arg tag "$TAG" \
+            --arg name "$TAG" \
+            --arg body "PLACEHOLDER" \
+            '{ tag_name: $tag, name: $name, body: $body, draft: true, prerelease: true }')
+
+          RELEASE_RESPONSE=$(curl -s -X POST \
+            -H "Authorization: token $GITHUB_TOKEN" \
             -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/$RELEASE_ID"
-
-          git config --local user.email "$CI_EMAIL"
-          git config --local user.name "$CI_USER"
-          # git push --delete origin "$TAG"
-          git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" --delete "$TAG"
-          echo "Deleted existing release and tag $TAG."
-        else
-          echo "No existing release found for tag $TAG."
+            https://api.github.com/repos/${GITHUB_REPOSITORY}/releases \
+            -d "$RELEASE_DATA")
         fi
 
-    - name: Create release and upload artifacts
+    - name: Update release metadata
       shell: bash
-      env:
-        GITHUB_TOKEN: ${{ inputs.secretGithubToken }}
       run: |
+        RELEASE_ID=${{ env.RELEASE_ID }}
+        TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
         TAG=v${{ env.VERSION }}
         RELEASE_NOTES=$(cat << 'EOF'
-        Apache Camel K ${{ env.VERSION }} build for testing purposese only (unstable). This nightly release is using an **unsupported** operator image published as `${{ env.IMAGE_NAME }}:${{ env.VERSION }}`. The available platforms are AMD64 and ARM64.
+        Apache Camel K ${{ env.VERSION }} build for testing purposes only (unstable). This nightly release is using an **unsupported** operator image published as `${{ env.IMAGE_NAME }}:${{ env.VERSION }}`. The available platforms are AMD64 and ARM64.
         ## Kubectl
         ```
-        kubectl apply -k github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=$TAG
+        kubectl apply -k github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v${{ env.VERSION }}
         ```
         ## Helm
         ```
-        helm install camel-k https://github.com/apache/camel-k/raw/$TAG/docs/charts/camel-k-${{ env.VERSION }}.tgz
+        helm install camel-k https://github.com/apache/camel-k/raw/v${{ env.VERSION }}/docs/charts/camel-k-${{ env.VERSION }}.tgz
         ```
         ## OLM
         Use the `operator-sdk` tool and run the bundle via:
         ```
         operator-sdk run bundle docker.io/testcamelk/camel-k-bundle:${{ env.VERSION }}
         ```
+
+        NOTE: last updated on $TIMESTAMP
         EOF
-        )        
-        FILES="./camel-k-client*.tar.gz sbom.json"
-        echo "Creating new release for tag $TAG..."
+        )
 
-        RELEASE_DATA=$(jq -n \
-          --arg tag "$TAG" \
-          --arg name "$TAG" \
-          --arg body "$RELEASE_NOTES" \
-          '{ tag_name: $tag, name: $name, body: $body, draft: false, prerelease: true }')
+        echo "Updating release $RELEASE_ID..."
+        UPDATED_NAME="v${{ env.VERSION }}"
 
-        RELEASE_RESPONSE=$(curl -s -X POST \
+        curl -s -X PATCH \
           -H "Authorization: token $GITHUB_TOKEN" \
           -H "Accept: application/vnd.github+json" \
-          https://api.github.com/repos/${GITHUB_REPOSITORY}/releases \
-          -d "$RELEASE_DATA")
+          https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/$RELEASE_ID \
+          -d "{ \"tag_name\": \"$TAG\", \"name\":\"$UPDATED_NAME\",\"body\":\"$RELEASE_NOTES\",\"draft\":false,\"prerelease\":true}"
 
-        UPLOAD_URL=$(echo "$RELEASE_RESPONSE" | jq -r .upload_url | sed -e "s/{?name,label}//")
+    - name: Delete old assets
+      shell: bash
+      run: |
+        RELEASE_ID=${{ env.RELEASE_ID }}
+
+        ASSETS=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+          -H "Accept: application/vnd.github+json" \
+          https://api.github.com/repos/$REPO/releases/$RELEASE_ID | jq '.assets[] | .id')
+
+        for ASSET_ID in $ASSETS; do
+          echo "Deleting asset $ASSET_ID"
+          curl -s -X DELETE -H "Authorization: token $TOKEN" \
+                -H "Accept: application/vnd.github+json" \
+                https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/assets/$ASSET_ID
+        done
+
+    - name: Upload new assets
+      shell: bash
+      run: |
+        RELEASE_ID=${{ env.RELEASE_ID }}
+        FILES="./camel-k-client*.tar.gz sbom.json"
 
         for FILE in $FILES; do
           if [ -f "$FILE" ]; then
@@ -202,10 +219,10 @@ runs:
               -H "Authorization: token $GITHUB_TOKEN" \
               -H "Content-Type: application/octet-stream" \
               --data-binary @"$FILE" \
-              "$UPLOAD_URL?name=$FILE_NAME"
+              "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/$RELEASE_ID/assets?name=$(basename $FILE)"
           else
             echo "File $FILE not found, skipping."
           fi
         done
 
-        echo "Release $TAG created successfully with artifacts."
+        echo "Release v${{ env.VERSION }} created successfully with artifacts."
