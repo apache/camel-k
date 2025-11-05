@@ -46,7 +46,7 @@ func TestKamelReset(t *testing.T) {
 			g.Eventually(Kit(t, ctx, ns, IntegrationKit(t, ctx, ns, name)())).Should(Not(BeNil()))
 			g.Eventually(Integration(t, ctx, ns, name)).Should(Not(BeNil()))
 
-			g.Expect(Kamel(t, ctx, "reset", "-n", ns, "-f").Execute()).To(Succeed())
+			g.Expect(Kamel(t, ctx, "reset", "-n", ns, "--force").Execute()).To(Succeed())
 			g.Expect(Integration(t, ctx, ns, name)()).To(BeNil())
 			g.Expect(Kits(t, ctx, ns)()).To(HaveLen(0))
 		})
@@ -59,7 +59,7 @@ func TestKamelReset(t *testing.T) {
 			g.Eventually(Kit(t, ctx, ns, IntegrationKit(t, ctx, ns, name)())).Should(Not(BeNil()))
 			g.Eventually(Integration(t, ctx, ns, name)).Should(Not(BeNil()))
 
-			g.Expect(Kamel(t, ctx, "reset", "-n", ns, "--skip-integrations", "-f").Execute()).To(Succeed())
+			g.Expect(Kamel(t, ctx, "reset", "-n", ns, "--skip-integrations", "--force").Execute()).To(Succeed())
 			g.Expect(Integration(t, ctx, ns, name)()).To(Not(BeNil()))
 			g.Expect(Kits(t, ctx, ns)()).To(HaveLen(0))
 		})
@@ -73,7 +73,7 @@ func TestKamelReset(t *testing.T) {
 			g.Eventually(Kit(t, ctx, ns, kitName)).Should(Not(BeNil()))
 			g.Eventually(Integration(t, ctx, ns, name)).Should(Not(BeNil()))
 
-			g.Expect(Kamel(t, ctx, "reset", "-n", ns, "--skip-kits", "-f").Execute()).To(Succeed())
+			g.Expect(Kamel(t, ctx, "reset", "-n", ns, "--skip-kits", "--force").Execute()).To(Succeed())
 			g.Expect(Integration(t, ctx, ns, name)()).To(BeNil())
 			g.Expect(Kit(t, ctx, ns, kitName)()).To(Not(BeNil()))
 		})

@@ -19,7 +19,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
@@ -64,7 +63,7 @@ func (o *resetCmdOptions) reset(cmd *cobra.Command, _ []string) {
 		fmt.Fprint(cmd.OutOrStdout(), "Type the namespace to confirm: ")
 
 		var input string
-		if _, err := fmt.Fscan(os.Stdin, &input); err != nil {
+		if _, err := fmt.Fscan(cmd.InOrStdin(), &input); err != nil {
 			fmt.Fprint(cmd.ErrOrStderr(), err)
 			return
 		}
