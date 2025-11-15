@@ -23,13 +23,13 @@ import corev1 "k8s.io/api/core/v1"
 //
 // +camel-k:trait=security-context.
 type SecurityContextTrait struct {
-	PlatformBaseTrait `property:",squash" json:",inline"`
+	PlatformBaseTrait `json:",inline" property:",squash"`
 
 	// Security Context RunAsUser configuration (default none): this value is automatically retrieved in Openshift clusters when not explicitly set.
-	RunAsUser *int64 `property:"run-as-user" json:"runAsUser,omitempty"`
+	RunAsUser *int64 `json:"runAsUser,omitempty" property:"run-as-user"`
 	// Security Context RunAsNonRoot configuration (default false).
-	RunAsNonRoot *bool `property:"run-as-non-root" json:"runAsNonRoot,omitempty"`
+	RunAsNonRoot *bool `json:"runAsNonRoot,omitempty" property:"run-as-non-root"`
 	// Security Context SeccompProfileType configuration (default RuntimeDefault).
 	// +kubebuilder:validation:Enum=Unconfined;RuntimeDefault
-	SeccompProfileType corev1.SeccompProfileType `property:"seccomp-profile-type" json:"seccompProfileType,omitempty"`
+	SeccompProfileType corev1.SeccompProfileType `json:"seccompProfileType,omitempty" property:"seccomp-profile-type"`
 }

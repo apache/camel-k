@@ -20,7 +20,7 @@ package trait
 // Trait is the base type for all traits. It could be disabled by the user.
 type Trait struct {
 	// Can be used to enable or disable a trait. All traits share this common property.
-	Enabled *bool `property:"enabled" json:"enabled,omitempty"`
+	Enabled *bool `json:"enabled,omitempty" property:"enabled"`
 
 	// Legacy trait configuration parameters.
 	// Deprecated: for backward compatibility.
@@ -30,7 +30,7 @@ type Trait struct {
 // PlatformBaseTrait is the base type for platform traits. It cannot be disabled by the user.
 type PlatformBaseTrait struct {
 	// Deprecated: no longer in use.
-	Enabled *bool `property:"enabled" json:"enabled,omitempty"`
+	Enabled *bool `json:"enabled,omitempty" property:"enabled"`
 	// Legacy trait configuration parameters.
 	// Deprecated: for backward compatibility.
 	Configuration *Configuration `json:"configuration,omitempty"`

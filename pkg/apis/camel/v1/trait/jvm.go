@@ -23,23 +23,23 @@ package trait
 //
 // +camel-k:trait=jvm.
 type JVMTrait struct {
-	Trait `property:",squash" json:",inline"`
+	Trait `json:",inline" property:",squash"`
 
 	// Activates remote debugging, so that a debugger can be attached to the JVM, e.g., using port-forwarding
-	Debug *bool `property:"debug" json:"debug,omitempty"`
+	Debug *bool `json:"debug,omitempty" property:"debug"`
 	// Suspends the target JVM immediately before the main class is loaded
-	DebugSuspend *bool `property:"debug-suspend" json:"debugSuspend,omitempty"`
+	DebugSuspend *bool `json:"debugSuspend,omitempty" property:"debug-suspend"`
 	// Prints the command used the start the JVM in the container logs (default `true`)
 	// Deprecated: no longer in use.
-	PrintCommand *bool `property:"print-command" json:"printCommand,omitempty"`
+	PrintCommand *bool `json:"printCommand,omitempty" property:"print-command"`
 	// Transport address at which to listen for the newly launched JVM (default `*:5005`)
-	DebugAddress string `property:"debug-address" json:"debugAddress,omitempty"`
+	DebugAddress string `json:"debugAddress,omitempty" property:"debug-address"`
 	// A list of JVM options
-	Options []string `property:"options" json:"options,omitempty"`
+	Options []string `json:"options,omitempty" property:"options"`
 	// Additional JVM classpath (use `Linux` classpath separator)
-	Classpath string `property:"classpath" json:"classpath,omitempty"`
+	Classpath string `json:"classpath,omitempty" property:"classpath"`
 	// The Jar dependency which will run the application. Leave it empty for managed Integrations.
-	Jar string `property:"jar" json:"jar,omitempty"`
+	Jar string `json:"jar,omitempty" property:"jar"`
 	// A list of JVM agents to download and execute with format `<agent-name>;<agent-url>[;<jvm-agent-options>]`.
-	Agents []string `property:"agents" json:"agents,omitempty"`
+	Agents []string `json:"agents,omitempty" property:"agents"`
 }

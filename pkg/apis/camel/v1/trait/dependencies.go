@@ -23,5 +23,5 @@ package trait
 // +camel-k:trait=dependencies.
 // +camel-k:internal.
 type DependenciesTrait struct {
-	PlatformBaseTrait `property:",squash" json:",inline"`
+	PlatformBaseTrait `json:",inline" property:",squash"`
 }

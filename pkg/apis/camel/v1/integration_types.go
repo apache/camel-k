@@ -308,13 +308,13 @@ type PodSpec struct {
 	// AutomountServiceAccountToken
 	AutomountServiceAccountToken *bool `json:"automountServiceAccountToken,omitempty" protobuf:"varint,21,opt,name=automountServiceAccountToken"`
 	// Volumes
-	Volumes []corev1.Volume `json:"volumes,omitempty" patchStrategy:"merge,retainKeys" patchMergeKey:"name" protobuf:"bytes,1,rep,name=volumes"`
+	Volumes []corev1.Volume `json:"volumes,omitempty" patchMergeKey:"name" patchStrategy:"merge,retainKeys" protobuf:"bytes,1,rep,name=volumes"`
 	// InitContainers
-	InitContainers []corev1.Container `json:"initContainers,omitempty" patchStrategy:"merge" patchMergeKey:"name" protobuf:"bytes,20,rep,name=initContainers"`
+	InitContainers []corev1.Container `json:"initContainers,omitempty" patchMergeKey:"name" patchStrategy:"merge" protobuf:"bytes,20,rep,name=initContainers"`
 	// Containers
-	Containers []corev1.Container `json:"containers" patchStrategy:"merge" patchMergeKey:"name" protobuf:"bytes,2,rep,name=containers"`
+	Containers []corev1.Container `json:"containers" patchMergeKey:"name" patchStrategy:"merge" protobuf:"bytes,2,rep,name=containers"`
 	// EphemeralContainers
-	EphemeralContainers []corev1.EphemeralContainer `json:"ephemeralContainers,omitempty" patchStrategy:"merge" patchMergeKey:"name" protobuf:"bytes,34,rep,name=ephemeralContainers"`
+	EphemeralContainers []corev1.EphemeralContainer `json:"ephemeralContainers,omitempty" patchMergeKey:"name" patchStrategy:"merge" protobuf:"bytes,34,rep,name=ephemeralContainers"`
 	// RestartPolicy
 	RestartPolicy corev1.RestartPolicy `json:"restartPolicy,omitempty" protobuf:"bytes,3,opt,name=restartPolicy,casttype=RestartPolicy"`
 	// TerminationGracePeriodSeconds
@@ -326,13 +326,13 @@ type PodSpec struct {
 	// NodeSelector
 	NodeSelector map[string]string `json:"nodeSelector,omitempty" protobuf:"bytes,7,rep,name=nodeSelector"`
 	// TopologySpreadConstraints
-	TopologySpreadConstraints []corev1.TopologySpreadConstraint `json:"topologySpreadConstraints,omitempty" patchStrategy:"merge" patchMergeKey:"topologyKey" protobuf:"bytes,33,opt,name=topologySpreadConstraints"`
+	TopologySpreadConstraints []corev1.TopologySpreadConstraint `json:"topologySpreadConstraints,omitempty" patchMergeKey:"topologyKey" patchStrategy:"merge" protobuf:"bytes,33,opt,name=topologySpreadConstraints"`
 	// PodSecurityContext
 	SecurityContext corev1.PodSecurityContext `json:"securityContext,omitempty" protobuf:"bytes,34,opt,name=securityContext"`
 }
 
 type PodCondition struct {
-	Name      string                `json:"name,omitempty" yaml:"name,omitempty"`
-	Condition corev1.PodCondition   `json:"condition" yaml:"condition"`
+	Name      string                `json:"name,omitempty"   yaml:"name,omitempty"`
+	Condition corev1.PodCondition   `json:"condition"        yaml:"condition"`
 	Health    []HealthCheckResponse `json:"health,omitempty" yaml:"health,omitempty"`
 }

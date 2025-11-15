@@ -62,10 +62,10 @@ func newCmdPromote(rootCmdOptions *RootCmdOptions) (*cobra.Command, *promoteCmdO
 type promoteCmdOptions struct {
 	*RootCmdOptions
 
-	To           string `mapstructure:"to" yaml:",omitempty"`
-	ToOperator   string `mapstructure:"to-operator" yaml:",omitempty"`
-	OutputFormat string `mapstructure:"output" yaml:",omitempty"`
-	Image        bool   `mapstructure:"image" yaml:",omitempty"`
+	To           string `mapstructure:"to"                yaml:",omitempty"`
+	ToOperator   string `mapstructure:"to-operator"       yaml:",omitempty"`
+	OutputFormat string `mapstructure:"output"            yaml:",omitempty"`
+	Image        bool   `mapstructure:"image"             yaml:",omitempty"`
 	ToGitOpsDir  string `mapstructure:"export-gitops-dir" yaml:",omitempty"`
 }
 

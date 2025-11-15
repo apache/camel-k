@@ -22,12 +22,12 @@ package trait
 // +camel-k:trait=platform.
 // +camel-k:internal.
 type PlatformTrait struct {
-	PlatformBaseTrait `property:",squash" json:",inline"`
+	PlatformBaseTrait `json:",inline" property:",squash"`
 
 	// Deprecated: no longer in use.
-	CreateDefault *bool `property:"create-default" json:"createDefault,omitempty"`
+	CreateDefault *bool `json:"createDefault,omitempty" property:"create-default"`
 	// Deprecated: no longer in use.
-	Global *bool `property:"global" json:"global,omitempty"`
+	Global *bool `json:"global,omitempty" property:"global"`
 	// Deprecated: no longer in use.
-	Auto *bool `property:"auto" json:"auto,omitempty"`
+	Auto *bool `json:"auto,omitempty" property:"auto"`
 }

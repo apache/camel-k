@@ -22,11 +22,11 @@ package trait
 // +camel-k:trait=gc.
 // +camel-k:internal.
 type GCTrait struct {
-	Trait `property:",squash" json:",inline"`
+	Trait `json:",inline" property:",squash"`
 
 	// Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`).
 	// Deprecated: no longer in use.
-	DiscoveryCache *DiscoveryCacheType `property:"discovery-cache" json:"discoveryCache,omitempty"`
+	DiscoveryCache *DiscoveryCacheType `json:"discoveryCache,omitempty" property:"discovery-cache"`
 }
 
 // +kubebuilder:validation:Enum=disabled;disk;memory

@@ -22,15 +22,15 @@ package trait
 //
 // +camel-k:trait=environment.
 type EnvironmentTrait struct {
-	PlatformBaseTrait `property:",squash" json:",inline"`
+	PlatformBaseTrait `json:",inline" property:",squash"`
 
 	// Enables injection of `NAMESPACE` and `POD_NAME` environment variables (default `true`)
-	ContainerMeta *bool `property:"container-meta" json:"containerMeta,omitempty"`
+	ContainerMeta *bool `json:"containerMeta,omitempty" property:"container-meta"`
 	// Propagates the `HTTP_PROXY`, `HTTPS_PROXY` and `NO_PROXY` environment variables (default `true`)
-	HTTPProxy *bool `property:"http-proxy" json:"httpProxy,omitempty"`
+	HTTPProxy *bool `json:"httpProxy,omitempty" property:"http-proxy"`
 	// A list of environment variables to be added to the integration container.
 	// The syntax is either VAR=VALUE or VAR=[configmap|secret]:name/key, where name represents the resource name,
 	// and key represents the resource key to be mapped as and environment variable.
 	// These take precedence over any previously defined environment variables.
-	Vars []string `property:"vars" json:"vars,omitempty"`
+	Vars []string `json:"vars,omitempty" property:"vars"`
 }

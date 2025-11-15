@@ -81,16 +81,16 @@ type IntegrationKitSpec struct {
 // IntegrationKitTraits defines traits assigned to an `IntegrationKit`.
 type IntegrationKitTraits struct {
 	// The builder trait is internally used to determine the best strategy to build and configure IntegrationKits.
-	Builder *trait.BuilderTrait `property:"builder" json:"builder,omitempty"`
+	Builder *trait.BuilderTrait `json:"builder,omitempty" property:"builder"`
 	// The Camel trait sets up Camel configuration.
-	Camel *trait.CamelTrait `property:"camel" json:"camel,omitempty"`
+	Camel *trait.CamelTrait `json:"camel,omitempty" property:"camel"`
 	// The Quarkus trait configures the Quarkus runtime.
 	// It's enabled by default.
 	// NOTE: Compiling to a native executable, requires at least 4GiB of memory, so the Pod running the native build must have enough memory available.
-	Quarkus *trait.QuarkusTrait `property:"quarkus" json:"quarkus,omitempty"`
+	Quarkus *trait.QuarkusTrait `json:"quarkus,omitempty" property:"quarkus"`
 	// The Registry trait sets up Maven to use the Image registry as a Maven repository (support removed since version 2.5.0).
 	// Deprecated: use jvm trait or read documentation.
-	Registry *trait.RegistryTrait `property:"registry" json:"registry,omitempty"`
+	Registry *trait.RegistryTrait `json:"registry,omitempty" property:"registry"`
 	// Deprecated: no longer in use.
 	Addons map[string]AddonTrait `json:"addons,omitempty"`
 }

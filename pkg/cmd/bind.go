@@ -78,17 +78,17 @@ const (
 type bindCmdOptions struct {
 	*RootCmdOptions
 
-	ErrorHandler   string   `mapstructure:"error-handler" yaml:",omitempty"`
-	Name           string   `mapstructure:"name" yaml:",omitempty"`
-	OutputFormat   string   `mapstructure:"output" yaml:",omitempty"`
-	Properties     []string `mapstructure:"properties" yaml:",omitempty"`
-	SkipChecks     bool     `mapstructure:"skip-checks" yaml:",omitempty"`
-	Steps          []string `mapstructure:"steps" yaml:",omitempty"`
-	Traits         []string `mapstructure:"traits" yaml:",omitempty"`
-	OperatorID     string   `mapstructure:"operator-id" yaml:",omitempty"`
-	Annotations    []string `mapstructure:"annotations" yaml:",omitempty"`
+	ErrorHandler   string   `mapstructure:"error-handler"   yaml:",omitempty"`
+	Name           string   `mapstructure:"name"            yaml:",omitempty"`
+	OutputFormat   string   `mapstructure:"output"          yaml:",omitempty"`
+	Properties     []string `mapstructure:"properties"      yaml:",omitempty"`
+	SkipChecks     bool     `mapstructure:"skip-checks"     yaml:",omitempty"`
+	Steps          []string `mapstructure:"steps"           yaml:",omitempty"`
+	Traits         []string `mapstructure:"traits"          yaml:",omitempty"`
+	OperatorID     string   `mapstructure:"operator-id"     yaml:",omitempty"`
+	Annotations    []string `mapstructure:"annotations"     yaml:",omitempty"`
 	ServiceAccount string   `mapstructure:"service-account" yaml:",omitempty"`
-	Dependencies   []string `mapstructure:"dependencies" yaml:",omitempty"`
+	Dependencies   []string `mapstructure:"dependencies"    yaml:",omitempty"`
 }
 
 func (o *bindCmdOptions) preRunE(cmd *cobra.Command, args []string) error {
