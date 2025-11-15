@@ -101,6 +101,7 @@ func Apply(ctx context.Context, c client.Client, integration *v1.Integration, ki
 	default:
 		ilog.Debug("Applied traits")
 	}
+
 	return environment, nil
 }
 
@@ -219,6 +220,7 @@ func getCamelAppObject(ctx context.Context, c client.Client, kind, namespace, na
 			},
 		}
 		err := c.Get(ctx, ctrl.ObjectKeyFromObject(ksvc), ksvc)
+
 		return ksvc, err
 	default:
 		return nil, fmt.Errorf("cannot create a synthetic environment for %s kind", kind)

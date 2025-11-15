@@ -54,6 +54,7 @@ type SelectorScraper struct {
 // NewSelectorScraper creates a new SelectorScraper.
 func NewSelectorScraper(client kubernetes.Interface, namespace string, defaultContainerName string, labelSelector string, tailLines *int64) *SelectorScraper {
 	klog.InitForCmd()
+
 	return &SelectorScraper{
 		client:               client,
 		namespace:            namespace,
@@ -75,6 +76,7 @@ func (s *SelectorScraper) Start(ctx context.Context) *bufio.Reader {
 			pipeOut.Close())
 	}
 	go s.periodicSynchronize(ctx, bufPipeOut, closeFun)
+
 	return bufPipeIn
 }
 
@@ -133,6 +135,7 @@ func (s *SelectorScraper) synchronize(ctx context.Context, out *bufio.Writer) er
 			}
 		}
 	}
+
 	return nil
 }
 
@@ -148,6 +151,7 @@ func (s *SelectorScraper) addPodScraper(ctx context.Context, podName string, out
 
 		if _, err := out.WriteString(prefix + "Monitoring pod " + podName + "\n"); err != nil {
 			s.L.Error(err, "Cannot write to output")
+
 			return
 		}
 		for {
@@ -156,14 +160,17 @@ func (s *SelectorScraper) addPodScraper(ctx context.Context, podName string, out
 				return
 			} else if err != nil {
 				s.L.Error(err, "Cannot read from pod stream")
+
 				return
 			}
 			if _, err := out.WriteString(prefix + str); err != nil {
 				s.L.Error(err, "Cannot write to output")
+
 				return
 			}
 			if err := out.Flush(); err != nil {
 				s.L.Error(err, "Cannot flush output")
+
 				return
 			}
 			if podCtx.Err() != nil {

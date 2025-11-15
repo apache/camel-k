@@ -31,5 +31,6 @@ func (c *defaultClient) ScalesClient() (scale.ScalesGetter, error) {
 	}
 	mapper := restmapper.NewDiscoveryRESTMapper(groupResources)
 	resolver := scale.NewDiscoveryScaleKindResolver(c.Discovery())
+
 	return scale.NewForConfig(c.GetConfig(), mapper, dynamic.LegacyAPIPathResolverFunc, resolver)
 }

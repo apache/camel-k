@@ -54,6 +54,7 @@ func (t *deployerTrait) Apply(e *Environment) error {
 				return err
 			}
 		}
+
 		return nil
 	})
 
@@ -64,8 +65,10 @@ func (t *deployerTrait) SelectControllerStrategy(e *Environment) (*ControllerStr
 	//nolint:staticcheck
 	if t.Kind != "" {
 		strategy := ControllerStrategy(t.Kind)
+
 		return &strategy, nil
 	}
+
 	return nil, nil
 }
 

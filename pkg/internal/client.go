@@ -66,6 +66,7 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 			"status.phase",
 			func(obj controller.Object) []string {
 				pod, _ := obj.(*corev1.Pod)
+
 				return []string{string(pod.Status.Phase)}
 			},
 		).
@@ -91,6 +92,7 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 		replicas := obj.Spec.Replicas
 		key := fmt.Sprintf("%s:%s:%s/%s", action.GetResource().Group, action.GetResource().Resource, action.GetNamespace(), obj.GetName())
 		replicasCount[key] = replicas
+
 		return true, &autoscalingv1.Scale{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      obj.Name,
@@ -115,6 +117,7 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 				Replicas: replicasCount[key],
 			},
 		}
+
 		return true, obj, nil
 	})
 
@@ -135,10 +138,12 @@ func filterObjects(scheme *runtime.Scheme, input []runtime.Object, filter func(g
 		for _, k := range kinds {
 			if filter(k) {
 				res = append(res, obj)
+
 				break
 			}
 		}
 	}
+
 	return res
 }
 
@@ -188,6 +193,7 @@ func (c *FakeClient) Patch(ctx context.Context, obj controller.Object, patch con
 		// Create fails if object already exists. Try to update it.
 		return c.Update(ctx, obj)
 	}
+
 	return nil
 }
 

@@ -37,8 +37,12 @@ const (
 var (
 	logger = log.WithName("keytool")
 
-	loggerInfo = func(s string) string { logger.Info(s); return s }
-	loggerNil  = func(s string) string { return s }
+	loggerInfo = func(s string) string {
+		logger.Info(s)
+
+		return s
+	}
+	loggerNil = func(s string) string { return s }
 )
 
 func GenerateKeystore(ctx context.Context, keystoreDir, keystoreName, keystorePass string, data [][]byte) error {

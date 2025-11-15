@@ -36,6 +36,7 @@ func RegisterBindingProvider(bp BindingProvider) {
 	sort.Slice(bindingProviders, func(i, j int) bool {
 		bi := bindingProviders[i]
 		bj := bindingProviders[j]
+
 		return (bi.Order() < bj.Order()) ||
 			(bi.Order() == bj.Order() && bi.ID() < bj.ID())
 	})
@@ -64,6 +65,7 @@ func Translate(ctx BindingContext, endpointCtx EndpointContext, endpoint v1.Endp
 	} else if ptr.Deref(endpoint.URI, "") != "" {
 		errorMessage = fmt.Sprintf("could not find any suitable binding provider for %s", *endpoint.URI)
 	}
+
 	return nil, errors.New(errorMessage)
 }
 
@@ -78,6 +80,7 @@ func validateEndpoint(ctx BindingContext, e v1.Endpoint) error {
 			if err != nil {
 				return err
 			}
+
 			return errors.New("cross-namespace Pipe references are not allowed for Knative")
 		}
 		// only check this when there is a cross-namespace access
@@ -113,5 +116,6 @@ func verifyResourceRBAC(ctx BindingContext, e v1.Endpoint) error {
 		return fmt.Errorf("cross-namespace Pipe reference authorization denied for the ServiceAccount %s and resources %s",
 			ctx.ServiceAccountName, resources)
 	}
+
 	return nil
 }

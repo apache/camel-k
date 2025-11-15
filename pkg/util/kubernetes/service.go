@@ -30,6 +30,7 @@ loop:
 	for _, port := range svc.Spec.Ports {
 		if port.Port != 80 { // Assuming HTTP default port
 			url += fmt.Sprintf(":%d", port.Port)
+
 			break loop
 		}
 	}

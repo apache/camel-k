@@ -43,6 +43,7 @@ func newKitDeleteCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kitDelete
 			if err := options.validate(args); err != nil {
 				return err
 			}
+
 			return options.run(cmd, args)
 		},
 	}

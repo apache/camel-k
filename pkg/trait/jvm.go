@@ -66,6 +66,7 @@ func (t *jvmTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	// Deprecated: the JVM has to be a platform trait and the user should not be able to disable it
 	if !ptr.Deref(t.Enabled, true) {
 		notice := userDisabledMessage + "; this configuration is deprecated and may be removed within next releases"
+
 		return false, NewIntegrationCondition("JVM", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, TraitConfigurationReason, notice), nil
 	}
 
@@ -275,6 +276,7 @@ func (t *jvmTrait) prepareClasspathItems(container *corev1.Container) string {
 
 	if existingClasspaths != nil {
 		existingClasspaths = append(existingClasspaths, items...)
+
 		return strings.Join(existingClasspaths, ":")
 	}
 

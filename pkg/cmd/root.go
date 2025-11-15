@@ -158,6 +158,7 @@ func addHelpSubCommands(cmd *cobra.Command) error {
 	for _, c := range cmd.Commands() {
 		if c.Name() == "help" {
 			helpCmd = c
+
 			break
 		}
 	}
@@ -227,6 +228,7 @@ func (command *RootCmdOptions) GetCmdClient() (client.Client, error) {
 	}
 	var err error
 	command._client, err = command.NewCmdClient()
+
 	return command._client, err
 }
 
@@ -236,6 +238,7 @@ func (command *RootCmdOptions) GetCamelCmdClient() (*v1.CamelV1Client, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return v1.NewForConfig(c.GetConfig())
 }
 
@@ -266,6 +269,7 @@ func wrappedFlagUsages(cmd *cobra.Command) string {
 	if w, _, err := term.GetSize(0); err == nil {
 		width = w
 	}
+
 	return cmd.Flags().FlagUsagesWrapped(width - 1)
 }
 

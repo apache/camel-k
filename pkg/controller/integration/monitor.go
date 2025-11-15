@@ -137,6 +137,7 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		integration.Status.Phase = v1.IntegrationPhaseError
 		integration.SetReadyCondition(corev1.ConditionFalse,
 			v1.IntegrationConditionInitializationFailedReason, err.Error())
+
 		return integration, err
 	}
 	// If the platform is not in ready status (it may happen when a new IntegrationPlatform is created), then, we may not be able to
@@ -150,6 +151,7 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 			"PlatformMissing",
 			"IntegrationPlatform is missing or not yet ready. If the problem persist, make sure to fix the IntegrationPlatform error or create a new one.",
 		)
+
 		return integration, nil
 	}
 	action.checkTraitAnnotationsDeprecatedNotice(integration)
@@ -159,6 +161,7 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		// We must remove them to clear any previous execution status.
 		integration.Status.Replicas = nil
 		integration.Status.RemoveCondition(v1.IntegrationConditionReady)
+
 		return integration, nil
 	}
 
@@ -180,6 +183,7 @@ func (action *monitorAction) checkTraitAnnotationsDeprecatedNotice(integration *
 					"WARN: annotation traits configuration is deprecated and will be removed soon. Use .spec.traits configuration for %s integration instead.",
 					integration.Name,
 				)
+
 				return
 			}
 		}
@@ -212,6 +216,7 @@ func (action *monitorAction) monitorPods(ctx context.Context, environment *trait
 				),
 			},
 		)
+
 		return integration, nil
 	}
 
@@ -377,6 +382,7 @@ func getIntegrationSecretAndConfigmapResourceVersions(ctx context.Context, clien
 			}
 		}
 	}
+
 	return secrets, configmaps
 }
 
@@ -448,6 +454,7 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(
 		// There may be pods that are not ready but still probable for getting error messages.
 		// Ignore returned error from probing as it's expected when the ctrl obj is not ready.
 		_, _, _ = action.probeReadiness(ctx, environment, integration, runningPods)
+
 		return err
 	}
 	if arePodsFailingStatuses(integration, pendingPods, runningPods) {
@@ -459,10 +466,12 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(
 	}
 	if !probeOk {
 		integration.Status.Phase = v1.IntegrationPhaseError
+
 		return nil
 	}
 	if done := controller.updateReadyCondition(readyPods); done {
 		integration.Status.Phase = v1.IntegrationPhaseRunning
+
 		return nil
 	}
 
@@ -478,6 +487,7 @@ func arePodsFailingStatuses(integration *v1.Integration, pendingPods []corev1.Po
 			scheduled.Reason == "Unschedulable" {
 			integration.Status.Phase = v1.IntegrationPhaseError
 			integration.SetReadyConditionError(scheduled.Message)
+
 			return true
 		}
 	}
@@ -491,6 +501,7 @@ func arePodsFailingStatuses(integration *v1.Integration, pendingPods []corev1.Po
 			if waiting := container.State.Waiting; waiting != nil && waiting.Reason == "ImagePullBackOff" {
 				integration.Status.Phase = v1.IntegrationPhaseError
 				integration.SetReadyConditionError(waiting.Message)
+
 				return true
 			}
 		}
@@ -508,11 +519,13 @@ func arePodsFailingStatuses(integration *v1.Integration, pendingPods []corev1.Po
 			if waiting := container.State.Waiting; waiting != nil && waiting.Reason == "CrashLoopBackOff" {
 				integration.Status.Phase = v1.IntegrationPhaseError
 				integration.SetReadyConditionError(waiting.Message)
+
 				return true
 			}
 			if terminated := container.State.Terminated; terminated != nil && terminated.Reason == "Error" {
 				integration.Status.Phase = v1.IntegrationPhaseError
 				integration.SetReadyConditionError(terminated.Message)
+
 				return true
 			}
 		}
@@ -544,12 +557,14 @@ func (action *monitorAction) probeReadiness(ctx context.Context, environment *tr
 		for p := range pod.Status.Conditions {
 			if pod.Status.Conditions[p].Type == corev1.PodReady {
 				readyCondition.Pods[i].Condition = pod.Status.Conditions[p]
+
 				break
 			}
 		}
 		// If it's in ready status, then we don't care to probe.
 		if ready := kubernetes.GetPodCondition(*pod, corev1.PodReady); ready.Status == corev1.ConditionTrue {
 			readyPods++
+
 			continue
 		}
 		unreadyPods++
@@ -608,11 +623,13 @@ func (action *monitorAction) probeReadiness(ctx context.Context, environment *tr
 			if errors.Is(err, context.DeadlineExceeded) {
 				readyCondition.Pods[i].Condition.Message = fmt.Sprintf("readiness probe timed out for Pod %s/%s", pod.Namespace, pod.Name)
 				runtimeReady = false
+
 				continue
 			}
 			if !k8serrors.IsServiceUnavailable(err) {
 				readyCondition.Pods[i].Condition.Message = fmt.Sprintf("readiness probe failed for Pod %s/%s: %s", pod.Namespace, pod.Name, err.Error())
 				runtimeReady = false
+
 				continue
 			}
 
@@ -670,6 +687,7 @@ func findHighestPriorityReadyKit(kits []v1.IntegrationKit) (*v1.IntegrationKit, 
 			priority = p
 		}
 	}
+
 	return kit, nil
 }
 
@@ -680,5 +698,6 @@ func getIntegrationContainer(environment *trait.Environment, pod *corev1.Pod) *c
 			return &pod.Spec.Containers[i]
 		}
 	}
+
 	return nil
 }

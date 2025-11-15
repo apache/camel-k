@@ -153,6 +153,7 @@ func (cfg *Config) Save() error {
 	if err != nil {
 		return err
 	}
+
 	return os.WriteFile(cfg.location, data, io.FilePerm600)
 }
 
@@ -181,11 +182,14 @@ func (cfg *Config) navigate(values map[string]interface{}, prefix string, create
 			if create {
 				child := make(map[string]interface{})
 				values[node] = child
+
 				return child
 			}
+
 			return nil
 		}
 	}
+
 	return values
 }
 
@@ -196,5 +200,6 @@ func (cfg *Config) convert(m map[interface{}]interface{}) map[string]interface{}
 			res[ks] = v
 		}
 	}
+
 	return res
 }

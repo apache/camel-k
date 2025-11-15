@@ -123,6 +123,7 @@ func (r *reconcileIntegrationPlatform) Reconcile(ctx context.Context, request re
 		return reconcile.Result{}, err
 	} else if !ok {
 		rlog.Info("Ignoring request because namespace is locked")
+
 		return reconcile.Result{}, nil
 	}
 
@@ -145,6 +146,7 @@ func (r *reconcileIntegrationPlatform) Reconcile(ctx context.Context, request re
 	// Only process resources assigned to the operator
 	if !platform.IsOperatorHandlerConsideringLock(ctx, r.client, request.Namespace, &instance) {
 		rlog.Info("Ignoring request because resource is not assigned to current operator")
+
 		return reconcile.Result{}, nil
 	}
 
@@ -175,6 +177,7 @@ func (r *reconcileIntegrationPlatform) Reconcile(ctx context.Context, request re
 		target, err = a.Handle(ctx, target)
 		if err != nil {
 			camelevent.NotifyIntegrationPlatformError(ctx, r.client, r.recorder, &instance, target, err)
+
 			return reconcile.Result{}, err
 		}
 
@@ -183,6 +186,7 @@ func (r *reconcileIntegrationPlatform) Reconcile(ctx context.Context, request re
 
 			if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(&instance)); err != nil {
 				camelevent.NotifyIntegrationPlatformError(ctx, r.client, r.recorder, &instance, target, err)
+
 				return reconcile.Result{}, err
 			}
 

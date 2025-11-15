@@ -33,6 +33,7 @@ func (in *PipeStatus) GetConditions() []ResourceCondition {
 	for _, c := range in.Conditions {
 		res = append(res, &c)
 	}
+
 	return res
 }
 
@@ -103,6 +104,7 @@ func (in *PipeStatus) GetCondition(condType PipeConditionType) *PipeCondition {
 			return &c
 		}
 	}
+
 	return nil
 }
 
@@ -190,6 +192,7 @@ func (p *EndpointProperties) GetPropertyMap() (map[string]string, error) {
 	for k, v := range props {
 		stringProps[k] = fmt.Sprintf("%v", v)
 	}
+
 	return stringProps, nil
 }
 

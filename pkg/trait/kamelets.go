@@ -77,6 +77,7 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 		var kamelets []string
 		_, err := e.ConsumeMeta(false, func(meta metadata.IntegrationMetadata) bool {
 			util.StringSliceUniqueConcat(&kamelets, meta.Kamelets)
+
 			return true
 		})
 		if err != nil {
@@ -97,6 +98,7 @@ func (t *kameletsTrait) Apply(e *Environment) error {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -128,6 +130,7 @@ func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet,
 		}
 		if kamelet == nil {
 			missingKamelets = append(missingKamelets, name)
+
 			continue
 		} else {
 			availableKamelets = append(availableKamelets, name)
@@ -240,6 +243,7 @@ func calculateNamespaces(kamelets []string) ([]string, error) {
 			for _, addedNs := range namespaces {
 				if addedNs == ns {
 					addNs = false
+
 					break loop
 				}
 			}
@@ -248,6 +252,7 @@ func calculateNamespaces(kamelets []string) ([]string, error) {
 			}
 		}
 	}
+
 	return namespaces, nil
 }
 
@@ -354,6 +359,7 @@ func (t *kameletsTrait) getKameletKeys() []string {
 		}
 	}
 	sort.Strings(answer)
+
 	return answer
 }
 
@@ -375,6 +381,7 @@ func getKameletKey(item string) string {
 	if len(parts) > 0 {
 		return parts[0]
 	}
+
 	return ""
 }
 
@@ -393,6 +400,7 @@ func getKameletParam(uri, param string) (string, error) {
 	}
 
 	queryParams := parsedURL.Query()
+
 	return queryParams.Get(param), nil
 }
 
@@ -422,6 +430,7 @@ func integrationSourceFromKameletSource(e *Environment, kamelet *v1.Kamelet, sou
 	target.Content = ""
 	target.ContentRef = name
 	target.ContentKey = contentKey
+
 	return *target, nil
 }
 

@@ -53,6 +53,7 @@ func FilterCamelCreatorLabels(source map[string]string) map[string]string {
 			res[k] = v
 		}
 	}
+
 	return res
 }
 
@@ -64,6 +65,7 @@ func MergeCamelCreatorLabels(source map[string]string, target map[string]string)
 	for k, v := range FilterCamelCreatorLabels(source) {
 		target[k] = v
 	}
+
 	return target
 }
 
@@ -85,5 +87,6 @@ func GetCamelCreator(obj runtime.Object) *corev1.ObjectReference {
 			}
 		}
 	}
+
 	return nil
 }

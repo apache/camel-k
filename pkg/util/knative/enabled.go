@@ -33,6 +33,7 @@ func IsRefKindInstalled(c kubernetes.Interface, ref corev1.ObjectReference) (boo
 	} else if installed {
 		return true, nil
 	}
+
 	return false, nil
 }
 
@@ -72,5 +73,6 @@ func isServerResourceAvailable(c kubernetes.Interface, api schema.GroupVersion) 
 	} else if err != nil {
 		return false, err
 	}
+
 	return true, nil
 }

@@ -59,6 +59,7 @@ func ManageSyntheticIntegrations(ctx context.Context, c client.Client, cache cac
 				ctrlObj, ok := obj.(ctrl.Object)
 				if !ok {
 					log.Error(fmt.Errorf("type assertion failed: %v", obj), "Failed to retrieve Object on add event")
+
 					return
 				}
 				if isManagedObject(ctrlObj) {
@@ -71,6 +72,7 @@ func ManageSyntheticIntegrations(ctx context.Context, c client.Client, cache cac
 				ctrlObj, ok := obj.(ctrl.Object)
 				if !ok {
 					log.Errorf(fmt.Errorf("type assertion failed: %v", obj), "Failed to retrieve Object on delete event")
+
 					return
 				}
 				if isManagedObject(ctrlObj) {
@@ -156,6 +158,7 @@ func getInformers(ctx context.Context, cl client.Client, c cache.Cache) ([]cache
 func getSyntheticIntegration(ctx context.Context, c client.Client, namespace, name string) (*v1.Integration, error) {
 	it := v1.NewIntegration(namespace, name)
 	err := c.Get(ctx, ctrl.ObjectKeyFromObject(&it), &it)
+
 	return &it, err
 }
 
@@ -166,6 +169,7 @@ func createSyntheticIntegration(ctx context.Context, c client.Client, it *v1.Int
 func deleteSyntheticIntegration(ctx context.Context, c client.Client, namespace, name string) error {
 	// As the Integration label was removed, we don't know which is the Synthetic integration to remove
 	it := v1.NewIntegration(namespace, name)
+
 	return c.Delete(ctx, &it)
 }
 
@@ -177,6 +181,7 @@ func isManagedObject(obj ctrl.Object) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -199,6 +204,7 @@ func nonManagedCamelApplicationFactory(obj ctrl.Object) (nonManagedCamelApplicat
 	if ok {
 		return &NonManagedCamelKnativeService{ksvc: ksvc}, nil
 	}
+
 	return nil, fmt.Errorf("unsupported %s object kind", obj.GetName())
 }
 
@@ -232,6 +238,7 @@ func (app *nonManagedCamelDeployment) Integration() *v1.Integration {
 		},
 	}
 	it.SetOwnerReferences(references)
+
 	return &it
 }
 
@@ -247,6 +254,7 @@ func (app *nonManagedCamelDeployment) getContainerNameFromDeployment() string {
 			return app.deploy.Name
 		}
 	}
+
 	return firstContainerName
 }
 
@@ -276,6 +284,7 @@ func (app *NonManagedCamelCronjob) Integration() *v1.Integration {
 		},
 	}
 	it.SetOwnerReferences(references)
+
 	return &it
 }
 
@@ -305,5 +314,6 @@ func (app *NonManagedCamelKnativeService) Integration() *v1.Integration {
 		},
 	}
 	it.SetOwnerReferences(references)
+
 	return &it
 }

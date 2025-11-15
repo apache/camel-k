@@ -114,6 +114,7 @@ func globSources(locations []string) ([]string, error) {
 			sources = append(sources, src)
 		}
 	}
+
 	return sources, nil
 }
 

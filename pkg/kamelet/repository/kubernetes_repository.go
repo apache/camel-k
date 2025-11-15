@@ -54,6 +54,7 @@ func (c *kubernetesKameletRepository) List(ctx context.Context) ([]string, error
 		res = append(res, item.Name)
 	}
 	sort.Strings(res)
+
 	return res, nil
 }
 
@@ -63,6 +64,7 @@ func (c *kubernetesKameletRepository) Get(ctx context.Context, name string) (*ca
 		// return nil if not found, so other repositories can try to find it
 		return nil, nil
 	}
+
 	return kamelet, err
 }
 
