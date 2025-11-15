@@ -21,36 +21,36 @@ package trait
 //
 // +camel-k:trait=keda.
 type KedaTrait struct {
-	Trait `property:",squash" json:",inline"`
+	Trait `json:",inline" property:",squash"`
 
 	// Interval (seconds) to check each trigger on.
-	PollingInterval *int32 `property:"polling-interval" json:"pollingInterval,omitempty"`
+	PollingInterval *int32 `json:"pollingInterval,omitempty" property:"polling-interval"`
 	// The wait period between the last active trigger reported and scaling the resource back to 0.
-	CooldownPeriod *int32 `property:"cooldown-period" json:"cooldownPeriod,omitempty"`
+	CooldownPeriod *int32 `json:"cooldownPeriod,omitempty" property:"cooldown-period"`
 	// Enabling this property allows KEDA to scale the resource down to the specified number of replicas.
-	IdleReplicaCount *int32 `property:"idle-replica-count" json:"idleReplicaCount,omitempty"`
+	IdleReplicaCount *int32 `json:"idleReplicaCount,omitempty" property:"idle-replica-count"`
 	// Minimum number of replicas.
-	MinReplicaCount *int32 `property:"min-replica-count" json:"minReplicaCount,omitempty"`
+	MinReplicaCount *int32 `json:"minReplicaCount,omitempty" property:"min-replica-count"`
 	// Maximum number of replicas.
-	MaxReplicaCount *int32 `property:"max-replica-count" json:"maxReplicaCount,omitempty"`
+	MaxReplicaCount *int32 `json:"maxReplicaCount,omitempty" property:"max-replica-count"`
 	// Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
 	// to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options
 	// and optionally a mapping of secrets, used by Keda operator to poll resources according to the autoscaler type.
-	Triggers []KedaTrigger `property:"triggers" json:"triggers,omitempty"`
+	Triggers []KedaTrigger `json:"triggers,omitempty" property:"triggers"`
 }
 
 type KedaTrigger struct {
 	// The autoscaler type.
-	Type string `property:"type" json:"type,omitempty"`
+	Type string `json:"type,omitempty" property:"type"`
 	// The trigger metadata (see Keda documentation to learn how to fill for each type).
-	Metadata map[string]string `property:"metadata" json:"metadata,omitempty"`
+	Metadata map[string]string `json:"metadata,omitempty" property:"metadata"`
 	// The secrets mapping to use. Keda allows the possibility to use values coming from different secrets.
-	Secrets []*KedaSecret `property:"secrets" json:"secrets,omitempty"`
+	Secrets []*KedaSecret `json:"secrets,omitempty" property:"secrets"`
 }
 
 type KedaSecret struct {
 	// The name of the secret to use.
-	Name string `property:"name" json:"name,omitempty"`
+	Name string `json:"name,omitempty" property:"name"`
 	// The mapping to use for this secret (eg, `database-secret-key:keda-secret-key`)
-	Mapping map[string]string `property:"mapping" json:"mapping,omitempty"`
+	Mapping map[string]string `json:"mapping,omitempty" property:"mapping"`
 }

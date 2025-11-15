@@ -21,10 +21,10 @@ package trait
 //
 // +camel-k:trait=init-containers.
 type InitContainersTrait struct {
-	Trait `property:",squash" json:",inline"`
+	Trait `json:",inline" property:",squash"`
 
 	// A list of init tasks to be executed with format `<name>;<container-image>;<container-command>`.
-	InitTasks []string `property:"init-tasks" json:"initTasks,omitempty"`
+	InitTasks []string `json:"initTasks,omitempty" property:"init-tasks"`
 	// A list of sidecar tasks to be executed with format `<name>;<container-image>;<container-command>`.
-	SidecarTasks []string `property:"sidecar-tasks" json:"sideCarTasks,omitempty"`
+	SidecarTasks []string `json:"sideCarTasks,omitempty" property:"sidecar-tasks"`
 }

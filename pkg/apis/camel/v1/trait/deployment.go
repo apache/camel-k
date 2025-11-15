@@ -27,25 +27,25 @@ import (
 //
 // +camel-k:trait=deployment.
 type DeploymentTrait struct {
-	PlatformBaseTrait `property:",squash" json:",inline"`
+	PlatformBaseTrait `json:",inline" property:",squash"`
 
 	// The maximum time in seconds for the deployment to make progress before it
 	// is considered to be failed. It defaults to `60s`.
-	ProgressDeadlineSeconds *int32 `property:"progress-deadline-seconds" json:"progressDeadlineSeconds,omitempty"`
+	ProgressDeadlineSeconds *int32 `json:"progressDeadlineSeconds,omitempty" property:"progress-deadline-seconds"`
 	// The deployment strategy to use to replace existing pods with new ones.
 	// +kubebuilder:validation:Enum=Recreate;RollingUpdate
-	Strategy appsv1.DeploymentStrategyType `property:"strategy" json:"strategy,omitempty"`
+	Strategy appsv1.DeploymentStrategyType `json:"strategy,omitempty" property:"strategy"`
 	// The maximum number of pods that can be unavailable during the update.
 	// Value can be an absolute number (ex: 5) or a percentage of desired pods (ex: 10%).
 	// Absolute number is calculated from percentage by rounding down.
 	// This can not be 0 if MaxSurge is 0.
 	// Defaults to `25%`.
-	RollingUpdateMaxUnavailable *intstr.IntOrString `property:"rolling-update-max-unavailable" json:"rollingUpdateMaxUnavailable,omitempty"`
+	RollingUpdateMaxUnavailable *intstr.IntOrString `json:"rollingUpdateMaxUnavailable,omitempty" property:"rolling-update-max-unavailable"`
 	// The maximum number of pods that can be scheduled above the desired number of
 	// pods.
 	// Value can be an absolute number (ex: 5) or a percentage of desired pods (ex: 10%).
 	// This can not be 0 if MaxUnavailable is 0.
 	// Absolute number is calculated from percentage by rounding up.
 	// Defaults to `25%`.
-	RollingUpdateMaxSurge *intstr.IntOrString `property:"rolling-update-max-surge" json:"rollingUpdateMaxSurge,omitempty"`
+	RollingUpdateMaxSurge *intstr.IntOrString `json:"rollingUpdateMaxSurge,omitempty" property:"rolling-update-max-surge"`
 }

@@ -27,18 +27,18 @@ package trait
 //
 // +camel-k:trait=telemetry.
 type TelemetryTrait struct {
-	Trait `property:",squash" json:",inline"`
+	Trait `json:",inline" property:",squash"`
 
 	// Enables automatic configuration of the trait, including automatic discovery of the telemetry endpoint.
-	Auto *bool `property:"auto" json:"auto,omitempty"`
+	Auto *bool `json:"auto,omitempty" property:"auto"`
 	// The name of the service that publishes telemetry data (defaults to the integration name)
-	ServiceName string `property:"service-name" json:"serviceName,omitempty"`
+	ServiceName string `json:"serviceName,omitempty" property:"service-name"`
 	// The target endpoint of the Telemetry service (automatically discovered by default)
-	Endpoint string `property:"endpoint" json:"endpoint,omitempty"`
+	Endpoint string `json:"endpoint,omitempty" property:"endpoint"`
 	// The sampler of the telemetry used for tracing (default "on")
-	Sampler string `property:"sampler" json:"sampler,omitempty"`
+	Sampler string `json:"sampler,omitempty" property:"sampler"`
 	// The sampler ratio of the telemetry used for tracing
-	SamplerRatio string `property:"sampler-ratio" json:"sampler-ratio,omitempty"`
+	SamplerRatio string `json:"sampler-ratio,omitempty" property:"sampler-ratio"`
 	// The sampler of the telemetry used for tracing is parent based (default "true")
-	SamplerParentBased *bool `property:"sampler-parent-based" json:"sampler-parent-based,omitempty"`
+	SamplerParentBased *bool `json:"sampler-parent-based,omitempty" property:"sampler-parent-based"`
 }

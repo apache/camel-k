@@ -50,7 +50,7 @@ type RootCmdOptions struct {
 	Flags         *viper.Viper       `mapstructure:"-"`
 	KubeConfig    string             `mapstructure:"kube-config"`
 	Namespace     string             `mapstructure:"namespace"`
-	Verbose       bool               `mapstructure:"verbose" yaml:",omitempty"`
+	Verbose       bool               `mapstructure:"verbose"     yaml:",omitempty"`
 }
 
 // NewKamelCommand --.

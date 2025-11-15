@@ -86,7 +86,7 @@ type Project struct {
 
 // Exclusion models a dependency exclusion.
 type Exclusion struct {
-	GroupID    string `xml:"groupId" yaml:"groupId"`
+	GroupID    string `xml:"groupId"    yaml:"groupId"`
 	ArtifactID string `xml:"artifactId" yaml:"artifactId"`
 }
 
@@ -95,14 +95,13 @@ type DependencyManagement struct {
 	Dependencies []Dependency `xml:"dependencies>dependency,omitempty"`
 }
 
-// Dependency models a dependency.
 type Dependency struct {
-	GroupID    string       `xml:"groupId" yaml:"groupId"`
-	ArtifactID string       `xml:"artifactId" yaml:"artifactId"`
-	Version    string       `xml:"version,omitempty" yaml:"version,omitempty"`
-	Type       string       `xml:"type,omitempty" yaml:"type,omitempty"`
-	Classifier string       `xml:"classifier,omitempty" yaml:"classifier,omitempty"`
-	Scope      string       `xml:"scope,omitempty" yaml:"scope,omitempty"`
+	GroupID    string       `xml:"groupId"                        yaml:"groupId"`
+	ArtifactID string       `xml:"artifactId"                     yaml:"artifactId"`
+	Version    string       `xml:"version,omitempty"              yaml:"version,omitempty"`
+	Type       string       `xml:"type,omitempty"                 yaml:"type,omitempty"`
+	Classifier string       `xml:"classifier,omitempty"           yaml:"classifier,omitempty"`
+	Scope      string       `xml:"scope,omitempty"                yaml:"scope,omitempty"`
 	Exclusions *[]Exclusion `xml:"exclusions>exclusion,omitempty" yaml:"exclusions,omitempty"`
 }
 

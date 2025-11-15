@@ -21,12 +21,12 @@ package trait
 //
 // +camel-k:trait=kamelets.
 type KameletsTrait struct {
-	Trait `property:",squash" json:",inline"`
+	Trait `json:",inline" property:",squash"`
 
 	// Automatically inject all referenced Kamelets and their default configuration (enabled by default)
-	Auto *bool `property:"auto" json:"auto,omitempty"`
+	Auto *bool `json:"auto,omitempty" property:"auto"`
 	// Comma separated list of Kamelet names to load into the current integration
-	List string `property:"list" json:"list,omitempty"`
+	List string `json:"list,omitempty" property:"list"`
 	// The directory where the application mounts and reads Kamelet spec (default `/etc/camel/kamelets`)
-	MountPoint string `property:"mount-point" json:"mountPoint,omitempty"`
+	MountPoint string `json:"mountPoint,omitempty" property:"mount-point"`
 }

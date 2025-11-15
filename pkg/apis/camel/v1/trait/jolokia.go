@@ -29,36 +29,36 @@ package trait
 // +camel-k:trait=jolokia.
 // +camel-k:deprecated=2.8.0.
 type JolokiaTrait struct {
-	Trait `property:",squash" json:",inline"`
+	Trait `json:",inline" property:",squash"`
 
 	// The PEM encoded CA certification file path, used to verify client certificates,
 	// applicable when `protocol` is `https` and `use-ssl-client-authentication` is `true`
 	// (default `/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt` for OpenShift).
-	CaCert *string `property:"ca-cert" json:"CACert,omitempty"`
+	CaCert *string `json:"CACert,omitempty" property:"ca-cert"`
 	// The principal(s) which must be given in a client certificate to allow access to the Jolokia endpoint,
 	// applicable when `protocol` is `https` and `use-ssl-client-authentication` is `true`
 	// (default `clientPrincipal=cn=system:master-proxy`, `cn=hawtio-online.hawtio.svc` and `cn=fuse-console.fuse.svc` for OpenShift).
-	ClientPrincipal []string `property:"client-principal" json:"clientPrincipal,omitempty"`
+	ClientPrincipal []string `json:"clientPrincipal,omitempty" property:"client-principal"`
 	// Listen for multicast requests (default `false`)
-	DiscoveryEnabled *bool `property:"discovery-enabled" json:"discoveryEnabled,omitempty"`
+	DiscoveryEnabled *bool `json:"discoveryEnabled,omitempty" property:"discovery-enabled"`
 	// Mandate the client certificate contains a client flag in the extended key usage section,
 	// applicable when `protocol` is `https` and `use-ssl-client-authentication` is `true`
 	// (default `true` for OpenShift).
-	ExtendedClientCheck *bool `property:"extended-client-check" json:"extendedClientCheck,omitempty"`
+	ExtendedClientCheck *bool `json:"extendedClientCheck,omitempty" property:"extended-client-check"`
 	// The Host address to which the Jolokia agent should bind to. If `"\*"` or `"0.0.0.0"` is given,
 	// the servers binds to every network interface (default `"*"`).
-	Host *string `property:"host" json:"host,omitempty"`
+	Host *string `json:"host,omitempty" property:"host"`
 	// The password used for authentication, applicable when the `user` option is set.
-	Password *string `property:"password" json:"password,omitempty"`
+	Password *string `json:"password,omitempty" property:"password"`
 	// The Jolokia endpoint port (default `8778`).
-	Port int32 `property:"port" json:"port,omitempty"`
+	Port int32 `json:"port,omitempty" property:"port"`
 	// The protocol to use, either `http` or `https` (default `https` for OpenShift)
-	Protocol *string `property:"protocol" json:"protocol,omitempty"`
+	Protocol *string `json:"protocol,omitempty" property:"protocol"`
 	// The user to be used for authentication
-	User *string `property:"user" json:"user,omitempty"`
+	User *string `json:"user,omitempty" property:"user"`
 	// Whether client certificates should be used for authentication (default `true` for OpenShift).
-	UseSslClientAuthentication *bool `property:"use-ssl-client-authentication" json:"useSSLClientAuthentication,omitempty"`
+	UseSslClientAuthentication *bool `json:"useSSLClientAuthentication,omitempty" property:"use-ssl-client-authentication"`
 	// A list of additional Jolokia options as defined
 	// in https://jolokia.org/reference/html/agents.html#agent-jvm-config[JVM agent configuration options]
-	Options []string `property:"options" json:"options,omitempty"`
+	Options []string `json:"options,omitempty" property:"options"`
 }
