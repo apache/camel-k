@@ -26,7 +26,6 @@ import (
 // BuildCamelServiceDefinition creates a CamelServiceDefinition from a given URL.
 func BuildCamelServiceDefinition(name string, endpointKind CamelEndpointKind, serviceType CamelServiceType,
 	serviceURL url.URL, apiVersion, kind string) (CamelServiceDefinition, error) {
-
 	definition := CamelServiceDefinition{
 		Name:        name,
 		URL:         serviceURL.String(),

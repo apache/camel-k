@@ -51,7 +51,6 @@ func WaitForS2iBuildCompletion(ctx context.Context, c client.Client, build *buil
 	key := ctrl.ObjectKeyFromObject(build)
 	for {
 		select {
-
 		case <-ctx.Done():
 			return ctx.Err()
 

@@ -102,7 +102,6 @@ func (t *podTrait) Apply(e *Environment) error {
 				}
 			}
 		})
-
 	}
 	if err != nil {
 		return err

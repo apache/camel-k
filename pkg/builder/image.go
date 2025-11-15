@@ -136,7 +136,6 @@ func incrementalImageContext(ctx *builderContext) error {
 
 		bestImage, commonLibs := findBestImage(images, ctx.Artifacts)
 		if bestImage.Image != "" {
-
 			log.Infof("Selected %s as base image for %s", bestImage.Image, ctx.Build.Name)
 			ctx.BaseImage = bestImage.Image
 			ctx.SelectedArtifacts = make([]v1.Artifact, 0)

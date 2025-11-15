@@ -168,7 +168,6 @@ func CreateSinkBinding(source corev1.ObjectReference, target corev1.ObjectRefere
 // GetAddressableReference looks up the resource among all given types and returns an object reference to it.
 func GetAddressableReference(ctx context.Context, c client.Client,
 	possibleReferences []corev1.ObjectReference, namespace string, name string) (*corev1.ObjectReference, error) {
-
 	for _, ref := range possibleReferences {
 		sink := ref.DeepCopy()
 		sink.Namespace = namespace

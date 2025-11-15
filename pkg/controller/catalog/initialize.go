@@ -57,7 +57,6 @@ func (action *initializeAction) Handle(ctx context.Context, catalog *v1.CamelCat
 	}
 
 	return initialize(catalog)
-
 }
 
 func initialize(catalog *v1.CamelCatalog) (*v1.CamelCatalog, error) {

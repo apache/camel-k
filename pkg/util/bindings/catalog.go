@@ -78,7 +78,6 @@ func validateEndpoint(ctx BindingContext, e v1.Endpoint) error {
 			}
 			return errors.New("cross-namespace Pipe references are not allowed for Knative")
 		}
-
 	}
 	return nil
 }

@@ -124,7 +124,6 @@ func NewClient(fastDiscovery bool) (Client, error) {
 
 // NewClientWithConfig creates a new k8s client that can be used from outside or in the cluster.
 func NewClientWithConfig(fastDiscovery bool, cfg *rest.Config) (Client, error) {
-
 	// The below call to apis.AddToScheme is not thread safe in the k8s API
 	// We try to synchronize here across all k8s clients
 	// https://github.com/apache/camel-k/issues/5315

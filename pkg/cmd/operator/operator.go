@@ -82,7 +82,6 @@ func printVersion() {
 
 // Run starts the Camel K operator.
 func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID string) {
-
 	flag.Parse()
 
 	// The logger instantiated here can be changed to any logger

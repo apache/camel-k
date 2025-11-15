@@ -72,7 +72,6 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 	//nolint:nestif
 	if pod == nil {
 		switch build.Status.Phase {
-
 		case v1.BuildPhasePending:
 			pod = newBuildPod(ctx, action.client, build)
 			// If the Builder Pod is in the Build namespace, we can set the ownership to it. If not (global operator mode)
@@ -103,7 +102,6 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 	}
 
 	switch pod.Status.Phase {
-
 	case corev1.PodPending, corev1.PodRunning:
 		// Pod remains in pending phase when init containers execute
 		if action.isPodScheduled(pod) {
@@ -337,7 +335,6 @@ func (action *monitorPodAction) setConditionsFromTerminationMessages(ctx context
 			buildStatus.SetCondition(containerConditionType, containerSucceeded, terminationReason, terminationMessage)
 		}
 	}
-
 }
 
 // we expect that the last task is any of the supported publishing task
@@ -345,9 +342,7 @@ func (action *monitorPodAction) setConditionsFromTerminationMessages(ctx context
 func publishTask(tasks []v1.Task) *v1.Task {
 	if len(tasks) > 0 {
 		return &tasks[len(tasks)-1]
-
 	}
-
 	return nil
 }
 

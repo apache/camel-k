@@ -158,7 +158,6 @@ kits:
 }
 
 func (action *buildKitAction) checkIntegrationKit(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
-
 	// IntegrationKit fully defined so find it
 	action.L.Debugf("Finding integration kit %s for integration %s\n",
 		integration.Status.IntegrationKit.Name, integration.Name)
@@ -175,7 +174,6 @@ func (action *buildKitAction) checkIntegrationKit(ctx context.Context, integrati
 		if err != nil {
 			return nil, fmt.Errorf("unable to match any integration kit with integration %s/%s: %w",
 				integration.Namespace, integration.Name, err)
-
 		}
 
 		if !match {

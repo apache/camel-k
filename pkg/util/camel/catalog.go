@@ -51,7 +51,6 @@ func catalogForRuntimeProvider(provider v1.RuntimeProvider) (*RuntimeCatalog, er
 	}
 
 	for _, name := range names {
-
 		content, err := resources.Resource(name)
 		if err != nil {
 			return nil, err
@@ -79,7 +78,6 @@ func GenerateCatalog(
 	mvn v1.MavenSpec,
 	runtime v1.RuntimeSpec,
 	extraRepositories []string) (*RuntimeCatalog, error) {
-
 	userSettings, err := kubernetes.ResolveValueSource(ctx, client, namespace, &mvn.Settings)
 	if err != nil {
 		return nil, err
@@ -112,7 +110,6 @@ func GenerateCatalogCommon(
 	caCert [][]byte,
 	mvn v1.MavenSpec,
 	runtime v1.RuntimeSpec) (*RuntimeCatalog, error) {
-
 	catalog := v1.CamelCatalog{}
 
 	err := util.WithTempDir("camel-catalog", func(tmpDir string) error {
@@ -167,7 +164,6 @@ func GenerateCatalogCommon(
 
 func generateMavenProject(runtimeVersion string) maven.Project {
 	p := maven.NewProjectWithGAV("org.apache.camel.k.integration", "camel-k-catalog-generator", defaults.Version)
-
 	plugin := maven.Plugin{
 		GroupID:    "org.apache.camel.k",
 		ArtifactID: "camel-k-maven-plugin",

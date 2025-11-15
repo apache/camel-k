@@ -180,7 +180,6 @@ func (c *RuntimeCatalog) VisitSchemes(visitor func(string, v1.CamelScheme) bool)
 
 // DecodeComponent parses the given URI and return a camel artifact and a scheme.
 func (c *RuntimeCatalog) DecodeComponent(uri string) (*v1.CamelArtifact, *v1.CamelScheme) {
-
 	var uriSplit []string
 
 	// Decode URI using formats http://my-site/test?param=value or log:info
