@@ -21,8 +21,10 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"k8s.io/utils/ptr"
 )
 
@@ -78,6 +80,38 @@ func validateEndpoint(ctx BindingContext, e v1.Endpoint) error {
 			}
 			return errors.New("cross-namespace Pipe references are not allowed for Knative")
 		}
+		// only check this when there is a cross-namespace access
+		return verifyResourceRBAC(ctx, e)
+	}
+
+	return nil
+}
+
+// verifyResourceRBAC verify if the ServiceAccount which is running the Integration has enough
+// privileges to access the resource. We avoid any potential cross-namespace vulnerability access.
+func verifyResourceRBAC(ctx BindingContext, e v1.Endpoint) error {
+	resources := strings.ToLower(e.Ref.Kind) + "s"
+	if ctx.ServiceAccountName == "" {
+		return fmt.Errorf("you must to use an authorized ServiceAccount to access cross-namespace resources %s. "+
+			"Set it in the Pipe spec accordingly", resources)
+	}
+	ok, err := kubernetes.CheckServiceAccountPermission(
+		ctx.Ctx,
+		ctx.Client,
+		fmt.Sprintf("system:serviceaccount:%s:%s", ctx.Namespace, ctx.ServiceAccountName),
+		e.Ref.GroupVersionKind().Group,
+		resources,
+		e.Ref.Namespace,
+		"get",
+	)
+
+	if err != nil {
+		return err
+	}
+
+	if !ok {
+		return fmt.Errorf("cross-namespace Pipe reference authorization denied for the ServiceAccount %s and resources %s",
+			ctx.ServiceAccountName, resources)
 	}
 	return nil
 }

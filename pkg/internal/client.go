@@ -28,6 +28,7 @@ import (
 	fakecamelclientset "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/fake"
 	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util"
+	authv1 "k8s.io/api/authorization/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -247,6 +248,25 @@ type FakeAuthorization struct {
 
 func (f *FakeAuthorization) SelfSubjectRulesReviews() authorizationv1.SelfSubjectRulesReviewInterface {
 	return f.AuthorizationV1Interface.SelfSubjectRulesReviews()
+}
+
+// Returns a fake SAR interface.
+func (f *FakeAuthorization) SubjectAccessReviews() authorizationv1.SubjectAccessReviewInterface {
+	return &FakeSAR{}
+}
+
+type FakeSAR struct {
+	authorizationv1.SubjectAccessReviewInterface
+}
+
+// Fake Create implementation (needed in cross namespace Kamelets test). Only allow `cross-ns-sa` user in `default` namespace.
+func (f *FakeSAR) Create(ctx context.Context, sar *authv1.SubjectAccessReview, opts metav1.CreateOptions) (*authv1.SubjectAccessReview, error) {
+	ra := sar.Spec.ResourceAttributes
+	allowed := sar.Spec.User == "system:serviceaccount:default:cross-ns-sa" && ra.Verb == "get" && ra.Resource == "kamelets"
+
+	sar.Status.Allowed = allowed
+	sar.Status.Reason = "mocked"
+	return sar, nil
 }
 
 type FakeDiscovery struct {
