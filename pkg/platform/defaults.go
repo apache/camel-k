@@ -120,7 +120,6 @@ func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPl
 	if p.Status.Cluster == v1.IntegrationPlatformClusterOpenShift &&
 		p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyS2I &&
 		p.Status.Build.Registry.Address == "" {
-
 		err := configureForOpenShiftS2i(ctx, c, p)
 		if err != nil {
 			return err

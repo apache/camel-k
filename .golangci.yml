@@ -46,7 +46,6 @@ linters:
     - tagliatelle
     - testpackage
     - varnamelen
-    - whitespace
     - wrapcheck
     - wsl
     - wsl_v5

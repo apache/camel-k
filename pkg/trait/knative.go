@@ -543,7 +543,6 @@ func (t *knativeTrait) withServiceDo(
 	serviceType knativeapi.CamelServiceType,
 	endpointKind knativeapi.CamelEndpointKind,
 	gen func(ref *corev1.ObjectReference, serviceURI string, urlProvider func() (*url.URL, error)) error) error {
-
 	for _, serviceURI := range t.extractServices(serviceURIs, serviceType) {
 		ref, err := knativeutil.ExtractObjectReference(serviceURI)
 		if err != nil {

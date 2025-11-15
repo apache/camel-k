@@ -253,9 +253,7 @@ func configureBinding(integration *v1.Integration, bindings ...*bindings.Binding
 
 			integration.Spec.AddConfigurationProperty(entry)
 		}
-
 	}
-
 	return nil
 }
 

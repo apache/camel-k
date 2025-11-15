@@ -259,7 +259,6 @@ func (t *builderTrait) Apply(e *Environment) error {
 	// Publishing task
 	tag := getTag(e)
 	switch e.Platform.Status.Build.PublishStrategy {
-
 	case v1.IntegrationPlatformBuildPublishStrategyJib:
 		jibTask := v1.Task{Jib: &v1.JibTask{
 			BaseTask: v1.BaseTask{

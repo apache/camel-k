@@ -68,7 +68,6 @@ func CreateCatalog(
 				runtime.Version,
 				runtime.Provider,
 				catalogName, err)
-
 		}
 	}
 

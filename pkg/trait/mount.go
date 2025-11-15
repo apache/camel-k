@@ -509,6 +509,5 @@ func (t *mountTrait) addSourcesProperties(e *Environment) {
 
 			idx++
 		}
-
 	}
 }

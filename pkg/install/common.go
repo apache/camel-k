@@ -62,7 +62,6 @@ func Resource(ctx context.Context, c client.Client, namespace string, force bool
 
 func ResourceOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection,
 	force bool, customizer ResourceCustomizer, name string) error {
-
 	content, err := resources.ResourceAsString(name)
 	if err != nil {
 		return err

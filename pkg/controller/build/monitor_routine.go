@@ -60,7 +60,6 @@ func (action *monitorRoutineAction) CanHandle(build *v1.Build) bool {
 // Handle handles the builds.
 func (action *monitorRoutineAction) Handle(ctx context.Context, build *v1.Build) (*v1.Build, error) {
 	switch build.Status.Phase {
-
 	case v1.BuildPhasePending:
 		if _, ok := routines.Load(build.Name); ok {
 			// Something went wrong. Let's fail the Build to start over a clean state.

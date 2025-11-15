@@ -868,9 +868,7 @@ func (o *runCmdOptions) applyDependencies(cmd *cobra.Command, it *v1.Integration
 			}
 		}
 		addDependency(cmd, it, item, catalog)
-
 	}
-
 	return nil
 }
 

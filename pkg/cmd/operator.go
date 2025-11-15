@@ -58,7 +58,6 @@ type operatorCmdOptions struct {
 }
 
 func (o *operatorCmdOptions) run(_ *cobra.Command, _ []string) {
-
 	leaderElectionID := o.LeaderElectionID
 	if leaderElectionID == "" {
 		if defaults.OperatorID() != "" {

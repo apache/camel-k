@@ -81,7 +81,6 @@ func (t *builderTask) Do(ctx context.Context) v1.BuildStatus {
 steps:
 	for _, step := range steps {
 		select {
-
 		case <-ctx.Done():
 			if errors.Is(ctx.Err(), context.Canceled) {
 				// Context canceled

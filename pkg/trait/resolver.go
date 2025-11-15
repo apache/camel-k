@@ -89,7 +89,6 @@ func resolveIntegrationSources(
 	integration *v1.Integration,
 	originalSourcesOnly bool,
 	resources *kubernetes.Collection) ([]v1.SourceSpec, error) {
-
 	if integration == nil {
 		return nil, nil
 	}

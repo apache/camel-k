@@ -117,7 +117,6 @@ func (action *monitorAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.Pip
 	target := pipe.DeepCopy()
 
 	switch it.Status.Phase {
-
 	case v1.IntegrationPhaseRunning:
 		target.Status.Phase = v1.PipePhaseReady
 		setPipeReadyCondition(target, &it)
@@ -175,7 +174,6 @@ func setPipeReadyCondition(kb *v1.Pipe, it *v1.Integration) {
 		}
 
 		kb.Status.SetConditions(c)
-
 	} else {
 		kb.Status.SetCondition(
 			v1.PipeConditionReady,
