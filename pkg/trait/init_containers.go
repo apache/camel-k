@@ -101,18 +101,21 @@ func (t *initContainersTrait) Apply(e *Environment) error {
 	if err := e.Resources.VisitDeploymentE(func(deployment *appsv1.Deployment) error {
 		// Deployment
 		initContainers = &deployment.Spec.Template.Spec.InitContainers
+
 		return nil
 	}); err != nil {
 		return err
 	} else if err := e.Resources.VisitKnativeServiceE(func(service *serving.Service) error {
 		// Knative Service
 		initContainers = &service.Spec.Template.Spec.InitContainers
+
 		return nil
 	}); err != nil {
 		return err
 	} else if err := e.Resources.VisitCronJobE(func(cron *batchv1.CronJob) error {
 		// CronJob
 		initContainers = &cron.Spec.JobTemplate.Spec.Template.Spec.InitContainers
+
 		return nil
 	}); err != nil {
 		return err

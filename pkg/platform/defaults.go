@@ -127,6 +127,7 @@ func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPl
 	}
 
 	log.Debugf("Final Registry Address: %s", p.Status.Build.Registry.Address)
+
 	return nil
 }
 

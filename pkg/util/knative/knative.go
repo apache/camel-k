@@ -82,6 +82,7 @@ func CreateServiceTrigger(brokerReference corev1.ObjectReference, serviceName st
 		Kind:       "Service",
 		Name:       serviceName,
 	}
+
 	return CreateTrigger(brokerReference, subscriberRef, eventType, path, attributes)
 }
 
@@ -92,6 +93,7 @@ func CreateKnativeServiceTrigger(brokerReference corev1.ObjectReference, service
 		Kind:       "Service",
 		Name:       serviceName,
 	}
+
 	return CreateTrigger(brokerReference, subscriberRef, eventType, path, attributes)
 }
 
@@ -180,6 +182,7 @@ func GetAddressableReference(ctx context.Context, c client.Client,
 
 		return sink, nil
 	}
+
 	return nil, k8serrors.NewNotFound(schema.GroupResource{}, name)
 }
 
@@ -189,6 +192,7 @@ func GetSinkURL(ctx context.Context, c client.Client, sink *corev1.ObjectReferen
 	if err != nil {
 		return nil, err
 	}
+
 	return url.Parse(res)
 }
 
@@ -227,6 +231,7 @@ func getSinkURI(ctx context.Context, c client.Client, sink *corev1.ObjectReferen
 	if addressURL.Host == "" {
 		return "", fmt.Errorf("sink %s contains an empty hostname", objIdentifier)
 	}
+
 	return addressURL.String(), nil
 }
 
@@ -259,5 +264,6 @@ func EnableKnativeBindInNamespace(ctx context.Context, client client.Client, nam
 	if err != nil {
 		return false, err
 	}
+
 	return true, nil
 }

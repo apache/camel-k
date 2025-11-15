@@ -41,6 +41,7 @@ func newCmdUndeploy(rootCmdOptions *RootCmdOptions) (*cobra.Command, *undeployCm
 			if err := options.validate(args); err != nil {
 				return err
 			}
+
 			return options.run(cmd, args)
 		},
 	}
@@ -86,12 +87,14 @@ func (o *undeployCmdOptions) undeployIntegrations(cmd *cobra.Command, c k8sclien
 			fmt.Fprintf(cmd.OutOrStdout(),
 				"warning: could not undeploy integration %s, it is not in status %s\n",
 				i.Name, v1.IntegrationPhaseRunning)
+
 			continue
 		}
 		if i.Annotations[v1.IntegrationDontRunAfterBuildAnnotation] != "true" {
 			fmt.Fprintf(cmd.OutOrStdout(),
 				"warning: could not undeploy integration %s, it is not annotated with %s=true\n",
 				i.Name, v1.IntegrationDontRunAfterBuildAnnotation)
+
 			continue
 		}
 		it := i
@@ -101,5 +104,6 @@ func (o *undeployCmdOptions) undeployIntegrations(cmd *cobra.Command, c k8sclien
 		}
 		undeployed++
 	}
+
 	return undeployed, nil
 }

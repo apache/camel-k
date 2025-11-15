@@ -173,6 +173,7 @@ func GetServiceType(ref v1.ObjectReference) (*knativev1.CamelServiceType, error)
 	for _, c := range KnownChannelKinds {
 		if c.Group == refGV.Group && c.Kind == ref.Kind {
 			channelType := knativev1.CamelServiceTypeChannel
+
 			return &channelType, nil
 		}
 	}
@@ -180,6 +181,7 @@ func GetServiceType(ref v1.ObjectReference) (*knativev1.CamelServiceType, error)
 	for _, c := range KnownBrokerKinds {
 		if c.Group == refGV.Group && c.Kind == ref.Kind {
 			eventType := knativev1.CamelServiceTypeEvent
+
 			return &eventType, nil
 		}
 	}
@@ -187,6 +189,7 @@ func GetServiceType(ref v1.ObjectReference) (*knativev1.CamelServiceType, error)
 	for _, c := range KnownEndpointKinds {
 		if c.Group == refGV.Group && c.Kind == ref.Kind {
 			endpointType := knativev1.CamelServiceTypeEndpoint
+
 			return &endpointType, nil
 		}
 	}
@@ -219,6 +222,7 @@ func fillMissingReferenceDataWith(serviceTypes []GroupVersionKindResource, ref v
 	default:
 		list = append(list, ref)
 	}
+
 	return list
 }
 
@@ -229,6 +233,7 @@ func getGroupVersions(serviceTypes []GroupVersionKindResource, kind string) []st
 			util.StringSliceUniqueAdd(&res, st.GroupVersion().String())
 		}
 	}
+
 	return res
 }
 
@@ -239,5 +244,6 @@ func getKinds(serviceTypes []GroupVersionKindResource, apiVersion string) []stri
 			util.StringSliceUniqueAdd(&res, st.Kind)
 		}
 	}
+
 	return res
 }

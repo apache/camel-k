@@ -50,6 +50,7 @@ func (o *deployCmdOptions) validate(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return errors.New("deploy requires an Integration name argument")
 	}
+
 	return nil
 }
 
@@ -83,6 +84,7 @@ func (o *deployCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 	if string(d) == "{}" {
 		fmt.Fprintln(cmd.OutOrStdout(), `Integration "`+name+`" unchanged`)
+
 		return nil
 	}
 	err = c.Status().Patch(o.Context, integration, patch)
@@ -91,5 +93,6 @@ func (o *deployCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Fprintln(cmd.OutOrStdout(), `Integration "`+name+`" deployed`)
+
 	return nil
 }

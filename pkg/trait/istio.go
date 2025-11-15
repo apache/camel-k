@@ -70,6 +70,7 @@ func (t *istioTrait) Apply(e *Environment) error {
 			cs.Template.Annotations = t.injectIstioAnnotation(cs.Template.Annotations, false)
 		})
 	}
+
 	return nil
 }
 
@@ -84,6 +85,7 @@ func (t *istioTrait) injectIstioAnnotation(annotations map[string]string, includ
 	if t.Inject != nil {
 		annotations[istioSidecarInjectAnnotation] = strconv.FormatBool(*t.Inject)
 	}
+
 	return annotations
 }
 

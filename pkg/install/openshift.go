@@ -110,6 +110,7 @@ func OpenShiftConsoleDownloadLink(ctx context.Context, c client.Client) error {
 					// Let's just skip the ConsoleCLIDownload resource creation
 					return nil
 				}
+
 				return err
 			}
 		}

@@ -136,13 +136,16 @@ func injectServersIntoMavenSettings(settings string, servers []v1.Server) string
 	newSettings, i := getServerTagIndex(settings)
 	if i < 0 {
 		log.Infof("Could not find a place to store Server information in Maven settings, skipping")
+
 		return settings
 	}
 	content, err := encodeXMLNoHeader(servers)
 	if err != nil {
 		log.Infof("Could not marshall extra Servers into Maven settings, skipping")
+
 		return settings
 	}
+
 	return newSettings[:i] + string(content) + newSettings[i:]
 }
 
@@ -156,6 +159,7 @@ func encodeXMLNoHeader(content interface{}) ([]byte, error) {
 		return []byte{}, err
 	}
 	w.WriteString("\n  ")
+
 	return w.Bytes(), nil
 }
 
@@ -175,6 +179,7 @@ func getServerTagIndex(val string) (string, int) {
 		i = strings.Index(val, tag)
 		if i > 0 {
 			i += len(tag)
+
 			break
 		}
 	}
@@ -187,6 +192,7 @@ func getServerTagIndex(val string) (string, int) {
 		i = loc[1]
 	}
 	val = val[:i] + serversTag + val[i:]
+
 	return val, strings.Index(val, endServerTag)
 }
 
@@ -215,5 +221,6 @@ func injectProfiles(ctx *builderContext) error {
 			}
 		}
 	}
+
 	return nil
 }

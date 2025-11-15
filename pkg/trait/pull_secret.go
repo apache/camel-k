@@ -121,6 +121,7 @@ func (t *pullSecretTrait) delegateImagePuller(e *Environment) error {
 	if _, err := kubernetes.ReplaceResource(e.Ctx, e.Client, rb); err != nil {
 		return fmt.Errorf("error during the creation of the system:image-puller delegating role binding: %w", err)
 	}
+
 	return nil
 }
 
@@ -145,6 +146,7 @@ func (t *pullSecretTrait) newImagePullerRoleBinding(e *Environment) *rbacv1.Role
 	if serviceAccount == "" {
 		serviceAccount = "default"
 	}
+
 	return &rbacv1.RoleBinding{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "RoleBinding",

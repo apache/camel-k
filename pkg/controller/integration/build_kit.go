@@ -54,6 +54,7 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 		action.L.Info("Integration %s digest has changed: resetting its status. Will check if it needs to be rebuilt and restarted.", integration.Name)
 		integration.Initialize()
 		integration.Status.Digest = hash
+
 		return integration, nil
 	}
 
@@ -75,6 +76,7 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 		err = fmt.Errorf("failed to lookup kits for integration %s/%s: %w", integration.Namespace, integration.Name, err)
 		integration.Status.Phase = v1.IntegrationPhaseError
 		integration.SetReadyConditionError(err.Error())
+
 		return integration, err
 	}
 
@@ -86,6 +88,7 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 		err = fmt.Errorf("failed to apply traits to integration %s/%s: %w", integration.Namespace, integration.Name, err)
 		integration.Status.Phase = v1.IntegrationPhaseError
 		integration.SetReadyConditionError(err.Error())
+
 		return integration, err
 	}
 
@@ -104,6 +107,7 @@ kits:
 				err = fmt.Errorf("error occurred matches integration kits with environment for integration %s/%s: %w", integration.Namespace, integration.Name, err)
 				integration.Status.Phase = v1.IntegrationPhaseError
 				integration.SetReadyConditionError(err.Error())
+
 				return integration, err
 			}
 			if match {
@@ -128,6 +132,7 @@ kits:
 			err = fmt.Errorf("failed to create new integration kit for integration %s/%s: %w", integration.Namespace, integration.Name, err)
 			integration.Status.Phase = v1.IntegrationPhaseError
 			integration.SetReadyConditionError(err.Error())
+
 			return integration, err
 		}
 		if integrationKit == nil {
@@ -198,6 +203,7 @@ func (action *buildKitAction) checkIntegrationKit(ctx context.Context, integrati
 	if kit.Status.Phase == v1.IntegrationKitPhaseError {
 		integration.Status.Phase = v1.IntegrationPhaseError
 		integration.SetIntegrationKit(kit)
+
 		return integration, nil
 	}
 
@@ -208,6 +214,7 @@ func (action *buildKitAction) checkIntegrationKit(ctx context.Context, integrati
 			integration.Status.Phase = v1.IntegrationPhaseDeploying
 		}
 		integration.SetIntegrationKit(kit)
+
 		return integration, nil
 	}
 

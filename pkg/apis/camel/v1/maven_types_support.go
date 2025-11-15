@@ -38,6 +38,7 @@ func (in *MavenArtifact) GetDependencyID() string {
 			mvn = mvn + ":" + in.Version
 		}
 	}
+
 	return mvn
 }
 
@@ -126,5 +127,6 @@ func (m PluginProperties) MarshalXML(e *xml.Encoder, start xml.StartElement) err
 			}
 		}
 	}
+
 	return e.EncodeToken(start.End())
 }

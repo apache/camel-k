@@ -65,12 +65,14 @@ func Uncompress(buffer io.Writer, data []byte) error {
 	data, err = io.ReadAll(gz)
 	if err != nil {
 		util.CloseQuietly(gz)
+
 		return err
 	}
 
 	_, err = buffer.Write(data)
 	if err != nil {
 		util.CloseQuietly(gz)
+
 		return err
 	}
 

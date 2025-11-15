@@ -58,6 +58,7 @@ func ReplaceResource(ctx context.Context, c client.Client, res ctrl.Object) (boo
 	if err != nil {
 		return replaced, fmt.Errorf("could not create or replace "+findResourceDetails(res)+": %w", err)
 	}
+
 	return replaced, nil
 }
 
@@ -104,5 +105,6 @@ func findResourceDetails(res ctrl.Object) string {
 	if res == nil {
 		return "nil resource"
 	}
+
 	return res.GetObjectKind().GroupVersionKind().String() + " " + res.GetName()
 }

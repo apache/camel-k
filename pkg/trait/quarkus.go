@@ -81,12 +81,14 @@ func getLanguageSettings(e *Environment, language v1.Language) languageSettings 
 		}
 		sourcesRequiredAtBuildTime, sExists := loader.Metadata["sources-required-at-build-time"]
 		deprecated, dpExists := loader.Metadata["deprecated"]
+
 		return languageSettings{
 			native:                     native == boolean.TrueString,
 			sourcesRequiredAtBuildTime: sExists && sourcesRequiredAtBuildTime == boolean.TrueString,
 			deprecated:                 dpExists && deprecated == boolean.TrueString,
 		}
 	}
+
 	return getLegacyLanguageSettings(language)
 }
 
@@ -126,6 +128,7 @@ func (t *quarkusTrait) Matches(trait Trait) bool {
 		if qt.containsMode(md) {
 			continue
 		}
+
 		return false
 	}
 	// We need to check if the native base image used is the same
@@ -176,12 +179,14 @@ func (t *quarkusTrait) adaptDeprecatedFields() *TraitCondition {
 		for _, pt := range t.PackageTypes {
 			if pt == traitv1.NativePackageType {
 				t.Modes = append(t.Modes, traitv1.NativeQuarkusMode)
+
 				continue
 			}
 			if pt == traitv1.FastJarPackageType {
 				t.Modes = append(t.Modes, traitv1.JvmQuarkusMode)
 			}
 		}
+
 		return NewIntegrationCondition("Quarkus", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, TraitConfigurationReason, message)
 	}
 
@@ -215,6 +220,7 @@ func (t *quarkusTrait) validateNativeSupport(e *Environment) error {
 func (t *quarkusTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit) {
 		t.applyWhileBuildingKit(e)
+
 		return nil
 	}
 
@@ -304,6 +310,7 @@ func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType quarkusPack
 	if e.Integration.Status.Capabilities != nil {
 		kit.Spec.Capabilities = e.Integration.Status.Capabilities
 	}
+
 	return kit
 }
 
@@ -428,6 +435,7 @@ func (t *quarkusTrait) isIncrementalImageBuild(e *Environment) bool {
 	// We need to get this information from the builder trait
 	if trait := e.Catalog.GetTrait(builderTraitID); trait != nil {
 		builder, ok := trait.(*builderTrait)
+
 		return ok && ptr.Deref(builder.IncrementalImageBuild, true)
 	}
 
@@ -461,8 +469,10 @@ func (t *quarkusTrait) isEmbedded(e *Environment, source v1.SourceSpec) bool {
 		return e.IntegrationKit != nil && t.isNativeIntegration(e) && sourcesRequiredAtBuildTime(e, source)
 	} else if e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) {
 		native, _ := t.isNativeKit(e)
+
 		return native && sourcesRequiredAtBuildTime(e, source)
 	}
+
 	return false
 }
 
@@ -472,6 +482,7 @@ func (t *quarkusTrait) containsMode(m traitv1.QuarkusMode) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -489,6 +500,7 @@ func packageType(mode traitv1.QuarkusMode) quarkusPackageType {
 // Indicates whether the given source file is required at build time for native compilation.
 func sourcesRequiredAtBuildTime(e *Environment, source v1.SourceSpec) bool {
 	settings := getLanguageSettings(e, source.InferLanguage())
+
 	return settings.native && settings.sourcesRequiredAtBuildTime
 }
 
@@ -500,5 +512,6 @@ func propagateSourcesRequiredAtBuildTime(e *Environment) []v1.SourceSpec {
 			array = append(array, source)
 		}
 	}
+
 	return array
 }

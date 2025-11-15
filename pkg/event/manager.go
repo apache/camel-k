@@ -313,6 +313,7 @@ func getCommonChangedConditions(oldConditions, newConditions []v1.ResourceCondit
 			res = append(res, newCond)
 		}
 	}
+
 	return res
 }
 
@@ -322,10 +323,13 @@ func getCreatorObject(ctx context.Context, c client.Client, obj runtime.Object) 
 			it := v1.NewIntegration(ref.Namespace, ref.Name)
 			if err := c.Get(ctx, ctrl.ObjectKeyFromObject(&it), &it); err != nil {
 				log.Infof("Cannot get information about the creator Integration %v: %v", ref, err)
+
 				return nil, nil
 			}
+
 			return ref, &it
 		}
 	}
+
 	return nil, nil
 }

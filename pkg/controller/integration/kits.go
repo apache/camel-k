@@ -134,34 +134,41 @@ func integrationMatches(ctx context.Context, c client.Client, integration *v1.In
 
 	if match, err := trait.HasMatchingTraits(itc, ikc); !match || err != nil {
 		ilog.Debug("Integration and integration-kit traits do not match", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
+
 		return false, err
 	}
 	if !util.StringSliceContains(kit.Spec.Dependencies, integration.Status.Dependencies) {
 		ilog.Debug("Integration and integration-kit dependencies do not match", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
+
 		return false, nil
 	}
 	// If IntegrationKit has any source, we must verify that it corresponds with the one in the Integration.
 	// This is important in case of Native builds as we need to rebuild when language requires a source during build.
 	if len(kit.Spec.Sources) > 0 && !hasMatchingSourcesForNative(integration, kit) {
 		ilog.Debug("Integration and integration-kit sources do not match", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
+
 		return false, nil
 	}
 
 	ilog.Debug("Matched Integration and integration-kit", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
+
 	return true, nil
 }
 
 func statusMatches(integration *v1.Integration, kit *v1.IntegrationKit, ilog *log.Logger) bool {
 	if kit.Status.RuntimeProvider != integration.Status.RuntimeProvider {
 		ilog.Debug("Integration and integration-kit runtime providers do not match", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
+
 		return false
 	}
 	if kit.Status.RuntimeVersion != integration.Status.RuntimeVersion {
 		ilog.Debug("Integration and integration-kit runtime versions do not match", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
+
 		return false
 	}
 	if len(integration.Status.Dependencies) != len(kit.Spec.Dependencies) {
 		ilog.Debug("Integration and integration-kit have different number of dependencies", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
+
 		return false
 	}
 
@@ -207,6 +214,7 @@ func hasMatchingSourcesForNative(it *v1.Integration, kit *v1.IntegrationKit) boo
 		for _, ikSource := range kit.Spec.Sources {
 			if itSource.Content == ikSource.Content {
 				found = true
+
 				break
 			}
 		}
@@ -214,5 +222,6 @@ func hasMatchingSourcesForNative(it *v1.Integration, kit *v1.IntegrationKit) boo
 			return false
 		}
 	}
+
 	return true
 }

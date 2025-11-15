@@ -37,6 +37,7 @@ func (a *jvmAgent) arg() string {
 	if a.options != "" {
 		arg += "=" + a.options
 	}
+
 	return arg
 }
 

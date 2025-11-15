@@ -52,6 +52,7 @@ func HandleIntegrationStateChanges(ctx context.Context, c client.Client, integra
 				return false
 			}
 		}
+
 		return true
 	}
 
@@ -163,5 +164,6 @@ func isAllowed(lastEvent, event *corev1.Event, baseTime int64) bool {
 	if lastEvent.InvolvedObject.Name != event.InvolvedObject.Name {
 		return true
 	}
+
 	return false
 }

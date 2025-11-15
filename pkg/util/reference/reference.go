@@ -81,6 +81,7 @@ func (c *Converter) FromString(str string) (corev1.ObjectReference, error) {
 	if ref.Kind == "" || !unicode.IsUpper([]rune(ref.Kind)[0]) {
 		return corev1.ObjectReference{}, fmt.Errorf("invalid kind: %q", ref.Kind)
 	}
+
 	return ref, nil
 }
 
@@ -113,8 +114,10 @@ func (c *Converter) PropertiesFromString(str string) (map[string]string, error) 
 			}
 			res[k] = v
 		}
+
 		return res, nil
 	}
+
 	return nil, nil
 }
 
@@ -153,10 +156,12 @@ func (c *Converter) simpleDecodeString(str string) (corev1.ObjectReference, erro
 				}
 			}
 		}
+
 		return ref, nil
 	}
 	if c.defaultPrefix != "" {
 		return corev1.ObjectReference{}, fmt.Errorf(`name %q does not match either "[[apigroup/]version:]kind:[namespace/]name" or "[namespace/]name"`, str)
 	}
+
 	return corev1.ObjectReference{}, fmt.Errorf(`name %q does not match format "[[apigroup/]version:]kind:[namespace/]name"`, str)
 }

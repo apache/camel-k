@@ -43,6 +43,7 @@ func CancelBuild(ctx context.Context, c client.Client, build *buildv1.Build) err
 		return err
 	}
 	*build = *target
+
 	return nil
 }
 
@@ -60,6 +61,7 @@ func WaitForS2iBuildCompletion(ctx context.Context, c client.Client, build *buil
 				if apierrors.IsNotFound(err) {
 					continue
 				}
+
 				return err
 			}
 
@@ -86,6 +88,7 @@ func BuildConfig(ctx context.Context, c client.Client, bc *buildv1.BuildConfig, 
 	if err := c.Create(ctx, bc); err != nil {
 		return fmt.Errorf("cannot create build config: %w", err)
 	}
+
 	return nil
 }
 
@@ -102,5 +105,6 @@ func ImageStream(ctx context.Context, c client.Client, is *imagev1.ImageStream, 
 	if err := c.Create(ctx, is); err != nil {
 		return fmt.Errorf("cannot create image stream: %w", err)
 	}
+
 	return nil
 }

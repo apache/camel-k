@@ -268,6 +268,7 @@ func hasVolume(pod *corev1.Pod, name string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 

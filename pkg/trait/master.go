@@ -73,6 +73,7 @@ func (t *masterTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		for _, endpoint := range meta.FromURIs {
 			if uri.GetComponent(endpoint) == masterComponent {
 				found = true
+
 				break loop
 			}
 		}
@@ -171,6 +172,7 @@ func findAdditionalDependencies(e *Environment, meta metadata.IntegrationMetadat
 			}
 		}
 	}
+
 	return dependencies
 }
 
@@ -183,6 +185,7 @@ func loadResource(cli client.Client, name string, params interface{}) (ctrl.Obje
 	if err != nil {
 		return nil, err
 	}
+
 	return obj, nil
 }
 
@@ -218,5 +221,6 @@ func (t *masterTrait) prepareRBAC(cli client.Client, serviceAccount, itName, itN
 		return nil, err
 	}
 	objs = append(objs, roleBinding)
+
 	return objs, nil
 }

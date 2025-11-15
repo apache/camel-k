@@ -85,6 +85,7 @@ func (t *builderTrait) Matches(trait Trait) bool {
 	copy(srtOtheTasks, otherTrait.Tasks)
 	slices.Sort(srtThisTasks)
 	slices.Sort(srtOtheTasks)
+
 	return slices.Equal(srtThisTasks, srtOtheTasks)
 }
 
@@ -156,6 +157,7 @@ func existsTaskRequest(tasks []string, taskName string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -229,6 +231,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 		); err != nil {
 			return err
 		}
+
 		return nil
 	}
 	builderTask.Configuration.NodeSelector = t.NodeSelector
@@ -303,11 +306,13 @@ func (t *builderTrait) Apply(e *Environment) error {
 			); err != nil {
 				return err
 			}
+
 			return err
 		}
 	}
 	// add local pipeline tasks to env pipeline
 	e.Pipeline = append(e.Pipeline, pipelineTasks...)
+
 	return nil
 }
 
@@ -358,6 +363,7 @@ func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfigurati
 			if string(s) == t.Strategy {
 				found = true
 				taskConf.Strategy = s
+
 				break
 			}
 		}
@@ -366,6 +372,7 @@ func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfigurati
 			for _, s := range v1.BuildStrategies {
 				strategies = append(strategies, string(s))
 			}
+
 			return nil, fmt.Errorf("unknown build strategy: %s. One of [%s] is expected", t.Strategy, strings.Join(strategies, ", "))
 		}
 	}
@@ -376,6 +383,7 @@ func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfigurati
 			if string(s) == t.OrderStrategy {
 				found = true
 				taskConf.OrderStrategy = s
+
 				break
 			}
 		}
@@ -384,6 +392,7 @@ func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfigurati
 			for _, s := range v1.BuildOrderStrategies {
 				strategies = append(strategies, string(s))
 			}
+
 			return nil, fmt.Errorf("unknown build order strategy: %s. One of [%s] is expected", t.OrderStrategy, strings.Join(strategies, ", "))
 		}
 	}
@@ -476,6 +485,7 @@ func getImageName(e *Environment) string {
 	if organization == "" {
 		organization = e.Platform.Namespace
 	}
+
 	return e.Platform.Status.Build.Registry.Address + "/" + organization + "/camel-k-" + imageName
 }
 
@@ -484,6 +494,7 @@ func (t *builderTrait) getBaseImage(e *Environment) string {
 	if baseImage == "" {
 		baseImage = e.Platform.Status.Build.BaseImage
 	}
+
 	return baseImage
 }
 
@@ -544,6 +555,7 @@ func (t *builderTrait) customTasks(tasksConf map[string]*v1.BuildConfiguration, 
 			customTasks[i].Custom.ContainerUserID = &uid
 		}
 	}
+
 	return customTasks, nil
 }
 
@@ -664,6 +676,7 @@ func filter(tasks []v1.Task, filterTasks []string) ([]v1.Task, error) {
 	if len(filteredTasks) == 0 || !publishingOrUserTask(filteredTasks[len(filteredTasks)-1]) {
 		return nil, fmt.Errorf("last pipeline task is not a publishing or a user task")
 	}
+
 	return filteredTasks, nil
 }
 

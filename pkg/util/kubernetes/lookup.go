@@ -51,6 +51,7 @@ func LookupConfigmap(ctx context.Context, c client.Client, ns string, name strin
 	} else if err != nil {
 		return nil
 	}
+
 	return &cm
 }
 
@@ -60,6 +61,7 @@ func LookupResourceVersion(ctx context.Context, c client.Client, object ctrl.Obj
 	if err := c.Get(ctx, ctrl.ObjectKeyFromObject(object), object); err != nil {
 		return ""
 	}
+
 	return object.GetResourceVersion()
 }
 
@@ -85,6 +87,7 @@ func LookupSecret(ctx context.Context, c client.Client, ns string, name string) 
 	} else if err != nil {
 		return nil
 	}
+
 	return &secret
 }
 
@@ -109,6 +112,7 @@ func LookupPersistentVolumeClaim(ctx context.Context, c client.Client, ns string
 	} else if err != nil {
 		return nil, err
 	}
+
 	return &pvc, nil
 }
 
@@ -133,6 +137,7 @@ func LookupStorageClass(ctx context.Context, c client.Client, ns string, name st
 	} else if err != nil {
 		return nil, err
 	}
+
 	return &sc, nil
 }
 
@@ -143,6 +148,7 @@ func LookupDefaultStorageClass(ctx context.Context, c client.Client) (*storagev1
 		if k8serrors.IsNotFound(err) {
 			return nil, nil
 		}
+
 		return nil, err
 	}
 	for _, sc := range storageClasses.Items {
@@ -150,6 +156,7 @@ func LookupDefaultStorageClass(ctx context.Context, c client.Client) (*storagev1
 			return &sc, nil
 		}
 	}
+
 	return nil, nil
 }
 
@@ -174,6 +181,7 @@ func LookupServiceAccount(ctx context.Context, c client.Client, ns string, name 
 	} else if err != nil {
 		return nil, err
 	}
+
 	return &sa, nil
 }
 
@@ -198,6 +206,7 @@ func LookupRole(ctx context.Context, c client.Client, ns string, name string) (*
 	} else if err != nil {
 		return nil, err
 	}
+
 	return &r, nil
 }
 
@@ -222,6 +231,7 @@ func LookupRoleBinding(ctx context.Context, c client.Client, ns string, name str
 	} else if err != nil {
 		return nil, err
 	}
+
 	return &rb, nil
 }
 
@@ -246,5 +256,6 @@ func LookupService(ctx context.Context, c client.Client, ns string, name string)
 	} else if err != nil {
 		return nil, err
 	}
+
 	return &svc, nil
 }

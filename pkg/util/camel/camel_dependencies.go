@@ -45,6 +45,7 @@ func NormalizeDependency(dependency string) string {
 	case strings.HasPrefix(newDep, "camel-"):
 		newDep = "camel:" + strings.TrimPrefix(dependency, "camel-")
 	}
+
 	return newDep
 }
 
@@ -209,6 +210,7 @@ func addJitPack(project *maven.Project, dependency string) error {
 	for _, repo := range project.Repositories {
 		if repo.URL == jitpack.RepoURL {
 			addRepo = false
+
 			break
 		}
 	}

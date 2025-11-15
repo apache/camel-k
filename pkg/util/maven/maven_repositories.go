@@ -33,6 +33,7 @@ func (o defaultRepositories) apply(settings *Settings) error {
 		settings.Profiles[0].Repositories = upsertRepository(repository, settings.Profiles[0].Repositories)
 		settings.Profiles[0].PluginRepositories = upsertRepository(repository, settings.Profiles[0].PluginRepositories)
 	}
+
 	return nil
 }
 
@@ -42,6 +43,7 @@ func defaultMavenRepositories() []v1.Repository {
 	for _, repository := range repos {
 		repositories = append(repositories, NewRepository(repository))
 	}
+
 	return repositories
 }
 
@@ -72,6 +74,7 @@ func (o extraRepositories) apply(settings *Settings) error {
 			settings.Profiles[0].PluginRepositories = upsertRepository(repository, settings.Profiles[0].PluginRepositories)
 		}
 	}
+
 	return nil
 }
 
@@ -82,6 +85,7 @@ func upsertRepository(repository v1.Repository, repositories *[]v1.Repository) *
 	for i, r := range *repositories {
 		if r.ID == repository.ID {
 			(*repositories)[i] = repository
+
 			return repositories
 		}
 	}
@@ -97,6 +101,7 @@ func upsertMirror(mirror Mirror, mirrors *[]Mirror) *[]Mirror {
 	for i, r := range *mirrors {
 		if r.ID == mirror.ID {
 			(*mirrors)[i] = mirror
+
 			return mirrors
 		}
 	}

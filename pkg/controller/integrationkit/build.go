@@ -92,6 +92,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 
 	if build.Status.Phase == v1.BuildPhaseRunning {
 		kit.Status.Phase = v1.IntegrationKitPhaseBuildRunning
+
 		return kit, nil
 	}
 

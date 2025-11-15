@@ -61,8 +61,10 @@ func (loc *JaegerTelemetryLocator) FindEndpoint(ctx context.Context, c client.Cl
 		for _, endpoint := range candidates {
 			l.Infof("Detected Jaeger endpoint at: %s", endpoint)
 		}
+
 		return candidates[0], nil
 	}
+
 	return "", nil
 }
 
