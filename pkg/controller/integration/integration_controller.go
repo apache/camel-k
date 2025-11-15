@@ -412,7 +412,7 @@ func watchKnativeResources(ctx context.Context, c client.Client, b *builder.Buil
 	// Check for permission to watch the Knative Service resource
 	checkCtx, cancel := context.WithTimeout(ctx, time.Minute)
 	defer cancel()
-	if ok, err = kubernetes.CheckPermission(checkCtx, c, serving.GroupName, "services", platform.GetOperatorWatchNamespace(), "", "watch"); err != nil {
+	if ok, err = kubernetes.CheckSelfPermission(checkCtx, c, serving.GroupName, "services", platform.GetOperatorWatchNamespace(), "", "watch"); err != nil {
 		return err
 	} else if ok {
 		log.Info("KnativeService resources installed in the cluster. RBAC privileges assigned correctly, you can use Knative features.")
