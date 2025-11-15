@@ -122,9 +122,6 @@ func TestValidateEndpoint(t *testing.T) {
 
 	for i, tc := range testcases {
 		t.Run(fmt.Sprintf("test-%d-%s", i, tc.name), func(t *testing.T) {
-			if tc.operatorNamespace != "" {
-				t.Setenv("NAMESPACE", tc.operatorNamespace)
-			}
 
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
@@ -137,6 +134,11 @@ func TestValidateEndpoint(t *testing.T) {
 				Client:    client,
 				Namespace: tc.namespace,
 				Profile:   v1.DefaultTraitProfile,
+			}
+			if tc.operatorNamespace != "" {
+				// special privileges required for cross namespace
+				bindingContext.ServiceAccountName = "cross-ns-sa"
+				bindingContext.Namespace = "default"
 			}
 
 			err = validateEndpoint(bindingContext, tc.endpoint)
@@ -167,6 +169,33 @@ func TestValidateEndpointErrorRefURI(t *testing.T) {
 }
 
 func TestValidateEndpointKameletCrossNS(t *testing.T) {
+	client, err := internal.NewFakeClient()
+	require.NoError(t, err)
+
+	endpoint := v1.Endpoint{
+		Ref: &corev1.ObjectReference{
+			Kind:       v1.KameletKind,
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Name:       "foo-kamelet",
+			Namespace:  "kamelet-ns",
+		},
+	}
+
+	bindingContext := BindingContext{
+		Namespace:          "default",
+		Client:             client,
+		Ctx:                context.Background(),
+		ServiceAccountName: "cross-ns-sa",
+	}
+
+	err = validateEndpoint(bindingContext, endpoint)
+	require.NoError(t, err)
+}
+
+func TestValidateEndpointKameletCrossNSNoSA(t *testing.T) {
+	client, err := internal.NewFakeClient()
+	require.NoError(t, err)
+
 	endpoint := v1.Endpoint{
 		Ref: &corev1.ObjectReference{
 			Kind:       v1.KameletKind,
@@ -178,10 +207,40 @@ func TestValidateEndpointKameletCrossNS(t *testing.T) {
 
 	bindingContext := BindingContext{
 		Namespace: "default",
+		Client:    client,
+		Ctx:       context.Background(),
 	}
 
-	err := validateEndpoint(bindingContext, endpoint)
+	err = validateEndpoint(bindingContext, endpoint)
+	require.Error(t, err)
+	require.Equal(t, "you must to use an authorized ServiceAccount to access cross-namespace resources kamelets. "+
+		"Set it in the Pipe spec accordingly", err.Error())
+}
+
+func TestValidateEndpointKameletCrossNSDenied(t *testing.T) {
+	client, err := internal.NewFakeClient()
 	require.NoError(t, err)
+
+	endpoint := v1.Endpoint{
+		Ref: &corev1.ObjectReference{
+			Kind:       v1.KameletKind,
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Name:       "foo-kamelet",
+			Namespace:  "kamelet-ns",
+		},
+	}
+
+	bindingContext := BindingContext{
+		Namespace:          "default",
+		Client:             client,
+		Ctx:                context.Background(),
+		ServiceAccountName: "my-sa",
+	}
+
+	err = validateEndpoint(bindingContext, endpoint)
+	require.Error(t, err)
+	require.Equal(t, "cross-namespace Pipe reference authorization denied for the ServiceAccount my-sa"+
+		" and resources kamelets", err.Error())
 }
 
 func TestValidateEndpointErrorKnativeCrossNS(t *testing.T) {

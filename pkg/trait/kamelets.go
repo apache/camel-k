@@ -39,6 +39,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/digest"
 	"github.com/apache/camel-k/v2/pkg/util/dsl"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
 const (
@@ -101,7 +102,7 @@ func (t *kameletsTrait) Apply(e *Environment) error {
 
 // collectKamelets load a Kamelet specification setting the specific version specification.
 func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet, error) {
-	namespaces, err := t.calculateNamespaces(e.Integration.Namespace, platform.GetOperatorNamespace())
+	namespaces, err := t.calculateNamespaces(e, e.Integration.Namespace, platform.GetOperatorNamespace())
 	if err != nil {
 		return nil, err
 	}
@@ -167,7 +168,8 @@ func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet,
 	kameletsAvailabilityMessage := ""
 	cond := corev1.ConditionTrue
 	if len(missingKamelets) > 0 {
-		kameletsAvailabilityMessage = fmt.Sprintf("Kamelets [%s] not found in cluster. Make sure to include the Kamelets dependency in the Integration.",
+		kameletsAvailabilityMessage = fmt.Sprintf("Kamelets [%s] not found in cluster. "+
+			"Make sure to include the Kamelets dependency in the Integration.",
 			strings.Join(missingKamelets, ","))
 		cond = corev1.ConditionUnknown
 	}
@@ -189,12 +191,44 @@ func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet,
 
 // calculateNamespaces is in charge to scan the kamelets specification and provide a list of
 // namespaces where to look for Kamelets.
-func (t *kameletsTrait) calculateNamespaces(defaultNamespaces ...string) ([]string, error) {
-	return calculateNamespaces(strings.Split(t.List, ","), defaultNamespaces...)
+func (t *kameletsTrait) calculateNamespaces(e *Environment, defaultNamespaces ...string) ([]string, error) {
+	namespaces, err := calculateNamespaces(strings.Split(t.List, ","))
+	if err != nil {
+		return namespaces, err
+	}
+	if len(namespaces) > 0 {
+		if e.Integration.Spec.ServiceAccountName == "" {
+			return nil, fmt.Errorf("you must to use an authorized ServiceAccount to access cross-namespace resources kamelets. " +
+				"Set it in the Integration spec accordingly")
+		}
+		// verify an SA exists and it is authorized for Kamelets in that namespace
+		for _, ns := range namespaces {
+			ok, err := kubernetes.CheckServiceAccountPermission(
+				e.Ctx,
+				e.Client,
+				fmt.Sprintf("system:serviceaccount:%s:%s", e.Integration.Namespace, e.Integration.Spec.ServiceAccountName),
+				v1.SchemeGroupVersion.Group,
+				"kamelets",
+				ns,
+				"get",
+			)
+			if err != nil {
+				return nil, err
+			}
+			if !ok {
+				return nil, fmt.Errorf("cross-namespace Integration reference authorization denied for the ServiceAccount %s and resources kamelets",
+					e.Integration.Spec.ServiceAccountName)
+			}
+		}
+	}
+
+	// Also append the default namespaces
+	namespaces = append(namespaces, defaultNamespaces...)
+	return namespaces, nil
 }
 
-func calculateNamespaces(kamelets []string, defaultNamespaces ...string) ([]string, error) {
-	namespaces := defaultNamespaces
+func calculateNamespaces(kamelets []string) ([]string, error) {
+	var namespaces []string
 	for _, kml := range kamelets {
 		ns, err := getKameletNamespace(kml)
 		if err != nil {

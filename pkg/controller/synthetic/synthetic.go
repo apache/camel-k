@@ -141,7 +141,7 @@ func getInformers(ctx context.Context, cl client.Client, c cache.Cache) ([]cache
 	}
 	// Watch for the Knative Services conditionally
 	if ok, err := kubernetes.IsAPIResourceInstalled(cl, servingv1.SchemeGroupVersion.String(), reflect.TypeOf(servingv1.Service{}).Name()); ok && err == nil {
-		if ok, err := kubernetes.CheckPermission(ctx, cl, serving.GroupName, "services", platform.GetOperatorWatchNamespace(), "", "watch"); ok && err == nil {
+		if ok, err := kubernetes.CheckSelfPermission(ctx, cl, serving.GroupName, "services", platform.GetOperatorWatchNamespace(), "", "watch"); ok && err == nil {
 			ksvc, err := c.GetInformer(ctx, &servingv1.Service{})
 			if err != nil {
 				return nil, err

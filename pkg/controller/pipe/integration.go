@@ -110,11 +110,12 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, pipe *v1.Pipe) (
 	}
 
 	bindingContext := bindings.BindingContext{
-		Ctx:       ctx,
-		Client:    c,
-		Namespace: it.Namespace,
-		Profile:   profile,
-		Metadata:  it.Annotations,
+		Ctx:                ctx,
+		Client:             c,
+		Namespace:          it.Namespace,
+		Profile:            profile,
+		Metadata:           it.Annotations,
+		ServiceAccountName: it.Spec.ServiceAccountName,
 	}
 
 	from, err := bindings.Translate(bindingContext, endpointTypeSourceContext, pipe.Spec.Source)
