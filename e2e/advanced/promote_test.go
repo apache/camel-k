@@ -59,7 +59,7 @@ func TestKamelCLIPromote(t *testing.T) {
 			kubectl create configmap my-cm-promote --from-literal=my-configmap-key="I am development configmap"
 			kubectl create secret generic my-sec-promote --from-literal=my-secret-key="very top secret development"
 
-			kamel run --dev e2e/advanced/files/promote-route.yaml --config configmap:my-cm-promote --config secret:my-sec-promote
+			kamel run e2e/advanced/files/promote-route.yaml --config configmap:my-cm-promote --config secret:my-sec-promote
 		*/
 
 		t.Run("plain integration dev", func(t *testing.T) {

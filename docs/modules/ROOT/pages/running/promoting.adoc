@@ -28,7 +28,7 @@ public class PromoteServer extends RouteBuilder {
 ```
 Let's run it:
 ```
-kamel run --dev -n development PromoteServer.java --config configmap:my-cm [-t service.node-port=true]
+kamel run -n development PromoteServer.java --config configmap:my-cm [-t service.node-port=true]
 ```
 Note that you may need to tweak the service trait, depending on the Kubernetes platform and the level of exposure you want to provide. As soon as it is finished, we can test it as well:
 ```

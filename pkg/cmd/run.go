@@ -93,8 +93,8 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 		"key optionally represents the configmap/secret key to be filtered and path represents the destination path)")
 	cmd.Flags().StringArray("maven-repository", nil, "Add a maven repository")
 	cmd.Flags().Bool("logs", false, "Print integration logs")
-	cmd.Flags().Bool("sync", false, "Synchronize the local source file with the cluster, republishing at each change")
-	cmd.Flags().Bool("dev", false, "Enable Dev mode (equivalent to \"-w --logs --sync\")")
+	cmd.Flags().Bool("sync", false, "[Deprecated] Synchronize the local source file with the cluster, republishing at each change")
+	cmd.Flags().Bool("dev", false, "[Deprecated] Enable Dev mode (equivalent to \"-w --logs --sync\")")
 	cmd.Flags().Bool("use-flows", true, "Write yaml sources as Flow objects in the integration custom resource")
 	cmd.Flags().StringP("operator-id", "x", "camel-k", "Operator id selected to manage this integration.")
 	cmd.Flags().String("profile", "", "Trait profile used for deployment")
@@ -128,10 +128,12 @@ type runCmdOptions struct {
 	Compression bool `mapstructure:"compression" yaml:",omitempty"`
 	Wait        bool `mapstructure:"wait" yaml:",omitempty"`
 	Logs        bool `mapstructure:"logs" yaml:",omitempty"`
-	Sync        bool `mapstructure:"sync" yaml:",omitempty"`
-	Dev         bool `mapstructure:"dev" yaml:",omitempty"`
-	UseFlows    bool `mapstructure:"use-flows" yaml:",omitempty"`
-	Save        bool `mapstructure:"save" yaml:",omitempty" kamel:"omitsave"`
+	// Deprecated: won't be supported in the future
+	Sync bool `mapstructure:"sync" yaml:",omitempty"`
+	// Deprecated: won't be supported in the future
+	Dev      bool `mapstructure:"dev" yaml:",omitempty"`
+	UseFlows bool `mapstructure:"use-flows" yaml:",omitempty"`
+	Save     bool `mapstructure:"save" yaml:",omitempty" kamel:"omitsave"`
 	// Deprecated: won't be supported in the future
 	IntegrationKit     string `mapstructure:"kit" yaml:",omitempty"`
 	IntegrationName    string `mapstructure:"name" yaml:",omitempty"`
@@ -298,6 +300,11 @@ func (o *runCmdOptions) validate(cmd *cobra.Command) error {
 	// Deprecated: to be removed
 	if o.Compression {
 		fmt.Fprintf(cmd.OutOrStdout(), "Compression property is deprecated. It will be removed from future releases.\n")
+	}
+
+	// Deprecated: to be removed
+	if o.Sync || o.Dev {
+		fmt.Fprintf(cmd.OutOrStdout(), "Dev and Sync properties are deprecated. They will be removed from future releases.\n")
 	}
 
 	var client client.Client

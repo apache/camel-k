@@ -194,7 +194,7 @@ func TestRunConfigSecrets(t *testing.T) {
 		})
 
 		/*
-			kamel run --dev --config secret:my-sec-multi/my-secret-key-2 ./e2e/common/config/files/config-secret-key-route.yaml
+			kamel run --config secret:my-sec-multi/my-secret-key-2 ./e2e/common/config/files/config-secret-key-route.yaml
 		*/
 
 		t.Run("Secret with filtered key", func(t *testing.T) {
