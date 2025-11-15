@@ -126,44 +126,44 @@ type runCmdOptions struct {
 
 	// Deprecated: won't be supported in the future
 	Compression bool `mapstructure:"compression" yaml:",omitempty"`
-	Wait        bool `mapstructure:"wait" yaml:",omitempty"`
-	Logs        bool `mapstructure:"logs" yaml:",omitempty"`
+	Wait        bool `mapstructure:"wait"        yaml:",omitempty"`
+	Logs        bool `mapstructure:"logs"        yaml:",omitempty"`
 	// Deprecated: won't be supported in the future
 	Sync bool `mapstructure:"sync" yaml:",omitempty"`
 	// Deprecated: won't be supported in the future
-	Dev      bool `mapstructure:"dev" yaml:",omitempty"`
+	Dev      bool `mapstructure:"dev"       yaml:",omitempty"`
 	UseFlows bool `mapstructure:"use-flows" yaml:",omitempty"`
-	Save     bool `mapstructure:"save" yaml:",omitempty" kamel:"omitsave"`
+	Save     bool `kamel:"omitsave"         mapstructure:"save" yaml:",omitempty"`
 	// Deprecated: won't be supported in the future
-	IntegrationKit     string `mapstructure:"kit" yaml:",omitempty"`
-	IntegrationName    string `mapstructure:"name" yaml:",omitempty"`
-	ContainerImage     string `mapstructure:"image" yaml:",omitempty"`
-	GitRepo            string `mapstructure:"git" yaml:",omitempty"`
-	GitBranch          string `mapstructure:"git-branch" yaml:",omitempty"`
-	GitTag             string `mapstructure:"git-tag" yaml:",omitempty"`
-	GitCommit          string `mapstructure:"git-commit" yaml:",omitempty"`
-	Profile            string `mapstructure:"profile" yaml:",omitempty"`
+	IntegrationKit     string `mapstructure:"kit"                 yaml:",omitempty"`
+	IntegrationName    string `mapstructure:"name"                yaml:",omitempty"`
+	ContainerImage     string `mapstructure:"image"               yaml:",omitempty"`
+	GitRepo            string `mapstructure:"git"                 yaml:",omitempty"`
+	GitBranch          string `mapstructure:"git-branch"          yaml:",omitempty"`
+	GitTag             string `mapstructure:"git-tag"             yaml:",omitempty"`
+	GitCommit          string `mapstructure:"git-commit"          yaml:",omitempty"`
+	Profile            string `mapstructure:"profile"             yaml:",omitempty"`
 	IntegrationProfile string `mapstructure:"integration-profile" yaml:",omitempty"`
-	OperatorID         string `mapstructure:"operator-id" yaml:",omitempty"`
-	OutputFormat       string `mapstructure:"output" yaml:",omitempty"`
+	OperatorID         string `mapstructure:"operator-id"         yaml:",omitempty"`
+	OutputFormat       string `mapstructure:"output"              yaml:",omitempty"`
 	// Deprecated: won't be supported in the future
-	PodTemplate    string   `mapstructure:"pod-template" yaml:",omitempty"`
+	PodTemplate    string   `mapstructure:"pod-template"    yaml:",omitempty"`
 	ServiceAccount string   `mapstructure:"service-account" yaml:",omitempty"`
-	Resources      []string `mapstructure:"resources" yaml:",omitempty"`
-	Dependencies   []string `mapstructure:"dependencies" yaml:",omitempty"`
+	Resources      []string `mapstructure:"resources"       yaml:",omitempty"`
+	Dependencies   []string `mapstructure:"dependencies"    yaml:",omitempty"`
 	// Deprecated: won't be supported in the future
 	Properties []string `mapstructure:"properties" yaml:",omitempty"`
 	// Deprecated: won't be supported in the future
-	BuildProperties []string `mapstructure:"build-properties" yaml:",omitempty"`
-	Configs         []string `mapstructure:"configs" yaml:",omitempty"`
+	BuildProperties []string `mapstructure:"build-properties"   yaml:",omitempty"`
+	Configs         []string `mapstructure:"configs"            yaml:",omitempty"`
 	Repositories    []string `mapstructure:"maven-repositories" yaml:",omitempty"`
-	Traits          []string `mapstructure:"traits" yaml:",omitempty"`
-	Volumes         []string `mapstructure:"volumes" yaml:",omitempty"`
+	Traits          []string `mapstructure:"traits"             yaml:",omitempty"`
+	Volumes         []string `mapstructure:"volumes"            yaml:",omitempty"`
 	// Deprecated: won't be supported in the future
-	EnvVars           []string `mapstructure:"envs" yaml:",omitempty"`
-	Labels            []string `mapstructure:"labels" yaml:",omitempty"`
-	Annotations       []string `mapstructure:"annotations" yaml:",omitempty"`
-	Sources           []string `mapstructure:"sources" yaml:",omitempty"`
+	EnvVars           []string `mapstructure:"envs"                 yaml:",omitempty"`
+	Labels            []string `mapstructure:"labels"               yaml:",omitempty"`
+	Annotations       []string `mapstructure:"annotations"          yaml:",omitempty"`
+	Sources           []string `mapstructure:"sources"              yaml:",omitempty"`
 	DontRunAfterBuild bool     `mapstructure:"dont-run-after-build" yaml:",omitempty"`
 }
 

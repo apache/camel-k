@@ -26,26 +26,26 @@ package trait
 //
 // +camel-k:trait=service.
 type ServiceTrait struct {
-	Trait `property:",squash" json:",inline"`
+	Trait `json:",inline" property:",squash"`
 
 	// To automatically detect from the code if a Service needs to be created.
-	Auto *bool `property:"auto" json:"auto,omitempty"`
+	Auto *bool `json:"auto,omitempty" property:"auto"`
 	// Enable Service to be exposed as NodePort (default `false`).
 	// Deprecated: Use service type instead.
-	NodePort *bool `property:"node-port" json:"nodePort,omitempty"`
+	NodePort *bool `json:"nodePort,omitempty" property:"node-port"`
 	// The type of service to be used, either 'ClusterIP', 'NodePort' or 'LoadBalancer'.
 	// +kubebuilder:validation:Enum=ClusterIP;NodePort;LoadBalancer
-	Type *ServiceType `property:"type" json:"type,omitempty"`
+	Type *ServiceType `json:"type,omitempty" property:"type"`
 	// The annotations added to the Service object.
-	Annotations map[string]string `property:"annotations" json:"annotations,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty" property:"annotations"`
 	// The labels added to the Service object.
-	Labels map[string]string `property:"labels" json:"labels,omitempty"`
+	Labels map[string]string `json:"labels,omitempty" property:"labels"`
 	// List of container ports available in the container to expose
 	// (syntax: <port-name>;<port-number>;<container-port-number>[;<port-protocol]).
 	// When omitted, `port-protocol` (admitted values `TCP`, `UDP` or `SCTP`) is `TCP`.
 	// Don't use this for the primary http managed port (which is managed by container trait).
 	// Don't use in Knative based environments.
-	Ports []string `property:"ports" json:"ports,omitempty"`
+	Ports []string `json:"ports,omitempty" property:"ports"`
 }
 
 type ServiceType string

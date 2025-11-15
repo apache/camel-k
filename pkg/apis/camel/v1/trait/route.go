@@ -32,44 +32,44 @@ package trait
 // +camel-k:trait=route.
 // +camel-k:deprecated=2.6.0.
 type RouteTrait struct {
-	Trait `property:",squash" json:",inline"`
+	Trait `json:",inline" property:",squash"`
 
 	// The annotations added to route.
 	// This can be used to set route specific annotations
 	// For annotations options see https://docs.openshift.com/container-platform/3.11/architecture/networking/routes.html#route-specific-annotations
 	// CLI usage example: -t "route.annotations.'haproxy.router.openshift.io/balance'=true"
-	Annotations map[string]string `property:"annotations" json:"annotations,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty" property:"annotations"`
 	// To configure the host exposed by the route.
-	Host string `property:"host" json:"host,omitempty"`
+	Host string `json:"host,omitempty" property:"host"`
 	// The TLS termination type, like `edge`, `passthrough` or `reencrypt`.
 	//
 	// Refer to the OpenShift route documentation for additional information.
 	// +kubebuilder:validation:Enum=edge;reencrypt;passthrough
-	TLSTermination string `property:"tls-termination" json:"tlsTermination,omitempty"`
+	TLSTermination string `json:"tlsTermination,omitempty" property:"tls-termination"`
 	// The TLS certificate contents.
 	//
 	// Refer to the OpenShift route documentation for additional information.
-	TLSCertificate string `property:"tls-certificate" json:"tlsCertificate,omitempty"`
+	TLSCertificate string `json:"tlsCertificate,omitempty" property:"tls-certificate"`
 	// The secret name and key reference to the TLS certificate. The format is "secret-name[/key-name]", the value represents the secret name, if there is only one key in the secret it will be read, otherwise you can set a key name separated with a "/".
 	//
 	// Refer to the OpenShift route documentation for additional information.
-	TLSCertificateSecret string `property:"tls-certificate-secret" json:"tlsCertificateSecret,omitempty"`
+	TLSCertificateSecret string `json:"tlsCertificateSecret,omitempty" property:"tls-certificate-secret"`
 	// The TLS certificate key contents.
 	//
 	// Refer to the OpenShift route documentation for additional information.
-	TLSKey string `property:"tls-key" json:"tlsKey,omitempty"`
+	TLSKey string `json:"tlsKey,omitempty" property:"tls-key"`
 	// The secret name and key reference to the TLS certificate key. The format is "secret-name[/key-name]", the value represents the secret name, if there is only one key in the secret it will be read, otherwise you can set a key name separated with a "/".
 	//
 	// Refer to the OpenShift route documentation for additional information.
-	TLSKeySecret string `property:"tls-key-secret" json:"tlsKeySecret,omitempty"`
+	TLSKeySecret string `json:"tlsKeySecret,omitempty" property:"tls-key-secret"`
 	// The TLS CA certificate contents.
 	//
 	// Refer to the OpenShift route documentation for additional information.
-	TLSCACertificate string `property:"tls-ca-certificate" json:"tlsCACertificate,omitempty"`
+	TLSCACertificate string `json:"tlsCACertificate,omitempty" property:"tls-ca-certificate"`
 	// The secret name and key reference to the TLS CA certificate. The format is "secret-name[/key-name]", the value represents the secret name, if there is only one key in the secret it will be read, otherwise you can set a key name separated with a "/".
 	//
 	// Refer to the OpenShift route documentation for additional information.
-	TLSCACertificateSecret string `property:"tls-ca-certificate-secret" json:"tlsCACertificateSecret,omitempty"`
+	TLSCACertificateSecret string `json:"tlsCACertificateSecret,omitempty" property:"tls-ca-certificate-secret"`
 	// The destination CA certificate provides the contents of the ca certificate of the final destination.  When using reencrypt
 	// termination this file should be provided in order to have routers use it for health checks on the secure connection.
 	// If this field is not specified, the router may provide its own destination CA and perform hostname validation using
@@ -77,14 +77,14 @@ type RouteTrait struct {
 	// verify.
 	//
 	// Refer to the OpenShift route documentation for additional information.
-	TLSDestinationCACertificate string `property:"tls-destination-ca-certificate" json:"tlsDestinationCACertificate,omitempty"`
+	TLSDestinationCACertificate string `json:"tlsDestinationCACertificate,omitempty" property:"tls-destination-ca-certificate"`
 	// The secret name and key reference to the destination CA certificate. The format is "secret-name[/key-name]", the value represents the secret name, if there is only one key in the secret it will be read, otherwise you can set a key name separated with a "/".
 	//
 	// Refer to the OpenShift route documentation for additional information.
-	TLSDestinationCACertificateSecret string `property:"tls-destination-ca-certificate-secret" json:"tlsDestinationCACertificateSecret,omitempty"`
+	TLSDestinationCACertificateSecret string `json:"tlsDestinationCACertificateSecret,omitempty" property:"tls-destination-ca-certificate-secret"`
 	// To configure how to deal with insecure traffic, e.g. `Allow`, `Disable` or `Redirect` traffic.
 	//
 	// Refer to the OpenShift route documentation for additional information.
 	// +kubebuilder:validation:Enum=None;Allow;Redirect
-	TLSInsecureEdgeTerminationPolicy string `property:"tls-insecure-edge-termination-policy" json:"tlsInsecureEdgeTerminationPolicy,omitempty"`
+	TLSInsecureEdgeTerminationPolicy string `json:"tlsInsecureEdgeTerminationPolicy,omitempty" property:"tls-insecure-edge-termination-policy"`
 }

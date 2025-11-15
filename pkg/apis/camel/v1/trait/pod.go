@@ -30,5 +30,5 @@ package trait
 // +camel-k:trait=pod.
 // +camel-k:deprecated=2.8.0.
 type PodTrait struct {
-	Trait `property:",squash" json:",inline"`
+	Trait `json:",inline" property:",squash"`
 }

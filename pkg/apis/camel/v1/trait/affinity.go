@@ -24,18 +24,18 @@ package trait
 //
 // +camel-k:trait=affinity.
 type AffinityTrait struct {
-	Trait `property:",squash" json:",inline"`
+	Trait `json:",inline" property:",squash"`
 
 	// Always co-locates multiple replicas of the integration in the same node (default `false`).
-	PodAffinity *bool `property:"pod-affinity" json:"podAffinity,omitempty"`
+	PodAffinity *bool `json:"podAffinity,omitempty" property:"pod-affinity"`
 	// Never co-locates multiple replicas of the integration in the same node (default `false`).
-	PodAntiAffinity *bool `property:"pod-anti-affinity" json:"podAntiAffinity,omitempty"`
+	PodAntiAffinity *bool `json:"podAntiAffinity,omitempty" property:"pod-anti-affinity"`
 	// Defines a set of nodes the integration pod(s) are eligible to be scheduled on, based on labels on the node.
-	NodeAffinityLabels []string `property:"node-affinity-labels" json:"nodeAffinityLabels,omitempty"`
+	NodeAffinityLabels []string `json:"nodeAffinityLabels,omitempty" property:"node-affinity-labels"`
 	// Defines a set of pods (namely those matching the label selector, relative to the given namespace) that the
 	// integration pod(s) should be co-located with.
-	PodAffinityLabels []string `property:"pod-affinity-labels" json:"podAffinityLabels,omitempty"`
+	PodAffinityLabels []string `json:"podAffinityLabels,omitempty" property:"pod-affinity-labels"`
 	// Defines a set of pods (namely those matching the label selector, relative to the given namespace) that the
 	// integration pod(s) should not be co-located with.
-	PodAntiAffinityLabels []string `property:"pod-anti-affinity-labels" json:"podAntiAffinityLabels,omitempty"`
+	PodAntiAffinityLabels []string `json:"podAntiAffinityLabels,omitempty" property:"pod-anti-affinity-labels"`
 }

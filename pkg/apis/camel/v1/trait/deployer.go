@@ -22,13 +22,13 @@ package trait
 //
 // +camel-k:trait=deployer.
 type DeployerTrait struct {
-	PlatformBaseTrait `property:",squash" json:",inline"`
+	PlatformBaseTrait `json:",inline" property:",squash"`
 
 	// Deprecated: this feature will be removed in future releases.
 	// Allows to explicitly select the desired deployment kind between `deployment`, `cron-job` or `knative-service`
 	// when creating the resources for running the integration.
 	// +kubebuilder:validation:Enum=deployment;cron-job;knative-service
-	Kind string `property:"kind" json:"kind,omitempty"`
+	Kind string `json:"kind,omitempty" property:"kind"`
 	// Deprecated: no longer in use.
-	UseSSA *bool `property:"use-ssa" json:"useSSA,omitempty"`
+	UseSSA *bool `json:"useSSA,omitempty" property:"use-ssa"`
 }

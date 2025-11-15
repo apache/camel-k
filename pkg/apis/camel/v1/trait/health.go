@@ -23,62 +23,62 @@ package trait
 //
 // +camel-k:trait=health.
 type HealthTrait struct {
-	Trait `property:",squash" json:",inline"`
+	Trait `json:",inline" property:",squash"`
 
 	// Configures the liveness probe for the integration container (default `false`).
-	LivenessProbeEnabled *bool `property:"liveness-probe-enabled" json:"livenessProbeEnabled,omitempty"`
+	LivenessProbeEnabled *bool `json:"livenessProbeEnabled,omitempty" property:"liveness-probe-enabled"`
 	// Scheme to use when connecting to the liveness probe (default `HTTP`).
-	LivenessScheme string `property:"liveness-scheme" json:"livenessScheme,omitempty"`
+	LivenessScheme string `json:"livenessScheme,omitempty" property:"liveness-scheme"`
 	// Number of seconds after the container has started before the liveness probe is initiated.
-	LivenessInitialDelay int32 `property:"liveness-initial-delay" json:"livenessInitialDelay,omitempty"`
+	LivenessInitialDelay int32 `json:"livenessInitialDelay,omitempty" property:"liveness-initial-delay"`
 	// Number of seconds after which the liveness probe times out.
-	LivenessTimeout int32 `property:"liveness-timeout" json:"livenessTimeout,omitempty"`
+	LivenessTimeout int32 `json:"livenessTimeout,omitempty" property:"liveness-timeout"`
 	// How often to perform the liveness probe.
-	LivenessPeriod int32 `property:"liveness-period" json:"livenessPeriod,omitempty"`
+	LivenessPeriod int32 `json:"livenessPeriod,omitempty" property:"liveness-period"`
 	// Minimum consecutive successes for the liveness probe to be considered successful after having failed.
-	LivenessSuccessThreshold int32 `property:"liveness-success-threshold" json:"livenessSuccessThreshold,omitempty"`
+	LivenessSuccessThreshold int32 `json:"livenessSuccessThreshold,omitempty" property:"liveness-success-threshold"`
 	// Minimum consecutive failures for the liveness probe to be considered failed after having succeeded.
-	LivenessFailureThreshold int32 `property:"liveness-failure-threshold" json:"livenessFailureThreshold,omitempty"`
+	LivenessFailureThreshold int32 `json:"livenessFailureThreshold,omitempty" property:"liveness-failure-threshold"`
 	// The liveness probe path to use (default provided by the Catalog runtime used).
-	LivenessProbe string `property:"liveness-probe" json:"livenessProbe,omitempty"`
+	LivenessProbe string `json:"livenessProbe,omitempty" property:"liveness-probe"`
 	// The liveness port to use (default 8080).
-	LivenessPort int32 `property:"liveness-port" json:"livenessPort,omitempty"`
+	LivenessPort int32 `json:"livenessPort,omitempty" property:"liveness-port"`
 
 	// Configures the readiness probe for the integration container (default `true`).
-	ReadinessProbeEnabled *bool `property:"readiness-probe-enabled" json:"readinessProbeEnabled,omitempty"`
+	ReadinessProbeEnabled *bool `json:"readinessProbeEnabled,omitempty" property:"readiness-probe-enabled"`
 	// Scheme to use when connecting to the readiness probe (default `HTTP`).
-	ReadinessScheme string `property:"readiness-scheme" json:"readinessScheme,omitempty"`
+	ReadinessScheme string `json:"readinessScheme,omitempty" property:"readiness-scheme"`
 	// Number of seconds after the container has started before the readiness probe is initiated.
-	ReadinessInitialDelay int32 `property:"readiness-initial-delay" json:"readinessInitialDelay,omitempty"`
+	ReadinessInitialDelay int32 `json:"readinessInitialDelay,omitempty" property:"readiness-initial-delay"`
 	// Number of seconds after which the readiness probe times out.
-	ReadinessTimeout int32 `property:"readiness-timeout" json:"readinessTimeout,omitempty"`
+	ReadinessTimeout int32 `json:"readinessTimeout,omitempty" property:"readiness-timeout"`
 	// How often to perform the readiness probe.
-	ReadinessPeriod int32 `property:"readiness-period" json:"readinessPeriod,omitempty"`
+	ReadinessPeriod int32 `json:"readinessPeriod,omitempty" property:"readiness-period"`
 	// Minimum consecutive successes for the readiness probe to be considered successful after having failed.
-	ReadinessSuccessThreshold int32 `property:"readiness-success-threshold" json:"readinessSuccessThreshold,omitempty"`
+	ReadinessSuccessThreshold int32 `json:"readinessSuccessThreshold,omitempty" property:"readiness-success-threshold"`
 	// Minimum consecutive failures for the readiness probe to be considered failed after having succeeded.
-	ReadinessFailureThreshold int32 `property:"readiness-failure-threshold" json:"readinessFailureThreshold,omitempty"`
+	ReadinessFailureThreshold int32 `json:"readinessFailureThreshold,omitempty" property:"readiness-failure-threshold"`
 	// The readiness probe path to use (default provided by the Catalog runtime used).
-	ReadinessProbe string `property:"readiness-probe" json:"readinessProbe,omitempty"`
+	ReadinessProbe string `json:"readinessProbe,omitempty" property:"readiness-probe"`
 	// The readiness port to use (default 8080).
-	ReadinessPort int32 `property:"readiness-port" json:"readinessPort,omitempty"`
+	ReadinessPort int32 `json:"readinessPort,omitempty" property:"readiness-port"`
 
 	// Configures the startup probe for the integration container (default `false`).
-	StartupProbeEnabled *bool `property:"startup-probe-enabled" json:"startupProbeEnabled,omitempty"`
+	StartupProbeEnabled *bool `json:"startupProbeEnabled,omitempty" property:"startup-probe-enabled"`
 	// Scheme to use when connecting to the startup probe (default `HTTP`).
-	StartupScheme string `property:"startup-scheme" json:"startupScheme,omitempty"`
+	StartupScheme string `json:"startupScheme,omitempty" property:"startup-scheme"`
 	// Number of seconds after the container has started before the startup probe is initiated.
-	StartupInitialDelay int32 `property:"startup-initial-delay" json:"startupInitialDelay,omitempty"`
+	StartupInitialDelay int32 `json:"startupInitialDelay,omitempty" property:"startup-initial-delay"`
 	// Number of seconds after which the startup probe times out.
-	StartupTimeout int32 `property:"startup-timeout" json:"startupTimeout,omitempty"`
+	StartupTimeout int32 `json:"startupTimeout,omitempty" property:"startup-timeout"`
 	// How often to perform the startup probe.
-	StartupPeriod int32 `property:"startup-period" json:"startupPeriod,omitempty"`
+	StartupPeriod int32 `json:"startupPeriod,omitempty" property:"startup-period"`
 	// Minimum consecutive successes for the startup probe to be considered successful after having failed.
-	StartupSuccessThreshold int32 `property:"startup-success-threshold" json:"startupSuccessThreshold,omitempty"`
+	StartupSuccessThreshold int32 `json:"startupSuccessThreshold,omitempty" property:"startup-success-threshold"`
 	// Minimum consecutive failures for the startup probe to be considered failed after having succeeded.
-	StartupFailureThreshold int32 `property:"startup-failure-threshold" json:"startupFailureThreshold,omitempty"`
+	StartupFailureThreshold int32 `json:"startupFailureThreshold,omitempty" property:"startup-failure-threshold"`
 	// The startup probe path to use (default provided by the Catalog runtime used).
-	StartupProbe string `property:"startup-probe" json:"startupProbe,omitempty"`
+	StartupProbe string `json:"startupProbe,omitempty" property:"startup-probe"`
 	// The startup port to use (default 8080).
-	StartupPort int32 `property:"startup-port" json:"startupPort,omitempty"`
+	StartupPort int32 `json:"startupPort,omitempty" property:"startup-port"`
 }

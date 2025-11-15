@@ -24,8 +24,8 @@ package trait
 // +camel-k:trait=error-handler.
 // +camel-k:internal.
 type ErrorHandlerTrait struct {
-	PlatformBaseTrait `property:",squash" json:",inline"`
+	PlatformBaseTrait `json:",inline" property:",squash"`
 
 	// The error handler ref name provided or found in application properties
-	ErrorHandlerRef string `property:"ref" json:"ref,omitempty"`
+	ErrorHandlerRef string `json:"ref,omitempty" property:"ref"`
 }

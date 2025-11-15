@@ -25,53 +25,53 @@ package trait
 //
 // +camel-k:trait=knative-service.
 type KnativeServiceTrait struct {
-	Trait `property:",squash" json:",inline"`
+	Trait `json:",inline" property:",squash"`
 
 	// The annotations added to route.
 	// This can be used to set knative service specific annotations
 	// CLI usage example: -t "knative-service.annotations.'haproxy.router.openshift.io/balance'=true"
-	Annotations map[string]string `property:"annotations" json:"annotations,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty" property:"annotations"`
 	// Configures the Knative autoscaling class property (e.g. to set `hpa.autoscaling.knative.dev` or `kpa.autoscaling.knative.dev` autoscaling).
 	//
 	// Refer to the Knative documentation for more information.
 	// +kubebuilder:validation:Enum=kpa.autoscaling.knative.dev;hpa.autoscaling.knative.dev
-	Class string `property:"autoscaling-class" json:"class,omitempty"`
+	Class string `json:"class,omitempty" property:"autoscaling-class"`
 	// Configures the Knative autoscaling metric property (e.g. to set `concurrency` based or `cpu` based autoscaling).
 	//
 	// Refer to the Knative documentation for more information.
-	Metric string `property:"autoscaling-metric" json:"autoscalingMetric,omitempty"`
+	Metric string `json:"autoscalingMetric,omitempty" property:"autoscaling-metric"`
 	// Sets the allowed concurrency level or CPU percentage (depending on the autoscaling metric) for each Pod.
 	//
 	// Refer to the Knative documentation for more information.
-	Target *int `property:"autoscaling-target" json:"autoscalingTarget,omitempty"`
+	Target *int `json:"autoscalingTarget,omitempty" property:"autoscaling-target"`
 	// The minimum number of Pods that should be running at any time for the integration. It's **zero** by default, meaning that
 	// the integration is scaled down to zero when not used for a configured amount of time.
 	//
 	// Refer to the Knative documentation for more information.
-	MinScale *int `property:"min-scale" json:"minScale,omitempty"`
+	MinScale *int `json:"minScale,omitempty" property:"min-scale"`
 	// An upper bound for the number of Pods that can be running in parallel for the integration.
 	// Knative has its own cap value that depends on the installation.
 	//
 	// Refer to the Knative documentation for more information.
-	MaxScale *int `property:"max-scale" json:"maxScale,omitempty"`
+	MaxScale *int `json:"maxScale,omitempty" property:"max-scale"`
 	// Enables to gradually shift traffic to the latest Revision and sets the rollout duration.
 	// It's disabled by default and must be expressed as a Golang `time.Duration` string representation,
 	// rounded to a second precision.
-	RolloutDuration string `property:"rollout-duration" json:"rolloutDuration,omitempty"`
+	RolloutDuration string `json:"rolloutDuration,omitempty" property:"rollout-duration"`
 	// Setting `cluster-local`, Knative service becomes a private service.
 	// Specifically, this option applies the `networking.knative.dev/visibility` label to Knative service.
 	//
 	// Refer to the Knative documentation for more information.
 	// +kubebuilder:validation:Enum=cluster-local
-	Visibility string `property:"visibility" json:"visibility,omitempty"`
+	Visibility string `json:"visibility,omitempty" property:"visibility"`
 	// Automatically deploy the integration as Knative service when all conditions hold:
 	//
 	// * Integration is using the Knative profile
 	// * All routes are either starting from an HTTP based consumer or a passive consumer (e.g. `direct` is a passive consumer)
-	Auto *bool `property:"auto" json:"auto,omitempty"`
+	Auto *bool `json:"auto,omitempty" property:"auto"`
 	// The maximum duration in seconds that the request instance is allowed to respond to a request.
 	// This field propagates to the integration pod's terminationGracePeriodSeconds
 	//
 	// Refer to the Knative documentation for more information.
-	TimeoutSeconds *int64 `property:"timeout-seconds" json:"timeoutSeconds,omitempty"`
+	TimeoutSeconds *int64 `json:"timeoutSeconds,omitempty" property:"timeout-seconds"`
 }

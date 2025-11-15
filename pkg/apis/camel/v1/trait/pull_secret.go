@@ -30,12 +30,12 @@ package trait
 //
 // +camel-k:trait=pull-secret.
 type PullSecretTrait struct {
-	Trait `property:",squash" json:",inline"`
+	Trait `json:",inline" property:",squash"`
 
 	// The pull secret name to set on the Pod. If left empty this is automatically taken from the `IntegrationPlatform` registry configuration.
-	SecretName string `property:"secret-name" json:"secretName,omitempty"`
+	SecretName string `json:"secretName,omitempty" property:"secret-name"`
 	// When using a global operator with a shared platform, this enables delegation of the `system:image-puller` cluster role on the operator namespace to the integration service account.
-	ImagePullerDelegation *bool `property:"image-puller-delegation" json:"imagePullerDelegation,omitempty"`
+	ImagePullerDelegation *bool `json:"imagePullerDelegation,omitempty" property:"image-puller-delegation"`
 	// Automatically configures the platform registry secret on the pod if it is of type `kubernetes.io/dockerconfigjson`.
-	Auto *bool `property:"auto" json:"auto,omitempty"`
+	Auto *bool `json:"auto,omitempty" property:"auto"`
 }

@@ -21,14 +21,14 @@ package trait
 //
 // +camel-k:trait=pdb.
 type PDBTrait struct {
-	Trait `property:",squash" json:",inline"`
+	Trait `json:",inline" property:",squash"`
 
 	// The number of pods for the Integration that must still be available after an eviction.
 	// It can be either an absolute number or a percentage.
 	// Only one of `min-available` and `max-unavailable` can be specified.
-	MinAvailable string `property:"min-available" json:"minAvailable,omitempty"`
+	MinAvailable string `json:"minAvailable,omitempty" property:"min-available"`
 	// The number of pods for the Integration that can be unavailable after an eviction.
 	// It can be either an absolute number or a percentage (default `1` if `min-available` is also not set).
 	// Only one of `max-unavailable` and `min-available` can be specified.
-	MaxUnavailable string `property:"max-unavailable" json:"maxUnavailable,omitempty"`
+	MaxUnavailable string `json:"maxUnavailable,omitempty" property:"max-unavailable"`
 }
