@@ -26,7 +26,6 @@ linters:
     - err113
     - exhaustive
     - exhaustruct
-    - forbidigo
     - funcorder
     - funlen
     - gochecknoglobals
@@ -42,7 +41,6 @@ linters:
     - paralleltest
     - perfsprint
     - revive
-    - tagalign
     - tagliatelle
     - testpackage
     - varnamelen

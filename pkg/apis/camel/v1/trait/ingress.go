@@ -26,30 +26,30 @@ import networkingv1 "k8s.io/api/networking/v1"
 //
 // +camel-k:trait=ingress.
 type IngressTrait struct {
-	Trait `property:",squash" json:",inline"`
+	Trait `json:",inline" property:",squash"`
 
 	// The Ingress class name as defined by the Ingress spec
 	// See https://kubernetes.io/docs/concepts/services-networking/ingress/
-	IngressClassName string `property:"ingress-class-name" json:"ingressClassName,omitempty"`
+	IngressClassName string `json:"ingressClassName,omitempty" property:"ingress-class-name"`
 	// The annotations added to the ingress.
 	// This can be used to set controller specific annotations, e.g., when using the NGINX Ingress controller:
 	// See https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md
-	Annotations map[string]string `property:"annotations" json:"annotations,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty" property:"annotations"`
 	// To configure the host exposed by the ingress.
-	Host string `property:"host" json:"host,omitempty"`
+	Host string `json:"host,omitempty" property:"host"`
 	// To configure the path exposed by the ingress (default `/`).
 	// Deprecated: In favor of `paths` - left for backward compatibility.
-	Path string `property:"path" json:"path,omitempty"`
+	Path string `json:"path,omitempty" property:"path"`
 	// To configure the paths exposed by the ingress (default `['/']`).
-	Paths []string `property:"paths" json:"paths,omitempty"`
+	Paths []string `json:"paths,omitempty" property:"paths"`
 	// To configure the path type exposed by the ingress.
 	// One of `Exact`, `Prefix`, `ImplementationSpecific` (default to `Prefix`).
 	// +kubebuilder:validation:Enum=Exact;Prefix;ImplementationSpecific
-	PathType *networkingv1.PathType `property:"path-type" json:"pathType,omitempty"`
+	PathType *networkingv1.PathType `json:"pathType,omitempty" property:"path-type"`
 	// To automatically add an ingress whenever the integration uses an HTTP endpoint consumer.
-	Auto *bool `property:"auto" json:"auto,omitempty"`
+	Auto *bool `json:"auto,omitempty" property:"auto"`
 	// To configure tls hosts
-	TLSHosts []string `property:"tls-hosts" json:"tlsHosts,omitempty"`
+	TLSHosts []string `json:"tlsHosts,omitempty" property:"tls-hosts"`
 	// To configure tls secret name
-	TLSSecretName string `property:"tls-secret-name" json:"tlsSecretName,omitempty"`
+	TLSSecretName string `json:"tlsSecretName,omitempty" property:"tls-secret-name"`
 }

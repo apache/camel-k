@@ -32,10 +32,10 @@ package trait
 //
 // +camel-k:trait=prometheus.
 type PrometheusTrait struct {
-	Trait `property:",squash" json:",inline"`
+	Trait `json:",inline" property:",squash"`
 
 	// Whether a `PodMonitor` resource is created (default `true`).
-	PodMonitor *bool `property:"pod-monitor" json:"podMonitor,omitempty"`
+	PodMonitor *bool `json:"podMonitor,omitempty" property:"pod-monitor"`
 	// The `PodMonitor` resource labels, applicable when `pod-monitor` is `true`.
-	PodMonitorLabels []string `property:"pod-monitor-labels" json:"podMonitorLabels,omitempty"`
+	PodMonitorLabels []string `json:"podMonitorLabels,omitempty" property:"pod-monitor-labels"`
 }

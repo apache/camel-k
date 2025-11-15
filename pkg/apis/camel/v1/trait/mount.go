@@ -21,29 +21,29 @@ package trait
 //
 // +camel-k:trait=mount.
 type MountTrait struct {
-	PlatformBaseTrait `property:",squash" json:",inline"`
+	PlatformBaseTrait `json:",inline" property:",squash"`
 
 	// A list of configuration pointing to configmap/secret.
 	// The configuration are expected to be UTF-8 resources as they are processed by runtime Camel Context and tried to be parsed as property files.
 	// They are also made available on the classpath in order to ease their usage directly from the Route.
 	// Syntax: [configmap|secret]:name[/key], where name represents the resource name and key optionally represents the resource key to be filtered
-	Configs []string `property:"configs" json:"configs,omitempty"`
+	Configs []string `json:"configs,omitempty" property:"configs"`
 	// A list of resources (text or binary content) pointing to configmap/secret.
 	// The resources are expected to be any resource type (text or binary content).
 	// The destination path can be either a default location or any path specified by the user.
 	// Syntax: [configmap|secret]:name[/key][@path], where name represents the resource name, key optionally represents the resource key to be filtered and path represents the destination path
-	Resources []string `property:"resources" json:"resources,omitempty"`
+	Resources []string `json:"resources,omitempty" property:"resources"`
 	// A list of Persistent Volume Claims to be mounted. Syntax: [pvcname:/container/path]. If the PVC is not found, the Integration fails.
 	// You can use the syntax [pvcname:/container/path:size:accessMode<:storageClass>] to create a dynamic PVC based on the Storage Class provided
 	// or the default cluster Storage Class. However, if the PVC exists, the operator would mount it.
-	Volumes []string `property:"volumes" json:"volumes,omitempty"`
+	Volumes []string `json:"volumes,omitempty" property:"volumes"`
 	// A list of EmptyDir volumes to be mounted. An optional size limit may be configured (default 500Mi).
 	// Syntax: name:/container/path[:sizeLimit]
-	EmptyDirs []string `property:"empty-dirs" json:"emptyDirs,omitempty"`
+	EmptyDirs []string `json:"emptyDirs,omitempty" property:"empty-dirs"`
 	// Enable "hot reload" when a secret/configmap mounted is edited (default `false`). The configmap/secret must be
 	// marked with `camel.apache.org/integration` label to be taken in account. The resource will be watched for any kind change, also for
 	// changes in metadata.
-	HotReload *bool `property:"hot-reload" json:"hotReload,omitempty"`
+	HotReload *bool `json:"hotReload,omitempty" property:"hot-reload"`
 	// Deprecated: no longer available since version 2.5.
-	ScanKameletsImplicitLabelSecrets *bool `property:"scan-kamelets-implicit-label-secrets" json:"scanKameletsImplicitLabelSecrets,omitempty"`
+	ScanKameletsImplicitLabelSecrets *bool `json:"scanKameletsImplicitLabelSecrets,omitempty" property:"scan-kamelets-implicit-label-secrets"`
 }

@@ -59,7 +59,7 @@ type resetCmdOptions struct {
 
 func (o *resetCmdOptions) reset(cmd *cobra.Command, _ []string) {
 	if !o.Force {
-		fmt.Printf("Reset will delete Camel K resources in namespace '%s'.\n", o.Namespace)
+		fmt.Fprintf(cmd.OutOrStdout(), "Reset will delete Camel K resources in namespace '%s'.\n", o.Namespace)
 		fmt.Fprint(cmd.OutOrStdout(), "Type the namespace to confirm: ")
 
 		var input string

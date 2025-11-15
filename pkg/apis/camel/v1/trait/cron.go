@@ -38,40 +38,40 @@ package trait
 //
 // +camel-k:trait=cron.
 type CronTrait struct {
-	Trait `property:",squash" json:",inline"`
+	Trait `json:",inline" property:",squash"`
 
 	// The CronJob schedule for the whole integration. If multiple routes are declared, they must have the same schedule for this
 	// mechanism to work correctly.
-	Schedule string `property:"schedule" json:"schedule,omitempty"`
+	Schedule string `json:"schedule,omitempty" property:"schedule"`
 	// The timezone that the CronJob will run on
-	TimeZone *string `property:"timeZone" json:"timeZone,omitempty"`
+	TimeZone *string `json:"timeZone,omitempty" property:"timeZone"`
 	// A comma separated list of the Camel components that need to be customized in order for them to work when the schedule is triggered externally by Kubernetes.
 	// Supported components are currently: `cron`, `timer` and `quartz`.
-	Components string `property:"components" json:"components,omitempty"`
+	Components string `json:"components,omitempty" property:"components"`
 	// Use the default Camel implementation of the `cron` endpoint (`quartz`) instead of trying to materialize the integration
 	// as Kubernetes CronJob.
-	Fallback *bool `property:"fallback" json:"fallback,omitempty"`
+	Fallback *bool `json:"fallback,omitempty" property:"fallback"`
 	// Specifies how to treat concurrent executions of a Job.
 	// Valid values are:
 	// - "Allow": allows CronJobs to run concurrently;
 	// - "Forbid" (default): forbids concurrent runs, skipping next run if previous run hasn't finished yet;
 	// - "Replace": cancels currently running job and replaces it with a new one
 	// +kubebuilder:validation:Enum=Allow;Forbid;Replace
-	ConcurrencyPolicy string `property:"concurrency-policy" json:"concurrencyPolicy,omitempty"`
+	ConcurrencyPolicy string `json:"concurrencyPolicy,omitempty" property:"concurrency-policy"`
 	// Automatically deploy the integration as CronJob when all routes are
 	// either starting from a periodic consumer (only `cron`, `timer` and `quartz` are supported) or a passive consumer (e.g. `direct` is a passive consumer).
 	//
 	// It's required that all periodic consumers have the same period, and it can be expressed as cron schedule (e.g. `1m` can be expressed as `0/1 * * * *`,
 	// while `35m` or `50s` cannot).
-	Auto *bool `property:"auto" json:"auto,omitempty"`
+	Auto *bool `json:"auto,omitempty" property:"auto"`
 	// Optional deadline in seconds for starting the job if it misses scheduled
 	// time for any reason.  Missed jobs executions will be counted as failed ones.
-	StartingDeadlineSeconds *int64 `property:"starting-deadline-seconds" json:"startingDeadlineSeconds,omitempty"`
+	StartingDeadlineSeconds *int64 `json:"startingDeadlineSeconds,omitempty" property:"starting-deadline-seconds"`
 	// Specifies the duration in seconds, relative to the start time, that the job
 	// may be continuously active before it is considered to be failed.
 	// It defaults to 60s.
-	ActiveDeadlineSeconds *int64 `property:"active-deadline-seconds" json:"activeDeadlineSeconds,omitempty"`
+	ActiveDeadlineSeconds *int64 `json:"activeDeadlineSeconds,omitempty" property:"active-deadline-seconds"`
 	// Specifies the number of retries before marking the job failed.
 	// It defaults to 2.
-	BackoffLimit *int32 `property:"backoff-limit" json:"backoffLimit,omitempty"`
+	BackoffLimit *int32 `json:"backoffLimit,omitempty" property:"backoff-limit"`
 }

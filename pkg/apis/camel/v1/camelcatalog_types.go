@@ -39,7 +39,7 @@ const (
 
 // CamelCatalog represents the languages, components, data formats and capabilities enabled on a given runtime provider. The catalog may be statically generated.
 type CamelCatalog struct {
-	metav1.TypeMeta   `json:",inline" yaml:",inline"`
+	metav1.TypeMeta   `json:",inline"            yaml:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty" yaml:"metadata,omitempty"`
 
 	// the actual state of the catalog

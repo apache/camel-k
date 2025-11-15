@@ -22,10 +22,10 @@ package trait
 //
 // +camel-k:trait=owner.
 type OwnerTrait struct {
-	Trait `property:",squash" json:",inline"`
+	Trait `json:",inline" property:",squash"`
 
 	// The set of annotations to be transferred
-	TargetAnnotations []string `property:"target-annotations" json:"targetAnnotations,omitempty"`
+	TargetAnnotations []string `json:"targetAnnotations,omitempty" property:"target-annotations"`
 	// The set of labels to be transferred
-	TargetLabels []string `property:"target-labels" json:"targetLabels,omitempty"`
+	TargetLabels []string `json:"targetLabels,omitempty" property:"target-labels"`
 }

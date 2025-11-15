@@ -30,7 +30,7 @@ type HealthCheck struct {
 }
 
 type HealthCheckResponse struct {
-	Name   string            `json:"name,omitempty" yaml:"name,omitempty"`
+	Name   string            `json:"name,omitempty"   yaml:"name,omitempty"`
 	Status HealthCheckStatus `json:"status,omitempty" yaml:"status,omitempty"`
-	Data   RawMessage        `json:"data,omitempty" yaml:"data,omitempty"`
+	Data   RawMessage        `json:"data,omitempty"   yaml:"data,omitempty"`
 }
