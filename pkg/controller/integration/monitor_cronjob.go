@@ -70,6 +70,7 @@ func (c *cronJobController) checkReadyCondition(ctx context.Context) (bool, erro
 				v1.IntegrationConditionLastJobFailedReason,
 				fmt.Sprintf("last job %s failed: %s", c.lastCompletedJob.Name, failed.Message))
 			c.integration.Status.Phase = v1.IntegrationPhaseError
+
 			return true, nil
 		}
 	}
@@ -82,17 +83,20 @@ func (c *cronJobController) updateReadyCondition(readyPods int32) bool {
 	case c.obj.Status.LastScheduleTime == nil:
 		c.integration.SetReadyCondition(corev1.ConditionTrue,
 			v1.IntegrationConditionCronJobCreatedReason, "cronjob created")
+
 		return true
 
 	case len(c.obj.Status.Active) > 0:
 		c.integration.SetReadyCondition(corev1.ConditionTrue,
 			v1.IntegrationConditionCronJobActiveReason, "cronjob active")
+
 		return true
 
 	case c.obj.Spec.SuccessfulJobsHistoryLimit != nil && *c.obj.Spec.SuccessfulJobsHistoryLimit == 0 &&
 		c.obj.Spec.FailedJobsHistoryLimit != nil && *c.obj.Spec.FailedJobsHistoryLimit == 0:
 		c.integration.SetReadyCondition(corev1.ConditionTrue,
 			v1.IntegrationConditionCronJobCreatedReason, "no jobs history available")
+
 		return true
 
 	case c.lastCompletedJob != nil:
@@ -101,6 +105,7 @@ func (c *cronJobController) updateReadyCondition(readyPods int32) bool {
 			c.integration.SetReadyCondition(corev1.ConditionTrue,
 				v1.IntegrationConditionLastJobSucceededReason,
 				fmt.Sprintf("last job %s completed successfully", c.lastCompletedJob.Name))
+
 			return true
 		}
 

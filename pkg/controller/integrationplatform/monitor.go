@@ -155,6 +155,7 @@ func (action *monitorAction) checkTraitAnnotationsDeprecatedNotice(platform *v1.
 					"WARN: annotation traits configuration is deprecated and will be removed soon. Use .spec.traits configuration for %s platform instead.",
 					platform.Name,
 				)
+
 				return
 			}
 		}
@@ -204,6 +205,7 @@ func specOrDefault(runtimeVersionSpec string) string {
 	if runtimeVersionSpec == "" {
 		return defaults.DefaultRuntimeVersion
 	}
+
 	return runtimeVersionSpec
 }
 

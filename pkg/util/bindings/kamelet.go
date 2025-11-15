@@ -158,6 +158,7 @@ func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointCont
 // getKameletName returns the kamelet with it's name and querystring attached.
 func getKameletName(name, id, version, namespace string) string {
 	kamelet := fmt.Sprintf("%s/%s", name, url.PathEscape(id))
+
 	return source.GetKameletQuerystring(kamelet, version, namespace)
 }
 

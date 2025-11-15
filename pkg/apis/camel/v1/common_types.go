@@ -346,6 +346,7 @@ func (o *ValueSource) String() string {
 	} else if o.SecretKeyRef != nil {
 		text = "secret:" + o.SecretKeyRef.Name + "/" + o.SecretKeyRef.Key
 	}
+
 	return text
 }
 

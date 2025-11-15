@@ -49,6 +49,7 @@ func PortForward(ctx context.Context, c client.Client, ns, labelSelector string,
 				return err
 			}
 		}
+
 		return nil
 	}
 
@@ -133,6 +134,7 @@ func bootstrapPortForward(ctx context.Context, c client.Client, ns string, label
 			return nil, err
 		}
 	}
+
 	return list, nil
 }
 
@@ -185,6 +187,7 @@ func portFowardPod(ctx context.Context, config *restclient.Config, ns, pod strin
 		if len(ports) != 1 {
 			return "", errors.New("wrong ports opened")
 		}
+
 		return fmt.Sprintf("localhost:%d", ports[0].Local), nil
 	case <-ctx.Done():
 		return "", errors.New("context closed")
@@ -197,5 +200,6 @@ func podReady(pod *corev1.Pod) bool {
 			return true
 		}
 	}
+
 	return false
 }

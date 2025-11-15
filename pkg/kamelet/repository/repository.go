@@ -57,6 +57,7 @@ func New(ctx context.Context, client camel.Interface, namespaces ...string) (Kam
 	if err != nil {
 		return nil, err
 	}
+
 	return NewForPlatform(ctx, client, platform, namespaces...)
 }
 
@@ -107,6 +108,7 @@ func lookupPlatform(ctx context.Context, client camel.Interface, namespaces ...s
 			return &pls.Items[0], nil
 		}
 	}
+
 	return nil, nil
 }
 
@@ -123,6 +125,7 @@ func getRepositoriesFromPlatform(platform *v1.IntegrationPlatform) []string {
 	for _, repo := range repos {
 		res = append(res, repo.URI)
 	}
+
 	return res
 }
 
@@ -148,8 +151,10 @@ func newFromURI(ctx context.Context, uri string) (KameletRepository, error) {
 		if len(parts) >= 3 {
 			path = strings.Join(parts[2:], "/")
 		}
+
 		return newGithubKameletRepository(ctx, owner, repo, path, version), nil
 	}
+
 	return nil, fmt.Errorf("invalid uri: %s", uri)
 }
 
@@ -163,5 +168,6 @@ func makeDistinctNonEmpty(names []string) []string {
 		presence[n] = true
 		res = append(res, n)
 	}
+
 	return res
 }

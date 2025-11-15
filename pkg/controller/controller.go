@@ -35,5 +35,6 @@ func AddToManager(ctx context.Context, manager ctrl.Manager, client client.Clien
 			return err
 		}
 	}
+
 	return nil
 }

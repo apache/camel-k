@@ -121,6 +121,7 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 		return reconcile.Result{}, err
 	} else if !ok {
 		rlog.Info("Ignoring request because namespace is locked")
+
 		return reconcile.Result{}, nil
 	}
 
@@ -141,6 +142,7 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 	// Only process resources assigned to the operator
 	if !platform.IsOperatorHandlerConsideringLock(ctx, r.client, request.Namespace, &instance) {
 		rlog.Info("Ignoring request because resource is not assigned to current operator")
+
 		return reconcile.Result{}, nil
 	}
 
@@ -151,6 +153,7 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 	ip, err := platform.GetForResource(ctx, r.client, &instance)
 	if err != nil {
 		rlog.Error(err, "Could not find a platform bound to this Build")
+
 		return reconcile.Result{}, err
 	}
 	buildMonitor := Monitor{
@@ -191,6 +194,7 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 		newTarget, err := a.Handle(ctx, target)
 		if err != nil {
 			camelevent.NotifyBuildError(ctx, r.client, r.recorder, &instance, newTarget, err)
+
 			return reconcile.Result{}, err
 		}
 
@@ -229,6 +233,7 @@ func (r *reconcileBuild) update(ctx context.Context, l log.Logger, base *v1.Buil
 
 	if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(base)); err != nil {
 		camelevent.NotifyBuildError(ctx, r.client, r.recorder, base, target, err)
+
 		return err
 	}
 

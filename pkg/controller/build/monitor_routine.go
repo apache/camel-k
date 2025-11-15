@@ -67,6 +67,7 @@ func (action *monitorRoutineAction) Handle(ctx context.Context, build *v1.Build)
 			build.Status.Phase = v1.BuildPhaseFailed
 			build.Status.Error = "Build routine exists"
 			monitorFinishedBuild(build)
+
 			return build, nil
 		}
 		status := v1.BuildStatus{Phase: v1.BuildPhaseRunning}
@@ -85,6 +86,7 @@ func (action *monitorRoutineAction) Handle(ctx context.Context, build *v1.Build)
 			build.Status.Phase = v1.BuildPhaseFailed
 			build.Status.Error = "Build routine not running"
 			monitorFinishedBuild(build)
+
 			return build, nil
 		}
 	}
@@ -92,6 +94,7 @@ func (action *monitorRoutineAction) Handle(ctx context.Context, build *v1.Build)
 	// Monitor running state of the build - this may have been done already by the schedule action but the monitor action is idempotent
 	// We do this here to recover the running build state in the monitor in case of an operator restart
 	monitorRunningBuild(build)
+
 	return nil, nil
 }
 
@@ -140,18 +143,21 @@ tasks:
 			} else if t := task.Package; t != nil {
 				if buildDir == "" {
 					status.Failed(fmt.Errorf("cannot determine builder directory for task %s", t.Name))
+
 					break tasks
 				}
 				t.BuildDir = buildDir
 			} else if t := task.S2i; t != nil && t.ContextDir == "" {
 				if buildDir == "" {
 					status.Failed(fmt.Errorf("cannot determine context directory for task %s", t.Name))
+
 					break tasks
 				}
 				t.ContextDir = filepath.Join(buildDir, builder.ContextDir)
 			} else if t := task.Jib; t != nil && t.ContextDir == "" {
 				if buildDir == "" {
 					status.Failed(fmt.Errorf("cannot determine context directory for task %s", t.Name))
+
 					break tasks
 				}
 				t.ContextDir = filepath.Join(buildDir, builder.ContextDir)
@@ -177,6 +183,7 @@ tasks:
 			err := action.updateBuildStatus(ctx, build, status)
 			if err != nil {
 				status.Failed(err)
+
 				break tasks
 			}
 		}
@@ -204,6 +211,7 @@ func (action *monitorRoutineAction) updateBuildStatus(ctx context.Context, build
 	if err != nil {
 		action.L.Errorf(err, "Cannot patch build status: %s", build.Name)
 		event.NotifyBuildError(ctx, action.client, action.recorder, build, target, err)
+
 		return err
 	}
 	switch target.Status.Phase {
@@ -218,6 +226,7 @@ func (action *monitorRoutineAction) updateBuildStatus(ctx context.Context, build
 		if err != nil {
 			action.L.Errorf(err, "Cannot update build status: %s", build.Name)
 			event.NotifyBuildError(ctx, action.client, action.recorder, build, target, err)
+
 			return err
 		}
 

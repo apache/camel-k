@@ -80,6 +80,7 @@ func (g *traitMetaDataGen) Filter(context *generator.Context, t *types.Type) boo
 			filter = false
 		}
 	}
+
 	return filter
 }
 
@@ -89,6 +90,7 @@ func (g *traitMetaDataGen) GenerateType(context *generator.Context, t *types.Typ
 	g.buildDescription(t, traitID, td)
 	g.buildFields(t, td)
 	g.Root.Traits = append(g.Root.Traits, *td)
+
 	return nil
 }
 
@@ -99,6 +101,7 @@ func (g *traitMetaDataGen) getTraitID(t *types.Type) string {
 			if len(matches) < 2 {
 				panic(fmt.Sprintf("unable to extract trait ID from tag line `%s`", s))
 			}
+
 			return matches[1]
 		}
 	}

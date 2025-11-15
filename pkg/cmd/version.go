@@ -79,6 +79,7 @@ func (o *versionCmdOptions) preRunE(cmd *cobra.Command, args []string) error {
 		cmd.Annotations[offlineCommandLabel] = "true"
 		fmt.Fprintf(cmd.OutOrStdout(), "Operator version discovery is deprecated. It will be removed from future releases.\n")
 	}
+
 	return o.preRun(cmd, args)
 }
 
@@ -97,6 +98,7 @@ func (o *versionCmdOptions) run(cmd *cobra.Command, _ []string) error {
 		}
 		o.displayOperatorVersion(cmd, c)
 	}
+
 	return nil
 }
 
@@ -171,6 +173,7 @@ func operatorVersion(ctx context.Context, c client.Client, namespace string) (st
 	if err != nil {
 		return "", err
 	}
+
 	return infos[infoVersion], nil
 }
 
@@ -181,11 +184,13 @@ func compatibleVersions(aVersion, bVersion string, cmd *cobra.Command) bool {
 	a, err := semver.NewVersion(aVersion)
 	if err != nil {
 		fmt.Fprintln(cmd.ErrOrStderr(), "Could not parse '"+aVersion+"' (error:", err.Error()+")")
+
 		return false
 	}
 	b, err := semver.NewVersion(bVersion)
 	if err != nil {
 		fmt.Fprintln(cmd.ErrOrStderr(), "Could not parse '"+bVersion+"' (error:", err.Error()+")")
+
 		return false
 	}
 	// We consider compatible when major and minor are equals

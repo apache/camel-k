@@ -51,6 +51,7 @@ func (action *monitorSyntheticAction) Handle(ctx context.Context, integration *v
 		// other reasons, likely some error to report
 		integration.Status.Phase = v1.IntegrationPhaseError
 		integration.SetReadyCondition(corev1.ConditionFalse, v1.IntegrationConditionImportingKindAvailableReason, err.Error())
+
 		return integration, err
 	}
 
@@ -62,6 +63,7 @@ func (action *monitorSyntheticAction) Handle(ctx context.Context, integration *v
 		if err != nil {
 			return integration, err
 		}
+
 		return nil, nil
 	}
 

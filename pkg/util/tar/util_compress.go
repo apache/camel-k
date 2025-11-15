@@ -53,6 +53,7 @@ func createArchiveFile(files []string, buf io.Writer) error {
 			return err
 		}
 	}
+
 	return nil
 }
 

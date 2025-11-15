@@ -118,6 +118,7 @@ func get(ctx context.Context, c k8sclient.Reader, namespace string, name string)
 			p, err = kubernetes.GetIntegrationPlatform(ctx, c, name, operatorNamespace)
 		}
 	}
+
 	return p, err
 }
 
@@ -130,6 +131,7 @@ func findAny(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.Int
 			p, err = findLocal(ctx, c, operatorNamespace)
 		}
 	}
+
 	return p, err
 }
 
@@ -143,6 +145,7 @@ func findLocal(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.I
 		if operatorID != "" {
 			if p, err := get(ctx, c, operatorNamespace, operatorID); err == nil {
 				log.Debugf("Found integration platform %s for operator %s in namespace %s", operatorID, operatorID, operatorNamespace)
+
 				return p, nil
 			}
 		}
@@ -158,6 +161,7 @@ func findLocal(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.I
 		platform := lst.Items[i]
 		if IsActive(&platform) {
 			log.Debugf("Found active integration platform %s in namespace %s", platform.Name, namespace)
+
 			return &platform, nil
 		} else {
 			fallback = &platform
@@ -166,10 +170,12 @@ func findLocal(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.I
 
 	if fallback != nil {
 		log.Debugf("Found inactive integration platform %s in namespace %s", fallback.Name, namespace)
+
 		return fallback, nil
 	}
 
 	log.Debugf("Unable to find integration platform in namespace %s", namespace)
+
 	return nil, k8serrors.NewNotFound(v1.Resource("IntegrationPlatform"), DefaultPlatformName)
 }
 
@@ -179,6 +185,7 @@ func ListPlatforms(ctx context.Context, c k8sclient.Reader, namespace string) (*
 	if err := c.List(ctx, &lst, k8sclient.InNamespace(namespace)); err != nil {
 		return nil, err
 	}
+
 	return &lst, nil
 }
 
@@ -201,5 +208,6 @@ func GetTraitProfile(p *v1.IntegrationPlatform) v1.TraitProfile {
 	case v1.IntegrationPlatformClusterOpenShift:
 		return v1.TraitProfileOpenShift
 	}
+
 	return ""
 }

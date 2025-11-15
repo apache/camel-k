@@ -36,6 +36,7 @@ func SanitizeName(name string) string {
 	name = strings.ToLower(name)
 	name = disallowedChars.ReplaceAllString(name, "")
 	name = strings.TrimFunc(name, isDisallowedStartEndChar)
+
 	return name
 }
 
@@ -44,6 +45,7 @@ func SanitizeLabel(name string) string {
 	name = strings.ToLower(name)
 	name = disallowedChars.ReplaceAllString(name, "")
 	name = strings.TrimFunc(name, isDisallowedStartEndChar)
+
 	return name
 }
 

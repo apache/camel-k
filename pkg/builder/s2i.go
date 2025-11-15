@@ -197,6 +197,7 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 					log.Errorf(err, "cannot cancel s2i Build: %s/%s", s2iBuild.Namespace, s2iBuild.Name)
 				}
 			}
+
 			return err
 		}
 		if s2iBuild.Status.Output.To != nil {
@@ -235,9 +236,11 @@ func (t *s2iTask) getControllerReference() metav1.Object {
 			o.SetAPIVersion(ref.APIVersion)
 			o.SetKind(ref.Kind)
 			owner = o
+
 			break
 		}
 	}
+
 	return owner
 }
 

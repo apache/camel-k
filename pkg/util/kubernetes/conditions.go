@@ -33,6 +33,7 @@ func GetPodCondition(pod corev1.Pod, conditionType corev1.PodConditionType) *cor
 			return &condition
 		}
 	}
+
 	return nil
 }
 
@@ -43,6 +44,7 @@ func GetDeploymentCondition(deployment appsv1.Deployment, conditionType appsv1.D
 			return &condition
 		}
 	}
+
 	return nil
 }
 
@@ -53,6 +55,7 @@ func GetKnativeServiceCondition(service servingv1.Service, conditionType knative
 			return &condition
 		}
 	}
+
 	return nil
 }
 
@@ -63,5 +66,6 @@ func GetJobCondition(job batchv1.Job, conditionType batchv1.JobConditionType) *b
 			return &condition
 		}
 	}
+
 	return nil
 }

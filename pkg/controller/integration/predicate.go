@@ -34,22 +34,26 @@ type StatusChangedPredicate struct {
 func (StatusChangedPredicate) Update(e event.UpdateEvent) bool {
 	if e.ObjectOld == nil {
 		Log.Error(nil, "Update event has no old object to update", "event", e)
+
 		return false
 	}
 	if e.ObjectNew == nil {
 		Log.Error(nil, "Update event has no new object to update", "event", e)
+
 		return false
 	}
 
 	s1 := reflect.ValueOf(e.ObjectOld).Elem().FieldByName("Status")
 	if !s1.IsValid() {
 		Log.Error(nil, "Update event old object has no Status field", "event", e)
+
 		return false
 	}
 
 	s2 := reflect.ValueOf(e.ObjectNew).Elem().FieldByName("Status")
 	if !s2.IsValid() {
 		Log.Error(nil, "Update event new object has no Status field", "event", e)
+
 		return false
 	}
 

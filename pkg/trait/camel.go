@@ -147,6 +147,7 @@ func (t *camelTrait) Apply(e *Environment) error {
 	if e.IntegrationInRunningPhases() {
 		e.Resources.AddAll(t.computeUserProperties(e))
 	}
+
 	return nil
 }
 
@@ -222,6 +223,7 @@ func determineRuntimeVersion(e *Environment) (string, error) {
 	if e.Platform != nil && e.Platform.Status.Build.RuntimeVersion != "" {
 		return e.Platform.Status.Build.RuntimeVersion, nil
 	}
+
 	return "", errors.New("unable to determine runtime version")
 }
 

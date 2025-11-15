@@ -49,6 +49,7 @@ func (action *monitorUnknownAction) Handle(ctx context.Context, integration *v1.
 		integration.Status.Phase = v1.IntegrationPhaseError
 		integration.SetReadyCondition(corev1.ConditionFalse,
 			v1.IntegrationConditionInitializationFailedReason, err.Error())
+
 		return integration, err
 	}
 	// We're good to monitor this again
@@ -64,6 +65,7 @@ func (action *monitorUnknownAction) Handle(ctx context.Context, integration *v1.
 			v1.IntegrationConditionPlatformAvailableReason,
 			environment.Platform.Namespace+"/"+environment.Platform.Name,
 		)
+
 		return integration, nil
 	}
 

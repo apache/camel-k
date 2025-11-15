@@ -68,6 +68,7 @@ func (s CamelServiceType) ResourceDescription(subject string) string {
 	if s == CamelServiceTypeEvent {
 		prefix = "broker for "
 	}
+
 	return fmt.Sprintf("%s%s %s", prefix, string(s), subject)
 }
 

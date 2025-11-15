@@ -46,6 +46,7 @@ func (t *dependenciesTrait) Configure(e *Environment) (bool, *TraitCondition, er
 	if e.Integration == nil {
 		return false, nil, nil
 	}
+
 	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization), nil, nil
 }
 
@@ -76,14 +77,17 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 				srcDeps := ExtractSourceLoaderDependencies(s, e.CamelCatalog)
 				dependencies.Merge(srcDeps)
 			}
+
 			return true
 		},
 		func(meta metadata.IntegrationMetadata) bool {
 			dependencies.Merge(meta.Dependencies)
 			meta.RequiredCapabilities.Each(func(item string) bool {
 				util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, item)
+
 				return true
 			})
+
 			return true
 		})
 	if err != nil {
@@ -93,6 +97,7 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 	// Add dependencies back to integration
 	dependencies.Each(func(item string) bool {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, item)
+
 		return true
 	})
 

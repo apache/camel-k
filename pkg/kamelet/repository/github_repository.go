@@ -76,6 +76,7 @@ func (c *githubKameletRepository) List(ctx context.Context) ([]string, error) {
 		}
 	}
 	sort.Strings(res)
+
 	return res, nil
 }
 
@@ -97,9 +98,11 @@ func (c *githubKameletRepository) Get(ctx context.Context, name string) (*v1.Kam
 			if kamelet.Name != name {
 				return nil, fmt.Errorf("kamelet names do not match: expected %s, got %s", name, kamelet.Name)
 			}
+
 			return kamelet, nil
 		}
 	}
+
 	return nil, nil
 }
 
@@ -110,6 +113,7 @@ func (c *githubKameletRepository) listFiles(ctx context.Context) ([]*github.Repo
 		ref = &github.RepositoryContentGetOptions{Ref: c.ref}
 	}
 	_, dir, _, err := gc.Repositories.GetContents(ctx, c.owner, c.repo, c.path, ref)
+
 	return dir, err
 }
 
@@ -152,6 +156,7 @@ func downloadGithubKamelet(ctx context.Context, url string, httpClient *http.Cli
 	if err := json.Unmarshal(content, &kamelet); err != nil {
 		return nil, err
 	}
+
 	return &kamelet, nil
 }
 

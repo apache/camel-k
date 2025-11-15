@@ -55,6 +55,7 @@ type PodScraper struct {
 // NewPodScraper creates a new pod scraper.
 func NewPodScraper(c kubernetes.Interface, namespace string, podName string, defaultContainerName string, tailLines *int64) *PodScraper {
 	klog.InitForCmd()
+
 	return &PodScraper{
 		namespace:            namespace,
 		podName:              podName,
@@ -76,6 +77,7 @@ func (s *PodScraper) Start(ctx context.Context) *bufio.Reader {
 			pipeOut.Close())
 	}
 	go s.doScrape(ctx, bufPipeOut, closeFun)
+
 	return bufPipeIn
 }
 
@@ -83,6 +85,7 @@ func (s *PodScraper) doScrape(ctx context.Context, out *bufio.Writer, clientClos
 	containerName, err := s.waitForPodRunning(ctx, s.namespace, s.podName, s.defaultContainerName)
 	if err != nil {
 		s.handleAndRestart(ctx, err, 5*time.Second, out, clientCloser)
+
 		return
 	}
 	logOptions := corev1.PodLogOptions{
@@ -93,6 +96,7 @@ func (s *PodScraper) doScrape(ctx context.Context, out *bufio.Writer, clientClos
 	byteReader, err := s.client.CoreV1().Pods(s.namespace).GetLogs(s.podName, &logOptions).Stream(ctx)
 	if err != nil {
 		s.handleAndRestart(ctx, err, 5*time.Second, out, clientCloser)
+
 		return
 	}
 
@@ -127,6 +131,7 @@ func (s *PodScraper) handleAndRestart(ctx context.Context, err error, wait time.
 		if err := clientCloser(); err != nil {
 			s.L.Error(err, "Unable to close the client")
 		}
+
 		return
 	}
 
@@ -138,6 +143,7 @@ func (s *PodScraper) handleAndRestart(ctx context.Context, err error, wait time.
 		if err := clientCloser(); err != nil {
 			s.L.Error(err, "Unable to close the client")
 		}
+
 		return
 	}
 
@@ -221,7 +227,9 @@ func (s *PodScraper) chooseContainer(p *corev1.Pod, defaultContainerName string)
 				containerNameFound = defaultContainerName
 			}
 		}
+
 		return containerNameFound
 	}
+
 	return ""
 }

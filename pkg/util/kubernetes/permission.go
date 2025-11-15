@@ -47,6 +47,7 @@ func CheckPermission(ctx context.Context, client kubernetes.Interface, group, re
 		if k8serrors.IsForbidden(err) {
 			return false, nil
 		}
+
 		return false, err
 	}
 

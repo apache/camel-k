@@ -79,5 +79,6 @@ func (tc *TraitCondition) typeForCondition() string {
 	if conditionType == "TraitInfo" {
 		conditionType = fmt.Sprintf("%s%s", tc.traitID, tc.integrationConditionType)
 	}
+
 	return conditionType
 }

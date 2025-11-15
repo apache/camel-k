@@ -151,6 +151,7 @@ func (r *ReconcilePipe) Reconcile(ctx context.Context, request reconcile.Request
 		return reconcile.Result{}, err
 	} else if !ok {
 		rlog.Info("Ignoring request because namespace is locked")
+
 		return reconcile.Result{}, nil
 	}
 
@@ -173,6 +174,7 @@ func (r *ReconcilePipe) Reconcile(ctx context.Context, request reconcile.Request
 	// Only process resources assigned to the operator
 	if !platform.IsOperatorHandlerConsideringLock(ctx, r.client, request.Namespace, &instance) {
 		rlog.Info("Ignoring request because resource is not assigned to current operator")
+
 		return reconcile.Result{}, nil
 	}
 
@@ -203,12 +205,14 @@ func (r *ReconcilePipe) Reconcile(ctx context.Context, request reconcile.Request
 			if target != nil {
 				_ = r.update(ctx, &instance, target, &targetLog)
 			}
+
 			return reconcile.Result{}, err
 		}
 
 		if target != nil {
 			if err := r.update(ctx, &instance, target, &targetLog); err != nil {
 				camelevent.NotifyPipeError(ctx, r.client, r.recorder, &instance, target, err)
+
 				return reconcile.Result{}, err
 			}
 		}
@@ -228,6 +232,7 @@ func (r *ReconcilePipe) update(ctx context.Context, base *v1.Pipe, target *v1.Pi
 
 	if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(base)); err != nil {
 		camelevent.NotifyPipeError(ctx, r.client, r.recorder, base, target, err)
+
 		return err
 	}
 

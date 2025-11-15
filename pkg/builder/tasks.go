@@ -148,6 +148,7 @@ func (b *Build) TaskByName(name string) Task {
 			}
 		}
 	}
+
 	return &missingTask{
 		build: b.build,
 		name:  name,

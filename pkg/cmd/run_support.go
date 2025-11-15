@@ -69,6 +69,7 @@ func filterFileLocation(maybeFileLocations []string) []string {
 			filteredOptions = append(filteredOptions, localPath)
 		}
 	}
+
 	return filteredOptions
 }
 
@@ -85,6 +86,7 @@ func loadPropertiesFromSecret(ctx context.Context, c client.Client, ns string, n
 	if secret == nil {
 		return nil, fmt.Errorf("%s secret not found in %s namespace, make sure to provide it before the Integration can run", name, ns)
 	}
+
 	return fromMapToProperties(secret.Data,
 		func(v reflect.Value) string { return string(v.Bytes()) },
 		func(v reflect.Value) (*properties.Properties, error) {
@@ -101,6 +103,7 @@ func loadPropertiesFromConfigMap(ctx context.Context, c client.Client, ns string
 	if cm == nil {
 		return nil, fmt.Errorf("%s configmap not found in %s namespace, make sure to provide it before the Integration can run", name, ns)
 	}
+
 	return fromMapToProperties(cm.Data,
 		func(v reflect.Value) string { return v.String() },
 		func(v reflect.Value) (*properties.Properties, error) { return keyValueProps(v.String()) })
@@ -124,6 +127,7 @@ func fromMapToProperties(data interface{}, toString func(reflect.Value) string, 
 			return nil, fmt.Errorf("cannot assign %s to %s", value, key)
 		}
 	}
+
 	return result, nil
 }
 
@@ -167,5 +171,6 @@ func extractTraitNames(traitProps []string) []string {
 		splits := strings.Split(tp, ".")
 		traitNameProps[i] = splits[0]
 	}
+
 	return traitNameProps
 }

@@ -142,6 +142,7 @@ func (c *Catalog) configureTraitsFromAnnotations(annotations map[string]string) 
 		}
 		current[prop] = v
 	}
+
 	return c.configureFromOptions(options)
 }
 
@@ -156,6 +157,7 @@ func (c *Catalog) configureFromOptions(traits map[string]map[string]interface{})
 			}
 		}
 	}
+
 	return nil
 }
 
@@ -171,9 +173,11 @@ func configureTrait(id string, config map[string]interface{}, trait interface{})
 				if err := json.Unmarshal([]byte(v), &value); err != nil {
 					return nil, fmt.Errorf("could not decode JSON array for configuring trait property: %w", err)
 				}
+
 				return value, nil
 			}
 		}
+
 		return data, nil
 	}
 

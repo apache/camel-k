@@ -77,6 +77,7 @@ func (env *CamelEnvironment) ToCamelProperties() map[string]string {
 			mappedServices[fmt.Sprintf("%s.path", resource)] = service.Path
 		}
 	}
+
 	return mappedServices
 }
 
@@ -86,6 +87,7 @@ func (env *CamelEnvironment) Serialize() (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return string(res), nil
 }
 
@@ -94,6 +96,7 @@ func (env *CamelEnvironment) Deserialize(str string) error {
 	if err := json.Unmarshal([]byte(str), env); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -113,5 +116,6 @@ func (env *CamelEnvironment) FindService(name string, endpointKind CamelEndpoint
 			return &svc
 		}
 	}
+
 	return nil
 }

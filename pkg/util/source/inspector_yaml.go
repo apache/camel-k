@@ -206,6 +206,7 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 			meta.ToURIs = append(meta.ToURIs, maybeURI)
 		}
 	}
+
 	return nil
 }
 
@@ -233,6 +234,7 @@ func (i YAMLInspector) parseStepsParam(steps []interface{}, meta *Metadata) erro
 			}
 		}
 	}
+
 	return nil
 }
 
@@ -277,6 +279,7 @@ func (i YAMLInspector) ReplaceFromURI(source *v1.SourceSpec, newFromURI string) 
 	newContent := string(newContentRaw)
 	if newContent != source.Content {
 		source.Content = newContent
+
 		return true, nil
 	}
 

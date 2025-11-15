@@ -43,6 +43,7 @@ func Parse(name, content string) ([]Option, error) {
 	for scanner.Scan() {
 		res = append(res, getModelineOptions(scanner.Text(), lang)...)
 	}
+
 	return res, scanner.Err()
 }
 
@@ -75,6 +76,7 @@ func getModelineOptions(line string, lang v1.Language) []Option {
 			res = append(res, opt)
 		}
 	}
+
 	return res
 }
 
@@ -98,5 +100,6 @@ func inferLanguage(fileName string) v1.Language {
 	if strings.HasSuffix(fileName, ".yml") {
 		return v1.LanguageYaml
 	}
+
 	return ""
 }

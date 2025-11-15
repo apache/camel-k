@@ -69,5 +69,6 @@ func (t *tolerationTrait) Apply(e *Environment) error {
 		podSpec.Tolerations = make([]corev1.Toleration, 0)
 	}
 	podSpec.Tolerations = append(podSpec.Tolerations, tolerations...)
+
 	return nil
 }

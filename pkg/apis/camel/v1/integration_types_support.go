@@ -94,6 +94,7 @@ func (in *Integration) AllSources() []SourceSpec {
 			for _, genSrc := range in.Status.GeneratedSources {
 				if src.Name == genSrc.Name {
 					found = true
+
 					break
 				}
 			}
@@ -117,6 +118,7 @@ func (in *Integration) OriginalSources() []SourceSpec {
 			if src.Name == genSrc.Name {
 				sources = append(sources, genSrc)
 				found = true
+
 				break loop
 			}
 		}
@@ -152,6 +154,7 @@ func (in *Integration) IsManagedBuild() bool {
 		return true
 	}
 	isManagedBuild, err := regexp.MatchString("(.*)/(.*)/camel-k-kit-(.*)@sha256:(.*)", in.Spec.Traits.Container.Image)
+
 	return err == nil && isManagedBuild
 }
 
@@ -206,6 +209,7 @@ func (in *IntegrationSpec) GetConfigurationProperty(property string) string {
 			}
 		}
 	}
+
 	return ""
 }
 
@@ -213,6 +217,7 @@ func trimFirstLeadingSpace(val string) string {
 	if strings.HasPrefix(val, " ") {
 		return val[1:]
 	}
+
 	return val
 }
 
@@ -224,6 +229,7 @@ func (in *IntegrationStatus) AddOrReplaceGeneratedSources(sources ...SourceSpec)
 			if r.Name == source.Name {
 				in.GeneratedSources[i] = source
 				replaced = true
+
 				break
 			}
 		}
@@ -292,6 +298,7 @@ func (in *Integration) SetIntegrationPlatform(platform *IntegrationPlatform) {
 func (in *Integration) SetIntegrationKit(kit *IntegrationKit) {
 	if kit == nil {
 		in.Status.IntegrationKit = nil
+
 		return
 	}
 
@@ -332,6 +339,7 @@ func (in *Integration) GetIntegrationKitNamespace(p *IntegrationPlatform) string
 	if p != nil {
 		return p.Namespace
 	}
+
 	return in.Namespace
 }
 
@@ -371,6 +379,7 @@ func (in *IntegrationStatus) GetCondition(condType IntegrationConditionType) *In
 			return &c
 		}
 	}
+
 	return nil
 }
 
@@ -454,6 +463,7 @@ func (in *IntegrationStatus) GetConditions() []ResourceCondition {
 	for _, c := range in.Conditions {
 		res = append(res, &c)
 	}
+
 	return res
 }
 
@@ -503,6 +513,7 @@ func FromYamlDSL(reader io.Reader) ([]Flow, error) {
 	if err = json.Unmarshal(jsonData, &flows); err != nil {
 		return nil, err
 	}
+
 	return flows, err
 }
 

@@ -65,5 +65,6 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&PipeList{},
 	)
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
+
 	return nil
 }

@@ -58,6 +58,7 @@ func MergePatch(source interface{}, target interface{}) ([]byte, error) {
 		if len(positivePatch) == 0 {
 			return make([]byte, 0), nil
 		}
+
 		return json.Marshal(positivePatch)
 	}
 }

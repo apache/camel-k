@@ -41,6 +41,7 @@ func GetComponent(uri string) string {
 	if len(parts) <= 1 {
 		return ""
 	}
+
 	return parts[0]
 }
 
@@ -51,8 +52,10 @@ func GetQueryParameter(uri string, param string) string {
 	res, err := url.QueryUnescape(val)
 	if err != nil {
 		log.Error(err, fmt.Sprintf("Invalid character sequence in parameter %q", param))
+
 		return ""
 	}
+
 	return res
 }
 
@@ -61,6 +64,7 @@ func matchOrEmpty(reg *regexp.Regexp, str string) string {
 	if len(match) > 1 {
 		return match[1]
 	}
+
 	return ""
 }
 
@@ -78,5 +82,6 @@ func AppendParameters(uri string, params map[string]string) string {
 		uri += fmt.Sprintf("%s%s=%s", prefix, url.QueryEscape(k), url.QueryEscape(params[k]))
 		prefix = "&"
 	}
+
 	return uri
 }

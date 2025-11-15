@@ -80,6 +80,7 @@ func newFastDiscoveryRESTMapperWithFilter(config *rest.Config, filter func(*meta
 	}
 	wg.Wait()
 	logrus.Debugf("Picked %d/%d", pickedCount, totalCount)
+
 	return restmapper.NewDiscoveryRESTMapper(grs), nil
 }
 

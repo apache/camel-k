@@ -55,6 +55,7 @@ func getIntegrationKit(ctx context.Context, c client.Client, integration *v1.Int
 	}
 	kit := v1.NewIntegrationKit(integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name)
 	err := c.Get(ctx, ctrl.ObjectKeyFromObject(kit), kit)
+
 	return kit, err
 }
 
@@ -83,6 +84,7 @@ func collectConfigurationPairs(configurationType string, configurable ...v1.Conf
 					if variable.Name == k {
 						result[i].Value = v
 						ok = true
+
 						break
 					}
 				}
@@ -122,6 +124,7 @@ func filterTransferableAnnotations(annotations map[string]string) map[string]str
 		}
 		res[k] = v
 	}
+
 	return res
 }
 
@@ -233,6 +236,7 @@ func getBuilderTask(tasks []v1.Task) *v1.BuilderTask {
 			return tasks[i].Builder
 		}
 	}
+
 	return nil
 }
 
@@ -242,6 +246,7 @@ func getPackageTask(tasks []v1.Task) *v1.BuilderTask {
 			return tasks[i].Package
 		}
 	}
+
 	return nil
 }
 
@@ -368,6 +373,7 @@ func extractAsArray(value string) []string {
 			}
 			arrayValue = append(arrayValue, prop)
 		}
+
 		return arrayValue
 	}
 

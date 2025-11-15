@@ -28,6 +28,7 @@ func IsAPIResourceInstalled(c kubernetes.Interface, groupVersion string, kind st
 		if k8serrors.IsNotFound(err) {
 			return false, nil
 		}
+
 		return false, err
 	}
 

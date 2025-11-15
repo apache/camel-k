@@ -76,6 +76,7 @@ func (t *securityContextTrait) Apply(e *Environment) error {
 	if podSpec == nil {
 		return fmt.Errorf("could not find any integration deployment for %v", e.Integration.Name)
 	}
+
 	return t.setSecurityContext(e, podSpec)
 }
 

@@ -129,6 +129,7 @@ func (c *RuntimeCatalog) GetArtifactByScheme(scheme string) *v1.CamelArtifact {
 			return &artifact
 		}
 	}
+
 	return nil
 }
 
@@ -139,24 +140,28 @@ func (c *RuntimeCatalog) GetArtifactByDataFormat(dataFormat string) *v1.CamelArt
 			return &artifact
 		}
 	}
+
 	return nil
 }
 
 // GetScheme returns the scheme definition for the given scheme id.
 func (c *RuntimeCatalog) GetScheme(id string) (v1.CamelScheme, bool) {
 	scheme, ok := c.schemesByID[id]
+
 	return scheme, ok
 }
 
 // GetLanguageDependency returns the maven dependency for the given language name.
 func (c *RuntimeCatalog) GetLanguageDependency(language string) (string, bool) {
 	language, ok := c.languageDependencies[language]
+
 	return language, ok
 }
 
 // GetJavaTypeDependency returns the maven dependency for the given type name.
 func (c *RuntimeCatalog) GetJavaTypeDependency(camelType string) (string, bool) {
 	javaType, ok := c.javaTypeDependencies[camelType]
+
 	return javaType, ok
 }
 
@@ -203,6 +208,7 @@ func (c *RuntimeCatalog) DecodeComponent(uri string) (*v1.CamelArtifact, *v1.Cam
 	if scheme, ok := c.GetScheme(uriStart); ok {
 		schemeRef = &scheme
 	}
+
 	return c.GetArtifactByScheme(uriStart), schemeRef
 }
 

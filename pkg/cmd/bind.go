@@ -96,6 +96,7 @@ func (o *bindCmdOptions) preRunE(cmd *cobra.Command, args []string) error {
 		// let the command work in offline mode
 		cmd.Annotations[offlineCommandLabel] = "true"
 	}
+
 	return o.preRun(cmd, args)
 }
 
@@ -273,6 +274,7 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 	} else {
 		fmt.Fprintln(cmd.OutOrStdout(), `binding "`+name+`" updated`)
 	}
+
 	return nil
 }
 
@@ -286,6 +288,7 @@ func maybeBuildArrayNotation(array, value string) string {
 	// append
 	if strings.HasPrefix(array, "[") && strings.HasSuffix(array, "]") {
 		content := array[1:len(array)-1] + "," + value
+
 		return "[" + content + "]"
 	}
 	// init the array notation
@@ -297,6 +300,7 @@ func showPipeOutput(cmd *cobra.Command, binding *v1.Pipe, outputFormat string, s
 	printer.Delegate = &kubernetes.CLIPrinter{
 		Format: outputFormat,
 	}
+
 	return printer.PrintObj(binding, cmd.OutOrStdout())
 }
 
@@ -326,6 +330,7 @@ func (o *bindCmdOptions) parseErrorHandler() (*v1.ErrorHandlerSpec, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &v1.ErrorHandlerSpec{RawMessage: errHandlMarshalled}, nil
 }
 
@@ -338,6 +343,7 @@ func parseErrorHandlerByType(value string) (string, string, error) {
 	if len(errHandlSplit) > 1 {
 		return errHandlSplit[0], errHandlSplit[1], nil
 	}
+
 	return errHandlSplit[0], "", nil
 }
 
@@ -355,8 +361,10 @@ func (o *bindCmdOptions) decode(res string, key string) (v1.Endpoint, error) {
 	if err != nil {
 		if uri.HasCamelURIFormat(res) {
 			endpoint.URI = &res
+
 			return endpoint, nil
 		}
+
 		return endpoint, err
 	}
 	endpoint.Ref = &ref
@@ -393,6 +401,7 @@ func (o *bindCmdOptions) nameFor(source, sink v1.Endpoint) string {
 	sourcePart := o.nameForEndpoint(source)
 	sinkPart := o.nameForEndpoint(sink)
 	name := fmt.Sprintf("%s-to-%s", sourcePart, sinkPart)
+
 	return kubernetes.SanitizeName(name)
 }
 
@@ -403,6 +412,7 @@ func (o *bindCmdOptions) nameForEndpoint(endpoint v1.Endpoint) string {
 	if endpoint.Ref != nil {
 		return endpoint.Ref.Name
 	}
+
 	return ""
 }
 
@@ -414,6 +424,7 @@ func (o *bindCmdOptions) asEndpointProperties(props map[string]string) (*v1.Endp
 	if err != nil {
 		return nil, err
 	}
+
 	return &v1.EndpointProperties{
 		RawMessage: v1.RawMessage(data),
 	}, nil
@@ -430,6 +441,7 @@ func (o *bindCmdOptions) getProperties(refType string) map[string]string {
 			props[k] = v
 		}
 	}
+
 	return props
 }
 
@@ -449,6 +461,7 @@ func (o *bindCmdOptions) parseProperty(prop string) (string, string, string, err
 	if !isSource && !isSink && !isStep && !isErrorHandler {
 		return "", "", "", fmt.Errorf(`property key %q does not start with "source.", "sink.", "error-handler." or "step-<n>."`, parts[0])
 	}
+
 	return keyParts[0], keyParts[1], parts[1], nil
 }
 
@@ -467,10 +480,13 @@ func (o *bindCmdOptions) checkCompliance(cmd *cobra.Command, endpoint v1.Endpoin
 			if k8serrors.IsNotFound(err) {
 				// Kamelet may be in the operator namespace, but we currently don't have a way to determine it: we just warn
 				fmt.Fprintf(cmd.ErrOrStderr(), "Warning: Kamelet %q not found in namespace %q\n", key.Name, key.Namespace)
+
 				return nil
 			}
+
 			return err
 		}
 	}
+
 	return nil
 }

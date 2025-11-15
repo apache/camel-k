@@ -72,6 +72,7 @@ var (
 			if bean := catalog.GetArtifactByScheme("bean"); bean != nil {
 				res = append(res, bean.GetDependencyID())
 			}
+
 			return res
 		},
 		jsonLibraryRegexp: func(catalog *camel.RuntimeCatalog) []string {
@@ -79,6 +80,7 @@ var (
 			if jsonDF := catalog.GetArtifactByDataFormat(defaultJSONDataFormat); jsonDF != nil {
 				res = append(res, jsonDF.GetDependencyID())
 			}
+
 			return res
 		},
 		jsonLanguageRegexp: func(catalog *camel.RuntimeCatalog) []string {
@@ -86,6 +88,7 @@ var (
 			if jsonDF := catalog.GetArtifactByDataFormat(defaultJSONDataFormat); jsonDF != nil {
 				res = append(res, jsonDF.GetDependencyID())
 			}
+
 			return res
 		},
 		restConfigurationRegexp: func(catalog *camel.RuntimeCatalog) []string {
@@ -95,6 +98,7 @@ var (
 					deps = append(deps, d.GetDependencyID())
 				}
 			}
+
 			return deps
 		},
 		restRegexp: func(catalog *camel.RuntimeCatalog) []string {
@@ -104,6 +108,7 @@ var (
 					deps = append(deps, d.GetDependencyID())
 				}
 			}
+
 			return deps
 		},
 		restClosureRegexp: func(catalog *camel.RuntimeCatalog) []string {
@@ -113,12 +118,14 @@ var (
 					deps = append(deps, d.GetDependencyID())
 				}
 			}
+
 			return deps
 		},
 		openAPIRegexp: func(catalog *camel.RuntimeCatalog) []string {
 			if dfDep := catalog.GetArtifactByScheme("rest-openapi"); dfDep != nil {
 				return []string{dfDep.GetDependencyID()}
 			}
+
 			return []string{}
 		},
 		groovyLanguageRegexp: func(catalog *camel.RuntimeCatalog) []string {
@@ -204,6 +211,7 @@ func InspectorForLanguage(catalog *camel.RuntimeCatalog, language v1.Language) I
 			},
 		}
 	}
+
 	return &baseInspector{}
 }
 
@@ -272,8 +280,10 @@ func (i *baseInspector) discoverCapabilities(source v1.SourceSpec, meta *Metadat
 		if !i.catalog.HasCapability(capability) {
 			err = fmt.Errorf("capability %s not supported in camel catalog runtime version %s",
 				capability, i.catalog.GetRuntimeVersion())
+
 			return false
 		}
+
 		return true
 	})
 
@@ -422,6 +432,7 @@ func (i *baseInspector) containsOnlyURIsIn(fromURI []string, allowed map[string]
 			return false
 		}
 	}
+
 	return true
 }
 
@@ -430,6 +441,7 @@ func (i *baseInspector) getURIPrefix(uri string) string {
 	if len(parts) > 0 {
 		return parts[0]
 	}
+
 	return ""
 }
 

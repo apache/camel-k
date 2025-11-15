@@ -99,6 +99,7 @@ func (in *CamelCatalogStatus) GetConditions() []ResourceCondition {
 	for _, c := range in.Conditions {
 		res = append(res, &c)
 	}
+
 	return res
 }
 
@@ -110,6 +111,7 @@ func (in *CamelCatalogStatus) GetCondition(condType CamelCatalogConditionType) *
 			return &c
 		}
 	}
+
 	return nil
 }
 
@@ -253,6 +255,7 @@ func (in *CamelArtifact) getDependencyIDs(schemeID string, scope func(CamelSchem
 	for _, ad := range ads {
 		deps = append(deps, ad.GetDependencyID())
 	}
+
 	return deps
 }
 
@@ -269,6 +272,7 @@ func (in *CamelArtifact) getDependencies(schemeID string, scope func(CamelScheme
 	if scheme == nil {
 		return nil
 	}
+
 	return scope(*scheme).Dependencies
 }
 
@@ -278,6 +282,7 @@ func (in *CamelArtifact) GetScheme(schemeID string) *CamelScheme {
 			return &scheme
 		}
 	}
+
 	return nil
 }
 

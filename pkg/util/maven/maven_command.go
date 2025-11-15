@@ -52,6 +52,7 @@ func (c *Command) Do(ctx context.Context) error {
 	cmd.Env = env
 
 	Log.WithValues("MAVEN_OPTS", mavenOptions).Infof("executing: %s", strings.Join(cmd.Args, " "))
+
 	return util.RunAndLog(ctx, cmd, LogHandler, LogHandler)
 }
 
@@ -146,6 +147,7 @@ func (c *Command) optionsFromEnv() ([]string, []string) {
 		for i, e := range env {
 			if strings.HasPrefix(e, "MAVEN_OPTS=") {
 				env[i] = "MAVEN_OPTS=" + mavenOptions
+
 				break
 			}
 		}
@@ -276,6 +278,7 @@ func generateProjectSettings(context Context) error {
 func (c *Command) prepareMavenWrapper(ctx context.Context) error {
 	cmd := exec.CommandContext(ctx, "cp", "--recursive", "/usr/share/maven/mvnw/.", ".")
 	cmd.Dir = c.context.Path
+
 	return util.RunAndLog(ctx, cmd, LogHandler, LogHandler)
 }
 
@@ -314,6 +317,7 @@ func ParseGAV(gav string) (Dependency, error) {
 		dep.Version = res[3]
 		dep.Classifier = res[4]
 	}
+
 	return dep, nil
 }
 

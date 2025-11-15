@@ -101,6 +101,7 @@ var (
 
 func newConfig(storageType StorageType, contentType ContentType, value string) *Config {
 	rn, mk, mp := parseCMOrSecretValue(value)
+
 	return &Config{
 		storageType:     storageType,
 		contentType:     contentType,

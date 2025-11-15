@@ -165,6 +165,7 @@ func downloadKameletDependency(ctx context.Context, c client.Client, platform *v
 	if err := p.Command(mc).DoPom(ctx); err != nil {
 		return err
 	}
+
 	return p.Command(mc).Do(timeoutCtx)
 }
 
@@ -173,6 +174,7 @@ func extractKameletsFromDependency(ctx context.Context, version, kameletsDir str
 		fmt.Sprintf("-xf camel-kamelets-%s.jar kamelets/", version), " ")
 	cmd := exec.CommandContext(ctx, "jar", args...)
 	cmd.Dir = kameletsDir
+
 	return util.RunAndLog(ctx, cmd, maven.LogHandler, maven.LogHandler)
 }
 
@@ -195,12 +197,14 @@ func applyKamelets(ctx context.Context, c client.Client, platform *v1.Integratio
 		if err != nil {
 			erroredKam++
 			log.Errorf(err, "Error occurred whilst loading a bundled kamelet named %s", f.Name())
+
 			return nil
 		}
 		err = applier.Apply(ctx, kamelet)
 		if err != nil {
 			erroredKam++
 			log.Errorf(err, "Error occurred whilst applying a bundled kamelet named %s", kamelet.GetName())
+
 			return nil
 		}
 		appliedKam++
@@ -265,6 +269,7 @@ func kameletViewerRole(ctx context.Context, c client.Client, namespace string) e
 		"/resources/viewer/user-global-kamelet-viewer-role.yaml"); err != nil {
 		return err
 	}
+
 	return install.Resource(ctx, c, namespace, true, install.IdentityResourceCustomizer,
 		"/resources/viewer/user-global-kamelet-viewer-role-binding.yaml")
 }

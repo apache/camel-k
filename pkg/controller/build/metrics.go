@@ -137,6 +137,7 @@ func getBuildAttemptFor(build *v1.Build) (int, int) {
 		attempt += failure.Recovery.Attempt
 		attemptMax = failure.Recovery.AttemptMax
 	}
+
 	return attempt, attemptMax
 }
 
@@ -145,5 +146,6 @@ func getBuildQueuingTime(build *v1.Build) time.Time {
 	if failure := build.Status.Failure; failure != nil {
 		queuingTime = failure.Recovery.AttemptTime.Time
 	}
+
 	return queuingTime
 }

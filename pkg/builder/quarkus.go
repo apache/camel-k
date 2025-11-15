@@ -102,6 +102,7 @@ func prepareProjectWithSources(ctx *builderContext) error {
 			return fmt.Errorf("failure while writing the configuration application.properties: %w", err)
 		}
 	}
+
 	return nil
 }
 
@@ -279,6 +280,7 @@ func computeApplicationProperties(appPropertiesPath string, applicationPropertie
 			return err
 		}
 	}
+
 	return nil
 }
 

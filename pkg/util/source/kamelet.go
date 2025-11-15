@@ -32,8 +32,10 @@ func ExtractKamelet(uri string) string {
 	if len(matches) > 1 {
 		version := getKameletParam(uri, v1.KameletVersionProperty)
 		namespace := getKameletParam(uri, v1.KameletNamespaceProperty)
+
 		return GetKameletQuerystring(matches[1], version, namespace)
 	}
+
 	return ""
 }
 
@@ -51,6 +53,7 @@ func getKameletParam(uri, param string) string {
 	}
 
 	queryParams := parsedURL.Query()
+
 	return queryParams.Get(param)
 }
 
@@ -67,6 +70,7 @@ func GetKameletQuerystring(name, version, namespace string) string {
 			}
 			querystring += v1.KameletNamespaceProperty + "=" + namespace
 		}
+
 		return fmt.Sprintf("%s?%s", name, querystring)
 	}
 

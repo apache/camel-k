@@ -97,6 +97,7 @@ func (t *serviceTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 				v1.IntegrationConditionServiceNotAvailableReason,
 				err.Error(),
 			)
+
 			return false, condition, err
 		}
 
@@ -137,6 +138,7 @@ func (t *serviceTrait) Apply(e *Environment) error {
 		svc.Spec.Type = serviceType
 	}
 	e.Resources.Add(svc)
+
 	return nil
 }
 
@@ -148,6 +150,7 @@ func (t *serviceTrait) getServiceFor(itName, itNamespace string) *corev1.Service
 		labels[k] = v
 	}
 	ports := t.getServicePorts()
+
 	return &corev1.Service{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Service",
@@ -213,5 +216,6 @@ func (t *serviceTrait) getServicePorts() []corev1.ServicePort {
 		}
 		ports = append(ports, p)
 	}
+
 	return ports
 }

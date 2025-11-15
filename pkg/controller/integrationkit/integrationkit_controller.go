@@ -136,16 +136,19 @@ func add(_ context.Context, mgr manager.Manager, r reconcile.Reconciler) error {
 					list := &v1.IntegrationKitList{}
 					if err := mgr.GetClient().List(ctx, list, ctrl.InNamespace(itp.Namespace)); err != nil {
 						log.Error(err, "Failed to list integration kits")
+
 						return requests
 					}
 					for _, kit := range list.Items {
 						if v, ok := kit.Annotations[v1.PlatformSelectorAnnotation]; ok && v != itp.Name {
 							log.Infof("Integration kit %s is waiting for selected integration platform '%s' - skip it now", kit.Name, v)
+
 							continue
 						}
 						if v, ok := kit.Annotations[v1.OperatorIDAnnotation]; ok && v != itp.Name {
 							// kit waiting for another platform to become ready - skip here
 							log.Debugf("Integration kit %s is waiting for another integration platform '%s' - skip it now", kit.Name, v)
+
 							continue
 						}
 						if kit.Status.Phase == v1.IntegrationKitPhaseWaitingForPlatform {
@@ -194,9 +197,11 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 	// Make sure the operator is allowed to act on namespace
 	if ok, err := platform.IsOperatorAllowedOnNamespace(ctx, r.client, request.Namespace); err != nil {
 		log.Debugf("Error occurred when checking whether operator is allowed in namespace %s: %v", request.Namespace, err)
+
 		return reconcile.Result{}, err
 	} else if !ok {
 		rlog.Info("Ignoring request because namespace is locked")
+
 		return reconcile.Result{}, nil
 	}
 
@@ -217,6 +222,7 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 	// Only process resources assigned to the operator
 	if !platform.IsOperatorHandlerConsideringLock(ctx, r.client, request.Namespace, &instance) {
 		rlog.Info("Ignoring request because resource is not assigned to current operator")
+
 		return reconcile.Result{}, nil
 	}
 
@@ -229,6 +235,7 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 		//nolint: staticcheck
 		if target.IsExternal() || target.IsSynthetic() {
 			target.Status.Phase = v1.IntegrationKitPhaseInitialization
+
 			return r.update(ctx, &instance, target)
 		}
 
@@ -279,12 +286,14 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 
 		if err != nil {
 			camelevent.NotifyIntegrationKitError(ctx, r.client, r.recorder, &instance, newTarget, err)
+
 			return reconcile.Result{}, err
 		}
 
 		if newTarget != nil {
 			if res, err := r.update(ctx, &instance, newTarget); err != nil {
 				camelevent.NotifyIntegrationKitError(ctx, r.client, r.recorder, &instance, newTarget, err)
+
 				return res, err
 			}
 

@@ -78,6 +78,7 @@ func (t *kedaTrait) Apply(e *Environment) error {
 		e.Resources.Add(auth)
 	}
 	e.Resources.Add(scaledObject)
+
 	return nil
 }
 
@@ -140,6 +141,7 @@ func (t *kedaTrait) getScaleTarget(it *v1.Integration) *corev1.ObjectReference {
 			}
 		}
 	}
+
 	return &corev1.ObjectReference{
 		APIVersion: it.APIVersion,
 		Kind:       it.Kind,

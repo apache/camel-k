@@ -47,6 +47,7 @@ func newCmdDelete(rootCmdOptions *RootCmdOptions) (*cobra.Command, *deleteCmdOpt
 			if err := options.validate(args); err != nil {
 				return err
 			}
+
 			return options.run(cmd, args)
 		},
 	}
@@ -133,6 +134,7 @@ func deletePipeOrIntegration(ctx context.Context, cmd *cobra.Command, c client.C
 	if deletedPipes {
 		// Deleting Pipe will automatically clean up the integration
 		fmt.Fprintln(cmd.OutOrStdout(), "Pipe "+pipe+" deleted")
+
 		return nil
 	}
 
@@ -160,6 +162,7 @@ func deletePipeIfExists(ctx context.Context, c client.Client, integration *v1.In
 		// Simply skip if binding doesn't exist (could be deleted already)
 		return false, name, nil
 	}
+
 	return err == nil, name, err
 }
 
@@ -174,5 +177,6 @@ func findCreator(integration *v1.Integration) (string, string) {
 			}
 		}
 	}
+
 	return kind, name
 }

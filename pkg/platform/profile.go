@@ -52,6 +52,7 @@ func findIntegrationProfile(ctx context.Context, c k8sclient.Reader, o k8sclient
 				profile, err = kubernetes.GetIntegrationProfile(ctx, c, profileName, operatorNamespace)
 			}
 		}
+
 		return profile, err
 	}
 

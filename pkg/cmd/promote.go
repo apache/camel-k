@@ -80,6 +80,7 @@ func (o *promoteCmdOptions) validate(_ *cobra.Command, args []string) error {
 		return errors.New("source and destination namespaces must be different in order to avoid promoted Integration/Pipe " +
 			"clashes with the source Integration/Pipe")
 	}
+
 	return nil
 }
 
@@ -135,6 +136,7 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 	// Image only mode
 	if o.Image {
 		showImageOnly(cmd, sourceIntegration)
+
 		return nil
 	}
 
@@ -153,6 +155,7 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 				return err
 			}
 			fmt.Fprintln(cmd.OutOrStdout(), `Exported a Kustomize based Gitops directory to `+o.ToGitOpsDir+` for "`+name+`" Pipe`)
+
 			return nil
 		}
 		replaced, err := o.replaceResource(destPipe)
@@ -164,6 +167,7 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 		} else {
 			fmt.Fprintln(cmd.OutOrStdout(), `Promoted Pipe "`+name+`" updated`)
 		}
+
 		return nil
 	}
 
@@ -178,6 +182,7 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 		fmt.Fprintln(cmd.OutOrStdout(), `Exported a Kustomize based Gitops directory to `+o.ToGitOpsDir+` for "`+name+`" Integration`)
+
 		return nil
 	}
 
@@ -190,6 +195,7 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 	} else {
 		fmt.Fprintln(cmd.OutOrStdout(), `Promoted Integration "`+name+`" updated`)
 	}
+
 	return nil
 }
 
@@ -315,6 +321,7 @@ func cloneAnnotations(ann map[string]string, operatorID string) map[string]strin
 	if !operatorIDAnnotationSet && operatorID != "" {
 		newMap[v1.OperatorIDAnnotation] = operatorID
 	}
+
 	return newMap
 }
 
@@ -324,6 +331,7 @@ func cloneLabels(lbs map[string]string) map[string]string {
 	for k, v := range lbs {
 		newMap[k] = v
 	}
+
 	return newMap
 }
 
@@ -598,6 +606,7 @@ func getPipePatch(basePipe *v1.Pipe) *v1.Pipe {
 			}
 		}
 	}
+
 	return &patchedPipe
 }
 

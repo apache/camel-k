@@ -98,6 +98,7 @@ func (action *initializeAction) image(ctx context.Context, env *trait.Environmen
 			// If the catalog is not available, likely it was required to be created
 			// by Integration trait, so we'll need to wait for it to be available
 			kit.Status.Phase = v1.IntegrationKitPhaseWaitingForCatalog
+
 			return nil
 		}
 
@@ -125,6 +126,7 @@ func (action *initializeAction) image(ctx context.Context, env *trait.Environmen
 
 	if catalog.Status.Phase != v1.CamelCatalogPhaseReady {
 		kit.Status.Phase = v1.IntegrationKitPhaseWaitingForCatalog
+
 		return nil
 	}
 

@@ -141,6 +141,7 @@ func (t *gcTrait) Apply(e *Environment) error {
 			resourceLabels[v1.IntegrationLabel] = env.Integration.Name
 			resource.SetLabels(resourceLabels)
 		})
+
 		return nil
 	})
 
@@ -213,6 +214,7 @@ func (t *gcTrait) deleteEachOf(ctx context.Context, deletableGVKs map[schema.Gro
 			if !k8serrors.IsNotFound(err) {
 				return fmt.Errorf("cannot list child resources: %w", err)
 			}
+
 			continue
 		}
 
@@ -243,6 +245,7 @@ func (t *gcTrait) canBeDeleted(e *Environment, u unstructured.Unstructured) bool
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -257,6 +260,7 @@ func (t *gcTrait) getDeletableTypes(e *Environment) (map[schema.GroupVersionKind
 	if !rateLimiter.Allow() {
 		// Return the cached set of garbage collectable GVKs.
 		maps.Copy(GVKs, collectableGVKs)
+
 		return GVKs, nil
 	}
 
@@ -307,6 +311,7 @@ func (t *gcTrait) getDeletableTypes(e *Environment) (map[schema.GroupVersionKind
 						if (resourceGroup == ruleGroup || ruleGroup == "*") && (resource.Name == ruleResource || ruleResource == "*") {
 							GVK := schema.FromAPIVersionAndKind(APIResourceList.GroupVersion, resource.Kind)
 							GVKs[GVK] = struct{}{}
+
 							break rule
 						}
 					}

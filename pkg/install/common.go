@@ -52,6 +52,7 @@ var RemoveIngressRoleCustomizer = func(object ctrl.Object) ctrl.Object {
 			}
 		}
 	}
+
 	return object
 }
 
@@ -79,6 +80,7 @@ func ObjectOrCollect(ctx context.Context, c client.Client, namespace string, col
 	if collection != nil {
 		// Adding to the collection before setting the namespace
 		collection.Add(obj)
+
 		return nil
 	}
 
@@ -96,6 +98,7 @@ func ObjectOrCollect(ctx context.Context, c client.Client, namespace string, col
 				return err
 			}
 		}
+
 		return nil
 	}
 

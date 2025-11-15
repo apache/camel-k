@@ -42,6 +42,7 @@ func newCmdRebuild(rootCmdOptions *RootCmdOptions) (*cobra.Command, *rebuildCmdO
 			if err := options.validate(args); err != nil {
 				return err
 			}
+
 			return options.run(cmd, args)
 		},
 	}
@@ -89,6 +90,7 @@ func (o *rebuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Fprintln(cmd.OutOrStdout(), len(integrations), "integrations have been rebuilt")
+
 	return nil
 }
 
@@ -97,6 +99,7 @@ func (o *rebuildCmdOptions) listAllIntegrations(c client.Client) ([]v1.Integrati
 	if err := c.List(o.Context, &list, k8sclient.InNamespace(o.Namespace)); err != nil {
 		return nil, fmt.Errorf("could not retrieve integrations from namespace %s: %w", o.Namespace, err)
 	}
+
 	return list.Items, nil
 }
 
@@ -108,5 +111,6 @@ func (o *rebuildCmdOptions) rebuildIntegrations(c k8sclient.StatusClient, integr
 			return fmt.Errorf("could not rebuild integration %s in namespace %s: %w", it.Name, o.Namespace, err)
 		}
 	}
+
 	return nil
 }

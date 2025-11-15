@@ -58,6 +58,7 @@ func (action *monitorAction) Handle(ctx context.Context, kit *v1.IntegrationKit)
 			)
 			action.L.Infof("WARN: Synthetic IntegrationKit feature is deprecated and will be removed soon.")
 		}
+
 		return kit, nil
 	}
 	hash, err := digest.ComputeForIntegrationKit(kit)
@@ -99,6 +100,7 @@ func (action *monitorAction) checkTraitAnnotationsDeprecatedNotice(integrationKi
 					"WARN: annotation traits configuration is deprecated and will be removed soon. Use .spec.traits configuration for %s integration kit instead.",
 					integrationKit.Name,
 				)
+
 				return
 			}
 		}

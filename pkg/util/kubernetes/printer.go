@@ -46,5 +46,6 @@ func (p *CLIPrinter) PrintObj(obj runtime.Object, output io.Writer) error {
 		return err
 	}
 	fmt.Fprint(output, string(data))
+
 	return nil
 }

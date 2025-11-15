@@ -48,6 +48,7 @@ func Resource(name string) ([]byte, error) {
 	data, err := io.ReadAll(file)
 	if err != nil {
 		_ = file.Close()
+
 		return nil, fmt.Errorf("cannot access resource file %s: %w", name, err)
 	}
 
@@ -57,6 +58,7 @@ func Resource(name string) ([]byte, error) {
 // ResourceAsString returns the named resource content as string.
 func ResourceAsString(name string) (string, error) {
 	data, err := Resource(name)
+
 	return string(data), err
 }
 
@@ -123,11 +125,13 @@ func Resources(dirName string) ([]string, error) {
 	}
 	if !info.IsDir() {
 		util.CloseQuietly(dir)
+
 		return nil, fmt.Errorf("location %s is not a directory: %w", dirName, err)
 	}
 	files, err := resources.ReadDir(dirName)
 	if err != nil {
 		util.CloseQuietly(dir)
+
 		return nil, fmt.Errorf("error while listing files on directory %s: %w", dirName, err)
 	}
 	var res []string

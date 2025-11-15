@@ -162,6 +162,7 @@ func ComputeForIntegration(integration *v1.Integration, configmapVersions []stri
 
 	// Add a letter at the beginning and use URL safe encoding
 	digest := "v" + base64.RawURLEncoding.EncodeToString(hash.Sum(nil))
+
 	return digest, nil
 }
 
@@ -175,6 +176,7 @@ func computeForTraits(hash hash.Hash, traits v1.Traits) error {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -251,6 +253,7 @@ func ComputeForIntegrationKit(kit *v1.IntegrationKit) (string, error) {
 
 	// Add a letter at the beginning and use URL safe encoding
 	digest := "v" + base64.RawURLEncoding.EncodeToString(hash.Sum(nil))
+
 	return digest, nil
 }
 
@@ -289,6 +292,7 @@ func ComputeForSource(s v1.SourceSpec) (string, error) {
 
 	// Add a letter at the beginning and use URL safe encoding
 	digest := "v" + base64.RawURLEncoding.EncodeToString(hash.Sum(nil))
+
 	return digest, nil
 }
 
@@ -300,6 +304,7 @@ func sortedTraitsMapKeys(m map[string]map[string]interface{}) []string {
 		i++
 	}
 	sort.Strings(res)
+
 	return res
 }
 
@@ -312,6 +317,7 @@ func sortedTraitAnnotationsKeys(it *v1.Integration) []string {
 		}
 	}
 	sort.Strings(res)
+
 	return res
 }
 
@@ -332,5 +338,6 @@ func ComputeSHA1(elem ...string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return base64.StdEncoding.EncodeToString(h.Sum(nil)), nil
 }

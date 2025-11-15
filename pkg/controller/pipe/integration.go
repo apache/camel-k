@@ -254,6 +254,7 @@ func configureBinding(integration *v1.Integration, bindings ...*bindings.Binding
 			integration.Spec.AddConfigurationProperty(entry)
 		}
 	}
+
 	return nil
 }
 
@@ -282,5 +283,6 @@ func determineTraitProfile(ctx context.Context, c client.Client, binding *v1.Pip
 			return plProfile, nil
 		}
 	}
+
 	return v1.DefaultTraitProfile, nil
 }

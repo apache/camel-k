@@ -63,6 +63,7 @@ func proxyGetHTTPProbe(ctx context.Context, c kubernetes.Interface, p *corev1.Pr
 	defer cancel()
 
 	params := make(map[string]string)
+
 	return c.CoreV1().
 		Pods(pod.Namespace).
 		ProxyGet(strings.ToLower(string(p.HTTPGet.Scheme)), pod.Name, strconv.Itoa(port), p.HTTPGet.Path, params).
@@ -88,6 +89,7 @@ func extractPortNumber(port intstr.IntOrString, container *corev1.Container) (in
 	if number > 0 && number < 65536 {
 		return number, nil
 	}
+
 	return number, fmt.Errorf("invalid port number: %v", number)
 }
 
@@ -98,5 +100,6 @@ func findPortByName(container *corev1.Container, portName string) (int, error) {
 			return int(port.ContainerPort), nil
 		}
 	}
+
 	return 0, fmt.Errorf("port %s not found", portName)
 }

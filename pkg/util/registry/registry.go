@@ -41,6 +41,7 @@ func MountSecretRegistryConfig(ctx context.Context, c client.Client, namespace, 
 		if removeErr := os.RemoveAll(dir); removeErr != nil {
 			err = multierr.Append(err, removeErr)
 		}
+
 		return "", err
 	}
 
@@ -49,9 +50,11 @@ func MountSecretRegistryConfig(ctx context.Context, c client.Client, namespace, 
 			if removeErr := os.RemoveAll(dir); removeErr != nil {
 				err = multierr.Append(err, removeErr)
 			}
+
 			return "", err
 		}
 	}
+
 	return dir, nil
 }
 
@@ -59,5 +62,6 @@ func remap(name string) string {
 	if name == ".dockerconfigjson" {
 		return "config.json"
 	}
+
 	return name
 }

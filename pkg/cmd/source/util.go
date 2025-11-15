@@ -38,6 +38,7 @@ func IsLocalAndFileExists(uri string) (bool, error) {
 		// it's not a local file as it matches one of the supporting schemes
 		return false, nil
 	}
+
 	return isExistingFile(uri)
 }
 

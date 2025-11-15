@@ -70,11 +70,13 @@ func (action *errorRecoveryAction) Handle(ctx context.Context, build *v1.Build) 
 				AttemptMax: defaultRecoveryMaxAttempt,
 			},
 		}
+
 		return build, nil
 	}
 
 	if build.Status.Failure.Recovery.Attempt >= build.Status.Failure.Recovery.AttemptMax {
 		build.Status.Phase = v1.BuildPhaseError
+
 		return build, nil
 	}
 

@@ -59,6 +59,7 @@ func (action *monitorAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.Pip
 	it := v1.Integration{}
 	if err := action.client.Get(ctx, key, &it); err != nil && k8serrors.IsNotFound(err) {
 		action.L.Info("Re-initializing Pipe")
+
 		return initializePipe(ctx, action.client, action.L, pipe)
 	} else if err != nil {
 		return nil, fmt.Errorf("could not load integration for Pipe %q: %w", pipe.Name, err)
@@ -87,6 +88,7 @@ func (action *monitorAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.Pip
 			"IntegrationError",
 			err,
 		)
+
 		return pipe, err
 	}
 
@@ -110,6 +112,7 @@ func (action *monitorAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.Pip
 			"",
 			"",
 		)
+
 		return target, nil
 	}
 
@@ -199,6 +202,7 @@ func (action *monitorAction) checkTraitAnnotationsDeprecatedNotice(pipe *v1.Pipe
 					"WARN: annotation traits configuration is deprecated and will be removed soon. Use .spec.traits configuration for %s pipe instead.",
 					pipe.Name,
 				)
+
 				return
 			}
 		}

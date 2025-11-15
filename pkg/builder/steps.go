@@ -66,6 +66,7 @@ func StepsFrom(ids ...string) ([]Step, error) {
 		}
 		steps = append(steps, s)
 	}
+
 	return steps, nil
 }
 
@@ -74,6 +75,7 @@ func StepIDsFor(steps ...Step) []string {
 	for _, step := range steps {
 		IDs = append(IDs, step.ID())
 	}
+
 	return IDs
 }
 

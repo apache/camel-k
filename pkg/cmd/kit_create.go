@@ -97,6 +97,7 @@ func (command *kitCreateCommandOptions) run(cmd *cobra.Command, args []string) e
 
 		if kit.Labels[v1.IntegrationKitTypeLabel] == v1.IntegrationKitTypePlatform {
 			fmt.Fprintln(cmd.OutOrStdout(), `integration kit "`+kit.Name+`" is not editable`)
+
 			return nil
 		}
 	}
@@ -161,6 +162,7 @@ func (command *kitCreateCommandOptions) run(cmd *cobra.Command, args []string) e
 		err = c.Get(command.Context, key, existing)
 		if err != nil {
 			fmt.Fprint(cmd.ErrOrStderr(), err.Error())
+
 			return nil
 		}
 		kit.ResourceVersion = existing.ResourceVersion
@@ -169,6 +171,7 @@ func (command *kitCreateCommandOptions) run(cmd *cobra.Command, args []string) e
 
 	if err != nil {
 		fmt.Fprint(cmd.ErrOrStderr(), err.Error())
+
 		return nil
 	}
 

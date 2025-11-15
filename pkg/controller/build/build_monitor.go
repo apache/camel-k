@@ -45,6 +45,7 @@ func (bm *Monitor) canSchedule(ctx context.Context, c ctrl.Reader, build *v1.Bui
 	var runningBuildsTotal int32
 	runningBuilds.Range(func(_, v interface{}) bool {
 		runningBuildsTotal++
+
 		return true
 	})
 

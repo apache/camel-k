@@ -65,6 +65,7 @@ func (a *ServerOrClientSideApplier) Apply(ctx context.Context, object ctrl.Objec
 	})
 	if err != nil {
 		a.tryServerSideApply = sync.Once{}
+
 		return err
 	}
 	v := a.hasServerSideApply.Load()
@@ -75,6 +76,7 @@ func (a *ServerOrClientSideApplier) Apply(ctx context.Context, object ctrl.Objec
 	} else {
 		return a.clientSideApply(ctx, object)
 	}
+
 	return nil
 }
 
@@ -113,6 +115,7 @@ func (a *ServerOrClientSideApplier) clientSideApply(ctx context.Context, resourc
 		// Update the resource with the object returned from the API server
 		return unstructuredToRuntimeObject(object, resource)
 	}
+
 	return a.Client.Patch(ctx, resource, ctrl.RawPatch(types.MergePatchType, p))
 }
 
@@ -136,5 +139,6 @@ func unstructuredToRuntimeObject(u *unstructured.Unstructured, obj ctrl.Object) 
 	if err != nil {
 		return err
 	}
+
 	return json.Unmarshal(data, obj)
 }

@@ -46,6 +46,7 @@ func (b *IntegrationProfileBuildSpec) GetTimeout() metav1.Duration {
 	if b.Timeout == nil {
 		return metav1.Duration{}
 	}
+
 	return *b.Timeout
 }
 

@@ -68,6 +68,7 @@ func (t *prometheusTrait) Apply(e *Environment) error {
 			v1.IntegrationConditionContainerNotAvailableReason,
 			"integration container not available",
 		)
+
 		return nil
 	}
 
@@ -109,6 +110,7 @@ func getPortName(portName string) string {
 	if portName == defaultKnativeContainerPortName {
 		return "user-port"
 	}
+
 	return portName
 }
 

@@ -71,6 +71,7 @@ func (t *jibTask) Do(ctx context.Context) v1.BuildStatus {
 		// because transitive resolution is the same even if spec differs.
 		status.Image = status.BaseImage
 		log.Infof("No new image to build, reusing existing image %s", status.Image)
+
 		return *status
 	}
 	mavenDir := strings.ReplaceAll(contextDir, ContextDir, "maven")
@@ -103,6 +104,7 @@ func (t *jibTask) Do(ctx context.Context) v1.BuildStatus {
 	if myerror != nil {
 		log.Errorf(myerror, "jib integration image containerization did not run successfully")
 		_ = cleanRegistryConfig(registryConfigDir)
+
 		return status.Failed(myerror)
 	} else {
 		log.Debug("jib integration image containerization did run successfully")
@@ -112,6 +114,7 @@ func (t *jibTask) Do(ctx context.Context) v1.BuildStatus {
 		mavenDigest, errDigest := util.ReadFile(filepath.Join(mavenDir, jib.JibDigestFile))
 		if errDigest != nil {
 			_ = cleanRegistryConfig(registryConfigDir)
+
 			return status.Failed(errDigest)
 		}
 		status.Digest = string(mavenDigest)
@@ -133,6 +136,7 @@ func cleanRegistryConfig(registryConfigDir string) error {
 	if err := os.RemoveAll(registryConfigDir); err != nil {
 		return err
 	}
+
 	return nil
 }
 

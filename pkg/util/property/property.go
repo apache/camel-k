@@ -37,6 +37,7 @@ func EncodePropertyFileEntry(key, value string) (string, error) {
 		return "", err
 	}
 	pair := strings.TrimSuffix(buf.String(), "\n")
+
 	return pair, nil
 }
 
@@ -50,6 +51,7 @@ func EncodePropertyFile(sourceProperties map[string]string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("could not compute application properties: %w", err)
 	}
+
 	return buf.String(), nil
 }
 
@@ -63,5 +65,6 @@ func SplitPropertyFileEntry(entry string) (string, string) {
 	if len(pair) == 2 {
 		v = strings.TrimSpace(pair[1])
 	}
+
 	return k, v
 }

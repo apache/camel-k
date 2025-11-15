@@ -78,6 +78,7 @@ func (c *Collection) AsKubernetesList() *corev1.List {
 		}
 		lst.Items = append(lst.Items, raw)
 	}
+
 	return &lst
 }
 
@@ -128,6 +129,7 @@ func (c *Collection) GetDeployment(filter func(*appsv1.Deployment) bool) *appsv1
 			retValue = re
 		}
 	})
+
 	return retValue
 }
 
@@ -153,6 +155,7 @@ func (c *Collection) RemoveDeployment(filter func(*appsv1.Deployment) bool) *app
 		if conv, ok := res.(*appsv1.Deployment); ok {
 			return filter(conv)
 		}
+
 		return false
 	})
 	if res == nil {
@@ -183,6 +186,7 @@ func (c *Collection) GetConfigMap(filter func(*corev1.ConfigMap) bool) *corev1.C
 			retValue = re
 		}
 	})
+
 	return retValue
 }
 
@@ -192,6 +196,7 @@ func (c *Collection) RemoveConfigMap(filter func(*corev1.ConfigMap) bool) *corev
 		if conv, ok := res.(*corev1.ConfigMap); ok {
 			return filter(conv)
 		}
+
 		return false
 	})
 	if res == nil {
@@ -222,6 +227,7 @@ func (c *Collection) GetSecret(filter func(*corev1.Secret) bool) *corev1.Secret 
 			retValue = re
 		}
 	})
+
 	return retValue
 }
 
@@ -242,6 +248,7 @@ func (c *Collection) GetService(filter func(*corev1.Service) bool) *corev1.Servi
 			retValue = re
 		}
 	})
+
 	return retValue
 }
 
@@ -250,6 +257,7 @@ func (c *Collection) GetUserServiceForIntegration(integration *v1.Integration) *
 	if integration == nil {
 		return nil
 	}
+
 	return c.GetService(func(s *corev1.Service) bool {
 		return s.Labels != nil &&
 			s.Labels[v1.IntegrationLabel] == integration.Name &&
@@ -262,6 +270,7 @@ func (c *Collection) GetServiceForIntegration(integration *v1.Integration) *core
 	if integration == nil {
 		return nil
 	}
+
 	return c.GetService(func(s *corev1.Service) bool {
 		return s.Labels != nil && s.Labels[v1.IntegrationLabel] == integration.Name
 	})
@@ -275,6 +284,7 @@ func (c *Collection) GetKnativeService(filter func(*serving.Service) bool) *serv
 			retValue = re
 		}
 	})
+
 	return retValue
 }
 
@@ -286,6 +296,7 @@ func (c *Collection) GetKnativeTrigger(filter func(*eventing.Trigger) bool) *eve
 			retValue = re
 		}
 	})
+
 	return retValue
 }
 
@@ -297,6 +308,7 @@ func (c *Collection) GetKnativeSubscription(filter func(subscription *messaging.
 			retValue = re
 		}
 	})
+
 	return retValue
 }
 
@@ -317,6 +329,7 @@ func (c *Collection) GetRoute(filter func(*routev1.Route) bool) *routev1.Route {
 			retValue = re
 		}
 	})
+
 	return retValue
 }
 
@@ -328,6 +341,7 @@ func (c *Collection) GetCronJob(filter func(job *batchv1.CronJob) bool) *batchv1
 			retValue = re
 		}
 	})
+
 	return retValue
 }
 
@@ -398,6 +412,7 @@ func (c *Collection) HasKnativeTrigger(filter func(trigger *eventing.Trigger) bo
 			retValue = &found
 		}
 	})
+
 	return retValue != nil && *retValue
 }
 
@@ -463,6 +478,7 @@ func (c *Collection) GetController(filter func(object ctrl.Object) bool) ctrl.Ob
 	if cj != nil {
 		return cj
 	}
+
 	return nil
 }
 
@@ -532,9 +548,11 @@ func (c *Collection) Remove(selector func(runtime.Object) bool) runtime.Object {
 	for idx, res := range c.items {
 		if selector(res) {
 			c.items = append(c.items[0:idx], c.items[idx+1:]...)
+
 			return res
 		}
 	}
+
 	return nil
 }
 
@@ -553,5 +571,6 @@ func (c *Collection) GetPodMonitor(filter func(*monitoringv1.PodMonitor) bool) *
 			retValue = podMonitor
 		}
 	})
+
 	return retValue
 }
