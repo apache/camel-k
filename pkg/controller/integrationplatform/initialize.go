@@ -19,7 +19,7 @@ package integrationplatform
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	platformutil "github.com/apache/camel-k/v2/pkg/platform"
@@ -56,7 +56,7 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1.Integra
 			"MissingRuntimeVersionSpec",
 			"Runtime version missing from build spec")
 
-		return platform, fmt.Errorf("runtime version missing from build spec")
+		return platform, errors.New("runtime version missing from build spec")
 	} else {
 		platform.Status.Phase = v1.IntegrationPlatformPhaseCreating
 	}

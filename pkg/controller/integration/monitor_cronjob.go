@@ -121,5 +121,5 @@ func (c *cronJobController) hasTemplateIntegrationLabel() bool {
 }
 
 func (c *cronJobController) getControllerName() string {
-	return fmt.Sprintf("CronJob/%s", c.obj.Name)
+	return "CronJob/" + c.obj.Name
 }

@@ -18,7 +18,6 @@ limitations under the License.
 package v1
 
 import (
-	"fmt"
 	"path/filepath"
 	"strconv"
 
@@ -217,7 +216,7 @@ func (in *IntegrationKitStatus) GetDependenciesPaths() *sets.Set {
 	s := sets.NewSet()
 	for _, dep := range in.Artifacts {
 		path := filepath.Dir(dep.Target)
-		s.Add(fmt.Sprintf("%s/*", path))
+		s.Add(path + "/*")
 	}
 
 	return s

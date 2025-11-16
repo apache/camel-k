@@ -20,6 +20,7 @@ package pipe
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"sort"
 
@@ -146,10 +147,10 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, pipe *v1.Pipe) (
 	}
 
 	if to.Step == nil && to.URI == "" {
-		return nil, fmt.Errorf("illegal step definition for sink step: either Step or URI should be provided")
+		return nil, errors.New("illegal step definition for sink step: either Step or URI should be provided")
 	}
 	if from.URI == "" {
-		return nil, fmt.Errorf("illegal step definition for source step: URI should be provided")
+		return nil, errors.New("illegal step definition for source step: URI should be provided")
 	}
 	for index, step := range steps {
 		if step.Step == nil && step.URI == "" {

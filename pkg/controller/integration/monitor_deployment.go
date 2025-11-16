@@ -96,5 +96,5 @@ func (c *deploymentController) hasTemplateIntegrationLabel() bool {
 }
 
 func (c *deploymentController) getControllerName() string {
-	return fmt.Sprintf("Deployment/%s", c.obj.Name)
+	return "Deployment/" + c.obj.Name
 }

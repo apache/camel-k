@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -201,7 +202,7 @@ func (t *cronTrait) Apply(e *Environment) error {
 		}
 		cronComponentArtifact := e.CamelCatalog.GetArtifactByScheme("timer")
 		if cronComponentArtifact == nil {
-			return fmt.Errorf("no timer artifact has been found in camel catalog")
+			return errors.New("no timer artifact has been found in camel catalog")
 		}
 		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, cronComponentArtifact.GetDependencyID())
 	}

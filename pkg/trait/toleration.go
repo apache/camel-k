@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"errors"
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
@@ -49,7 +50,7 @@ func (t *tolerationTrait) Configure(e *Environment) (bool, *TraitCondition, erro
 	}
 
 	if len(t.Taints) == 0 {
-		return false, nil, fmt.Errorf("no taint was provided")
+		return false, nil, errors.New("no taint was provided")
 	}
 
 	return e.IntegrationInRunningPhases(), nil, nil

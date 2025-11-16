@@ -93,7 +93,7 @@ func modelineRegexp(lang v1.Language) *regexp.Regexp {
 
 func inferLanguage(fileName string) v1.Language {
 	for _, l := range v1.Languages {
-		if strings.HasSuffix(fileName, fmt.Sprintf(".%s", string(l))) {
+		if strings.HasSuffix(fileName, "."+string(l)) {
 			return l
 		}
 	}

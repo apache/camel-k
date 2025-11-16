@@ -105,7 +105,7 @@ func (g *traitMetaDataGen) getTraitID(t *types.Type) string {
 			return matches[1]
 		}
 	}
-	panic(fmt.Sprintf("trait ID not found in type %s", t.Name.Name))
+	panic("trait ID not found in type " + t.Name.Name)
 }
 
 func (g *traitMetaDataGen) buildDescription(t *types.Type, traitID string, td *traitMetaData) {

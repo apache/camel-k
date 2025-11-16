@@ -19,7 +19,7 @@ package trait
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -630,7 +630,7 @@ func (e *Environment) consumeSourcesMeta(
 		consumeSources(sources)
 	}
 	if e.CamelCatalog == nil {
-		return false, fmt.Errorf("cannot extract metadata from sources. Camel Catalog is null")
+		return false, errors.New("cannot extract metadata from sources. Camel Catalog is null")
 	}
 	meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
 	if err != nil {

@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -53,7 +54,7 @@ func (t *affinityTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 	}
 
 	if ptr.Deref(t.PodAffinity, false) && ptr.Deref(t.PodAntiAffinity, false) {
-		return false, nil, fmt.Errorf("both pod affinity and pod anti-affinity can't be set simultaneously")
+		return false, nil, errors.New("both pod affinity and pod anti-affinity can't be set simultaneously")
 	}
 
 	return e.IntegrationInRunningPhases(), nil, nil

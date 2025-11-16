@@ -154,10 +154,8 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 					"ImageDigestAvailable",
 					corev1.ConditionFalse,
 					"ImageDigestAvailable",
-					fmt.Sprintf(
-						"%s publishing task completed but no digest is available in container status. Make sure that the process successfully push the image to the registry and write its digest to /dev/termination-log",
-						publishTaskName(build.Spec.Tasks),
-					),
+					publishTaskName(build.Spec.Tasks)+
+						" publishing task completed but no digest is available in container status. Make sure that the process successfully push the image to the registry and write its digest to /dev/termination-log",
 				)
 			}
 		}

@@ -177,7 +177,7 @@ func (c *Catalog) executedTraitCondition(executedTrait []Trait) (*TraitCondition
 		return nil, traits, err
 	}
 
-	message := fmt.Sprintf("Applied traits: %s", strings.Join(traitIds, ","))
+	message := "Applied traits: " + strings.Join(traitIds, ",")
 	c.L.Debug(message)
 
 	return NewIntegrationCondition("", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, TraitConfigurationReason, message), traits, nil

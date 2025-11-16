@@ -18,8 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"fmt"
-
 	"github.com/Masterminds/semver"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -155,7 +153,7 @@ func (t *telemetryTrait) setCatalogConfiguration(e *Environment) {
 		e.ApplicationProperties["camel.k.telemetry.endpoint"] = t.Endpoint
 	}
 	if t.ServiceName != "" {
-		e.ApplicationProperties["camel.k.telemetry.serviceName"] = fmt.Sprintf("service.name=%s", t.ServiceName)
+		e.ApplicationProperties["camel.k.telemetry.serviceName"] = "service.name=" + t.ServiceName
 	}
 	if t.Sampler != "" {
 		e.ApplicationProperties["camel.k.telemetry.sampler"] = t.Sampler
@@ -218,8 +216,8 @@ func (t *telemetryTrait) setRuntimeProviderQuarkus315Properties(e *Environment) 
 		e.ApplicationProperties[propEndpoint] = t.Endpoint
 	}
 	if t.ServiceName != "" {
-		e.ApplicationProperties["camel.k.telemetry.serviceName"] = fmt.Sprintf("service.name=%s", t.ServiceName)
-		e.ApplicationProperties[propServiceName] = fmt.Sprintf("service.name=%s", t.ServiceName)
+		e.ApplicationProperties["camel.k.telemetry.serviceName"] = "service.name=" + t.ServiceName
+		e.ApplicationProperties[propServiceName] = "service.name=" + t.ServiceName
 	}
 	if t.Sampler != "" {
 		e.ApplicationProperties["camel.k.telemetry.sampler"] = t.Sampler

@@ -331,13 +331,13 @@ func getMavenContext(args, options []string) string {
 	for _, arg := range args {
 		arg = strings.TrimSpace(arg)
 		if arg != "package" && len(arg) != 0 {
-			mavenContext += fmt.Sprintf("%s\n", arg)
+			mavenContext += arg + "\n"
 		}
 	}
 	for _, opt := range options {
 		opt = strings.TrimSpace(opt)
 		if len(opt) != 0 {
-			mavenContext += fmt.Sprintf("%s\n", opt)
+			mavenContext += opt + "\n"
 		}
 	}
 

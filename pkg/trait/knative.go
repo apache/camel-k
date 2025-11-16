@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"reflect"
@@ -127,7 +128,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 				corev1.ConditionFalse,
 				v1.IntegrationConditionKnativeNotInstalledReason,
 				"integration cannot run. Knative is not installed in the cluster",
-			), fmt.Errorf("integration cannot run. Knative is not installed in the cluster")
+			), errors.New("integration cannot run. Knative is not installed in the cluster")
 		}
 
 		if t.SinkBinding == nil {
@@ -207,7 +208,7 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 			if err != nil {
 				return err
 			}
-			path := fmt.Sprintf("/channels/%s", ref.Name)
+			path := "/channels/" + ref.Name
 			meta := map[string]string{
 				knativeapi.CamelMetaEndpointKind:      string(knativeapi.CamelEndpointKindSource),
 				knativeapi.CamelMetaKnativeAPIVersion: ref.APIVersion,
@@ -328,7 +329,7 @@ func (t *knativeTrait) configureEvents(e *Environment, env *knativeapi.CamelEnvi
 				//nolint:goconst
 				serviceName = "default"
 			}
-			servicePath := fmt.Sprintf("/events/%s", eventType)
+			servicePath := "/events/" + eventType
 			if triggerErr := t.createTrigger(e, ref, eventType, servicePath); triggerErr != nil {
 				return triggerErr
 			}

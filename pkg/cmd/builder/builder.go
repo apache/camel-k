@@ -46,7 +46,7 @@ const terminationMessagePath = "/dev/termination-log"
 var log = logger.WithName("builder")
 
 func printVersion() {
-	log.Info(fmt.Sprintf("Go Version: %s", runtime.Version()))
+	log.Info("Go Version: " + runtime.Version())
 	log.Info(fmt.Sprintf("Go OS/Arch: %s/%s", runtime.GOOS, runtime.GOARCH))
 	log.Info(fmt.Sprintf("Camel K Version: %v", defaults.Version))
 }

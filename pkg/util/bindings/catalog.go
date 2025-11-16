@@ -63,7 +63,7 @@ func Translate(ctx BindingContext, endpointCtx EndpointContext, endpoint v1.Endp
 		errorMessage = fmt.Sprintf("could not find any suitable binding provider for %s/%s %s in namespace %s. Bindings available: %q",
 			endpoint.Ref.APIVersion, endpoint.Ref.Kind, endpoint.Ref.Name, endpoint.Ref.Namespace, availableBindings)
 	} else if ptr.Deref(endpoint.URI, "") != "" {
-		errorMessage = fmt.Sprintf("could not find any suitable binding provider for %s", *endpoint.URI)
+		errorMessage = "could not find any suitable binding provider for " + *endpoint.URI
 	}
 
 	return nil, errors.New(errorMessage)
