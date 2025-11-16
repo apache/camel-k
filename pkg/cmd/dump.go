@@ -204,7 +204,7 @@ func dumpNamespace(ctx context.Context, c client.Client, ns string, out io.Write
 		for _, container := range allContainers {
 			pad := "    "
 			fmt.Fprintf(out, "%s%s\n", pad, container.Name)
-			err := dumpLogs(ctx, c, pad+"%s> ", ns, pod.Name, container.Name, out, logLines)
+			err := dumpLogs(ctx, c, pad+"> ", ns, pod.Name, container.Name, out, logLines)
 			if err != nil {
 				fmt.Fprintf(out, "%sERROR while reading the logs: %v\n", pad, err)
 			}
