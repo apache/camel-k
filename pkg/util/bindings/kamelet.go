@@ -123,7 +123,7 @@ func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointCont
 		if len(steps) > 1 {
 			binding.Step = map[string]interface{}{
 				"pipeline": map[string]interface{}{
-					"id":    fmt.Sprintf("%s-pipeline", id),
+					"id":    id + "-pipeline",
 					"steps": steps,
 				},
 			}
@@ -138,7 +138,7 @@ func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointCont
 			}
 		}
 
-		binding.URI = fmt.Sprintf("kamelet:%s", kameletTranslated)
+		binding.URI = "kamelet:" + kameletTranslated
 	case v1.EndpointTypeSink:
 		if in, applicationProperties := k.DataTypeStep(e, id, v1.TypeSlotIn, dataTypeActionKamelet); in != nil {
 			binding.Step = in
@@ -147,9 +147,9 @@ func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointCont
 			}
 		}
 
-		binding.URI = fmt.Sprintf("kamelet:%s", kameletTranslated)
+		binding.URI = "kamelet:" + kameletTranslated
 	default:
-		binding.URI = fmt.Sprintf("kamelet:%s", kameletTranslated)
+		binding.URI = "kamelet:" + kameletTranslated
 	}
 
 	return &binding, nil

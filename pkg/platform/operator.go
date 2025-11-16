@@ -19,7 +19,6 @@ package platform
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"strings"
 
@@ -104,7 +103,7 @@ func GetOperatorPodName() string {
 
 // GetOperatorLockName returns the name of the lock lease that is electing a leader on the particular namespace.
 func GetOperatorLockName(operatorID string) string {
-	return fmt.Sprintf("%s-lock", operatorID)
+	return operatorID + "-lock"
 }
 
 // IsNamespaceLocked tells if the namespace contains a lock indicating that an operator owns it.

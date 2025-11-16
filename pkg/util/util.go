@@ -563,7 +563,7 @@ func NavigateConfigTree(current interface{}, nodes []string) (interface{}, error
 // IToInt32 attempts to convert safely an int to an int32.
 func IToInt32(x int) (*int32, error) {
 	if x < math.MinInt32 || x > math.MaxInt32 {
-		return nil, fmt.Errorf("integer overflow casting to int32 type")
+		return nil, errors.New("integer overflow casting to int32 type")
 	}
 	casted := int32(x)
 
@@ -573,7 +573,7 @@ func IToInt32(x int) (*int32, error) {
 // IToInt8 attempts to convert safely an int to an int8.
 func IToInt8(x int) (*int8, error) {
 	if x < math.MinInt8 || x > math.MaxInt8 {
-		return nil, fmt.Errorf("integer overflow casting to int8 type")
+		return nil, errors.New("integer overflow casting to int8 type")
 	}
 	casted := int8(x)
 

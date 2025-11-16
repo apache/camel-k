@@ -18,7 +18,7 @@ limitations under the License.
 package trait
 
 import (
-	"fmt"
+	"errors"
 
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -73,7 +73,7 @@ func (t *podTrait) Apply(e *Environment) error {
 	var patchedPodSpec *corev1.PodSpec
 	strategy, err := e.DetermineControllerStrategy()
 	if err != nil {
-		return fmt.Errorf("unable to determine the controller strategy")
+		return errors.New("unable to determine the controller strategy")
 	}
 	switch strategy {
 	case ControllerStrategyCronJob:

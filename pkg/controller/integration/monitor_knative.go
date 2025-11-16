@@ -19,7 +19,6 @@ package integration
 
 import (
 	"context"
-	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
 
@@ -66,5 +65,5 @@ func (c *knativeServiceController) hasTemplateIntegrationLabel() bool {
 }
 
 func (c *knativeServiceController) getControllerName() string {
-	return fmt.Sprintf("KnativeService/%s", c.obj.Name)
+	return "KnativeService/" + c.obj.Name
 }

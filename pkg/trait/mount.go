@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"errors"
 	"fmt"
 	"path"
 	"path/filepath"
@@ -408,7 +409,7 @@ func createPVC(e *Environment, volumeParts []string) error {
 			return fmt.Errorf("error looking up for default StorageClass, %w", err)
 		}
 		if sc == nil {
-			return fmt.Errorf("could not find any default StorageClass")
+			return errors.New("could not find any default StorageClass")
 		}
 	}
 

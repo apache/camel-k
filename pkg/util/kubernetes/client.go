@@ -19,6 +19,7 @@ package kubernetes
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
@@ -189,7 +190,7 @@ func GetConfigMapRefValue(ctx context.Context, client ctrl.Reader, namespace str
 
 func ResolveValueSource(ctx context.Context, client ctrl.Reader, namespace string, valueSource *v1.ValueSource) (string, error) {
 	if valueSource.ConfigMapKeyRef != nil && valueSource.SecretKeyRef != nil {
-		return "", fmt.Errorf("value source has bot config map and secret configured")
+		return "", errors.New("value source has bot config map and secret configured")
 	}
 	if valueSource.ConfigMapKeyRef != nil {
 		return GetConfigMapRefValue(ctx, client, namespace, valueSource.ConfigMapKeyRef)

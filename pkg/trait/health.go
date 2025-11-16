@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"errors"
 	"fmt"
 	"sort"
 
@@ -131,19 +132,19 @@ func (t *healthTrait) Apply(e *Environment) error {
 func (t *healthTrait) setProbes(container *corev1.Container, port *intstr.IntOrString) error {
 	if ptr.Deref(t.LivenessProbeEnabled, false) {
 		if t.LivenessProbe == "" {
-			return fmt.Errorf("you need to configure a liveness probe explicitly or in your catalog")
+			return errors.New("you need to configure a liveness probe explicitly or in your catalog")
 		}
 		container.LivenessProbe = t.newLivenessProbe(port, t.LivenessProbe)
 	}
 	if ptr.Deref(t.ReadinessProbeEnabled, true) {
 		if t.ReadinessProbe == "" {
-			return fmt.Errorf("you need to configure a readiness probe explicitly or in your catalog")
+			return errors.New("you need to configure a readiness probe explicitly or in your catalog")
 		}
 		container.ReadinessProbe = t.newReadinessProbe(port, t.ReadinessProbe)
 	}
 	if ptr.Deref(t.StartupProbeEnabled, false) {
 		if t.StartupProbe == "" {
-			return fmt.Errorf("you need to configure a startup probe explicitly or in your catalog")
+			return errors.New("you need to configure a startup probe explicitly or in your catalog")
 		}
 		container.StartupProbe = t.newStartupProbe(port, t.StartupProbe)
 	}

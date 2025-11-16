@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"slices"
@@ -165,19 +166,19 @@ func (t *builderTrait) adaptDeprecatedFields() *TraitCondition {
 		m := "The request-cpu parameter is deprecated and may be removed in future releases. Make sure to use tasks-request-cpu parameter instead."
 		t.L.Info(m)
 		condition = newOrAppend(condition, m)
-		t.TasksRequestCPU = append(t.TasksRequestCPU, fmt.Sprintf("builder:%s", t.RequestCPU))
+		t.TasksRequestCPU = append(t.TasksRequestCPU, "builder:"+t.RequestCPU)
 	}
 	if t.LimitCPU != "" {
 		m := "The limit-cpu parameter is deprecated and may be removed in future releases. Make sure to use tasks-limit-cpu parameter instead."
 		t.L.Info(m)
 		condition = newOrAppend(condition, m)
-		t.TasksLimitCPU = append(t.TasksLimitCPU, fmt.Sprintf("builder:%s", t.LimitCPU))
+		t.TasksLimitCPU = append(t.TasksLimitCPU, "builder:"+t.LimitCPU)
 	}
 	if t.RequestMemory != "" {
 		m := "The request-memory parameter is deprecated and may be removed in future releases. Make sure to use tasks-request-memory parameter instead."
 		t.L.Info(m)
 		condition = newOrAppend(condition, m)
-		t.TasksRequestMemory = append(t.TasksRequestMemory, fmt.Sprintf("builder:%s", t.RequestMemory))
+		t.TasksRequestMemory = append(t.TasksRequestMemory, "builder:"+t.RequestMemory)
 	}
 	if t.LimitMemory != "" {
 		m := "The limit-memory parameter is deprecated and may be removed in future releases. Make sure to use tasks-limit-memory parameter instead."
@@ -186,7 +187,7 @@ func (t *builderTrait) adaptDeprecatedFields() *TraitCondition {
 			condition = NewIntegrationCondition("Builder", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, TraitConfigurationReason, "")
 		}
 		condition = newOrAppend(condition, m)
-		t.TasksLimitMemory = append(t.TasksLimitMemory, fmt.Sprintf("builder:%s", t.LimitMemory))
+		t.TasksLimitMemory = append(t.TasksLimitMemory, "builder:"+t.LimitMemory)
 	}
 
 	return condition
@@ -225,7 +226,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 			"IntegrationKitPropertiesFormatValid",
 			corev1.ConditionFalse,
 			"IntegrationKitPropertiesFormatValid",
-			fmt.Sprintf("One or more properties where not formatted as expected: %s", err.Error()),
+			"One or more properties where not formatted as expected: "+err.Error(),
 		); err != nil {
 			return err
 		}
@@ -662,7 +663,7 @@ func filter(tasks []v1.Task, filterTasks []string) ([]v1.Task, error) {
 	}
 	// make sure the last task is either a publishing task or a custom task
 	if len(filteredTasks) == 0 || !publishingOrUserTask(filteredTasks[len(filteredTasks)-1]) {
-		return nil, fmt.Errorf("last pipeline task is not a publishing or a user task")
+		return nil, errors.New("last pipeline task is not a publishing or a user task")
 	}
 	return filteredTasks, nil
 }

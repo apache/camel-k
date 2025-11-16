@@ -112,7 +112,7 @@ func (action *monitorAction) Handle(ctx context.Context, platform *v1.Integratio
 				v1.IntegrationPlatformConditionTypeRegistryAvailable,
 				corev1.ConditionTrue,
 				v1.IntegrationPlatformConditionTypeRegistryAvailableReason,
-				fmt.Sprintf("registry available at %s", platform.Status.Build.Registry.Address))
+				"registry available at "+platform.Status.Build.Registry.Address)
 			// Warn if insecure registry
 			if platform.Status.Build.Registry.Insecure {
 				platform.Status.SetCondition(

@@ -19,7 +19,7 @@ package v1
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 )
 
 // +kubebuilder:object:generate=false
@@ -130,7 +130,7 @@ func (e *ErrorHandlerSink) Configuration() (map[string]interface{}, error) {
 // Validate --.
 func (e *ErrorHandlerSink) Validate() error {
 	if e.DLCEndpoint == nil {
-		return fmt.Errorf("missing endpoint in Error Handler Sink")
+		return errors.New("missing endpoint in Error Handler Sink")
 	}
 	return nil
 }

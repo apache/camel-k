@@ -187,7 +187,7 @@ func (t *jolokiaTrait) addToJolokiaOptions(options map[string]string) {
 	if t.Password != nil {
 		options["password"] = *t.Password
 	}
-	options["port"] = fmt.Sprintf("%v", t.getPort())
+	options["port"] = strconv.Itoa(int(t.getPort()))
 	if t.Protocol != nil {
 		options["protocol"] = *t.Protocol
 	}

@@ -118,7 +118,7 @@ func (o *bindCmdOptions) validate(cmd *cobra.Command, args []string) error {
 	}
 
 	if o.OperatorID == "" {
-		return fmt.Errorf("cannot use empty operator id")
+		return errors.New("cannot use empty operator id")
 	}
 
 	for _, annotation := range o.Annotations {

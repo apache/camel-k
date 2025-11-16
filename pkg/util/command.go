@@ -32,7 +32,7 @@ import (
 func RunAndLog(ctx context.Context, cmd *exec.Cmd, stdOutF func(string) string, stdErrF func(string) string) error {
 	scanOutMsg := ""
 	scanErrMsg := ""
-	stdOutF(fmt.Sprintf("Executed command: %s", cmd.String()))
+	stdOutF("Executed command: " + cmd.String())
 
 	stdOut, err := cmd.StdoutPipe()
 	if err != nil {

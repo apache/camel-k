@@ -248,9 +248,9 @@ func (t *kameletsTrait) addKamelets(e *Environment) error {
 		cm.Annotations[kameletMountPointAnnotation] = kameletMountPoint
 		e.Resources.Add(cm)
 		if e.ApplicationProperties[KameletLocationProperty] == "" {
-			e.ApplicationProperties[KameletLocationProperty] = fmt.Sprintf("file:%s", kameletMountPoint)
+			e.ApplicationProperties[KameletLocationProperty] = "file:" + kameletMountPoint
 		} else {
-			e.ApplicationProperties[KameletLocationProperty] += fmt.Sprintf(",file:%s", kameletMountPoint)
+			e.ApplicationProperties[KameletLocationProperty] += ",file:" + kameletMountPoint
 		}
 	}
 	e.ApplicationProperties[KameletLocationProperty] += ",classpath:/kamelets"
@@ -275,7 +275,7 @@ func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1.Kamelet) 
 		}
 		flowSource := v1.SourceSpec{
 			DataSpec: v1.DataSpec{
-				Name:    fmt.Sprintf("%s.yaml", kamelet.Name),
+				Name:    kamelet.Name + ".yaml",
 				Content: string(flowData),
 			},
 			Language: v1.LanguageYaml,

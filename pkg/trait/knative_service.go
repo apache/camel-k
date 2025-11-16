@@ -18,7 +18,7 @@ limitations under the License.
 package trait
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 
 	corev1 "k8s.io/api/core/v1"
@@ -124,7 +124,7 @@ func (t *knativeServiceTrait) Apply(e *Environment) error {
 		v1.IntegrationConditionKnativeServiceAvailable,
 		corev1.ConditionTrue,
 		v1.IntegrationConditionKnativeServiceAvailableReason,
-		fmt.Sprintf("Knative service name is %s", ksvc.Name),
+		"Knative service name is "+ksvc.Name,
 	)
 
 	return nil
@@ -140,7 +140,7 @@ func (t *knativeServiceTrait) SelectControllerStrategy(e *Environment) (*Control
 		if ptr.Deref(t.Enabled, false) {
 			// Warn the user that he requested a feature but it cannot be fulfilled due to missing
 			// API installation
-			return nil, fmt.Errorf("missing Knative Service API, cannot enable Knative service trait")
+			return nil, errors.New("missing Knative Service API, cannot enable Knative service trait")
 		}
 		// Fallback to other strategies otherwise
 		return nil, nil

@@ -18,6 +18,7 @@ limitations under the License.
 package bindings
 
 import (
+	"errors"
 	"fmt"
 
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -66,7 +67,7 @@ func (s StrimziBindingProvider) Translate(ctx BindingContext, _ EndpointContext,
 	if err != nil {
 		return nil, err
 	}
-	kafkaURI := fmt.Sprintf("kafka:%s", camelKafka.topicName)
+	kafkaURI := "kafka:" + camelKafka.topicName
 	kafkaURI = uri.AppendParameters(kafkaURI, camelKafka.properties)
 
 	return &Binding{
@@ -93,7 +94,7 @@ func (s StrimziBindingProvider) fromKafkaToCamel(ctx BindingContext, endpoint ca
 		return nil, err
 	}
 	if props == nil || props["topic"] == "" {
-		return nil, fmt.Errorf("invalid endpoint configuration: missing topic property")
+		return nil, errors.New("invalid endpoint configuration: missing topic property")
 	}
 	topicName := props["topic"]
 	delete(props, "topic")

@@ -21,6 +21,7 @@ import (
 	"context"
 	"encoding/csv"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"reflect"
@@ -199,10 +200,10 @@ func isOfflineCommand(cmd *cobra.Command) bool {
 
 func clone(dst interface{}, src interface{}) error {
 	if dst == nil {
-		return fmt.Errorf("dst cannot be nil")
+		return errors.New("dst cannot be nil")
 	}
 	if src == nil {
-		return fmt.Errorf("src cannot be nil")
+		return errors.New("src cannot be nil")
 	}
 
 	data, err := json.Marshal(src)

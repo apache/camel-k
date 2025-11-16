@@ -245,7 +245,7 @@ func (o *runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
 
 func (o *runCmdOptions) validate(cmd *cobra.Command) error {
 	if o.OperatorID == "" {
-		return fmt.Errorf("cannot use empty operator id")
+		return errors.New("cannot use empty operator id")
 	}
 
 	for _, volume := range o.Volumes {
@@ -263,7 +263,7 @@ func (o *runCmdOptions) validate(cmd *cobra.Command) error {
 	}
 
 	if o.OutputFormat != "" && o.Dev {
-		return fmt.Errorf("cannot use --dev with -o/--output option")
+		return errors.New("cannot use --dev with -o/--output option")
 	}
 
 	for _, label := range o.Labels {
@@ -566,7 +566,7 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 		}
 	} else if o.ContainerImage != "" {
 		// Self Managed Integration as the user provided a container image built externally
-		o.Traits = append(o.Traits, fmt.Sprintf("container.image=%s", o.ContainerImage))
+		o.Traits = append(o.Traits, "container.image="+o.ContainerImage)
 	} else if o.GitRepo != "" {
 		if o.GitBranch != "" && o.GitTag != "" {
 			err := errors.New("illegal arguments: cannot specify both git branch and tag")
@@ -778,10 +778,10 @@ func (o *runCmdOptions) convertOptionsToTraits(cmd *cobra.Command, c client.Clie
 	}
 
 	for _, item := range o.Volumes {
-		o.Traits = append(o.Traits, fmt.Sprintf("mount.volumes=%s", item))
+		o.Traits = append(o.Traits, "mount.volumes="+item)
 	}
 	for _, item := range o.EnvVars {
-		o.Traits = append(o.Traits, fmt.Sprintf("environment.vars=%s", item))
+		o.Traits = append(o.Traits, "environment.vars="+item)
 	}
 
 	return nil
@@ -871,7 +871,7 @@ func (o *runCmdOptions) applyDependencies(cmd *cobra.Command, it *v1.Integration
 				return err
 			}
 			if catalog == nil {
-				return fmt.Errorf("error trying to load the default Camel catalog")
+				return errors.New("error trying to load the default Camel catalog")
 			}
 		}
 		addDependency(cmd, it, item, catalog)

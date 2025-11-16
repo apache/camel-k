@@ -175,7 +175,7 @@ func findAdditionalDependencies(e *Environment, meta metadata.IntegrationMetadat
 }
 
 func loadResource(cli client.Client, name string, params interface{}) (ctrl.Object, error) {
-	data, err := resources.TemplateResource(fmt.Sprintf("resources/addons/master/%s", name), params)
+	data, err := resources.TemplateResource("resources/addons/master/"+name, params)
 	if err != nil {
 		return nil, err
 	}
@@ -198,7 +198,7 @@ func (t *masterTrait) prepareRBAC(cli client.Client, serviceAccount, itName, itN
 		ServiceAccount string
 	}{
 		Namespace:      itNamespace,
-		Name:           fmt.Sprintf("%s-master", itName),
+		Name:           itName + "-master",
 		ServiceAccount: serviceAccount,
 	}
 

@@ -20,6 +20,7 @@ package knative
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 
@@ -128,7 +129,7 @@ func CreateTrigger(brokerReference corev1.ObjectReference, subscriberRef duckv1.
 func GetTriggerName(brokerName string, subscriberName string, eventType string) string {
 	nameSuffix := ""
 	if eventType != "" {
-		nameSuffix = fmt.Sprintf("-%s", util.SanitizeLabel(eventType))
+		nameSuffix = "-" + util.SanitizeLabel(eventType)
 	}
 
 	return brokerName + "-" + subscriberName + nameSuffix
@@ -197,7 +198,7 @@ func GetSinkURL(ctx context.Context, c client.Client, sink *corev1.ObjectReferen
 // Method taken from https://github.com/knative/eventing-contrib/blob/master/pkg/controller/sinks/sinks.go
 func getSinkURI(ctx context.Context, c client.Client, sink *corev1.ObjectReference, namespace string) (string, error) {
 	if sink == nil {
-		return "", fmt.Errorf("sink ref is nil")
+		return "", errors.New("sink ref is nil")
 	}
 
 	u := &unstructured.Unstructured{}

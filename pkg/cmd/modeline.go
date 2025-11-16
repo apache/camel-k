@@ -258,7 +258,7 @@ func getRefPathOrProperty(pathOrProperty string) string {
 
 func getFullPathOrProperty(pathOrProperty string, fullPath string) string {
 	if strings.HasPrefix(pathOrProperty, "file:") {
-		return fmt.Sprintf("file:%s", fullPath)
+		return "file:" + fullPath
 	}
 	return pathOrProperty
 }

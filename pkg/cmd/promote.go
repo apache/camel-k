@@ -346,7 +346,7 @@ func (o *promoteCmdOptions) editPipe(kb *v1.Pipe, it *v1.Integration, kit *v1.In
 		// We must provide the classpath expected for the IntegrationKit. This is calculated dynamically and
 		// would get lost when creating the non managed build Integration. For this reason
 		// we must report it in the promoted Integration.
-		mergedClasspath := getClasspath(kit, dst.Annotations[fmt.Sprintf("%sjvm.classpath", v1.TraitAnnotationPrefix)])
+		mergedClasspath := getClasspath(kit, dst.Annotations[v1.TraitAnnotationPrefix+"jvm.classpath"])
 		if traits.JVM == nil {
 			traits.JVM = &traitv1.JVMTrait{}
 		}

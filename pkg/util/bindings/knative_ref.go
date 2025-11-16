@@ -93,7 +93,7 @@ func (k KnativeRefBindingProvider) Translate(ctx BindingContext, endpointCtx End
 			for key, value := range props {
 				if key == "cloudEventsType" {
 					// cloudEventsType is a synonym for type filter attribute
-					filterExpressions = append(filterExpressions, fmt.Sprintf("type=%s", value))
+					filterExpressions = append(filterExpressions, "type="+value)
 				} else if key != "name" {
 					filterExpressions = append(filterExpressions, fmt.Sprintf("%s=%s", key, value))
 				}

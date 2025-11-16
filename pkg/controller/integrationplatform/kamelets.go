@@ -116,7 +116,7 @@ func downloadKameletDependency(ctx context.Context, c client.Client, platform *v
 	// TODO: this one should be already managed during the command execution
 	// This workaround is fixing temporarily the problem
 	mc.AddArgument("-Dmaven.repo.local=" + mc.LocalRepository)
-	mc.AddArgument(fmt.Sprintf("-DoutputDirectory=%s", kameletsDir))
+	mc.AddArgument("-DoutputDirectory=" + kameletsDir)
 
 	if settings, err := kubernetes.ResolveValueSource(ctx, c, platform.Namespace, &platform.Status.Build.Maven.Settings); err != nil {
 		return err

@@ -294,7 +294,7 @@ func notifyIfConditionUpdated(recorder record.EventRecorder, newResource runtime
 	for _, cond := range getCommonChangedConditions(oldConditions, newConditions) {
 		tail := ""
 		if cond.GetMessage() != "" {
-			tail = fmt.Sprintf(": %s", cond.GetMessage())
+			tail = ": " + cond.GetMessage()
 		}
 		recorder.Eventf(newResource, corev1.EventTypeNormal, reason, "Condition %q is %q for %s %s%s", cond.GetType(), cond.GetStatus(), resourceType, name, tail)
 	}

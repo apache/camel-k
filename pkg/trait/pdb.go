@@ -18,7 +18,7 @@ limitations under the License.
 package trait
 
 import (
-	"fmt"
+	"errors"
 
 	policyv1 "k8s.io/api/policy/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -52,15 +52,15 @@ func (t *pdbTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 
 	strategy, err := e.DetermineControllerStrategy()
 	if err != nil {
-		return false, nil, fmt.Errorf("unable to determine the controller strategy")
+		return false, nil, errors.New("unable to determine the controller strategy")
 	}
 
 	if strategy == ControllerStrategyCronJob {
-		return false, nil, fmt.Errorf("poddisruptionbudget isn't supported with cron-job controller strategy")
+		return false, nil, errors.New("poddisruptionbudget isn't supported with cron-job controller strategy")
 	}
 
 	if t.MaxUnavailable != "" && t.MinAvailable != "" {
-		return false, nil, fmt.Errorf("both minAvailable and maxUnavailable can't be set simultaneously")
+		return false, nil, errors.New("both minAvailable and maxUnavailable can't be set simultaneously")
 	}
 
 	return e.IntegrationInRunningPhases(), nil, nil

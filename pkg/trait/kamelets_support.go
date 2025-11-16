@@ -63,7 +63,7 @@ func (kb *kameletBundle) toConfigmaps(itName, itNamespace string) ([]*corev1.Con
 			cmID++
 			cm = newBundleConfigmap(itName, itNamespace, cmID)
 		}
-		cm.Data[fmt.Sprintf("%s.kamelet.yaml", k.Name)] = string(serialized)
+		cm.Data[k.Name+".kamelet.yaml"] = string(serialized)
 		cmSize += len(serialized)
 	}
 	// Add the last configmap

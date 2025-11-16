@@ -61,8 +61,8 @@ const (
 	adocNavMarkerEnd   = adocCommonMarkerEnd + " (trait-nav)"
 )
 
-var tagTraitRegex = regexp.MustCompile(fmt.Sprintf("%s=([a-z0-9-]+)", regexp.QuoteMeta(tagTrait)))
-var tagDeprecatedRegex = regexp.MustCompile(fmt.Sprintf("%s=(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)", regexp.QuoteMeta(tagDeprecated)))
+var tagTraitRegex = regexp.MustCompile(regexp.QuoteMeta(tagTrait) + "=([a-z0-9-]+)")
+var tagDeprecatedRegex = regexp.MustCompile(regexp.QuoteMeta(tagDeprecated) + "=(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)")
 
 // traitDocGen produces documentation about traits.
 type traitDocGen struct {
@@ -269,7 +269,7 @@ func getTraitID(t *types.Type) string {
 			return matches[1]
 		}
 	}
-	panic(fmt.Sprintf("trait ID not found in type %s", t.Name.Name))
+	panic("trait ID not found in type " + t.Name.Name)
 }
 
 func getDeprecatedVersion(t *types.Type) string {
