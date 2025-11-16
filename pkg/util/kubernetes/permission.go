@@ -74,6 +74,7 @@ func CheckServiceAccountPermission(ctx context.Context, client kubernetes.Interf
 		if k8serrors.IsForbidden(err) {
 			return false, nil
 		}
+
 		return false, err
 	}
 

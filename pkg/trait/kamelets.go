@@ -227,6 +227,7 @@ func (t *kameletsTrait) calculateNamespaces(e *Environment, defaultNamespaces ..
 
 	// Also append the default namespaces
 	namespaces = append(namespaces, defaultNamespaces...)
+
 	return namespaces, nil
 }
 

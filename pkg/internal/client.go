@@ -272,6 +272,7 @@ func (f *FakeSAR) Create(ctx context.Context, sar *authv1.SubjectAccessReview, o
 
 	sar.Status.Allowed = allowed
 	sar.Status.Reason = "mocked"
+
 	return sar, nil
 }
 
