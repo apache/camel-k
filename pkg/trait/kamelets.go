@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"path/filepath"
@@ -201,7 +202,7 @@ func (t *kameletsTrait) calculateNamespaces(e *Environment, defaultNamespaces ..
 	}
 	if len(namespaces) > 0 {
 		if e.Integration.Spec.ServiceAccountName == "" {
-			return nil, fmt.Errorf("you must to use an authorized ServiceAccount to access cross-namespace resources kamelets. " +
+			return nil, errors.New("you must to use an authorized ServiceAccount to access cross-namespace resources kamelets. " +
 				"Set it in the Integration spec accordingly")
 		}
 		// verify an SA exists and it is authorized for Kamelets in that namespace
