@@ -43,12 +43,14 @@ func (c *deploymentController) checkReadyCondition(ctx context.Context) (bool, e
 	if replicaFailure != nil && replicaFailure.Status == corev1.ConditionTrue {
 		c.integration.Status.Phase = v1.IntegrationPhaseError
 		c.integration.SetReadyConditionError(replicaFailure.Message)
+
 		return true, nil
 	}
 
 	if progressing != nil && progressing.Status == corev1.ConditionFalse && progressing.Reason == "ProgressDeadlineExceeded" {
 		c.integration.Status.Phase = v1.IntegrationPhaseError
 		c.integration.SetReadyConditionError(progressing.Message)
+
 		return true, nil
 	}
 
@@ -72,6 +74,7 @@ func (c *deploymentController) updateReadyCondition(readyPods int32) bool {
 		c.integration.SetReadyCondition(corev1.ConditionTrue,
 			v1.IntegrationConditionDeploymentReadyReason,
 			fmt.Sprintf("%d/%d ready replicas", readyReplicas, replicas))
+
 		return true
 
 	case c.obj.Status.UpdatedReplicas < replicas:

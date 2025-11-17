@@ -126,5 +126,6 @@ func (action *scheduleAction) patchBuildStatus(ctx context.Context, build *v1.Bu
 	event.NotifyBuildUpdated(ctx, action.client, action.recorder, build, target)
 
 	*build = *target
+
 	return nil
 }

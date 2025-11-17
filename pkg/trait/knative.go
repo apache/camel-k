@@ -100,6 +100,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 		if len(t.EventSinks) == 0 {
 			t.EventSinks = filterMetaItems(meta, knativeapi.CamelServiceTypeEvent, "to")
 		}
+
 		return true
 	})
 	if err != nil {
@@ -153,6 +154,7 @@ func filterMetaItems(meta metadata.IntegrationMetadata, cst knativeapi.CamelServ
 		return nil
 	}
 	sort.Strings(items)
+
 	return items
 }
 
@@ -247,6 +249,7 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 				return err
 			}
 			env.Services = append(env.Services, svc)
+
 			return nil
 		})
 	if err != nil {
@@ -262,6 +265,7 @@ func (t *knativeTrait) createSubscription(e *Environment, ref *corev1.ObjectRefe
 	}
 	sub := knativeutil.CreateSubscription(*ref, e.Integration.Name, path)
 	e.Resources.Add(sub)
+
 	return nil
 }
 
@@ -304,6 +308,7 @@ func (t *knativeTrait) configureEndpoints(e *Environment, env *knativeapi.CamelE
 				return err
 			}
 			env.Services = append(env.Services, svc)
+
 			return nil
 		})
 	if err != nil {
@@ -364,6 +369,7 @@ func (t *knativeTrait) configureEvents(e *Environment, env *knativeapi.CamelEnvi
 				return err
 			}
 			env.Services = append(env.Services, svc)
+
 			return nil
 		})
 	if err != nil {
@@ -387,6 +393,7 @@ func (t *knativeTrait) isSinkBindingAllowed(e *Environment) bool {
 			return false
 		}
 	}
+
 	return true
 }
 
@@ -466,6 +473,7 @@ func (t *knativeTrait) configureSinkBinding(e *Environment, env *knativeapi.Came
 				// all the information to perform injection.
 				e.Resources.AddFirst(knativeutil.CreateSinkBinding(source, target))
 			}
+
 			return nil
 		})
 
@@ -571,6 +579,7 @@ func (t *knativeTrait) withServiceDo(
 				return nil, fmt.Errorf("cannot determine address of %s: %w", serviceType.ResourceDescription(ref.Name), err)
 			}
 			t.L.Infof("Found URL for %s: %s", serviceType.ResourceDescription(ref.Name), targetURL.String())
+
 			return targetURL, nil
 		}
 
@@ -579,6 +588,7 @@ func (t *knativeTrait) withServiceDo(
 			return fmt.Errorf("unexpected error while executing handler for %s: %w", serviceType.ResourceDescription(ref.Name), err)
 		}
 	}
+
 	return nil
 }
 
@@ -592,5 +602,6 @@ func (t *knativeTrait) extractServices(names []string, serviceType knativeapi.Ca
 		}
 	}
 	sort.Strings(answer)
+
 	return answer
 }

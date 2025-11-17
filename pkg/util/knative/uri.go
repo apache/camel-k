@@ -45,6 +45,7 @@ func FilterURIs(uris []string, kind knativev1.CamelServiceType) []string {
 			res = append(res, uri)
 		}
 	}
+
 	return res
 }
 
@@ -53,6 +54,7 @@ func NormalizeToURI(kind knativev1.CamelServiceType, uriOrString string) string 
 	if plainNameRegexp.MatchString(uriOrString) {
 		return fmt.Sprintf("knative://%s/%s", string(kind), uriOrString)
 	}
+
 	return uriOrString
 }
 
@@ -64,6 +66,7 @@ func ExtractObjectReference(uri string) (v1.ObjectReference, error) {
 			name = "default"
 		}
 		apiVersion := uriutils.GetQueryParameter(uri, paramAPIVersion)
+
 		return v1.ObjectReference{
 			Name:       name,
 			APIVersion: apiVersion,
@@ -77,6 +80,7 @@ func ExtractObjectReference(uri string) (v1.ObjectReference, error) {
 	}
 	apiVersion := uriutils.GetQueryParameter(uri, paramAPIVersion)
 	kind := uriutils.GetQueryParameter(uri, paramKind)
+
 	return v1.ObjectReference{
 		Name:       name,
 		APIVersion: apiVersion,
@@ -94,6 +98,7 @@ func matchOrEmpty(reg *regexp.Regexp, index int, str string) string {
 	if len(match) > index {
 		return match[index]
 	}
+
 	return ""
 }
 
@@ -102,5 +107,6 @@ func isKnativeURI(kind knativev1.CamelServiceType, uri string) bool {
 	if len(match) == 3 && match[1] == string(kind) {
 		return true
 	}
+
 	return false
 }

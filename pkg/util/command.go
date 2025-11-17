@@ -53,10 +53,12 @@ func RunAndLog(ctx context.Context, cmd *exec.Cmd, stdOutF func(string) string, 
 	g, _ := errgroup.WithContext(ctx)
 	g.Go(func() error {
 		scanOutMsg = scan(stdOut, stdOutF)
+
 		return nil
 	})
 	g.Go(func() error {
 		scanErrMsg = scan(stdErr, stdErrF)
+
 		return nil
 	})
 	if err = g.Wait(); err != nil {
@@ -89,5 +91,6 @@ func formatErr(stdout, stderr string) string {
 	if stdout == "" {
 		return stderr
 	}
+
 	return fmt.Sprintf("stdout: %s, stderr: %s", stdout, stderr)
 }

@@ -123,6 +123,7 @@ func (r *reconcileCatalog) Reconcile(ctx context.Context, request reconcile.Requ
 		return reconcile.Result{}, err
 	} else if !ok {
 		rlog.Info("Ignoring request because namespace is locked")
+
 		return reconcile.Result{}, nil
 	}
 
@@ -145,6 +146,7 @@ func (r *reconcileCatalog) Reconcile(ctx context.Context, request reconcile.Requ
 	// Only process resources assigned to the operator
 	if !platform.IsOperatorHandlerConsideringLock(ctx, r.client, request.Namespace, &instance) {
 		rlog.Info("Ignoring request because resource is not assigned to current operator")
+
 		return reconcile.Result{}, nil
 	}
 
@@ -174,6 +176,7 @@ func (r *reconcileCatalog) Reconcile(ctx context.Context, request reconcile.Requ
 
 		if err != nil {
 			camelevent.NotifyCamelCatalogError(ctx, r.client, r.recorder, &instance, target, err)
+
 			return reconcile.Result{}, err
 		}
 
@@ -182,6 +185,7 @@ func (r *reconcileCatalog) Reconcile(ctx context.Context, request reconcile.Requ
 
 			if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(&instance)); err != nil {
 				camelevent.NotifyCamelCatalogError(ctx, r.client, r.recorder, &instance, target, err)
+
 				return reconcile.Result{}, err
 			}
 
@@ -199,6 +203,7 @@ func (r *reconcileCatalog) Reconcile(ctx context.Context, request reconcile.Requ
 		// handle one action at time so the resource
 		// is always at its latest state
 		camelevent.NotifyCamelCatalogUpdated(ctx, r.client, r.recorder, &instance, target)
+
 		break
 	}
 

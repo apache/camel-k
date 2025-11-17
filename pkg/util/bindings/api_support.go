@@ -38,5 +38,6 @@ func (c EndpointContext) GenerateID() string {
 	if c.Position != nil {
 		id = fmt.Sprintf("%s-%d", id, *c.Position)
 	}
+
 	return id
 }

@@ -56,6 +56,7 @@ func DeleteIntegration(ctx context.Context, c client.Client, name string, namesp
 			Name:      name,
 		},
 	}
+
 	return c.Delete(ctx, &integration)
 }
 
@@ -215,6 +216,7 @@ func clone(dst interface{}, src interface{}) error {
 	if err != nil {
 		return fmt.Errorf("unable to unmarshal into dst: %w", err)
 	}
+
 	return nil
 }
 
@@ -265,5 +267,6 @@ func getIntegrations(ctx context.Context, c client.Client, names []string, names
 		}
 		ints = append(ints, it)
 	}
+
 	return ints, nil
 }

@@ -183,3 +183,10 @@ rules:
   verbs:
   - get
   - list
+# Required to check if a ServiceAccount can access other namespaces resources
+- apiGroups:
+  - authorization.k8s.io
+  resources:
+  - subjectaccessreviews
+  verbs:
+  - create

@@ -81,6 +81,7 @@ func (action *createAction) Handle(ctx context.Context, platform *v1.Integration
 
 	if platform.Status.Build.RuntimeCoreVersion != "" {
 		action.L.Infof("IntegrationPlatform is about to install Apache Kamelet Catalog version %s", platform.Status.Build.RuntimeCoreVersion)
+
 		return installKamelets(ctx, action.client, platform)
 	} else {
 		action.L.Info("IntegrationPlatform has no Camel core version. " +

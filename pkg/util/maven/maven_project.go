@@ -227,5 +227,6 @@ func NewMirror(repo string) Mirror {
 			}
 		}
 	}
+
 	return m
 }

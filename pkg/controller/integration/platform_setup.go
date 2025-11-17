@@ -56,6 +56,7 @@ func (action *platformSetupAction) Handle(ctx context.Context, integration *v1.I
 		integration.Status.Phase = v1.IntegrationPhaseError
 		integration.SetReadyCondition(corev1.ConditionFalse,
 			v1.IntegrationConditionInitializationFailedReason, err.Error())
+
 		return integration, err
 	}
 
@@ -102,5 +103,6 @@ func determineBestTraitProfile(c client.Client, integration *v1.Integration, p *
 	} else if ok {
 		return v1.TraitProfileKnative, nil
 	}
+
 	return platform.GetTraitProfile(p), nil
 }

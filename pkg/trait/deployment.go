@@ -56,6 +56,7 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, *TraitCondition, erro
 
 	if e.IntegrationInPhase(v1.IntegrationPhaseRunning, v1.IntegrationPhaseError) {
 		condition := e.Integration.Status.GetCondition(v1.IntegrationConditionDeploymentAvailable)
+
 		return condition != nil && condition.Status == corev1.ConditionTrue, nil, nil
 	}
 
@@ -86,6 +87,7 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, *TraitCondition, erro
 
 func (t *deploymentTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
 	deploymentStrategy := ControllerStrategyDeployment
+
 	return &deploymentStrategy, nil
 }
 

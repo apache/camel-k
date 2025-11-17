@@ -87,6 +87,7 @@ func (in *IntegrationPlatform) GetActualValue(extractor func(spec IntegrationPla
 	if res == "" {
 		res = extractor(in.Spec)
 	}
+
 	return res
 }
 
@@ -104,6 +105,7 @@ func (in *IntegrationPlatformStatus) GetCondition(condType IntegrationPlatformCo
 			return &c
 		}
 	}
+
 	return nil
 }
 
@@ -176,6 +178,7 @@ func (b *IntegrationPlatformBuildSpec) GetTimeout() metav1.Duration {
 	if b.Timeout == nil {
 		return metav1.Duration{}
 	}
+
 	return *b.Timeout
 }
 
@@ -187,6 +190,7 @@ func (in *IntegrationPlatformStatus) GetConditions() []ResourceCondition {
 	for _, c := range in.Conditions {
 		res = append(res, &c)
 	}
+
 	return res
 }
 

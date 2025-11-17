@@ -65,5 +65,6 @@ func Packages(context *generator.Context, arguments *args.GeneratorArgs) generat
 			},
 		})
 	}
+
 	return packages
 }

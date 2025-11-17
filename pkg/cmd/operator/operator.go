@@ -243,6 +243,7 @@ func getNamespacesSelector(operatorNamespace string, watchNamespace string) map[
 	if operatorNamespace != watchNamespace {
 		namespacesSelector[watchNamespace] = cache.Config{}
 	}
+
 	return namespacesSelector
 }
 
@@ -252,6 +253,7 @@ func getWatchNamespace() (string, error) {
 	if !found {
 		return "", fmt.Errorf("%s must be set", platform.OperatorWatchNamespaceEnvVariable)
 	}
+
 	return ns, nil
 }
 
@@ -272,6 +274,7 @@ func getOperatorImage(ctx context.Context, c ctrl.Reader) (string, error) {
 	if len(pod.Spec.Containers) == 0 {
 		return "", errors.New("no containers found in operator pod")
 	}
+
 	return pod.Spec.Containers[0].Image, nil
 }
 

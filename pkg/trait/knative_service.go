@@ -159,6 +159,7 @@ func (t *knativeServiceTrait) SelectControllerStrategy(e *Environment) (*Control
 	}
 	if enabled {
 		controllerStrategy := ControllerStrategyKnativeService
+
 		return &controllerStrategy, nil
 	}
 

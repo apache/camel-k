@@ -120,6 +120,7 @@ func (t *cronTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 				"fallback strategy selected",
 			)
 		}
+
 		return true, condition, nil
 	}
 
@@ -172,6 +173,7 @@ func (t *cronTrait) autoConfigure(e *Environment) error {
 		for _, fromURI := range fromURIs {
 			if uri.GetComponent(fromURI) == genericCronComponent {
 				t.Fallback = ptr.To(true)
+
 				break
 			}
 		}
@@ -304,6 +306,7 @@ func (t *cronTrait) SelectControllerStrategy(e *Environment) (*ControllerStrateg
 			return &cronStrategy, nil
 		}
 	}
+
 	return nil, nil
 }
 
@@ -321,11 +324,13 @@ func (c *cronInfo) withComponents(components ...string) *cronInfo {
 	for _, comp := range components {
 		util.StringSliceUniqueAdd(&c.components, comp)
 	}
+
 	return c
 }
 
 func (c *cronInfo) withSchedule(schedule string) *cronInfo {
 	c.schedule = schedule
+
 	return c
 }
 
@@ -340,6 +345,7 @@ func (t *cronTrait) getGlobalCron(e *Environment) (*cronInfo, error) {
 		if scheme.Passive {
 			passiveComponents[id] = true
 		}
+
 		return true
 	})
 
@@ -354,6 +360,7 @@ func (t *cronTrait) getGlobalCron(e *Environment) (*cronInfo, error) {
 	}
 
 	globalCron := getCronForURIs(cron)
+
 	return globalCron, nil
 }
 
@@ -361,6 +368,7 @@ func (t *cronTrait) getSourcesFromURIs(e *Environment) ([]string, error) {
 	var fromUris []string
 	_, err := e.ConsumeMeta(true, func(meta metadata.IntegrationMetadata) bool {
 		fromUris = meta.FromURIs
+
 		return true
 	})
 	if err != nil {
@@ -394,12 +402,14 @@ func getCronForURIs(camelURIs []string) *cronInfo {
 			globalCron = globalCron.withComponents(cr.components...)
 		}
 	}
+
 	return globalCron
 }
 
 func getCronForURI(camelURI string) *cronInfo {
 	comp := uri.GetComponent(camelURI)
 	extractor := supportedCamelComponents[comp]
+
 	return extractor(camelURI)
 }
 
@@ -440,6 +450,7 @@ func timerToCronInfo(camelURI string) *cronInfo {
 			return newCronInfo().withComponents("timer").withSchedule(fmt.Sprintf("0/%d * * * ?", minutes))
 		}
 	}
+
 	return nil
 }
 
@@ -478,6 +489,7 @@ func cronEquivalent(cron1, cron2 string) bool {
 	// best effort to determine if two crons are equivalent
 	cron1 = strings.ReplaceAll(cron1, "?", "*")
 	cron2 = strings.ReplaceAll(cron2, "?", "*")
+
 	return cron1 == cron2
 }
 
@@ -501,6 +513,7 @@ func toKubernetesCronSchedule(cron string) string {
 	if len(parts) == 5 {
 		return strings.Join(parts, " ")
 	}
+
 	return ""
 }
 
@@ -509,6 +522,7 @@ func checkedStringToUint64(str string) uint64 {
 	if err != nil {
 		panic(err)
 	}
+
 	return res
 }
 

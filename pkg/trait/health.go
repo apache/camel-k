@@ -106,6 +106,7 @@ func (t *healthTrait) Apply(e *Environment) error {
 			// sort the dependencies to get always the same list if they don't change
 			sort.Strings(e.Integration.Status.Dependencies)
 		}
+
 		return nil
 	}
 
@@ -236,6 +237,7 @@ func (t *healthTrait) newStartupProbe(port *intstr.IntOrString, path string) *co
 func (t *healthTrait) getLivenessPort(port *intstr.IntOrString) *intstr.IntOrString {
 	if t.LivenessPort != 0 {
 		livenessPort := intstr.FromInt32(t.LivenessPort)
+
 		return &livenessPort
 	}
 
@@ -245,6 +247,7 @@ func (t *healthTrait) getLivenessPort(port *intstr.IntOrString) *intstr.IntOrStr
 func (t *healthTrait) getReadinessPort(port *intstr.IntOrString) *intstr.IntOrString {
 	if t.ReadinessPort != 0 {
 		readinessPort := intstr.FromInt32(t.ReadinessPort)
+
 		return &readinessPort
 	}
 
@@ -254,6 +257,7 @@ func (t *healthTrait) getReadinessPort(port *intstr.IntOrString) *intstr.IntOrSt
 func (t *healthTrait) getStartupPort(port *intstr.IntOrString) *intstr.IntOrString {
 	if t.StartupPort != 0 {
 		startupPort := intstr.FromInt32(t.StartupPort)
+
 		return &startupPort
 	}
 

@@ -29,6 +29,7 @@ func isKameletFileName(fileName string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -38,6 +39,7 @@ func isFileNameForKamelet(name, fileName string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -46,5 +48,6 @@ func getKameletNameFromFile(fileName string) string {
 	for _, suffix := range fileSuffixes {
 		name = strings.TrimSuffix(name, suffix)
 	}
+
 	return name
 }

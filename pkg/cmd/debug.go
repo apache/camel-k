@@ -70,6 +70,7 @@ func (o *debugCmdOptions) validateArgs(_ *cobra.Command, args []string) error {
 	if len(args) < 1 {
 		return errors.New("run expects 1 argument, received 0")
 	}
+
 	return nil
 }
 
@@ -134,6 +135,7 @@ func (o *debugCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 func (o *debugCmdOptions) toggleDebug(c camelv1.IntegrationsGetter, it *v1.Integration, active bool) (*v1.Integration, error) {
 	it = o.toggle(it, active)
+
 	return c.Integrations(it.Namespace).Update(o.Context, it, metav1.UpdateOptions{})
 }
 

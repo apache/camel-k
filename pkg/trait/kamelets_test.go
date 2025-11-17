@@ -773,14 +773,11 @@ func TestKameletNamespaceParameter(t *testing.T) {
 func TestCalculateKameletNamespaces(t *testing.T) {
 	namespaces, err := calculateNamespaces(
 		[]string{"my-kamelet", "my-kamelet?kameletNamespace=ns1", "my-kamelet?kameletVersion=v2&kameletNamespace=ns2"},
-		"default", "camel-k",
 	)
 	require.NoError(t, err)
-	assert.Len(t, namespaces, 4)
+	assert.Len(t, namespaces, 2)
 	assert.Contains(t, namespaces, "ns1")
 	assert.Contains(t, namespaces, "ns2")
-	assert.Contains(t, namespaces, "default")
-	assert.Contains(t, namespaces, "camel-k")
 }
 
 func TestKameletMultiNamespace(t *testing.T) {
@@ -794,7 +791,7 @@ func TestKameletMultiNamespace(t *testing.T) {
 		flow,
 		&v1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "test",
+				Namespace: "default",
 				Name:      "timer",
 			},
 			Spec: v1.KameletSpec{
@@ -828,6 +825,20 @@ func TestKameletMultiNamespace(t *testing.T) {
 	assert.True(t, enabled)
 	assert.Nil(t, condition)
 
+	// Must fail, no ServiceAccount
+	err = trait.Apply(environment)
+	require.Error(t, err)
+	assert.Equal(t, "you must to use an authorized ServiceAccount to access cross-namespace resources kamelets. "+
+		"Set it in the Integration spec accordingly", err.Error())
+	// Must fail, unauthorized ServiceAccount
+	environment.Integration.Spec.ServiceAccountName = "unauth-sa"
+	err = trait.Apply(environment)
+	require.Error(t, err)
+	assert.Equal(t, "cross-namespace Integration reference authorization denied for the ServiceAccount unauth-sa "+
+		"and resources kamelets", err.Error())
+	// Now we should good to go
+	environment.Integration.Namespace = "default"
+	environment.Integration.Spec.ServiceAccountName = "cross-ns-sa"
 	err = trait.Apply(environment)
 	require.NoError(t, err)
 	assert.Equal(t, "extra?kameletNamespace=ns1,timer", trait.List)
@@ -850,7 +861,7 @@ func TestKameletMultiNamespaceMissing(t *testing.T) {
 		flow,
 		&v1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "test",
+				Namespace: "default",
 				Name:      "timer",
 			},
 			Spec: v1.KameletSpec{
@@ -879,6 +890,9 @@ func TestKameletMultiNamespaceMissing(t *testing.T) {
 			},
 		})
 
+	// Cross namespaces authorized user
+	environment.Integration.Namespace = "default"
+	environment.Integration.Spec.ServiceAccountName = "cross-ns-sa"
 	enabled, condition, err := trait.Configure(environment)
 	require.NoError(t, err)
 	assert.True(t, enabled)

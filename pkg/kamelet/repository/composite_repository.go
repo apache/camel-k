@@ -54,6 +54,7 @@ func (c *compositeKameletRepository) List(ctx context.Context) ([]string, error)
 		res = append(res, kam)
 	}
 	sort.Strings(res)
+
 	return res, nil
 }
 
@@ -64,6 +65,7 @@ func (c *compositeKameletRepository) Get(ctx context.Context, name string) (*v1.
 			return kam, err
 		}
 	}
+
 	return nil, nil
 }
 
@@ -72,5 +74,6 @@ func (c *compositeKameletRepository) String() string {
 	for _, repo := range c.repositories {
 		descs = append(descs, repo.String())
 	}
+
 	return fmt.Sprintf("(%s)", strings.Join(descs, ", "))
 }

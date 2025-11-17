@@ -80,6 +80,7 @@ func nativeImageContext(ctx *builderContext) error {
 			},
 		}
 		ctx.SelectedArtifacts = ctx.Artifacts
+
 		return nil
 	})
 }
@@ -221,6 +222,7 @@ func listPublishedImages(context *builderContext) ([]v1.IntegrationKitStatus, er
 		}
 		images = append(images, kit.Status)
 	}
+
 	return images, nil
 }
 
@@ -247,6 +249,7 @@ func findBestImage(images []v1.IntegrationKitStatus, artifacts []v1.Artifact) (v
 			// otherwise, checksums would never match and we would always use the root image
 			if !strings.HasPrefix(artifact.Target, "dependencies/lib") {
 				nonLibArtifacts++
+
 				continue
 			}
 

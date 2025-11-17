@@ -55,6 +55,7 @@ func (action *initializeAction) CanHandle(pipe *v1.Pipe) bool {
 
 func (action *initializeAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.Pipe, error) {
 	action.L.Info("Initializing Pipe")
+
 	return initializePipe(ctx, action.client, action.L, pipe)
 }
 
@@ -69,6 +70,7 @@ func initializePipe(ctx context.Context, c client.Client, l log.Logger, pipe *v1
 			"IntegrationError",
 			err,
 		)
+
 		return pipe, err
 	}
 	if _, err := kubernetes.ReplaceResource(ctx, c, it); err != nil {
@@ -80,6 +82,7 @@ func initializePipe(ctx context.Context, c client.Client, l log.Logger, pipe *v1
 
 	target := pipe.DeepCopy()
 	target.Status.Phase = v1.PipePhaseCreating
+
 	return target, nil
 }
 
@@ -87,6 +90,7 @@ func propagateIcon(ctx context.Context, c client.Client, l log.Logger, pipe *v1.
 	icon, err := findIcon(ctx, c, pipe)
 	if err != nil {
 		l.Errorf(err, "cannot find icon for Pipe %q", pipe.Name)
+
 		return
 	}
 	if icon == "" {

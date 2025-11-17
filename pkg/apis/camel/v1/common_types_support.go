@@ -57,6 +57,7 @@ func TraitProfileByName(name string) TraitProfile {
 			return p
 		}
 	}
+
 	return ""
 }
 
@@ -146,6 +147,7 @@ func (m RawMessage) MarshalJSON() ([]byte, error) {
 	if m == nil {
 		return []byte("null"), nil
 	}
+
 	return m, nil
 }
 
@@ -155,6 +157,7 @@ func (m *RawMessage) UnmarshalJSON(data []byte) error {
 		return errors.New("json.RawMessage: UnmarshalJSON on nil pointer")
 	}
 	*m = append((*m)[0:0], data...)
+
 	return nil
 }
 
@@ -167,6 +170,7 @@ func (m *RawMessage) String() string {
 	if err != nil {
 		return ""
 	}
+
 	return string(b)
 }
 
@@ -280,5 +284,6 @@ func (s *SourceSpec) InferLanguage() Language {
 			return l
 		}
 	}
+
 	return ""
 }

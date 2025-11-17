@@ -132,5 +132,6 @@ func (e *ErrorHandlerSink) Validate() error {
 	if e.DLCEndpoint == nil {
 		return errors.New("missing endpoint in Error Handler Sink")
 	}
+
 	return nil
 }

@@ -45,6 +45,7 @@ func (build *Build) BuilderPodNamespace() string {
 			return t.Builder.Configuration.BuilderPodNamespace
 		}
 	}
+
 	return ""
 }
 
@@ -82,6 +83,7 @@ func FindBuilderTask(tasks []Task) (*BuilderTask, bool) {
 			return t.Builder, true
 		}
 	}
+
 	return nil, false
 }
 
@@ -104,6 +106,7 @@ func ConfigurationTasksByName(tasks []Task, name string) *BuildConfiguration {
 			return &t.Jib.Configuration
 		}
 	}
+
 	return &BuildConfiguration{}
 }
 
@@ -112,6 +115,7 @@ func SetBuilderConfigurationTasks(tasks []Task, conf *BuildConfiguration) {
 	for _, t := range tasks {
 		if t.Builder != nil {
 			t.Builder.Configuration = *conf
+
 			return
 		}
 	}
@@ -141,12 +145,14 @@ func (in *BuildStatus) GetCondition(condType BuildConditionType) *BuildCondition
 			return &c
 		}
 	}
+
 	return nil
 }
 
 func (in *BuildStatus) Failed(err error) BuildStatus {
 	in.Error = err.Error()
 	in.Phase = BuildPhaseFailed
+
 	return *in
 }
 
@@ -224,6 +230,7 @@ func (in *BuildStatus) GetConditions() []ResourceCondition {
 	for _, c := range in.Conditions {
 		res = append(res, &c)
 	}
+
 	return res
 }
 
@@ -348,6 +355,7 @@ buildLoop:
 			} else if commonDependencies > bestBuildCommonDependencies {
 				bestBuildCommonDependencies = commonDependencies
 				bestBuild = b
+
 				continue
 			}
 		}
@@ -356,6 +364,7 @@ buildLoop:
 	if bestBuildCommonDependencies > 0 {
 		return true, &bestBuild
 	}
+
 	return false, nil
 }
 
@@ -366,5 +375,6 @@ func compareBuilds(b1 *Build, b2 *Build) int {
 	if b2.CreationTimestamp.Before(&b1.CreationTimestamp) {
 		return 1
 	}
+
 	return strings.Compare(b1.Name, b2.Name)
 }

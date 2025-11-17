@@ -100,6 +100,7 @@ func (in *IntegrationKit) HasHigherPriorityThan(kit *IntegrationKit) bool {
 			p2 = p
 		}
 	}
+
 	return p1 > p2
 }
 
@@ -133,6 +134,7 @@ func (in *IntegrationKitStatus) GetCondition(condType IntegrationKitConditionTyp
 			return &c
 		}
 	}
+
 	return nil
 }
 
@@ -205,6 +207,7 @@ func (in *IntegrationKitStatus) GetConditions() []ResourceCondition {
 	for _, c := range in.Conditions {
 		res = append(res, &c)
 	}
+
 	return res
 }
 

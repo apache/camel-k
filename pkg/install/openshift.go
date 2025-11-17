@@ -69,7 +69,7 @@ func OpenShiftConsoleDownloadLink(ctx context.Context, c client.Client) error {
 	}
 
 	// Check for permission to create the ConsoleCLIDownload resource
-	ok, err = kubernetes.CheckPermission(ctx, c, console.GroupName, "consoleclidownloads", "", KamelCLIDownloadName, "create")
+	ok, err = kubernetes.CheckSelfPermission(ctx, c, console.GroupName, "consoleclidownloads", "", KamelCLIDownloadName, "create")
 	if err != nil {
 		return err
 	}
@@ -110,6 +110,7 @@ func OpenShiftConsoleDownloadLink(ctx context.Context, c client.Client) error {
 					// Let's just skip the ConsoleCLIDownload resource creation
 					return nil
 				}
+
 				return err
 			}
 		}

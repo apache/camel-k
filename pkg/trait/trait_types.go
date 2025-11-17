@@ -346,11 +346,13 @@ func (e *Environment) determineDefaultContainerPortName() string {
 	controller, err := e.DetermineControllerStrategy()
 	if err != nil {
 		log.WithValues("Function", "trait.determineDefaultContainerPortName").Errorf(err, "could not determine controller strategy, using default deployment container name")
+
 		return defaultContainerPortName
 	}
 	if controller == ControllerStrategyKnativeService {
 		return defaultKnativeContainerPortName
 	}
+
 	return defaultContainerPortName
 }
 
@@ -364,6 +366,7 @@ func (e *Environment) getControllerStrategyChoosers() []ControllerStrategySelect
 	sort.Slice(res, func(i, j int) bool {
 		return res[i].ControllerStrategySelectorOrder() < res[j].ControllerStrategySelectorOrder()
 	})
+
 	return res
 }
 
@@ -413,6 +416,7 @@ func (e *Environment) DetermineCatalogNamespace() string {
 	if e.Integration != nil && e.Integration.Namespace != "" {
 		return e.Integration.Namespace
 	}
+
 	return ""
 }
 
@@ -483,6 +487,7 @@ func getMountPoint(resourceName string, mountPoint string, storagetype, resource
 		if storagetype == secretStorageType {
 			defaultResourceMountPoint = camel.ResourcesSecretsMountPath
 		}
+
 		return filepath.Join(defaultResourceMountPoint, resourceName)
 	}
 	defaultMountPoint := camel.ConfigConfigmapsMountPath
@@ -509,6 +514,7 @@ func (e *Environment) GetIntegrationContainerName() string {
 			containerName = ct.getContainerName()
 		}
 	}
+
 	return containerName
 }
 
@@ -519,11 +525,13 @@ func (e *Environment) isEmbedded(source v1.SourceSpec) bool {
 			return qt.isEmbedded(e, source)
 		}
 	}
+
 	return false
 }
 
 func (e *Environment) GetIntegrationContainer() *corev1.Container {
 	containerName := e.GetIntegrationContainerName()
+
 	return e.Resources.GetContainerByName(containerName)
 }
 
@@ -587,8 +595,10 @@ func CapabilityPropertyKey(camelPropertyKey string, vars map[string]string) stri
 			// Should not happen, but fallback to the key not expanded instead of panic if it comes to happen
 			return camelPropertyKey
 		}
+
 		return strings.ReplaceAll(camelPropertyKey, match[1], vars[match[2]])
 	}
+
 	return camelPropertyKey
 }
 

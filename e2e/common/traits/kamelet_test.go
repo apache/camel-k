@@ -89,15 +89,24 @@ func TestKameletNamespaced(t *testing.T) {
 	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns1 string) {
 		t.Run("store kamelet", func(t *testing.T) {
-			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/my-timer-source-ns.kamelet.yaml", "-n", ns1))
+			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "cross-ns/my-timer-source-ns.kamelet.yaml", "-n", ns1))
 		})
 
 		WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns2 string) {
-			t.Run("namespaced kamelet", func(t *testing.T) {
+			t.Run("set privileges", func(t *testing.T) {
+				ExpectExecSucceed(t, g, Kubectl("apply", "-f", "cross-ns/sa.yaml", "-n", ns2))
+				ExpectExecSucceed(t, g, Kubectl("apply", "-f", "cross-ns/sa-role.yaml", "-n", ns1))
+				saRbFile := cloneAndReplaceNamespace(t, "cross-ns/sa-rolebinding.yaml", ns2)
+				ExpectExecSucceed(t, g, Kubectl("apply", "-f", saRbFile, "-n", ns1))
+			})
+			t.Run("cross namespace kamelet", func(t *testing.T) {
 				// Clone the resource in a temporary file as it will require to be changed
 				routeFile := cloneAndReplaceNamespace(t, "files/kamelet-it-ns.yaml", ns1)
-				name := RandomizedSuffixName("namespaced-kamelet")
-				g.Expect(KamelRun(t, ctx, ns2, routeFile, "--name", name).Execute()).To(Succeed())
+				name := RandomizedSuffixName("cross-namespace-kamelet")
+				g.Expect(KamelRun(t, ctx, ns2, routeFile,
+					"--service-account", "my-cross-ns-sa",
+					"--name", name,
+				).Execute()).To(Succeed())
 				g.Eventually(IntegrationConditionStatus(t, ctx, ns2, name, v1.IntegrationConditionReady), TestTimeoutMedium).
 					Should(Equal(corev1.ConditionTrue))
 				g.Eventually(IntegrationPodPhase(t, ctx, ns2, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))

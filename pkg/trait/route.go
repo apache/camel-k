@@ -226,6 +226,7 @@ func (t *routeTrait) readContentIfExists(e *Environment, secretName string) (str
 	if len(secret.Data) == 1 && len(key) == 0 {
 		for _, value := range secret.Data {
 			content := string(value)
+
 			return content, nil
 		}
 	}
@@ -234,7 +235,9 @@ func (t *routeTrait) readContentIfExists(e *Environment, secretName string) (str
 		if len(content) == 0 {
 			return "", fmt.Errorf("could not find key %s in secret %s in namespace %s", key, secretName, t.service.Namespace)
 		}
+
 		return content, nil
 	}
+
 	return "", nil
 }

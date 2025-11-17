@@ -95,6 +95,7 @@ func (t *mountTrait) Apply(e *Environment) error {
 		volumes = &deployment.Spec.Template.Spec.Volumes
 		initContainers = &deployment.Spec.Template.Spec.InitContainers
 		visited = true
+
 		return nil
 	}); err != nil {
 		return err
@@ -105,6 +106,7 @@ func (t *mountTrait) Apply(e *Environment) error {
 		volumes = &service.Spec.Template.Spec.Volumes
 		initContainers = &service.Spec.Template.Spec.InitContainers
 		visited = true
+
 		return nil
 	}); err != nil {
 		return err
@@ -115,6 +117,7 @@ func (t *mountTrait) Apply(e *Environment) error {
 		volumes = &cron.Spec.JobTemplate.Spec.Template.Spec.Volumes
 		initContainers = &cron.Spec.JobTemplate.Spec.Template.Spec.InitContainers
 		visited = true
+
 		return nil
 	}); err != nil {
 		return err
@@ -336,6 +339,7 @@ func ParseEmptyDirVolume(item string) (*corev1.Volume, *corev1.VolumeMount, erro
 	}
 
 	volumeMount := getMount(refName, volumeParts[1], "", false)
+
 	return volume, volumeMount, nil
 }
 
@@ -372,6 +376,7 @@ func ParseAndCreateVolume(e *Environment, item string) (*corev1.Volume, *corev1.
 	}
 
 	volumeMount := getMount(volumeName, volumeParts[1], "", false)
+
 	return volume, volumeMount, nil
 }
 
@@ -468,6 +473,7 @@ func (t *mountTrait) addSourcesProperties(e *Environment) {
 				continue
 			}
 			sourceLocationEnabled = true
+
 			break
 		}
 		if sourceLocationEnabled {

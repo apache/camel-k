@@ -117,6 +117,7 @@ func (t *containerTrait) Apply(e *Environment) error {
 	if err := t.configureImageIntegrationKit(e); err != nil {
 		return err
 	}
+
 	return t.configureContainer(e)
 }
 
@@ -166,6 +167,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 		}
 		containers = &deployment.Spec.Template.Spec.Containers
 		visited = true
+
 		return nil
 	}); err != nil {
 		return err
@@ -189,6 +191,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 		containers = &service.Spec.Template.Spec.Containers
 		visited = true
 		knative = true
+
 		return nil
 	}); err != nil {
 		return err
@@ -200,6 +203,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 		}
 		containers = &cron.Spec.JobTemplate.Spec.Template.Spec.Containers
 		visited = true
+
 		return nil
 	}); err != nil {
 		return err

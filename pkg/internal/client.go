@@ -28,6 +28,7 @@ import (
 	fakecamelclientset "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/fake"
 	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util"
+	authv1 "k8s.io/api/authorization/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -65,6 +66,7 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 			"status.phase",
 			func(obj controller.Object) []string {
 				pod, _ := obj.(*corev1.Pod)
+
 				return []string{string(pod.Status.Phase)}
 			},
 		).
@@ -90,6 +92,7 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 		replicas := obj.Spec.Replicas
 		key := fmt.Sprintf("%s:%s:%s/%s", action.GetResource().Group, action.GetResource().Resource, action.GetNamespace(), obj.GetName())
 		replicasCount[key] = replicas
+
 		return true, &autoscalingv1.Scale{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      obj.Name,
@@ -114,6 +117,7 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 				Replicas: replicasCount[key],
 			},
 		}
+
 		return true, obj, nil
 	})
 
@@ -134,10 +138,12 @@ func filterObjects(scheme *runtime.Scheme, input []runtime.Object, filter func(g
 		for _, k := range kinds {
 			if filter(k) {
 				res = append(res, obj)
+
 				break
 			}
 		}
 	}
+
 	return res
 }
 
@@ -187,6 +193,7 @@ func (c *FakeClient) Patch(ctx context.Context, obj controller.Object, patch con
 		// Create fails if object already exists. Try to update it.
 		return c.Update(ctx, obj)
 	}
+
 	return nil
 }
 
@@ -247,6 +254,26 @@ type FakeAuthorization struct {
 
 func (f *FakeAuthorization) SelfSubjectRulesReviews() authorizationv1.SelfSubjectRulesReviewInterface {
 	return f.AuthorizationV1Interface.SelfSubjectRulesReviews()
+}
+
+// Returns a fake SAR interface.
+func (f *FakeAuthorization) SubjectAccessReviews() authorizationv1.SubjectAccessReviewInterface {
+	return &FakeSAR{}
+}
+
+type FakeSAR struct {
+	authorizationv1.SubjectAccessReviewInterface
+}
+
+// Fake Create implementation (needed in cross namespace Kamelets test). Only allow `cross-ns-sa` user in `default` namespace.
+func (f *FakeSAR) Create(ctx context.Context, sar *authv1.SubjectAccessReview, opts metav1.CreateOptions) (*authv1.SubjectAccessReview, error) {
+	ra := sar.Spec.ResourceAttributes
+	allowed := sar.Spec.User == "system:serviceaccount:default:cross-ns-sa" && ra.Verb == "get" && ra.Resource == "kamelets"
+
+	sar.Status.Allowed = allowed
+	sar.Status.Reason = "mocked"
+
+	return sar, nil
 }
 
 type FakeDiscovery struct {

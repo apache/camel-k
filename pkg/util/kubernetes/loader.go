@@ -65,5 +65,6 @@ func runtimeObjectFromUnstructured(scheme *runtime.Scheme, u *unstructured.Unstr
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode json data with gvk(%v): %w", gvk.String(), err)
 	}
+
 	return ro, nil
 }

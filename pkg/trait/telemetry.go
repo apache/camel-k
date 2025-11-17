@@ -99,6 +99,7 @@ func (t *telemetryTrait) Configure(e *Environment) (bool, *TraitCondition, error
 					endpoint,
 				)
 				t.Endpoint = endpoint
+
 				break
 			}
 		}
@@ -130,6 +131,7 @@ func (t *telemetryTrait) Apply(e *Environment) error {
 		}
 		if qv.Compare(ck315) >= 0 {
 			t.setRuntimeProviderQuarkus315Properties(e)
+
 			return nil
 		}
 	}
