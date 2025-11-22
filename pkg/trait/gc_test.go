@@ -30,6 +30,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/utils/ptr"
 	eventingv1 "knative.dev/eventing/pkg/apis/eventing/v1"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
@@ -348,4 +349,42 @@ func createNominalGCTest() (*gcTrait, *Environment) {
 	}
 
 	return trait, environment
+}
+
+func TestCanResourceBeDeleted(t *testing.T) {
+	it := &v1.Integration{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "my-it",
+		},
+	}
+
+	resNoOwner := unstructured.Unstructured{}
+	resNoOwner.SetOwnerReferences(
+		[]metav1.OwnerReference{},
+	)
+	assert.False(t, canBeDeleted(it, resNoOwner))
+
+	resNotThisItOwner := unstructured.Unstructured{}
+	resNotThisItOwner.SetOwnerReferences(
+		[]metav1.OwnerReference{
+			metav1.OwnerReference{
+				APIVersion: v1.SchemeGroupVersion.String(),
+				Kind:       "Integration",
+				Name:       "another-it",
+			},
+		},
+	)
+	assert.False(t, canBeDeleted(it, resNotThisItOwner))
+
+	resThisItOwner := unstructured.Unstructured{}
+	resThisItOwner.SetOwnerReferences(
+		[]metav1.OwnerReference{
+			metav1.OwnerReference{
+				APIVersion: v1.SchemeGroupVersion.String(),
+				Kind:       "Integration",
+				Name:       "my-it",
+			},
+		},
+	)
+	assert.True(t, canBeDeleted(it, resThisItOwner))
 }
