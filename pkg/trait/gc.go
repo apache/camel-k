@@ -198,6 +198,8 @@ func (t *gcTrait) garbageCollectResources(e *Environment) error {
 	return t.deleteEachOf(e.Ctx, deletableGVKs, e, selector)
 }
 
+// deleteEachOf takes care of the effective deletion of each deletableGVKs passed for the given selector. It should be any older generation resource
+// of the Integration.
 func (t *gcTrait) deleteEachOf(ctx context.Context, deletableGVKs map[schema.GroupVersionKind]struct{}, e *Environment, selector labels.Selector) error {
 	for GVK := range deletableGVKs {
 		resources := unstructured.UnstructuredList{
@@ -220,7 +222,7 @@ func (t *gcTrait) deleteEachOf(ctx context.Context, deletableGVKs map[schema.Gro
 
 		for _, resource := range resources.Items {
 			r := resource
-			if !t.canBeDeleted(e, r) {
+			if !canBeDeleted(e.Integration, r) {
 				continue
 			}
 			err := t.Client.Delete(ctx, &r, ctrl.PropagationPolicy(metav1.DeletePropagationBackground))
@@ -238,10 +240,10 @@ func (t *gcTrait) deleteEachOf(ctx context.Context, deletableGVKs map[schema.Gro
 	return nil
 }
 
-func (t *gcTrait) canBeDeleted(e *Environment, u unstructured.Unstructured) bool {
-	// Only delete direct children of the integration, otherwise we can affect the behavior of external controllers (i.e. Knative)
+// canBeDeleted is an important security check. We make sure that we are only deleting those resources belonging to the given Integration.
+func canBeDeleted(it *v1.Integration, u unstructured.Unstructured) bool {
 	for _, o := range u.GetOwnerReferences() {
-		if o.Kind == v1.IntegrationKind && strings.HasPrefix(o.APIVersion, v1.SchemeGroupVersion.Group) && o.Name == e.Integration.Name {
+		if o.Kind == v1.IntegrationKind && strings.HasPrefix(o.APIVersion, v1.SchemeGroupVersion.Group) && o.Name == it.Name {
 			return true
 		}
 	}
@@ -249,6 +251,8 @@ func (t *gcTrait) canBeDeleted(e *Environment, u unstructured.Unstructured) bool
 	return false
 }
 
+// getDeletableTypes returns the list of deletable types resources, inspecting the rules for which the operator SA is allowed in the
+// Integration namespace.
 func (t *gcTrait) getDeletableTypes(e *Environment) (map[schema.GroupVersionKind]struct{}, error) {
 	lock.Lock()
 	defer lock.Unlock()
