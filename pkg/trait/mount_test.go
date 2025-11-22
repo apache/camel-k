@@ -642,3 +642,64 @@ func TestAgentVolume(t *testing.T) {
 		return false
 	})
 }
+
+func TestMountMultipleKeysSameSecret(t *testing.T) {
+	traitCatalog := NewCatalog(nil)
+	environment := getNominalEnv(t, traitCatalog)
+	environment.Integration.Spec.Traits.Mount = &traitv1.MountTrait{
+		Configs: []string{
+			"secret:my-secret/truststore.p12",
+			"secret:my-secret/truststore.password",
+		},
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	conditions, traits, err := traitCatalog.apply(environment)
+
+	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
+	assert.NotEmpty(t, conditions)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("mount"))
+
+	s := environment.Resources.GetDeployment(func(service *appsv1.Deployment) bool {
+		return service.Name == "hello"
+	})
+	assert.NotNil(t, s)
+	spec := s.Spec.Template.Spec
+
+	assert.Len(t, spec.Containers[0].VolumeMounts, 4)
+	assert.Len(t, spec.Volumes, 4)
+
+	found := 0
+	for _, v := range spec.Volumes {
+		if v.Name == "my-secret" {
+			found++
+		}
+	}
+	assert.Equal(t, 1, found, "Expected exactly 1 volume named my-secret")
+
+	found = 0
+	for _, v := range spec.Volumes {
+		if v.Name == "my-secret-1" {
+			found++
+		}
+	}
+	assert.Equal(t, 1, found, "Expected exactly 1 volume named my-secret-1")
+
+	found = 0
+	for _, v := range spec.Containers[0].VolumeMounts {
+		if v.MountPath == "/etc/camel/conf.d/_secrets/my-secret" {
+			found++
+		}
+	}
+	assert.Equal(t, 1, found, "Expected exactly 1 volume mounted at my-secret")
+
+	found = 0
+	for _, v := range spec.Containers[0].VolumeMounts {
+		if v.MountPath == "/etc/camel/conf.d/_secrets/my-secret-1" {
+			found++
+		}
+	}
+	assert.Equal(t, 1, found, "Expected exactly 1 volume mounted at my-secret-1")
+}
