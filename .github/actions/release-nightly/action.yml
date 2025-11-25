@@ -182,7 +182,7 @@ runs:
         operator-sdk run bundle docker.io/testcamelk/camel-k-bundle:${{ env.VERSION }}
         ```
 
-        NOTE: last updated on $TIMESTAMP
+        NOTE: last updated on ${TIMESTAMP}
         EOF
         )
 
@@ -228,22 +228,18 @@ runs:
         RELEASE_ID=${{ env.RELEASE_ID }}
         FILES="./camel-k-client*.tar.gz sbom.json"
 
-        if [ -n "$ASSETS" ]; then
-          for FILE in $FILES; do
-            if [ -f "$FILE" ]; then
-              FILE_NAME=$(basename "$FILE")
-              echo "Uploading $FILE_NAME..."
-              curl -s -X POST \
-                -H "Authorization: token $GITHUB_TOKEN" \
-                -H "Content-Type: application/octet-stream" \
-                --data-binary @"$FILE" \
-                "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/$RELEASE_ID/assets?name=$(basename $FILE)"
-            else
-              echo "File $FILE not found, skipping."
-            fi
-          done
-        else
-          echo "No assets to upload."
-        fi
+        for FILE in $FILES; do
+          if [ -f "$FILE" ]; then
+            FILE_NAME=$(basename "$FILE")
+            echo "Uploading $FILE_NAME..."
+            curl -s -X POST \
+              -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Content-Type: application/octet-stream" \
+              --data-binary @"$FILE" \
+              "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/$RELEASE_ID/assets?name=$(basename $FILE)"
+          else
+            echo "File $FILE not found, skipping."
+          fi
+        done
 
         echo "Release ${{ env.TAG }} created successfully with artifacts."
