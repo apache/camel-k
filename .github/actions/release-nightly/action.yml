@@ -173,7 +173,7 @@ runs:
         RELEASE_ID=${{ env.RELEASE_ID }}
         RELEASE_NOTES=$(cat << 'EOF'
         ```
-        NOTE: last update on {{ env.UPD_DATE }}
+        NOTE: last update on ${{ env.UPD_DATE }}
         ```
         Apache Camel K ${{ env.VERSION }} build for testing purposes only (unstable). This nightly release is using an **unsupported** operator image published as `${{ env.IMAGE_NAME }}:${{ env.VERSION }}`. The available platforms are AMD64 and ARM64.
         ## Kubectl
@@ -220,7 +220,7 @@ runs:
           for ASSET_ID in $ASSETS; do
             echo "Deleting asset $ASSET_ID"
             curl -s -X DELETE \
-                 -H "Authorization: token $TOKEN" \
+                 -H "Authorization: token $GITHUB_TOKEN" \
                  -H "Accept: application/vnd.github+json" \
                  "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/assets/$ASSET_ID"
           done
