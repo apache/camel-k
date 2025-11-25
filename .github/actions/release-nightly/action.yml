@@ -60,7 +60,13 @@ runs:
     - name: Set up QEMU (required by multi platform build)
       uses: docker/setup-qemu-action@v3
 
+    # 
+    # IMPORTANT:
     # Do we really want to run smoke test?
+    # We can skip unless we see the usage of the nightly is widespread and it makes sense to run some smoke
+    # test before releasing
+    #
+    
     # - name: Infra setting
     #   uses: ./.github/actions/infra-setting
 
@@ -165,8 +171,10 @@ runs:
       shell: bash
       run: |
         RELEASE_ID=${{ env.RELEASE_ID }}
-        TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
         RELEASE_NOTES=$(cat << 'EOF'
+        ```
+        NOTE: last update on {{ env.UPD_DATE }}
+        ```
         Apache Camel K ${{ env.VERSION }} build for testing purposes only (unstable). This nightly release is using an **unsupported** operator image published as `${{ env.IMAGE_NAME }}:${{ env.VERSION }}`. The available platforms are AMD64 and ARM64.
         ## Kubectl
         ```
@@ -181,8 +189,6 @@ runs:
         ```
         operator-sdk run bundle docker.io/testcamelk/camel-k-bundle:${{ env.VERSION }}
         ```
-
-        NOTE: last updated on ${TIMESTAMP}
         EOF
         )
 
