@@ -42,13 +42,12 @@ func newCmdDebug(rootCmdOptions *RootCmdOptions) (*cobra.Command, *debugCmdOptio
 	}
 
 	cmd := cobra.Command{
-		Use:        "debug [integration name]",
-		Short:      "Debug an integration running on Kubernetes",
-		Long:       `Set an integration running on the Kubernetes cluster in debug mode and forward ports in order to connect a remote debugger running on the local host.`,
-		Args:       options.validateArgs,
-		PreRunE:    decode(&options, options.Flags),
-		RunE:       options.run,
-		Deprecated: "Warning: this command is deprecated and will be removed in the future.",
+		Use:     "debug [integration name]",
+		Short:   "Debug an integration running on Kubernetes",
+		Long:    `Set an integration running on the Kubernetes cluster in debug mode and forward ports in order to connect a remote debugger running on the local host.`,
+		Args:    options.validateArgs,
+		PreRunE: decode(&options, options.Flags),
+		RunE:    options.run,
 	}
 
 	cmd.Flags().Bool("suspend", true, "Suspend the integration on startup, to let the debugger attach from the beginning")
