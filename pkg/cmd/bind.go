@@ -232,17 +232,9 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(o.Traits) > 0 {
-		if pipe.Annotations == nil {
-			pipe.Annotations = make(map[string]string)
-		}
-
-		for _, t := range o.Traits {
-			kv := strings.SplitN(t, "=", 2)
-			if len(kv) != 2 {
-				return fmt.Errorf("could not parse trait configuration %s, expected format 'trait.property=value'", t)
-			}
-			value := maybeBuildArrayNotation(pipe.Annotations[v1.TraitAnnotationPrefix+kv[0]], kv[1])
-			pipe.Annotations[v1.TraitAnnotationPrefix+kv[0]] = value
+		catalog := trait.NewCatalog(client)
+		if err := trait.ConfigureTraits(o.Traits, &pipe.Spec.Traits, catalog); err != nil {
+			return err
 		}
 	}
 
@@ -276,23 +268,6 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
-}
-
-// buildArrayNotation is used to build an array annotation to support traits array configuration
-// for example, `-t camel.properties=a=1 -t camel.properties=b=2` would convert into annotation
-// `camel.properties=[a=1,b=2]“.
-func maybeBuildArrayNotation(array, value string) string {
-	if array == "" {
-		return value
-	}
-	// append
-	if strings.HasPrefix(array, "[") && strings.HasSuffix(array, "]") {
-		content := array[1:len(array)-1] + "," + value
-
-		return "[" + content + "]"
-	}
-	// init the array notation
-	return "[" + array + "," + value + "]"
 }
 
 func showPipeOutput(cmd *cobra.Command, binding *v1.Pipe, outputFormat string, scheme runtime.ObjectTyper) error {

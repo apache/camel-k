@@ -181,13 +181,16 @@ kind: Pipe
 metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
-    trait.camel.apache.org/mount.configs: configmap:my-cm
   name: my-to-my
 spec:
   sink:
     uri: my:dst
   source:
     uri: my:src
+  traits:
+    mount:
+      configs:
+      - configmap:my-cm
 status: {}
 `, output)
 }
@@ -204,13 +207,17 @@ kind: Pipe
 metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
-    trait.camel.apache.org/camel.properties: '[a=1,b=2]'
   name: my-to-my
 spec:
   sink:
     uri: my:dst
   source:
     uri: my:src
+  traits:
+    camel:
+      properties:
+      - a=1
+      - b=2
 status: {}
 `, output)
 }

@@ -25,6 +25,7 @@ import (
 
 const (
 	// TraitAnnotationPrefix represents the prefix used for traits annotations.
+	// Deprecated: use .spec.traits instead.
 	TraitAnnotationPrefix = "trait.camel.apache.org/"
 	// OperatorIDAnnotation operator id annotation label.
 	OperatorIDAnnotation = "camel.apache.org/operator.id"

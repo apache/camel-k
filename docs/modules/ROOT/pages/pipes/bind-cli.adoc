@@ -67,7 +67,6 @@ kind: Pipe
 metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
-    trait.camel.apache.org/camel.runtime-version: 3.6.0
   name: timer-source-to-log-sink
   namespace: camel-k
 spec:
@@ -85,5 +84,8 @@ spec:
       kind: Kamelet
       name: timer-source
       namespace: camel-k
+  traits:
+    camel:
+      runtime-version: 3.6.0
 status: {}
 ----

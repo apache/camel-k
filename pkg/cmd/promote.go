@@ -142,10 +142,7 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 	// Pipe promotion
 	if promotePipe {
-		destPipe, err := o.editPipe(sourcePipe, sourceIntegration, sourceKit)
-		if err != nil {
-			return err
-		}
+		destPipe := o.editPipe(sourcePipe, sourceIntegration, sourceKit)
 		if o.OutputFormat != "" {
 			return showPipeOutput(cmd, destPipe, o.OutputFormat, c.GetScheme())
 		}
@@ -265,7 +262,7 @@ func (o *promoteCmdOptions) editIntegration(it *v1.Integration, kit *v1.Integrat
 			dstIt.Spec.Traits.JVM = &traitv1.JVMTrait{}
 		}
 		jvmTrait := dstIt.Spec.Traits.JVM
-		mergedClasspath := getClasspath(kit, jvmTrait.Classpath)
+		mergedClasspath := getClasspath(kit, jvmTrait)
 		jvmTrait.Classpath = mergedClasspath
 		// We must also set the runtime version so we pin it to the given catalog on which
 		// the container image was built
@@ -279,7 +276,11 @@ func (o *promoteCmdOptions) editIntegration(it *v1.Integration, kit *v1.Integrat
 }
 
 // getClasspath merges the classpath required by the kit with any value provided in the trait.
-func getClasspath(kit *v1.IntegrationKit, jvmTraitClasspath string) string {
+func getClasspath(kit *v1.IntegrationKit, jvmTraitSpec *traitv1.JVMTrait) string {
+	jvmTraitClasspath := ""
+	if jvmTraitSpec != nil {
+		jvmTraitClasspath = jvmTraitSpec.Classpath
+	}
 	kitClasspathSet := kit.Status.GetDependenciesPaths()
 	if !kitClasspathSet.IsEmpty() {
 		if jvmTraitClasspath != "" {
@@ -335,7 +336,7 @@ func cloneLabels(lbs map[string]string) map[string]string {
 	return newMap
 }
 
-func (o *promoteCmdOptions) editPipe(kb *v1.Pipe, it *v1.Integration, kit *v1.IntegrationKit) (*v1.Pipe, error) {
+func (o *promoteCmdOptions) editPipe(kb *v1.Pipe, it *v1.Integration, kit *v1.IntegrationKit) *v1.Pipe {
 	contImage := it.Status.Image
 	// Pipe
 	dst := v1.NewPipe(o.To, kb.Name)
@@ -354,11 +355,12 @@ func (o *promoteCmdOptions) editPipe(kb *v1.Pipe, it *v1.Integration, kit *v1.In
 		// We must provide the classpath expected for the IntegrationKit. This is calculated dynamically and
 		// would get lost when creating the non managed build Integration. For this reason
 		// we must report it in the promoted Integration.
-		mergedClasspath := getClasspath(kit, dst.Annotations[v1.TraitAnnotationPrefix+"jvm.classpath"])
 		if traits.JVM == nil {
 			traits.JVM = &traitv1.JVMTrait{}
 		}
-		traits.JVM.Classpath = mergedClasspath
+		jvmTrait := traits.JVM
+		mergedClasspath := getClasspath(kit, jvmTrait)
+		jvmTrait.Classpath = mergedClasspath
 		// We must also set the runtime version so we pin it to the given catalog on which
 		// the container image was built
 		if traits.Camel == nil {
@@ -366,9 +368,8 @@ func (o *promoteCmdOptions) editPipe(kb *v1.Pipe, it *v1.Integration, kit *v1.In
 		}
 		traits.Camel.RuntimeVersion = kit.Status.RuntimeVersion
 	}
-	if err := dst.SetTraits(traits); err != nil {
-		return nil, err
-	}
+	dst.SetTraits(traits)
+
 	if dst.Spec.Source.Ref != nil {
 		dst.Spec.Source.Ref.Namespace = o.To
 	}
@@ -383,7 +384,7 @@ func (o *promoteCmdOptions) editPipe(kb *v1.Pipe, it *v1.Integration, kit *v1.In
 		}
 	}
 
-	return &dst, nil
+	return &dst
 }
 
 func (o *promoteCmdOptions) replaceResource(res k8sclient.Object) (bool, error) {
@@ -481,10 +482,32 @@ patches:
 
 // getIntegrationPatch will filter those traits/configuration we want to include in the Integration patch.
 func getIntegrationPatch(baseIt *v1.Integration) *v1.Integration {
+	patchedTraits := patchTraits(baseIt.Spec.Traits)
+
+	patchedIt := v1.NewIntegration("", baseIt.Name)
+	patchedIt.Spec = v1.IntegrationSpec{
+		Traits: patchedTraits,
+	}
+
+	return &patchedIt
+}
+
+// getPipePatch will filter those traits/configuration we want to include in the Pipe patch.
+func getPipePatch(basePipe *v1.Pipe) *v1.Pipe {
+	patchedTraits := patchTraits(*basePipe.Spec.Traits)
+
+	patchedPipe := v1.NewPipe("", basePipe.Name)
+	patchedPipe.Spec = v1.PipeSpec{
+		Traits: &patchedTraits,
+	}
+
+	return &patchedPipe
+}
+
+func patchTraits(baseTraits v1.Traits) v1.Traits {
 	patchedTraits := v1.Traits{}
-	baseTraits := baseIt.Spec.Traits
 	if baseTraits.Affinity != nil {
-		patchedTraits.Affinity = baseIt.Spec.Traits.Affinity
+		patchedTraits.Affinity = baseTraits.Affinity
 	}
 	if baseTraits.Camel != nil && baseTraits.Camel.Properties != nil {
 		patchedTraits.Camel = &traitv1.CamelTrait{
@@ -520,15 +543,10 @@ func getIntegrationPatch(baseIt *v1.Integration) *v1.Integration {
 		}
 	}
 	if baseTraits.Toleration != nil {
-		patchedTraits.Toleration = baseIt.Spec.Traits.Toleration
+		patchedTraits.Toleration = baseTraits.Toleration
 	}
 
-	patchedIt := v1.NewIntegration("", baseIt.Name)
-	patchedIt.Spec = v1.IntegrationSpec{
-		Traits: patchedTraits,
-	}
-
-	return &patchedIt
+	return patchedTraits
 }
 
 // appendKustomizePipe creates a Kustomize GitOps based directory structure for the chosen Pipe.
@@ -592,51 +610,4 @@ patches:
 	}
 
 	return err
-}
-
-// getPipePatch will filter those traits/configuration we want to include in the Pipe patch.
-func getPipePatch(basePipe *v1.Pipe) *v1.Pipe {
-	patchedPipe := v1.NewPipe("", basePipe.Name)
-	patchedPipe.Annotations = basePipe.Annotations
-	// Only keep those traits we want to include in the patch
-	for kAnn := range basePipe.Annotations {
-		if strings.HasPrefix(kAnn, v1.TraitAnnotationPrefix) {
-			if !isPipeTraitPatch(kAnn) {
-				delete(basePipe.Annotations, kAnn)
-			}
-		}
-	}
-
-	return &patchedPipe
-}
-
-// isPipeTraitPatch returns true if it belongs to the list of the opinionated traits we want to keep in the patch.
-func isPipeTraitPatch(keyAnnotation string) bool {
-	if strings.HasPrefix(keyAnnotation, v1.TraitAnnotationPrefix+"affinity") {
-		return true
-	}
-	if keyAnnotation == v1.TraitAnnotationPrefix+"camel.properties" {
-		return true
-	}
-	if strings.HasPrefix(keyAnnotation, v1.TraitAnnotationPrefix+"container.request") ||
-		strings.HasPrefix(keyAnnotation, v1.TraitAnnotationPrefix+"container.limit") {
-		return true
-	}
-	if keyAnnotation == v1.TraitAnnotationPrefix+"environment.vars" {
-		return true
-	}
-	if keyAnnotation == v1.TraitAnnotationPrefix+"jvm.options" {
-		return true
-	}
-	if strings.HasPrefix(keyAnnotation, v1.TraitAnnotationPrefix+"mount.configs") ||
-		strings.HasPrefix(keyAnnotation, v1.TraitAnnotationPrefix+"mount.resources") ||
-		strings.HasPrefix(keyAnnotation, v1.TraitAnnotationPrefix+"mount.volumes") ||
-		strings.HasPrefix(keyAnnotation, v1.TraitAnnotationPrefix+"mount.empty-dirs") {
-		return true
-	}
-	if strings.HasPrefix(keyAnnotation, v1.TraitAnnotationPrefix+"toleration") {
-		return true
-	}
-
-	return false
 }
