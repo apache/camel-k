@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	scase "github.com/stoewer/go-strcase"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -72,28 +71,9 @@ func (in *Pipe) SetOperatorID(operatorID string) {
 	SetAnnotation(&in.ObjectMeta, OperatorIDAnnotation, operatorID)
 }
 
-// SetTrait converts a trait into the related annotation.
-func (in *Pipe) SetTraits(traits *Traits) error {
-	var mappedTraits map[string]map[string]interface{}
-	data, err := json.Marshal(traits)
-	if err != nil {
-		return err
-	}
-	err = json.Unmarshal(data, &mappedTraits)
-	if err != nil {
-		return err
-	}
-
-	if in.Annotations == nil && (len(mappedTraits) > 0) {
-		in.Annotations = make(map[string]string)
-	}
-	for id, trait := range mappedTraits {
-		for k, v := range trait {
-			in.Annotations[fmt.Sprintf("%s%s.%s", TraitAnnotationPrefix, id, scase.KebabCase(k))] = fmt.Sprintf("%v", v)
-		}
-	}
-
-	return nil
+// SetTrait add the Trait specification to the Pipe.
+func (in *Pipe) SetTraits(traits *Traits) {
+	in.Spec.Traits = traits
 }
 
 // GetCondition returns the condition with the provided type.

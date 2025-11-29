@@ -67,15 +67,22 @@ func TestSetTraits(t *testing.T) {
 		},
 	}
 
-	expectedAnnotations := map[string]string(map[string]string{
-		"trait.camel.apache.org/affinity.enabled":        "true",
-		"trait.camel.apache.org/affinity.pod-affinity":   "true",
-		"trait.camel.apache.org/knative.channel-sources": "[channel-a channel-b]",
-		"trait.camel.apache.org/knative.enabled":         "true",
-	})
+	expectedTraits := &Traits{
+		Affinity: &trait.AffinityTrait{
+			Trait: trait.Trait{
+				Enabled: ptr.To(true),
+			},
+			PodAffinity: ptr.To(true),
+		},
+		Knative: &trait.KnativeTrait{
+			Trait: trait.Trait{
+				Enabled: ptr.To(true),
+			},
+			ChannelSources: []string{"channel-a", "channel-b"},
+		},
+	}
 
 	pipe := NewPipe("my-pipe", "my-ns")
-	err := pipe.SetTraits(&traits)
-	assert.NoError(t, err)
-	assert.Equal(t, expectedAnnotations, pipe.Annotations)
+	pipe.SetTraits(&traits)
+	assert.Equal(t, expectedTraits, pipe.Spec.Traits)
 }

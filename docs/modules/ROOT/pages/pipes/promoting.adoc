@@ -32,9 +32,6 @@ kind: Pipe
 metadata:
   annotations:
     camel.apache.org/kamelet.icon: data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gU3ZnIFZlY3RvciBJY29ucyA6IGh0dHA6Ly93d3cub25saW5ld2ViZm9udHMuY29tL2ljb24gLS0...
-    trait.camel.apache.org/camel.runtime-version: 3.8.1
-    trait.camel.apache.org/container.image: 10.100.107.57/camel-k/camel-k-kit-crbhu56n5tgc73cb1ts0@sha256:e3f66b61148e77ceda8531632847b455219300d95c9e640f4924b7e69419c2b9
-    trait.camel.apache.org/jvm.classpath: dependencies/*:dependencies/app/*:dependencies/lib/boot/*:dependencies/lib/main/*:dependencies/quarkus/*
   name: timer-source-to-log-sink
   namespace: prod
 spec:
@@ -52,6 +49,13 @@ spec:
       kind: Kamelet
       name: timer-source
       namespace: prod
+  traits:
+    camel:
+      runtime-version: 3.8.1
+    container:
+      image: 10.100.107.57/camel-k/camel-k-kit-crbhu56n5tgc73cb1ts0@sha256:e3f66b61148e77ceda8531632847b455219300d95c9e640f4924b7e69419c2b9
+    jvm:
+      classpath: dependencies/*:dependencies/app/*:dependencies/lib/boot/*:dependencies/lib/main/*:dependencies/quarkus/*
 status: {}
 ----
 

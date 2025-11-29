@@ -154,15 +154,18 @@ func TestPipeDryRun(t *testing.T) {
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
-  annotations:
-    trait.camel.apache.org/camel.runtime-version: 1.2.3
-    trait.camel.apache.org/container.image: my-special-image
-    trait.camel.apache.org/jvm.classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
   name: my-pipe-test
   namespace: prod-namespace
 spec:
   sink: {}
   source: {}
+  traits:
+    camel:
+      runtimeVersion: 1.2.3
+    container:
+      image: my-special-image
+    jvm:
+      classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
 status: {}
 `, output)
 }
@@ -254,9 +257,6 @@ kind: Pipe
 metadata:
   annotations:
     my-annotation: my-value
-    trait.camel.apache.org/camel.runtime-version: 1.2.3
-    trait.camel.apache.org/container.image: my-special-image
-    trait.camel.apache.org/jvm.classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
   labels:
     my-label: my-value
   name: my-pipe-test
@@ -264,6 +264,13 @@ metadata:
 spec:
   sink: {}
   source: {}
+  traits:
+    camel:
+      runtimeVersion: 1.2.3
+    container:
+      image: my-special-image
+    jvm:
+      classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
 status: {}
 `, output)
 }
@@ -442,9 +449,6 @@ kind: Pipe
 metadata:
   annotations:
     my-annotation: my-value
-    trait.camel.apache.org/camel.runtime-version: 1.2.3
-    trait.camel.apache.org/container.image: my-special-image
-    trait.camel.apache.org/jvm.classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
   labels:
     my-label: my-value
   name: my-pipe-test
@@ -452,6 +456,13 @@ metadata:
 spec:
   sink: {}
   source: {}
+  traits:
+    camel:
+      runtimeVersion: 1.2.3
+    container:
+      image: my-special-image
+    jvm:
+      classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
 status: {}
 `, output)
 }
@@ -605,50 +616,83 @@ kind: Pipe
 metadata:
   annotations:
     my-annotation: my-value
-    trait.camel.apache.org/affinity.node-affinity-labels: '[node1,node2]'
-    trait.camel.apache.org/camel.properties: '[a=1]'
-    trait.camel.apache.org/camel.runtime-version: 1.2.3
-    trait.camel.apache.org/container.image: my-special-image
-    trait.camel.apache.org/container.image-pull-policy: Always
-    trait.camel.apache.org/container.limit-cpu: "2"
-    trait.camel.apache.org/container.limit-memory: 1024Mi
-    trait.camel.apache.org/container.request-cpu: "1"
-    trait.camel.apache.org/container.request-memory: 2048Mi
-    trait.camel.apache.org/environment.vars: '[MYVAR=1]'
-    trait.camel.apache.org/jvm.classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
-    trait.camel.apache.org/jvm.jar: my.jar
-    trait.camel.apache.org/jvm.options: '[-XMX 123]'
-    trait.camel.apache.org/mount.resources: '[configmap:my-cm,secret:my-sec/my-key@/tmp/file.txt]'
-    trait.camel.apache.org/service.auto: "false"
-    trait.camel.apache.org/toleration.taints: '[mytaints:true]'
   labels:
     my-label: my-value
   name: my-pipe-test
 spec:
   sink: {}
   source: {}
+  traits:
+    affinity:
+      nodeAffinityLabels:
+      - my-node
+    camel:
+      properties:
+      - my.property=val
+      runtimeVersion: 1.2.3
+    container:
+      image: my-special-image
+      imagePullPolicy: Always
+      limitCPU: "1"
+      limitMemory: 1024Mi
+      port: 2000
+      requestCPU: "0.5"
+      requestMemory: 512Mi
+    environment:
+      vars:
+      - MY_VAR=val
+    jvm:
+      classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
+      jar: my.jar
+      options:
+      - -XMX 123
+    mount:
+      configs:
+      - configmap:my-cm
+      - secret:my-sec
+    service:
+      annotations:
+        my-annotation: "123"
+      auto: false
+      enabled: true
+    toleration:
+      taints:
+      - taint1:true
 status: {}
 `
 
 const expectedGitOpsPipePatch = `apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
-  annotations:
-    my-annotation: my-value
-    trait.camel.apache.org/affinity.node-affinity-labels: '[node1,node2]'
-    trait.camel.apache.org/camel.properties: '[a=1]'
-    trait.camel.apache.org/container.limit-cpu: "2"
-    trait.camel.apache.org/container.limit-memory: 1024Mi
-    trait.camel.apache.org/container.request-cpu: "1"
-    trait.camel.apache.org/container.request-memory: 2048Mi
-    trait.camel.apache.org/environment.vars: '[MYVAR=1]'
-    trait.camel.apache.org/jvm.options: '[-XMX 123]'
-    trait.camel.apache.org/mount.resources: '[configmap:my-cm,secret:my-sec/my-key@/tmp/file.txt]'
-    trait.camel.apache.org/toleration.taints: '[mytaints:true]'
   name: my-pipe-test
 spec:
   sink: {}
   source: {}
+  traits:
+    affinity:
+      nodeAffinityLabels:
+      - my-node
+    camel:
+      properties:
+      - my.property=val
+    container:
+      limitCPU: "1"
+      limitMemory: 1024Mi
+      requestCPU: "0.5"
+      requestMemory: 512Mi
+    environment:
+      vars:
+      - MY_VAR=val
+    jvm:
+      options:
+      - -XMX 123
+    mount:
+      configs:
+      - configmap:my-cm
+      - secret:my-sec
+    toleration:
+      taints:
+      - taint1:true
 status: {}
 `
 
@@ -661,34 +705,59 @@ func TestPipeGitOps(t *testing.T) {
 	dstPlatform.Status.Version = defaults.Version
 	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
 	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
-	defaultKB := nominalPipe("my-pipe-test")
-	defaultKB.Annotations = map[string]string{
+	defaultPipe := nominalPipe("my-pipe-test")
+	defaultPipe.Annotations = map[string]string{
 		"camel.apache.org/operator.id": "camel-k",
 		"my-annotation":                "my-value",
-		v1.TraitAnnotationPrefix + "affinity.node-affinity-labels": "[node1,node2]",
-		v1.TraitAnnotationPrefix + "camel.properties":              "[a=1]",
-		v1.TraitAnnotationPrefix + "container.limit-cpu":           "2",
-		v1.TraitAnnotationPrefix + "container.limit-memory":        "1024Mi",
-		v1.TraitAnnotationPrefix + "container.request-cpu":         "1",
-		v1.TraitAnnotationPrefix + "container.request-memory":      "2048Mi",
-		v1.TraitAnnotationPrefix + "container.image-pull-policy":   "Always",
-		v1.TraitAnnotationPrefix + "environment.vars":              "[MYVAR=1]",
-		v1.TraitAnnotationPrefix + "jvm.options":                   "[-XMX 123]",
-		v1.TraitAnnotationPrefix + "jvm.jar":                       "my.jar",
-		v1.TraitAnnotationPrefix + "mount.resources":               "[configmap:my-cm,secret:my-sec/my-key@/tmp/file.txt]",
-		v1.TraitAnnotationPrefix + "service.auto":                  "false",
-		v1.TraitAnnotationPrefix + "toleration.taints":             "[mytaints:true]",
 	}
-	defaultKB.Labels = map[string]string{
+	defaultPipe.Labels = map[string]string{
 		"my-label": "my-value",
 	}
 	defaultIntegration, defaultKit := nominalIntegration("my-pipe-test")
+	defaultIntegration.Status.Traits = &v1.Traits{
+		Affinity: &trait.AffinityTrait{
+			NodeAffinityLabels: []string{"my-node"},
+		},
+		Camel: &trait.CamelTrait{
+			Properties: []string{"my.property=val"},
+		},
+		Container: &trait.ContainerTrait{
+			LimitCPU:        "1",
+			LimitMemory:     "1024Mi",
+			RequestCPU:      "0.5",
+			RequestMemory:   "512Mi",
+			Port:            2000,
+			ImagePullPolicy: corev1.PullAlways,
+		},
+		Environment: &trait.EnvironmentTrait{
+			Vars: []string{"MY_VAR=val"},
+		},
+		JVM: &trait.JVMTrait{
+			Jar:     "my.jar",
+			Options: []string{"-XMX 123"},
+		},
+		Mount: &trait.MountTrait{
+			Configs: []string{"configmap:my-cm", "secret:my-sec"},
+		},
+		Service: &trait.ServiceTrait{
+			Trait: trait.Trait{
+				Enabled: ptr.To(true),
+			},
+			Auto: ptr.To(false),
+			Annotations: map[string]string{
+				"my-annotation": "123",
+			},
+		},
+		Toleration: &trait.TolerationTrait{
+			Taints: []string{"taint1:true"},
+		},
+	}
 	srcCatalog := createTestCamelCatalog(srcPlatform)
 	dstCatalog := createTestCamelCatalog(dstPlatform)
 
 	tmpDir := t.TempDir()
 
-	_, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultKB, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
+	_, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultPipe, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
 	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-pipe-test", "--to", "prod-namespace", "--export-gitops-dir", tmpDir, "-n", "default")
 	require.NoError(t, err)
 	assert.Contains(t, output, `Exported a Kustomize based Gitops directory`)

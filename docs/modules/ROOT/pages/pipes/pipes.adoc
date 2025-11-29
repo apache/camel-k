@@ -67,31 +67,31 @@ In the example above we're making sure to call an intermediate resource in order
 
 === Traits configuration
 
-Although this should not be necessarily required (the operator do all the required configuration for you), you can tune your `Pipe` with xref:traits:traits.adoc[traits] configuration adding `.metadata.annotations`. Let's have a look at the following example:
+Although this should not be necessarily required (the operator do all the required configuration for you), you can tune your `Pipe` with xref:traits:traits.adoc[traits] configuration adding `.spec.traits` as you are used to do with Integration. Let's have a look at the following example:
 
-.timer-2-log-annotation.yaml
+.timer-2-log.yaml
 [source,yaml,subs="attributes+"]
 ----
 apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
-  name: timer-2-log-annotation
-  annotations: # <1>
-    trait.camel.apache.org/logging.level: DEBUG
-    trait.camel.apache.org/logging.color: "false"
+  name: timer-2-log
 spec:
   source:
     uri: timer:foo
   sink:
     uri: log:bar
+  traits:
+    mount:
+      configs:
+      - configmap:my-cm
 ----
-<1> Include `.metadata.annotations` to specify the list of traits we want to configure
 
-In this example, we've set the `logging` trait to specify certain configuration we want to apply. You can do the same with all the traits available, just by setting `trait.camel.apache.org/trait-name.trait-property` with the expected value.
+In this example, we've set the `mount` trait to add a given Configmap at runtime. You can do the same with all the traits available.
 
 [NOTE]
 ====
-If you need to specify an array of values, the syntax will be `trait.camel.apache.org/trait.conf: "[\"opt1\", \"opt2\", ...]"`
+You can use `kamel bind -t` as well.
 ====
 
 == Using Kamel CLI
