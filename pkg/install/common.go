@@ -18,17 +18,10 @@ limitations under the License.
 package install
 
 import (
-	"context"
-
 	networking "k8s.io/api/networking/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
-
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/client"
-	"github.com/apache/camel-k/v2/pkg/resources"
-	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
 // ResourceCustomizer can be used to inject code that changes the objects before they are created.
@@ -54,54 +47,4 @@ var RemoveIngressRoleCustomizer = func(object ctrl.Object) ctrl.Object {
 	}
 
 	return object
-}
-
-// Resource installs a single named resource from the project resource directory.
-func Resource(ctx context.Context, c client.Client, namespace string, force bool, customizer ResourceCustomizer, name string) error {
-	return ResourceOrCollect(ctx, c, namespace, nil, force, customizer, name)
-}
-
-func ResourceOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection,
-	force bool, customizer ResourceCustomizer, name string) error {
-	content, err := resources.ResourceAsString(name)
-	if err != nil {
-		return err
-	}
-
-	obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), content)
-	if err != nil {
-		return err
-	}
-
-	return ObjectOrCollect(ctx, c, namespace, collection, force, customizer(obj))
-}
-
-func ObjectOrCollect(ctx context.Context, c client.Client, namespace string, collection *kubernetes.Collection, force bool, obj ctrl.Object) error {
-	if collection != nil {
-		// Adding to the collection before setting the namespace
-		collection.Add(obj)
-
-		return nil
-	}
-
-	obj.SetNamespace(namespace)
-
-	if force {
-		if _, err := kubernetes.ReplaceResource(ctx, c, obj); err != nil {
-			return err
-		}
-		// For some resources, also reset the status
-		if obj.GetObjectKind().GroupVersionKind().Kind == v1.IntegrationKitKind ||
-			obj.GetObjectKind().GroupVersionKind().Kind == v1.BuildKind ||
-			obj.GetObjectKind().GroupVersionKind().Kind == v1.IntegrationPlatformKind {
-			if err := c.Status().Update(ctx, obj); err != nil {
-				return err
-			}
-		}
-
-		return nil
-	}
-
-	// Just try to create them
-	return c.Create(ctx, obj)
 }

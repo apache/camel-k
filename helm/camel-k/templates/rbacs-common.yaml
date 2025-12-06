@@ -108,6 +108,22 @@ rules:
   - create
 ---
 apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app: camel-k
+  name: camel-k-kamelet-viewer
+rules:
+- apiGroups:
+  - camel.apache.org
+  resources:
+  - kamelets
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   labels:
@@ -134,3 +150,18 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: camel-k-builder
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app: camel-k
+  name: camel-k-kamelet-viewer
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: camel-k-kamelet-viewer
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: Group
+  name: system:authenticated

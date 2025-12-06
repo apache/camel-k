@@ -102,13 +102,6 @@ spec:
 	assert.Equal(t, "my-itp", kamelet.GetOwnerReferences()[0].Name)
 }
 
-func TestPrepareKameletsPermissions(t *testing.T) {
-	c, err := internal.NewFakeClient()
-	assert.NoError(t, err)
-	err = prepareKameletsPermissions(context.TODO(), c, "camel-k")
-	assert.NoError(t, err)
-}
-
 func TestPrepareKameletsDirectory(t *testing.T) {
 	kameletDir, err := prepareKameletDirectory()
 	assert.NoError(t, err)

@@ -22,7 +22,9 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
+- kamelets-viewer-role.yaml
 - builder-role.yaml
 - builder-role-openshift.yaml
 - builder-role-binding.yaml
 - builder-role-binding-openshift.yaml
+- kamelets-viewer-role-binding.yaml

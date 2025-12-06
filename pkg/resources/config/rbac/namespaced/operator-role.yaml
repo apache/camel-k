@@ -67,22 +67,33 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - pods
-  - services
-  - endpoints
-  - persistentvolumeclaims
   - configmaps
-  - secrets
-  - serviceaccounts
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
-  - update
   - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - create
+  - patch
+  - list
+  - watch
+  - delete
 - apiGroups:
   - ""
   resources:
@@ -97,44 +108,15 @@ rules:
   verbs:
   - get
 - apiGroups:
-  - policy
-  resources:
-  - poddisruptionbudgets
-  verbs:
-  - create
-  - delete
-  - get
-  - update
-  - list
-  - patch
-  - watch
-- apiGroups:
-  - rbac.authorization.k8s.io
-  resources:
-  - roles
-  - rolebindings
-  - clusterrolebindings
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
   - apps
   resources:
   - deployments
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
-  - update
   - watch
 - apiGroups:
   - batch
@@ -143,20 +125,33 @@ rules:
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
-  - update
   - watch
+# Required by Service trait
 - apiGroups:
-  - batch
+  - ""
   resources:
-  - jobs
+  - services
   verbs:
+  - create
+  - delete
   - get
   - list
+  - patch
   - watch
+# Required by PDB trait
+- apiGroups:
+  - policy
+  resources:
+  - poddisruptionbudgets
+  verbs:
+  - create
+  - delete
+  - list
+  - patch
+# Required by ingress trait
 - apiGroups:
   - networking.k8s.io
   resources:
@@ -164,12 +159,16 @@ rules:
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
-  - update
-  - watch
+# Required by mount trait
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumeclaims
+  verbs:
+  - create
 - apiGroups:
   - storage.k8s.io
   resources:
@@ -177,10 +176,15 @@ rules:
   verbs:
   - get
   - list
+# Roles and RoleBindings
 - apiGroups:
-  - ""
+  - rbac.authorization.k8s.io
   resources:
-  - namespaces
+  - roles
+  - rolebindings
+  - clusterrolebindings
   verbs:
+  - create
   - get
   - list
+  - patch
