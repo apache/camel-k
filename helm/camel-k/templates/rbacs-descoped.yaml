@@ -44,6 +44,7 @@ rules:
   - camel.apache.org
   resources:
   - builds
+  - integrations
   verbs:
   - delete
 - apiGroups:
@@ -66,22 +67,33 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - pods
-  - services
-  - endpoints
-  - persistentvolumeclaims
   - configmaps
-  - secrets
-  - serviceaccounts
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
-  - update
   - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - create
+  - patch
+  - list
+  - watch
+  - delete
 - apiGroups:
   - ""
   resources:
@@ -96,44 +108,15 @@ rules:
   verbs:
   - get
 - apiGroups:
-  - policy
-  resources:
-  - poddisruptionbudgets
-  verbs:
-  - create
-  - delete
-  - get
-  - update
-  - list
-  - patch
-  - watch
-- apiGroups:
-  - rbac.authorization.k8s.io
-  resources:
-  - roles
-  - rolebindings
-  - clusterrolebindings
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
   - apps
   resources:
   - deployments
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
-  - update
   - watch
 - apiGroups:
   - batch
@@ -142,33 +125,20 @@ rules:
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
-  - update
   - watch
 - apiGroups:
-  - batch
+  - ""
   resources:
-  - jobs
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - networking.k8s.io
-  resources:
-  - ingresses
+  - services
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
-  - update
-  - watch
 - apiGroups:
   - storage.k8s.io
   resources:
@@ -179,8 +149,46 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - namespaces
+  - persistentvolumeclaims
   verbs:
+  - create
+- apiGroups:
+  - policy
+  resources:
+  - poddisruptionbudgets
+  verbs:
+  - create
+  - delete
+  - list
+  - patch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - roles
+  - rolebindings
+  - clusterrolebindings
+  verbs:
+  - create
+  - get
+  - list
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
+  - create
+  - delete
   - get
   - list
 - apiGroups:
@@ -223,12 +231,9 @@ rules:
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
-  - update
-  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -248,8 +253,6 @@ rules:
   - get
   - list
   - patch
-  - update
-  - watch
 - apiGroups:
   - eventing.knative.dev
   resources:
@@ -261,7 +264,6 @@ rules:
   - get
   - list
   - patch
-  - update
 - apiGroups:
   - messaging.knative.dev
   resources:
@@ -274,7 +276,6 @@ rules:
   - get
   - list
   - patch
-  - update
 - apiGroups:
   - sources.knative.dev
   resources:
@@ -284,14 +285,6 @@ rules:
   - delete
   - get
   - list
-  - patch
-  - update
-- apiGroups:
-  - ""
-  resources:
-  - namespaces
-  verbs:
-  - get
   - patch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -308,12 +301,10 @@ rules:
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
   - update
-  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -412,12 +403,9 @@ rules:
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
-  - update
-  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -435,7 +423,6 @@ rules:
   verbs:
   - get
   - list
-  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

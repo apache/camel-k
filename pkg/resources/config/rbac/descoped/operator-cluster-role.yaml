@@ -44,6 +44,7 @@ rules:
   - camel.apache.org
   resources:
   - builds
+  - integrations
   verbs:
   - delete
 - apiGroups:
@@ -66,22 +67,33 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - pods
-  - services
-  - endpoints
-  - persistentvolumeclaims
   - configmaps
-  - secrets
-  - serviceaccounts
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
-  - update
   - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - create
+  - patch
+  - list
+  - watch
+  - delete
 - apiGroups:
   - ""
   resources:
@@ -95,33 +107,7 @@ rules:
   - pods/log
   verbs:
   - get
-- apiGroups:
-  - policy
-  resources:
-  - poddisruptionbudgets
-  verbs:
-  - create
-  - delete
-  - get
-  - update
-  - list
-  - patch
-  - watch
-- apiGroups:
-  - rbac.authorization.k8s.io
-  resources:
-  - roles
-  - rolebindings
-  - clusterrolebindings
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - get
-  - list
-  - patch
-  - update
-  - watch
+# Controllers: manage deployments
 - apiGroups:
   - apps
   resources:
@@ -129,12 +115,11 @@ rules:
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
-  - update
   - watch
+# Controllers: manage cronjobs
 - apiGroups:
   - batch
   resources:
@@ -142,33 +127,22 @@ rules:
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
-  - update
   - watch
+# Required by service trait
 - apiGroups:
-  - batch
+  - ""
   resources:
-  - jobs
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - networking.k8s.io
-  resources:
-  - ingresses
+  - services
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
-  - update
-  - watch
+# Required by mount trait
 - apiGroups:
   - storage.k8s.io
   resources:
@@ -179,8 +153,50 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - namespaces
+  - persistentvolumeclaims
   verbs:
+  - create
+# Required by PDB trait
+- apiGroups:
+  - policy
+  resources:
+  - poddisruptionbudgets
+  verbs:
+  - create
+  - delete
+  - list
+  - patch
+# Required by ingress trait
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+# Roles and RoleBindings
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - roles
+  - rolebindings
+  - clusterrolebindings
+  verbs:
+  - create
+  - get
+  - list
+  - patch
+# Service Accounts (dynamic SA creation)
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
+  - create
+  - delete
   - get
   - list
 # Required to check if a ServiceAccount can access other namespaces resources

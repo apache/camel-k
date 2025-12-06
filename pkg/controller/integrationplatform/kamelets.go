@@ -29,8 +29,6 @@ import (
 	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/install"
-	"github.com/apache/camel-k/v2/pkg/platform"
 	"knative.dev/pkg/ptr"
 
 	"github.com/apache/camel-k/v2/pkg/client"
@@ -53,10 +51,6 @@ const (
 // installKameletCatalog installs the version Apache Kamelet Catalog into the specified namespace.
 // It returns the number of Kamelets installed and errored if successful.
 func installKameletCatalog(ctx context.Context, c client.Client, platform *v1.IntegrationPlatform, version string) (int, int, error) {
-	// Prepare proper privileges for Kamelets installed globally
-	if err := prepareKameletsPermissions(ctx, c, platform.Namespace); err != nil {
-		return -1, -1, err
-	}
 	// Prepare directory to contains kamelets
 	kameletDir, err := prepareKameletDirectory()
 	if err != nil {
@@ -72,20 +66,6 @@ func installKameletCatalog(ctx context.Context, c client.Client, platform *v1.In
 	}
 	// Store Kamelets as Kubernetes resources
 	return applyKamelets(ctx, c, platform, kameletDir)
-}
-
-func prepareKameletsPermissions(ctx context.Context, c client.Client, installingNamespace string) error {
-	watchOperatorNamespace := platform.GetOperatorWatchNamespace()
-	operatorNamespace := platform.GetOperatorNamespace()
-	if watchOperatorNamespace == "" && operatorNamespace == installingNamespace {
-		// Kamelets installed into the global operator namespace
-		// They need to be visible publicly
-		if err := kameletViewerRole(ctx, c, installingNamespace); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 func prepareKameletDirectory() (string, error) {
@@ -261,15 +241,4 @@ func loadKamelet(path string, platform *v1.IntegrationPlatform) (*v1.Kamelet, er
 	kamelet.SetOwnerReferences(references)
 
 	return kamelet, nil
-}
-
-// kameletViewerRole installs the role that allows any user ro access kamelets in the global namespace.
-func kameletViewerRole(ctx context.Context, c client.Client, namespace string) error {
-	if err := install.Resource(ctx, c, namespace, true, install.IdentityResourceCustomizer,
-		"/resources/viewer/user-global-kamelet-viewer-role.yaml"); err != nil {
-		return err
-	}
-
-	return install.Resource(ctx, c, namespace, true, install.IdentityResourceCustomizer,
-		"/resources/viewer/user-global-kamelet-viewer-role-binding.yaml")
 }

@@ -29,9 +29,9 @@ rules:
   verbs:
   - create
   - delete
-  - deletecollection
+  # - deletecollection
   - get
   - list
   - patch
-  - update
-  - watch
+  # - update
+  # - watch

@@ -67,22 +67,33 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - pods
-  - services
-  - endpoints
-  - persistentvolumeclaims
   - configmaps
-  - secrets
-  - serviceaccounts
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
-  - update
   - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - create
+  - patch
+  - list
+  - watch
+  - delete
 - apiGroups:
   - ""
   resources:
@@ -97,44 +108,15 @@ rules:
   verbs:
   - get
 - apiGroups:
-  - policy
-  resources:
-  - poddisruptionbudgets
-  verbs:
-  - create
-  - delete
-  - get
-  - update
-  - list
-  - patch
-  - watch
-- apiGroups:
-  - rbac.authorization.k8s.io
-  resources:
-  - roles
-  - rolebindings
-  - clusterrolebindings
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
   - apps
   resources:
   - deployments
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
-  - update
   - watch
 - apiGroups:
   - batch
@@ -143,20 +125,30 @@ rules:
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
-  - update
   - watch
 - apiGroups:
-  - batch
+  - ""
   resources:
-  - jobs
+  - services
   verbs:
+  - create
+  - delete
   - get
   - list
+  - patch
   - watch
+- apiGroups:
+  - policy
+  resources:
+  - poddisruptionbudgets
+  verbs:
+  - create
+  - delete
+  - list
+  - patch
 - apiGroups:
   - networking.k8s.io
   resources:
@@ -164,12 +156,15 @@ rules:
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
-  - update
-  - watch
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumeclaims
+  verbs:
+  - create
 - apiGroups:
   - storage.k8s.io
   resources:
@@ -178,12 +173,16 @@ rules:
   - get
   - list
 - apiGroups:
-  - ""
+  - rbac.authorization.k8s.io
   resources:
-  - namespaces
+  - roles
+  - rolebindings
+  - clusterrolebindings
   verbs:
+  - create
   - get
   - list
+  - patch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -218,12 +217,9 @@ rules:
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
-  - update
-  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -243,8 +239,6 @@ rules:
   - get
   - list
   - patch
-  - update
-  - watch
 - apiGroups:
   - eventing.knative.dev
   resources:
@@ -256,7 +250,6 @@ rules:
   - get
   - list
   - patch
-  - update
 - apiGroups:
   - messaging.knative.dev
   resources:
@@ -269,7 +262,6 @@ rules:
   - get
   - list
   - patch
-  - update
 - apiGroups:
   - sources.knative.dev
   resources:
@@ -279,14 +271,6 @@ rules:
   - delete
   - get
   - list
-  - patch
-  - update
-- apiGroups:
-  - ""
-  resources:
-  - namespaces
-  verbs:
-  - get
   - patch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -303,12 +287,10 @@ rules:
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
   - update
-  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -407,12 +389,9 @@ rules:
   verbs:
   - create
   - delete
-  - deletecollection
   - get
   - list
   - patch
-  - update
-  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -430,7 +409,6 @@ rules:
   verbs:
   - get
   - list
-  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
