@@ -48,7 +48,8 @@ func (action *monitorAction) Name() string {
 func (action *monitorAction) CanHandle(pipe *v1.Pipe) bool {
 	return pipe.Status.Phase == v1.PipePhaseCreating ||
 		pipe.Status.Phase == v1.PipePhaseError ||
-		pipe.Status.Phase == v1.PipePhaseReady
+		pipe.Status.Phase == v1.PipePhaseReady ||
+		pipe.Status.Phase == v1.PipePhaseBuildComplete
 }
 
 func (action *monitorAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.Pipe, error) {
@@ -127,6 +128,16 @@ func (action *monitorAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.Pip
 	case v1.IntegrationPhaseError:
 		target.Status.Phase = v1.PipePhaseError
 		setPipeReadyCondition(target, &it)
+
+	case v1.IntegrationPhaseBuildComplete:
+		target.Status.Phase = v1.PipePhaseBuildComplete
+		c := v1.PipeCondition{
+			Type:    v1.PipeConditionReady,
+			Status:  corev1.ConditionFalse,
+			Reason:  "BuildComplete",
+			Message: fmt.Sprintf("Integration %q build completed successfully", it.GetName()),
+		}
+		target.Status.SetConditions(c)
 
 	default:
 		target.Status.Phase = v1.PipePhaseCreating

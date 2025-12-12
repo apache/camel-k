@@ -376,3 +376,47 @@ func TestPipeIntegrationPipeTraitAnnotations(t *testing.T) {
 	assert.Equal(t, corev1.ConditionFalse, handledPipe.Status.GetCondition(v1.PipeConditionReady).Status)
 	assert.Equal(t, "Integration \"my-pipe\" is in \"Creating\" phase", handledPipe.Status.GetCondition(v1.PipeConditionReady).Message)
 }
+
+func TestPipeIntegrationBuildComplete(t *testing.T) {
+	pipe := &v1.Pipe{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       v1.PipeKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "ns",
+			Name:      "my-pipe",
+		},
+		Spec: v1.PipeSpec{
+			Source: v1.Endpoint{
+				URI: ptr.To("timer:tick"),
+			},
+			Sink: v1.Endpoint{
+				URI: ptr.To("log:info"),
+			},
+		},
+		Status: v1.PipeStatus{
+			Phase: v1.PipePhaseCreating,
+		},
+	}
+
+	c, err := internal.NewFakeClient(pipe)
+	require.NoError(t, err)
+	it, err := CreateIntegrationFor(context.TODO(), c, pipe)
+	require.NoError(t, err)
+	it.Status.Phase = v1.IntegrationPhaseBuildComplete
+	c, err = internal.NewFakeClient(pipe, it)
+	require.NoError(t, err)
+
+	a := NewMonitorAction()
+	a.InjectLogger(log.Log)
+	a.InjectClient(c)
+	assert.Equal(t, "monitor", a.Name())
+	assert.True(t, a.CanHandle(pipe))
+	handledPipe, err := a.Handle(context.TODO(), pipe)
+	require.NoError(t, err)
+	assert.Equal(t, v1.PipePhaseBuildComplete, handledPipe.Status.Phase)
+	assert.Equal(t, corev1.ConditionFalse, handledPipe.Status.GetCondition(v1.PipeConditionReady).Status)
+	assert.Equal(t, "BuildComplete", handledPipe.Status.GetCondition(v1.PipeConditionReady).Reason)
+	assert.Equal(t, "Integration \"my-pipe\" build completed successfully", handledPipe.Status.GetCondition(v1.PipeConditionReady).Message)
+}
