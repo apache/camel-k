@@ -18,9 +18,12 @@ limitations under the License.
 package trait
 
 import (
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/utils/ptr"
+
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
-	"k8s.io/utils/ptr"
 )
 
 const (
@@ -54,7 +57,17 @@ func (l *loggingTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 		return false, NewIntegrationConditionUserDisabled("Logging"), nil
 	}
 
-	return e.IntegrationInRunningPhases(), nil, nil
+	condition := NewIntegrationCondition(
+		"Logging",
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		TraitConfigurationReason,
+		"Logging trait is deprecated and may be removed in future versions. "+
+			"Use Quarkus properties directly (e.g., quarkus.log.level, quarkus.log.console.json). "+
+			"See https://quarkus.io/guides/logging for more details.",
+	)
+
+	return e.IntegrationInRunningPhases(), condition, nil
 }
 
 func (l *loggingTrait) Apply(e *Environment) error {

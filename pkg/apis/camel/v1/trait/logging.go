@@ -20,7 +20,16 @@ package trait
 // The Logging trait is used to configure Integration runtime logging options (such as color and format).
 // The logging backend is provided by Quarkus, whose configuration is documented at https://quarkus.io/guides/logging.
 //
+// WARNING: The Logging trait is **deprecated** and will be removed in future release versions:
+// use Quarkus logging properties directly instead.
+//
+// Migration example:
+//
+//	Before: traits.logging.level=DEBUG
+//	After:  -p quarkus.log.level=DEBUG
+//
 // +camel-k:trait=logging.
+// +camel-k:deprecated=2.9.0.
 type LoggingTrait struct {
 	Trait `json:",inline" property:",squash"`
 
