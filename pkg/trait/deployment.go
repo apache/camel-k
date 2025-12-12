@@ -119,7 +119,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 	}
 
 	// Set the default container annotation for kubectl commands
-	annotations["kubectl.kubernetes.io/default-container"] = defaultContainerName
+	annotations[defaultContainerAnnotation] = defaultContainerName
 
 	deadline := defaultProgressDeadline
 	if t.ProgressDeadlineSeconds != nil {
