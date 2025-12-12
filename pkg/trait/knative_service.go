@@ -195,7 +195,7 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 	}
 
 	// Set the default container annotation for kubectl
-	revisionAnnotations["kubectl.kubernetes.io/default-container"] = defaultContainerName
+	revisionAnnotations[defaultContainerAnnotation] = defaultContainerName
 
 	// Set Knative auto-scaling
 	if t.Class != "" {

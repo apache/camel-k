@@ -45,9 +45,10 @@ const (
 	containerTraitID    = "container"
 	containerTraitOrder = 1600
 
-	defaultContainerName = "integration"
-	defaultContainerPort = 8080
-	defaultServicePort   = 80
+	defaultContainerName       = "integration"
+	defaultContainerAnnotation = "kubectl.kubernetes.io/default-container"
+	defaultContainerPort       = 8080
+	defaultServicePort         = 80
 
 	defaultContainerRunAsNonRoot             = false
 	defaultContainerSeccompProfileType       = corev1.SeccompProfileTypeRuntimeDefault
