@@ -208,8 +208,8 @@ github.com/opencontainers/go-digest v1.0.0 h1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8
 github.com/opencontainers/go-digest v1.0.0/go.mod h1:0JzlMkj0TRzQZfJkVvzbP0HBR3IKzErnv2BNG4W4MAM=
 github.com/openshift/api v0.0.0-20250820105013-6282350d0c39 h1:X42iTyo3AAHS36BkiBkU8FvxfK8NEDmnBi3QrnaCIlA=
 github.com/openshift/api v0.0.0-20250820105013-6282350d0c39/go.mod h1:SPLf21TYPipzCO67BURkCfK6dcIIxx0oNRVWaOyRcXM=
-github.com/operator-framework/api v0.36.0 h1:6+duRhamCvB540JbvNp/1+Pot7luff7HqdAOm9bAntg=
-github.com/operator-framework/api v0.36.0/go.mod h1:QSmHMx8XpGsNWvjU5CUelVZC916VLp/TZhfYvGKpghM=
+github.com/operator-framework/api v0.37.0 h1:2XCMWitBnumtJTqzip6LQKUwpM2pXVlt3gkpdlkbaCE=
+github.com/operator-framework/api v0.37.0/go.mod h1:NZs4vB+Jiamyv3pdPDjZtuC4U7KX0eq4z2r5hKY5fUA=
 github.com/pelletier/go-toml/v2 v2.2.4 h1:mye9XuhQ6gvn5h28+VilKrrPoQVanw5PMw/TB0t5Ec4=
 github.com/pelletier/go-toml/v2 v2.2.4/go.mod h1:2gIqNv+qfxSVS7cM2xJQKtLSTLUE9V8t9Stt+h56mCY=
 github.com/pjbgf/sha1cd v0.3.2 h1:a9wb0bp1oC2TGwStyn0Umc/IGKQnEgF0vVaZ8QF8eo4=
@@ -474,8 +474,8 @@ knative.dev/pkg v0.0.0-20251022162148-4ebd86bc2d85 h1:6cFtFO8JE0AiY66BphR3taXbqd
 knative.dev/pkg v0.0.0-20251022162148-4ebd86bc2d85/go.mod h1:riEe6VGLodQ/KC4zWRnOqE6Lo5/CkKfwW/RQmNUPltU=
 knative.dev/serving v0.47.0 h1:qNe8GcI12VigsGRqBojqTE/u63rikAWAtGliEOgNxAY=
 knative.dev/serving v0.47.0/go.mod h1:DauLoEbJVFlKwZWSspfMD4PhZ0m3mCYUKpn8vc/cV4U=
-sigs.k8s.io/controller-runtime v0.22.3 h1:I7mfqz/a/WdmDCEnXmSPm8/b/yRTy6JsKKENTijTq8Y=
-sigs.k8s.io/controller-runtime v0.22.3/go.mod h1:+QX1XUpTXN4mLoblf4tqr5CQcyHPAki2HLXqQMY6vh8=
+sigs.k8s.io/controller-runtime v0.22.4 h1:GEjV7KV3TY8e+tJ2LCTxUTanW4z/FmNB7l327UfMq9A=
+sigs.k8s.io/controller-runtime v0.22.4/go.mod h1:+QX1XUpTXN4mLoblf4tqr5CQcyHPAki2HLXqQMY6vh8=
 sigs.k8s.io/gateway-api v1.1.0 h1:DsLDXCi6jR+Xz8/xd0Z1PYl2Pn0TyaFMOPPZIj4inDM=
 sigs.k8s.io/gateway-api v1.1.0/go.mod h1:ZH4lHrL2sDi0FHZ9jjneb8kKnGzFWyrTya35sWUTrRs=
 sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 h1:IpInykpT6ceI+QxKBbEflcR5EXP7sU1kvOlxwZh5txg=

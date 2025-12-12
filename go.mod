@@ -19,7 +19,7 @@ require (
 	github.com/onsi/gomega v1.38.3
 	// go get github.com/openshift/api@release-4.21
 	github.com/openshift/api v0.0.0-20250820105013-6282350d0c39
-	github.com/operator-framework/api v0.36.0
+	github.com/operator-framework/api v0.37.0
 	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.87.1
 	github.com/prometheus/client_golang v1.23.2
 	github.com/prometheus/client_model v0.6.2
@@ -50,7 +50,7 @@ require (
 	knative.dev/eventing v0.47.0
 	knative.dev/pkg v0.0.0-20251022162148-4ebd86bc2d85
 	knative.dev/serving v0.47.0
-	sigs.k8s.io/controller-runtime v0.22.3
+	sigs.k8s.io/controller-runtime v0.22.4
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.1
 )
 
