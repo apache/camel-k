@@ -153,10 +153,13 @@ $ kamel run -t telemetry.enabled=true \
 [source,console]
 ----
 $ kamel run \
+  --dependency camel:opentelemetry \
   -p quarkus.otel.exporter.otlp.traces.endpoint=http://jaeger:4317 \
   -p quarkus.otel.resource.attributes=service.name=my-integration \
   MyRoute.java
 ----
+
+NOTE: The `--dependency camel:opentelemetry` is required. Previously, the telemetry trait automatically added this dependency via the `camel-k:telemetry` capability. With direct configuration, you must explicitly include the OpenTelemetry dependency.
 
 === Benefits of Direct Configuration
 
