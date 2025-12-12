@@ -38,7 +38,8 @@ func TestTelemetryTraitOnDefaultQuarkus(t *testing.T) {
 	ok, condition, err := telemetry.Configure(e)
 	require.NoError(t, err)
 	assert.True(t, ok)
-	assert.Nil(t, condition)
+	assert.NotNil(t, condition)
+	assert.Contains(t, condition.message, "Telemetry trait is deprecated")
 
 	err = telemetry.Apply(e)
 	require.NoError(t, err)
@@ -69,7 +70,8 @@ func TestTelemetryTraitWithValues(t *testing.T) {
 	ok, condition, err := telemetry.Configure(e)
 	require.NoError(t, err)
 	assert.True(t, ok)
-	assert.Nil(t, condition)
+	assert.NotNil(t, condition)
+	assert.Contains(t, condition.message, "Telemetry trait is deprecated")
 
 	err = telemetry.Apply(e)
 	require.NoError(t, err)
@@ -102,7 +104,8 @@ func TestTelemetryForSelfManagedBuild(t *testing.T) {
 	ok, condition, err := telemetry.Configure(e)
 	require.NoError(t, err)
 	assert.True(t, ok)
-	assert.Nil(t, condition)
+	assert.NotNil(t, condition)
+	assert.Contains(t, condition.message, "Telemetry trait is deprecated")
 
 	err = telemetry.Apply(e)
 	require.NoError(t, err)
@@ -136,4 +139,20 @@ func createTelemetryEnvironment(t *testing.T, catalogGen func() (*camel.RuntimeC
 	}
 	e.Integration = &it
 	return &e
+}
+
+func TestTelemetryTraitDeprecationWarning(t *testing.T) {
+	e := createTelemetryEnvironment(t, camel.QuarkusCatalog)
+	telemetry := NewTelemetryTrait()
+	tt, _ := telemetry.(*telemetryTrait)
+	tt.Enabled = ptr.To(true)
+	tt.Auto = ptr.To(false)
+
+	configured, condition, err := telemetry.Configure(e)
+
+	require.NoError(t, err)
+	assert.True(t, configured)
+	assert.NotNil(t, condition)
+	assert.Contains(t, condition.message, "Telemetry trait is deprecated")
+	assert.Contains(t, condition.message, "properties and dependencies")
 }

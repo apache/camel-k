@@ -23,9 +23,18 @@ package trait
 //
 // The Telemetry trait is disabled by default.
 //
+// WARNING: The Telemetry trait is **deprecated** and will be removed in future release versions.
+// The same behavior can be achieved via properties and dependencies configuration.
+//
+// Migration example:
+//
+//	Before: --trait telemetry.endpoint=http://jaeger:4317
+//	After:  -p quarkus.otel.exporter.otlp.traces.endpoint=http://jaeger:4317
+//
 // WARNING: The Telemetry trait can't be enabled at the same time as the Tracing trait.
 //
 // +camel-k:trait=telemetry.
+// +camel-k:deprecated=2.9.0.
 type TelemetryTrait struct {
 	Trait `json:",inline" property:",squash"`
 
