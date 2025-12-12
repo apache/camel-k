@@ -154,3 +154,16 @@ func TestJsonLoggingTrait(t *testing.T) {
 	assert.Equal(t, "${camel.k.logging.jsonPrettyPrint}", env.ApplicationProperties["quarkus.log.console.json.pretty-print"])
 	assert.Equal(t, "", env.ApplicationProperties["quarkus.console.color"])
 }
+
+func TestLoggingTraitDeprecationWarning(t *testing.T) {
+	env := createDefaultLoggingTestEnv(t)
+	loggingTrait := newLoggingTraitTrait()
+
+	configured, condition, err := loggingTrait.Configure(env)
+
+	require.NoError(t, err)
+	assert.True(t, configured)
+	assert.NotNil(t, condition)
+	assert.Contains(t, condition.message, "Logging trait is deprecated")
+	assert.Contains(t, condition.message, "Quarkus properties")
+}
