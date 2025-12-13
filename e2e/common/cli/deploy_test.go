@@ -48,8 +48,18 @@ func TestBuildDontRun(t *testing.T) {
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseBuildComplete))
 			g.Consistently(IntegrationPhase(t, ctx, ns, name), 10*time.Second).Should(Equal(v1.IntegrationPhaseBuildComplete))
 			g.Eventually(Deployment(t, ctx, ns, name)).Should(BeNil())
+
+			// Verify DeploymentTimestamp is NOT set before deploying (dry-build waits)
+			it := Integration(t, ctx, ns, name)()
+			g.Expect(it).NotTo(BeNil())
+			g.Expect(it.Status.InitializationTimestamp).NotTo(BeNil())
+			g.Expect(it.Status.DeploymentTimestamp).To(BeNil())
 		})
 		t.Run("deploy the integration", func(t *testing.T) {
+			// Capture InitializationTimestamp before deploying
+			itBeforeDeploy := Integration(t, ctx, ns, name)()
+			initTimestamp := itBeforeDeploy.Status.InitializationTimestamp
+
 			g.Expect(Kamel(t, ctx, "deploy", name, "-n", ns).Execute()).To(Succeed())
 			// The integration should run immediately
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
@@ -58,6 +68,12 @@ func TestBuildDontRun(t *testing.T) {
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady)).
 				Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("Magicstring!"))
+
+			// Verify DeploymentTimestamp is now set and is after InitializationTimestamp
+			it := Integration(t, ctx, ns, name)()
+			g.Expect(it).NotTo(BeNil())
+			g.Expect(it.Status.DeploymentTimestamp).NotTo(BeNil())
+			g.Expect(it.Status.DeploymentTimestamp.Time).To(BeTemporally(">", initTimestamp.Time))
 		})
 		t.Run("undeploy the integration", func(t *testing.T) {
 			g.Expect(Kamel(t, ctx, "undeploy", name, "-n", ns).Execute()).To(Succeed())

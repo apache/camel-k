@@ -231,6 +231,8 @@ func (action *buildAction) handleBuildRunning(ctx context.Context, it *v1.Integr
 		if it.Annotations[v1.IntegrationDontRunAfterBuildAnnotation] == v1.IntegrationDontRunAfterBuildAnnotationTrueValue {
 			it.Status.Phase = v1.IntegrationPhaseBuildComplete
 		} else {
+			now := metav1.Now().Rfc3339Copy()
+			it.Status.DeploymentTimestamp = &now
 			it.Status.Phase = v1.IntegrationPhaseDeploying
 		}
 	case v1.BuildPhaseError, v1.BuildPhaseInterrupted, v1.BuildPhaseFailed:

@@ -25,6 +25,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util/digest"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func newBuildKitAction() Action {
@@ -150,6 +151,8 @@ kits:
 			if integration.Annotations[v1.IntegrationDontRunAfterBuildAnnotation] == v1.IntegrationDontRunAfterBuildAnnotationTrueValue {
 				integration.Status.Phase = v1.IntegrationPhaseBuildComplete
 			} else {
+				now := metav1.Now().Rfc3339Copy()
+				integration.Status.DeploymentTimestamp = &now
 				integration.Status.Phase = v1.IntegrationPhaseDeploying
 			}
 		}
@@ -211,6 +214,8 @@ func (action *buildKitAction) checkIntegrationKit(ctx context.Context, integrati
 		if integration.Annotations[v1.IntegrationDontRunAfterBuildAnnotation] == v1.IntegrationDontRunAfterBuildAnnotationTrueValue {
 			integration.Status.Phase = v1.IntegrationPhaseBuildComplete
 		} else {
+			now := metav1.Now().Rfc3339Copy()
+			integration.Status.DeploymentTimestamp = &now
 			integration.Status.Phase = v1.IntegrationPhaseDeploying
 		}
 		integration.SetIntegrationKit(kit)
