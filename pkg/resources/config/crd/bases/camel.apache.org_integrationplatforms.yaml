@@ -1472,6 +1472,16 @@ spec:
                         items:
                           type: string
                         type: array
+                      caCert:
+                        description: |-
+                          The secret should contain PEM-encoded certificates.
+                          Example: "secret:my-ca-certs" or "secret:my-ca-certs/custom-ca.crt"
+                        type: string
+                      caCertMountPath:
+                        description: |-
+                          The path where the generated truststore will be mounted
+                          Default: "/etc/camel/conf.d/_truststore"
+                        type: string
                       classpath:
                         description: Additional JVM classpath (use `Linux` classpath
                           separator)
@@ -3865,6 +3875,16 @@ spec:
                         items:
                           type: string
                         type: array
+                      caCert:
+                        description: |-
+                          The secret should contain PEM-encoded certificates.
+                          Example: "secret:my-ca-certs" or "secret:my-ca-certs/custom-ca.crt"
+                        type: string
+                      caCertMountPath:
+                        description: |-
+                          The path where the generated truststore will be mounted
+                          Default: "/etc/camel/conf.d/_truststore"
+                        type: string
                       classpath:
                         description: Additional JVM classpath (use `Linux` classpath
                           separator)

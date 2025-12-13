@@ -18,12 +18,14 @@ limitations under the License.
 package trait
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"path/filepath"
 	"sort"
 	"strings"
 
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -47,6 +49,10 @@ const (
 	defaultMaxMemoryPercentage          = int64(50)
 	lowMemoryThreshold                  = 300
 	lowMemoryMAxMemoryDefaultPercentage = int64(25)
+	defaultCACertMountPath              = "/etc/camel/conf.d/_truststore"
+	caCertVolumeName                    = "jvm-truststore"
+	caCertSecretVolumeName              = "ca-cert-secret" //nolint:gosec // G101: not a credential, just a volume name
+	trustStoreName                      = "truststore.jks"
 )
 
 type jvmTrait struct {
@@ -156,6 +162,14 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	}
 	if httpProxyArgs != nil {
 		args = append(args, httpProxyArgs...)
+	}
+
+	caCertArgs, err := t.configureCaCert(e)
+	if err != nil {
+		return err
+	}
+	if caCertArgs != nil {
+		args = append(args, caCertArgs...)
 	}
 
 	return t.feedContainer(container, args, e)
@@ -368,4 +382,128 @@ func getLegacyCamelQuarkusDependenciesPaths() *sets.Set {
 	s.Add("dependencies/quarkus/*")
 
 	return s
+}
+
+// parseSecretRef parses a secret reference in the format "secret:name" or "secret:name/key".
+func parseSecretRef(ref string) (string, string, error) {
+	if !strings.HasPrefix(ref, "secret:") {
+		return "", "", fmt.Errorf("invalid CA cert reference %q: must start with 'secret:'", ref)
+	}
+
+	ref = strings.TrimPrefix(ref, "secret:")
+	parts := strings.SplitN(ref, "/", 2)
+	secretName, secretKey := parts[0], ""
+
+	if len(parts) > 1 {
+		secretKey = parts[1]
+	}
+	if secretName == "" {
+		return "", "", errors.New("invalid CA cert reference: secret name is empty")
+	}
+
+	return secretName, secretKey, nil
+}
+
+// configureCACert sets up the truststore for CA certificates.
+func (t *jvmTrait) configureCaCert(e *Environment) ([]string, error) {
+	if t.CACert == "" {
+		return nil, nil
+	}
+
+	secretName, secretKey, err := parseSecretRef(t.CACert)
+	if err != nil {
+		return nil, err
+	}
+
+	if secretKey == "" {
+		secretKey = "ca.crt"
+	}
+
+	mountPath := defaultCACertMountPath
+	if t.CACertMountPath != "" {
+		mountPath = t.CACertMountPath
+	}
+
+	// Use a deterministic password based on integration name to avoid
+	// changing the deployment spec on every reconciliation cycle.
+	// For a truststore i.e public CA certs only, security of this password is not critical.
+	trustStorePass := "camelk-" + e.Integration.Name
+	trustStorePath := filepath.Join(mountPath, trustStoreName)
+
+	// add secret volume.
+	secretVolume := corev1.Volume{
+		Name: caCertSecretVolumeName,
+		VolumeSource: corev1.VolumeSource{
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: secretName,
+			},
+		},
+	}
+
+	// add an emptyDir volume.
+	trustStoreVolume := corev1.Volume{
+		Name: caCertVolumeName,
+		VolumeSource: corev1.VolumeSource{
+			EmptyDir: &corev1.EmptyDirVolumeSource{},
+		},
+	}
+
+	// add volumes to deployment.
+	e.Resources.VisitDeployment(func(deployment *appsv1.Deployment) {
+		deployment.Spec.Template.Spec.Volumes = append(
+			deployment.Spec.Template.Spec.Volumes,
+			secretVolume, trustStoreVolume,
+		)
+	})
+
+	// add mount to integration container
+	container := e.GetIntegrationContainer()
+	container.VolumeMounts = append(container.VolumeMounts, corev1.VolumeMount{
+		Name:      caCertVolumeName,
+		MountPath: mountPath,
+		ReadOnly:  true,
+	})
+
+	initContainer := corev1.Container{
+		Name:            "generate-truststore",
+		Image:           container.Image,
+		ImagePullPolicy: container.ImagePullPolicy,
+		Command: []string{
+			"keytool",
+			"-importcert",
+			"-noprompt",
+			"-alias",
+			"custom-ca",
+			"-storepass",
+			trustStorePass,
+			"-keystore",
+			trustStorePath,
+			"-file",
+			filepath.Join("/etc/secrets/cacert", secretKey),
+		},
+		VolumeMounts: []corev1.VolumeMount{
+			{
+				Name:      caCertSecretVolumeName,
+				MountPath: "/etc/secrets/cacert",
+				ReadOnly:  true,
+			},
+			{
+				Name:      caCertVolumeName,
+				MountPath: mountPath,
+			},
+		},
+	}
+
+	// add to deployment container
+	e.Resources.VisitDeployment(func(deployment *appsv1.Deployment) {
+		deployment.Spec.Template.Spec.InitContainers = append(
+			deployment.Spec.Template.Spec.InitContainers,
+			initContainer,
+		)
+	})
+
+	return []string{
+		"-Djavax.net.ssl.trustStore=" + trustStorePath,
+		"-Djavax.net.ssl.trustStorePassword=" + trustStorePass,
+	}, nil
 }

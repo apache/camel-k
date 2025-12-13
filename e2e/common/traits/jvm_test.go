@@ -24,8 +24,15 @@ package common
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/pem"
+	"math/big"
 	"os"
 	"testing"
+	"time"
 
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/require"
@@ -83,5 +90,64 @@ func TestJVMTrait(t *testing.T) {
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Hello World!"))
 		})
+
+		t.Run("JVM trait CA cert", func(t *testing.T) {
+			// Generate a valid self-signed certificate
+			certPem, err := generateSelfSignedCert()
+			require.NoError(t, err)
+
+			caCertData := make(map[string]string)
+			caCertData["ca.crt"] = string(certPem)
+
+			err = CreatePlainTextSecret(t, ctx, ns, "test-ca-cert", caCertData)
+			require.NoError(t, err)
+
+			name := RandomizedSuffixName("cacert")
+			g.Expect(KamelRun(t, ctx, ns,
+				"./files/Java.java",
+				"--name", name,
+				"-t", "jvm.ca-cert=secret:test-ca-cert",
+			).Execute()).To(Succeed())
+
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+
+			// Verify init container was added
+			pod := IntegrationPod(t, ctx, ns, name)()
+			g.Expect(pod).NotTo(BeNil())
+			initContainerNames := make([]string, 0)
+			for _, c := range pod.Spec.InitContainers {
+				initContainerNames = append(initContainerNames, c.Name)
+			}
+			g.Expect(initContainerNames).To(ContainElement("generate-truststore"))
+		})
 	})
+}
+
+// Helper to generate a self-signed certificate for testing
+func generateSelfSignedCert() ([]byte, error) {
+	priv, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		return nil, err
+	}
+
+	template := x509.Certificate{
+		SerialNumber: big.NewInt(1),
+		Subject: pkix.Name{
+			Organization: []string{"Test Co"},
+		},
+		NotBefore: time.Now(),
+		NotAfter:  time.Now().Add(time.Hour * 24),
+
+		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		BasicConstraintsValid: true,
+	}
+
+	derBytes, err := x509.CreateCertificate(rand.Reader, &template, &template, &priv.PublicKey, priv)
+	if err != nil {
+		return nil, err
+	}
+
+	return pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: derBytes}), nil
 }

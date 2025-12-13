@@ -719,3 +719,58 @@ func TestApplyJvmTraitAgentFail(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "could not parse JVM agent")
 }
+
+func TestApplyJvmTraitWithCACert(t *testing.T) {
+	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+	trait.CACert = "secret:my-ca-secret"
+
+	d := appsv1.Deployment{
+		Spec: appsv1.DeploymentSpec{
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name: defaultContainerName,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	environment.Resources.Add(&d)
+	configure, condition, err := trait.Configure(environment)
+	require.NoError(t, err)
+	assert.True(t, configure)
+	assert.Nil(t, condition)
+
+	err = trait.Apply(environment)
+	require.NoError(t, err)
+
+	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Args, "-Djavax.net.ssl.trustStore=/etc/camel/conf.d/_truststore/truststore.jks")
+	assert.Len(t, d.Spec.Template.Spec.Volumes, 2)
+	assert.Equal(t, "ca-cert-secret", d.Spec.Template.Spec.Volumes[0].Name)
+	assert.Equal(t, "jvm-truststore", d.Spec.Template.Spec.Volumes[1].Name)
+	assert.Len(t, d.Spec.Template.Spec.InitContainers, 1)
+	assert.Equal(t, "generate-truststore", d.Spec.Template.Spec.InitContainers[0].Name)
+}
+
+func TestParseSecretRef(t *testing.T) {
+	name, key, err := parseSecretRef("secret:my-secret")
+	require.NoError(t, err)
+	assert.Equal(t, "my-secret", name)
+	assert.Equal(t, "", key)
+
+	name, key, err = parseSecretRef("secret:my-secret/ca.crt")
+	require.NoError(t, err)
+	assert.Equal(t, "my-secret", name)
+	assert.Equal(t, "ca.crt", key)
+
+	_, _, err = parseSecretRef("configmap:my-cm")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "must start with 'secret:'")
+
+	_, _, err = parseSecretRef("secret:")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "secret name is empty")
+}
