@@ -39,11 +39,11 @@ func TestTelemetryTrait(t *testing.T) {
 		// Check service is available
 		g.Eventually(ServicesByType(t, ctx, "otlp", corev1.ServiceTypeClusterIP), TestTimeoutLong).ShouldNot(BeEmpty())
 
-		// Create integration and activate traces by telemetry trait
+		// Create integration and activate traces using OpenTelemetry properties and dependency
 		g.Expect(KamelRun(t, ctx, ns,
 			"files/rest-consumer.yaml", "--name", "rest-consumer",
-			"-t", "telemetry.enabled=true",
-			"-t", "telemetry.endpoint=http://opentelemetrycollector.otlp:4317").Execute()).To(Succeed())
+			"--dependency", "camel:opentelemetry",
+			"-p", "quarkus.otel.exporter.otlp.traces.endpoint=http://opentelemetrycollector.otlp:4317").Execute()).To(Succeed())
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, "rest-consumer"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
 		name := "Bob"

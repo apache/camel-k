@@ -73,7 +73,15 @@ func (t *telemetryTrait) Configure(e *Environment) (bool, *TraitCondition, error
 		return false, nil, nil
 	}
 
-	var condition *TraitCondition
+	// Deprecation warning
+	condition := NewIntegrationCondition(
+		"Telemetry",
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		TraitConfigurationReason,
+		"Telemetry trait is deprecated and may be removed in future versions. "+
+			"Use properties and dependencies configuration instead.",
+	)
 
 	if !ptr.Deref(t.Auto, true) {
 		return true, condition, nil
