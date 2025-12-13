@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"strings"
 
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -100,7 +101,21 @@ func (t *masterTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		}
 	}
 
-	return enabled, nil, nil
+	// Add deprecation warning condition when the trait is enabled
+	var condition *TraitCondition
+	if enabled {
+		condition = NewIntegrationCondition(
+			"Master",
+			v1.IntegrationConditionTraitInfo,
+			corev1.ConditionTrue,
+			TraitConfigurationReason,
+			"The master trait is deprecated and will be removed in a future release. "+
+				"Please manually create the required Role and RoleBinding, then configure Quarkus properties directly. "+
+				"See documentation for migration guide.",
+		)
+	}
+
+	return enabled, condition, nil
 }
 
 func (t *masterTrait) Apply(e *Environment) error {
