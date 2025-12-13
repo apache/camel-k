@@ -93,7 +93,12 @@ func integrationUpdateFunc(c client.Client, old *v1.Integration, it *v1.Integrat
 	previous := old.Status.GetCondition(v1.IntegrationConditionReady)
 	next := it.Status.GetCondition(v1.IntegrationConditionReady)
 	if isIntegrationUpdated(it, previous, next) {
-		duration := next.FirstTruthyTime.Sub(it.Status.InitializationTimestamp.Time)
+		// Use DeploymentTimestamp if available (for dry-build), else use InitializationTimestamp
+		startTime := it.Status.InitializationTimestamp.Time
+		if it.Status.DeploymentTimestamp != nil && !it.Status.DeploymentTimestamp.IsZero() {
+			startTime = it.Status.DeploymentTimestamp.Time
+		}
+		duration := next.FirstTruthyTime.Sub(startTime)
 		Log.WithValues("request-namespace", it.Namespace, "request-name", it.Name, "ready-after", duration.Seconds()).
 			ForIntegration(it).Infof("First readiness after %s", duration)
 		timeToFirstReadiness.Observe(duration.Seconds())
