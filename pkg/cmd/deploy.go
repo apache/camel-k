@@ -23,6 +23,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/spf13/cobra"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -74,6 +75,9 @@ func (o *deployCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	integration := existing.DeepCopy()
+	// Set DeploymentTimestamp to track when deployment was initiated
+	now := metav1.Now().Rfc3339Copy()
+	integration.Status.DeploymentTimestamp = &now
 	integration.Status.Phase = v1.IntegrationPhaseDeploying
 
 	patch := ctrl.MergeFrom(existing)

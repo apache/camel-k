@@ -133,6 +133,8 @@ type IntegrationStatus struct {
 	Capabilities []string `json:"capabilities,omitempty"`
 	// the timestamp representing the last time when this integration was initialized.
 	InitializationTimestamp *metav1.Time `json:"lastInitTimestamp,omitempty"`
+	// the timestamp representing the last time when this integration was deployed.
+	DeploymentTimestamp *metav1.Time `json:"lastDeploymentTimestamp,omitempty"`
 }
 
 // +kubebuilder:object:root=true
