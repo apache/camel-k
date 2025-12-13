@@ -89,9 +89,12 @@ func TestMasterOn(t *testing.T) {
 	mt := NewMasterTrait()
 	mt.InjectClient(client)
 	// Initialization phase
-	configured, conditions, err := mt.Configure(&environment)
+	configured, condition, err := mt.Configure(&environment)
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	// Verify deprecation condition is present
+	assert.NotNil(t, condition)
+	assert.Equal(t, TraitConfigurationReason, condition.reason)
+	assert.Contains(t, condition.message, "deprecated")
 	assert.True(t, configured)
 	err = mt.Apply(&environment)
 	require.NoError(t, err)
@@ -180,9 +183,10 @@ func TestMasterOff(t *testing.T) {
 	mt := NewMasterTrait()
 	mt.InjectClient(client)
 	// Initialization phase
-	configured, conditions, err := mt.Configure(&environment)
+	configured, condition, err := mt.Configure(&environment)
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+
+	assert.Nil(t, condition)
 	assert.False(t, configured)
 }
 
@@ -243,9 +247,12 @@ func TestMasterAuto(t *testing.T) {
 	mt.InjectClient(client)
 	trait, _ := mt.(*masterTrait)
 	// Initialization phase
-	configured, conditions, err := trait.Configure(&environment)
+	configured, condition, err := trait.Configure(&environment)
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	// Verify deprecation condition is present
+	assert.NotNil(t, condition)
+	assert.Equal(t, TraitConfigurationReason, condition.reason)
+	assert.Contains(t, condition.message, "deprecated")
 	assert.True(t, configured)
 	err = trait.Apply(&environment)
 	require.NoError(t, err)
@@ -260,4 +267,73 @@ func TestMasterAuto(t *testing.T) {
 		},
 	}
 	assert.Equal(t, expectedTrait.Trait, trait.Trait)
+}
+
+func TestMasterTraitDeprecationWarning(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	client, err := internal.NewFakeClient()
+	require.NoError(t, err)
+	traitCatalog := NewCatalog(nil)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Client:       client,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseInitialization,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:    "Master.java",
+							Content: `from("master:lock:timer:tick").to("log:test")`,
+						},
+						Language: v1.LanguageJavaSource,
+					},
+				},
+				Traits: v1.Traits{},
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
+				},
+				Profile: v1.TraitProfileKnative,
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      kubernetes.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	mt := NewMasterTrait()
+	mt.InjectClient(client)
+	configured, condition, err := mt.Configure(&environment)
+	require.NoError(t, err)
+	assert.True(t, configured)
+
+	require.NotNil(t, condition)
+	assert.Equal(t, TraitConfigurationReason, condition.reason)
+	assert.Contains(t, condition.message, "deprecated")
+	assert.Contains(t, condition.message, "removed")
+	assert.Contains(t, condition.message, "Role")
+	assert.Contains(t, condition.message, "RoleBinding")
+	assert.Contains(t, condition.message, "Quarkus properties")
 }
