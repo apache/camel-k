@@ -68,3 +68,24 @@ func TestBuildDontRun(t *testing.T) {
 		})
 	})
 }
+
+func TestPipeBuildDontRun(t *testing.T) {
+	t.Parallel()
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		name := RandomizedSuffixName("pipe-deploy")
+		t.Run("build and dont run pipe", func(t *testing.T) {
+			g.Expect(KamelBind(t, ctx, ns, "timer-source?message=HelloPipe", "log-sink",
+				"--name", name,
+				"--annotation", "camel.apache.org/dont-run-after-build=true",
+			).Execute()).To(Succeed())
+			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseBuildComplete))
+			g.Eventually(PipePhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.PipePhaseBuildComplete))
+			g.Consistently(IntegrationPhase(t, ctx, ns, name), 10*time.Second).Should(Equal(v1.IntegrationPhaseBuildComplete))
+			g.Consistently(PipePhase(t, ctx, ns, name), 10*time.Second).Should(Equal(v1.PipePhaseBuildComplete))
+			g.Eventually(Deployment(t, ctx, ns, name)).Should(BeNil())
+			// Pipe condition should indicate build is complete
+			g.Eventually(PipeCondition(t, ctx, ns, name, v1.PipeConditionReady), TestTimeoutShort).Should(
+				WithTransform(PipeConditionReason, Equal("BuildComplete")))
+		})
+	})
+}

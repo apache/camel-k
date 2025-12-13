@@ -159,6 +159,8 @@ const (
 	PipePhaseError PipePhase = "Error"
 	// PipePhaseReady --.
 	PipePhaseReady PipePhase = "Ready"
+	// PipePhaseBuildComplete --.
+	PipePhaseBuildComplete PipePhase = "Build Complete"
 )
 
 // +kubebuilder:object:root=true
