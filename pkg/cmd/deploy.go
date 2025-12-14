@@ -32,9 +32,8 @@ func newCmdDeploy(rootCmdOptions *RootCmdOptions) (*cobra.Command, *deployCmdOpt
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:     "deploy my-it",
-		Short:   "Deploy an Integration",
-		Long:    "Deploy an Integration that was previously built",
+		Use:     "deploy <name>",
+		Short:   "Deploy an Integration or Pipe that was previously built with --dont-run-after-build flag",
 		PreRunE: decode(&options, options.Flags),
 		RunE:    options.run,
 	}
@@ -48,7 +47,7 @@ type deployCmdOptions struct {
 
 func (o *deployCmdOptions) validate(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
-		return errors.New("deploy requires an Integration name argument")
+		return errors.New("deploy requires an Integration or Pipe name argument")
 	}
 
 	return nil
@@ -67,7 +66,7 @@ func (o *deployCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 	existing, err := getIntegration(o.Context, c, name, o.Namespace)
 	if err != nil {
-		return fmt.Errorf("could not get Integration "+name+": %w", err)
+		return fmt.Errorf("could not get Integration or Pipe "+name+": %w", err)
 	}
 	if existing.Status.Phase != v1.IntegrationPhaseBuildComplete {
 		return fmt.Errorf("could not run an Integration in %s status", existing.Status.Phase)

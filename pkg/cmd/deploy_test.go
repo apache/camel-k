@@ -60,14 +60,14 @@ func TestDeployMissingInput(t *testing.T) {
 	cmd, _ := initializeDeployCmdOptions(t)
 	_, err := ExecuteCommand(cmd, cmdDeploy)
 	require.Error(t, err)
-	assert.Equal(t, "deploy requires an Integration name argument", err.Error())
+	assert.Equal(t, "deploy requires an Integration or Pipe name argument", err.Error())
 }
 
 func TestDeployMissingIntegration(t *testing.T) {
 	cmd, _ := initializeDeployCmdOptions(t)
 	_, err := ExecuteCommand(cmd, cmdDeploy, "missing-it")
 	require.Error(t, err)
-	assert.Equal(t, "could not get Integration missing-it: integrations.camel.apache.org \"missing-it\" not found", err.Error())
+	assert.Equal(t, "could not get Integration or Pipe missing-it: integrations.camel.apache.org \"missing-it\" not found", err.Error())
 }
 
 func TestDeployCantDeployRunningIntegration(t *testing.T) {

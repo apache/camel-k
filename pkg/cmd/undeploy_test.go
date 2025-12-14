@@ -60,7 +60,7 @@ func TestUndeployNoArgs(t *testing.T) {
 	cmd, _ := initializeUndeployCmdOptions(t)
 	_, err := ExecuteCommand(cmd, cmdUndeploy)
 	require.Error(t, err)
-	assert.Equal(t, "undeploy requires an Integration name argument", err.Error())
+	assert.Equal(t, "undeploy requires an Integration or Pipe name argument", err.Error())
 }
 
 func TestUndeployMissingIntegrations(t *testing.T) {

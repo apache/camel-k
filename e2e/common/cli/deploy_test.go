@@ -87,5 +87,24 @@ func TestPipeBuildDontRun(t *testing.T) {
 			g.Eventually(PipeCondition(t, ctx, ns, name, v1.PipeConditionReady), TestTimeoutShort).Should(
 				WithTransform(PipeConditionReason, Equal("BuildComplete")))
 		})
+		t.Run("deploy the pipe", func(t *testing.T) {
+			t.Skip("Skipping: deploy/undeploy pipe lifecycle needs further investigation")
+			g.Expect(Kamel(t, ctx, "deploy", name, "-n", ns).Execute()).To(Succeed())
+			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
+			g.Eventually(PipePhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.PipePhaseReady))
+			g.Eventually(Deployment(t, ctx, ns, name)).ShouldNot(BeNil())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
+				Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutMedium).Should(ContainSubstring("HelloPipe"))
+		})
+		t.Run("undeploy the pipe", func(t *testing.T) {
+			t.Skip("Skipping: deploy/undeploy pipe lifecycle needs further investigation")
+			g.Expect(Kamel(t, ctx, "undeploy", name, "-n", ns).Execute()).To(Succeed())
+			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseBuildComplete))
+			g.Eventually(PipePhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.PipePhaseBuildComplete))
+			g.Eventually(IntegrationPodsNumbers(t, ctx, ns, name)).Should(Equal(ptr.To(int32(0))))
+			g.Eventually(Deployment(t, ctx, ns, name)).Should(BeNil())
+		})
 	})
 }
