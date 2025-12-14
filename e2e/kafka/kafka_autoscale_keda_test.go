@@ -73,3 +73,28 @@ func TestKafkaKedaAutoscale(t *testing.T) {
 		})
 	})
 }
+
+func TestKafkaKedaAutoDiscovery(t *testing.T) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		t.Run("Auto-discovery Kafka", func(t *testing.T) {
+			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/keda-kafka-auto-discovery.yaml"))
+			ns := "kafka"
+			integrationName := "keda-kafka-auto-discovery"
+
+			// Wait for ScaledObject
+			g.Eventually(ScaledObject(t, ctx, ns, integrationName), TestTimeoutMedium).
+				ShouldNot(BeNil())
+
+			// Verify the auto-discovered
+			scaledObj := ScaledObject(t, ctx, ns, integrationName)()
+			g.Expect(scaledObj).NotTo(BeNil())
+			g.Expect(scaledObj.Spec.Triggers).To(HaveLen(1))
+			g.Expect(scaledObj.Spec.Triggers[0].Type).To(Equal("kafka"))
+			g.Expect(scaledObj.Spec.Triggers[0].Metadata["topic"]).To(Equal("my-topic"))
+			g.Expect(scaledObj.Spec.Triggers[0].Metadata["bootstrapServers"]).To(Equal("my-cluster-kafka-bootstrap.kafka.svc:9092"))
+			g.Expect(scaledObj.Spec.Triggers[0].Metadata["consumerGroup"]).To(Equal("auto-group"))
+
+			g.Expect(Kamel(t, ctx, "delete", integrationName, "-n", ns).Execute()).To(Succeed())
+		})
+	})
+}

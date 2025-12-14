@@ -710,6 +710,11 @@ func (in *KedaTrait) DeepCopyInto(out *KedaTrait) {
 		*out = new(int32)
 		**out = **in
 	}
+	if in.Auto != nil {
+		in, out := &in.Auto, &out.Auto
+		*out = new(bool)
+		**out = **in
+	}
 	if in.Triggers != nil {
 		in, out := &in.Triggers, &out.Triggers
 		*out = make([]KedaTrigger, len(*in))

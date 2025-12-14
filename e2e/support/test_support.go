@@ -75,6 +75,7 @@ import (
 	"github.com/apache/camel-k/v2/e2e/support/util"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	kedav1alpha1 "github.com/apache/camel-k/v2/pkg/apis/duck/keda/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/cmd"
 	"github.com/apache/camel-k/v2/pkg/platform"
@@ -192,6 +193,7 @@ func init() {
 	client.FastMapperAllowedAPIGroups["operators.coreos.com"] = true
 	client.FastMapperAllowedAPIGroups["config.openshift.io"] = true
 	client.FastMapperAllowedAPIGroups["policy"] = true
+	client.FastMapperAllowedAPIGroups["keda.sh"] = true
 
 	var err error
 
@@ -3109,4 +3111,20 @@ func DefaultOperatorSecurityContext() *corev1.SecurityContext {
 	}
 
 	return &sc
+}
+
+// ScaledObject retrieves a KEDA ScaledObject by name from a namespace.
+func ScaledObject(t *testing.T, ctx context.Context, ns, name string) func() *kedav1alpha1.ScaledObject {
+	return func() *kedav1alpha1.ScaledObject {
+		scaledObject := kedav1alpha1.ScaledObject{}
+		key := ctrl.ObjectKey{
+			Namespace: ns,
+			Name:      name,
+		}
+		if err := TestClient(t).Get(ctx, key, &scaledObject); err != nil {
+			log.Error(err, "Error while retrieving ScaledObject "+name)
+			return nil
+		}
+		return &scaledObject
+	}
 }
