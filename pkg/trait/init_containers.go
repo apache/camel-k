@@ -90,6 +90,27 @@ func (t *initContainersTrait) Configure(e *Environment) (bool, *TraitCondition, 
 			}
 			t.tasks = append(t.tasks, agentDownloadTask)
 		}
+		// Set the CA cert truststore init container if configured
+		if ok && jvm.hasCACert() {
+			_, secretKey, err := parseSecretRef(jvm.CACert)
+			if err != nil {
+				return false, nil, err
+			}
+			if secretKey == "" {
+				secretKey = "ca.crt"
+			}
+
+			keytoolCmd := fmt.Sprintf(
+				"keytool -importcert -noprompt -alias custom-ca -storepass %s -keystore %s -file /etc/secrets/cacert/%s",
+				getTrustStorePassword(e.Integration.Name), jvm.getTrustStorePath(), secretKey,
+			)
+			caCertTask := containerTask{
+				name:    "generate-truststore",
+				image:   defaults.BaseImage(),
+				command: keytoolCmd,
+			}
+			t.tasks = append(t.tasks, caCertTask)
+		}
 	}
 
 	return len(t.tasks) > 0, nil, nil

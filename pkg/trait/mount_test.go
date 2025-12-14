@@ -703,3 +703,67 @@ func TestMountMultipleKeysSameSecret(t *testing.T) {
 	}
 	assert.Equal(t, 1, found, "Expected exactly 1 volume mounted at my-secret-1")
 }
+
+func TestCACertVolume(t *testing.T) {
+	traitCatalog := NewCatalog(nil)
+
+	environment := getNominalEnv(t, traitCatalog)
+
+	environment.Integration.Spec.Traits.Mount = &traitv1.MountTrait{}
+	environment.Integration.Spec.Traits.JVM = &traitv1.JVMTrait{
+		CACert: "secret:my-ca-secret",
+	}
+	environment.Platform.ResyncStatusFullConfig()
+	conditions, traits, err := traitCatalog.apply(environment)
+
+	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
+	assert.NotEmpty(t, conditions)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("mount"))
+
+	deployment := environment.Resources.GetDeployment(func(service *appsv1.Deployment) bool {
+		return service.Name == "hello"
+	})
+	assert.NotNil(t, deployment)
+	spec := deployment.Spec.Template.Spec
+
+	// Should have: 2 base volumes + secret volume + emptyDir volume = 4
+	assert.Len(t, spec.Volumes, 4)
+
+	// Check secret volume exists
+	var secretVolume *corev1.Volume
+	for _, v := range spec.Volumes {
+		if v.Name == caCertSecretVolumeName {
+			secretVolume = &v
+			break
+		}
+	}
+	assert.NotNil(t, secretVolume, "Expected secret volume for CA cert")
+	assert.NotNil(t, secretVolume.Secret)
+	assert.Equal(t, "my-ca-secret", secretVolume.Secret.SecretName)
+
+	// Check emptyDir volume exists
+	var emptyDirVolume *corev1.Volume
+	for _, v := range spec.Volumes {
+		if v.Name == caCertVolumeName {
+			emptyDirVolume = &v
+			break
+		}
+	}
+	assert.NotNil(t, emptyDirVolume, "Expected emptyDir volume for truststore")
+	assert.NotNil(t, emptyDirVolume.EmptyDir)
+
+	assert.Condition(t, func() bool {
+		for _, container := range spec.Containers {
+			if container.Name == "integration" {
+				for _, volumeMount := range container.VolumeMounts {
+					if volumeMount.Name == caCertVolumeName {
+						return volumeMount.MountPath == defaultCACertMountPath
+					}
+				}
+			}
+		}
+		return false
+	})
+}

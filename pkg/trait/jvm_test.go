@@ -747,12 +747,9 @@ func TestApplyJvmTraitWithCACert(t *testing.T) {
 	err = trait.Apply(environment)
 	require.NoError(t, err)
 
+	// JVM trait now only adds JVM args for truststore
 	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Args, "-Djavax.net.ssl.trustStore=/etc/camel/conf.d/_truststore/truststore.jks")
-	assert.Len(t, d.Spec.Template.Spec.Volumes, 2)
-	assert.Equal(t, "ca-cert-secret", d.Spec.Template.Spec.Volumes[0].Name)
-	assert.Equal(t, "jvm-truststore", d.Spec.Template.Spec.Volumes[1].Name)
-	assert.Len(t, d.Spec.Template.Spec.InitContainers, 1)
-	assert.Equal(t, "generate-truststore", d.Spec.Template.Spec.InitContainers[0].Name)
+	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Args, "-Djavax.net.ssl.trustStorePassword=camelk-my-it")
 }
 
 func TestParseSecretRef(t *testing.T) {
