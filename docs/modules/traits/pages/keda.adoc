@@ -47,11 +47,16 @@ The following configuration options are available:
 | int32
 | Maximum number of replicas.
 
-| keda.triggers
-| []github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait.KedaTrigger
+| keda.auto
+| bool
 | Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
 to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options
 and optionally a mapping of secrets, used by Keda operator to poll resources according to the autoscaler type.
+Automatically discover KEDA triggers from Camel component URIs.
+
+| keda.triggers
+| []github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait.KedaTrigger
+| 
 
 |===
 

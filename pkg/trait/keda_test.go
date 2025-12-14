@@ -58,6 +58,66 @@ func TestKeda(t *testing.T) {
 	assert.Equal(t, "10", scaledObject.Spec.Triggers[0].Metadata["lagThreshold"])
 }
 
+func TestKedaAutoDiscovery(t *testing.T) {
+	tests := []struct {
+		name           string
+		source         string
+		expectedType   string
+		expectedParams map[string]string
+	}{
+		{
+			name:         "kafka",
+			source:       `from("kafka:my-topic?brokers=my-broker:9092&groupId=my-group").log("${body}");`,
+			expectedType: "kafka",
+			expectedParams: map[string]string{
+				"topic":            "my-topic",
+				"bootstrapServers": "my-broker:9092",
+				"consumerGroup":    "my-group",
+			},
+		},
+		{
+			name:         "aws2-sqs",
+			source:       `from("aws2-sqs:my-queue?region=us-east-1").log("${body}");`,
+			expectedType: "aws-sqs-queue",
+			expectedParams: map[string]string{
+				"queueURL":  "my-queue",
+				"awsRegion": "us-east-1",
+			},
+		},
+		{
+			name:         "spring-rabbitmq",
+			source:       `from("spring-rabbitmq:exchange?queues=my-queue&addresses=rabbit:5672").log("${body}");`,
+			expectedType: "rabbitmq",
+			expectedParams: map[string]string{
+				"queueName": "my-queue",
+				"host":      "rabbit:5672",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			environment := autoDiscoveryEnvWithSource(t, tt.source)
+			environment.Platform.ResyncStatusFullConfig()
+			traitCatalog := environment.Catalog
+
+			_, _, err := traitCatalog.apply(&environment)
+
+			require.NoError(t, err)
+			assert.NotEmpty(t, environment.ExecutedTraits)
+			assert.NotNil(t, environment.GetTrait("keda"))
+
+			scaledObject := getKedaScaledObject(environment.Resources)
+			require.NotNil(t, scaledObject)
+			require.Len(t, scaledObject.Spec.Triggers, 1)
+			assert.Equal(t, tt.expectedType, scaledObject.Spec.Triggers[0].Type)
+			for k, v := range tt.expectedParams {
+				assert.Equal(t, v, scaledObject.Spec.Triggers[0].Metadata[k], "metadata key %s mismatch", k)
+			}
+		})
+	}
+}
+
 func TestKedaAuthentication(t *testing.T) {
 	environment := nominalEnv(t)
 	environment.Integration.Spec.Traits.Keda.Triggers[0].Secrets = []*traitv1.KedaSecret{
@@ -181,6 +241,72 @@ func nominalEnv(t *testing.T) Environment {
 								},
 							},
 						},
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
+				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      kubernetes.NewCollection(),
+	}
+}
+
+// autoDiscoveryEnvWithSource creates an environment with the given source but NO manual triggers.
+func autoDiscoveryEnvWithSource(t *testing.T, source string) Environment {
+	t.Helper()
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	client, _ := internal.NewFakeClient()
+	traitCatalog := NewCatalog(nil)
+
+	return Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Client:       client,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:        "routes.java",
+							Content:     source,
+							Compression: false,
+						},
+						Language: v1.LanguageJavaSource,
+					},
+				},
+				Traits: v1.Traits{
+					Keda: &traitv1.KedaTrait{
+						Trait: traitv1.Trait{
+							Enabled: ptr.To(true),
+						},
+						// No triggers - auto-discovery should kick in
 					},
 				},
 			},

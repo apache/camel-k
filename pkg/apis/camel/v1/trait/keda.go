@@ -36,6 +36,9 @@ type KedaTrait struct {
 	// Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
 	// to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options
 	// and optionally a mapping of secrets, used by Keda operator to poll resources according to the autoscaler type.
+	// Automatically discover KEDA triggers from Camel component URIs.
+	// +kubebuilder:validation:Optional
+	Auto     *bool         `json:"auto,omitempty" property:"auto"`
 	Triggers []KedaTrigger `json:"triggers,omitempty" property:"triggers"`
 }
 
