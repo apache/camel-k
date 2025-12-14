@@ -52,6 +52,7 @@ func getIntegrationKit(ctx context.Context, c client.Client, integration *v1.Int
 	if integration.Status.IntegrationKit == nil {
 		return nil, nil
 	}
+
 	return kubernetes.GetIntegrationKit(ctx, c, integration.Status.IntegrationKit.Name, integration.Status.IntegrationKit.Namespace)
 }
 

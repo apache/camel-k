@@ -227,6 +227,7 @@ func (o *promoteCmdOptions) getIntegrationKit(c client.Client, ref *corev1.Objec
 	if ref == nil {
 		return nil, nil
 	}
+
 	return kubernetes.GetIntegrationKit(o.Context, c, ref.Name, ref.Namespace)
 }
 
