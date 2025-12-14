@@ -37,6 +37,7 @@ type TraitsApplyConfiguration struct {
 	Environment     *trait.EnvironmentTrait                 `json:"environment,omitempty"`
 	ErrorHandler    *trait.ErrorHandlerTrait                `json:"error-handler,omitempty"`
 	GC              *trait.GCTrait                          `json:"gc,omitempty"`
+	GitOps          *trait.GitOpsTrait                      `json:"gitops,omitempty"`
 	Health          *trait.HealthTrait                      `json:"health,omitempty"`
 	Ingress         *trait.IngressTrait                     `json:"ingress,omitempty"`
 	InitContainers  *trait.InitContainersTrait              `json:"init-containers,omitempty"`
@@ -162,6 +163,14 @@ func (b *TraitsApplyConfiguration) WithErrorHandler(value trait.ErrorHandlerTrai
 // If called multiple times, the GC field is set to the value of the last call.
 func (b *TraitsApplyConfiguration) WithGC(value trait.GCTrait) *TraitsApplyConfiguration {
 	b.GC = &value
+	return b
+}
+
+// WithGitOps sets the GitOps field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the GitOps field is set to the value of the last call.
+func (b *TraitsApplyConfiguration) WithGitOps(value trait.GitOpsTrait) *TraitsApplyConfiguration {
+	b.GitOps = &value
 	return b
 }
 

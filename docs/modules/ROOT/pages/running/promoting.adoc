@@ -57,8 +57,6 @@ Please notice that the Integration running in test is not altered in any way and
 [[traits]]
 == Moving traits
 
-NOTE: this feature is available starting from version 2.5
-
 When you use the `promote` subcommand, you're also keeping the status of any configured trait along with the new promoted Integration. The tool is in fact in charge to recover the trait configuration of the source Integration and port it over to the new Integration promoted.
 
 This is particularly nice when you have certain traits which are requiring the scan the source code (for instance, Service trait). In this way, when you promote the new Integration, the traits will be automatically configured to copy any parameter, replicating the very exact behavior between the source and destination environment.
@@ -66,9 +64,7 @@ This is particularly nice when you have certain traits which are requiring the s
 With this approach, you won't need to worry any longer about any trait which was requiring the source to be attached in order to automatically scan for features.
 
 [[gitops]]
-== GitOps
-
-NOTE: this feature is available starting from version 2.6
+== Make your own GitOps
 
 The promote has also the possibility to create a Kustomize based overlay structure in order to simplify the creation of a **GitOps based deployment** process. Let's pretend we want to create a GitOps pipeline for two environments, as an example, *staging* and *production*. For each environment we can call the export command:
 
@@ -119,18 +115,6 @@ status: {}
 The CLI has a predetermined set of configuration (traits) which are typically subject of environment patching, such as Camel properties or any Kubernetes resource configuration. You will need to change those parameters accordingly or add any one else required for your specific use case.
 
 The above structure could be used directly with `kubectl` (eg, `kubectl apply -k /tmp/integrations/promote-server/overlays/production`). For this reason it can be used *as is* to feed a Git repository and referenced in any CICD pipeline.
-
-=== Running Camel with ArgoCD
-
-Once you have stored the project in a Git repository, if you're using a CICD technology like https://argo-cd.readthedocs.io[ArgoCD] you can run immediately your *production* pipeline as:
-
-```
-argocd app create my-ck-it-prod --repo https://git-server/repo/promote-server.git --path overlays/production --dest-server https://kubernetes.default.svc --dest-namespace prod
-```
-
-From this moment onward any change can be performed on the repository and it will be automatically refreshed by the CICD pipeline accordingly.
-
-NOTE: any other CICD technology can be adopted using the Git repository as source.
 
 === Predetermined configuration
 

@@ -60,18 +60,14 @@ metadata:
 spec:
   git:
     url: https://github.com/michalvavrik/sample.git
-    branch: feature/xyz    # Use specific branch
+    # branch: feature/xyz    # Use specific branch
     # tag: v1.2.3         # Or use specific tag
     # commit: f2b9bd064a62263ab53b3bfe6ac2b71e68dba45b  # Or use specific commit
 ```
 
 == Rebuild
 
-In order to trigger a rebuild of an Integration you will need to `kamel reset` or to wipe off the Integration `status` as it normally happens for any other regular Integration.
-
-== GitOps
-
-The possibility to build directly from the Git repo will give you more flexibility to close the loop between your CICD which is taking care to build an application and to deploy it.
+In order to trigger a rebuild of an Integration you will need to `kamel rebuild` or to wipe off the Integration `status` as it normally happens for any other regular Integration.
 
 == Future developments
 

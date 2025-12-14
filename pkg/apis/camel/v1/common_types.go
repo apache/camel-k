@@ -208,6 +208,8 @@ type Traits struct {
 	ErrorHandler *trait.ErrorHandlerTrait `json:"error-handler,omitempty" property:"error-handler"`
 	// The configuration of GC trait
 	GC *trait.GCTrait `json:"gc,omitempty" property:"gc"`
+	// The configuration of GitOps trait
+	GitOps *trait.GitOpsTrait `json:"gitops,omitempty" property:"gitops"`
 	// The configuration of Health trait
 	Health *trait.HealthTrait `json:"health,omitempty" property:"health"`
 	// The configuration of Ingress trait

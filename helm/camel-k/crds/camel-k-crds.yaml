@@ -4331,6 +4331,71 @@ spec:
                           traits share this common property.
                         type: boolean
                     type: object
+                  gitops:
+                    description: The configuration of GitOps trait
+                    properties:
+                      branch:
+                        description: the git branch to check out.
+                        type: string
+                      branchPush:
+                        description: the git branch to push to. If omitted, the operator
+                          will push to a new branch named as `cicd/release-candidate-<datetime>`.
+                        type: string
+                      commit:
+                        description: the git commit (full SHA) to check out.
+                        type: string
+                      committerEmail:
+                        default: camel-k-operator@apache.org
+                        description: The email used to commit the GitOps changes (default
+                          `camel-k-operator@apache.org`).
+                        type: string
+                      committerName:
+                        default: Camel K Operator
+                        description: The name used to commit the GitOps changes (default
+                          `Camel K Operator`).
+                        type: string
+                      configuration:
+                        description: |-
+                          Legacy trait configuration parameters.
+                          Deprecated: for backward compatibility.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                      integrationDirectory:
+                        default: integrations
+                        description: The root path where to store Kustomize overlays
+                          (default `integrations`).
+                        type: string
+                      overlays:
+                        default:
+                        - dev
+                        - stag
+                        - prod
+                        description: a list of overlays to provide (default {"dev","stag","prod"}).
+                        items:
+                          type: string
+                        type: array
+                      overwriteOverlay:
+                        default: false
+                        description: a flag (default, false) to overwrite any existing
+                          overlay.
+                        type: boolean
+                      secret:
+                        description: the Kubernetes secret where the Git token is
+                          stored. The operator will pick up the first secret key only,
+                          whichever the name it is.
+                        type: string
+                      tag:
+                        description: the git tag to check out.
+                        type: string
+                      url:
+                        description: the URL of the repository where the project is
+                          stored.
+                        type: string
+                    type: object
                   health:
                     description: The configuration of Health trait
                     properties:
@@ -6659,6 +6724,71 @@ spec:
                           traits share this common property.
                         type: boolean
                     type: object
+                  gitops:
+                    description: The configuration of GitOps trait
+                    properties:
+                      branch:
+                        description: the git branch to check out.
+                        type: string
+                      branchPush:
+                        description: the git branch to push to. If omitted, the operator
+                          will push to a new branch named as `cicd/release-candidate-<datetime>`.
+                        type: string
+                      commit:
+                        description: the git commit (full SHA) to check out.
+                        type: string
+                      committerEmail:
+                        default: camel-k-operator@apache.org
+                        description: The email used to commit the GitOps changes (default
+                          `camel-k-operator@apache.org`).
+                        type: string
+                      committerName:
+                        default: Camel K Operator
+                        description: The name used to commit the GitOps changes (default
+                          `Camel K Operator`).
+                        type: string
+                      configuration:
+                        description: |-
+                          Legacy trait configuration parameters.
+                          Deprecated: for backward compatibility.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                      integrationDirectory:
+                        default: integrations
+                        description: The root path where to store Kustomize overlays
+                          (default `integrations`).
+                        type: string
+                      overlays:
+                        default:
+                        - dev
+                        - stag
+                        - prod
+                        description: a list of overlays to provide (default {"dev","stag","prod"}).
+                        items:
+                          type: string
+                        type: array
+                      overwriteOverlay:
+                        default: false
+                        description: a flag (default, false) to overwrite any existing
+                          overlay.
+                        type: boolean
+                      secret:
+                        description: the Kubernetes secret where the Git token is
+                          stored. The operator will pick up the first secret key only,
+                          whichever the name it is.
+                        type: string
+                      tag:
+                        description: the git tag to check out.
+                        type: string
+                      url:
+                        description: the URL of the repository where the project is
+                          stored.
+                        type: string
+                    type: object
                   health:
                     description: The configuration of Health trait
                     properties:
@@ -8889,6 +9019,71 @@ spec:
                           traits share this common property.
                         type: boolean
                     type: object
+                  gitops:
+                    description: The configuration of GitOps trait
+                    properties:
+                      branch:
+                        description: the git branch to check out.
+                        type: string
+                      branchPush:
+                        description: the git branch to push to. If omitted, the operator
+                          will push to a new branch named as `cicd/release-candidate-<datetime>`.
+                        type: string
+                      commit:
+                        description: the git commit (full SHA) to check out.
+                        type: string
+                      committerEmail:
+                        default: camel-k-operator@apache.org
+                        description: The email used to commit the GitOps changes (default
+                          `camel-k-operator@apache.org`).
+                        type: string
+                      committerName:
+                        default: Camel K Operator
+                        description: The name used to commit the GitOps changes (default
+                          `Camel K Operator`).
+                        type: string
+                      configuration:
+                        description: |-
+                          Legacy trait configuration parameters.
+                          Deprecated: for backward compatibility.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                      integrationDirectory:
+                        default: integrations
+                        description: The root path where to store Kustomize overlays
+                          (default `integrations`).
+                        type: string
+                      overlays:
+                        default:
+                        - dev
+                        - stag
+                        - prod
+                        description: a list of overlays to provide (default {"dev","stag","prod"}).
+                        items:
+                          type: string
+                        type: array
+                      overwriteOverlay:
+                        default: false
+                        description: a flag (default, false) to overwrite any existing
+                          overlay.
+                        type: boolean
+                      secret:
+                        description: the Kubernetes secret where the Git token is
+                          stored. The operator will pick up the first secret key only,
+                          whichever the name it is.
+                        type: string
+                      tag:
+                        description: the git tag to check out.
+                        type: string
+                      url:
+                        description: the URL of the repository where the project is
+                          stored.
+                        type: string
+                    type: object
                   health:
                     description: The configuration of Health trait
                     properties:
@@ -11095,6 +11290,71 @@ spec:
                         description: Can be used to enable or disable a trait. All
                           traits share this common property.
                         type: boolean
+                    type: object
+                  gitops:
+                    description: The configuration of GitOps trait
+                    properties:
+                      branch:
+                        description: the git branch to check out.
+                        type: string
+                      branchPush:
+                        description: the git branch to push to. If omitted, the operator
+                          will push to a new branch named as `cicd/release-candidate-<datetime>`.
+                        type: string
+                      commit:
+                        description: the git commit (full SHA) to check out.
+                        type: string
+                      committerEmail:
+                        default: camel-k-operator@apache.org
+                        description: The email used to commit the GitOps changes (default
+                          `camel-k-operator@apache.org`).
+                        type: string
+                      committerName:
+                        default: Camel K Operator
+                        description: The name used to commit the GitOps changes (default
+                          `Camel K Operator`).
+                        type: string
+                      configuration:
+                        description: |-
+                          Legacy trait configuration parameters.
+                          Deprecated: for backward compatibility.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                      integrationDirectory:
+                        default: integrations
+                        description: The root path where to store Kustomize overlays
+                          (default `integrations`).
+                        type: string
+                      overlays:
+                        default:
+                        - dev
+                        - stag
+                        - prod
+                        description: a list of overlays to provide (default {"dev","stag","prod"}).
+                        items:
+                          type: string
+                        type: array
+                      overwriteOverlay:
+                        default: false
+                        description: a flag (default, false) to overwrite any existing
+                          overlay.
+                        type: boolean
+                      secret:
+                        description: the Kubernetes secret where the Git token is
+                          stored. The operator will pick up the first secret key only,
+                          whichever the name it is.
+                        type: string
+                      tag:
+                        description: the git tag to check out.
+                        type: string
+                      url:
+                        description: the URL of the repository where the project is
+                          stored.
+                        type: string
                     type: object
                   health:
                     description: The configuration of Health trait
@@ -20137,6 +20397,71 @@ spec:
                           traits share this common property.
                         type: boolean
                     type: object
+                  gitops:
+                    description: The configuration of GitOps trait
+                    properties:
+                      branch:
+                        description: the git branch to check out.
+                        type: string
+                      branchPush:
+                        description: the git branch to push to. If omitted, the operator
+                          will push to a new branch named as `cicd/release-candidate-<datetime>`.
+                        type: string
+                      commit:
+                        description: the git commit (full SHA) to check out.
+                        type: string
+                      committerEmail:
+                        default: camel-k-operator@apache.org
+                        description: The email used to commit the GitOps changes (default
+                          `camel-k-operator@apache.org`).
+                        type: string
+                      committerName:
+                        default: Camel K Operator
+                        description: The name used to commit the GitOps changes (default
+                          `Camel K Operator`).
+                        type: string
+                      configuration:
+                        description: |-
+                          Legacy trait configuration parameters.
+                          Deprecated: for backward compatibility.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                      integrationDirectory:
+                        default: integrations
+                        description: The root path where to store Kustomize overlays
+                          (default `integrations`).
+                        type: string
+                      overlays:
+                        default:
+                        - dev
+                        - stag
+                        - prod
+                        description: a list of overlays to provide (default {"dev","stag","prod"}).
+                        items:
+                          type: string
+                        type: array
+                      overwriteOverlay:
+                        default: false
+                        description: a flag (default, false) to overwrite any existing
+                          overlay.
+                        type: boolean
+                      secret:
+                        description: the Kubernetes secret where the Git token is
+                          stored. The operator will pick up the first secret key only,
+                          whichever the name it is.
+                        type: string
+                      tag:
+                        description: the git tag to check out.
+                        type: string
+                      url:
+                        description: the URL of the repository where the project is
+                          stored.
+                        type: string
+                    type: object
                   health:
                     description: The configuration of Health trait
                     properties:
@@ -22292,6 +22617,71 @@ spec:
                         description: Can be used to enable or disable a trait. All
                           traits share this common property.
                         type: boolean
+                    type: object
+                  gitops:
+                    description: The configuration of GitOps trait
+                    properties:
+                      branch:
+                        description: the git branch to check out.
+                        type: string
+                      branchPush:
+                        description: the git branch to push to. If omitted, the operator
+                          will push to a new branch named as `cicd/release-candidate-<datetime>`.
+                        type: string
+                      commit:
+                        description: the git commit (full SHA) to check out.
+                        type: string
+                      committerEmail:
+                        default: camel-k-operator@apache.org
+                        description: The email used to commit the GitOps changes (default
+                          `camel-k-operator@apache.org`).
+                        type: string
+                      committerName:
+                        default: Camel K Operator
+                        description: The name used to commit the GitOps changes (default
+                          `Camel K Operator`).
+                        type: string
+                      configuration:
+                        description: |-
+                          Legacy trait configuration parameters.
+                          Deprecated: for backward compatibility.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                      integrationDirectory:
+                        default: integrations
+                        description: The root path where to store Kustomize overlays
+                          (default `integrations`).
+                        type: string
+                      overlays:
+                        default:
+                        - dev
+                        - stag
+                        - prod
+                        description: a list of overlays to provide (default {"dev","stag","prod"}).
+                        items:
+                          type: string
+                        type: array
+                      overwriteOverlay:
+                        default: false
+                        description: a flag (default, false) to overwrite any existing
+                          overlay.
+                        type: boolean
+                      secret:
+                        description: the Kubernetes secret where the Git token is
+                          stored. The operator will pick up the first secret key only,
+                          whichever the name it is.
+                        type: string
+                      tag:
+                        description: the git tag to check out.
+                        type: string
+                      url:
+                        description: the URL of the repository where the project is
+                          stored.
+                        type: string
                     type: object
                   health:
                     description: The configuration of Health trait
@@ -32695,6 +33085,71 @@ spec:
                               All traits share this common property.
                             type: boolean
                         type: object
+                      gitops:
+                        description: The configuration of GitOps trait
+                        properties:
+                          branch:
+                            description: the git branch to check out.
+                            type: string
+                          branchPush:
+                            description: the git branch to push to. If omitted, the
+                              operator will push to a new branch named as `cicd/release-candidate-<datetime>`.
+                            type: string
+                          commit:
+                            description: the git commit (full SHA) to check out.
+                            type: string
+                          committerEmail:
+                            default: camel-k-operator@apache.org
+                            description: The email used to commit the GitOps changes
+                              (default `camel-k-operator@apache.org`).
+                            type: string
+                          committerName:
+                            default: Camel K Operator
+                            description: The name used to commit the GitOps changes
+                              (default `Camel K Operator`).
+                            type: string
+                          configuration:
+                            description: |-
+                              Legacy trait configuration parameters.
+                              Deprecated: for backward compatibility.
+                            type: object
+                            x-kubernetes-preserve-unknown-fields: true
+                          enabled:
+                            description: Can be used to enable or disable a trait.
+                              All traits share this common property.
+                            type: boolean
+                          integrationDirectory:
+                            default: integrations
+                            description: The root path where to store Kustomize overlays
+                              (default `integrations`).
+                            type: string
+                          overlays:
+                            default:
+                            - dev
+                            - stag
+                            - prod
+                            description: a list of overlays to provide (default {"dev","stag","prod"}).
+                            items:
+                              type: string
+                            type: array
+                          overwriteOverlay:
+                            default: false
+                            description: a flag (default, false) to overwrite any
+                              existing overlay.
+                            type: boolean
+                          secret:
+                            description: the Kubernetes secret where the Git token
+                              is stored. The operator will pick up the first secret
+                              key only, whichever the name it is.
+                            type: string
+                          tag:
+                            description: the git tag to check out.
+                            type: string
+                          url:
+                            description: the URL of the repository where the project
+                              is stored.
+                            type: string
+                        type: object
                       health:
                         description: The configuration of Health trait
                         properties:
@@ -34788,6 +35243,71 @@ spec:
                         description: Can be used to enable or disable a trait. All
                           traits share this common property.
                         type: boolean
+                    type: object
+                  gitops:
+                    description: The configuration of GitOps trait
+                    properties:
+                      branch:
+                        description: the git branch to check out.
+                        type: string
+                      branchPush:
+                        description: the git branch to push to. If omitted, the operator
+                          will push to a new branch named as `cicd/release-candidate-<datetime>`.
+                        type: string
+                      commit:
+                        description: the git commit (full SHA) to check out.
+                        type: string
+                      committerEmail:
+                        default: camel-k-operator@apache.org
+                        description: The email used to commit the GitOps changes (default
+                          `camel-k-operator@apache.org`).
+                        type: string
+                      committerName:
+                        default: Camel K Operator
+                        description: The name used to commit the GitOps changes (default
+                          `Camel K Operator`).
+                        type: string
+                      configuration:
+                        description: |-
+                          Legacy trait configuration parameters.
+                          Deprecated: for backward compatibility.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                      integrationDirectory:
+                        default: integrations
+                        description: The root path where to store Kustomize overlays
+                          (default `integrations`).
+                        type: string
+                      overlays:
+                        default:
+                        - dev
+                        - stag
+                        - prod
+                        description: a list of overlays to provide (default {"dev","stag","prod"}).
+                        items:
+                          type: string
+                        type: array
+                      overwriteOverlay:
+                        default: false
+                        description: a flag (default, false) to overwrite any existing
+                          overlay.
+                        type: boolean
+                      secret:
+                        description: the Kubernetes secret where the Git token is
+                          stored. The operator will pick up the first secret key only,
+                          whichever the name it is.
+                        type: string
+                      tag:
+                        description: the git tag to check out.
+                        type: string
+                      url:
+                        description: the URL of the repository where the project is
+                          stored.
+                        type: string
                     type: object
                   health:
                     description: The configuration of Health trait
