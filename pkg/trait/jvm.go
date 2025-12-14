@@ -221,21 +221,19 @@ func getClasspathSet(cps string) *sets.Set {
 }
 
 func (t *jvmTrait) getIntegrationKit(e *Environment) (*v1.IntegrationKit, error) {
-	if e.IntegrationKit != nil {
-		return e.IntegrationKit, nil
-	}
+	kit := e.IntegrationKit
 
-	if e.Integration.Status.IntegrationKit != nil {
+	if kit == nil && e.Integration.Status.IntegrationKit != nil {
 		name := e.Integration.Status.IntegrationKit.Name
 		ns := e.Integration.GetIntegrationKitNamespace(e.Platform)
-		kit, err := kubernetes.GetIntegrationKit(e.Ctx, t.Client, name, ns)
+		k, err := kubernetes.GetIntegrationKit(e.Ctx, t.Client, name, ns)
 		if err != nil {
 			return nil, fmt.Errorf("unable to find integration kit %s/%s: %w", ns, name, err)
 		}
-		return kit, nil
+		kit = k
 	}
 
-	return nil, nil
+	return kit, nil
 }
 
 func (t *jvmTrait) enableDebug(e *Environment) string {
