@@ -26,12 +26,11 @@ import (
 	"regexp"
 	"strings"
 
-	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
-
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/property"
 	"github.com/apache/camel-k/v2/pkg/util/sets"
 )
@@ -53,10 +52,7 @@ func getIntegrationKit(ctx context.Context, c client.Client, integration *v1.Int
 	if integration.Status.IntegrationKit == nil {
 		return nil, nil
 	}
-	kit := v1.NewIntegrationKit(integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name)
-	err := c.Get(ctx, ctrl.ObjectKeyFromObject(kit), kit)
-
-	return kit, err
+	return kubernetes.GetIntegrationKit(ctx, c, integration.Status.IntegrationKit.Name, integration.Status.IntegrationKit.Namespace)
 }
 
 func collectConfigurationPairs(configurationType string, configurable ...v1.Configurable) []variable {

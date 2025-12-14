@@ -227,16 +227,7 @@ func (o *promoteCmdOptions) getIntegrationKit(c client.Client, ref *corev1.Objec
 	if ref == nil {
 		return nil, nil
 	}
-	ik := v1.NewIntegrationKit(ref.Namespace, ref.Name)
-	key := k8sclient.ObjectKey{
-		Name:      ref.Name,
-		Namespace: ref.Namespace,
-	}
-	if err := c.Get(o.Context, key, ik); err != nil {
-		return nil, err
-	}
-
-	return ik, nil
+	return kubernetes.GetIntegrationKit(o.Context, c, ref.Name, ref.Namespace)
 }
 
 func (o *promoteCmdOptions) editIntegration(it *v1.Integration, kit *v1.IntegrationKit) *v1.Integration {
