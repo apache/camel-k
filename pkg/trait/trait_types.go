@@ -219,10 +219,14 @@ type Environment struct {
 	// The IntegrationKits to be created for the Integration
 	IntegrationKits []v1.IntegrationKit
 	// The resources owned by the Integration that are applied to the API server
-	Resources             *kubernetes.Collection
-	PostActions           []func(*Environment) error
-	PostStepProcessors    []func(*Environment) error
-	PostProcessors        []func(*Environment) error
+	Resources *kubernetes.Collection
+	// Actions to be executed after each trait is completed for the given phase.
+	PostStepProcessors []func(*Environment) error
+	// Actions to be executed after all traits have completed for the given phase.
+	PostProcessors []func(*Environment) error
+	// Actions to be executed after all traits have completed for the given phase and Integration status set.
+	PostActions []func(*Environment) error
+	// Tasks pipeline to execute.
 	Pipeline              []v1.Task
 	ConfiguredTraits      []Trait
 	ExecutedTraits        []Trait

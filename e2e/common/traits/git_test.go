@@ -37,7 +37,7 @@ import (
 func TestGitRepository(t *testing.T) {
 	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		t.Run("Camel Quarkus", func(t *testing.T) {
+		t.Run("Camel Main from Git", func(t *testing.T) {
 			itName := "sample"
 			g.Expect(KamelRun(t, ctx, ns,
 				"--git", "https://github.com/squakez/sample.git",

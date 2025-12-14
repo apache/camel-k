@@ -3228,6 +3228,11 @@ func (in *Traits) DeepCopyInto(out *Traits) {
 		*out = new(trait.GCTrait)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.GitOps != nil {
+		in, out := &in.GitOps, &out.GitOps
+		*out = new(trait.GitOpsTrait)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Health != nil {
 		in, out := &in.Health, &out.Health
 		*out = new(trait.HealthTrait)

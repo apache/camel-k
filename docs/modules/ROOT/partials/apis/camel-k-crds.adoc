@@ -6006,6 +6006,13 @@ Deprecated: no longer in use.
 
 The configuration of GC trait
 
+|`gitops` +
+*xref:#_camel_apache_org_v1_trait_GitOpsTrait[GitOpsTrait]*
+|
+
+
+The configuration of GitOps trait
+
 |`health` +
 *xref:#_camel_apache_org_v1_trait_HealthTrait[HealthTrait]*
 |
@@ -7202,6 +7209,110 @@ The GC Trait garbage-collects all resources that are no longer necessary upon in
 
 Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`).
 Deprecated: no longer in use.
+
+
+|===
+
+[#_camel_apache_org_v1_trait_GitOpsTrait]
+=== GitOpsTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The GitOps Trait is used to configure the repository where you want to push a GitOps Kustomize overlay configuration of the Integration built.
+If the trait is enabled but no pull configuration is provided, then, the operator will use the values stored in Integration `.spec.git` field used
+to pull the project.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`url` +
+string
+|
+
+
+the URL of the repository where the project is stored.
+
+|`secret` +
+string
+|
+
+
+the Kubernetes secret where the Git token is stored. The operator will pick up the first secret key only, whichever the name it is.
+
+|`branch` +
+string
+|
+
+
+the git branch to check out.
+
+|`tag` +
+string
+|
+
+
+the git tag to check out.
+
+|`commit` +
+string
+|
+
+
+the git commit (full SHA) to check out.
+
+|`branchPush` +
+string
+|
+
+
+the git branch to push to. If omitted, the operator will push to a new branch named as `cicd/release-candidate-<datetime>`.
+
+|`overlays` +
+[]string
+|
+
+
+a list of overlays to provide (default \{"dev","stag","prod"}).
+
+|`overwriteOverlay` +
+bool
+|
+
+
+a flag (default, false) to overwrite any existing overlay.
+
+|`integrationDirectory` +
+string
+|
+
+
+The root path where to store Kustomize overlays (default `integrations`).
+
+|`committerName` +
+string
+|
+
+
+The name used to commit the GitOps changes (default `Camel K Operator`).
+
+|`committerEmail` +
+string
+|
+
+
+The email used to commit the GitOps changes (default `camel-k-operator@apache.org`).
 
 
 |===
@@ -9396,6 +9507,7 @@ The list of taints to tolerate, in the form `Key[=Value]:Effect[:Seconds]`
 * <<#_camel_apache_org_v1_trait_AffinityTrait, AffinityTrait>>
 * <<#_camel_apache_org_v1_trait_CronTrait, CronTrait>>
 * <<#_camel_apache_org_v1_trait_GCTrait, GCTrait>>
+* <<#_camel_apache_org_v1_trait_GitOpsTrait, GitOpsTrait>>
 * <<#_camel_apache_org_v1_trait_HealthTrait, HealthTrait>>
 * <<#_camel_apache_org_v1_trait_IngressTrait, IngressTrait>>
 * <<#_camel_apache_org_v1_trait_InitContainersTrait, InitContainersTrait>>

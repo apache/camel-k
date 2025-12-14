@@ -31,6 +31,7 @@ func init() {
 	AddToTraits(newEnvironmentTrait)
 	AddToTraits(newGCTrait)
 	AddToTraits(newGitTrait)
+	AddToTraits(newGitOpsTrait)
 	AddToTraits(newHealthTrait)
 	AddToTraits(newInitContainersTrait)
 	AddToTraits(NewInitTrait)
