@@ -28,7 +28,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
-	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -36,6 +35,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/envvar"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/sets"
 )
 
@@ -221,18 +221,21 @@ func getClasspathSet(cps string) *sets.Set {
 }
 
 func (t *jvmTrait) getIntegrationKit(e *Environment) (*v1.IntegrationKit, error) {
-	kit := e.IntegrationKit
-
-	if kit == nil && e.Integration.Status.IntegrationKit != nil {
-		name := e.Integration.Status.IntegrationKit.Name
-		ns := e.Integration.GetIntegrationKitNamespace(e.Platform)
-		kit = v1.NewIntegrationKit(ns, name)
-		if err := t.Client.Get(e.Ctx, ctrl.ObjectKeyFromObject(kit), kit); err != nil {
-			return nil, fmt.Errorf("unable to find integration kit %s/%s: %w", ns, name, err)
-		}
+	if e.IntegrationKit != nil {
+		return e.IntegrationKit, nil
 	}
 
-	return kit, nil
+	if e.Integration.Status.IntegrationKit != nil {
+		name := e.Integration.Status.IntegrationKit.Name
+		ns := e.Integration.GetIntegrationKitNamespace(e.Platform)
+		kit, err := kubernetes.GetIntegrationKit(e.Ctx, t.Client, name, ns)
+		if err != nil {
+			return nil, fmt.Errorf("unable to find integration kit %s/%s: %w", ns, name, err)
+		}
+		return kit, nil
+	}
+
+	return nil, nil
 }
 
 func (t *jvmTrait) enableDebug(e *Environment) string {
