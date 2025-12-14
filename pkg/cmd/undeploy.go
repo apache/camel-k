@@ -33,9 +33,9 @@ func newCmdUndeploy(rootCmdOptions *RootCmdOptions) (*cobra.Command, *undeployCm
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:     "undeploy [integration1] [integration2] ...",
-		Short:   "Undeploy one or more integrations previously deployed.",
-		Long:    `Clear the state of one or more integrations causing them to move back to a Build Complete status.`,
+		Use:     "undeploy [name1] [name2] ...",
+		Short:   "Undeploy one or more Integrations or Pipes previously deployed.",
+		Long:    `Clear the state of one or more Integrations or Pipes causing them to move back to a Build Complete status.`,
 		PreRunE: decode(&options, options.Flags),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(args); err != nil {
@@ -55,7 +55,7 @@ type undeployCmdOptions struct {
 
 func (o *undeployCmdOptions) validate(args []string) error {
 	if len(args) == 0 {
-		return errors.New("undeploy requires an Integration name argument")
+		return errors.New("undeploy requires an Integration or Pipe name argument")
 	}
 
 	return nil
