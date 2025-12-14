@@ -48,6 +48,7 @@ func TestMasterTrait(t *testing.T) {
 
 			// Run using Quarkus properties instead of deprecated trait
 			g.Expect(KamelRun(t, ctx, ns, "files/Master.java",
+				"-d", "camel:kubernetes",
 				"-p", fmt.Sprintf("quarkus.camel.cluster.kubernetes.resource-name=%s-lock", name),
 				"-p", "quarkus.camel.cluster.kubernetes.resource-type=Lease",
 				"-p", fmt.Sprintf("quarkus.camel.cluster.kubernetes.labels.\"camel.apache.org/integration\"=%s", name),
@@ -66,6 +67,7 @@ func TestMasterTrait(t *testing.T) {
 			CreateMasterRBAC(t, ctx, g, ns, nameSecond, "default")
 
 			g.Expect(KamelRun(t, ctx, ns, "files/Master.java", "--name", nameFirst,
+				"-d", "camel:kubernetes",
 				"--label", "leader-group=same",
 				"-t", "owner.target-labels=leader-group",
 				"-p", fmt.Sprintf("quarkus.camel.cluster.kubernetes.resource-name=%s", lockName),
@@ -76,6 +78,7 @@ func TestMasterTrait(t *testing.T) {
 			g.Eventually(IntegrationLogs(t, ctx, ns, nameFirst), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 			g.Expect(KamelRun(t, ctx, ns, "files/Master.java", "--name", nameSecond,
+				"-d", "camel:kubernetes",
 				"--label", "leader-group=same",
 				"-t", "owner.target-labels=leader-group",
 				"-p", fmt.Sprintf("quarkus.camel.cluster.kubernetes.resource-name=%s", lockName),
