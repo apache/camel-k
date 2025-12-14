@@ -478,8 +478,11 @@ func TestMetrics(t *testing.T) {
 		t.Run("Integration first readiness metric", func(t *testing.T) {
 			var ts1, ts2 time.Time
 
-			// The start time is taken from the Integration status initialization timestamp
+			// Use DeploymentTimestamp if available (for dry-build), else use InitializationTimestamp
 			ts1 = it.Status.InitializationTimestamp.Time
+			if it.Status.DeploymentTimestamp != nil && !it.Status.DeploymentTimestamp.IsZero() {
+				ts1 = it.Status.DeploymentTimestamp.Time
+			}
 			g.Expect(ts1).NotTo(BeZero())
 			// The end time is reported into the ready condition first truthy time
 			ts2 = it.Status.GetCondition(v1.IntegrationConditionReady).FirstTruthyTime.Time
