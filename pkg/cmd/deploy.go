@@ -33,7 +33,7 @@ func newCmdDeploy(rootCmdOptions *RootCmdOptions) (*cobra.Command, *deployCmdOpt
 	}
 	cmd := cobra.Command{
 		Use:     "deploy <name>",
-		Short:   "Deploy an Integration or Pipe that was previously built with --dont-run-after-build flag",
+		Short:   "Deploy an Integration or Pipe that was previously built",
 		PreRunE: decode(&options, options.Flags),
 		RunE:    options.run,
 	}
