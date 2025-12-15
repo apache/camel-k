@@ -3709,6 +3709,13 @@ features offered by the Integration
 
 the timestamp representing the last time when this integration was initialized.
 
+|`lastDeploymentTimestamp` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+the timestamp representing the last time when this integration was deployed.
+
 
 |===
 
