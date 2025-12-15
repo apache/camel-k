@@ -102,11 +102,17 @@ func TestJVMTrait(t *testing.T) {
 			err = CreatePlainTextSecret(t, ctx, ns, "test-ca-cert", caCertData)
 			require.NoError(t, err)
 
+			passwordData := make(map[string]string)
+			passwordData["password"] = "test-password-123"
+			err = CreatePlainTextSecret(t, ctx, ns, "test-ca-password", passwordData)
+			require.NoError(t, err)
+
 			name := RandomizedSuffixName("cacert")
 			g.Expect(KamelRun(t, ctx, ns,
 				"./files/Java.java",
 				"--name", name,
 				"-t", "jvm.ca-cert=secret:test-ca-cert",
+				"-t", "jvm.ca-cert-password=secret:test-ca-password",
 			).Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))

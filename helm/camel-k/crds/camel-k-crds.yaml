@@ -4666,6 +4666,12 @@ spec:
                           The path where the generated truststore will be mounted
                           Default: "/etc/camel/conf.d/_truststore"
                         type: string
+                      caCertPassword:
+                        description: |-
+                          Required when caCert is set. A secret reference containing the truststore password.
+                          If the secret key is not specified, "password" is used as the default key.
+                          Example: "secret:my-truststore-password" or "secret:my-truststore-password/mykey"
+                        type: string
                       classpath:
                         description: Additional JVM classpath (use `Linux` classpath
                           separator)
@@ -7004,6 +7010,12 @@ spec:
                           The path where the generated truststore will be mounted
                           Default: "/etc/camel/conf.d/_truststore"
                         type: string
+                      caCertPassword:
+                        description: |-
+                          Required when caCert is set. A secret reference containing the truststore password.
+                          If the secret key is not specified, "password" is used as the default key.
+                          Example: "secret:my-truststore-password" or "secret:my-truststore-password/mykey"
+                        type: string
                       classpath:
                         description: Additional JVM classpath (use `Linux` classpath
                           separator)
@@ -9244,6 +9256,12 @@ spec:
                           The path where the generated truststore will be mounted
                           Default: "/etc/camel/conf.d/_truststore"
                         type: string
+                      caCertPassword:
+                        description: |-
+                          Required when caCert is set. A secret reference containing the truststore password.
+                          If the secret key is not specified, "password" is used as the default key.
+                          Example: "secret:my-truststore-password" or "secret:my-truststore-password/mykey"
+                        type: string
                       classpath:
                         description: Additional JVM classpath (use `Linux` classpath
                           separator)
@@ -11460,6 +11478,12 @@ spec:
                         description: |-
                           The path where the generated truststore will be mounted
                           Default: "/etc/camel/conf.d/_truststore"
+                        type: string
+                      caCertPassword:
+                        description: |-
+                          Required when caCert is set. A secret reference containing the truststore password.
+                          If the secret key is not specified, "password" is used as the default key.
+                          Example: "secret:my-truststore-password" or "secret:my-truststore-password/mykey"
                         type: string
                       classpath:
                         description: Additional JVM classpath (use `Linux` classpath
@@ -20512,6 +20536,12 @@ spec:
                           The path where the generated truststore will be mounted
                           Default: "/etc/camel/conf.d/_truststore"
                         type: string
+                      caCertPassword:
+                        description: |-
+                          Required when caCert is set. A secret reference containing the truststore password.
+                          If the secret key is not specified, "password" is used as the default key.
+                          Example: "secret:my-truststore-password" or "secret:my-truststore-password/mykey"
+                        type: string
                       classpath:
                         description: Additional JVM classpath (use `Linux` classpath
                           separator)
@@ -22677,6 +22707,12 @@ spec:
                         description: |-
                           The path where the generated truststore will be mounted
                           Default: "/etc/camel/conf.d/_truststore"
+                        type: string
+                      caCertPassword:
+                        description: |-
+                          Required when caCert is set. A secret reference containing the truststore password.
+                          If the secret key is not specified, "password" is used as the default key.
+                          Example: "secret:my-truststore-password" or "secret:my-truststore-password/mykey"
                         type: string
                       classpath:
                         description: Additional JVM classpath (use `Linux` classpath
@@ -33091,6 +33127,12 @@ spec:
                               The path where the generated truststore will be mounted
                               Default: "/etc/camel/conf.d/_truststore"
                             type: string
+                          caCertPassword:
+                            description: |-
+                              Required when caCert is set. A secret reference containing the truststore password.
+                              If the secret key is not specified, "password" is used as the default key.
+                              Example: "secret:my-truststore-password" or "secret:my-truststore-password/mykey"
+                            type: string
                           classpath:
                             description: Additional JVM classpath (use `Linux` classpath
                               separator)
@@ -35193,6 +35235,12 @@ spec:
                         description: |-
                           The path where the generated truststore will be mounted
                           Default: "/etc/camel/conf.d/_truststore"
+                        type: string
+                      caCertPassword:
+                        description: |-
+                          Required when caCert is set. A secret reference containing the truststore password.
+                          If the secret key is not specified, "password" is used as the default key.
+                          Example: "secret:my-truststore-password" or "secret:my-truststore-password/mykey"
                         type: string
                       classpath:
                         description: Additional JVM classpath (use `Linux` classpath
