@@ -153,7 +153,7 @@ func (t *mountTrait) configureVolumesAndMounts(
 	for _, c := range t.Configs {
 		if conf, parseErr := utilResource.ParseConfig(c); parseErr == nil {
 			// Let Camel parse these resources as properties
-			destFilePath := t.mountResource(vols, mnts, conf)
+			destFilePath := t.mountResource(vols, mnts, icnts, conf)
 			e.appendCloudPropertiesLocation(destFilePath)
 		} else {
 			return parseErr
@@ -161,7 +161,7 @@ func (t *mountTrait) configureVolumesAndMounts(
 	}
 	for _, r := range t.Resources {
 		if res, parseErr := utilResource.ParseResource(r); parseErr == nil {
-			t.mountResource(vols, mnts, res)
+			t.mountResource(vols, mnts, icnts, res)
 		} else {
 			return parseErr
 		}
@@ -335,7 +335,7 @@ func (t *mountTrait) configureCamelVolumesAndMounts(e *Environment, vols *[]core
 }
 
 // mountResource add the resource to volumes and mounts and return the final path where the resource is mounted.
-func (t *mountTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.VolumeMount, conf *utilResource.Config) string {
+func (t *mountTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.VolumeMount, icnts *[]corev1.Container, conf *utilResource.Config) string {
 	refName := sanitizeVolumeName(conf.Name(), vols)
 	dstDir := conf.DestinationPath()
 	dstFile := ""
@@ -354,6 +354,10 @@ func (t *mountTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.VolumeM
 
 	*vols = append(*vols, *vol)
 	*mnts = append(*mnts, *mnt)
+
+	for i := range *icnts {
+		(*icnts)[i].VolumeMounts = append((*icnts)[i].VolumeMounts, *mnt)
+	}
 
 	return mnt.MountPath
 }

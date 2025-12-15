@@ -67,5 +67,36 @@ func TestInitContainerTrait(t *testing.T) {
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("helloSidecar10"))
 		})
+
+		t.Run("Init container reads mounted configs and resources", func(t *testing.T) {
+
+			configData := make(map[string]string)
+			configData["config.txt"] = "fromConfigMap"
+			g.Expect(CreatePlainTextConfigmap(t, ctx, ns, "init-cm", configData)).To(Succeed())
+
+			secretData := make(map[string]string)
+			secretData["secret.txt"] = "fromSecret"
+			g.Expect(CreatePlainTextSecret(t, ctx, ns, "init-secret", secretData)).To(Succeed())
+
+			resourceData := make(map[string]string)
+			resourceData["resource.txt"] = "fromResource"
+			g.Expect(CreatePlainTextConfigmap(t, ctx, ns, "init-resource", resourceData)).To(Succeed())
+
+			name := RandomizedSuffixName("init-all")
+			g.Expect(KamelRun(t, ctx, ns,
+				"files/init-container.yaml",
+				"-t", "mount.empty-dirs=common:/tmp",
+				"-t", "mount.configs=configmap:init-cm",
+				"-t", "mount.configs=secret:init-secret",
+				"-t", "mount.resources=configmap:init-resource",
+				"-t", "init-containers.init-tasks=init;alpine;/bin/sh -c \"cat /etc/camel/conf.d/_configmaps/init-cm/config.txt > /tmp/init && echo -n ' ' >> /tmp/init && cat /etc/camel/conf.d/_secrets/init-secret/secret.txt >> /tmp/init && echo -n ' ' >> /tmp/init && cat /etc/camel/resources.d/_configmaps/init-resource/resource.txt >> /tmp/init\"",
+				"--name", name,
+			).Execute()).To(Succeed())
+
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("fromConfigMap"))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("fromSecret"))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("fromResource"))
+		})
 	})
 }

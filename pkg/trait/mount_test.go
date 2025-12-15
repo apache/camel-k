@@ -581,11 +581,29 @@ func TestMountVolumesInitContainers(t *testing.T) {
 	assert.NotNil(t, s)
 	spec := s.Spec.Template.Spec
 
-	assert.Len(t, spec.InitContainers[0].VolumeMounts, 1)
+	assert.Len(t, spec.InitContainers[0].VolumeMounts, 3)
 
 	assert.Condition(t, func() bool {
 		for _, v := range spec.InitContainers[0].VolumeMounts {
 			if v.Name == "my-pvc" {
+				return true
+			}
+		}
+		return false
+	})
+
+	assert.Condition(t, func() bool {
+		for _, v := range spec.InitContainers[0].VolumeMounts {
+			if v.Name == "my-cm" {
+				return true
+			}
+		}
+		return false
+	})
+
+	assert.Condition(t, func() bool {
+		for _, v := range spec.InitContainers[0].VolumeMounts {
+			if v.Name == "my-secret" {
 				return true
 			}
 		}
