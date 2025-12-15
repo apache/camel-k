@@ -104,7 +104,6 @@ func TestPipeBuildDontRun(t *testing.T) {
 				WithTransform(PipeConditionReason, Equal("BuildComplete")))
 		})
 		t.Run("deploy the pipe", func(t *testing.T) {
-			t.Skip("Skipping: deploy/undeploy pipe lifecycle needs further investigation")
 			g.Expect(Kamel(t, ctx, "deploy", name, "-n", ns).Execute()).To(Succeed())
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
 			g.Eventually(PipePhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.PipePhaseReady))
@@ -115,12 +114,44 @@ func TestPipeBuildDontRun(t *testing.T) {
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutMedium).Should(ContainSubstring("HelloPipe"))
 		})
 		t.Run("undeploy the pipe", func(t *testing.T) {
-			t.Skip("Skipping: deploy/undeploy pipe lifecycle needs further investigation")
 			g.Expect(Kamel(t, ctx, "undeploy", name, "-n", ns).Execute()).To(Succeed())
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseBuildComplete))
 			g.Eventually(PipePhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.PipePhaseBuildComplete))
 			g.Eventually(IntegrationPodsNumbers(t, ctx, ns, name)).Should(Equal(ptr.To(int32(0))))
 			g.Eventually(Deployment(t, ctx, ns, name)).Should(BeNil())
+		})
+	})
+}
+
+func TestHasNeverDeployedLogic(t *testing.T) {
+	t.Parallel()
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		// Critical edge case: deployment with trait config (e.g. replicas=0)
+		t.Run("deployment with trait config sets deployment timestamp", func(t *testing.T) {
+			deployedName := RandomizedSuffixName("deployed")
+			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml",
+				"--name", deployedName,
+				"--trait", "deployment.replicas=0",
+			).Execute()).To(Succeed())
+
+			g.Eventually(func() v1.IntegrationPhase {
+				it := Integration(t, ctx, ns, deployedName)()
+				if it == nil {
+					return ""
+				}
+				return it.Status.Phase
+			}, TestTimeoutMedium).Should(Or(
+				Equal(v1.IntegrationPhaseDeploying),
+				Equal(v1.IntegrationPhaseRunning),
+			))
+
+			it := Integration(t, ctx, ns, deployedName)()
+			g.Expect(it).NotTo(BeNil())
+			g.Expect(it.Status.DeploymentTimestamp).NotTo(BeNil(),
+				"ANY deployment (regardless of replica count) MUST set DeploymentTimestamp - hasNeverDeployed returns false")
+
+			t.Logf("Integration deployed with spec.replicas=%v, DeploymentTimestamp=%v",
+				it.Spec.Replicas, it.Status.DeploymentTimestamp)
 		})
 	})
 }
