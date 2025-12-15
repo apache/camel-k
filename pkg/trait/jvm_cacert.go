@@ -21,13 +21,17 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	corev1 "k8s.io/api/core/v1"
 )
 
 const (
-	defaultCACertMountPath = "/etc/camel/conf.d/_truststore"
-	caCertVolumeName       = "jvm-truststore"
-	caCertSecretVolumeName = "ca-cert-secret" //nolint:gosec // G101: not a credential, just a volume name
-	trustStoreName         = "truststore.jks"
+	defaultCACertMountPath      = "/etc/camel/conf.d/_truststore"
+	caCertVolumeName            = "jvm-truststore"
+	caCertSecretVolumeName      = "ca-cert-secret" //nolint:gosec // G101: not a credential, just a volume name
+	trustStoreName              = "truststore.jks"
+	truststorePasswordEnvVar    = "TRUSTSTORE_PASSWORD"
+	truststorePasswordSecretKey = "password"
 )
 
 func (t *jvmTrait) hasCACert() bool {
@@ -66,6 +70,34 @@ func (t *jvmTrait) getTrustStorePath() string {
 	return t.getCACertMountPath() + "/" + trustStoreName
 }
 
-func getTrustStorePassword(integrationName string) string {
-	return "camelk-" + integrationName
+// getTrustStorePasswordSecretRef parses and returns the user-provided password secret reference.
+func (t *jvmTrait) getTrustStorePasswordSecretRef() (string, string, error) {
+	if t.CACertPassword == "" {
+		return "", "", errors.New("ca-cert-password is required when ca-cert is set")
+	}
+
+	secretName, secretKey, err := parseSecretRef(t.CACertPassword)
+	if err != nil {
+		return "", "", fmt.Errorf("invalid ca-cert-password reference: %w", err)
+	}
+	if secretKey == "" {
+		secretKey = truststorePasswordSecretKey
+	}
+
+	return secretName, secretKey, nil
+}
+
+// getTrustStorePasswordEnvVar returns the environment variable for truststore password injection.
+func getTrustStorePasswordEnvVar(secretName, secretKey string) corev1.EnvVar {
+	return corev1.EnvVar{
+		Name: truststorePasswordEnvVar,
+		ValueFrom: &corev1.EnvVarSource{
+			SecretKeyRef: &corev1.SecretKeySelector{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: secretName,
+				},
+				Key: secretKey,
+			},
+		},
+	}
 }

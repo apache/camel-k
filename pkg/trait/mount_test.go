@@ -729,7 +729,8 @@ func TestCACertVolume(t *testing.T) {
 
 	environment.Integration.Spec.Traits.Mount = &traitv1.MountTrait{}
 	environment.Integration.Spec.Traits.JVM = &traitv1.JVMTrait{
-		CACert: "secret:my-ca-secret",
+		CACert:         "secret:my-ca-secret",
+		CACertPassword: "secret:my-ca-password",
 	}
 	environment.Platform.ResyncStatusFullConfig()
 	conditions, traits, err := traitCatalog.apply(environment)

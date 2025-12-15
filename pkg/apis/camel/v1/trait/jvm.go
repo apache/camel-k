@@ -48,4 +48,8 @@ type JVMTrait struct {
 	// The path where the generated truststore will be mounted
 	// Default: "/etc/camel/conf.d/_truststore"
 	CACertMountPath string `json:"caCertMountPath,omitempty" property:"ca-cert-mount-path"`
+	// Required when caCert is set. A secret reference containing the truststore password.
+	// If the secret key is not specified, "password" is used as the default key.
+	// Example: "secret:my-truststore-password" or "secret:my-truststore-password/mykey"
+	CACertPassword string `json:"caCertPassword,omitempty" property:"ca-cert-password"`
 }

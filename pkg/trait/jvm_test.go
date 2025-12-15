@@ -720,7 +720,7 @@ func TestApplyJvmTraitAgentFail(t *testing.T) {
 	assert.Contains(t, err.Error(), "could not parse JVM agent")
 }
 
-func TestApplyJvmTraitWithCACert(t *testing.T) {
+func TestApplyJvmTraitWithCACertMissingPassword(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
 	trait.CACert = "secret:my-ca-secret"
 
@@ -745,11 +745,54 @@ func TestApplyJvmTraitWithCACert(t *testing.T) {
 	assert.Nil(t, condition)
 
 	err = trait.Apply(environment)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "ca-cert-password is required")
+}
+
+func TestApplyJvmTraitWithCACert(t *testing.T) {
+	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+	trait.CACert = "secret:my-ca-secret"
+	trait.CACertPassword = "secret:my-truststore-password"
+
+	d := appsv1.Deployment{
+		Spec: appsv1.DeploymentSpec{
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name: defaultContainerName,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	environment.Resources.Add(&d)
+	configure, condition, err := trait.Configure(environment)
+	require.NoError(t, err)
+	assert.True(t, configure)
+	assert.Nil(t, condition)
+
+	err = trait.Apply(environment)
 	require.NoError(t, err)
 
-	// JVM trait now only adds JVM args for truststore
 	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Args, "-Djavax.net.ssl.trustStore=/etc/camel/conf.d/_truststore/truststore.jks")
-	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Args, "-Djavax.net.ssl.trustStorePassword=camelk-my-it")
+	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Args, "-Djavax.net.ssl.trustStorePassword=$(TRUSTSTORE_PASSWORD)")
+
+	// Verify TRUSTSTORE_PASSWORD env var is injected from user-provided secret
+	var foundEnvVar bool
+	for _, env := range d.Spec.Template.Spec.Containers[0].Env {
+		if env.Name == "TRUSTSTORE_PASSWORD" {
+			foundEnvVar = true
+			assert.NotNil(t, env.ValueFrom)
+			assert.NotNil(t, env.ValueFrom.SecretKeyRef)
+			assert.Equal(t, "my-truststore-password", env.ValueFrom.SecretKeyRef.Name)
+			assert.Equal(t, "password", env.ValueFrom.SecretKeyRef.Key)
+			break
+		}
+	}
+	assert.True(t, foundEnvVar, "TRUSTSTORE_PASSWORD env var should be injected")
 }
 
 func TestParseSecretRef(t *testing.T) {
@@ -770,4 +813,56 @@ func TestParseSecretRef(t *testing.T) {
 	_, _, err = parseSecretRef("secret:")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "secret name is empty")
+}
+
+func TestApplyJvmTraitWithCACertUserProvidedPassword(t *testing.T) {
+	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+	trait.CACert = "secret:my-ca-secret"
+	trait.CACertPassword = "secret:my-custom-password/mykey"
+
+	d := appsv1.Deployment{
+		Spec: appsv1.DeploymentSpec{
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name: defaultContainerName,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	environment.Resources.Add(&d)
+	configure, condition, err := trait.Configure(environment)
+	require.NoError(t, err)
+	assert.True(t, configure)
+	assert.Nil(t, condition)
+
+	err = trait.Apply(environment)
+	require.NoError(t, err)
+
+	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Args, "-Djavax.net.ssl.trustStorePassword=$(TRUSTSTORE_PASSWORD)")
+
+	var foundEnvVar bool
+	for _, env := range d.Spec.Template.Spec.Containers[0].Env {
+		if env.Name == "TRUSTSTORE_PASSWORD" {
+			foundEnvVar = true
+			assert.NotNil(t, env.ValueFrom)
+			assert.NotNil(t, env.ValueFrom.SecretKeyRef)
+			assert.Equal(t, "my-custom-password", env.ValueFrom.SecretKeyRef.Name)
+			assert.Equal(t, "mykey", env.ValueFrom.SecretKeyRef.Key)
+			break
+		}
+	}
+	assert.True(t, foundEnvVar, "TRUSTSTORE_PASSWORD env var should be injected")
+
+	var foundAutoSecret bool
+	environment.Resources.VisitSecret(func(secret *corev1.Secret) {
+		if secret.Name == "my-it-truststore-password" {
+			foundAutoSecret = true
+		}
+	})
+	assert.False(t, foundAutoSecret, "Auto-generated password secret should NOT be created when user provides one")
 }
