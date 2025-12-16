@@ -5,7 +5,7 @@
 package trait
 
 import (
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
@@ -731,17 +731,17 @@ func (in *KedaTrait) DeepCopyInto(out *KedaTrait) {
 		*out = new(int32)
 		**out = **in
 	}
-	if in.Auto != nil {
-		in, out := &in.Auto, &out.Auto
-		*out = new(bool)
-		**out = **in
-	}
 	if in.Triggers != nil {
 		in, out := &in.Triggers, &out.Triggers
 		*out = make([]KedaTrigger, len(*in))
 		for i := range *in {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
+	}
+	if in.Auto != nil {
+		in, out := &in.Auto, &out.Auto
+		*out = new(bool)
+		**out = **in
 	}
 	if in.AutoMetadata != nil {
 		in, out := &in.AutoMetadata, &out.AutoMetadata

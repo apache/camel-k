@@ -74,7 +74,7 @@ Default: "/etc/camel/conf.d/_truststore"
 
 | jvm.ca-cert-password
 | string
-| **Required when ca-cert is set.** A secret reference containing the truststore password.
+| Required when caCert is set. A secret reference containing the truststore password.
 If the secret key is not specified, "password" is used as the default key.
 Example: "secret:my-truststore-password" or "secret:my-truststore-password/mykey"
 
@@ -151,5 +151,3 @@ This will automatically:
 4. Inject the truststore password securely as an environment variable from your secret
 
 NOTE: The `ca-cert-password` option is **required** when using `ca-cert`. The password is never exposed in command-line arguments - it is injected as an environment variable from the secret.
-
-

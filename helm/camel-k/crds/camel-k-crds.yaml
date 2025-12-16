@@ -4808,11 +4808,8 @@ spec:
                     description: The configuration of Keda trait
                     properties:
                       auto:
-                        description: |-
-                          Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
-                          to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options
-                          and optionally a mapping of secrets, used by Keda operator to poll resources according to the autoscaler type.
-                          Automatically discover KEDA triggers from Camel component URIs.
+                        description: Automatically discover KEDA triggers from Camel
+                          component URIs.
                         type: boolean
                       autoMetadata:
                         additionalProperties:
@@ -4856,6 +4853,10 @@ spec:
                         format: int32
                         type: integer
                       triggers:
+                        description: |-
+                          Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
+                          to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options
+                          and optionally a mapping of secrets, used by Keda operator to poll resources according to the autoscaler type.
                         items:
                           properties:
                             metadata:
@@ -7229,11 +7230,8 @@ spec:
                     description: The configuration of Keda trait
                     properties:
                       auto:
-                        description: |-
-                          Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
-                          to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options
-                          and optionally a mapping of secrets, used by Keda operator to poll resources according to the autoscaler type.
-                          Automatically discover KEDA triggers from Camel component URIs.
+                        description: Automatically discover KEDA triggers from Camel
+                          component URIs.
                         type: boolean
                       autoMetadata:
                         additionalProperties:
@@ -7277,6 +7275,10 @@ spec:
                         format: int32
                         type: integer
                       triggers:
+                        description: |-
+                          Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
+                          to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options
+                          and optionally a mapping of secrets, used by Keda operator to poll resources according to the autoscaler type.
                         items:
                           properties:
                             metadata:
@@ -9552,11 +9554,8 @@ spec:
                     description: The configuration of Keda trait
                     properties:
                       auto:
-                        description: |-
-                          Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
-                          to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options
-                          and optionally a mapping of secrets, used by Keda operator to poll resources according to the autoscaler type.
-                          Automatically discover KEDA triggers from Camel component URIs.
+                        description: Automatically discover KEDA triggers from Camel
+                          component URIs.
                         type: boolean
                       autoMetadata:
                         additionalProperties:
@@ -9600,6 +9599,10 @@ spec:
                         format: int32
                         type: integer
                       triggers:
+                        description: |-
+                          Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
+                          to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options
+                          and optionally a mapping of secrets, used by Keda operator to poll resources according to the autoscaler type.
                         items:
                           properties:
                             metadata:
@@ -11852,11 +11855,8 @@ spec:
                     description: The configuration of Keda trait
                     properties:
                       auto:
-                        description: |-
-                          Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
-                          to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options
-                          and optionally a mapping of secrets, used by Keda operator to poll resources according to the autoscaler type.
-                          Automatically discover KEDA triggers from Camel component URIs.
+                        description: Automatically discover KEDA triggers from Camel
+                          component URIs.
                         type: boolean
                       autoMetadata:
                         additionalProperties:
@@ -11900,6 +11900,10 @@ spec:
                         format: int32
                         type: integer
                       triggers:
+                        description: |-
+                          Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
+                          to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options
+                          and optionally a mapping of secrets, used by Keda operator to poll resources according to the autoscaler type.
                         items:
                           properties:
                             metadata:
@@ -20986,11 +20990,8 @@ spec:
                     description: The configuration of Keda trait
                     properties:
                       auto:
-                        description: |-
-                          Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
-                          to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options
-                          and optionally a mapping of secrets, used by Keda operator to poll resources according to the autoscaler type.
-                          Automatically discover KEDA triggers from Camel component URIs.
+                        description: Automatically discover KEDA triggers from Camel
+                          component URIs.
                         type: boolean
                       autoMetadata:
                         additionalProperties:
@@ -21034,6 +21035,10 @@ spec:
                         format: int32
                         type: integer
                       triggers:
+                        description: |-
+                          Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
+                          to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options
+                          and optionally a mapping of secrets, used by Keda operator to poll resources according to the autoscaler type.
                         items:
                           properties:
                             metadata:
@@ -23240,11 +23245,8 @@ spec:
                     description: The configuration of Keda trait
                     properties:
                       auto:
-                        description: |-
-                          Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
-                          to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options
-                          and optionally a mapping of secrets, used by Keda operator to poll resources according to the autoscaler type.
-                          Automatically discover KEDA triggers from Camel component URIs.
+                        description: Automatically discover KEDA triggers from Camel
+                          component URIs.
                         type: boolean
                       autoMetadata:
                         additionalProperties:
@@ -23288,6 +23290,10 @@ spec:
                         format: int32
                         type: integer
                       triggers:
+                        description: |-
+                          Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
+                          to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options
+                          and optionally a mapping of secrets, used by Keda operator to poll resources according to the autoscaler type.
                         items:
                           properties:
                             metadata:
@@ -33736,11 +33742,8 @@ spec:
                         description: The configuration of Keda trait
                         properties:
                           auto:
-                            description: |-
-                              Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
-                              to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options
-                              and optionally a mapping of secrets, used by Keda operator to poll resources according to the autoscaler type.
-                              Automatically discover KEDA triggers from Camel component URIs.
+                            description: Automatically discover KEDA triggers from
+                              Camel component URIs.
                             type: boolean
                           autoMetadata:
                             additionalProperties:
@@ -33785,6 +33788,10 @@ spec:
                             format: int32
                             type: integer
                           triggers:
+                            description: |-
+                              Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
+                              to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options
+                              and optionally a mapping of secrets, used by Keda operator to poll resources according to the autoscaler type.
                             items:
                               properties:
                                 metadata:
@@ -35922,11 +35929,8 @@ spec:
                     description: The configuration of Keda trait
                     properties:
                       auto:
-                        description: |-
-                          Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
-                          to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options
-                          and optionally a mapping of secrets, used by Keda operator to poll resources according to the autoscaler type.
-                          Automatically discover KEDA triggers from Camel component URIs.
+                        description: Automatically discover KEDA triggers from Camel
+                          component URIs.
                         type: boolean
                       autoMetadata:
                         additionalProperties:
@@ -35970,6 +35974,10 @@ spec:
                         format: int32
                         type: integer
                       triggers:
+                        description: |-
+                          Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
+                          to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options
+                          and optionally a mapping of secrets, used by Keda operator to poll resources according to the autoscaler type.
                         items:
                           properties:
                             metadata:

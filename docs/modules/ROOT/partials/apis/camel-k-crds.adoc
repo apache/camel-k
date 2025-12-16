@@ -7812,6 +7812,15 @@ string
 The path where the generated truststore will be mounted
 Default: "/etc/camel/conf.d/_truststore"
 
+|`caCertPassword` +
+string
+|
+
+
+Required when caCert is set. A secret reference containing the truststore password.
+If the secret key is not specified, "password" is used as the default key.
+Example: "secret:my-truststore-password" or "secret:my-truststore-password/mykey"
+
 
 |===
 
@@ -8066,22 +8075,21 @@ int32
 
 Maximum number of replicas.
 
-|`auto` +
-bool
+|`triggers` +
+*xref:#_camel_apache_org_v1_trait_KedaTrigger[[\]KedaTrigger]*
 |
 
 
 Definition of triggers according to the KEDA format. Each trigger must contain `type` field corresponding
 to the name of a KEDA autoscaler and a key/value map named `metadata` containing specific trigger options
 and optionally a mapping of secrets, used by Keda operator to poll resources according to the autoscaler type.
-Automatically discover KEDA triggers from Camel component URIs.
 
-|`triggers` +
-*xref:#_camel_apache_org_v1_trait_KedaTrigger[[\]KedaTrigger]*
+|`auto` +
+bool
 |
 
 
-
+Automatically discover KEDA triggers from Camel component URIs.
 
 |`autoMetadata` +
 map[string]map[string]string
