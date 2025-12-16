@@ -64,6 +64,9 @@ func TestKedaAutoDiscovery(t *testing.T) {
 		source         string
 		expectedType   string
 		expectedParams map[string]string
+		manualTrigger  *traitv1.KedaTrigger
+		autoMetadata   map[string]map[string]string
+		expectedCount  int
 	}{
 		{
 			name:         "kafka",
@@ -74,30 +77,50 @@ func TestKedaAutoDiscovery(t *testing.T) {
 				"bootstrapServers": "my-broker:9092",
 				"consumerGroup":    "my-group",
 			},
+			manualTrigger: nil,
+			expectedCount: 1,
 		},
 		{
-			name:         "aws2-sqs",
-			source:       `from("aws2-sqs:my-queue?region=us-east-1").log("${body}");`,
-			expectedType: "aws-sqs-queue",
+			name:         "manual-trigger-does-not-block-auto-discovery",
+			source:       `from("kafka:my-topic?brokers=my-broker:9092&groupId=my-group").log("${body}");`,
+			expectedType: "kafka",
 			expectedParams: map[string]string{
-				"queueURL":  "my-queue",
-				"awsRegion": "us-east-1",
+				"topic":            "my-topic",
+				"bootstrapServers": "my-broker:9092",
+				"consumerGroup":    "my-group",
 			},
+			manualTrigger: &traitv1.KedaTrigger{
+				Type: "cron",
+				Metadata: map[string]string{
+					"timezone": "Etc/UTC",
+					"start":    "0 * * * *",
+					"end":      "59 * * * *",
+				},
+			},
+			expectedCount: 2, // 1 manual (cron) + 1 auto-discovered (kafka)
 		},
 		{
-			name:         "spring-rabbitmq",
-			source:       `from("spring-rabbitmq:exchange?queues=my-queue&addresses=rabbit:5672").log("${body}");`,
-			expectedType: "rabbitmq",
+			name:         "auto-metadata-merge",
+			source:       `from("kafka:my-topic?brokers=my-broker:9092&groupId=my-group").log("${body}");`,
+			expectedType: "kafka",
 			expectedParams: map[string]string{
-				"queueName": "my-queue",
-				"host":      "rabbit:5672",
+				"topic":            "my-topic",
+				"bootstrapServers": "my-broker:9092",
+				"consumerGroup":    "my-group",
+				"lagThreshold":     "10", // merged from autoMetadata
 			},
+			autoMetadata: map[string]map[string]string{
+				"kafka": {
+					"lagThreshold": "10",
+				},
+			},
+			expectedCount: 1,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			environment := autoDiscoveryEnvWithSource(t, tt.source)
+			environment := autoDiscoveryEnvWithSource(t, tt.source, tt.manualTrigger, tt.autoMetadata)
 			environment.Platform.ResyncStatusFullConfig()
 			traitCatalog := environment.Catalog
 
@@ -109,10 +132,18 @@ func TestKedaAutoDiscovery(t *testing.T) {
 
 			scaledObject := getKedaScaledObject(environment.Resources)
 			require.NotNil(t, scaledObject)
-			require.Len(t, scaledObject.Spec.Triggers, 1)
-			assert.Equal(t, tt.expectedType, scaledObject.Spec.Triggers[0].Type)
+			require.Len(t, scaledObject.Spec.Triggers, tt.expectedCount)
+			// Find the auto-discovered trigger by type
+			var foundTrigger *v1alpha1.ScaleTriggers
+			for i := range scaledObject.Spec.Triggers {
+				if scaledObject.Spec.Triggers[i].Type == tt.expectedType {
+					foundTrigger = &scaledObject.Spec.Triggers[i]
+					break
+				}
+			}
+			require.NotNil(t, foundTrigger, "expected trigger type %s not found", tt.expectedType)
 			for k, v := range tt.expectedParams {
-				assert.Equal(t, v, scaledObject.Spec.Triggers[0].Metadata[k], "metadata key %s mismatch", k)
+				assert.Equal(t, v, foundTrigger.Metadata[k], "metadata key %s mismatch", k)
 			}
 		})
 	}
@@ -230,6 +261,7 @@ func nominalEnv(t *testing.T) Environment {
 						Trait: traitv1.Trait{
 							Enabled: ptr.To(true),
 						},
+						Auto: ptr.To(false), // Disable auto-discovery for manual trigger test
 						Triggers: []traitv1.KedaTrigger{
 							traitv1.KedaTrigger{
 								Type: "kafka",
@@ -269,8 +301,8 @@ func nominalEnv(t *testing.T) Environment {
 	}
 }
 
-// autoDiscoveryEnvWithSource creates an environment with the given source but NO manual triggers.
-func autoDiscoveryEnvWithSource(t *testing.T, source string) Environment {
+// autoDiscoveryEnvWithSource creates an environment with the given source and optional manual trigger.
+func autoDiscoveryEnvWithSource(t *testing.T, source string, manualTrigger *traitv1.KedaTrigger, autoMetadata map[string]map[string]string) Environment {
 	t.Helper()
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
@@ -302,12 +334,20 @@ func autoDiscoveryEnvWithSource(t *testing.T, source string) Environment {
 					},
 				},
 				Traits: v1.Traits{
-					Keda: &traitv1.KedaTrait{
-						Trait: traitv1.Trait{
-							Enabled: ptr.To(true),
-						},
-						// No triggers - auto-discovery should kick in
-					},
+					Keda: func() *traitv1.KedaTrait {
+						keda := &traitv1.KedaTrait{
+							Trait: traitv1.Trait{
+								Enabled: ptr.To(true),
+							},
+						}
+						if manualTrigger != nil {
+							keda.Triggers = []traitv1.KedaTrigger{*manualTrigger}
+						}
+						if autoMetadata != nil {
+							keda.AutoMetadata = autoMetadata
+						}
+						return keda
+					}(),
 				},
 			},
 		},

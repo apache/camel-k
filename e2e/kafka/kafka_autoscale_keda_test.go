@@ -77,7 +77,7 @@ func TestKafkaKedaAutoscale(t *testing.T) {
 func TestKafkaKedaAutoDiscovery(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		t.Run("Auto-discovery Kafka", func(t *testing.T) {
-			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/keda-kafka-auto-discovery.yaml"))
+			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/keda-it-kafkatopic-to-log-auto.yaml"))
 			ns := "kafka"
 			integrationName := "keda-kafka-auto-discovery"
 
@@ -93,6 +93,65 @@ func TestKafkaKedaAutoDiscovery(t *testing.T) {
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["topic"]).To(Equal("my-topic"))
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["bootstrapServers"]).To(Equal("my-cluster-kafka-bootstrap.kafka.svc:9092"))
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["consumerGroup"]).To(Equal("auto-group"))
+
+			g.Expect(Kamel(t, ctx, "delete", integrationName, "-n", ns).Execute()).To(Succeed())
+		})
+	})
+}
+
+func TestKafkaKedaAutoDiscoveryWithManualTrigger(t *testing.T) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		t.Run("Auto-discovery with manual trigger (Case 2)", func(t *testing.T) {
+			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/keda-kafka-auto-discovery-with-manual.yaml"))
+			ns := "kafka"
+			integrationName := "keda-kafka-auto-discovery-with-manual"
+
+			g.Eventually(ScaledObject(t, ctx, ns, integrationName), TestTimeoutMedium).
+				ShouldNot(BeNil())
+
+			scaledObj := ScaledObject(t, ctx, ns, integrationName)()
+			g.Expect(scaledObj).NotTo(BeNil())
+			g.Expect(scaledObj.Spec.Triggers).To(HaveLen(2))
+
+			var kafkaTrigger, cronTrigger interface{}
+			for _, trigger := range scaledObj.Spec.Triggers {
+				if trigger.Type == "kafka" {
+					kafkaTrigger = trigger
+				}
+				if trigger.Type == "cron" {
+					cronTrigger = trigger
+				}
+			}
+			g.Expect(kafkaTrigger).NotTo(BeNil(), "kafka trigger should be auto-discovered")
+			g.Expect(cronTrigger).NotTo(BeNil(), "cron trigger should exist from manual config")
+
+			g.Expect(Kamel(t, ctx, "delete", integrationName, "-n", ns).Execute()).To(Succeed())
+		})
+	})
+}
+
+func TestKafkaKedaAutoMetadata(t *testing.T) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		t.Run("Auto-discovery with autoMetadata merge (Case 3)", func(t *testing.T) {
+			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/keda-kafka-auto-metadata.yaml"))
+			ns := "kafka"
+			integrationName := "keda-kafka-auto-metadata"
+
+			g.Eventually(ScaledObject(t, ctx, ns, integrationName), TestTimeoutMedium).
+				ShouldNot(BeNil())
+
+			// Verify the trigger has merged metadata
+			scaledObj := ScaledObject(t, ctx, ns, integrationName)()
+			g.Expect(scaledObj).NotTo(BeNil())
+			g.Expect(scaledObj.Spec.Triggers).To(HaveLen(1))
+			g.Expect(scaledObj.Spec.Triggers[0].Type).To(Equal("kafka"))
+			// Auto-discovered
+			g.Expect(scaledObj.Spec.Triggers[0].Metadata["topic"]).To(Equal("my-topic"))
+			g.Expect(scaledObj.Spec.Triggers[0].Metadata["bootstrapServers"]).To(Equal("my-cluster-kafka-bootstrap.kafka.svc:9092"))
+			g.Expect(scaledObj.Spec.Triggers[0].Metadata["consumerGroup"]).To(Equal("metadata-group"))
+			// Merge
+			g.Expect(scaledObj.Spec.Triggers[0].Metadata["lagThreshold"]).To(Equal("100"))
+			g.Expect(scaledObj.Spec.Triggers[0].Metadata["activationLagThreshold"]).To(Equal("10"))
 
 			g.Expect(Kamel(t, ctx, "delete", integrationName, "-n", ns).Execute()).To(Succeed())
 		})

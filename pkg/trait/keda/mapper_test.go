@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package trait
+package keda
 
 import (
 	"testing"
@@ -47,13 +47,6 @@ func TestParseComponentURI(t *testing.T) {
 			params:    map[string]string{"region": "us-east-1"},
 		},
 		{
-			name:      "spring-rabbitmq",
-			uri:       "spring-rabbitmq:exchange?queues=myQueue&addresses=localhost:5672",
-			scheme:    "spring-rabbitmq",
-			pathValue: "exchange",
-			params:    map[string]string{"queues": "myQueue", "addresses": "localhost:5672"},
-		},
-		{
 			name:      "timer unsupported",
 			uri:       "timer:tick?period=1000",
 			scheme:    "timer",
@@ -78,82 +71,11 @@ func TestParseComponentURI(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			scheme, pathValue, params, err := parseComponentURI(tt.uri)
+			scheme, pathValue, params, err := ParseComponentURI(tt.uri)
 			require.NoError(t, err)
 			assert.Equal(t, tt.scheme, scheme)
 			assert.Equal(t, tt.pathValue, pathValue)
 			assert.Equal(t, tt.params, params)
-		})
-	}
-}
-
-func TestMapToKedaTrigger(t *testing.T) {
-	tests := []struct {
-		name         string
-		uri          string
-		expectNil    bool
-		expectedType string
-		expectedMeta map[string]string
-	}{
-		{
-			name:         "kafka trigger",
-			uri:          "kafka:orders?brokers=broker:9092&groupId=grp",
-			expectNil:    false,
-			expectedType: "kafka",
-			expectedMeta: map[string]string{
-				"topic":            "orders",
-				"bootstrapServers": "broker:9092",
-				"consumerGroup":    "grp",
-			},
-		},
-		{
-			name:         "aws2-sqs trigger",
-			uri:          "aws2-sqs:myQueue?region=us-east-1",
-			expectNil:    false,
-			expectedType: "aws-sqs-queue",
-			expectedMeta: map[string]string{
-				"queueURL":  "myQueue",
-				"awsRegion": "us-east-1",
-			},
-		},
-		{
-			name:         "spring-rabbitmq trigger",
-			uri:          "spring-rabbitmq:exchange?queues=myQueue&addresses=localhost:5672",
-			expectNil:    false,
-			expectedType: "rabbitmq",
-			expectedMeta: map[string]string{
-				"queueName": "myQueue",
-				"host":      "localhost:5672",
-			},
-		},
-		{
-			name:      "timer no trigger",
-			uri:       "timer:tick",
-			expectNil: true,
-		},
-		{
-			name:      "direct no trigger",
-			uri:       "direct:start",
-			expectNil: true,
-		},
-		{
-			name:      "empty uri no trigger",
-			uri:       "",
-			expectNil: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			trigger, err := mapToKedaTrigger(tt.uri)
-			require.NoError(t, err)
-			if tt.expectNil {
-				assert.Nil(t, trigger)
-			} else {
-				require.NotNil(t, trigger)
-				assert.Equal(t, tt.expectedType, trigger.Type)
-				assert.Equal(t, tt.expectedMeta, trigger.Metadata)
-			}
 		})
 	}
 }

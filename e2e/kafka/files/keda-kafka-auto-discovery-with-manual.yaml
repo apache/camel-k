@@ -14,24 +14,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ---------------------------------------------------------------------------
-# This integration tests KEDA auto-discovery - no manual triggers are specified,
-# the trait should automatically discover the kafka component and create a trigger.
+# This integration tests KEDA auto-discovery with manual trigger (Case 2):
+# - Manual cron trigger is specified
+# - Kafka trigger should still be auto-discovered (different type)
+# - Result: 2 triggers (cron + kafka)
+
 apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:
-  name: keda-kafka-auto-discovery
+  name: keda-kafka-auto-discovery-with-manual
   namespace: kafka
 spec:
   sources:
     - content: |
-        from("kafka:my-topic?brokers=my-cluster-kafka-bootstrap.kafka.svc:9092&groupId=auto-group")
+        from("kafka:my-topic?brokers=my-cluster-kafka-bootstrap.kafka.svc:9092&groupId=mixed-group")
           .log("${body}");
       name: routes.java
   traits:
     keda:
       enabled: true
       minReplicaCount: 0
-      maxReplicaCount: 1
-      cooldownPeriod: 20
-      pollingInterval: 10
-      # No triggers specified - auto-discovery should create kafka scaler
+      maxReplicaCount: 2
+      # Manual cron trigger - kafka should still be auto-discovered
+      triggers:
+        - type: cron
+          metadata:
+            timezone: "Etc/UTC"
+            start: "0 * * * *"
+            end: "59 * * * *"
+            desiredReplicas: "1"
