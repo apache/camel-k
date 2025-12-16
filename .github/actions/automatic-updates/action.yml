@@ -60,7 +60,7 @@ runs:
     - name: Run Test and get coverage badge
       shell: bash
       run: |
-        go test -v ./... -covermode=count -coverprofile=coverage.out
+        go test -v ./... -covermode=count -coverprofile=coverage.out -coverpkg=./...
         # Remove mock and generated code from account
         grep -v "github.com/apache/camel-k/v2/pkg/client" coverage.out \
           | grep -v "zz_generated" \
