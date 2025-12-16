@@ -45,7 +45,7 @@ runs:
   - name: Test new branch
     shell: bash
     run: |
-      COVERAGE_OPTS="-covermode=count -coverprofile=coverage.out" make build
+      COVERAGE_OPTS="-covermode=count -coverprofile=coverage.out -coverpkg=./..." make build
 
   # Only run these on pull request events
   - name: Save new coverage value
@@ -73,7 +73,7 @@ runs:
     if: github.event_name == 'pull_request'
     shell: bash
     run: |
-      COVERAGE_OPTS="-covermode=count -coverprofile=coverage.out" make build
+      COVERAGE_OPTS="-covermode=count -coverprofile=coverage.out -coverpkg=./..." make build
       # Remove mock and generated code from account
       grep -v "github.com/apache/camel-k/v2/pkg/client" coverage.out \
         | grep -v "zz_generated" \
