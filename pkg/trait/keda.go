@@ -25,6 +25,8 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/apis/duck/keda/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/metadata"
+	kedamapper "github.com/apache/camel-k/v2/pkg/trait/keda"
+	_ "github.com/apache/camel-k/v2/pkg/trait/keda/scalers"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
@@ -50,7 +52,7 @@ func (t *kedaTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		return false, nil, nil
 	}
 
-	if ptr.Deref(t.Auto, true) && len(t.Triggers) == 0 {
+	if ptr.Deref(t.Auto, true) {
 		if err := t.autoDiscoverTriggers(e); err != nil {
 			return false, nil, err
 		}
@@ -156,20 +158,37 @@ func (t *kedaTrait) getScaleTarget(it *v1.Integration) *corev1.ObjectReference {
 	}
 }
 
-// Auto-discover triggers if Auto is enabled (default) and no manual triggers specified
+// autoDiscoverTriggers discovers KEDA triggers from Camel source URIs.
 func (t *kedaTrait) autoDiscoverTriggers(e *Environment) error {
+	// Build set of manually configured trigger types
+	manualTypes := make(map[string]bool)
+	for _, trigger := range t.Triggers {
+		manualTypes[trigger.Type] = true
+	}
+
 	meta, err := metadata.ExtractAll(e.CamelCatalog, e.Integration.AllSources())
 	if err != nil {
 		return err
 	}
+
 	for _, fromURI := range meta.FromURIs {
-		trigger, err := mapToKedaTrigger(fromURI)
+		trigger, err := kedamapper.MapToKedaTrigger(fromURI)
 		if err != nil {
 			return err
 		}
-		if trigger != nil {
+		// Only add if trigger type not already manually configured
+		if trigger != nil && !manualTypes[trigger.Type] {
+			// Merge additional metadata if configured
+			if t.AutoMetadata != nil {
+				if extra, ok := t.AutoMetadata[trigger.Type]; ok {
+					for k, v := range extra {
+						trigger.Metadata[k] = v
+					}
+				}
+			}
 			t.Triggers = append(t.Triggers, *trigger)
 		}
 	}
+
 	return nil
 }

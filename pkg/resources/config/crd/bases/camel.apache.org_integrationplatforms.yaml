@@ -1484,6 +1484,15 @@ spec:
                           and optionally a mapping of secrets, used by Keda operator to poll resources according to the autoscaler type.
                           Automatically discover KEDA triggers from Camel component URIs.
                         type: boolean
+                      autoMetadata:
+                        additionalProperties:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        description: |-
+                          Additional metadata to merge into auto-discovered triggers. Keys are trigger types (e.g., "kafka"),
+                          values are maps of metadata key-value pairs to merge (e.g., {"lagThreshold": "10"}).
+                        type: object
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
@@ -3815,6 +3824,15 @@ spec:
                           and optionally a mapping of secrets, used by Keda operator to poll resources according to the autoscaler type.
                           Automatically discover KEDA triggers from Camel component URIs.
                         type: boolean
+                      autoMetadata:
+                        additionalProperties:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        description: |-
+                          Additional metadata to merge into auto-discovered triggers. Keys are trigger types (e.g., "kafka"),
+                          values are maps of metadata key-value pairs to merge (e.g., {"lagThreshold": "10"}).
+                        type: object
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.

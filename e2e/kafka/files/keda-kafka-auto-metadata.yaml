@@ -14,16 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ---------------------------------------------------------------------------
+# This integration tests KEDA autoMetadata merge (Case 3):
+# - Kafka trigger is auto-discovered from URI
+# - Additional metadata (lagThreshold) is merged via autoMetadata
 
 apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:
-  name: keda-kafka-auto-discovery
+  name: keda-kafka-auto-metadata
   namespace: kafka
 spec:
   sources:
     - content: |
-        from("kafka:my-topic?brokers=my-cluster-kafka-bootstrap.kafka.svc:9092&groupId=auto-group")
+        from("kafka:my-topic?brokers=my-cluster-kafka-bootstrap.kafka.svc:9092&groupId=metadata-group")
           .log("${body}");
       name: routes.java
   traits:
@@ -31,6 +34,8 @@ spec:
       enabled: true
       minReplicaCount: 0
       maxReplicaCount: 1
-      cooldownPeriod: 20
-      pollingInterval: 10
-      # No triggers specified - auto-discovery should create kafka scaler
+      # Extra metadata to merge into auto-discovered kafka trigger
+      autoMetadata:
+        kafka:
+          lagThreshold: "100"
+          activationLagThreshold: "10"

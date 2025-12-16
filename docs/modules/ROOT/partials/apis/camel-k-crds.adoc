@@ -7949,6 +7949,14 @@ Automatically discover KEDA triggers from Camel component URIs.
 
 
 
+|`autoMetadata` +
+map[string]map[string]string
+|
+
+
+Additional metadata to merge into auto-discovered triggers. Keys are trigger types (e.g., "kafka"),
+values are maps of metadata key-value pairs to merge (e.g., {"lagThreshold": "10"}).
+
 
 |===
 
