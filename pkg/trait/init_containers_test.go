@@ -393,8 +393,8 @@ func TestApplyInitContainerWithCACert(t *testing.T) {
 			Spec: v1.IntegrationSpec{
 				Traits: v1.Traits{
 					JVM: &trait.JVMTrait{
-						CACert:         "secret:my-ca-secret",
-						CACertPassword: "secret:my-ca-password",
+						CACert:         "/etc/camel/conf.d/_secrets/my-ca/ca.crt",
+						CACertPassword: "/etc/camel/conf.d/_secrets/truststore-pass/password",
 					},
 				},
 			},

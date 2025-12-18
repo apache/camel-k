@@ -17,21 +17,13 @@ limitations under the License.
 
 package trait
 
-import (
-	"errors"
-	"fmt"
-	"strings"
-
-	corev1 "k8s.io/api/core/v1"
-)
+import "errors"
 
 const (
-	defaultCACertMountPath      = "/etc/camel/conf.d/_truststore"
-	caCertVolumeName            = "jvm-truststore"
-	caCertSecretVolumeName      = "ca-cert-secret" //nolint:gosec // G101: not a credential, just a volume name
-	trustStoreName              = "truststore.jks"
-	truststorePasswordEnvVar    = "TRUSTSTORE_PASSWORD"
-	truststorePasswordSecretKey = "password"
+	defaultCACertMountPath   = "/etc/camel/conf.d/_truststore"
+	caCertVolumeName         = "jvm-truststore"
+	trustStoreName           = "truststore.jks"
+	truststorePasswordEnvVar = "TRUSTSTORE_PASSWORD"
 )
 
 func (t *jvmTrait) hasCACert() bool {
@@ -46,58 +38,28 @@ func (t *jvmTrait) getCACertMountPath() string {
 	return defaultCACertMountPath
 }
 
-// parseSecretRef parses a secret reference in the format "secret:name" or "secret:name/key".
-func parseSecretRef(ref string) (string, string, error) {
-	if !strings.HasPrefix(ref, "secret:") {
-		return "", "", fmt.Errorf("invalid CA cert reference %q: must start with 'secret:'", ref)
-	}
-
-	ref = strings.TrimPrefix(ref, "secret:")
-	parts := strings.SplitN(ref, "/", 2)
-	secretName, secretKey := parts[0], ""
-
-	if len(parts) > 1 {
-		secretKey = parts[1]
-	}
-	if secretName == "" {
-		return "", "", errors.New("invalid CA cert reference: secret name is empty")
-	}
-
-	return secretName, secretKey, nil
-}
-
 func (t *jvmTrait) getTrustStorePath() string {
 	return t.getCACertMountPath() + "/" + trustStoreName
 }
 
-// getTrustStorePasswordSecretRef parses and returns the user-provided password secret reference.
-func (t *jvmTrait) getTrustStorePasswordSecretRef() (string, string, error) {
+// validateCACertConfig validates that the required file paths are provided.
+func (t *jvmTrait) validateCACertConfig() error {
+	if t.CACert == "" {
+		return nil
+	}
 	if t.CACertPassword == "" {
-		return "", "", errors.New("ca-cert-password is required when ca-cert is set")
+		return errors.New("ca-cert-password is required when ca-cert is set")
 	}
 
-	secretName, secretKey, err := parseSecretRef(t.CACertPassword)
-	if err != nil {
-		return "", "", fmt.Errorf("invalid ca-cert-password reference: %w", err)
-	}
-	if secretKey == "" {
-		secretKey = truststorePasswordSecretKey
-	}
-
-	return secretName, secretKey, nil
+	return nil
 }
 
-// getTrustStorePasswordEnvVar returns the environment variable for truststore password injection.
-func getTrustStorePasswordEnvVar(secretName, secretKey string) corev1.EnvVar {
-	return corev1.EnvVar{
-		Name: truststorePasswordEnvVar,
-		ValueFrom: &corev1.EnvVarSource{
-			SecretKeyRef: &corev1.SecretKeySelector{
-				LocalObjectReference: corev1.LocalObjectReference{
-					Name: secretName,
-				},
-				Key: secretKey,
-			},
-		},
-	}
+// getCACertPath returns the user-provided CA certificate file path.
+func (t *jvmTrait) getCACertPath() string {
+	return t.CACert
+}
+
+// getCACertPasswordPath returns the user-provided password file path.
+func (t *jvmTrait) getCACertPasswordPath() string {
+	return t.CACertPassword
 }

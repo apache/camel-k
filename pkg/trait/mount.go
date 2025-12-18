@@ -190,7 +190,6 @@ func (t *mountTrait) configureVolumesAndMounts(
 	}
 	// Mount the agent volume if any agent exists
 	trait := e.Catalog.GetTrait(jvmTraitID)
-	//nolint:nestif
 	if trait != nil {
 		jvm, ok := trait.(*jvmTrait)
 		if ok && jvm.hasJavaAgents() {
@@ -204,24 +203,10 @@ func (t *mountTrait) configureVolumesAndMounts(
 				(*icnts)[i].VolumeMounts = append((*icnts)[i].VolumeMounts, *volumeMount)
 			}
 		}
-		// Mount CA cert volumes if configured
-		if ok && jvm.hasCACert() {
-			secretName, _, err := parseSecretRef(jvm.CACert)
-			if err != nil {
-				return err
-			}
-			mountPath := jvm.getCACertMountPath()
 
-			// Secret volume for CA cert
-			secretVolume := corev1.Volume{
-				Name: caCertSecretVolumeName,
-				VolumeSource: corev1.VolumeSource{
-					Secret: &corev1.SecretVolumeSource{
-						SecretName: secretName,
-					},
-				},
-			}
-			*vols = append(*vols, secretVolume)
+		// Mount CA cert truststore volume if configured
+		if ok && jvm.hasCACert() {
+			mountPath := jvm.getCACertMountPath()
 
 			// EmptyDir volume for truststore output
 			trustStoreVolume := corev1.Volume{
@@ -239,14 +224,9 @@ func (t *mountTrait) configureVolumesAndMounts(
 				ReadOnly:  true,
 			})
 
-			// Mount volumes to init containers for truststore generation
+			// Mount truststore volume to init containers
 			for i := range *icnts {
 				(*icnts)[i].VolumeMounts = append((*icnts)[i].VolumeMounts,
-					corev1.VolumeMount{
-						Name:      caCertSecretVolumeName,
-						MountPath: "/etc/secrets/cacert",
-						ReadOnly:  true,
-					},
 					corev1.VolumeMount{
 						Name:      caCertVolumeName,
 						MountPath: mountPath,

@@ -111,8 +111,10 @@ func TestJVMTrait(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns,
 				"./files/Java.java",
 				"--name", name,
-				"-t", "jvm.ca-cert=secret:test-ca-cert",
-				"-t", "jvm.ca-cert-password=secret:test-ca-password",
+				"-t", "mount.configs=secret:test-ca-cert",
+				"-t", "mount.configs=secret:test-ca-password",
+				"-t", "jvm.ca-cert=/etc/camel/conf.d/_secrets/test-ca-cert/ca.crt",
+				"-t", "jvm.ca-cert-password=/etc/camel/conf.d/_secrets/test-ca-password/password",
 			).Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
