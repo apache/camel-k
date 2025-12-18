@@ -729,8 +729,8 @@ func TestCACertVolume(t *testing.T) {
 
 	environment.Integration.Spec.Traits.Mount = &traitv1.MountTrait{}
 	environment.Integration.Spec.Traits.JVM = &traitv1.JVMTrait{
-		CACert:         "secret:my-ca-secret",
-		CACertPassword: "secret:my-ca-password",
+		CACert:         "/etc/camel/conf.d/_secrets/my-ca/ca.crt",
+		CACertPassword: "/etc/camel/conf.d/_secrets/truststore-pass/password",
 	}
 	environment.Platform.ResyncStatusFullConfig()
 	conditions, traits, err := traitCatalog.apply(environment)
@@ -747,22 +747,10 @@ func TestCACertVolume(t *testing.T) {
 	assert.NotNil(t, deployment)
 	spec := deployment.Spec.Template.Spec
 
-	// Should have: 2 base volumes + secret volume + emptyDir volume = 4
-	assert.Len(t, spec.Volumes, 4)
+	// Should have: 2 base volumes + emptyDir volume for truststore = 3
+	assert.Len(t, spec.Volumes, 3)
 
-	// Check secret volume exists
-	var secretVolume *corev1.Volume
-	for _, v := range spec.Volumes {
-		if v.Name == caCertSecretVolumeName {
-			secretVolume = &v
-			break
-		}
-	}
-	assert.NotNil(t, secretVolume, "Expected secret volume for CA cert")
-	assert.NotNil(t, secretVolume.Secret)
-	assert.Equal(t, "my-ca-secret", secretVolume.Secret.SecretName)
-
-	// Check emptyDir volume exists
+	// Check emptyDir volume exists for truststore
 	var emptyDirVolume *corev1.Volume
 	for _, v := range spec.Volumes {
 		if v.Name == caCertVolumeName {

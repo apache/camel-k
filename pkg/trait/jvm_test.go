@@ -722,7 +722,7 @@ func TestApplyJvmTraitAgentFail(t *testing.T) {
 
 func TestApplyJvmTraitWithCACertMissingPassword(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-	trait.CACert = "secret:my-ca-secret"
+	trait.CACert = "/etc/camel/conf.d/_secrets/my-ca/ca.crt"
 
 	d := appsv1.Deployment{
 		Spec: appsv1.DeploymentSpec{
@@ -751,8 +751,8 @@ func TestApplyJvmTraitWithCACertMissingPassword(t *testing.T) {
 
 func TestApplyJvmTraitWithCACert(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-	trait.CACert = "secret:my-ca-secret"
-	trait.CACertPassword = "secret:my-truststore-password"
+	trait.CACert = "/etc/camel/conf.d/_secrets/my-ca/ca.crt"
+	trait.CACertPassword = "/etc/camel/conf.d/_secrets/truststore-pass/password"
 
 	d := appsv1.Deployment{
 		Spec: appsv1.DeploymentSpec{
@@ -779,46 +779,31 @@ func TestApplyJvmTraitWithCACert(t *testing.T) {
 
 	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Args, "-Djavax.net.ssl.trustStore=/etc/camel/conf.d/_truststore/truststore.jks")
 	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Args, "-Djavax.net.ssl.trustStorePassword=$(TRUSTSTORE_PASSWORD)")
-
-	// Verify TRUSTSTORE_PASSWORD env var is injected from user-provided secret
-	var foundEnvVar bool
-	for _, env := range d.Spec.Template.Spec.Containers[0].Env {
-		if env.Name == "TRUSTSTORE_PASSWORD" {
-			foundEnvVar = true
-			assert.NotNil(t, env.ValueFrom)
-			assert.NotNil(t, env.ValueFrom.SecretKeyRef)
-			assert.Equal(t, "my-truststore-password", env.ValueFrom.SecretKeyRef.Name)
-			assert.Equal(t, "password", env.ValueFrom.SecretKeyRef.Key)
-			break
-		}
-	}
-	assert.True(t, foundEnvVar, "TRUSTSTORE_PASSWORD env var should be injected")
 }
 
-func TestParseSecretRef(t *testing.T) {
-	name, key, err := parseSecretRef("secret:my-secret")
+func TestValidateCACertConfig(t *testing.T) {
+	trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+
+	trait.CACert = ""
+	err := trait.validateCACertConfig()
 	require.NoError(t, err)
-	assert.Equal(t, "my-secret", name)
-	assert.Equal(t, "", key)
 
-	name, key, err = parseSecretRef("secret:my-secret/ca.crt")
+	trait.CACert = "/etc/camel/conf.d/_secrets/my-ca/ca.crt"
+	trait.CACertPassword = ""
+	err = trait.validateCACertConfig()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "ca-cert-password is required")
+
+	trait.CACertPassword = "/etc/camel/conf.d/_secrets/truststore-pass/password"
+	err = trait.validateCACertConfig()
 	require.NoError(t, err)
-	assert.Equal(t, "my-secret", name)
-	assert.Equal(t, "ca.crt", key)
-
-	_, _, err = parseSecretRef("configmap:my-cm")
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "must start with 'secret:'")
-
-	_, _, err = parseSecretRef("secret:")
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "secret name is empty")
 }
 
-func TestApplyJvmTraitWithCACertUserProvidedPassword(t *testing.T) {
+func TestApplyJvmTraitWithCustomCACertMountPath(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-	trait.CACert = "secret:my-ca-secret"
-	trait.CACertPassword = "secret:my-custom-password/mykey"
+	trait.CACert = "/etc/camel/conf.d/_secrets/my-ca/ca.crt"
+	trait.CACertPassword = "/etc/camel/conf.d/_secrets/truststore-pass/password"
+	trait.CACertMountPath = "/custom/truststore/path"
 
 	d := appsv1.Deployment{
 		Spec: appsv1.DeploymentSpec{
@@ -843,26 +828,6 @@ func TestApplyJvmTraitWithCACertUserProvidedPassword(t *testing.T) {
 	err = trait.Apply(environment)
 	require.NoError(t, err)
 
+	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Args, "-Djavax.net.ssl.trustStore=/custom/truststore/path/truststore.jks")
 	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Args, "-Djavax.net.ssl.trustStorePassword=$(TRUSTSTORE_PASSWORD)")
-
-	var foundEnvVar bool
-	for _, env := range d.Spec.Template.Spec.Containers[0].Env {
-		if env.Name == "TRUSTSTORE_PASSWORD" {
-			foundEnvVar = true
-			assert.NotNil(t, env.ValueFrom)
-			assert.NotNil(t, env.ValueFrom.SecretKeyRef)
-			assert.Equal(t, "my-custom-password", env.ValueFrom.SecretKeyRef.Name)
-			assert.Equal(t, "mykey", env.ValueFrom.SecretKeyRef.Key)
-			break
-		}
-	}
-	assert.True(t, foundEnvVar, "TRUSTSTORE_PASSWORD env var should be injected")
-
-	var foundAutoSecret bool
-	environment.Resources.VisitSecret(func(secret *corev1.Secret) {
-		if secret.Name == "my-it-truststore-password" {
-			foundAutoSecret = true
-		}
-	})
-	assert.False(t, foundAutoSecret, "Auto-generated password secret should NOT be created when user provides one")
 }

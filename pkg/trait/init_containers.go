@@ -93,28 +93,18 @@ func (t *initContainersTrait) Configure(e *Environment) (bool, *TraitCondition, 
 		}
 		// Set the CA cert truststore init container if configured
 		if ok && jvm.hasCACert() {
-			_, secretKey, err := parseSecretRef(jvm.CACert)
-			if err != nil {
+			if err := jvm.validateCACertConfig(); err != nil {
 				return false, nil, err
 			}
-			if secretKey == "" {
-				secretKey = "ca.crt"
-			}
-
-			secretName, secretKey2, err := jvm.getTrustStorePasswordSecretRef()
-			if err != nil {
-				return false, nil, err
-			}
-
+			// keytool reads password from file using -storepass:file
 			keytoolCmd := fmt.Sprintf(
-				"keytool -importcert -noprompt -alias custom-ca -storepass:env %s -keystore %s -file /etc/secrets/cacert/%s",
-				truststorePasswordEnvVar, jvm.getTrustStorePath(), secretKey,
+				"keytool -importcert -noprompt -alias custom-ca -storepass:file %s -keystore %s -file %s",
+				jvm.getCACertPasswordPath(), jvm.getTrustStorePath(), jvm.getCACertPath(),
 			)
 			caCertTask := containerTask{
 				name:    "generate-truststore",
 				image:   defaults.BaseImage(),
 				command: keytoolCmd,
-				env:     []corev1.EnvVar{getTrustStorePasswordEnvVar(secretName, secretKey2)},
 			}
 			t.tasks = append(t.tasks, caCertTask)
 		}
