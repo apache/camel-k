@@ -20,7 +20,6 @@
 *** xref:installation/advanced/http-proxy.adoc[HTTP Proxy]
 *** xref:installation/advanced/offline.adoc[Offline]
 *** xref:installation/advanced/pruning-registry.adoc[Pruning Registry]
-*** xref:installation/advanced/operator-tuning.adoc[Operator Tuning]
 * xref:running/running.adoc[Run an Integration]
 ** xref:running/running-cli.adoc[kamel run CLI]
 ** xref:running/build-from-git.adoc[Git hosted Integrations]
