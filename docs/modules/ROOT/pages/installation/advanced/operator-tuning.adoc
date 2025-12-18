@@ -1,0 +1,69 @@
+[[operator-tuning]]
+= Operator Tuning
+
+The Camel K operator can be tuned using environment variables. This page documents the environment variables that can be used to customize the operator behavior.
+
+[[operator-env-vars]]
+== Operator Environment Variables
+
+These environment variables configure the Camel K operator behavior.
+
+[cols="2,1,3"]
+|===
+|Variable |Default |Description
+
+|`WATCH_NAMESPACE`
+|_empty_
+|The namespace(s) the operator watches for Integration resources. When not set or empty, the operator watches all namespaces.
+
+|`NAMESPACE`
+|_auto-detected_
+|The namespace where the operator pod is running.
+
+|`POD_NAME`
+|_auto-detected_
+|The name of the operator pod.
+
+|`KAMEL_OPERATOR_ID`
+|`camel-k`
+|The operator ID used to identify which operator instance manages specific resources. Can also be set via `OPERATOR_ID`.
+
+|`KAMEL_BASE_IMAGE`
+|`eclipse-temurin:17-jdk`
+|The base image used for building Integration images. Can also be set via `RELATED_IMAGE_BASE`.
+
+|`CAMEL_K_SYNTHETIC_INTEGRATIONS`
+|`false`
+|When set to `true`, enables synthetic Integration support for managing external workloads.
+
+|`LOG_LEVEL`
+|`info`
+|The log level for the operator. Valid values: `debug`, `info`, `warn`, `error`.
+
+|`KAMELET_CATALOG_DIR`
+|`/tmp/kamelets/`
+|Directory where Kamelet catalog files are extracted during installation.
+|===
+
+[[setting-env-vars]]
+== Setting Environment Variables
+
+Environment variables for the operator can be set in the operator Deployment:
+
+[source,yaml]
+----
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: camel-k-operator
+spec:
+  template:
+    spec:
+      containers:
+      - name: camel-k-operator
+        env:
+        - name: LOG_LEVEL
+          value: "debug"
+        - name: CAMEL_K_SYNTHETIC_INTEGRATIONS
+          value: "true"
+----
