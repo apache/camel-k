@@ -4723,8 +4723,7 @@ spec:
                         type: array
                       caCert:
                         description: |-
-                          Path to a PEM-encoded CA certificate file. The file must be mounted
-                          by the user using the mount trait (e.g., mount.configs or mount.secrets).
+                          Path to a PEM-encoded CA certificate file.
                           Example: "/etc/camel/conf.d/_secrets/my-ca/ca.crt"
                         type: string
                       caCertMountPath:
@@ -4735,7 +4734,6 @@ spec:
                       caCertPassword:
                         description: |-
                           Required when caCert is set. Path to a file containing the truststore password.
-                          The file must be mounted by the user using the mount trait.
                           Example: "/etc/camel/conf.d/_secrets/truststore-pass/password"
                         type: string
                       classpath:
@@ -7146,8 +7144,7 @@ spec:
                         type: array
                       caCert:
                         description: |-
-                          Path to a PEM-encoded CA certificate file. The file must be mounted
-                          by the user using the mount trait (e.g., mount.configs or mount.secrets).
+                          Path to a PEM-encoded CA certificate file.
                           Example: "/etc/camel/conf.d/_secrets/my-ca/ca.crt"
                         type: string
                       caCertMountPath:
@@ -7158,7 +7155,6 @@ spec:
                       caCertPassword:
                         description: |-
                           Required when caCert is set. Path to a file containing the truststore password.
-                          The file must be mounted by the user using the mount trait.
                           Example: "/etc/camel/conf.d/_secrets/truststore-pass/password"
                         type: string
                       classpath:
@@ -9471,8 +9467,7 @@ spec:
                         type: array
                       caCert:
                         description: |-
-                          Path to a PEM-encoded CA certificate file. The file must be mounted
-                          by the user using the mount trait (e.g., mount.configs or mount.secrets).
+                          Path to a PEM-encoded CA certificate file.
                           Example: "/etc/camel/conf.d/_secrets/my-ca/ca.crt"
                         type: string
                       caCertMountPath:
@@ -9483,7 +9478,6 @@ spec:
                       caCertPassword:
                         description: |-
                           Required when caCert is set. Path to a file containing the truststore password.
-                          The file must be mounted by the user using the mount trait.
                           Example: "/etc/camel/conf.d/_secrets/truststore-pass/password"
                         type: string
                       classpath:
@@ -11773,8 +11767,7 @@ spec:
                         type: array
                       caCert:
                         description: |-
-                          Path to a PEM-encoded CA certificate file. The file must be mounted
-                          by the user using the mount trait (e.g., mount.configs or mount.secrets).
+                          Path to a PEM-encoded CA certificate file.
                           Example: "/etc/camel/conf.d/_secrets/my-ca/ca.crt"
                         type: string
                       caCertMountPath:
@@ -11785,7 +11778,6 @@ spec:
                       caCertPassword:
                         description: |-
                           Required when caCert is set. Path to a file containing the truststore password.
-                          The file must be mounted by the user using the mount trait.
                           Example: "/etc/camel/conf.d/_secrets/truststore-pass/password"
                         type: string
                       classpath:
@@ -20909,8 +20901,7 @@ spec:
                         type: array
                       caCert:
                         description: |-
-                          Path to a PEM-encoded CA certificate file. The file must be mounted
-                          by the user using the mount trait (e.g., mount.configs or mount.secrets).
+                          Path to a PEM-encoded CA certificate file.
                           Example: "/etc/camel/conf.d/_secrets/my-ca/ca.crt"
                         type: string
                       caCertMountPath:
@@ -20921,7 +20912,6 @@ spec:
                       caCertPassword:
                         description: |-
                           Required when caCert is set. Path to a file containing the truststore password.
-                          The file must be mounted by the user using the mount trait.
                           Example: "/etc/camel/conf.d/_secrets/truststore-pass/password"
                         type: string
                       classpath:
@@ -23165,8 +23155,7 @@ spec:
                         type: array
                       caCert:
                         description: |-
-                          Path to a PEM-encoded CA certificate file. The file must be mounted
-                          by the user using the mount trait (e.g., mount.configs or mount.secrets).
+                          Path to a PEM-encoded CA certificate file.
                           Example: "/etc/camel/conf.d/_secrets/my-ca/ca.crt"
                         type: string
                       caCertMountPath:
@@ -23177,7 +23166,6 @@ spec:
                       caCertPassword:
                         description: |-
                           Required when caCert is set. Path to a file containing the truststore password.
-                          The file must be mounted by the user using the mount trait.
                           Example: "/etc/camel/conf.d/_secrets/truststore-pass/password"
                         type: string
                       classpath:
@@ -33663,8 +33651,7 @@ spec:
                             type: array
                           caCert:
                             description: |-
-                              Path to a PEM-encoded CA certificate file. The file must be mounted
-                              by the user using the mount trait (e.g., mount.configs or mount.secrets).
+                              Path to a PEM-encoded CA certificate file.
                               Example: "/etc/camel/conf.d/_secrets/my-ca/ca.crt"
                             type: string
                           caCertMountPath:
@@ -33675,7 +33662,6 @@ spec:
                           caCertPassword:
                             description: |-
                               Required when caCert is set. Path to a file containing the truststore password.
-                              The file must be mounted by the user using the mount trait.
                               Example: "/etc/camel/conf.d/_secrets/truststore-pass/password"
                             type: string
                           classpath:
@@ -35851,8 +35837,7 @@ spec:
                         type: array
                       caCert:
                         description: |-
-                          Path to a PEM-encoded CA certificate file. The file must be mounted
-                          by the user using the mount trait (e.g., mount.configs or mount.secrets).
+                          Path to a PEM-encoded CA certificate file.
                           Example: "/etc/camel/conf.d/_secrets/my-ca/ca.crt"
                         type: string
                       caCertMountPath:
@@ -35863,7 +35848,6 @@ spec:
                       caCertPassword:
                         description: |-
                           Required when caCert is set. Path to a file containing the truststore password.
-                          The file must be mounted by the user using the mount trait.
                           Example: "/etc/camel/conf.d/_secrets/truststore-pass/password"
                         type: string
                       classpath:

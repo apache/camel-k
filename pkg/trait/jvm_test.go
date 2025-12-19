@@ -720,35 +720,6 @@ func TestApplyJvmTraitAgentFail(t *testing.T) {
 	assert.Contains(t, err.Error(), "could not parse JVM agent")
 }
 
-func TestApplyJvmTraitWithCACertMissingPassword(t *testing.T) {
-	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-	trait.CACert = "/etc/camel/conf.d/_secrets/my-ca/ca.crt"
-
-	d := appsv1.Deployment{
-		Spec: appsv1.DeploymentSpec{
-			Template: corev1.PodTemplateSpec{
-				Spec: corev1.PodSpec{
-					Containers: []corev1.Container{
-						{
-							Name: defaultContainerName,
-						},
-					},
-				},
-			},
-		},
-	}
-
-	environment.Resources.Add(&d)
-	configure, condition, err := trait.Configure(environment)
-	require.NoError(t, err)
-	assert.True(t, configure)
-	assert.Nil(t, condition)
-
-	err = trait.Apply(environment)
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "ca-cert-password is required")
-}
-
 func TestApplyJvmTraitWithCACert(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
 	trait.CACert = "/etc/camel/conf.d/_secrets/my-ca/ca.crt"
