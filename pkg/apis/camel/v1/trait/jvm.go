@@ -42,15 +42,13 @@ type JVMTrait struct {
 	Jar string `json:"jar,omitempty" property:"jar"`
 	// A list of JVM agents to download and execute with format `<agent-name>;<agent-url>[;<jvm-agent-options>]`.
 	Agents []string `json:"agents,omitempty" property:"agents"`
-	// Path to a PEM-encoded CA certificate file. The file must be mounted
-	// by the user using the mount trait (e.g., mount.configs or mount.secrets).
+	// Path to a PEM-encoded CA certificate file.
 	// Example: "/etc/camel/conf.d/_secrets/my-ca/ca.crt"
 	CACert string `json:"caCert,omitempty" property:"ca-cert"`
 	// The path where the generated truststore will be mounted.
 	// Default: "/etc/camel/conf.d/_truststore"
 	CACertMountPath string `json:"caCertMountPath,omitempty" property:"ca-cert-mount-path"`
 	// Required when caCert is set. Path to a file containing the truststore password.
-	// The file must be mounted by the user using the mount trait.
 	// Example: "/etc/camel/conf.d/_secrets/truststore-pass/password"
 	CACertPassword string `json:"caCertPassword,omitempty" property:"ca-cert-password"`
 }
