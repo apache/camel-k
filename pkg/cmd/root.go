@@ -88,6 +88,9 @@ func kamelPreAddCommandInit(options *RootCmdOptions) *cobra.Command {
 	cmd.PersistentFlags().StringVarP(&options.Namespace, "namespace", "n", "", "Namespace to use for all operations")
 	cmd.PersistentFlags().BoolVarP(&options.Verbose, "verbose", "V", false, "Verbose logging")
 
+	// Disable the default completion command
+	cmd.CompletionOptions.DisableDefaultCmd = true
+
 	cobra.AddTemplateFunc("wrappedFlagUsages", wrappedFlagUsages)
 	cmd.SetUsageTemplate(usageTemplate)
 
