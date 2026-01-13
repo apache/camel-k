@@ -156,6 +156,9 @@ rules:
   - persistentvolumeclaims
   verbs:
   - create
+  - get
+  - list
+  - watch
 # Required by PDB trait
 - apiGroups:
   - policy

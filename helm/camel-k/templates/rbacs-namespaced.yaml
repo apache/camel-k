@@ -165,6 +165,9 @@ rules:
   - persistentvolumeclaims
   verbs:
   - create
+  - get
+  - list
+  - watch
 - apiGroups:
   - storage.k8s.io
   resources:
