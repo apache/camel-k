@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"strings"
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -431,4 +432,237 @@ func TestApplyInitContainerWithCACert(t *testing.T) {
 	assert.Equal(t, defaults.BaseImage(), initContainer.Image)
 
 	assert.Contains(t, initContainer.Command[0], "keytool")
+}
+
+func TestApplyInitContainerWithMultipleCACerts(t *testing.T) {
+	deployment := &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "my-it",
+			Labels: map[string]string{
+				v1.IntegrationLabel: "my-it",
+			},
+		},
+		Spec: appsv1.DeploymentSpec{
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{},
+			},
+		},
+	}
+	catalog, _ := camel.DefaultCatalog()
+	traitCatalog := NewCatalog(nil)
+	fakeClient, _ := internal.NewFakeClient(deployment)
+	environment := Environment{
+		Client:       fakeClient,
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Resources:    kubernetes.NewCollection(),
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "my-it",
+			},
+			Spec: v1.IntegrationSpec{
+				Traits: v1.Traits{
+					JVM: &trait.JVMTrait{
+						CACerts: []string{
+							"/etc/camel/conf.d/_secrets/ca1/ca.crt",
+							"/etc/camel/conf.d/_secrets/ca2/ca.crt",
+							"/etc/camel/conf.d/_secrets/ca3/ca.crt",
+						},
+						CACertPassword: "/etc/camel/conf.d/_secrets/truststore-pass/password",
+					},
+				},
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseRunning,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
+				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+	}
+	environment.Resources.Add(deployment)
+	environment.Platform.ResyncStatusFullConfig()
+	_, _, err := traitCatalog.apply(&environment)
+
+	require.NoError(t, err)
+
+	deploy := environment.Resources.GetDeploymentForIntegration(environment.Integration)
+	require.NotNil(t, deploy)
+
+	require.Len(t, deploy.Spec.Template.Spec.InitContainers, 1)
+	initContainer := deploy.Spec.Template.Spec.InitContainers[0]
+	assert.Equal(t, "generate-truststore", initContainer.Name)
+	assert.Equal(t, defaults.BaseImage(), initContainer.Image)
+
+	commandStr := strings.Join(initContainer.Command, " ")
+	assert.Contains(t, commandStr, "/bin/bash")
+	assert.Contains(t, commandStr, "keytool")
+	assert.Contains(t, commandStr, "custom-ca-0")
+	assert.Contains(t, commandStr, "custom-ca-1")
+	assert.Contains(t, commandStr, "custom-ca-2")
+	assert.Contains(t, commandStr, "/etc/camel/conf.d/_secrets/ca1/ca.crt")
+	assert.Contains(t, commandStr, "/etc/camel/conf.d/_secrets/ca2/ca.crt")
+	assert.Contains(t, commandStr, "/etc/camel/conf.d/_secrets/ca3/ca.crt")
+	assert.Contains(t, commandStr, "&&")
+}
+
+func TestApplyInitContainerWithCACertsBackwardCompatibility(t *testing.T) {
+	deployment := &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "my-it",
+			Labels: map[string]string{
+				v1.IntegrationLabel: "my-it",
+			},
+		},
+		Spec: appsv1.DeploymentSpec{
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{},
+			},
+		},
+	}
+	catalog, _ := camel.DefaultCatalog()
+	traitCatalog := NewCatalog(nil)
+	fakeClient, _ := internal.NewFakeClient(deployment)
+	environment := Environment{
+		Client:       fakeClient,
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Resources:    kubernetes.NewCollection(),
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "my-it",
+			},
+			Spec: v1.IntegrationSpec{
+				Traits: v1.Traits{
+					JVM: &trait.JVMTrait{
+						CACerts: []string{
+							"/etc/camel/conf.d/_secrets/ca1/ca.crt",
+						},
+						CACert:         "/etc/camel/conf.d/_secrets/ca2/ca.crt",
+						CACertPassword: "/etc/camel/conf.d/_secrets/truststore-pass/password",
+					},
+				},
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseRunning,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
+				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+	}
+	environment.Resources.Add(deployment)
+	environment.Platform.ResyncStatusFullConfig()
+	_, _, err := traitCatalog.apply(&environment)
+
+	require.NoError(t, err)
+
+	deploy := environment.Resources.GetDeploymentForIntegration(environment.Integration)
+	require.NotNil(t, deploy)
+
+	require.Len(t, deploy.Spec.Template.Spec.InitContainers, 1)
+	initContainer := deploy.Spec.Template.Spec.InitContainers[0]
+
+	commandStr := strings.Join(initContainer.Command, " ")
+	assert.Contains(t, commandStr, "/etc/camel/conf.d/_secrets/ca1/ca.crt")
+	assert.Contains(t, commandStr, "/etc/camel/conf.d/_secrets/ca2/ca.crt")
+}
+
+func TestApplyInitContainerWithSystemTruststore(t *testing.T) {
+	deployment := &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "my-it",
+			Labels: map[string]string{
+				v1.IntegrationLabel: "my-it",
+			},
+		},
+		Spec: appsv1.DeploymentSpec{
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{},
+			},
+		},
+	}
+	catalog, _ := camel.DefaultCatalog()
+	traitCatalog := NewCatalog(nil)
+	fakeClient, _ := internal.NewFakeClient(deployment)
+	environment := Environment{
+		Client:       fakeClient,
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Resources:    kubernetes.NewCollection(),
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "my-it",
+			},
+			Spec: v1.IntegrationSpec{
+				Traits: v1.Traits{
+					JVM: &trait.JVMTrait{
+						CACerts: []string{
+							"/etc/camel/conf.d/_secrets/my-ca/ca.crt",
+						},
+						CACertPassword:            "/etc/camel/conf.d/_secrets/truststore-pass/password",
+						CACertUseSystemTruststore: ptr.To(true),
+					},
+				},
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseRunning,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
+				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+	}
+	environment.Resources.Add(deployment)
+	environment.Platform.ResyncStatusFullConfig()
+	_, _, err := traitCatalog.apply(&environment)
+
+	require.NoError(t, err)
+
+	deploy := environment.Resources.GetDeploymentForIntegration(environment.Integration)
+	require.NotNil(t, deploy)
+
+	require.Len(t, deploy.Spec.Template.Spec.InitContainers, 1)
+	initContainer := deploy.Spec.Template.Spec.InitContainers[0]
+	assert.Equal(t, "generate-truststore", initContainer.Name)
+
+	commandStr := strings.Join(initContainer.Command, " ")
+	assert.Contains(t, commandStr, "/bin/bash")
+
+	assert.Contains(t, commandStr, "cp $JAVA_HOME/lib/security/cacerts")
+	assert.Contains(t, commandStr, "keytool -storepasswd")
+	assert.Contains(t, commandStr, "-storepass changeit")
+	assert.Contains(t, commandStr, "keytool -importcert")
+	assert.Contains(t, commandStr, "/etc/camel/conf.d/_secrets/my-ca/ca.crt")
+	assert.Contains(t, commandStr, "&&")
 }

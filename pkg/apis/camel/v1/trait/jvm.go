@@ -42,13 +42,18 @@ type JVMTrait struct {
 	Jar string `json:"jar,omitempty" property:"jar"`
 	// A list of JVM agents to download and execute with format `<agent-name>;<agent-url>[;<jvm-agent-options>]`.
 	Agents []string `json:"agents,omitempty" property:"agents"`
-	// Path to a PEM-encoded CA certificate file.
-	// Example: "/etc/camel/conf.d/_secrets/my-ca/ca.crt"
+	// A list of paths to PEM-encoded CA certificates to import into the truststore.
+	// Certificates must be mounted via the mount trait.
+	CACerts []string `json:"caCerts,omitempty" property:"ca-certs"`
+	// Path to a PEM-encoded CA certificate file. Use CACerts for multiple certificates.
 	CACert string `json:"caCert,omitempty" property:"ca-cert"`
 	// The path where the generated truststore will be mounted.
 	// Default: "/etc/camel/conf.d/_truststore"
 	CACertMountPath string `json:"caCertMountPath,omitempty" property:"ca-cert-mount-path"`
-	// Required when caCert is set. Path to a file containing the truststore password.
-	// Example: "/etc/camel/conf.d/_secrets/truststore-pass/password"
+	// Path to a custom truststore password file.
+	// Default: uses "changeit" if not specified.
 	CACertPassword string `json:"caCertPassword,omitempty" property:"ca-cert-password"`
+	// If true, the JDK's default cacerts is copied as the base truststore.
+	// Default: false (empty truststore).
+	CACertUseSystemTruststore *bool `json:"caCertUseSystemTruststore,omitempty" property:"ca-cert-use-system-truststore"`
 }
