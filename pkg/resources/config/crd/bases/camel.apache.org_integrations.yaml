@@ -8206,9 +8206,8 @@ spec:
                           type: string
                         type: array
                       caCert:
-                        description: |-
-                          Path to a PEM-encoded CA certificate file.
-                          Example: "/etc/camel/conf.d/_secrets/my-ca/ca.crt"
+                        description: Path to a PEM-encoded CA certificate file. Use
+                          CACerts for multiple certificates.
                         type: string
                       caCertMountPath:
                         description: |-
@@ -8217,9 +8216,21 @@ spec:
                         type: string
                       caCertPassword:
                         description: |-
-                          Required when caCert is set. Path to a file containing the truststore password.
-                          Example: "/etc/camel/conf.d/_secrets/truststore-pass/password"
+                          Path to a custom truststore password file.
+                          Default: uses "changeit" if not specified.
                         type: string
+                      caCertUseSystemTruststore:
+                        description: |-
+                          If true, the JDK's default cacerts is copied as the base truststore.
+                          Default: false (empty truststore).
+                        type: boolean
+                      caCerts:
+                        description: |-
+                          A list of paths to PEM-encoded CA certificates to import into the truststore.
+                          Certificates must be mounted via the mount trait.
+                        items:
+                          type: string
+                        type: array
                       classpath:
                         description: Additional JVM classpath (use `Linux` classpath
                           separator)
@@ -10521,9 +10532,8 @@ spec:
                           type: string
                         type: array
                       caCert:
-                        description: |-
-                          Path to a PEM-encoded CA certificate file.
-                          Example: "/etc/camel/conf.d/_secrets/my-ca/ca.crt"
+                        description: Path to a PEM-encoded CA certificate file. Use
+                          CACerts for multiple certificates.
                         type: string
                       caCertMountPath:
                         description: |-
@@ -10532,9 +10542,21 @@ spec:
                         type: string
                       caCertPassword:
                         description: |-
-                          Required when caCert is set. Path to a file containing the truststore password.
-                          Example: "/etc/camel/conf.d/_secrets/truststore-pass/password"
+                          Path to a custom truststore password file.
+                          Default: uses "changeit" if not specified.
                         type: string
+                      caCertUseSystemTruststore:
+                        description: |-
+                          If true, the JDK's default cacerts is copied as the base truststore.
+                          Default: false (empty truststore).
+                        type: boolean
+                      caCerts:
+                        description: |-
+                          A list of paths to PEM-encoded CA certificates to import into the truststore.
+                          Certificates must be mounted via the mount trait.
+                        items:
+                          type: string
+                        type: array
                       classpath:
                         description: Additional JVM classpath (use `Linux` classpath
                           separator)

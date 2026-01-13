@@ -17,17 +17,22 @@ limitations under the License.
 
 package trait
 
-import "errors"
-
-const (
-	defaultCACertMountPath   = "/etc/camel/conf.d/_truststore"
-	caCertVolumeName         = "jvm-truststore"
-	trustStoreName           = "truststore.jks"
-	truststorePasswordEnvVar = "TRUSTSTORE_PASSWORD"
+import (
+	"k8s.io/utils/ptr"
 )
 
-func (t *jvmTrait) hasCACert() bool {
-	return t.CACert != ""
+const (
+	defaultCACertMountPath    = "/etc/camel/conf.d/_truststore"
+	caCertVolumeName          = "jvm-truststore"
+	trustStoreName            = "truststore.jks"
+	truststorePasswordEnvVar  = "TRUSTSTORE_PASSWORD"
+	jdkCacertsPath            = "$JAVA_HOME/lib/security/cacerts"
+	jdkCacertsDefaultPassword = "changeit"
+)
+
+// hasCACerts returns true if any CA certificates are configured (either via CACerts array or CACert).
+func (t *jvmTrait) hasCACerts() bool {
+	return len(t.CACerts) > 0 || t.CACert != ""
 }
 
 func (t *jvmTrait) getCACertMountPath() string {
@@ -42,24 +47,50 @@ func (t *jvmTrait) getTrustStorePath() string {
 	return t.getCACertMountPath() + "/" + trustStoreName
 }
 
-// validateCACertConfig validates that the required file paths are provided.
-func (t *jvmTrait) validateCACertConfig() error {
-	if t.CACert == "" {
-		return nil
-	}
-	if t.CACertPassword == "" {
-		return errors.New("ca-cert-password is required when ca-cert is set")
-	}
-
-	return nil
+// hasCustomPassword returns true if a custom password file path is provided.
+func (t *jvmTrait) hasCustomPassword() bool {
+	return t.CACertPassword != ""
 }
 
-// getCACertPath returns the user-provided CA certificate file path.
-func (t *jvmTrait) getCACertPath() string {
-	return t.CACert
+// getEffectiveTruststorePassword returns the password for the truststore.
+func (t *jvmTrait) getEffectiveTruststorePassword() string {
+	if t.hasCustomPassword() {
+		return "$(cat " + t.CACertPassword + ")"
+	}
+
+	return jdkCacertsDefaultPassword
+}
+
+// getAllCACertPaths returns all configured CA certificate paths.
+// It merges the CACert (if set) with the CACerts array.
+func (t *jvmTrait) getAllCACertPaths() []string {
+	var paths []string
+
+	paths = append(paths, t.CACerts...)
+
+	if t.CACert != "" {
+		found := false
+		for _, p := range paths {
+			if p == t.CACert {
+				found = true
+
+				break
+			}
+		}
+		if !found {
+			paths = append(paths, t.CACert)
+		}
+	}
+
+	return paths
 }
 
 // getCACertPasswordPath returns the user-provided password file path.
 func (t *jvmTrait) getCACertPasswordPath() string {
 	return t.CACertPassword
+}
+
+// useSystemTruststore returns true if JDK's default cacerts should be used as base.
+func (t *jvmTrait) useSystemTruststore() bool {
+	return ptr.Deref(t.CACertUseSystemTruststore, false)
 }

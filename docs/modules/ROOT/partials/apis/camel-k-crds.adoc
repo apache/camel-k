@@ -7836,13 +7836,20 @@ The Jar dependency which will run the application. Leave it empty for managed In
 
 A list of JVM agents to download and execute with format `<agent-name>;<agent-url>[;<jvm-agent-options>]`.
 
+|`caCerts` +
+[]string
+|
+
+
+A list of paths to PEM-encoded CA certificates to import into the truststore.
+Certificates must be mounted via the mount trait.
+
 |`caCert` +
 string
 |
 
 
-Path to a PEM-encoded CA certificate file.
-Example: "/etc/camel/conf.d/_secrets/my-ca/ca.crt"
+Path to a PEM-encoded CA certificate file. Use CACerts for multiple certificates.
 
 |`caCertMountPath` +
 string
@@ -7857,8 +7864,16 @@ string
 |
 
 
-Required when caCert is set. Path to a file containing the truststore password.
-Example: "/etc/camel/conf.d/_secrets/truststore-pass/password"
+Path to a custom truststore password file.
+Default: uses "changeit" if not specified.
+
+|`caCertUseSystemTruststore` +
+bool
+|
+
+
+If true, the JDK's default cacerts is copied as the base truststore.
+Default: false (empty truststore).
 
 
 |===

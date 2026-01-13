@@ -92,19 +92,49 @@ func (t *initContainersTrait) Configure(e *Environment) (bool, *TraitCondition, 
 			t.tasks = append(t.tasks, agentDownloadTask)
 		}
 		// Set the CA cert truststore init container if configured
-		if ok && jvm.hasCACert() {
-			if err := jvm.validateCACertConfig(); err != nil {
-				return false, nil, err
+		if ok && jvm.hasCACerts() {
+			var allCommands []string
+			effectivePassword := jvm.getEffectiveTruststorePassword()
+
+			if jvm.useSystemTruststore() {
+				copyCmd := fmt.Sprintf("cp %s %s", jdkCacertsPath, jvm.getTrustStorePath())
+				allCommands = append(allCommands, copyCmd)
+
+				if jvm.hasCustomPassword() {
+					changePassCmd := fmt.Sprintf(
+						"keytool -storepasswd -keystore %s -storepass %s -new %s",
+						jvm.getTrustStorePath(), jdkCacertsDefaultPassword, effectivePassword,
+					)
+					allCommands = append(allCommands, changePassCmd)
+				}
 			}
-			// keytool reads password from file using -storepass:file
-			keytoolCmd := fmt.Sprintf(
-				"keytool -importcert -noprompt -alias custom-ca -storepass:file %s -keystore %s -file %s",
-				jvm.getCACertPasswordPath(), jvm.getTrustStorePath(), jvm.getCACertPath(),
-			)
+
+			certPaths := jvm.getAllCACertPaths()
+			for i, certPath := range certPaths {
+				var cmd string
+				if jvm.hasCustomPassword() {
+					cmd = fmt.Sprintf(
+						"keytool -importcert -noprompt -alias custom-ca-%d -storepass:file %s -keystore %s -file %s",
+						i, jvm.getCACertPasswordPath(), jvm.getTrustStorePath(), certPath,
+					)
+				} else {
+					cmd = fmt.Sprintf(
+						"keytool -importcert -noprompt -alias custom-ca-%d -storepass %s -keystore %s -file %s",
+						i, jdkCacertsDefaultPassword, jvm.getTrustStorePath(), certPath,
+					)
+				}
+				allCommands = append(allCommands, cmd)
+			}
+
+			fullCommand := strings.Join(allCommands, " && ")
+			// Wrap in bash shell when there are multiple commands or shell features are used
+			if len(allCommands) > 1 || jvm.useSystemTruststore() {
+				fullCommand = fmt.Sprintf("/bin/bash -c \"%s\"", fullCommand)
+			}
 			caCertTask := containerTask{
 				name:    "generate-truststore",
 				image:   defaults.BaseImage(),
-				command: keytoolCmd,
+				command: fullCommand,
 			}
 			t.tasks = append(t.tasks, caCertTask)
 		}
