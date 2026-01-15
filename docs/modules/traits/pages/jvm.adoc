@@ -62,29 +62,25 @@ Deprecated: no longer in use.
 | []string
 | A list of JVM agents to download and execute with format `<agent-name>;<agent-url>[;<jvm-agent-options>]`.
 
-| jvm.ca-certs
-| []string
-| A list of paths to PEM-encoded CA certificates to import into the truststore.
-Certificates must be mounted via the mount trait.
+| jvm.ca-certificates
+| []github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait.CACertConfig
+| A list of CA certificates to import into the truststore. Certificates must be mounted via the mount trait.
 
-| jvm.ca-cert
-| string
-| Path to a PEM-encoded CA certificate file. Use CACerts for multiple certificates.
+| jvm.base-truststore
+| github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait.BaseTruststore
+| Optional base truststore to use as the starting point for adding certificates.
 
 | jvm.ca-cert-mount-path
 | string
-| The path where the generated truststore will be mounted.
-Default: "/etc/camel/conf.d/_truststore"
+| The path where the generated truststore will be mounted (default `/etc/camel/conf.d/_truststore`).
+
+| jvm.ca-cert
+| string
+| Deprecated: Use CACertificates instead. Path to a PEM-encoded CA certificate file.
 
 | jvm.ca-cert-password
 | string
-| Path to a custom truststore password file.
-Default: uses "changeit" if not specified.
-
-| jvm.ca-cert-use-system-truststore
-| bool
-| If true, the JDK's default cacerts is copied as the base truststore.
-Default: false (empty truststore).
+| Deprecated: Use CACertificates instead. Path to a file containing the truststore password.
 
 |===
 

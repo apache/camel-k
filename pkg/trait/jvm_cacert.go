@@ -18,21 +18,28 @@ limitations under the License.
 package trait
 
 import (
-	"k8s.io/utils/ptr"
+	"errors"
+	"fmt"
+
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 )
 
 const (
-	defaultCACertMountPath    = "/etc/camel/conf.d/_truststore"
-	caCertVolumeName          = "jvm-truststore"
-	trustStoreName            = "truststore.jks"
-	truststorePasswordEnvVar  = "TRUSTSTORE_PASSWORD"
-	jdkCacertsPath            = "$JAVA_HOME/lib/security/cacerts"
-	jdkCacertsDefaultPassword = "changeit"
+	defaultCACertMountPath = "/etc/camel/conf.d/_truststore"
+	caCertVolumeName       = "jvm-truststore"
+	trustStoreName         = "truststore.jks"
 )
 
-// hasCACerts returns true if any CA certificates are configured (either via CACerts array or CACert).
+// CACertEntry represents a resolved CA certificate configuration.
+type CACertEntry struct {
+	CertPath     string
+	PasswordPath string
+}
+
+// hasCACerts returns true if any CA certificates are configured.
 func (t *jvmTrait) hasCACerts() bool {
-	return len(t.CACerts) > 0 || t.CACert != ""
+	//nolint:staticcheck
+	return len(t.CACertificates) > 0 || t.CACert != ""
 }
 
 func (t *jvmTrait) getCACertMountPath() string {
@@ -47,50 +54,77 @@ func (t *jvmTrait) getTrustStorePath() string {
 	return t.getCACertMountPath() + "/" + trustStoreName
 }
 
-// hasCustomPassword returns true if a custom password file path is provided.
-func (t *jvmTrait) hasCustomPassword() bool {
-	return t.CACertPassword != ""
+// hasBaseTruststore returns true if a base truststore is configured.
+func (t *jvmTrait) hasBaseTruststore() bool {
+	return t.BaseTruststore != nil && t.BaseTruststore.TruststorePath != "" && t.BaseTruststore.PasswordPath != ""
 }
 
-// getEffectiveTruststorePassword returns the password for the truststore.
-func (t *jvmTrait) getEffectiveTruststorePassword() string {
-	if t.hasCustomPassword() {
-		return "$(cat " + t.CACertPassword + ")"
+// getBaseTruststore returns the base truststore configuration if set.
+func (t *jvmTrait) getBaseTruststore() *traitv1.BaseTruststore {
+	return t.BaseTruststore
+}
+
+// getAllCACertEntries returns all configured CA certificate entries.
+func (t *jvmTrait) getAllCACertEntries() []CACertEntry {
+	var entries []CACertEntry
+
+	for _, cert := range t.CACertificates {
+		if cert.CertPath != "" && cert.PasswordPath != "" {
+			entries = append(entries, CACertEntry{
+				CertPath:     cert.CertPath,
+				PasswordPath: cert.PasswordPath,
+			})
+		}
 	}
 
-	return jdkCacertsDefaultPassword
-}
-
-// getAllCACertPaths returns all configured CA certificate paths.
-// It merges the CACert (if set) with the CACerts array.
-func (t *jvmTrait) getAllCACertPaths() []string {
-	var paths []string
-
-	paths = append(paths, t.CACerts...)
-
-	if t.CACert != "" {
+	//nolint:staticcheck
+	if t.CACert != "" && t.CACertPassword != "" {
 		found := false
-		for _, p := range paths {
-			if p == t.CACert {
+		for _, e := range entries {
+			//nolint:staticcheck
+			if e.CertPath == t.CACert {
 				found = true
 
 				break
 			}
 		}
 		if !found {
-			paths = append(paths, t.CACert)
+			entries = append(entries, CACertEntry{
+				//nolint:staticcheck
+				CertPath: t.CACert,
+				//nolint:staticcheck
+				PasswordPath: t.CACertPassword,
+			})
 		}
 	}
 
-	return paths
+	return entries
 }
 
-// getCACertPasswordPath returns the user-provided password file path.
-func (t *jvmTrait) getCACertPasswordPath() string {
-	return t.CACertPassword
-}
+// validateCACertConfig validates the CA certificate configuration.
+func (t *jvmTrait) validateCACertConfig() error {
+	for i, cert := range t.CACertificates {
+		if cert.CertPath != "" && cert.PasswordPath == "" {
+			return fmt.Errorf("CACertificates[%d]: password path is required when certificate path is specified", i)
+		}
+		if cert.CertPath == "" && cert.PasswordPath != "" {
+			return fmt.Errorf("CACertificates[%d]: certificate path is required when password path is specified", i)
+		}
+	}
 
-// useSystemTruststore returns true if JDK's default cacerts should be used as base.
-func (t *jvmTrait) useSystemTruststore() bool {
-	return ptr.Deref(t.CACertUseSystemTruststore, false)
+	//nolint:staticcheck
+	if t.CACert != "" && t.CACertPassword == "" {
+		return errors.New("ca-cert-password is required when ca-cert is specified")
+	}
+
+	if t.BaseTruststore != nil {
+		if t.BaseTruststore.TruststorePath != "" && t.BaseTruststore.PasswordPath == "" {
+			return errors.New("base-truststore password path is required when truststore path is specified")
+		}
+		if t.BaseTruststore.TruststorePath == "" && t.BaseTruststore.PasswordPath != "" {
+			return errors.New("base-truststore truststore path is required when password path is specified")
+		}
+	}
+
+	return nil
 }

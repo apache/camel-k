@@ -17,6 +17,22 @@ limitations under the License.
 
 package trait
 
+// CACertConfig associates a CA certificate with its password file.
+type CACertConfig struct {
+	// Path to the PEM-encoded CA certificate file to import.
+	CertPath string `json:"certPath,omitempty" property:"cert-path"`
+	// Path to a file containing the password for importing this certificate.
+	PasswordPath string `json:"passwordPath,omitempty" property:"password-path"`
+}
+
+// BaseTruststore represents an existing truststore to use as the base for adding certificates.
+type BaseTruststore struct {
+	// Path to the base truststore file.
+	TruststorePath string `json:"truststorePath,omitempty" property:"truststore-path"`
+	// Path to a file containing the password for the base truststore.
+	PasswordPath string `json:"passwordPath,omitempty" property:"password-path"`
+}
+
 // The JVM trait is used to configure the JVM that runs the Integration. This trait is configured only for Integration and related IntegrationKits
 // (bound to a container image) built by Camel K operator. If the system detects the usage of a different container image (ie, built externally), then, the
 // trait is disabled by the platform.
@@ -42,18 +58,14 @@ type JVMTrait struct {
 	Jar string `json:"jar,omitempty" property:"jar"`
 	// A list of JVM agents to download and execute with format `<agent-name>;<agent-url>[;<jvm-agent-options>]`.
 	Agents []string `json:"agents,omitempty" property:"agents"`
-	// A list of paths to PEM-encoded CA certificates to import into the truststore.
-	// Certificates must be mounted via the mount trait.
-	CACerts []string `json:"caCerts,omitempty" property:"ca-certs"`
-	// Path to a PEM-encoded CA certificate file. Use CACerts for multiple certificates.
-	CACert string `json:"caCert,omitempty" property:"ca-cert"`
-	// The path where the generated truststore will be mounted.
-	// Default: "/etc/camel/conf.d/_truststore"
+	// A list of CA certificates to import into the truststore. Certificates must be mounted via the mount trait.
+	CACertificates []CACertConfig `json:"caCertificates,omitempty" property:"ca-certificates"`
+	// Optional base truststore to use as the starting point for adding certificates.
+	BaseTruststore *BaseTruststore `json:"baseTruststore,omitempty" property:"base-truststore"`
+	// The path where the generated truststore will be mounted (default `/etc/camel/conf.d/_truststore`).
 	CACertMountPath string `json:"caCertMountPath,omitempty" property:"ca-cert-mount-path"`
-	// Path to a custom truststore password file.
-	// Default: uses "changeit" if not specified.
+	// Deprecated: Use CACertificates instead. Path to a PEM-encoded CA certificate file.
+	CACert string `json:"caCert,omitempty" property:"ca-cert"`
+	// Deprecated: Use CACertificates instead. Path to a file containing the truststore password.
 	CACertPassword string `json:"caCertPassword,omitempty" property:"ca-cert-password"`
-	// If true, the JDK's default cacerts is copied as the base truststore.
-	// Default: false (empty truststore).
-	CACertUseSystemTruststore *bool `json:"caCertUseSystemTruststore,omitempty" property:"ca-cert-use-system-truststore"`
 }

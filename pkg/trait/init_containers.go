@@ -94,41 +94,34 @@ func (t *initContainersTrait) Configure(e *Environment) (bool, *TraitCondition, 
 		// Set the CA cert truststore init container if configured
 		if ok && jvm.hasCACerts() {
 			var allCommands []string
-			effectivePassword := jvm.getEffectiveTruststorePassword()
 
-			if jvm.useSystemTruststore() {
-				copyCmd := fmt.Sprintf("cp %s %s", jdkCacertsPath, jvm.getTrustStorePath())
+			if jvm.hasBaseTruststore() {
+				baseTruststore := jvm.getBaseTruststore()
+				copyCmd := fmt.Sprintf("cp %s %s", baseTruststore.TruststorePath, jvm.getTrustStorePath())
 				allCommands = append(allCommands, copyCmd)
 
-				if jvm.hasCustomPassword() {
+				entries := jvm.getAllCACertEntries()
+				if len(entries) > 0 {
 					changePassCmd := fmt.Sprintf(
-						"keytool -storepasswd -keystore %s -storepass %s -new %s",
-						jvm.getTrustStorePath(), jdkCacertsDefaultPassword, effectivePassword,
+						"keytool -storepasswd -keystore %s -storepass:file %s -new $(cat %s)",
+						jvm.getTrustStorePath(), baseTruststore.PasswordPath, entries[0].PasswordPath,
 					)
 					allCommands = append(allCommands, changePassCmd)
 				}
 			}
 
-			certPaths := jvm.getAllCACertPaths()
-			for i, certPath := range certPaths {
-				var cmd string
-				if jvm.hasCustomPassword() {
-					cmd = fmt.Sprintf(
-						"keytool -importcert -noprompt -alias custom-ca-%d -storepass:file %s -keystore %s -file %s",
-						i, jvm.getCACertPasswordPath(), jvm.getTrustStorePath(), certPath,
-					)
-				} else {
-					cmd = fmt.Sprintf(
-						"keytool -importcert -noprompt -alias custom-ca-%d -storepass %s -keystore %s -file %s",
-						i, jdkCacertsDefaultPassword, jvm.getTrustStorePath(), certPath,
-					)
-				}
+			certEntries := jvm.getAllCACertEntries()
+			for i, entry := range certEntries {
+				cmd := fmt.Sprintf(
+					"keytool -importcert -noprompt -alias custom-ca-%d -storepass:file %s -keystore %s -file %s",
+					i, entry.PasswordPath, jvm.getTrustStorePath(), entry.CertPath,
+				)
 				allCommands = append(allCommands, cmd)
 			}
 
 			fullCommand := strings.Join(allCommands, " && ")
 			// Wrap in bash shell when there are multiple commands or shell features are used
-			if len(allCommands) > 1 || jvm.useSystemTruststore() {
+			if len(allCommands) > 1 || jvm.hasBaseTruststore() {
 				fullCommand = fmt.Sprintf("/bin/bash -c \"%s\"", fullCommand)
 			}
 			caCertTask := containerTask{
