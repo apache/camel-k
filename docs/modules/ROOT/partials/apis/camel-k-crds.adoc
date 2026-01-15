@@ -6445,6 +6445,37 @@ integration pod(s) should not be co-located with.
 
 |===
 
+[#_camel_apache_org_v1_trait_BaseTruststore]
+=== BaseTruststore
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_trait_JVMTrait, JVMTrait>>
+
+BaseTruststore represents an existing truststore to use as the base for adding certificates.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`truststorePath` +
+string
+|
+
+
+Path to the base truststore file.
+
+|`passwordPath` +
+string
+|
+
+
+Path to a file containing the password for the base truststore.
+
+
+|===
+
 [#_camel_apache_org_v1_trait_BuilderTrait]
 === BuilderTrait
 
@@ -6624,6 +6655,37 @@ When using `pod` strategy, annotation to use for the builder pod.
 
 
 The list of manifest platforms to use to build a container image (default `linux/amd64`).
+
+
+|===
+
+[#_camel_apache_org_v1_trait_CACertConfig]
+=== CACertConfig
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_trait_JVMTrait, JVMTrait>>
+
+CACertConfig associates a CA certificate with its password file.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`certPath` +
+string
+|
+
+
+Path to the PEM-encoded CA certificate file to import.
+
+|`passwordPath` +
+string
+|
+
+
+Path to a file containing the password for importing this certificate.
 
 
 |===
@@ -7836,44 +7898,40 @@ The Jar dependency which will run the application. Leave it empty for managed In
 
 A list of JVM agents to download and execute with format `<agent-name>;<agent-url>[;<jvm-agent-options>]`.
 
-|`caCerts` +
-[]string
+|`caCertificates` +
+*xref:#_camel_apache_org_v1_trait_CACertConfig[[\]CACertConfig]*
 |
 
 
-A list of paths to PEM-encoded CA certificates to import into the truststore.
-Certificates must be mounted via the mount trait.
+A list of CA certificates to import into the truststore. Certificates must be mounted via the mount trait.
 
-|`caCert` +
-string
+|`baseTruststore` +
+*xref:#_camel_apache_org_v1_trait_BaseTruststore[BaseTruststore]*
 |
 
 
-Path to a PEM-encoded CA certificate file. Use CACerts for multiple certificates.
+Optional base truststore to use as the starting point for adding certificates.
 
 |`caCertMountPath` +
 string
 |
 
 
-The path where the generated truststore will be mounted.
-Default: "/etc/camel/conf.d/_truststore"
+The path where the generated truststore will be mounted (default `/etc/camel/conf.d/_truststore`).
+
+|`caCert` +
+string
+|
+
+
+Deprecated: Use CACertificates instead. Path to a PEM-encoded CA certificate file.
 
 |`caCertPassword` +
 string
 |
 
 
-Path to a custom truststore password file.
-Default: uses "changeit" if not specified.
-
-|`caCertUseSystemTruststore` +
-bool
-|
-
-
-If true, the JDK's default cacerts is copied as the base truststore.
-Default: false (empty truststore).
+Deprecated: Use CACertificates instead. Path to a file containing the truststore password.
 
 
 |===

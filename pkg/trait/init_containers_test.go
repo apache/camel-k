@@ -394,8 +394,12 @@ func TestApplyInitContainerWithCACert(t *testing.T) {
 			Spec: v1.IntegrationSpec{
 				Traits: v1.Traits{
 					JVM: &trait.JVMTrait{
-						CACert:         "/etc/camel/conf.d/_secrets/my-ca/ca.crt",
-						CACertPassword: "/etc/camel/conf.d/_secrets/truststore-pass/password",
+						CACertificates: []trait.CACertConfig{
+							{
+								CertPath:     "/etc/camel/conf.d/_secrets/my-ca/ca.crt",
+								PasswordPath: "/etc/camel/conf.d/_secrets/truststore-pass/password",
+							},
+						},
 					},
 				},
 			},
@@ -463,12 +467,20 @@ func TestApplyInitContainerWithMultipleCACerts(t *testing.T) {
 			Spec: v1.IntegrationSpec{
 				Traits: v1.Traits{
 					JVM: &trait.JVMTrait{
-						CACerts: []string{
-							"/etc/camel/conf.d/_secrets/ca1/ca.crt",
-							"/etc/camel/conf.d/_secrets/ca2/ca.crt",
-							"/etc/camel/conf.d/_secrets/ca3/ca.crt",
+						CACertificates: []trait.CACertConfig{
+							{
+								CertPath:     "/etc/camel/conf.d/_secrets/ca1/ca.crt",
+								PasswordPath: "/etc/camel/conf.d/_secrets/pass1/password",
+							},
+							{
+								CertPath:     "/etc/camel/conf.d/_secrets/ca2/ca.crt",
+								PasswordPath: "/etc/camel/conf.d/_secrets/pass2/password",
+							},
+							{
+								CertPath:     "/etc/camel/conf.d/_secrets/ca3/ca.crt",
+								PasswordPath: "/etc/camel/conf.d/_secrets/pass3/password",
+							},
 						},
-						CACertPassword: "/etc/camel/conf.d/_secrets/truststore-pass/password",
 					},
 				},
 			},
@@ -545,11 +557,14 @@ func TestApplyInitContainerWithCACertsBackwardCompatibility(t *testing.T) {
 			Spec: v1.IntegrationSpec{
 				Traits: v1.Traits{
 					JVM: &trait.JVMTrait{
-						CACerts: []string{
-							"/etc/camel/conf.d/_secrets/ca1/ca.crt",
+						CACertificates: []trait.CACertConfig{
+							{
+								CertPath:     "/etc/camel/conf.d/_secrets/ca1/ca.crt",
+								PasswordPath: "/etc/camel/conf.d/_secrets/pass1/password",
+							},
 						},
 						CACert:         "/etc/camel/conf.d/_secrets/ca2/ca.crt",
-						CACertPassword: "/etc/camel/conf.d/_secrets/truststore-pass/password",
+						CACertPassword: "/etc/camel/conf.d/_secrets/pass2/password",
 					},
 				},
 			},
@@ -588,7 +603,7 @@ func TestApplyInitContainerWithCACertsBackwardCompatibility(t *testing.T) {
 	assert.Contains(t, commandStr, "/etc/camel/conf.d/_secrets/ca2/ca.crt")
 }
 
-func TestApplyInitContainerWithSystemTruststore(t *testing.T) {
+func TestApplyInitContainerWithBaseTruststore(t *testing.T) {
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "my-it",
@@ -617,11 +632,16 @@ func TestApplyInitContainerWithSystemTruststore(t *testing.T) {
 			Spec: v1.IntegrationSpec{
 				Traits: v1.Traits{
 					JVM: &trait.JVMTrait{
-						CACerts: []string{
-							"/etc/camel/conf.d/_secrets/my-ca/ca.crt",
+						CACertificates: []trait.CACertConfig{
+							{
+								CertPath:     "/etc/camel/conf.d/_secrets/my-ca/ca.crt",
+								PasswordPath: "/etc/camel/conf.d/_secrets/truststore-pass/password",
+							},
 						},
-						CACertPassword:            "/etc/camel/conf.d/_secrets/truststore-pass/password",
-						CACertUseSystemTruststore: ptr.To(true),
+						BaseTruststore: &trait.BaseTruststore{
+							TruststorePath: "/opt/java/openjdk/lib/security/cacerts",
+							PasswordPath:   "/etc/camel/conf.d/_secrets/base-truststore-pass/password",
+						},
 					},
 				},
 			},
@@ -659,9 +679,9 @@ func TestApplyInitContainerWithSystemTruststore(t *testing.T) {
 	commandStr := strings.Join(initContainer.Command, " ")
 	assert.Contains(t, commandStr, "/bin/bash")
 
-	assert.Contains(t, commandStr, "cp $JAVA_HOME/lib/security/cacerts")
+	assert.Contains(t, commandStr, "cp /opt/java/openjdk/lib/security/cacerts")
 	assert.Contains(t, commandStr, "keytool -storepasswd")
-	assert.Contains(t, commandStr, "-storepass changeit")
+	assert.Contains(t, commandStr, "-storepass:file /etc/camel/conf.d/_secrets/base-truststore-pass/password")
 	assert.Contains(t, commandStr, "keytool -importcert")
 	assert.Contains(t, commandStr, "/etc/camel/conf.d/_secrets/my-ca/ca.crt")
 	assert.Contains(t, commandStr, "&&")

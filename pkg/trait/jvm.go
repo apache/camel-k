@@ -104,7 +104,25 @@ func (t *jvmTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		t.jvmAgentArgs = jvmAgentArgs
 	}
 
-	return true, nil, nil
+	if err := t.validateCACertConfig(); err != nil {
+		return false, nil, err
+	}
+
+	var condition *TraitCondition
+	//nolint:staticcheck
+	if t.CACert != "" || t.CACertPassword != "" {
+		m := "The ca-cert and ca-cert-password parameters are deprecated and may be removed in future releases. Use ca-certificates instead."
+		t.L.Info(m)
+		condition = NewIntegrationCondition(
+			"JVM",
+			v1.IntegrationConditionTraitInfo,
+			corev1.ConditionTrue,
+			TraitConfigurationReason,
+			m,
+		)
+	}
+
+	return true, condition, nil
 }
 
 func (t *jvmTrait) Apply(e *Environment) error {
@@ -376,12 +394,19 @@ func getLegacyCamelQuarkusDependenciesPaths() *sets.Set {
 
 // configureCACert configures the CA certificate truststore and returns the JVM arguments.
 func (t *jvmTrait) configureCaCert() []string {
-	if t.CACert == "" {
+	if !t.hasCACerts() {
+		return nil
+	}
+
+	// Get the password path from the first certificate entry
+	// All certificates use the same truststore, so we use the first entry's password
+	entries := t.getAllCACertEntries()
+	if len(entries) == 0 {
 		return nil
 	}
 
 	return []string{
 		"-Djavax.net.ssl.trustStore=" + t.getTrustStorePath(),
-		fmt.Sprintf("-Djavax.net.ssl.trustStorePassword=$(%s)", truststorePasswordEnvVar),
+		fmt.Sprintf("-Djavax.net.ssl.trustStorePassword=$(cat %s)", entries[0].PasswordPath),
 	}
 }
