@@ -526,6 +526,12 @@ func TestApplyInitContainerWithMultipleCACerts(t *testing.T) {
 	assert.Contains(t, commandStr, "/etc/camel/conf.d/_secrets/ca2/ca.crt")
 	assert.Contains(t, commandStr, "/etc/camel/conf.d/_secrets/ca3/ca.crt")
 	assert.Contains(t, commandStr, "&&")
+
+	firstPasswordCount := strings.Count(commandStr, "/etc/camel/conf.d/_secrets/pass1/password")
+	assert.Equal(t, 3, firstPasswordCount, "All 3 keytool commands should use the first certificate's password")
+
+	assert.NotContains(t, commandStr, "storepass:file /etc/camel/conf.d/_secrets/pass2/password")
+	assert.NotContains(t, commandStr, "storepass:file /etc/camel/conf.d/_secrets/pass3/password")
 }
 
 func TestApplyInitContainerWithCACertsBackwardCompatibility(t *testing.T) {

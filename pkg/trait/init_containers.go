@@ -111,10 +111,15 @@ func (t *initContainersTrait) Configure(e *Environment) (bool, *TraitCondition, 
 			}
 
 			certEntries := jvm.getAllCACertEntries()
+			// Use the first certificate's password for all imports since they share the same truststore
+			truststorePassPath := ""
+			if len(certEntries) > 0 {
+				truststorePassPath = certEntries[0].PasswordPath
+			}
 			for i, entry := range certEntries {
 				cmd := fmt.Sprintf(
 					"keytool -importcert -noprompt -alias custom-ca-%d -storepass:file %s -keystore %s -file %s",
-					i, entry.PasswordPath, jvm.getTrustStorePath(), entry.CertPath,
+					i, truststorePassPath, jvm.getTrustStorePath(), entry.CertPath,
 				)
 				allCommands = append(allCommands, cmd)
 			}
