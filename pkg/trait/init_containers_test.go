@@ -686,9 +686,9 @@ func TestApplyInitContainerWithBaseTruststore(t *testing.T) {
 	assert.Contains(t, commandStr, "/bin/bash")
 
 	assert.Contains(t, commandStr, "cp /opt/java/openjdk/lib/security/cacerts")
-	assert.Contains(t, commandStr, "keytool -storepasswd")
-	assert.Contains(t, commandStr, "-storepass:file /etc/camel/conf.d/_secrets/base-truststore-pass/password")
+	assert.NotContains(t, commandStr, "keytool -storepasswd")
 	assert.Contains(t, commandStr, "keytool -importcert")
+	assert.Contains(t, commandStr, "-storepass:file /etc/camel/conf.d/_secrets/base-truststore-pass/password")
 	assert.Contains(t, commandStr, "/etc/camel/conf.d/_secrets/my-ca/ca.crt")
 	assert.Contains(t, commandStr, "&&")
 }

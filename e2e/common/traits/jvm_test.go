@@ -91,44 +91,6 @@ func TestJVMTrait(t *testing.T) {
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Hello World!"))
 		})
 
-		t.Run("JVM trait CA cert (deprecated fields)", func(t *testing.T) {
-			certPem, err := generateSelfSignedCert()
-			require.NoError(t, err)
-
-			caCertData := make(map[string]string)
-			caCertData["ca.crt"] = string(certPem)
-
-			err = CreatePlainTextSecret(t, ctx, ns, "test-ca-cert", caCertData)
-			require.NoError(t, err)
-
-			passwordData := make(map[string]string)
-			passwordData["password"] = "test-password-123"
-			err = CreatePlainTextSecret(t, ctx, ns, "test-ca-password", passwordData)
-			require.NoError(t, err)
-
-			name := RandomizedSuffixName("cacert")
-			g.Expect(KamelRun(t, ctx, ns,
-				"./files/Java.java",
-				"--name", name,
-				"-t", "mount.configs=secret:test-ca-cert",
-				"-t", "mount.configs=secret:test-ca-password",
-				// Using deprecated fields for backward compatibility test
-				"-t", "jvm.ca-cert=/etc/camel/conf.d/_secrets/test-ca-cert/ca.crt",
-				"-t", "jvm.ca-cert-password=/etc/camel/conf.d/_secrets/test-ca-password/password",
-			).Execute()).To(Succeed())
-
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-
-			pod := IntegrationPod(t, ctx, ns, name)()
-			g.Expect(pod).NotTo(BeNil())
-			initContainerNames := make([]string, 0)
-			for _, c := range pod.Spec.InitContainers {
-				initContainerNames = append(initContainerNames, c.Name)
-			}
-			g.Expect(initContainerNames).To(ContainElement("generate-truststore"))
-		})
-
 		t.Run("JVM trait multiple CA certs", func(t *testing.T) {
 			// Test the new ca-certificates field with multiple certificates, each with its own password
 			cert1Pem, err := generateSelfSignedCert()

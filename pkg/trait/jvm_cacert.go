@@ -104,11 +104,8 @@ func (t *jvmTrait) getAllCACertEntries() []CACertEntry {
 // validateCACertConfig validates the CA certificate configuration.
 func (t *jvmTrait) validateCACertConfig() error {
 	for i, cert := range t.CACertificates {
-		if cert.CertPath != "" && cert.PasswordPath == "" {
-			return fmt.Errorf("CACertificates[%d]: password path is required when certificate path is specified", i)
-		}
-		if cert.CertPath == "" && cert.PasswordPath != "" {
-			return fmt.Errorf("CACertificates[%d]: certificate path is required when password path is specified", i)
+		if cert.CertPath == "" || cert.PasswordPath == "" {
+			return fmt.Errorf("CACertificates[%d]: both cert-path and password-path are required", i)
 		}
 	}
 
@@ -118,11 +115,10 @@ func (t *jvmTrait) validateCACertConfig() error {
 	}
 
 	if t.BaseTruststore != nil {
-		if t.BaseTruststore.TruststorePath != "" && t.BaseTruststore.PasswordPath == "" {
-			return errors.New("base-truststore password path is required when truststore path is specified")
-		}
-		if t.BaseTruststore.TruststorePath == "" && t.BaseTruststore.PasswordPath != "" {
-			return errors.New("base-truststore truststore path is required when password path is specified")
+		hasTruststorePath := t.BaseTruststore.TruststorePath != ""
+		hasPasswordPath := t.BaseTruststore.PasswordPath != ""
+		if hasTruststorePath != hasPasswordPath {
+			return errors.New("base-truststore: both truststore-path and password-path are required")
 		}
 	}
 

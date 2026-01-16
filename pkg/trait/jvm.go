@@ -398,15 +398,22 @@ func (t *jvmTrait) configureCaCert() []string {
 		return nil
 	}
 
-	// Get the password path from the first certificate entry
-	// All certificates use the same truststore, so we use the first entry's password
-	entries := t.getAllCACertEntries()
-	if len(entries) == 0 {
-		return nil
+	// Determine which password to use for the truststore:
+	// If base truststore exists, use its password (we keep the original truststore password)
+	// Otherwise, use the first certificate's password
+	var truststorePassPath string
+	if t.hasBaseTruststore() {
+		truststorePassPath = t.getBaseTruststore().PasswordPath
+	} else {
+		entries := t.getAllCACertEntries()
+		if len(entries) == 0 {
+			return nil
+		}
+		truststorePassPath = entries[0].PasswordPath
 	}
 
 	return []string{
 		"-Djavax.net.ssl.trustStore=" + t.getTrustStorePath(),
-		fmt.Sprintf("-Djavax.net.ssl.trustStorePassword=$(cat %s)", entries[0].PasswordPath),
+		fmt.Sprintf("-Djavax.net.ssl.trustStorePassword=$(cat %s)", truststorePassPath),
 	}
 }
