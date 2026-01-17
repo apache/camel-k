@@ -21,6 +21,8 @@ package trait
 // such as sidecar injection and outbound IP ranges.
 //
 // +camel-k:trait=istio.
+//
+//nolint:godoclint
 type IstioTrait struct {
 	Trait `json:",inline" property:",squash"`
 

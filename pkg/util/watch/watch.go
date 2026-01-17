@@ -127,18 +127,12 @@ func isAllowed(lastEvent, event *corev1.Event, baseTime int64) bool {
 		return true
 	}
 
-	curTime := event.CreationTimestamp.UnixNano()
-	if event.LastTimestamp.UnixNano() > curTime {
-		curTime = event.LastTimestamp.UnixNano()
-	}
+	curTime := max(event.LastTimestamp.UnixNano(), event.CreationTimestamp.UnixNano())
 	if curTime < baseTime {
 		return false
 	}
 
-	lastTime := lastEvent.CreationTimestamp.UnixNano()
-	if lastEvent.LastTimestamp.UnixNano() > lastTime {
-		lastTime = lastEvent.LastTimestamp.UnixNano()
-	}
+	lastTime := max(lastEvent.LastTimestamp.UnixNano(), lastEvent.CreationTimestamp.UnixNano())
 	if curTime < lastTime {
 		return false
 	}

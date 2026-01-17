@@ -20,6 +20,8 @@ package trait
 // The KEDA trait allows you to configure KEDA autoscalers to scale up and down based of events.
 //
 // +camel-k:trait=keda.
+//
+//nolint:godoclint
 type KedaTrait struct {
 	Trait `json:",inline" property:",squash"`
 

@@ -184,7 +184,7 @@ func (c *CamelCatalogSpec) GetRuntimeVersion() string {
 	return c.Runtime.Version
 }
 
-// GetRuntimeVersion returns the Camel K runtime version of the catalog.
+// GetRuntimeProvider returns the Camel K runtime provider of the catalog.
 func (c *CamelCatalogSpec) GetRuntimeProvider() RuntimeProvider {
 	return c.Runtime.Provider
 }

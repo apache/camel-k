@@ -21,12 +21,19 @@ package v1
 
 // RepositoryApplyConfiguration represents a declarative configuration of the Repository type for use
 // with apply.
+//
+// Repository defines a Maven repository.
 type RepositoryApplyConfiguration struct {
-	ID        *string                             `json:"id,omitempty"`
-	Name      *string                             `json:"name,omitempty"`
-	URL       *string                             `json:"url,omitempty"`
+	// identifies the repository
+	ID *string `json:"id,omitempty"`
+	// name of the repository
+	Name *string `json:"name,omitempty"`
+	// location of the repository
+	URL *string `json:"url,omitempty"`
+	// can use snapshot
 	Snapshots *RepositoryPolicyApplyConfiguration `json:"snapshots,omitempty"`
-	Releases  *RepositoryPolicyApplyConfiguration `json:"releases,omitempty"`
+	// can use stable releases
+	Releases *RepositoryPolicyApplyConfiguration `json:"releases,omitempty"`
 }
 
 // RepositoryApplyConfiguration constructs a declarative configuration of the Repository type for use with

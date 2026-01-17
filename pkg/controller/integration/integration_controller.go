@@ -310,11 +310,11 @@ func add(ctx context.Context, mgr manager.Manager, c client.Client, r reconcile.
 	// Watch for all the resources
 	watchIntegrationResources(c, b)
 	// Watch for the CronJob conditionally
-	if ok, err := kubernetes.IsAPIResourceInstalled(c, batchv1.SchemeGroupVersion.String(), reflect.TypeOf(batchv1.CronJob{}).Name()); ok && err == nil {
+	if ok, err := kubernetes.IsAPIResourceInstalled(c, batchv1.SchemeGroupVersion.String(), reflect.TypeFor[batchv1.CronJob]().Name()); ok && err == nil {
 		watchCronJobResources(b)
 	}
 	// Watch for the Knative Services conditionally
-	if ok, err := kubernetes.IsAPIResourceInstalled(c, servingv1.SchemeGroupVersion.String(), reflect.TypeOf(servingv1.Service{}).Name()); err != nil {
+	if ok, err := kubernetes.IsAPIResourceInstalled(c, servingv1.SchemeGroupVersion.String(), reflect.TypeFor[servingv1.Service]().Name()); err != nil {
 		return err
 	} else if ok {
 		if err = watchKnativeResources(ctx, c, b); err != nil {
@@ -419,7 +419,7 @@ func watchCronJobResources(b *builder.Builder) {
 
 func watchKnativeResources(ctx context.Context, c client.Client, b *builder.Builder) error {
 	// Watch for the owned Knative Services conditionally
-	ok, err := kubernetes.IsAPIResourceInstalled(c, servingv1.SchemeGroupVersion.String(), reflect.TypeOf(servingv1.Service{}).Name())
+	ok, err := kubernetes.IsAPIResourceInstalled(c, servingv1.SchemeGroupVersion.String(), reflect.TypeFor[servingv1.Service]().Name())
 	if err != nil {
 		return err
 	}

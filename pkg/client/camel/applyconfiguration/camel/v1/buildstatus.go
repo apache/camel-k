@@ -26,19 +26,35 @@ import (
 
 // BuildStatusApplyConfiguration represents a declarative configuration of the BuildStatus type for use
 // with apply.
+//
+// BuildStatus defines the observed state of Build.
 type BuildStatusApplyConfiguration struct {
-	ObservedGeneration *int64                             `json:"observedGeneration,omitempty"`
-	Phase              *camelv1.BuildPhase                `json:"phase,omitempty"`
-	Image              *string                            `json:"image,omitempty"`
-	Digest             *string                            `json:"digest,omitempty"`
-	RootImage          *string                            `json:"rootImage,omitempty"`
-	BaseImage          *string                            `json:"baseImage,omitempty"`
-	Artifacts          []ArtifactApplyConfiguration       `json:"artifacts,omitempty"`
-	Error              *string                            `json:"error,omitempty"`
-	Failure            *FailureApplyConfiguration         `json:"failure,omitempty"`
-	StartedAt          *metav1.Time                       `json:"startedAt,omitempty"`
-	Conditions         []BuildConditionApplyConfiguration `json:"conditions,omitempty"`
-	Duration           *string                            `json:"duration,omitempty"`
+	// ObservedGeneration is the most recent generation observed for this Build.
+	ObservedGeneration *int64 `json:"observedGeneration,omitempty"`
+	// describes the phase
+	Phase *camelv1.BuildPhase `json:"phase,omitempty"`
+	// the image name built
+	Image *string `json:"image,omitempty"`
+	// the digest from image
+	Digest *string `json:"digest,omitempty"`
+	// root image (the first image from which the incremental image has started)
+	RootImage *string `json:"rootImage,omitempty"`
+	// the base image used for this build
+	BaseImage *string `json:"baseImage,omitempty"`
+	// a list of artifacts contained in the build
+	Artifacts []ArtifactApplyConfiguration `json:"artifacts,omitempty"`
+	// the error description (if any)
+	Error *string `json:"error,omitempty"`
+	// the reason of the failure (if any)
+	Failure *FailureApplyConfiguration `json:"failure,omitempty"`
+	// the time when it started
+	StartedAt *metav1.Time `json:"startedAt,omitempty"`
+	// a list of conditions occurred during the build
+	Conditions []BuildConditionApplyConfiguration `json:"conditions,omitempty"`
+	// how long it took for the build
+	// Change to Duration / ISO 8601 when CRD uses OpenAPI spec v3
+	// https://github.com/OAI/OpenAPI-Specification/issues/845
+	Duration *string `json:"duration,omitempty"`
 }
 
 // BuildStatusApplyConfiguration constructs a declarative configuration of the BuildStatus type for use with

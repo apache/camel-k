@@ -21,9 +21,14 @@ package v1
 
 // EventTypeSpecApplyConfiguration represents a declarative configuration of the EventTypeSpec type for use
 // with apply.
+//
+// EventTypeSpec represents a specification for an event type.
+// Deprecated: In favor of using DataTypeSpec.
 type EventTypeSpecApplyConfiguration struct {
-	MediaType *string                            `json:"mediaType,omitempty"`
-	Schema    *JSONSchemaPropsApplyConfiguration `json:"schema,omitempty"`
+	// media type as expected for HTTP media types (ie, application/json)
+	MediaType *string `json:"mediaType,omitempty"`
+	// the expected schema for the event
+	Schema *JSONSchemaPropsApplyConfiguration `json:"schema,omitempty"`
 }
 
 // EventTypeSpecApplyConfiguration constructs a declarative configuration of the EventTypeSpec type for use with

@@ -64,6 +64,7 @@ type IntegrationKitSpec struct {
 	// traits that the kit will execute
 	Traits IntegrationKitTraits `json:"traits,omitempty"`
 	// Deprecated:
+	//
 	// Use camel trait (camel.properties) to manage properties
 	// Use mount trait (mount.configs) to manage configs
 	// Use mount trait (mount.resources) to manage resources
@@ -89,6 +90,7 @@ type IntegrationKitTraits struct {
 	// NOTE: Compiling to a native executable, requires at least 4GiB of memory, so the Pod running the native build must have enough memory available.
 	Quarkus *trait.QuarkusTrait `json:"quarkus,omitempty" property:"quarkus"`
 	// The Registry trait sets up Maven to use the Image registry as a Maven repository (support removed since version 2.5.0).
+	//
 	// Deprecated: use jvm trait or read documentation.
 	Registry *trait.RegistryTrait `json:"registry,omitempty" property:"registry"`
 	// Deprecated: no longer in use.
@@ -156,8 +158,9 @@ const (
 	IntegrationKitTypeUser = "user"
 	// IntegrationKitTypeExternal identifies a Kit created by any third party.
 	IntegrationKitTypeExternal = "external"
-	// Deprecated: synthetic Integration Kits are replaced by non managed build Integrations.
 	// IntegrationKitTypeSynthetic identifies a synthetic Kit (generated for any container image for which the operator cannot make any assumption).
+	//
+	// Deprecated: synthetic Integration Kits are replaced by non managed build Integrations.
 	IntegrationKitTypeSynthetic = "synthetic"
 
 	// IntegrationKitLayoutLabel labels the kit layout.
@@ -166,6 +169,7 @@ const (
 	// IntegrationKitLayoutFastJar labels a kit using the Quarkus fast-jar packaging.
 	IntegrationKitLayoutFastJar = "fast-jar"
 	// IntegrationKitLayoutNative labels a kit using the Quarkus native packaging.
+	//
 	// Deprecated: no longer in use.
 	IntegrationKitLayoutNative = "native"
 	// IntegrationKitLayoutNativeSources labels a kit using the Quarkus native-sources packaging.

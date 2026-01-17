@@ -20,6 +20,8 @@ package trait
 // The PDB trait allows to configure the PodDisruptionBudget resource for the Integration pods.
 //
 // +camel-k:trait=pdb.
+//
+//nolint:godoclint
 type PDBTrait struct {
 	Trait `json:",inline" property:",squash"`
 

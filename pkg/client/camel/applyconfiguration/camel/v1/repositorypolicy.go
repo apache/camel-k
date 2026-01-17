@@ -21,9 +21,17 @@ package v1
 
 // RepositoryPolicyApplyConfiguration represents a declarative configuration of the RepositoryPolicy type for use
 // with apply.
+//
+// RepositoryPolicy defines the policy associated to a Maven repository.
 type RepositoryPolicyApplyConfiguration struct {
-	Enabled        *bool   `json:"enabled,omitempty"`
-	UpdatePolicy   *string `json:"updatePolicy,omitempty"`
+	// is the policy activated or not
+	Enabled *bool `json:"enabled,omitempty"`
+	// This element specifies how often updates should attempt to occur.
+	// Maven will compare the local POM's timestamp (stored in a repository's maven-metadata file) to the remote.
+	// The choices are: `always`, `daily` (default), `interval:X` (where X is an integer in minutes) or `never`
+	UpdatePolicy *string `json:"updatePolicy,omitempty"`
+	// When Maven deploys files to the repository, it also deploys corresponding checksum files.
+	// Your options are to `ignore`, `fail`, or `warn` on missing or incorrect checksums.
 	ChecksumPolicy *string `json:"checksumPolicy,omitempty"`
 }
 

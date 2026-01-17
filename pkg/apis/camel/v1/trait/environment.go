@@ -21,6 +21,8 @@ package trait
 // such as `NAMESPACE`, `POD_NAME` and others.
 //
 // +camel-k:trait=environment.
+//
+//nolint:godoclint
 type EnvironmentTrait struct {
 	PlatformBaseTrait `json:",inline" property:",squash"`
 

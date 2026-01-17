@@ -21,11 +21,17 @@ package v1
 
 // PublishTaskApplyConfiguration represents a declarative configuration of the PublishTask type for use
 // with apply.
+//
+// PublishTask image publish configuration.
 type PublishTaskApplyConfiguration struct {
-	ContextDir *string                         `json:"contextDir,omitempty"`
-	BaseImage  *string                         `json:"baseImage,omitempty"`
-	Image      *string                         `json:"image,omitempty"`
-	Registry   *RegistrySpecApplyConfiguration `json:"registry,omitempty"`
+	// can be useful to share info with other tasks
+	ContextDir *string `json:"contextDir,omitempty"`
+	// base image layer
+	BaseImage *string `json:"baseImage,omitempty"`
+	// final image name
+	Image *string `json:"image,omitempty"`
+	// where to publish the final image
+	Registry *RegistrySpecApplyConfiguration `json:"registry,omitempty"`
 }
 
 // PublishTaskApplyConfiguration constructs a declarative configuration of the PublishTask type for use with

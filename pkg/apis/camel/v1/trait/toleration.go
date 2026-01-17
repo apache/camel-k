@@ -31,6 +31,8 @@ package trait
 // It's disabled by default.
 //
 // +camel-k:trait=toleration.
+//
+//nolint:godoclint
 type TolerationTrait struct {
 	Trait `json:",inline" property:",squash"`
 

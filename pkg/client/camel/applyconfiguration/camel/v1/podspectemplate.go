@@ -21,7 +21,10 @@ package v1
 
 // PodSpecTemplateApplyConfiguration represents a declarative configuration of the PodSpecTemplate type for use
 // with apply.
+//
+// PodSpecTemplate represent a template used to deploy an Integration `Pod`.
 type PodSpecTemplateApplyConfiguration struct {
+	// the specification
 	Spec *PodSpecApplyConfiguration `json:"spec,omitempty"`
 }
 

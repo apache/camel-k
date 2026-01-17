@@ -25,9 +25,14 @@ import (
 
 // KameletSpecApplyConfiguration represents a declarative configuration of the KameletSpec type for use
 // with apply.
+//
+// KameletSpec specifies the configuration required to execute a Kamelet.
 type KameletSpecApplyConfiguration struct {
 	KameletSpecBaseApplyConfiguration `json:",inline"`
-	Versions                          map[string]KameletSpecBaseApplyConfiguration `json:"versions,omitempty"`
+	// the optional versions available for this Kamelet. This field may not be taken in account by Camel core and is meant to support
+	// any user defined versioning model on cluster only. If the user wants to use any given version, she must materialize a file with the given version spec
+	// as the `main` Kamelet spec on the runtime.
+	Versions map[string]KameletSpecBaseApplyConfiguration `json:"versions,omitempty"`
 }
 
 // KameletSpecApplyConfiguration constructs a declarative configuration of the KameletSpec type for use with

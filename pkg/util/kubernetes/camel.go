@@ -18,6 +18,7 @@ limitations under the License.
 package kubernetes
 
 import (
+	"maps"
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
@@ -62,9 +63,7 @@ func MergeCamelCreatorLabels(source map[string]string, target map[string]string)
 	if target == nil {
 		target = make(map[string]string)
 	}
-	for k, v := range FilterCamelCreatorLabels(source) {
-		target[k] = v
-	}
+	maps.Copy(target, FilterCamelCreatorLabels(source))
 
 	return target
 }

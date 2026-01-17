@@ -79,11 +79,11 @@ func (t *Traits) Merge(other Traits) error {
 	}
 
 	// merge them
-	map1 := make(map[string]interface{})
+	map1 := make(map[string]any)
 	if err := json.Unmarshal(data1, &map1); err != nil {
 		return err
 	}
-	map2 := make(map[string]interface{})
+	map2 := make(map[string]any)
 	if err := json.Unmarshal(data2, &map2); err != nil {
 		return err
 	}
@@ -117,11 +117,11 @@ func (t *IntegrationKitTraits) Merge(other IntegrationKitTraits) error {
 	}
 
 	// merge them
-	map1 := make(map[string]interface{})
+	map1 := make(map[string]any)
 	if err := json.Unmarshal(data1, &map1); err != nil {
 		return err
 	}
-	map2 := make(map[string]interface{})
+	map2 := make(map[string]any)
 	if err := json.Unmarshal(data2, &map2); err != nil {
 		return err
 	}

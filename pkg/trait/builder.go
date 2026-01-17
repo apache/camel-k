@@ -162,6 +162,7 @@ func existsTaskRequest(tasks []string, taskName string) bool {
 	return false
 }
 
+//nolint:staticcheck
 func (t *builderTrait) adaptDeprecatedFields() *TraitCondition {
 	var condition *TraitCondition
 	if t.RequestCPU != "" {
@@ -279,7 +280,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 			jibTask.Jib.Configuration.ImagePlatforms = t.ImagePlatforms
 		}
 		pipelineTasks = append(pipelineTasks, jibTask)
-
+	//nolint:staticcheck
 	case v1.IntegrationPlatformBuildPublishStrategyS2I:
 		pipelineTasks = append(pipelineTasks, v1.Task{S2i: &v1.S2iTask{
 			BaseTask: v1.BaseTask{
@@ -369,7 +370,7 @@ func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfigurati
 			}
 		}
 		if !found {
-			var strategies []string
+			strategies := make([]string, 0, len(v1.BuildStrategies))
 			for _, s := range v1.BuildStrategies {
 				strategies = append(strategies, string(s))
 			}
@@ -454,7 +455,7 @@ func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfigurati
 		task.Maven.Profiles = mavenProfiles
 	}
 
-	steps := make([]builder.Step, 0)
+	steps := make([]builder.Step, 0, len(builder.Project.CommonSteps))
 	steps = append(steps, builder.Project.CommonSteps...)
 
 	// sort steps by phase
@@ -659,6 +660,7 @@ func filter(tasks []v1.Task, filterTasks []string) ([]v1.Task, error) {
 			case t.Package != nil && t.Package.Name == f:
 				filteredTasks = append(filteredTasks, t)
 				found = true
+			//nolint:staticcheck
 			case t.S2i != nil && t.S2i.Name == f:
 				filteredTasks = append(filteredTasks, t)
 				found = true

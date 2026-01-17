@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package duck contains a partial schema of the KEDA APIs
+// Package v1alpha1 contains a partial schema of the KEDA APIs
 // +kubebuilder:object:generate=true
 // +groupName=keda.sh
 package v1alpha1

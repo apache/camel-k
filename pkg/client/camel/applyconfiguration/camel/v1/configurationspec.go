@@ -21,8 +21,12 @@ package v1
 
 // ConfigurationSpecApplyConfiguration represents a declarative configuration of the ConfigurationSpec type for use
 // with apply.
+//
+// ConfigurationSpec represents a generic configuration specification.
 type ConfigurationSpecApplyConfiguration struct {
-	Type  *string `json:"type,omitempty"`
+	// represents the type of configuration, ie: property, configmap, secret, ...
+	Type *string `json:"type,omitempty"`
+	// the value to assign to the configuration (syntax may vary depending on the `Type`)
 	Value *string `json:"value,omitempty"`
 }
 

@@ -61,7 +61,7 @@ var (
 func OpenShiftConsoleDownloadLink(ctx context.Context, c client.Client) error {
 	// Check the ConsoleCLIDownload CRD is present, which should be starting OpenShift version 4.2.
 	// That check is also enough to exclude Kubernetes clusters.
-	ok, err := kubernetes.IsAPIResourceInstalled(c, "console.openshift.io/v1", reflect.TypeOf(console.ConsoleCLIDownload{}).Name())
+	ok, err := kubernetes.IsAPIResourceInstalled(c, "console.openshift.io/v1", reflect.TypeFor[console.ConsoleCLIDownload]().Name())
 	if err != nil {
 		return err
 	} else if !ok {

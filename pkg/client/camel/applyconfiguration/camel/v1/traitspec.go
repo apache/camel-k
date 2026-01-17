@@ -21,7 +21,12 @@ package v1
 
 // TraitSpecApplyConfiguration represents a declarative configuration of the TraitSpec type for use
 // with apply.
+//
+// A TraitSpec contains the configuration of a trait.
+//
+// Deprecated: superseded by each Trait type, left for backward compatibility.
 type TraitSpecApplyConfiguration struct {
+	// TraitConfiguration parameters configuration
 	Configuration *TraitConfigurationApplyConfiguration `json:"configuration,omitempty"`
 }
 

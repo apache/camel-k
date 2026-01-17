@@ -21,6 +21,10 @@ package v1
 
 // SpectrumTaskApplyConfiguration represents a declarative configuration of the SpectrumTask type for use
 // with apply.
+//
+// SpectrumTask is used to configure Spectrum.
+//
+// Deprecated: no longer in use.
 type SpectrumTaskApplyConfiguration struct {
 	BaseTaskApplyConfiguration    `json:",inline"`
 	PublishTaskApplyConfiguration `json:",inline"`

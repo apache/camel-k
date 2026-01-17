@@ -55,7 +55,7 @@ func ManageSyntheticIntegrations(ctx context.Context, c client.Client, cache cac
 	}
 	for _, informer := range informers {
 		_, err := informer.AddEventHandler(clientgocache.ResourceEventHandlerFuncs{
-			AddFunc: func(obj interface{}) {
+			AddFunc: func(obj any) {
 				ctrlObj, ok := obj.(ctrl.Object)
 				if !ok {
 					log.Error(fmt.Errorf("type assertion failed: %v", obj), "Failed to retrieve Object on add event")
@@ -68,7 +68,7 @@ func ManageSyntheticIntegrations(ctx context.Context, c client.Client, cache cac
 
 				onAdd(ctx, c, ctrlObj)
 			},
-			DeleteFunc: func(obj interface{}) {
+			DeleteFunc: func(obj any) {
 				ctrlObj, ok := obj.(ctrl.Object)
 				if !ok {
 					log.Errorf(fmt.Errorf("type assertion failed: %v", obj), "Failed to retrieve Object on delete event")
@@ -134,7 +134,7 @@ func getInformers(ctx context.Context, cl client.Client, c cache.Cache) ([]cache
 	}
 	informers := []cache.Informer{deploy}
 	// Watch for the CronJob conditionally
-	if ok, err := kubernetes.IsAPIResourceInstalled(cl, batchv1.SchemeGroupVersion.String(), reflect.TypeOf(batchv1.CronJob{}).Name()); ok && err == nil {
+	if ok, err := kubernetes.IsAPIResourceInstalled(cl, batchv1.SchemeGroupVersion.String(), reflect.TypeFor[batchv1.CronJob]().Name()); ok && err == nil {
 		cron, err := c.GetInformer(ctx, &batchv1.CronJob{})
 		if err != nil {
 			return nil, err
@@ -142,7 +142,7 @@ func getInformers(ctx context.Context, cl client.Client, c cache.Cache) ([]cache
 		informers = append(informers, cron)
 	}
 	// Watch for the Knative Services conditionally
-	if ok, err := kubernetes.IsAPIResourceInstalled(cl, servingv1.SchemeGroupVersion.String(), reflect.TypeOf(servingv1.Service{}).Name()); ok && err == nil {
+	if ok, err := kubernetes.IsAPIResourceInstalled(cl, servingv1.SchemeGroupVersion.String(), reflect.TypeFor[servingv1.Service]().Name()); ok && err == nil {
 		if ok, err := kubernetes.CheckSelfPermission(ctx, cl, serving.GroupName, "services", platform.GetOperatorWatchNamespace(), "", "watch"); ok && err == nil {
 			ksvc, err := c.GetInformer(ctx, &servingv1.Service{})
 			if err != nil {

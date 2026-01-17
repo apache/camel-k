@@ -23,6 +23,7 @@ type Trait struct {
 	Enabled *bool `json:"enabled,omitempty" property:"enabled"`
 
 	// Legacy trait configuration parameters.
+	//
 	// Deprecated: for backward compatibility.
 	Configuration *Configuration `json:"configuration,omitempty"`
 }
@@ -32,11 +33,13 @@ type PlatformBaseTrait struct {
 	// Deprecated: no longer in use.
 	Enabled *bool `json:"enabled,omitempty" property:"enabled"`
 	// Legacy trait configuration parameters.
+	//
 	// Deprecated: for backward compatibility.
 	Configuration *Configuration `json:"configuration,omitempty"`
 }
 
-// Configuration defines the trait structure
+// Configuration defines the trait structure.
+//
 // Deprecated: for backward compatibility.
 type Configuration struct {
 	RawMessage `json:",inline"`
@@ -46,5 +49,6 @@ type Configuration struct {
 // +kubebuilder:validation:Type=object
 // +kubebuilder:validation:Format=""
 // +kubebuilder:pruning:PreserveUnknownFields
+//
 // Deprecated: for backward compatibility.
 type RawMessage []byte //nolint: recvcheck

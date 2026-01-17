@@ -43,6 +43,7 @@ func addDependency(cmd *cobra.Command, it *v1.Integration, dependency string, ca
 func parseConfig(ctx context.Context, cmd *cobra.Command, c client.Client, config *resource.Config, integration *v1.Integration) error {
 	switch config.StorageType() {
 	case resource.StorageTypeConfigmap:
+		//nolint:staticcheck
 		cm := kubernetes.LookupConfigmap(ctx, c, integration.Namespace, config.Name())
 		if cm == nil {
 			fmt.Fprintln(cmd.ErrOrStderr(), "Warn:", config.Name(), "Configmap not found in", integration.Namespace, "namespace, make sure to provide it before the Integration can run")
@@ -50,6 +51,7 @@ func parseConfig(ctx context.Context, cmd *cobra.Command, c client.Client, confi
 			return errors.New("you cannot provide a binary config, use a text file instead")
 		}
 	case resource.StorageTypeSecret:
+		//nolint:staticcheck
 		secret := kubernetes.LookupSecret(ctx, c, integration.Namespace, config.Name())
 		if secret == nil {
 			fmt.Fprintln(cmd.ErrOrStderr(), "Warn:", config.Name(), "Secret not found in", integration.Namespace, "namespace, make sure to provide it before the Integration can run")
@@ -111,7 +113,7 @@ func loadPropertiesFromConfigMap(ctx context.Context, c client.Client, ns string
 }
 
 // Deprecated: func supporting other deprecated funcs.
-func fromMapToProperties(data interface{}, toString func(reflect.Value) string, loadProperties func(reflect.Value) (*properties.Properties, error)) (*properties.Properties, error) {
+func fromMapToProperties(data any, toString func(reflect.Value) string, loadProperties func(reflect.Value) (*properties.Properties, error)) (*properties.Properties, error) {
 	result := properties.NewProperties()
 	m := reflect.ValueOf(data)
 	for _, k := range m.MapKeys() {

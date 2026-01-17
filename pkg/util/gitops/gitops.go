@@ -20,6 +20,7 @@ package util
 import (
 	"context"
 	"errors"
+	"maps"
 	"os"
 	"path/filepath"
 	"sort"
@@ -107,7 +108,7 @@ func getClasspath(kit *v1.IntegrationKit, jvmTraitSpec *traitv1.JVMTrait) string
 
 func getClasspathSet(cps string) *sets.Set {
 	s := sets.NewSet()
-	for _, cp := range strings.Split(cps, ":") {
+	for cp := range strings.SplitSeq(cps, ":") {
 		s.Add(cp)
 	}
 
@@ -141,9 +142,7 @@ func cloneAnnotations(ann map[string]string, operatorID string) map[string]strin
 // Return all labels. The method is a reference if in the future we need to apply any filtering.
 func cloneLabels(lbs map[string]string) map[string]string {
 	newMap := make(map[string]string)
-	for k, v := range lbs {
-		newMap[k] = v
-	}
+	maps.Copy(newMap, lbs)
 
 	return newMap
 }

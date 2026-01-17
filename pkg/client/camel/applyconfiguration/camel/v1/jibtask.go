@@ -21,6 +21,8 @@ package v1
 
 // JibTaskApplyConfiguration represents a declarative configuration of the JibTask type for use
 // with apply.
+//
+// JibTask is used to configure Jib.
 type JibTaskApplyConfiguration struct {
 	BaseTaskApplyConfiguration    `json:",inline"`
 	PublishTaskApplyConfiguration `json:",inline"`

@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"reflect"
 	"regexp"
 	"strings"
@@ -35,9 +36,9 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/sets"
 )
 
-type Options map[string]map[string]interface{}
+type Options map[string]map[string]any
 
-func (u Options) Get(id string) (map[string]interface{}, bool) {
+func (u Options) Get(id string) (map[string]any, bool) {
 	if t, ok := u[id]; ok {
 		return t, true
 	}
@@ -155,7 +156,7 @@ func ExtractSourceLoaderDependencies(source v1.SourceSpec, catalog *camel.Runtim
 
 // AssertTraitsType asserts that traits is either v1.Traits or v1.IntegrationKitTraits.
 // This function is provided because Go doesn't have Either nor union types.
-func AssertTraitsType(traits interface{}) error {
+func AssertTraitsType(traits any) error {
 	_, ok1 := traits.(v1.Traits)
 	_, ok2 := traits.(v1.IntegrationKitTraits)
 	if !ok1 && !ok2 {
@@ -166,7 +167,7 @@ func AssertTraitsType(traits interface{}) error {
 }
 
 // ToTraitMap accepts either v1.Traits or v1.IntegrationKitTraits and converts it to a map of traits.
-func ToTraitMap(traits interface{}) (Options, error) {
+func ToTraitMap(traits any) (Options, error) {
 	if err := AssertTraitsType(traits); err != nil {
 		return nil, err
 	}
@@ -186,12 +187,12 @@ func ToTraitMap(traits interface{}) (Options, error) {
 // MigrateLegacyConfiguration moves up the legacy configuration in a trait to the new top-level properties.
 // Values of the new properties always take precedence over the ones from the legacy configuration
 // with the same property names.
-func MigrateLegacyConfiguration(trait map[string]interface{}) error {
+func MigrateLegacyConfiguration(trait map[string]any) error {
 	if trait["configuration"] == nil {
 		return nil
 	}
 
-	if config, ok := trait["configuration"].(map[string]interface{}); ok {
+	if config, ok := trait["configuration"].(map[string]any); ok {
 		// For traits that had the same property name "configuration",
 		// the property needs to be renamed to "config" to avoid naming conflicts
 		// (e.g. Knative trait).
@@ -214,7 +215,7 @@ func MigrateLegacyConfiguration(trait map[string]interface{}) error {
 }
 
 // ToTrait unmarshals a map configuration to a target trait.
-func ToTrait(trait map[string]interface{}, target interface{}) error {
+func ToTrait(trait map[string]any, target any) error {
 	data, err := json.Marshal(trait)
 	if err != nil {
 		return err
@@ -317,19 +318,18 @@ func newTraitsOptions(c client.Client, opts Options, annotations map[string]stri
 		return nil, err
 	}
 
-	for k, v := range m2 {
-		opts[k] = v
-	}
+	maps.Copy(opts, m2)
 
 	return opts, nil
 }
 
-// ExtractAndDeleteTraits will extract the annotation traits into v1.Traits struct, removing from the value from the input map.
+// ExtractAndMaybeDeleteTraits will extract the annotation traits into v1.Traits struct, removing from the value from the input map.
 func ExtractAndMaybeDeleteTraits(c client.Client, annotations map[string]string, del bool) (*v1.Traits, error) {
 	// structure that will be marshalled into a v1.Traits as it was a kamel run command
 	catalog := NewCatalog(c)
 	traitsPlainParams := []string{}
 	for k, v := range annotations {
+		//nolint:staticcheck
 		if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
 			key := strings.ReplaceAll(k, v1.TraitAnnotationPrefix, "")
 			traitID := strings.Split(key, ".")[0]
@@ -356,14 +356,15 @@ func ExtractAndMaybeDeleteTraits(c client.Client, annotations map[string]string,
 	return &traits, nil
 }
 
-// extractTraitValue can detect if the value is an array representation as ["prop1=1", "prop2=2"] and
+// extractAsArray can detect if the value is an array representation as ["prop1=1", "prop2=2"] and
 // return an array with the values or with the single value passed as a parameter.
 func extractAsArray(value string) []string {
 	if strings.HasPrefix(value, "[") && strings.HasSuffix(value, "]") {
-		arrayValue := []string{}
+		//nolint: prealloc // cannot prealloc as SplitSeq is an iterator
+		var arrayValue []string
 		data := value[1 : len(value)-1]
-		vals := strings.Split(data, ",")
-		for _, v := range vals {
+		vals := strings.SplitSeq(data, ",")
+		for v := range vals {
 			prop := strings.Trim(v, " ")
 			if strings.HasPrefix(prop, `"`) && strings.HasSuffix(prop, `"`) {
 				prop = prop[1 : len(prop)-1]
@@ -401,6 +402,7 @@ func NewSpecTraitsOptionsForIntegrationAndPlatform(
 	}
 
 	// Deprecated: to remove when we remove support for traits annotations.
+	//
 	// IMPORTANT: when we remove this we'll need to remove the client.Client from the func,
 	// which will bring to more cascade removal. It had to be introduced to support the deprecated feature
 	// in a properly manner (ie, comparing the spec.traits with annotations in a proper way).
@@ -414,6 +416,7 @@ func NewSpecTraitsOptionsForIntegration(c client.Client, i *v1.Integration) (Opt
 	}
 
 	// Deprecated: to remove when we remove support for traits annotations.
+	//
 	// IMPORTANT: when we remove this we'll need to remove the client.Client from the func,
 	// which will bring to more cascade removal. It had to be introduced to support the deprecated feature
 	// in a properly manner (ie, comparing the spec.traits with annotations in a proper way).
@@ -427,6 +430,7 @@ func newTraitsOptionsForIntegrationKit(c client.Client, i *v1.IntegrationKit, tr
 	}
 
 	// Deprecated: to remove when we remove support for traits annotations.
+	//
 	// IMPORTANT: when we remove this we'll need to remove the client.Client from the func,
 	// which will bring to more cascade removal. It had to be introduced to support the deprecated feature
 	// in a properly manner (ie, comparing the spec.traits with annotations in a proper way).
@@ -478,7 +482,7 @@ func HasMatchingTraits(traitMap Options, kitTraitMap Options) (bool, error) {
 	return true, nil
 }
 
-func matchesComparableTrait(ct ComparableTrait, it map[string]interface{}, kt map[string]interface{}) (bool, error) {
+func matchesComparableTrait(ct ComparableTrait, it map[string]any, kt map[string]any) (bool, error) {
 	t1 := reflect.New(reflect.TypeOf(ct).Elem()).Interface()
 	if err := ToTrait(it, &t1); err != nil {
 		return false, err
@@ -499,7 +503,7 @@ func matchesComparableTrait(ct ComparableTrait, it map[string]interface{}, kt ma
 	return ct2.Matches(tt1), nil
 }
 
-func matchesTrait(it map[string]interface{}, kt map[string]interface{}) bool {
+func matchesTrait(it map[string]any, kt map[string]any) bool {
 	// perform exact match on the two trait maps
 	return reflect.DeepEqual(it, kt)
 }

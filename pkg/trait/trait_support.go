@@ -26,7 +26,7 @@ import (
 	"github.com/go-viper/mapstructure/v2"
 )
 
-type optionMap map[string]map[string]interface{}
+type optionMap map[string]map[string]any
 
 var traitConfigRegexp = regexp.MustCompile(`^([a-z0-9-]+)((?:\.[a-z0-9-]+)(?:\[[0-9]+\]|\..+)*)=(.*)$`)
 
@@ -49,7 +49,7 @@ func ValidateTraits(catalog *Catalog, traits []string) error {
 	return nil
 }
 
-func ConfigureTraits(options []string, traits interface{}, catalog Finder) error {
+func ConfigureTraits(options []string, traits any, catalog Finder) error {
 	config, err := optionsToMap(options)
 	if err != nil {
 		return err
@@ -87,7 +87,7 @@ func optionsToMap(options []string) (optionMap, error) {
 		fullProp := parts[2][1:]
 		value := parts[3]
 		if _, ok := optionMap[id]; !ok {
-			optionMap[id] = make(map[string]interface{})
+			optionMap[id] = make(map[string]any)
 		}
 
 		propParts := util.ConfigTreePropertySplit(fullProp)
@@ -97,7 +97,7 @@ func optionsToMap(options []string) (optionMap, error) {
 			if err != nil {
 				return nil, err
 			}
-			if cc, ok := c.(map[string]interface{}); ok {
+			if cc, ok := c.(map[string]any); ok {
 				current = cc
 			} else {
 				return nil, errors.New("trait configuration cannot end with a slice")

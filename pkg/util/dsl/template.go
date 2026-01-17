@@ -32,7 +32,7 @@ func TemplateToYamlDSL(template v1.Template, id string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	jsondata := make(map[string]interface{})
+	jsondata := make(map[string]any)
 	err = json.Unmarshal(data, &jsondata)
 	if err != nil {
 		return nil, fmt.Errorf("error unmarshalling json: %w", err)
@@ -40,9 +40,9 @@ func TemplateToYamlDSL(template v1.Template, id string) ([]byte, error) {
 	if _, present := jsondata["id"]; !present {
 		jsondata["id"] = id
 	}
-	templateWrapper := make(map[string]interface{}, 2)
+	templateWrapper := make(map[string]any, 2)
 	templateWrapper["routeTemplate"] = jsondata
-	listWrapper := make([]interface{}, 0, 1)
+	listWrapper := make([]any, 0, 1)
 	listWrapper = append(listWrapper, templateWrapper)
 	yamldata, err := yaml2.Marshal(listWrapper)
 	if err != nil {

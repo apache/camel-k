@@ -186,7 +186,7 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, pipe *v1.Pipe) (
 		})
 	}
 
-	dslSteps := make([]map[string]interface{}, 0)
+	dslSteps := make([]map[string]any, 0)
 
 	if from.Step != nil {
 		dslSteps = append(dslSteps, from.AsYamlDSL())
@@ -199,17 +199,17 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, pipe *v1.Pipe) (
 	if to.Step != nil {
 		dslSteps = append(dslSteps, to.AsYamlDSL())
 	}
-	dslSteps = append(dslSteps, map[string]interface{}{
+	dslSteps = append(dslSteps, map[string]any{
 		"to": to.URI,
 	})
 
-	fromWrapper := map[string]interface{}{
+	fromWrapper := map[string]any{
 		"uri":   from.URI,
 		"steps": dslSteps,
 	}
 
-	flowRoute := map[string]interface{}{
-		"route": map[string]interface{}{
+	flowRoute := map[string]any{
+		"route": map[string]any{
 			"id":   "binding",
 			"from": fromWrapper,
 		},
@@ -244,6 +244,7 @@ func configureBinding(integration *v1.Integration, bindings ...*bindings.Binding
 		if b == nil {
 			continue
 		}
+		//nolint:staticcheck
 		if err := integration.Spec.Traits.Merge(b.Traits); err != nil {
 			return err
 		}

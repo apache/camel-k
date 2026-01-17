@@ -25,13 +25,22 @@ import (
 
 // KameletSpecBaseApplyConfiguration represents a declarative configuration of the KameletSpecBase type for use
 // with apply.
+//
+// KameletSpecBase specifies the base configuration of a Kamelet.
 type KameletSpecBaseApplyConfiguration struct {
-	Definition   *JSONSchemaPropsApplyConfiguration                   `json:"definition,omitempty"`
-	Sources      []SourceSpecApplyConfiguration                       `json:"sources,omitempty"`
-	Template     *TemplateApplyConfiguration                          `json:"template,omitempty"`
-	Types        map[camelv1.TypeSlot]EventTypeSpecApplyConfiguration `json:"types,omitempty"`
-	DataTypes    map[camelv1.TypeSlot]DataTypesSpecApplyConfiguration `json:"dataTypes,omitempty"`
-	Dependencies []string                                             `json:"dependencies,omitempty"`
+	// defines the formal configuration of the Kamelet
+	Definition *JSONSchemaPropsApplyConfiguration `json:"definition,omitempty"`
+	// sources in any Camel DSL supported
+	Sources []SourceSpecApplyConfiguration `json:"sources,omitempty"`
+	// the main source in YAML DSL
+	Template *TemplateApplyConfiguration `json:"template,omitempty"`
+	// data specification types for the events consumed/produced by the Kamelet
+	// Deprecated: In favor of using DataTypes
+	Types map[camelv1.TypeSlot]EventTypeSpecApplyConfiguration `json:"types,omitempty"`
+	// data specification types for the events consumed/produced by the Kamelet
+	DataTypes map[camelv1.TypeSlot]DataTypesSpecApplyConfiguration `json:"dataTypes,omitempty"`
+	// Camel dependencies needed by the Kamelet
+	Dependencies []string `json:"dependencies,omitempty"`
 }
 
 // KameletSpecBaseApplyConfiguration constructs a declarative configuration of the KameletSpecBase type for use with

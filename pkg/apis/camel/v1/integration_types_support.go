@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"slices"
 	"strings"
 
 	yaml2 "gopkg.in/yaml.v2"
@@ -186,10 +187,8 @@ func (in *IntegrationSpec) AddDependency(dependency string) {
 	if in.Dependencies == nil {
 		in.Dependencies = make([]string, 0)
 	}
-	for _, d := range in.Dependencies {
-		if d == dependency {
-			return
-		}
+	if slices.Contains(in.Dependencies, dependency) {
+		return
 	}
 	in.Dependencies = append(in.Dependencies, dependency)
 }
@@ -262,7 +261,7 @@ func (in *Integration) Configurations() []ConfigurationSpec {
 		return []ConfigurationSpec{}
 	}
 
-	answer := make([]ConfigurationSpec, 0)
+	answer := make([]ConfigurationSpec, 0, len(in.Status.Configuration)+len(in.Spec.Configuration))
 	answer = append(answer, in.Status.Configuration...)
 	answer = append(answer, in.Spec.Configuration...)
 
@@ -523,7 +522,7 @@ func ToYamlDSL(flows []Flow) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	var jsondata interface{}
+	var jsondata any
 	d := json.NewDecoder(bytes.NewReader(data))
 	d.UseNumber()
 	if err := d.Decode(&jsondata); err != nil {

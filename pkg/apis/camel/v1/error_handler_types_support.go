@@ -28,7 +28,7 @@ import (
 type ErrorHandler interface {
 	Type() ErrorHandlerType
 	Endpoint() *Endpoint
-	Configuration() (map[string]interface{}, error)
+	Configuration() (map[string]any, error)
 	Validate() error
 }
 
@@ -47,7 +47,7 @@ func (e *baseErrorHandler) Endpoint() *Endpoint {
 }
 
 // Configuration --.
-func (e *baseErrorHandler) Configuration() (map[string]interface{}, error) {
+func (e *baseErrorHandler) Configuration() (map[string]any, error) {
 	return nil, nil
 }
 
@@ -67,8 +67,8 @@ func (e *ErrorHandlerNone) Type() ErrorHandlerType {
 }
 
 // Configuration --.
-func (e *ErrorHandlerNone) Configuration() (map[string]interface{}, error) {
-	return map[string]interface{}{}, nil
+func (e *ErrorHandlerNone) Configuration() (map[string]any, error) {
+	return map[string]any{}, nil
 }
 
 // ErrorHandlerLog represent a default (log) error handler type.
@@ -84,13 +84,13 @@ func (e *ErrorHandlerLog) Type() ErrorHandlerType {
 }
 
 // Configuration --.
-func (e *ErrorHandlerLog) Configuration() (map[string]interface{}, error) {
+func (e *ErrorHandlerLog) Configuration() (map[string]any, error) {
 	properties, err := e.ErrorHandlerNone.Configuration()
 	if err != nil {
 		return nil, err
 	}
 	if e.Parameters != nil {
-		var parameters map[string]interface{}
+		var parameters map[string]any
 		err := json.Unmarshal(e.Parameters.RawMessage, &parameters)
 		if err != nil {
 			return nil, err
@@ -118,7 +118,7 @@ func (e *ErrorHandlerSink) Endpoint() *Endpoint {
 }
 
 // Configuration --.
-func (e *ErrorHandlerSink) Configuration() (map[string]interface{}, error) {
+func (e *ErrorHandlerSink) Configuration() (map[string]any, error) {
 	properties, err := e.ErrorHandlerLog.Configuration()
 	if err != nil {
 		return nil, err

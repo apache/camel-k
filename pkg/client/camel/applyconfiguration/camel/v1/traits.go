@@ -25,51 +25,111 @@ import (
 
 // TraitsApplyConfiguration represents a declarative configuration of the Traits type for use
 // with apply.
+//
+// Traits represents the collection of trait configurations.
 type TraitsApplyConfiguration struct {
-	Affinity        *trait.AffinityTrait                    `json:"affinity,omitempty"`
-	Builder         *trait.BuilderTrait                     `json:"builder,omitempty"`
-	Camel           *trait.CamelTrait                       `json:"camel,omitempty"`
-	Container       *trait.ContainerTrait                   `json:"container,omitempty"`
-	Cron            *trait.CronTrait                        `json:"cron,omitempty"`
-	Dependencies    *trait.DependenciesTrait                `json:"dependencies,omitempty"`
-	Deployer        *trait.DeployerTrait                    `json:"deployer,omitempty"`
-	Deployment      *trait.DeploymentTrait                  `json:"deployment,omitempty"`
-	Environment     *trait.EnvironmentTrait                 `json:"environment,omitempty"`
-	ErrorHandler    *trait.ErrorHandlerTrait                `json:"error-handler,omitempty"`
-	GC              *trait.GCTrait                          `json:"gc,omitempty"`
-	GitOps          *trait.GitOpsTrait                      `json:"gitops,omitempty"`
-	Health          *trait.HealthTrait                      `json:"health,omitempty"`
-	Ingress         *trait.IngressTrait                     `json:"ingress,omitempty"`
-	InitContainers  *trait.InitContainersTrait              `json:"init-containers,omitempty"`
-	Istio           *trait.IstioTrait                       `json:"istio,omitempty"`
-	Jolokia         *trait.JolokiaTrait                     `json:"jolokia,omitempty"`
-	JVM             *trait.JVMTrait                         `json:"jvm,omitempty"`
-	Kamelets        *trait.KameletsTrait                    `json:"kamelets,omitempty"`
-	Keda            *trait.KedaTrait                        `json:"keda,omitempty"`
-	Knative         *trait.KnativeTrait                     `json:"knative,omitempty"`
-	KnativeService  *trait.KnativeServiceTrait              `json:"knative-service,omitempty"`
-	Logging         *trait.LoggingTrait                     `json:"logging,omitempty"`
-	Master          *trait.MasterTrait                      `json:"master,omitempty"`
-	Mount           *trait.MountTrait                       `json:"mount,omitempty"`
-	OpenAPI         *trait.OpenAPITrait                     `json:"openapi,omitempty"`
-	Owner           *trait.OwnerTrait                       `json:"owner,omitempty"`
-	PDB             *trait.PDBTrait                         `json:"pdb,omitempty"`
-	Platform        *trait.PlatformTrait                    `json:"platform,omitempty"`
-	Pod             *trait.PodTrait                         `json:"pod,omitempty"`
-	Prometheus      *trait.PrometheusTrait                  `json:"prometheus,omitempty"`
-	PullSecret      *trait.PullSecretTrait                  `json:"pull-secret,omitempty"`
-	Quarkus         *trait.QuarkusTrait                     `json:"quarkus,omitempty"`
-	Registry        *trait.RegistryTrait                    `json:"registry,omitempty"`
-	Route           *trait.RouteTrait                       `json:"route,omitempty"`
-	SecurityContext *trait.SecurityContextTrait             `json:"security-context,omitempty"`
-	Service         *trait.ServiceTrait                     `json:"service,omitempty"`
-	ServiceBinding  *trait.ServiceBindingTrait              `json:"service-binding,omitempty"`
-	Telemetry       *trait.TelemetryTrait                   `json:"telemetry,omitempty"`
-	Toleration      *trait.TolerationTrait                  `json:"toleration,omitempty"`
-	Addons          map[string]AddonTraitApplyConfiguration `json:"addons,omitempty"`
-	Strimzi         *TraitSpecApplyConfiguration            `json:"strimzi,omitempty"`
-	ThreeScale      *TraitSpecApplyConfiguration            `json:"3scale,omitempty"`
-	Tracing         *TraitSpecApplyConfiguration            `json:"tracing,omitempty"`
+	// The configuration of Affinity trait
+	Affinity *trait.AffinityTrait `json:"affinity,omitempty"`
+	// The configuration of Builder trait
+	Builder *trait.BuilderTrait `json:"builder,omitempty"`
+	// The configuration of Camel trait
+	Camel *trait.CamelTrait `json:"camel,omitempty"`
+	// The configuration of Container trait
+	Container *trait.ContainerTrait `json:"container,omitempty"`
+	// The configuration of Cron trait
+	Cron *trait.CronTrait `json:"cron,omitempty"`
+	// The configuration of Dependencies trait
+	Dependencies *trait.DependenciesTrait `json:"dependencies,omitempty"`
+	// The configuration of Deployer trait
+	Deployer *trait.DeployerTrait `json:"deployer,omitempty"`
+	// The configuration of Deployment trait
+	Deployment *trait.DeploymentTrait `json:"deployment,omitempty"`
+	// The configuration of Environment trait
+	Environment *trait.EnvironmentTrait `json:"environment,omitempty"`
+	// The configuration of Error Handler trait.
+	//
+	// Deprecated: no longer in use.
+	ErrorHandler *trait.ErrorHandlerTrait `json:"error-handler,omitempty"`
+	// The configuration of GC trait
+	GC *trait.GCTrait `json:"gc,omitempty"`
+	// The configuration of GitOps trait
+	GitOps *trait.GitOpsTrait `json:"gitops,omitempty"`
+	// The configuration of Health trait
+	Health *trait.HealthTrait `json:"health,omitempty"`
+	// The configuration of Ingress trait
+	Ingress *trait.IngressTrait `json:"ingress,omitempty"`
+	// The configuration of Init Containers trait
+	InitContainers *trait.InitContainersTrait `json:"init-containers,omitempty"`
+	// The configuration of Istio trait
+	Istio *trait.IstioTrait `json:"istio,omitempty"`
+	// The configuration of Jolokia trait.
+	//
+	// Deprecated: use jvm.agent instead.
+	Jolokia *trait.JolokiaTrait `json:"jolokia,omitempty"`
+	// The configuration of JVM trait
+	JVM *trait.JVMTrait `json:"jvm,omitempty"`
+	// The configuration of Kamelets trait
+	Kamelets *trait.KameletsTrait `json:"kamelets,omitempty"`
+	// The configuration of Keda trait
+	Keda *trait.KedaTrait `json:"keda,omitempty"`
+	// The configuration of Knative trait
+	Knative *trait.KnativeTrait `json:"knative,omitempty"`
+	// The configuration of Knative Service trait
+	KnativeService *trait.KnativeServiceTrait `json:"knative-service,omitempty"`
+	// The configuration of Logging trait
+	Logging *trait.LoggingTrait `json:"logging,omitempty"`
+	// The configuration of Master trait
+	Master *trait.MasterTrait `json:"master,omitempty"`
+	// The configuration of Mount trait
+	Mount *trait.MountTrait `json:"mount,omitempty"`
+	// The configuration of OpenAPI trait.
+	//
+	// Deprecated: no longer in use.
+	OpenAPI *trait.OpenAPITrait `json:"openapi,omitempty"`
+	// The configuration of Owner trait
+	Owner *trait.OwnerTrait `json:"owner,omitempty"`
+	// The configuration of PDB trait
+	PDB *trait.PDBTrait `json:"pdb,omitempty"`
+	// The configuration of Platform trait
+	Platform *trait.PlatformTrait `json:"platform,omitempty"`
+	// The configuration of Pod trait.
+	//
+	// Deprecated: use init-containers instead.
+	Pod *trait.PodTrait `json:"pod,omitempty"`
+	// The configuration of Prometheus trait
+	Prometheus *trait.PrometheusTrait `json:"prometheus,omitempty"`
+	// The configuration of Pull Secret trait
+	PullSecret *trait.PullSecretTrait `json:"pull-secret,omitempty"`
+	// The configuration of Quarkus trait
+	Quarkus *trait.QuarkusTrait `json:"quarkus,omitempty"`
+	// The configuration of Registry trait (support removed since version 2.5.0).
+	//
+	// Deprecated: use jvm trait or read documentation.
+	Registry *trait.RegistryTrait `json:"registry,omitempty"`
+	// The configuration of Route trait.
+	//
+	// Deprecated: use ingress instead.
+	Route *trait.RouteTrait `json:"route,omitempty"`
+	// The configuration of Security Context trait
+	SecurityContext *trait.SecurityContextTrait `json:"security-context,omitempty"`
+	// The configuration of Service trait
+	Service *trait.ServiceTrait `json:"service,omitempty"`
+	// The configuration of Service Binding trait.
+	//
+	// Deprecated: no longer in use.
+	ServiceBinding *trait.ServiceBindingTrait `json:"service-binding,omitempty"`
+	// The configuration of Telemetry trait
+	Telemetry *trait.TelemetryTrait `json:"telemetry,omitempty"`
+	// The configuration of Toleration trait
+	Toleration *trait.TolerationTrait `json:"toleration,omitempty"`
+	// Deprecated: no longer in use.
+	Addons map[string]AddonTraitApplyConfiguration `json:"addons,omitempty"`
+	// Deprecated: no longer in use.
+	Strimzi *TraitSpecApplyConfiguration `json:"strimzi,omitempty"`
+	// Deprecated: no longer in use.
+	ThreeScale *TraitSpecApplyConfiguration `json:"3scale,omitempty"`
+	// Deprecated: no longer in use.
+	Tracing *TraitSpecApplyConfiguration `json:"tracing,omitempty"`
 }
 
 // TraitsApplyConfiguration constructs a declarative configuration of the Traits type for use with

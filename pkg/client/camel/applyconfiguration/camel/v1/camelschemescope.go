@@ -21,7 +21,10 @@ package v1
 
 // CamelSchemeScopeApplyConfiguration represents a declarative configuration of the CamelSchemeScope type for use
 // with apply.
+//
+// CamelSchemeScope contains scoped information about a scheme.
 type CamelSchemeScopeApplyConfiguration struct {
+	// list of dependencies needed for this scope
 	Dependencies []CamelArtifactDependencyApplyConfiguration `json:"dependencies,omitempty"`
 }
 

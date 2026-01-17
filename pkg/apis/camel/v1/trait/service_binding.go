@@ -26,6 +26,8 @@ package trait
 //
 // +camel-k:trait=service-binding.
 // +camel-k:internal.
+//
+//nolint:godoclint
 type ServiceBindingTrait struct {
 	Trait `json:",inline" property:",squash"`
 

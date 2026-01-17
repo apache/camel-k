@@ -26,7 +26,7 @@ import (
 type LogEntry struct {
 	// Zap
 	Level      zapcore.Level `json:"level,omitempty"`
-	Timestamp  time.Time     `json:"ts,omitempty"`
+	Timestamp  time.Time     `json:"ts"`
 	LoggerName string        `json:"logger,omitempty"`
 	Message    string        `json:"msg,omitempty"`
 	// Controller runtime

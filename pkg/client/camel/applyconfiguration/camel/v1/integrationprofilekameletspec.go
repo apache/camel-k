@@ -21,7 +21,10 @@ package v1
 
 // IntegrationProfileKameletSpecApplyConfiguration represents a declarative configuration of the IntegrationProfileKameletSpec type for use
 // with apply.
+//
+// IntegrationProfileKameletSpec define the behavior for all the Kamelets controller by the IntegrationProfile.
 type IntegrationProfileKameletSpecApplyConfiguration struct {
+	// remote repository used to retrieve Kamelet catalog
 	Repositories []KameletRepositorySpecApplyConfiguration `json:"repositories,omitempty"`
 }
 

@@ -20,6 +20,7 @@ package trait
 import (
 	"errors"
 	"fmt"
+	"maps"
 	"net/url"
 	"reflect"
 	"sort"
@@ -141,7 +142,6 @@ func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 }
 
 func filterMetaItems(meta metadata.IntegrationMetadata, cst knativeapi.CamelServiceType, uriType string) []string {
-	items := make([]string, 0)
 	var uris []string
 	switch uriType {
 	case "from":
@@ -149,7 +149,9 @@ func filterMetaItems(meta metadata.IntegrationMetadata, cst knativeapi.CamelServ
 	case "to":
 		uris = meta.ToURIs
 	}
-	items = append(items, knativeutil.FilterURIs(uris, cst)...)
+	filtered := knativeutil.FilterURIs(uris, cst)
+	items := make([]string, 0, len(filtered))
+	items = append(items, filtered...)
 	if len(items) == 0 {
 		return nil
 	}
@@ -193,9 +195,7 @@ func (t *knativeTrait) Apply(e *Environment) error {
 	if e.ApplicationProperties == nil {
 		e.ApplicationProperties = make(map[string]string)
 	}
-	for k, v := range env.ToCamelProperties() {
-		e.ApplicationProperties[k] = v
-	}
+	maps.Copy(e.ApplicationProperties, env.ToCamelProperties())
 
 	return nil
 }

@@ -72,11 +72,12 @@ type IntegrationSpec struct {
 	Profile TraitProfile `json:"profile,omitempty"`
 	// the traits needed to run this Integration
 	Traits Traits `json:"traits,omitempty"`
-	// Pod template customization
-	// Deprecated:
-	// Use container, init-containers or owner traits instead
+	// Pod template customization.
+	//
+	// Deprecated: use container, init-containers or owner traits instead
 	PodTemplate *PodSpecTemplate `json:"template,omitempty"`
 	// Deprecated:
+	//
 	// Use camel trait (camel.properties) to manage properties
 	// Use mount trait (mount.configs) to manage configs
 	// Use mount trait (mount.resources) to manage resources
@@ -118,8 +119,9 @@ type IntegrationStatus struct {
 	RuntimeProvider RuntimeProvider `json:"runtimeProvider,omitempty"`
 	// the catalog used to build/operate the Integration.
 	Catalog *Catalog `json:"catalog,omitempty"`
-	// Deprecated:
-	// a list of configuration specification
+	// a list of configuration specification.
+	//
+	// Deprecated: use properties instead.
 	Configuration []ConfigurationSpec `json:"configuration,omitempty"`
 	// a list of events happened for the Integration
 	Conditions []IntegrationCondition `json:"conditions,omitempty"`

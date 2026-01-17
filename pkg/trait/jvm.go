@@ -217,7 +217,7 @@ func getClasspath(depsDirs *sets.Set, jvmTraitClasspath string) string {
 
 func getClasspathSet(cps string) *sets.Set {
 	s := sets.NewSet()
-	for _, cp := range strings.Split(cps, ":") {
+	for cp := range strings.SplitSeq(cps, ":") {
 		s.Add(cp)
 	}
 

@@ -55,6 +55,7 @@ func (b *Build) Task(task v1.Task) Task {
 			build: b.build,
 			task:  task.Package,
 		}
+	//nolint:staticcheck
 	case task.S2i != nil:
 		return &s2iTask{
 			c:     b.builder.client,
@@ -134,6 +135,7 @@ func (b *Build) TaskByName(name string) Task {
 				build: b.build,
 				task:  task.Package,
 			}
+		//nolint:staticcheck
 		case task.S2i != nil && task.S2i.Name == name:
 			return &s2iTask{
 				c:     b.builder.client,

@@ -21,8 +21,12 @@ package v1
 
 // KameletPropertyApplyConfiguration represents a declarative configuration of the KameletProperty type for use
 // with apply.
+//
+// KameletProperty specify the behavior of a property in a Kamelet.
 type KameletPropertyApplyConfiguration struct {
-	Name    *string `json:"name,omitempty"`
+	// the name of the property
+	Name *string `json:"name,omitempty"`
+	// the default value of the property (if any)
 	Default *string `json:"default,omitempty"`
 }
 

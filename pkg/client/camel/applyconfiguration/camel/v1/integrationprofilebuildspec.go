@@ -26,13 +26,23 @@ import (
 
 // IntegrationProfileBuildSpecApplyConfiguration represents a declarative configuration of the IntegrationProfileBuildSpec type for use
 // with apply.
+//
+// IntegrationProfileBuildSpec contains profile related build information.
+// This configuration can be used to tune the behavior of the Integration/IntegrationKit image builds.
 type IntegrationProfileBuildSpecApplyConfiguration struct {
-	RuntimeVersion  *string                         `json:"runtimeVersion,omitempty"`
-	RuntimeProvider *camelv1.RuntimeProvider        `json:"runtimeProvider,omitempty"`
-	BaseImage       *string                         `json:"baseImage,omitempty"`
-	Registry        *RegistrySpecApplyConfiguration `json:"registry,omitempty"`
-	Timeout         *metav1.Duration                `json:"timeout,omitempty"`
-	Maven           *MavenSpecApplyConfiguration    `json:"maven,omitempty"`
+	// the Camel K Runtime dependency version
+	RuntimeVersion *string `json:"runtimeVersion,omitempty"`
+	// the runtime used. Likely Camel Quarkus (we used to have main runtime which has been discontinued since version 1.5)
+	RuntimeProvider *camelv1.RuntimeProvider `json:"runtimeProvider,omitempty"`
+	// a base image that can be used as base layer for all images.
+	// It can be useful if you want to provide some custom base image with further utility software
+	BaseImage *string `json:"baseImage,omitempty"`
+	// the image registry used to push/pull Integration images
+	Registry *RegistrySpecApplyConfiguration `json:"registry,omitempty"`
+	// how much time to wait before time out the pipeline process
+	Timeout *metav1.Duration `json:"timeout,omitempty"`
+	// Maven configuration used to build the Camel/Camel-Quarkus applications
+	Maven *MavenSpecApplyConfiguration `json:"maven,omitempty"`
 }
 
 // IntegrationProfileBuildSpecApplyConfiguration constructs a declarative configuration of the IntegrationProfileBuildSpec type for use with

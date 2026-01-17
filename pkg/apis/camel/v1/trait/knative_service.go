@@ -24,6 +24,8 @@ package trait
 // are only relevant when the Camel route(s) use(s) an HTTP endpoint consumer.
 //
 // +camel-k:trait=knative-service.
+//
+//nolint:godoclint
 type KnativeServiceTrait struct {
 	Trait `json:",inline" property:",squash"`
 

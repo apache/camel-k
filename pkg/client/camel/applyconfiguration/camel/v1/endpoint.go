@@ -26,11 +26,17 @@ import (
 
 // EndpointApplyConfiguration represents a declarative configuration of the Endpoint type for use
 // with apply.
+//
+// Endpoint represents a source/sink external entity (could be any Kubernetes resource or Camel URI).
 type EndpointApplyConfiguration struct {
-	Ref        *corev1.ObjectReference                                  `json:"ref,omitempty"`
-	URI        *string                                                  `json:"uri,omitempty"`
-	Properties *EndpointPropertiesApplyConfiguration                    `json:"properties,omitempty"`
-	DataTypes  map[camelv1.TypeSlot]DataTypeReferenceApplyConfiguration `json:"dataTypes,omitempty"`
+	// Ref can be used to declare a Kubernetes resource as source/sink endpoint
+	Ref *corev1.ObjectReference `json:"ref,omitempty"`
+	// URI can be used to specify the (Camel) endpoint explicitly
+	URI *string `json:"uri,omitempty"`
+	// Properties are a key value representation of endpoint properties
+	Properties *EndpointPropertiesApplyConfiguration `json:"properties,omitempty"`
+	// DataTypes defines the data type of the data produced/consumed by the endpoint and references a given data type specification.
+	DataTypes map[camelv1.TypeSlot]DataTypeReferenceApplyConfiguration `json:"dataTypes,omitempty"`
 }
 
 // EndpointApplyConfiguration constructs a declarative configuration of the Endpoint type for use with

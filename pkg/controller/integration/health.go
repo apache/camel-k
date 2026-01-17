@@ -33,7 +33,7 @@ import (
 )
 
 const (
-	// The key used for propagating error details from Camel health to MicroProfile Health
+	// HealthCheckErrorMessage key used for propagating error details from Camel health to MicroProfile Health
 	// (See CAMEL-17138).
 	HealthCheckErrorMessage = "error.message"
 )

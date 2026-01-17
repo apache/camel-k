@@ -151,14 +151,14 @@ func (c *Catalog) apply(environment *Environment) ([]*TraitCondition, *v1.Traits
 
 func (c *Catalog) executedTraitCondition(executedTrait []Trait) (*TraitCondition, v1.Traits, error) {
 	var traits v1.Traits
-	var traitMap = make(map[string]map[string]interface{})
+	var traitMap = make(map[string]map[string]any)
 	traitIds := make([]string, 0)
 	for _, trait := range executedTrait {
 		data, err := json.Marshal(trait)
 		if err != nil {
 			return nil, traits, err
 		}
-		var traitIDMap map[string]interface{}
+		var traitIDMap map[string]any
 		if err := json.Unmarshal(data, &traitIDMap); err != nil {
 			return nil, traits, err
 		}

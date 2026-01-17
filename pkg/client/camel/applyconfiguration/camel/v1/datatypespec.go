@@ -21,14 +21,23 @@ package v1
 
 // DataTypeSpecApplyConfiguration represents a declarative configuration of the DataTypeSpec type for use
 // with apply.
+//
+// DataTypeSpec represents the specification for a data type.
 type DataTypeSpecApplyConfiguration struct {
-	Scheme       *string                                 `json:"scheme,omitempty"`
-	Format       *string                                 `json:"format,omitempty"`
-	Description  *string                                 `json:"description,omitempty"`
-	MediaType    *string                                 `json:"mediaType,omitempty"`
-	Dependencies []string                                `json:"dependencies,omitempty"`
-	Headers      map[string]HeaderSpecApplyConfiguration `json:"headers,omitempty"`
-	Schema       *JSONSchemaPropsApplyConfiguration      `json:"schema,omitempty"`
+	// the data type component scheme
+	Scheme *string `json:"scheme,omitempty"`
+	// the data type format name
+	Format *string `json:"format,omitempty"`
+	// optional description
+	Description *string `json:"description,omitempty"`
+	// media type as expected for HTTP media types (ie, application/json)
+	MediaType *string `json:"mediaType,omitempty"`
+	// the list of Camel or Maven dependencies required by the data type
+	Dependencies []string `json:"dependencies,omitempty"`
+	// one to many header specifications
+	Headers map[string]HeaderSpecApplyConfiguration `json:"headers,omitempty"`
+	// the expected schema for the data type
+	Schema *JSONSchemaPropsApplyConfiguration `json:"schema,omitempty"`
 }
 
 // DataTypeSpecApplyConfiguration constructs a declarative configuration of the DataTypeSpec type for use with

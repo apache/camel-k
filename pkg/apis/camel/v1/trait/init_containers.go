@@ -17,9 +17,11 @@ limitations under the License.
 
 package trait
 
-// The InitContainersTrait trait can be used to configure `init containers` or `sidecar containers`.
+// The Init Containers trait can be used to configure `init containers` or `sidecar containers`.
 //
 // +camel-k:trait=init-containers.
+//
+//nolint:godoclint
 type InitContainersTrait struct {
 	Trait `json:",inline" property:",squash"`
 

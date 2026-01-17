@@ -22,6 +22,8 @@ package trait
 //
 // +camel-k:trait=dependencies.
 // +camel-k:internal.
+//
+//nolint:godoclint
 type DependenciesTrait struct {
 	PlatformBaseTrait `json:",inline" property:",squash"`
 }

@@ -25,19 +25,33 @@ import (
 
 // PodSpecApplyConfiguration represents a declarative configuration of the PodSpec type for use
 // with apply.
+//
+// PodSpec defines a group of Kubernetes resources.
 type PodSpecApplyConfiguration struct {
-	AutomountServiceAccountToken  *bool                             `json:"automountServiceAccountToken,omitempty"`
-	Volumes                       []corev1.Volume                   `json:"volumes,omitempty"`
-	InitContainers                []corev1.Container                `json:"initContainers,omitempty"`
-	Containers                    []corev1.Container                `json:"containers,omitempty"`
-	EphemeralContainers           []corev1.EphemeralContainer       `json:"ephemeralContainers,omitempty"`
-	RestartPolicy                 *corev1.RestartPolicy             `json:"restartPolicy,omitempty"`
-	TerminationGracePeriodSeconds *int64                            `json:"terminationGracePeriodSeconds,omitempty"`
-	ActiveDeadlineSeconds         *int64                            `json:"activeDeadlineSeconds,omitempty"`
-	DNSPolicy                     *corev1.DNSPolicy                 `json:"dnsPolicy,omitempty"`
-	NodeSelector                  map[string]string                 `json:"nodeSelector,omitempty"`
-	TopologySpreadConstraints     []corev1.TopologySpreadConstraint `json:"topologySpreadConstraints,omitempty"`
-	SecurityContext               *corev1.PodSecurityContext        `json:"securityContext,omitempty"`
+	// AutomountServiceAccountToken
+	AutomountServiceAccountToken *bool `json:"automountServiceAccountToken,omitempty"`
+	// Volumes
+	Volumes []corev1.Volume `json:"volumes,omitempty"`
+	// InitContainers
+	InitContainers []corev1.Container `json:"initContainers,omitempty"`
+	// Containers
+	Containers []corev1.Container `json:"containers,omitempty"`
+	// EphemeralContainers
+	EphemeralContainers []corev1.EphemeralContainer `json:"ephemeralContainers,omitempty"`
+	// RestartPolicy
+	RestartPolicy *corev1.RestartPolicy `json:"restartPolicy,omitempty"`
+	// TerminationGracePeriodSeconds
+	TerminationGracePeriodSeconds *int64 `json:"terminationGracePeriodSeconds,omitempty"`
+	// ActiveDeadlineSeconds
+	ActiveDeadlineSeconds *int64 `json:"activeDeadlineSeconds,omitempty"`
+	// DNSPolicy
+	DNSPolicy *corev1.DNSPolicy `json:"dnsPolicy,omitempty"`
+	// NodeSelector
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+	// TopologySpreadConstraints
+	TopologySpreadConstraints []corev1.TopologySpreadConstraint `json:"topologySpreadConstraints,omitempty"`
+	// PodSecurityContext
+	SecurityContext *corev1.PodSecurityContext `json:"securityContext,omitempty"`
 }
 
 // PodSpecApplyConfiguration constructs a declarative configuration of the PodSpec type for use with

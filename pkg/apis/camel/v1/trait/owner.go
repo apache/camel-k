@@ -21,6 +21,8 @@ package trait
 // and transfers annotations and labels on the integration onto these owned resources.
 //
 // +camel-k:trait=owner.
+//
+//nolint:godoclint
 type OwnerTrait struct {
 	Trait `json:",inline" property:",squash"`
 

@@ -24,12 +24,14 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"math"
 	"math/rand"
 	"os"
 	"path"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -76,13 +78,7 @@ func StringSliceContains(slice []string, items []string) bool {
 }
 
 func StringSliceExists(slice []string, item string) bool {
-	for i := range slice {
-		if slice[i] == item {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(slice, item)
 }
 
 func StringSliceContainsAnyOf(slice []string, items ...string) bool {
@@ -103,10 +99,8 @@ func StringSliceUniqueAdd(slice *[]string, item string) bool {
 		newSlice := make([]string, 0)
 		slice = &newSlice
 	}
-	for _, i := range *slice {
-		if i == item {
-			return false
-		}
+	if slices.Contains(*slice, item) {
+		return false
 	}
 
 	*slice = append(*slice, item)
@@ -163,11 +157,11 @@ func RandomString(n int) string {
 	return sb.String()
 }
 
-func EncodeXML(content interface{}) ([]byte, error) {
+func EncodeXML(content any) ([]byte, error) {
 	return encodeXML(content, xml.Header)
 }
 
-func encodeXML(content interface{}, xmlHeader string) ([]byte, error) {
+func encodeXML(content any, xmlHeader string) ([]byte, error) {
 	w := &bytes.Buffer{}
 	w.WriteString(xmlHeader)
 
@@ -304,7 +298,7 @@ type BytesMarshaller interface {
 	MarshalBytes() ([]byte, error)
 }
 
-func SortedMapKeys(m map[string]interface{}) []string {
+func SortedMapKeys(m map[string]any) []string {
 	res := make([]string, len(m))
 	i := 0
 	for k := range m {
@@ -334,9 +328,7 @@ func CopyMap(source map[string]string) map[string]string {
 		return nil
 	}
 	dest := make(map[string]string, len(source))
-	for k, v := range source {
-		dest[k] = v
-	}
+	maps.Copy(dest, source)
 
 	return dest
 }
@@ -350,8 +342,8 @@ func JSONToYAML(src []byte) ([]byte, error) {
 	return MapToYAML(mapdata)
 }
 
-func JSONToMap(src []byte) (map[string]interface{}, error) {
-	jsondata := map[string]interface{}{}
+func JSONToMap(src []byte) (map[string]any, error) {
+	jsondata := map[string]any{}
 	err := json.Unmarshal(src, &jsondata)
 	if err != nil {
 		return nil, fmt.Errorf("error unmarshalling json: %w", err)
@@ -360,7 +352,7 @@ func JSONToMap(src []byte) (map[string]interface{}, error) {
 	return jsondata, nil
 }
 
-func MapToYAML(src map[string]interface{}) ([]byte, error) {
+func MapToYAML(src map[string]any) ([]byte, error) {
 	yamldata, err := yaml2.Marshal(&src)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling to yaml: %w", err)
@@ -516,7 +508,7 @@ func trimQuotes(s string) string {
 
 // NavigateConfigTree switch to the element in the tree represented by the "nodes" spec and creates intermediary
 // nodes if missing. Nodes specs starting with "[" and ending in "]" are treated as slice indexes.
-func NavigateConfigTree(current interface{}, nodes []string) (interface{}, error) {
+func NavigateConfigTree(current any, nodes []string) (any, error) {
 	if len(nodes) == 0 {
 		return current, nil
 	}
@@ -527,18 +519,18 @@ func NavigateConfigTree(current interface{}, nodes []string) (interface{}, error
 
 		return strings.HasPrefix(nodes[idx], "[") && strings.HasSuffix(nodes[idx], "]")
 	}
-	makeNext := func() interface{} {
+	makeNext := func() any {
 		if isSlice(1) {
-			slice := make([]interface{}, 0)
+			slice := make([]any, 0)
 
 			return &slice
 		}
 
-		return make(map[string]interface{})
+		return make(map[string]any)
 	}
 	switch c := current.(type) {
-	case map[string]interface{}:
-		var next interface{}
+	case map[string]any:
+		var next any
 		if n, ok := c[nodes[0]]; ok {
 			next = n
 		} else {
@@ -547,7 +539,7 @@ func NavigateConfigTree(current interface{}, nodes []string) (interface{}, error
 		}
 
 		return NavigateConfigTree(next, nodes[1:])
-	case *[]interface{}:
+	case *[]any:
 		if !isSlice(0) {
 			return nil, fmt.Errorf("attempting to set map value %q into a slice", nodes[0])
 		}
@@ -555,7 +547,7 @@ func NavigateConfigTree(current interface{}, nodes []string) (interface{}, error
 		if err != nil {
 			return nil, fmt.Errorf("value %q inside brackets is not numeric: %w", nodes[0], err)
 		}
-		var next interface{}
+		var next any
 		if len(*c) > pos && (*c)[pos] != nil {
 			next = (*c)[pos]
 		} else {

@@ -24,6 +24,8 @@ package trait
 //
 // +camel-k:trait=registry.
 // +camel-k:internal.
+//
+//nolint:godoclint
 type RegistryTrait struct {
 	Trait `json:",inline" property:",squash"`
 }

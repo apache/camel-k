@@ -22,6 +22,8 @@ package trait
 // to pull the project.
 //
 // +camel-k:trait=gitops.
+//
+//nolint:godoclint
 type GitOpsTrait struct {
 	Trait `json:",inline" property:",squash"`
 

@@ -25,11 +25,17 @@ import (
 
 // KameletStatusApplyConfiguration represents a declarative configuration of the KameletStatus type for use
 // with apply.
+//
+// KameletStatus defines the observed state of Kamelet.
 type KameletStatusApplyConfiguration struct {
-	ObservedGeneration *int64                               `json:"observedGeneration,omitempty"`
-	Phase              *camelv1.KameletPhase                `json:"phase,omitempty"`
-	Conditions         []KameletConditionApplyConfiguration `json:"conditions,omitempty"`
-	Properties         []KameletPropertyApplyConfiguration  `json:"properties,omitempty"`
+	// ObservedGeneration is the most recent generation observed for this Kamelet.
+	ObservedGeneration *int64 `json:"observedGeneration,omitempty"`
+	// Phase --
+	Phase *camelv1.KameletPhase `json:"phase,omitempty"`
+	// Conditions --
+	Conditions []KameletConditionApplyConfiguration `json:"conditions,omitempty"`
+	// Properties --
+	Properties []KameletPropertyApplyConfiguration `json:"properties,omitempty"`
 }
 
 // KameletStatusApplyConfiguration constructs a declarative configuration of the KameletStatus type for use with

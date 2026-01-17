@@ -198,7 +198,7 @@ func dumpNamespace(ctx context.Context, c client.Client, ns string, out io.Write
 		fmt.Fprintf(out, "name=%s\n", pod.Name)
 		dumpConditions("  ", pod.Status.Conditions, out)
 		fmt.Fprintf(out, "  logs:\n")
-		var allContainers []v1.Container
+		allContainers := make([]v1.Container, 0, len(pod.Spec.InitContainers)+len(pod.Spec.Containers))
 		allContainers = append(allContainers, pod.Spec.InitContainers...)
 		allContainers = append(allContainers, pod.Spec.Containers...)
 		for _, container := range allContainers {

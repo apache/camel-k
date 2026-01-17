@@ -53,6 +53,7 @@ func (t *podTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if !ptr.Deref(t.Enabled, true) {
 		return false, NewIntegrationConditionUserDisabled("Pod"), nil
 	}
+	//nolint:staticcheck
 	if e.Integration.Spec.PodTemplate == nil {
 		return false, nil, nil
 	}
@@ -69,6 +70,7 @@ func (t *podTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 }
 
 func (t *podTrait) Apply(e *Environment) error {
+	//nolint:staticcheck
 	changes := e.Integration.Spec.PodTemplate.Spec
 	var patchedPodSpec *corev1.PodSpec
 	strategy, err := e.DetermineControllerStrategy()

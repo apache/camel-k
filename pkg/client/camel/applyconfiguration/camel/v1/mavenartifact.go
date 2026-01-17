@@ -21,11 +21,18 @@ package v1
 
 // MavenArtifactApplyConfiguration represents a declarative configuration of the MavenArtifact type for use
 // with apply.
+//
+// MavenArtifact defines a GAV (Group:Artifact:Type:Version:Classifier) Maven artifact.
 type MavenArtifactApplyConfiguration struct {
-	GroupID    *string `json:"groupId,omitempty"`
+	// Maven Group
+	GroupID *string `json:"groupId,omitempty"`
+	// Maven Artifact
 	ArtifactID *string `json:"artifactId,omitempty"`
-	Type       *string `json:"type,omitempty"`
-	Version    *string `json:"version,omitempty"`
+	// Maven Type
+	Type *string `json:"type,omitempty"`
+	// Maven Version
+	Version *string `json:"version,omitempty"`
+	// Maven Classifier
 	Classifier *string `json:"classifier,omitempty"`
 }
 

@@ -19,6 +19,7 @@ package trait
 
 import (
 	"fmt"
+	"maps"
 	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -181,9 +182,7 @@ func (t *kedaTrait) autoDiscoverTriggers(e *Environment) error {
 			// Merge additional metadata if configured
 			if t.AutoMetadata != nil {
 				if extra, ok := t.AutoMetadata[trigger.Type]; ok {
-					for k, v := range extra {
-						trigger.Metadata[k] = v
-					}
+					maps.Copy(trigger.Metadata, extra)
 				}
 			}
 			t.Triggers = append(t.Triggers, *trigger)

@@ -31,12 +31,15 @@ type BuildSpec struct {
 	// The sequence of tasks (pipeline) to be performed.
 	Tasks []Task `json:"tasks,omitempty"`
 	// The configuration that should be used to perform the Build.
+	//
 	// Deprecated: no longer in use in Camel K 2 - maintained for backward compatibility
 	Configuration BuildConfiguration `json:"configuration,omitempty"`
 	// The container image to be used to run the build.
+	//
 	// Deprecated: no longer in use in Camel K 2 - maintained for backward compatibility
 	ToolImage string `json:"toolImage,omitempty"`
 	// The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
+	//
 	// Deprecated: no longer in use in Camel K 2 - maintained for backward compatibility
 	BuilderPodNamespace string `json:"operatorNamespace,omitempty"`
 	// Timeout defines the Build maximum execution duration.
@@ -45,7 +48,8 @@ type BuildSpec struct {
 	// and its phase set to BuildPhaseFailed.
 	// +kubebuilder:validation:Format=duration
 	Timeout metav1.Duration `json:"timeout,omitempty"`
-	// the maximum amount of parallel running builds started by this operator instance
+	// the maximum amount of parallel running builds started by this operator instance.
+	//
 	// Deprecated: no longer in use in Camel K 2 - maintained for backward compatibility
 	MaxRunningBuilds int32 `json:"maxRunningBuilds,omitempty"`
 }
@@ -66,16 +70,20 @@ type Task struct {
 
 	// Application Publishing
 
-	// a BuildahTask, for Buildah strategy
+	// a BuildahTask, for Buildah strategy.
+	//
 	// Deprecated: use jib or a custom publishing strategy instead
 	Buildah *BuildahTask `json:"buildah,omitempty"`
-	// a KanikoTask, for Kaniko strategy
+	// a KanikoTask, for Kaniko strategy.
+	//
 	// Deprecated: use jib or a custom publishing strategy instead
 	Kaniko *KanikoTask `json:"kaniko,omitempty"`
-	// a SpectrumTask, for Spectrum strategy
+	// a SpectrumTask, for Spectrum strategy.
+	//
 	// Deprecated: use jib or a custom publishing strategy instead
 	Spectrum *SpectrumTask `json:"spectrum,omitempty"`
-	// a S2iTask, for S2I strategy
+	// a S2iTask, for S2I strategy.
+	//
 	// Deprecated: use jib or a custom publishing strategy instead
 	S2i *S2iTask `json:"s2i,omitempty"`
 	// a JibTask, for Jib strategy
@@ -150,6 +158,7 @@ type PublishTask struct {
 }
 
 // BuildahTask is used to configure Buildah.
+//
 // Deprecated: no longer in use.
 type BuildahTask struct {
 	BaseTask    `json:",inline"`
@@ -164,6 +173,7 @@ type BuildahTask struct {
 }
 
 // KanikoTask is used to configure Kaniko.
+//
 // Deprecated: no longer in use.
 type KanikoTask struct {
 	BaseTask    `json:",inline"`
@@ -178,6 +188,7 @@ type KanikoTask struct {
 }
 
 // KanikoTaskCache is used to configure Kaniko cache.
+//
 // Deprecated: no longer in use.
 type KanikoTaskCache struct {
 	// true if a cache is enabled
@@ -193,6 +204,7 @@ type JibTask struct {
 }
 
 // SpectrumTask is used to configure Spectrum.
+//
 // Deprecated: no longer in use.
 type SpectrumTask struct {
 	BaseTask    `json:",inline"`
@@ -216,7 +228,8 @@ type UserTask struct {
 	ContainerImage string `json:"image,omitempty"`
 	// the user id used to run the container
 	ContainerUserID *int64 `json:"userId,omitempty"`
-	// the command to execute
+	// the command to execute.
+	//
 	// Deprecated: use ContainerCommands
 	ContainerCommand string `json:"command,omitempty"`
 	// the command to execute

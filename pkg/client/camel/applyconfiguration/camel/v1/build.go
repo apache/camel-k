@@ -27,6 +27,9 @@ import (
 
 // BuildApplyConfiguration represents a declarative configuration of the Build type for use
 // with apply.
+//
+// Change format to 'duration' when CRD uses OpenAPI spec v3 (https://github.com/OAI/OpenAPI-Specification/issues/845)
+// Build is the Schema for the builds API.
 type BuildApplyConfiguration struct {
 	metav1.TypeMetaApplyConfiguration    `json:",inline"`
 	*metav1.ObjectMetaApplyConfiguration `json:"metadata,omitempty"`
@@ -44,6 +47,7 @@ func Build(name, namespace string) *BuildApplyConfiguration {
 	b.WithAPIVersion("camel.apache.org/v1")
 	return b
 }
+
 func (b BuildApplyConfiguration) IsApplyConfiguration() {}
 
 // WithKind sets the Kind field in the declarative configuration to the given value

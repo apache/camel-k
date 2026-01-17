@@ -37,6 +37,7 @@ type IntegrationPlatformSpec struct {
 	// list of traits to be executed for all the Integration/IntegrationKits built from this IntegrationPlatform
 	Traits Traits `json:"traits,omitempty"`
 	// Deprecated:
+	//
 	// Use camel trait (camel.properties) to manage properties
 	// Use mount trait (mount.configs) to manage configs
 	// Use mount trait (mount.resources) to manage resources
@@ -129,7 +130,8 @@ type IntegrationPlatformBuildSpec struct {
 	BaseImage string `json:"baseImage,omitempty"`
 	// the image registry used to push/pull Integration images
 	Registry RegistrySpec `json:"registry,omitempty"`
-	// the timeout (in seconds) to use when creating the build tools container image
+	// the timeout (in seconds) to use when creating the build tools container image.
+	//
 	// Deprecated: no longer in use
 	BuildCatalogToolTimeout *metav1.Duration `json:"buildCatalogToolTimeout,omitempty"`
 	// how much time to wait before time out the pipeline process
@@ -143,6 +145,7 @@ type IntegrationPlatformBuildSpec struct {
 }
 
 // IntegrationPlatformKameletSpec define the behavior for all the Kamelets controller by the IntegrationPlatform.
+//
 // Deprecated: to be removed in future versions.
 type IntegrationPlatformKameletSpec struct {
 	// remote repository used to retrieve Kamelet catalog
@@ -153,9 +156,10 @@ type IntegrationPlatformKameletSpec struct {
 type IntegrationPlatformBuildPublishStrategy string
 
 const (
-	// IntegrationPlatformBuildPublishStrategyJib uses the Source to Images (S2I) feature
+	// IntegrationPlatformBuildPublishStrategyS2I uses the Source to Images (S2I) feature
 	// (https://docs.openshift.com/container-platform/4.9/openshift_images/create-images.html#images-create-s2i_create-images)
 	// provided by an OpenShift cluster in order to create and push the images to the registry. It is the default choice on OpenShift cluster.
+	//
 	// Deprecated: use jib or a custom publishing strategy instead.
 	IntegrationPlatformBuildPublishStrategyS2I IntegrationPlatformBuildPublishStrategy = "S2I"
 	// IntegrationPlatformBuildPublishStrategyJib uses Jib maven plugin (https://github.com/GoogleContainerTools/jib)
@@ -195,6 +199,7 @@ const (
 	IntegrationPlatformPhaseCreateCatalog IntegrationPlatformPhase = "CreateCatalog"
 
 	// IntegrationPlatformConditionReady is the condition if the IntegrationPlatform is ready.
+	//
 	// Deprecated: use IntegrationPlatformConditionTypeCreated.
 	IntegrationPlatformConditionReady = "Ready"
 	// IntegrationPlatformConditionTypeCreated is the condition if the IntegrationPlatform has been created.

@@ -21,10 +21,16 @@ package v1
 
 // ArtifactApplyConfiguration represents a declarative configuration of the Artifact type for use
 // with apply.
+//
+// Artifact represents a materialized artifact (a jar dependency or in general a file used by the build).
 type ArtifactApplyConfiguration struct {
-	ID       *string `json:"id,omitempty"`
+	// the identification (GAV for maven dependencies or file name for other file types)
+	ID *string `json:"id,omitempty"`
+	// where it is located in the builder `Pod`
 	Location *string `json:"location,omitempty"`
-	Target   *string `json:"target,omitempty"`
+	// the expected location in the runtime
+	Target *string `json:"target,omitempty"`
+	// a checksum (SHA1) of the content
 	Checksum *string `json:"checksum,omitempty"`
 }
 

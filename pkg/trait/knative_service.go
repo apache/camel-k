@@ -19,6 +19,7 @@ package trait
 
 import (
 	"errors"
+	"maps"
 	"strconv"
 
 	corev1 "k8s.io/api/core/v1"
@@ -173,25 +174,19 @@ func (t *knativeServiceTrait) ControllerStrategySelectorOrder() int {
 func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, error) {
 	serviceAnnotations := make(map[string]string)
 	if e.Integration.Annotations != nil {
-		for k, v := range e.Integration.Annotations {
-			serviceAnnotations[k] = v
-		}
+		maps.Copy(serviceAnnotations, e.Integration.Annotations)
 	}
 	// Set Knative rollout
 	if t.RolloutDuration != "" {
 		serviceAnnotations[knativeServingRolloutDurationAnnotation] = t.RolloutDuration
 	}
 	if t.Annotations != nil {
-		for k, v := range t.Annotations {
-			serviceAnnotations[k] = v
-		}
+		maps.Copy(serviceAnnotations, t.Annotations)
 	}
 
 	revisionAnnotations := make(map[string]string)
 	if e.Integration.Annotations != nil {
-		for k, v := range filterTransferableAnnotations(e.Integration.Annotations) {
-			revisionAnnotations[k] = v
-		}
+		maps.Copy(revisionAnnotations, filterTransferableAnnotations(e.Integration.Annotations))
 	}
 
 	// Set the default container annotation for kubectl

@@ -22,6 +22,7 @@ import (
 	"errors"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 
@@ -261,13 +262,7 @@ func (e *Environment) IntegrationInPhase(phases ...v1.IntegrationPhase) bool {
 		return false
 	}
 
-	for _, phase := range phases {
-		if e.Integration.Status.Phase == phase {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(phases, e.Integration.Status.Phase)
 }
 
 func (e *Environment) IntegrationInRunningPhases() bool {
@@ -279,13 +274,7 @@ func (e *Environment) IntegrationKitInPhase(phases ...v1.IntegrationKitPhase) bo
 		return false
 	}
 
-	for _, phase := range phases {
-		if e.IntegrationKit.Status.Phase == phase {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(phases, e.IntegrationKit.Status.Phase)
 }
 
 func (e *Environment) PlatformInPhase(phases ...v1.IntegrationPlatformPhase) bool {
@@ -293,13 +282,7 @@ func (e *Environment) PlatformInPhase(phases ...v1.IntegrationPlatformPhase) boo
 		return false
 	}
 
-	for _, phase := range phases {
-		if e.Platform.Status.Phase == phase {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(phases, e.Platform.Status.Phase)
 }
 
 func (e *Environment) InPhase(c v1.IntegrationKitPhase, i v1.IntegrationPhase) bool {

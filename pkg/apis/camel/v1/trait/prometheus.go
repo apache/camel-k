@@ -31,6 +31,8 @@ package trait
 // The Prometheus trait is disabled by default.
 //
 // +camel-k:trait=prometheus.
+//
+//nolint:godoclint
 type PrometheusTrait struct {
 	Trait `json:",inline" property:",squash"`
 

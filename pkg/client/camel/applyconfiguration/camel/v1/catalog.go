@@ -25,6 +25,8 @@ import (
 
 // CatalogApplyConfiguration represents a declarative configuration of the Catalog type for use
 // with apply.
+//
+// Catalog represents the Camel Catalog runtime specification.
 type CatalogApplyConfiguration struct {
 	Version  *string                  `json:"version,omitempty"`
 	Provider *camelv1.RuntimeProvider `json:"provider,omitempty"`

@@ -21,6 +21,8 @@ package trait
 //
 // +camel-k:trait=platform.
 // +camel-k:internal.
+//
+//nolint:godoclint
 type PlatformTrait struct {
 	PlatformBaseTrait `json:",inline" property:",squash"`
 

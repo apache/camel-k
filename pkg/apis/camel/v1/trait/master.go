@@ -36,6 +36,8 @@ package trait
 //
 // +camel-k:trait=master.
 // +camel-k:deprecated=2.9.0.
+//
+//nolint:godoclint
 type MasterTrait struct {
 	Trait `json:",inline" property:",squash"`
 

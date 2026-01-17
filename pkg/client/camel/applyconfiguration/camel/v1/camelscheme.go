@@ -21,11 +21,18 @@ package v1
 
 // CamelSchemeApplyConfiguration represents a declarative configuration of the CamelScheme type for use
 // with apply.
+//
+// CamelScheme represents the scheme used to identify a component in a URI (ie, timer in a timer:xyz endpoint URI).
 type CamelSchemeApplyConfiguration struct {
-	ID       *string                             `json:"id,omitempty"`
-	Passive  *bool                               `json:"passive,omitempty"`
-	HTTP     *bool                               `json:"http,omitempty"`
+	// the ID (ie, timer in a timer:xyz URI)
+	ID *string `json:"id,omitempty"`
+	// is a passive scheme
+	Passive *bool `json:"passive,omitempty"`
+	// is a HTTP based scheme
+	HTTP *bool `json:"http,omitempty"`
+	// required scope for consumer
 	Consumer *CamelSchemeScopeApplyConfiguration `json:"consumer,omitempty"`
+	// required scope for producers
 	Producer *CamelSchemeScopeApplyConfiguration `json:"producer,omitempty"`
 }
 

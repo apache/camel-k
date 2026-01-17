@@ -21,9 +21,16 @@ package v1
 
 // IntegrationProfileSpecApplyConfiguration represents a declarative configuration of the IntegrationProfileSpec type for use
 // with apply.
+//
+// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+// Important: Run "make generate-deepcopy" to regenerate code after modifying this file
+// IntegrationProfileSpec applies user defined settings to the IntegrationProfile.
 type IntegrationProfileSpecApplyConfiguration struct {
-	Build   *IntegrationProfileBuildSpecApplyConfiguration   `json:"build,omitempty"`
-	Traits  *TraitsApplyConfiguration                        `json:"traits,omitempty"`
+	// specify how to build the Integration/IntegrationKits
+	Build *IntegrationProfileBuildSpecApplyConfiguration `json:"build,omitempty"`
+	// list of traits to be executed for all the Integration/IntegrationKits built from this IntegrationProfile
+	Traits *TraitsApplyConfiguration `json:"traits,omitempty"`
+	// configuration to be executed to all Kamelets controlled by this IntegrationProfile
 	Kamelet *IntegrationProfileKameletSpecApplyConfiguration `json:"kamelet,omitempty"`
 }
 

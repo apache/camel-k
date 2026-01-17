@@ -78,6 +78,7 @@ func (t *ingressTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 		}
 	}
 
+	//nolint:staticcheck
 	if t.Path != "" {
 		m := "The path parameter is deprecated and may be removed in a future release. Use the paths parameter instead."
 		t.L.Info(m)
@@ -168,6 +169,7 @@ func (t *ingressTrait) getPaths(service *corev1.Service) []networkingv1.HTTPIngr
 	}
 
 	paths := []networkingv1.HTTPIngressPath{}
+	//nolint:staticcheck
 	if t.Path == "" && len(t.Paths) == 0 {
 		paths = append(paths, createIngressPath(defaultPath))
 	} else {

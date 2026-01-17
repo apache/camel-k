@@ -25,13 +25,21 @@ import (
 
 // RuntimeSpecApplyConfiguration represents a declarative configuration of the RuntimeSpec type for use
 // with apply.
+//
+// RuntimeSpec represents the configuration for the Java runtime in charge to execute the Camel application.
 type RuntimeSpecApplyConfiguration struct {
-	Version          *string                                 `json:"version,omitempty"`
-	Provider         *camelv1.RuntimeProvider                `json:"provider,omitempty"`
-	ApplicationClass *string                                 `json:"applicationClass,omitempty"`
-	Dependencies     []MavenArtifactApplyConfiguration       `json:"dependencies,omitempty"`
-	Metadata         map[string]string                       `json:"metadata,omitempty"`
-	Capabilities     map[string]CapabilityApplyConfiguration `json:"capabilities,omitempty"`
+	// Camel K Runtime version
+	Version *string `json:"version,omitempty"`
+	// Camel main application provider, ie, Camel Quarkus
+	Provider *camelv1.RuntimeProvider `json:"provider,omitempty"`
+	// application entry point (main) to be executed
+	ApplicationClass *string `json:"applicationClass,omitempty"`
+	// list of dependencies needed to run the application
+	Dependencies []MavenArtifactApplyConfiguration `json:"dependencies,omitempty"`
+	// set of metadata
+	Metadata map[string]string `json:"metadata,omitempty"`
+	// features offered by this runtime
+	Capabilities map[string]CapabilityApplyConfiguration `json:"capabilities,omitempty"`
 }
 
 // RuntimeSpecApplyConfiguration constructs a declarative configuration of the RuntimeSpec type for use with

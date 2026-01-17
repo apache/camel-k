@@ -48,6 +48,7 @@ func newBuildPod(ctx context.Context, client client.Client, build *v1.Build) *co
 	}
 	for _, task := range build.Spec.Tasks {
 		// get pod security context from security context constraint configuration in namespace
+		//nolint:staticcheck
 		if task.S2i != nil {
 			podSecurityContextConstrained, _ := openshift.GetOpenshiftPodSecurityContextRestricted(ctx, client, build.BuilderPodNamespace())
 			if podSecurityContextConstrained != nil {
@@ -91,6 +92,7 @@ func newBuildPod(ctx context.Context, client client.Client, build *v1.Build) *co
 		// It's a type of builder task, we can reuse the same type
 		case task.Package != nil:
 			addBuildTaskToPod(ctx, client, build, task.Package.Name, pod)
+		//nolint:staticcheck
 		case task.S2i != nil:
 			addBuildTaskToPod(ctx, client, build, task.S2i.Name, pod)
 		case task.Jib != nil:

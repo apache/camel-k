@@ -25,13 +25,35 @@ import (
 
 // BuildSpecApplyConfiguration represents a declarative configuration of the BuildSpec type for use
 // with apply.
+//
+// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+// Important: Run "make generate-deepcopy" to regenerate code after modifying this file
+// BuildSpec defines the list of tasks to be execute for a Build. From Camel K version 2, it would be more appropriate
+// to think it as pipeline.
 type BuildSpecApplyConfiguration struct {
-	Tasks               []TaskApplyConfiguration              `json:"tasks,omitempty"`
-	Configuration       *BuildConfigurationApplyConfiguration `json:"configuration,omitempty"`
-	ToolImage           *string                               `json:"toolImage,omitempty"`
-	BuilderPodNamespace *string                               `json:"operatorNamespace,omitempty"`
-	Timeout             *metav1.Duration                      `json:"timeout,omitempty"`
-	MaxRunningBuilds    *int32                                `json:"maxRunningBuilds,omitempty"`
+	// The sequence of tasks (pipeline) to be performed.
+	Tasks []TaskApplyConfiguration `json:"tasks,omitempty"`
+	// The configuration that should be used to perform the Build.
+	//
+	// Deprecated: no longer in use in Camel K 2 - maintained for backward compatibility
+	Configuration *BuildConfigurationApplyConfiguration `json:"configuration,omitempty"`
+	// The container image to be used to run the build.
+	//
+	// Deprecated: no longer in use in Camel K 2 - maintained for backward compatibility
+	ToolImage *string `json:"toolImage,omitempty"`
+	// The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
+	//
+	// Deprecated: no longer in use in Camel K 2 - maintained for backward compatibility
+	BuilderPodNamespace *string `json:"operatorNamespace,omitempty"`
+	// Timeout defines the Build maximum execution duration.
+	// The Build deadline is set to the Build start time plus the Timeout duration.
+	// If the Build deadline is exceeded, the Build context is canceled,
+	// and its phase set to BuildPhaseFailed.
+	Timeout *metav1.Duration `json:"timeout,omitempty"`
+	// the maximum amount of parallel running builds started by this operator instance.
+	//
+	// Deprecated: no longer in use in Camel K 2 - maintained for backward compatibility
+	MaxRunningBuilds *int32 `json:"maxRunningBuilds,omitempty"`
 }
 
 // BuildSpecApplyConfiguration constructs a declarative configuration of the BuildSpec type for use with

@@ -21,15 +21,34 @@ package v1
 
 // TaskApplyConfiguration represents a declarative configuration of the Task type for use
 // with apply.
+//
+// Task represents the abstract task. Only one of the task should be configured to represent the specific task chosen.
 type TaskApplyConfiguration struct {
-	Builder  *BuilderTaskApplyConfiguration  `json:"builder,omitempty"`
-	Custom   *UserTaskApplyConfiguration     `json:"custom,omitempty"`
-	Package  *BuilderTaskApplyConfiguration  `json:"package,omitempty"`
-	Buildah  *BuildahTaskApplyConfiguration  `json:"buildah,omitempty"`
-	Kaniko   *KanikoTaskApplyConfiguration   `json:"kaniko,omitempty"`
+	// a BuilderTask, used to generate and build the project
+	Builder *BuilderTaskApplyConfiguration `json:"builder,omitempty"`
+	// User customizable task execution. These are executed after the build and before the package task.
+	Custom *UserTaskApplyConfiguration `json:"custom,omitempty"`
+	// Application pre publishing
+	// a PackageTask, used to package the project
+	Package *BuilderTaskApplyConfiguration `json:"package,omitempty"`
+	// a BuildahTask, for Buildah strategy.
+	//
+	// Deprecated: use jib or a custom publishing strategy instead
+	Buildah *BuildahTaskApplyConfiguration `json:"buildah,omitempty"`
+	// a KanikoTask, for Kaniko strategy.
+	//
+	// Deprecated: use jib or a custom publishing strategy instead
+	Kaniko *KanikoTaskApplyConfiguration `json:"kaniko,omitempty"`
+	// a SpectrumTask, for Spectrum strategy.
+	//
+	// Deprecated: use jib or a custom publishing strategy instead
 	Spectrum *SpectrumTaskApplyConfiguration `json:"spectrum,omitempty"`
-	S2i      *S2iTaskApplyConfiguration      `json:"s2i,omitempty"`
-	Jib      *JibTaskApplyConfiguration      `json:"jib,omitempty"`
+	// a S2iTask, for S2I strategy.
+	//
+	// Deprecated: use jib or a custom publishing strategy instead
+	S2i *S2iTaskApplyConfiguration `json:"s2i,omitempty"`
+	// a JibTask, for Jib strategy
+	Jib *JibTaskApplyConfiguration `json:"jib,omitempty"`
 }
 
 // TaskApplyConfiguration constructs a declarative configuration of the Task type for use with

@@ -21,10 +21,15 @@ package v1
 
 // DataTypesSpecApplyConfiguration represents a declarative configuration of the DataTypesSpec type for use
 // with apply.
+//
+// DataTypesSpec represents the specification for a set of data types.
 type DataTypesSpecApplyConfiguration struct {
-	Default *string                                   `json:"default,omitempty"`
-	Types   map[string]DataTypeSpecApplyConfiguration `json:"types,omitempty"`
-	Headers map[string]HeaderSpecApplyConfiguration   `json:"headers,omitempty"`
+	// the default data type for this Kamelet
+	Default *string `json:"default,omitempty"`
+	// one to many data type specifications
+	Types map[string]DataTypeSpecApplyConfiguration `json:"types,omitempty"`
+	// one to many header specifications
+	Headers map[string]HeaderSpecApplyConfiguration `json:"headers,omitempty"`
 }
 
 // DataTypesSpecApplyConfiguration constructs a declarative configuration of the DataTypesSpec type for use with

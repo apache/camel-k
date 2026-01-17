@@ -91,9 +91,9 @@ type JSONSchemaProps struct {
 	Type         string                    `json:"type,omitempty"`
 }
 
-// +kubebuilder:validation:Type=""
 // JSON represents any valid JSON value.
 // These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+// +kubebuilder:validation:Type=""
 type JSON struct {
 	RawMessage `json:",inline"`
 }

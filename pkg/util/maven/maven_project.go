@@ -188,10 +188,10 @@ func NewRepository(repo string) v1.Repository {
 		},
 	}
 
-	if idx := strings.Index(repo, "@"); idx != -1 {
-		r.URL = repo[:idx]
+	if before, after, ok := strings.Cut(repo, "@"); ok {
+		r.URL = before
 
-		for _, attribute := range strings.Split(repo[idx+1:], "@") {
+		for attribute := range strings.SplitSeq(after, "@") {
 			switch {
 			case attribute == "snapshots":
 				r.Snapshots.Enabled = true
@@ -213,10 +213,10 @@ func NewRepository(repo string) v1.Repository {
 
 func NewMirror(repo string) Mirror {
 	m := Mirror{}
-	if idx := strings.Index(repo, "@"); idx != -1 {
-		m.URL = repo[:idx]
+	if before, after, ok := strings.Cut(repo, "@"); ok {
+		m.URL = before
 
-		for _, attribute := range strings.Split(repo[idx+1:], "@") {
+		for attribute := range strings.SplitSeq(after, "@") {
 			switch {
 			case strings.HasPrefix(attribute, "mirrorOf="):
 				m.MirrorOf = attribute[9:]

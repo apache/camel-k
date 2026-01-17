@@ -25,11 +25,16 @@ import (
 
 // IntegrationProfileStatusApplyConfiguration represents a declarative configuration of the IntegrationProfileStatus type for use
 // with apply.
+//
+// IntegrationProfileStatus defines the observed state of IntegrationProfile.
 type IntegrationProfileStatusApplyConfiguration struct {
 	IntegrationProfileSpecApplyConfiguration `json:",inline"`
-	ObservedGeneration                       *int64                                          `json:"observedGeneration,omitempty"`
-	Phase                                    *camelv1.IntegrationProfilePhase                `json:"phase,omitempty"`
-	Conditions                               []IntegrationProfileConditionApplyConfiguration `json:"conditions,omitempty"`
+	// ObservedGeneration is the most recent generation observed for this IntegrationProfile.
+	ObservedGeneration *int64 `json:"observedGeneration,omitempty"`
+	// defines in what phase the IntegrationProfile is found
+	Phase *camelv1.IntegrationProfilePhase `json:"phase,omitempty"`
+	// which are the conditions met (particularly useful when in ERROR phase)
+	Conditions []IntegrationProfileConditionApplyConfiguration `json:"conditions,omitempty"`
 }
 
 // IntegrationProfileStatusApplyConfiguration constructs a declarative configuration of the IntegrationProfileStatus type for use with

@@ -49,7 +49,7 @@ func lookupKitsForIntegration(ctx context.Context, c client.Client, integration 
 		return nil, err
 	}
 
-	listOptions := []ctrl.ListOption{
+	defaultListOptions := []ctrl.ListOption{
 		ctrl.InNamespace(integration.GetIntegrationKitNamespace(pl)),
 		ctrl.MatchingLabels{
 			kubernetes.CamelLabelRuntimeVersion:  integration.Status.RuntimeVersion,
@@ -59,6 +59,8 @@ func lookupKitsForIntegration(ctx context.Context, c client.Client, integration 
 			Selector: labels.NewSelector().Add(*kitTypes),
 		},
 	}
+	listOptions := make([]ctrl.ListOption, 0, len(defaultListOptions)+len(options))
+	listOptions = append(listOptions, defaultListOptions...)
 	listOptions = append(listOptions, options...)
 
 	list := v1.NewIntegrationKitList()

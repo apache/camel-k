@@ -87,7 +87,7 @@ func (s *SelectorScraper) periodicSynchronize(ctx context.Context, out *bufio.Wr
 	select {
 	case <-ctx.Done():
 		// cleanup
-		s.podScrapers.Range(func(_, v interface{}) bool {
+		s.podScrapers.Range(func(_, v any) bool {
 			if canc, isCanc := v.(context.CancelFunc); isCanc {
 				canc()
 			}
@@ -117,7 +117,7 @@ func (s *SelectorScraper) synchronize(ctx context.Context, out *bufio.Writer) er
 	}
 
 	toBeRemoved := make(map[string]bool)
-	s.podScrapers.Range(func(k, _ interface{}) bool {
+	s.podScrapers.Range(func(k, _ any) bool {
 		if str, isStr := k.(string); isStr {
 			if _, ok := present[str]; !ok {
 				toBeRemoved[str] = true

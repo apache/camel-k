@@ -71,7 +71,7 @@ func (in *Pipe) SetOperatorID(operatorID string) {
 	SetAnnotation(&in.ObjectMeta, OperatorIDAnnotation, operatorID)
 }
 
-// SetTrait add the Trait specification to the Pipe.
+// SetTraits add the Trait specification to the Pipe.
 func (in *Pipe) SetTraits(traits *Traits) {
 	in.Spec.Traits = traits
 }
@@ -162,7 +162,7 @@ func (p *EndpointProperties) GetPropertyMap() (map[string]string, error) {
 	}
 
 	// Convert json property values to objects before getting their string representation
-	var props map[string]interface{}
+	var props map[string]any
 	d := json.NewDecoder(bytes.NewReader(p.RawMessage))
 	d.UseNumber()
 	if err := d.Decode(&props); err != nil {

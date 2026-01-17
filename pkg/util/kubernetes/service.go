@@ -19,6 +19,7 @@ package kubernetes
 
 import (
 	"fmt"
+	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 )
@@ -26,14 +27,16 @@ import (
 // GetClusterTypeServiceURI will return the URL of the Service in the cluster type format.
 func GetClusterTypeServiceURI(svc *corev1.Service) string {
 	url := fmt.Sprintf("http://%s.%s.svc.cluster.local", svc.Name, svc.Namespace)
+	var urlSb30 strings.Builder
 loop:
 	for _, port := range svc.Spec.Ports {
 		if port.Port != 80 { // Assuming HTTP default port
-			url += fmt.Sprintf(":%d", port.Port)
+			urlSb30.WriteString(fmt.Sprintf(":%d", port.Port))
 
 			break loop
 		}
 	}
+	url += urlSb30.String()
 
 	return url
 }

@@ -21,8 +21,12 @@ package v1
 
 // DataTypeReferenceApplyConfiguration represents a declarative configuration of the DataTypeReference type for use
 // with apply.
+//
+// DataTypeReference references to the specification of a data type by its scheme and format name.
 type DataTypeReferenceApplyConfiguration struct {
+	// the data type component scheme
 	Scheme *string `json:"scheme,omitempty"`
+	// the data type format name
 	Format *string `json:"format,omitempty"`
 }
 

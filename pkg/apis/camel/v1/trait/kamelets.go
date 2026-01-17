@@ -20,6 +20,8 @@ package trait
 // The kamelets trait is a platform trait used to inject Kamelets into the integration runtime.
 //
 // +camel-k:trait=kamelets.
+//
+//nolint:godoclint
 type KameletsTrait struct {
 	Trait `json:",inline" property:",squash"`
 

@@ -37,6 +37,8 @@ package trait
 //     `cron:tab?schedule=0/2 * * * ?` or `quartz:trigger?cron=0 0/2 * * * ?`.
 //
 // +camel-k:trait=cron.
+//
+//nolint:godoclint
 type CronTrait struct {
 	Trait `json:",inline" property:",squash"`
 

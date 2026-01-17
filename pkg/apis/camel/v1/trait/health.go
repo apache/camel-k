@@ -22,6 +22,8 @@ package trait
 // NOTE: this trait is disabled by default.
 //
 // +camel-k:trait=health.
+//
+//nolint:godoclint
 type HealthTrait struct {
 	Trait `json:",inline" property:",squash"`
 

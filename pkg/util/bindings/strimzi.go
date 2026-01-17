@@ -40,7 +40,7 @@ type camelKafka struct {
 	properties map[string]string
 }
 
-// BindingProvider allows to connect to a Kafka topic via Binding.
+// StrimziBindingProvider allows to connect to a Kafka topic via Binding.
 type StrimziBindingProvider struct {
 	Client internalclientset.Interface
 }

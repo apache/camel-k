@@ -27,11 +27,15 @@ import (
 
 // IntegrationApplyConfiguration represents a declarative configuration of the Integration type for use
 // with apply.
+//
+// Integration is the Schema for the integrations API.
 type IntegrationApplyConfiguration struct {
 	metav1.TypeMetaApplyConfiguration    `json:",inline"`
 	*metav1.ObjectMetaApplyConfiguration `json:"metadata,omitempty"`
-	Spec                                 *IntegrationSpecApplyConfiguration   `json:"spec,omitempty"`
-	Status                               *IntegrationStatusApplyConfiguration `json:"status,omitempty"`
+	// the desired Integration specification
+	Spec *IntegrationSpecApplyConfiguration `json:"spec,omitempty"`
+	// the status of the Integration
+	Status *IntegrationStatusApplyConfiguration `json:"status,omitempty"`
 }
 
 // Integration constructs a declarative configuration of the Integration type for use with
@@ -44,6 +48,7 @@ func Integration(name, namespace string) *IntegrationApplyConfiguration {
 	b.WithAPIVersion("camel.apache.org/v1")
 	return b
 }
+
 func (b IntegrationApplyConfiguration) IsApplyConfiguration() {}
 
 // WithKind sets the Kind field in the declarative configuration to the given value

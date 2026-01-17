@@ -109,8 +109,7 @@ func (g *traitMetaDataGen) getTraitID(t *types.Type) string {
 }
 
 func (g *traitMetaDataGen) buildDescription(t *types.Type, traitID string, td *traitMetaData) {
-	desc := []string(nil)
-	desc = append(desc, filterOutTagsAndComments(t.CommentLines)...)
+	desc := filterOutTagsAndComments(t.CommentLines)
 	td.Name = traitID
 	td.Description = ""
 	for _, line := range desc {

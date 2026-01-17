@@ -51,32 +51,32 @@ type Logger struct {
 }
 
 // Debugf --.
-func (l Logger) Debugf(format string, args ...interface{}) {
+func (l Logger) Debugf(format string, args ...any) {
 	l.delegate.V(1).Info(fmt.Sprintf(format, args...))
 }
 
 // Infof --.
-func (l Logger) Infof(format string, args ...interface{}) {
+func (l Logger) Infof(format string, args ...any) {
 	l.delegate.Info(fmt.Sprintf(format, args...))
 }
 
 // Errorf --.
-func (l Logger) Errorf(err error, format string, args ...interface{}) {
+func (l Logger) Errorf(err error, format string, args ...any) {
 	l.delegate.Error(err, fmt.Sprintf(format, args...))
 }
 
 // Debug --.
-func (l Logger) Debug(msg string, keysAndValues ...interface{}) {
+func (l Logger) Debug(msg string, keysAndValues ...any) {
 	l.delegate.V(1).Info(msg, keysAndValues...)
 }
 
 // Info --.
-func (l Logger) Info(msg string, keysAndValues ...interface{}) {
+func (l Logger) Info(msg string, keysAndValues ...any) {
 	l.delegate.Info(msg, keysAndValues...)
 }
 
 // Error --.
-func (l Logger) Error(err error, msg string, keysAndValues ...interface{}) {
+func (l Logger) Error(err error, msg string, keysAndValues ...any) {
 	l.delegate.Error(err, msg, keysAndValues...)
 }
 
@@ -88,7 +88,7 @@ func (l Logger) WithName(name string) Logger {
 }
 
 // WithValues --.
-func (l Logger) WithValues(keysAndValues ...interface{}) Logger {
+func (l Logger) WithValues(keysAndValues ...any) Logger {
 	return Logger{
 		delegate: l.delegate.WithValues(keysAndValues...),
 	}
@@ -191,7 +191,7 @@ func WithName(name string) Logger {
 }
 
 // WithValues --.
-func WithValues(keysAndValues ...interface{}) Logger {
+func WithValues(keysAndValues ...any) Logger {
 	return Log.WithValues(keysAndValues...)
 }
 
@@ -212,31 +212,31 @@ func ForIntegrationKit(target *v1.IntegrationKit) Logger {
 // ***********************************
 
 // Debugf --.
-func Debugf(format string, args ...interface{}) {
+func Debugf(format string, args ...any) {
 	Log.Debugf(format, args...)
 }
 
 // Infof --.
-func Infof(format string, args ...interface{}) {
+func Infof(format string, args ...any) {
 	Log.Infof(format, args...)
 }
 
 // Errorf --.
-func Errorf(err error, format string, args ...interface{}) {
+func Errorf(err error, format string, args ...any) {
 	Log.Errorf(err, format, args...)
 }
 
 // Debug --.
-func Debug(msg string, keysAndValues ...interface{}) {
+func Debug(msg string, keysAndValues ...any) {
 	Log.Debug(msg, keysAndValues...)
 }
 
 // Info --.
-func Info(msg string, keysAndValues ...interface{}) {
+func Info(msg string, keysAndValues ...any) {
 	Log.Info(msg, keysAndValues...)
 }
 
 // Error --.
-func Error(err error, msg string, keysAndValues ...interface{}) {
+func Error(err error, msg string, keysAndValues ...any) {
 	Log.Error(err, msg, keysAndValues...)
 }

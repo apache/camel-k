@@ -23,6 +23,8 @@ package trait
 // It's disabled by default.
 //
 // +camel-k:trait=affinity.
+//
+//nolint:godoclint
 type AffinityTrait struct {
 	Trait `json:",inline" property:",squash"`
 

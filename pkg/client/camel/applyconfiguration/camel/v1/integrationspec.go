@@ -26,19 +26,41 @@ import (
 
 // IntegrationSpecApplyConfiguration represents a declarative configuration of the IntegrationSpec type for use
 // with apply.
+//
+// IntegrationSpec specifies the configuration of an Integration.
+// The Integration will be watched by the operator which will be in charge to run the related application, according to the configuration specified.
 type IntegrationSpecApplyConfiguration struct {
-	Replicas           *int32                                `json:"replicas,omitempty"`
-	Sources            []SourceSpecApplyConfiguration        `json:"sources,omitempty"`
-	Git                *GitConfigSpecApplyConfiguration      `json:"git,omitempty"`
-	Flows              []FlowApplyConfiguration              `json:"flows,omitempty"`
-	IntegrationKit     *corev1.ObjectReference               `json:"integrationKit,omitempty"`
-	Dependencies       []string                              `json:"dependencies,omitempty"`
-	Profile            *camelv1.TraitProfile                 `json:"profile,omitempty"`
-	Traits             *TraitsApplyConfiguration             `json:"traits,omitempty"`
-	PodTemplate        *PodSpecTemplateApplyConfiguration    `json:"template,omitempty"`
-	Configuration      []ConfigurationSpecApplyConfiguration `json:"configuration,omitempty"`
-	Repositories       []string                              `json:"repositories,omitempty"`
-	ServiceAccountName *string                               `json:"serviceAccountName,omitempty"`
+	// the number of `Pods` needed for the running Integration
+	Replicas *int32 `json:"replicas,omitempty"`
+	// the sources which contain the Camel routes to run
+	Sources []SourceSpecApplyConfiguration `json:"sources,omitempty"`
+	// the configuration of the project to build on Git
+	Git *GitConfigSpecApplyConfiguration `json:"git,omitempty"`
+	// a source in YAML DSL language which contain the routes to run
+	Flows []FlowApplyConfiguration `json:"flows,omitempty"`
+	// the reference of the `IntegrationKit` which is used for this Integration
+	IntegrationKit *corev1.ObjectReference `json:"integrationKit,omitempty"`
+	// the list of Camel or Maven dependencies required by the Integration
+	Dependencies []string `json:"dependencies,omitempty"`
+	// the profile needed to run this Integration
+	Profile *camelv1.TraitProfile `json:"profile,omitempty"`
+	// the traits needed to run this Integration
+	Traits *TraitsApplyConfiguration `json:"traits,omitempty"`
+	// Pod template customization.
+	//
+	// Deprecated: use container, init-containers or owner traits instead
+	PodTemplate *PodSpecTemplateApplyConfiguration `json:"template,omitempty"`
+	// Deprecated:
+	//
+	// Use camel trait (camel.properties) to manage properties
+	// Use mount trait (mount.configs) to manage configs
+	// Use mount trait (mount.resources) to manage resources
+	// Use mount trait (mount.volumes) to manage volumes
+	Configuration []ConfigurationSpecApplyConfiguration `json:"configuration,omitempty"`
+	// additional Maven repositories to be used
+	Repositories []string `json:"repositories,omitempty"`
+	// custom SA to use for the Integration
+	ServiceAccountName *string `json:"serviceAccountName,omitempty"`
 }
 
 // IntegrationSpecApplyConfiguration constructs a declarative configuration of the IntegrationSpec type for use with

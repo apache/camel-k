@@ -25,10 +25,15 @@ import (
 
 // MavenBuildSpecApplyConfiguration represents a declarative configuration of the MavenBuildSpec type for use
 // with apply.
+//
+// MavenBuildSpec defines the Maven configuration plus additional repositories to use.
 type MavenBuildSpecApplyConfiguration struct {
+	// base Maven specification
 	MavenSpecApplyConfiguration `json:",inline"`
-	Repositories                []RepositoryApplyConfiguration `json:"repositories,omitempty"`
-	Servers                     []ServerApplyConfiguration     `json:"servers,omitempty"`
+	// additional repositories
+	Repositories []RepositoryApplyConfiguration `json:"repositories,omitempty"`
+	// Servers (auth)
+	Servers []ServerApplyConfiguration `json:"servers,omitempty"`
 }
 
 // MavenBuildSpecApplyConfiguration constructs a declarative configuration of the MavenBuildSpec type for use with

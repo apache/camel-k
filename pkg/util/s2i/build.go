@@ -35,7 +35,7 @@ import (
 	ctrlutil "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
-// Cancel the s2i Build by updating its status.
+// CancelBuild cancels the s2i Build by updating its status.
 func CancelBuild(ctx context.Context, c client.Client, build *buildv1.Build) error {
 	target := build.DeepCopy()
 	target.Status.Cancelled = true
@@ -47,7 +47,7 @@ func CancelBuild(ctx context.Context, c client.Client, build *buildv1.Build) err
 	return nil
 }
 
-// Wait for the s2i Build to complete with success or cancellation.
+// WaitForS2iBuildCompletion waits for the s2i Build to complete with success or cancellation.
 func WaitForS2iBuildCompletion(ctx context.Context, c client.Client, build *buildv1.Build) error {
 	key := ctrl.ObjectKeyFromObject(build)
 	for {
@@ -75,7 +75,7 @@ func WaitForS2iBuildCompletion(ctx context.Context, c client.Client, build *buil
 	}
 }
 
-// Create the BuildConfig of the build with the right owner after having deleted it already existed.
+// BuildConfig creates the BuildConfig of the build with the right owner after having deleted it already existed.
 func BuildConfig(ctx context.Context, c client.Client, bc *buildv1.BuildConfig, owner metav1.Object) error {
 	if err := c.Delete(ctx, bc); err != nil && !apierrors.IsNotFound(err) {
 		return fmt.Errorf("cannot delete build config: %w", err)
@@ -92,7 +92,7 @@ func BuildConfig(ctx context.Context, c client.Client, bc *buildv1.BuildConfig, 
 	return nil
 }
 
-// Create the ImageStream for the builded image with the right owner after having deleted it already existed.
+// ImageStream creates the ImageStream for the builded image with the right owner after having deleted it already existed.
 func ImageStream(ctx context.Context, c client.Client, is *imagev1.ImageStream, owner metav1.Object) error {
 	if err := c.Delete(ctx, is); err != nil && !apierrors.IsNotFound(err) {
 		return fmt.Errorf("cannot delete image stream: %w", err)

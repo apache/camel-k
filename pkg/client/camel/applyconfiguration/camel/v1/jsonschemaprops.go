@@ -25,6 +25,8 @@ import (
 
 // JSONSchemaPropsApplyConfiguration represents a declarative configuration of the JSONSchemaProps type for use
 // with apply.
+//
+// JSONSchemaProps is a JSON-Schema following Specification Draft 4 (http://json-schema.org/).
 type JSONSchemaPropsApplyConfiguration struct {
 	ID           *string                                     `json:"id,omitempty"`
 	Description  *string                                     `json:"description,omitempty"`

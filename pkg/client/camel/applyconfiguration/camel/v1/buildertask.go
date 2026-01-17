@@ -21,16 +21,26 @@ package v1
 
 // BuilderTaskApplyConfiguration represents a declarative configuration of the BuilderTask type for use
 // with apply.
+//
+// BuilderTask is the generic task in charge of building the application image.
 type BuilderTaskApplyConfiguration struct {
 	BaseTaskApplyConfiguration `json:",inline"`
-	BaseImage                  *string                           `json:"baseImage,omitempty"`
-	Runtime                    *RuntimeSpecApplyConfiguration    `json:"runtime,omitempty"`
-	Dependencies               []string                          `json:"dependencies,omitempty"`
-	Steps                      []string                          `json:"steps,omitempty"`
-	Maven                      *MavenBuildSpecApplyConfiguration `json:"maven,omitempty"`
-	BuildDir                   *string                           `json:"buildDir,omitempty"`
-	Sources                    []SourceSpecApplyConfiguration    `json:"sources,omitempty"`
-	Git                        *GitConfigSpecApplyConfiguration  `json:"git,omitempty"`
+	// the base image layer
+	BaseImage *string `json:"baseImage,omitempty"`
+	// the configuration required for the runtime application
+	Runtime *RuntimeSpecApplyConfiguration `json:"runtime,omitempty"`
+	// the list of dependencies to use for this build
+	Dependencies []string `json:"dependencies,omitempty"`
+	// the list of steps to execute (see pkg/builder/)
+	Steps []string `json:"steps,omitempty"`
+	// the configuration required by Maven for the application build phase
+	Maven *MavenBuildSpecApplyConfiguration `json:"maven,omitempty"`
+	// workspace directory to use
+	BuildDir *string `json:"buildDir,omitempty"`
+	// the sources to add at build time
+	Sources []SourceSpecApplyConfiguration `json:"sources,omitempty"`
+	// the configuration of the project to build on Git
+	Git *GitConfigSpecApplyConfiguration `json:"git,omitempty"`
 }
 
 // BuilderTaskApplyConfiguration constructs a declarative configuration of the BuilderTask type for use with

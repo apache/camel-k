@@ -122,7 +122,7 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 
 	klog.SetLogger(log.AsLogger())
 
-	_, err := maxprocs.Set(maxprocs.Logger(func(f string, a ...interface{}) { log.Info(fmt.Sprintf(f, a)) }))
+	_, err := maxprocs.Set(maxprocs.Logger(func(f string, a ...any) { log.Info(fmt.Sprintf(f, a)) }))
 	if err != nil {
 		log.Error(err, "failed to set GOMAXPROCS from cgroups")
 	}
@@ -185,11 +185,11 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 		&batchv1.Job{}:       selector,
 	}
 
-	if ok, err := kubernetes.IsAPIResourceInstalled(bootstrapClient, servingv1.SchemeGroupVersion.String(), reflect.TypeOf(servingv1.Service{}).Name()); ok && err == nil {
+	if ok, err := kubernetes.IsAPIResourceInstalled(bootstrapClient, servingv1.SchemeGroupVersion.String(), reflect.TypeFor[servingv1.Service]().Name()); ok && err == nil {
 		selectors[&servingv1.Service{}] = selector
 	}
 
-	if ok, err := kubernetes.IsAPIResourceInstalled(bootstrapClient, batchv1.SchemeGroupVersion.String(), reflect.TypeOf(batchv1.CronJob{}).Name()); ok && err == nil {
+	if ok, err := kubernetes.IsAPIResourceInstalled(bootstrapClient, batchv1.SchemeGroupVersion.String(), reflect.TypeFor[batchv1.CronJob]().Name()); ok && err == nil {
 		selectors[&batchv1.CronJob{}] = selector
 	}
 

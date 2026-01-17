@@ -25,13 +25,20 @@ import (
 
 // IntegrationPlatformStatusApplyConfiguration represents a declarative configuration of the IntegrationPlatformStatus type for use
 // with apply.
+//
+// IntegrationPlatformStatus defines the observed state of IntegrationPlatform.
 type IntegrationPlatformStatusApplyConfiguration struct {
 	IntegrationPlatformSpecApplyConfiguration `json:",inline"`
-	ObservedGeneration                        *int64                                           `json:"observedGeneration,omitempty"`
-	Phase                                     *camelv1.IntegrationPlatformPhase                `json:"phase,omitempty"`
-	Conditions                                []IntegrationPlatformConditionApplyConfiguration `json:"conditions,omitempty"`
-	Version                                   *string                                          `json:"version,omitempty"`
-	Info                                      map[string]string                                `json:"info,omitempty"`
+	// ObservedGeneration is the most recent generation observed for this IntegrationPlatform.
+	ObservedGeneration *int64 `json:"observedGeneration,omitempty"`
+	// defines in what phase the IntegrationPlatform is found
+	Phase *camelv1.IntegrationPlatformPhase `json:"phase,omitempty"`
+	// which are the conditions met (particularly useful when in ERROR phase)
+	Conditions []IntegrationPlatformConditionApplyConfiguration `json:"conditions,omitempty"`
+	// the Camel K operator version controlling this IntegrationPlatform
+	Version *string `json:"version,omitempty"`
+	// generic information related to the build of Camel K operator software
+	Info map[string]string `json:"info,omitempty"`
 }
 
 // IntegrationPlatformStatusApplyConfiguration constructs a declarative configuration of the IntegrationPlatformStatus type for use with

@@ -25,9 +25,13 @@ import (
 
 // ValueSourceApplyConfiguration represents a declarative configuration of the ValueSource type for use
 // with apply.
+//
+// ValueSource --.
 type ValueSourceApplyConfiguration struct {
+	// Selects a key of a ConfigMap.
 	ConfigMapKeyRef *corev1.ConfigMapKeySelector `json:"configMapKeyRef,omitempty"`
-	SecretKeyRef    *corev1.SecretKeySelector    `json:"secretKeyRef,omitempty"`
+	// Selects a key of a secret.
+	SecretKeyRef *corev1.SecretKeySelector `json:"secretKeyRef,omitempty"`
 }
 
 // ValueSourceApplyConfiguration constructs a declarative configuration of the ValueSource type for use with

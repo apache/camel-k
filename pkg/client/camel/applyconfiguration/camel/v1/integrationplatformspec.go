@@ -25,13 +25,30 @@ import (
 
 // IntegrationPlatformSpecApplyConfiguration represents a declarative configuration of the IntegrationPlatformSpec type for use
 // with apply.
+//
+// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+// Important: Run "make generate-deepcopy" to regenerate code after modifying this file
+// IntegrationPlatformSpec defines the desired state of IntegrationPlatform.
 type IntegrationPlatformSpecApplyConfiguration struct {
-	Cluster       *camelv1.IntegrationPlatformCluster               `json:"cluster,omitempty"`
-	Profile       *camelv1.TraitProfile                             `json:"profile,omitempty"`
-	Build         *IntegrationPlatformBuildSpecApplyConfiguration   `json:"build,omitempty"`
-	Traits        *TraitsApplyConfiguration                         `json:"traits,omitempty"`
-	Configuration []ConfigurationSpecApplyConfiguration             `json:"configuration,omitempty"`
-	Kamelet       *IntegrationPlatformKameletSpecApplyConfiguration `json:"kamelet,omitempty"`
+	// what kind of cluster you're running (ie, plain Kubernetes or OpenShift)
+	Cluster *camelv1.IntegrationPlatformCluster `json:"cluster,omitempty"`
+	// the profile you wish to use. It will apply certain traits which are required by the specific profile chosen.
+	// It usually relates the Cluster with the optional definition of special profiles (ie, Knative)
+	Profile *camelv1.TraitProfile `json:"profile,omitempty"`
+	// specify how to build the Integration/IntegrationKits
+	Build *IntegrationPlatformBuildSpecApplyConfiguration `json:"build,omitempty"`
+	// list of traits to be executed for all the Integration/IntegrationKits built from this IntegrationPlatform
+	Traits *TraitsApplyConfiguration `json:"traits,omitempty"`
+	// Deprecated:
+	//
+	// Use camel trait (camel.properties) to manage properties
+	// Use mount trait (mount.configs) to manage configs
+	// Use mount trait (mount.resources) to manage resources
+	// Use mount trait (mount.volumes) to manage volumes
+	// list of configuration properties to be attached to all the Integration/IntegrationKits built from this IntegrationPlatform
+	Configuration []ConfigurationSpecApplyConfiguration `json:"configuration,omitempty"`
+	// configuration to be executed to all Kamelets controlled by this IntegrationPlatform
+	Kamelet *IntegrationPlatformKameletSpecApplyConfiguration `json:"kamelet,omitempty"`
 }
 
 // IntegrationPlatformSpecApplyConfiguration constructs a declarative configuration of the IntegrationPlatformSpec type for use with

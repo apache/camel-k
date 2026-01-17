@@ -467,12 +467,20 @@ func (o *runCmdOptions) waitForIntegrationReady(cmd *cobra.Command, c client.Cli
 
 func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sources []string) error {
 	// Let's watch all relevant files when in dev mode
-	var files []string
+	res := filterFileLocation(o.Resources)
+	cfg := filterFileLocation(o.Configs)
+	prop := filterFileLocation(o.Properties)
+	buildProp := filterFileLocation(o.BuildProperties)
+
+	files := make([]string, 0,
+		len(sources)+len(res)+len(cfg)+len(prop)+len(buildProp),
+	)
+
 	files = append(files, sources...)
-	files = append(files, filterFileLocation(o.Resources)...)
-	files = append(files, filterFileLocation(o.Configs)...)
-	files = append(files, filterFileLocation(o.Properties)...)
-	files = append(files, filterFileLocation(o.BuildProperties)...)
+	files = append(files, res...)
+	files = append(files, cfg...)
+	files = append(files, prop...)
+	files = append(files, buildProp...)
 
 	for _, s := range files {
 		ok, err := source.IsLocalAndFileExists(s)

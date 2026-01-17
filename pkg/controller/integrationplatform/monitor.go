@@ -86,7 +86,7 @@ func (action *monitorAction) Handle(ctx context.Context, platform *v1.Integratio
 		return platform, err
 	}
 	//nolint: nestif
-	if isOpenshift && platform.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyS2I {
+	if isOpenshift && platform.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyS2I { //nolint:staticcheck
 		platform.Status.SetCondition(
 			v1.IntegrationPlatformConditionTypeRegistryAvailable,
 			corev1.ConditionFalse,
