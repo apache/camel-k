@@ -73,6 +73,14 @@ func TestGetIntegrationSecretAndConfigmapResourceVersions(t *testing.T) {
 				},
 			},
 		},
+		Status: v1.IntegrationStatus{
+			Traits: &v1.Traits{
+				Mount: &trait.MountTrait{
+					Configs:   []string{"configmap:cm-test"},
+					Resources: []string{"secret:sec-test"},
+				},
+			},
+		},
 	}
 	c, err := internal.NewFakeClient(cm, sec)
 	assert.Nil(t, err)
@@ -82,6 +90,7 @@ func TestGetIntegrationSecretAndConfigmapResourceVersions(t *testing.T) {
 	assert.Len(t, secrets, 0)
 	// Enabled hot reload (true)
 	it.Spec.Traits.Mount.HotReload = ptr.To(true)
+	it.Status.Traits.Mount.HotReload = ptr.To(true)
 	configmaps, secrets = getIntegrationSecretAndConfigmapResourceVersions(context.TODO(), c, it)
 	assert.Len(t, configmaps, 1)
 	assert.Len(t, secrets, 1)
