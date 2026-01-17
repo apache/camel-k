@@ -348,10 +348,10 @@ func isIntegrationKitResetRequired(integration *v1.Integration, kit *v1.Integrat
 func getIntegrationSecretAndConfigmapResourceVersions(ctx context.Context, client client.Client, integration *v1.Integration) ([]string, []string) {
 	configmaps := make([]string, 0)
 	secrets := make([]string, 0)
-	if integration.Spec.Traits.Mount != nil && ptr.Deref(integration.Spec.Traits.Mount.HotReload, false) {
-		mergedResources := make([]string, 0)
-		mergedResources = append(mergedResources, integration.Spec.Traits.Mount.Configs...)
-		mergedResources = append(mergedResources, integration.Spec.Traits.Mount.Resources...)
+	if integration.Status.Traits != nil && integration.Status.Traits.Mount != nil && ptr.Deref(integration.Status.Traits.Mount.HotReload, false) {
+		mergedResources := make([]string, 0, len(integration.Status.Traits.Mount.Configs)+len(integration.Status.Traits.Mount.Resources))
+		mergedResources = append(mergedResources, integration.Status.Traits.Mount.Configs...)
+		mergedResources = append(mergedResources, integration.Status.Traits.Mount.Resources...)
 		for _, c := range mergedResources {
 			if conf, parseErr := utilResource.ParseConfig(c); parseErr == nil {
 				if conf.StorageType() == utilResource.StorageTypeConfigmap {
