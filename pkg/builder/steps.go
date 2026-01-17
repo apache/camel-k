@@ -71,7 +71,7 @@ func StepsFrom(ids ...string) ([]Step, error) {
 }
 
 func StepIDsFor(steps ...Step) []string {
-	IDs := make([]string, 0)
+	IDs := make([]string, 0, len(steps))
 	for _, step := range steps {
 		IDs = append(IDs, step.ID())
 	}
@@ -79,7 +79,7 @@ func StepIDsFor(steps ...Step) []string {
 	return IDs
 }
 
-func registerSteps(steps interface{}) {
+func registerSteps(steps any) {
 	v := reflect.ValueOf(steps)
 	t := reflect.TypeOf(steps)
 

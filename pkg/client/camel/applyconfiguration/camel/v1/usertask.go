@@ -21,13 +21,22 @@ package v1
 
 // UserTaskApplyConfiguration represents a declarative configuration of the UserTask type for use
 // with apply.
+//
+// UserTask is used to execute any generic custom operation.
 type UserTaskApplyConfiguration struct {
 	BaseTaskApplyConfiguration `json:",inline"`
-	ContainerImage             *string  `json:"image,omitempty"`
-	ContainerUserID            *int64   `json:"userId,omitempty"`
-	ContainerCommand           *string  `json:"command,omitempty"`
-	ContainerCommands          []string `json:"commands,omitempty"`
-	PublishingImage            *string  `json:"publishingImage,omitempty"`
+	// the container image to use
+	ContainerImage *string `json:"image,omitempty"`
+	// the user id used to run the container
+	ContainerUserID *int64 `json:"userId,omitempty"`
+	// the command to execute.
+	//
+	// Deprecated: use ContainerCommands
+	ContainerCommand *string `json:"command,omitempty"`
+	// the command to execute
+	ContainerCommands []string `json:"commands,omitempty"`
+	// the desired image build name
+	PublishingImage *string `json:"publishingImage,omitempty"`
 }
 
 // UserTaskApplyConfiguration constructs a declarative configuration of the UserTask type for use with

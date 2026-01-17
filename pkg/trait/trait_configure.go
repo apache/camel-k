@@ -68,7 +68,7 @@ func (c *Catalog) Configure(env *Environment) error {
 	return nil
 }
 
-func (c *Catalog) configureTraits(traits interface{}) error {
+func (c *Catalog) configureTraits(traits any) error {
 	traitMap, err := ToTraitMap(traits)
 	if err != nil {
 		return err
@@ -83,7 +83,7 @@ func (c *Catalog) configureTraits(traits interface{}) error {
 	return nil
 }
 
-func (c *Catalog) configureTrait(id string, trait map[string]interface{}) error {
+func (c *Catalog) configureTrait(id string, trait map[string]any) error {
 	if catTrait := c.GetTrait(id); catTrait != nil {
 		if err := decodeTrait(trait, catTrait); err != nil {
 			return err
@@ -93,7 +93,7 @@ func (c *Catalog) configureTrait(id string, trait map[string]interface{}) error 
 	return nil
 }
 
-func decodeTrait(in map[string]interface{}, target Trait) error {
+func decodeTrait(in map[string]any, target Trait) error {
 	// Migrate legacy configuration properties before applying to catalog
 	if err := MigrateLegacyConfiguration(in); err != nil {
 		return err
@@ -109,7 +109,7 @@ func decodeTrait(in map[string]interface{}, target Trait) error {
 
 // Deprecated: to be removed in future versions.
 func (c *Catalog) configureTraitsFromAnnotations(annotations map[string]string) error {
-	options := make(map[string]map[string]interface{}, len(annotations))
+	options := make(map[string]map[string]any, len(annotations))
 	for k, v := range annotations {
 		if !strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
 			continue
@@ -124,7 +124,7 @@ func (c *Catalog) configureTraitsFromAnnotations(annotations map[string]string) 
 		id := parts[0]
 		prop := parts[1]
 		if _, ok := options[id]; !ok {
-			options[id] = make(map[string]interface{})
+			options[id] = make(map[string]any)
 		}
 
 		propParts := util.ConfigTreePropertySplit(prop)
@@ -134,7 +134,7 @@ func (c *Catalog) configureTraitsFromAnnotations(annotations map[string]string) 
 			if err != nil {
 				return err
 			}
-			if cc, ok := c.(map[string]interface{}); ok {
+			if cc, ok := c.(map[string]any); ok {
 				current = cc
 			} else {
 				return errors.New(`invalid array specification: to set an array value use the ["v1", "v2"] format`)
@@ -147,7 +147,7 @@ func (c *Catalog) configureTraitsFromAnnotations(annotations map[string]string) 
 }
 
 // Deprecated: to be removed in future versions.
-func (c *Catalog) configureFromOptions(traits map[string]map[string]interface{}) error {
+func (c *Catalog) configureFromOptions(traits map[string]map[string]any) error {
 	for id, config := range traits {
 		t := c.GetTrait(id)
 		if t != nil {
@@ -162,14 +162,14 @@ func (c *Catalog) configureFromOptions(traits map[string]map[string]interface{})
 }
 
 // Deprecated: to be removed in future versions.
-func configureTrait(id string, config map[string]interface{}, trait interface{}) error {
+func configureTrait(id string, config map[string]any, trait any) error {
 	md := mapstructure.Metadata{}
 
-	var valueConverter mapstructure.DecodeHookFuncKind = func(sourceKind reflect.Kind, targetKind reflect.Kind, data interface{}) (interface{}, error) {
+	var valueConverter mapstructure.DecodeHookFuncKind = func(sourceKind reflect.Kind, targetKind reflect.Kind, data any) (any, error) {
 		// Allow JSON encoded arrays to set slices
 		if sourceKind == reflect.String && targetKind == reflect.Slice {
 			if v, ok := data.(string); ok && strings.HasPrefix(v, "[") && strings.HasSuffix(v, "]") {
-				var value interface{}
+				var value any
 				if err := json.Unmarshal([]byte(v), &value); err != nil {
 					return nil, fmt.Errorf("could not decode JSON array for configuring trait property: %w", err)
 				}

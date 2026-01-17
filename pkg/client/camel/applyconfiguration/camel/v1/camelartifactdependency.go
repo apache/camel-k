@@ -21,9 +21,13 @@ package v1
 
 // CamelArtifactDependencyApplyConfiguration represents a declarative configuration of the CamelArtifactDependency type for use
 // with apply.
+//
+// CamelArtifactDependency represent a maven's dependency.
 type CamelArtifactDependencyApplyConfiguration struct {
+	// the maven dependency
 	MavenArtifactApplyConfiguration `json:",inline"`
-	Exclusions                      []CamelArtifactExclusionApplyConfiguration `json:"exclusions,omitempty"`
+	// provide a list of artifacts to exclude for this dependency
+	Exclusions []CamelArtifactExclusionApplyConfiguration `json:"exclusions,omitempty"`
 }
 
 // CamelArtifactDependencyApplyConfiguration constructs a declarative configuration of the CamelArtifactDependency type for use with

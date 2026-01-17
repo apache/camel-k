@@ -63,7 +63,7 @@ func ResourceAsString(name string) (string, error) {
 }
 
 // TemplateResource loads a file resource as go template and processes it using the given parameters.
-func TemplateResource(name string, params interface{}) (string, error) {
+func TemplateResource(name string, params any) (string, error) {
 	rawData, err := ResourceAsString(name)
 	if err != nil {
 		return "", err

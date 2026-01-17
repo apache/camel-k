@@ -132,8 +132,8 @@ func getRepositoriesFromPlatform(platform *v1.IntegrationPlatform) []string {
 func newFromURI(ctx context.Context, uri string) (KameletRepository, error) {
 	if uri == NoneRepository {
 		return newEmptyKameletRepository(), nil
-	} else if strings.HasPrefix(uri, "github:") {
-		desc := strings.TrimPrefix(uri, "github:")
+	} else if after, ok := strings.CutPrefix(uri, "github:"); ok {
+		desc := after
 		var version string
 		if strings.Contains(desc, "@") {
 			pos := strings.LastIndex(desc, "@")

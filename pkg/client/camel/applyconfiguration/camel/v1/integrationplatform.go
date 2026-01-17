@@ -27,6 +27,11 @@ import (
 
 // IntegrationPlatformApplyConfiguration represents a declarative configuration of the IntegrationPlatform type for use
 // with apply.
+//
+// IntegrationPlatform is the resource used to drive the Camel K operator behavior.
+// It defines the behavior of all Custom Resources (`IntegrationKit`, `Integration`, `Kamelet`) in the given namespace.
+// When the Camel K operator is installed in `global` mode,
+// you will need to specify an `IntegrationPlatform` in each namespace where you want the Camel K operator to be executed.
 type IntegrationPlatformApplyConfiguration struct {
 	metav1.TypeMetaApplyConfiguration    `json:",inline"`
 	*metav1.ObjectMetaApplyConfiguration `json:"metadata,omitempty"`
@@ -44,6 +49,7 @@ func IntegrationPlatform(name, namespace string) *IntegrationPlatformApplyConfig
 	b.WithAPIVersion("camel.apache.org/v1")
 	return b
 }
+
 func (b IntegrationPlatformApplyConfiguration) IsApplyConfiguration() {}
 
 // WithKind sets the Kind field in the declarative configuration to the given value

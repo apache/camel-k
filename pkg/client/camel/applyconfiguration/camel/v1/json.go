@@ -25,6 +25,9 @@ import (
 
 // JSONApplyConfiguration represents a declarative configuration of the JSON type for use
 // with apply.
+//
+// JSON represents any valid JSON value.
+// These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
 type JSONApplyConfiguration struct {
 	camelv1.RawMessage `json:",inline"`
 }

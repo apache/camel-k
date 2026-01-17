@@ -122,22 +122,22 @@ func setErrorHandlerConfiguration(errorHandlerBinding *bindings.Binding, errorHa
 }
 
 // translateCamelErrorHandler will translate a binding as an error handler YAML as expected by Camel.
-func translateCamelErrorHandler(b *bindings.Binding) map[string]interface{} {
-	yamlCode := map[string]interface{}{}
+func translateCamelErrorHandler(b *bindings.Binding) map[string]any {
+	yamlCode := map[string]any{}
 	switch b.URI {
 	case "":
-		yamlCode["errorHandler"] = map[string]interface{}{
-			"noErrorHandler": map[string]interface{}{},
+		yamlCode["errorHandler"] = map[string]any{
+			"noErrorHandler": map[string]any{},
 		}
 	case defaultCamelErrorHandler:
-		yamlCode["errorHandler"] = map[string]interface{}{
-			"defaultErrorHandler": map[string]interface{}{
+		yamlCode["errorHandler"] = map[string]any{
+			"defaultErrorHandler": map[string]any{
 				"logName": "err",
 			},
 		}
 	default:
-		yamlCode["errorHandler"] = map[string]interface{}{
-			"deadLetterChannel": map[string]interface{}{
+		yamlCode["errorHandler"] = map[string]any{
+			"deadLetterChannel": map[string]any{
 				"deadLetterUri": b.URI,
 			},
 		}

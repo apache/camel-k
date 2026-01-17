@@ -20,6 +20,7 @@ package internal
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/apache/camel-k/v2/pkg/apis"
@@ -74,9 +75,11 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 		WithStatusSubresource(&v1.IntegrationKit{}).
 		Build()
 
+	//nolint:staticcheck
 	camelClientset := fakecamelclientset.NewSimpleClientset(filterObjects(scheme, initObjs, func(gvk schema.GroupVersionKind) bool {
 		return strings.Contains(gvk.Group, "camel")
 	})...)
+	//nolint:staticcheck
 	clientset := fakeclientset.NewSimpleClientset(filterObjects(scheme, initObjs, func(gvk schema.GroupVersionKind) bool {
 		return !strings.Contains(gvk.Group, "camel") && !strings.Contains(gvk.Group, "knative")
 	})...)
@@ -135,12 +138,8 @@ func filterObjects(scheme *runtime.Scheme, input []runtime.Object, filter func(g
 	var res []runtime.Object
 	for _, obj := range input {
 		kinds, _, _ := scheme.ObjectKinds(obj)
-		for _, k := range kinds {
-			if filter(k) {
-				res = append(res, obj)
-
-				break
-			}
+		if slices.ContainsFunc(kinds, filter) {
+			res = append(res, obj)
 		}
 	}
 
@@ -256,7 +255,7 @@ func (f *FakeAuthorization) SelfSubjectRulesReviews() authorizationv1.SelfSubjec
 	return f.AuthorizationV1Interface.SelfSubjectRulesReviews()
 }
 
-// Returns a fake SAR interface.
+// SubjectAccessReviews returns a fake SAR interface.
 func (f *FakeAuthorization) SubjectAccessReviews() authorizationv1.SubjectAccessReviewInterface {
 	return &FakeSAR{}
 }
@@ -265,7 +264,7 @@ type FakeSAR struct {
 	authorizationv1.SubjectAccessReviewInterface
 }
 
-// Fake Create implementation (needed in cross namespace Kamelets test). Only allow `cross-ns-sa` user in `default` namespace.
+// Create fake create implementation (needed in cross namespace Kamelets test). Only allow `cross-ns-sa` user in `default` namespace.
 func (f *FakeSAR) Create(ctx context.Context, sar *authv1.SubjectAccessReview, opts metav1.CreateOptions) (*authv1.SubjectAccessReview, error) {
 	ra := sar.Spec.ResourceAttributes
 	allowed := sar.Spec.User == "system:serviceaccount:default:cross-ns-sa" && ra.Verb == "get" && ra.Resource == "kamelets"

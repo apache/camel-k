@@ -36,9 +36,9 @@ func ParseComponentURI(rawURI string) (string, string, map[string]string, error)
 	// extract path
 	remainder := strings.TrimPrefix(rawURI, scheme+":")
 	var pathValue string
-	if idx := strings.Index(remainder, "?"); idx >= 0 {
-		pathValue = remainder[:idx]
-		queryString := remainder[idx+1:]
+	if before, after, ok := strings.Cut(remainder, "?"); ok {
+		pathValue = before
+		queryString := after
 
 		values, parseErr := url.ParseQuery(queryString)
 		if parseErr != nil {

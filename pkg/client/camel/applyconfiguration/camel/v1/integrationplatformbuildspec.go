@@ -26,19 +26,38 @@ import (
 
 // IntegrationPlatformBuildSpecApplyConfiguration represents a declarative configuration of the IntegrationPlatformBuildSpec type for use
 // with apply.
+//
+// IntegrationPlatformBuildSpec contains platform related build information.
+// This configuration can be used to tune the behavior of the Integration/IntegrationKit image builds.
+// You can define the build strategy, the image registry to use and the Maven configuration to adopt.
 type IntegrationPlatformBuildSpecApplyConfiguration struct {
-	BuildConfiguration      *BuildConfigurationApplyConfiguration            `json:"buildConfiguration,omitempty"`
-	PublishStrategy         *camelv1.IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
-	RuntimeVersion          *string                                          `json:"runtimeVersion,omitempty"`
-	RuntimeProvider         *camelv1.RuntimeProvider                         `json:"runtimeProvider,omitempty"`
-	RuntimeCoreVersion      *string                                          `json:"runtimeCoreVersion,omitempty"`
-	BaseImage               *string                                          `json:"baseImage,omitempty"`
-	Registry                *RegistrySpecApplyConfiguration                  `json:"registry,omitempty"`
-	BuildCatalogToolTimeout *metav1.Duration                                 `json:"buildCatalogToolTimeout,omitempty"`
-	Timeout                 *metav1.Duration                                 `json:"timeout,omitempty"`
-	Maven                   *MavenSpecApplyConfiguration                     `json:"maven,omitempty"`
-	PublishStrategyOptions  map[string]string                                `json:"PublishStrategyOptions,omitempty"`
-	MaxRunningBuilds        *int32                                           `json:"maxRunningBuilds,omitempty"`
+	// the configuration required to build an Integration container image
+	BuildConfiguration *BuildConfigurationApplyConfiguration `json:"buildConfiguration,omitempty"`
+	// the strategy to adopt for publishing an Integration container image
+	PublishStrategy *camelv1.IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
+	// the Camel K Runtime dependency version
+	RuntimeVersion *string `json:"runtimeVersion,omitempty"`
+	// the runtime used. Likely Camel Quarkus (we used to have main runtime which has been discontinued since version 1.5)
+	RuntimeProvider *camelv1.RuntimeProvider `json:"runtimeProvider,omitempty"`
+	// the Camel core version used by this IntegrationPlatform
+	RuntimeCoreVersion *string `json:"runtimeCoreVersion,omitempty"`
+	// a base image that can be used as base layer for all images.
+	// It can be useful if you want to provide some custom base image with further utility software
+	BaseImage *string `json:"baseImage,omitempty"`
+	// the image registry used to push/pull Integration images
+	Registry *RegistrySpecApplyConfiguration `json:"registry,omitempty"`
+	// the timeout (in seconds) to use when creating the build tools container image.
+	//
+	// Deprecated: no longer in use
+	BuildCatalogToolTimeout *metav1.Duration `json:"buildCatalogToolTimeout,omitempty"`
+	// how much time to wait before time out the pipeline process
+	Timeout *metav1.Duration `json:"timeout,omitempty"`
+	// Maven configuration used to build the Camel/Camel-Quarkus applications
+	Maven *MavenSpecApplyConfiguration `json:"maven,omitempty"`
+	// Deprecated: no longer in use
+	PublishStrategyOptions map[string]string `json:"PublishStrategyOptions,omitempty"`
+	// the maximum amount of parallel running pipelines started by this operator instance
+	MaxRunningBuilds *int32 `json:"maxRunningBuilds,omitempty"`
 }
 
 // IntegrationPlatformBuildSpecApplyConfiguration constructs a declarative configuration of the IntegrationPlatformBuildSpec type for use with

@@ -20,6 +20,7 @@ package trait
 import (
 	"errors"
 	"fmt"
+	"maps"
 	"regexp"
 	"strconv"
 	"strings"
@@ -235,9 +236,7 @@ func (t *cronTrait) Apply(e *Environment) error {
 func (t *cronTrait) getCronJobFor(e *Environment) *batchv1.CronJob {
 	annotations := make(map[string]string)
 	if e.Integration.Annotations != nil {
-		for k, v := range filterTransferableAnnotations(e.Integration.Annotations) {
-			annotations[k] = v
-		}
+		maps.Copy(annotations, filterTransferableAnnotations(e.Integration.Annotations))
 	}
 
 	// Set the default container annotation for kubectl commands

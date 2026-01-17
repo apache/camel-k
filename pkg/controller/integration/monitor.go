@@ -349,7 +349,7 @@ func getIntegrationSecretAndConfigmapResourceVersions(ctx context.Context, clien
 	configmaps := make([]string, 0)
 	secrets := make([]string, 0)
 	if integration.Spec.Traits.Mount != nil && ptr.Deref(integration.Spec.Traits.Mount.HotReload, false) {
-		mergedResources := make([]string, 0)
+		mergedResources := make([]string, 0, len(integration.Spec.Traits.Mount.Configs)+len(integration.Spec.Traits.Mount.Resources))
 		mergedResources = append(mergedResources, integration.Spec.Traits.Mount.Configs...)
 		mergedResources = append(mergedResources, integration.Spec.Traits.Mount.Resources...)
 		for _, c := range mergedResources {
@@ -493,7 +493,7 @@ func arePodsFailingStatuses(integration *v1.Integration, pendingPods []corev1.Po
 	}
 	// Check pending container statuses
 	for _, pod := range pendingPods {
-		var containers []corev1.ContainerStatus
+		containers := make([]corev1.ContainerStatus, 0, len(pod.Status.InitContainerStatuses)+len(pod.Status.ContainerStatuses))
 		containers = append(containers, pod.Status.InitContainerStatuses...)
 		containers = append(containers, pod.Status.ContainerStatuses...)
 		for _, container := range containers {
@@ -511,7 +511,7 @@ func arePodsFailingStatuses(integration *v1.Integration, pendingPods []corev1.Po
 		if pod.DeletionTimestamp != nil {
 			continue
 		}
-		var containers []corev1.ContainerStatus
+		containers := make([]corev1.ContainerStatus, 0, len(pod.Status.InitContainerStatuses)+len(pod.Status.ContainerStatuses))
 		containers = append(containers, pod.Status.InitContainerStatuses...)
 		containers = append(containers, pod.Status.ContainerStatuses...)
 		for _, container := range containers {

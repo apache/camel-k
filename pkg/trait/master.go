@@ -191,7 +191,7 @@ func findAdditionalDependencies(e *Environment, meta metadata.IntegrationMetadat
 	return dependencies
 }
 
-func loadResource(cli client.Client, name string, params interface{}) (ctrl.Object, error) {
+func loadResource(cli client.Client, name string, params any) (ctrl.Object, error) {
 	data, err := resources.TemplateResource("resources/addons/master/"+name, params)
 	if err != nil {
 		return nil, err

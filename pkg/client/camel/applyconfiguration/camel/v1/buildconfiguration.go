@@ -25,18 +25,31 @@ import (
 
 // BuildConfigurationApplyConfiguration represents a declarative configuration of the BuildConfiguration type for use
 // with apply.
+//
+// BuildConfiguration represent the configuration required to build the runtime.
 type BuildConfigurationApplyConfiguration struct {
-	ToolImage           *string                     `json:"toolImage,omitempty"`
-	BuilderPodNamespace *string                     `json:"operatorNamespace,omitempty"`
-	Strategy            *camelv1.BuildStrategy      `json:"strategy,omitempty"`
-	OrderStrategy       *camelv1.BuildOrderStrategy `json:"orderStrategy,omitempty"`
-	RequestCPU          *string                     `json:"requestCPU,omitempty"`
-	RequestMemory       *string                     `json:"requestMemory,omitempty"`
-	LimitCPU            *string                     `json:"limitCPU,omitempty"`
-	LimitMemory         *string                     `json:"limitMemory,omitempty"`
-	NodeSelector        map[string]string           `json:"nodeSelector,omitempty"`
-	Annotations         map[string]string           `json:"annotations,omitempty"`
-	ImagePlatforms      []string                    `json:"platforms,omitempty"`
+	// The container image to be used to run the build.
+	ToolImage *string `json:"toolImage,omitempty"`
+	// The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
+	BuilderPodNamespace *string `json:"operatorNamespace,omitempty"`
+	// the strategy to adopt
+	Strategy *camelv1.BuildStrategy `json:"strategy,omitempty"`
+	// the build order strategy to adopt
+	OrderStrategy *camelv1.BuildOrderStrategy `json:"orderStrategy,omitempty"`
+	// The minimum amount of CPU required. Only used for `pod` strategy
+	RequestCPU *string `json:"requestCPU,omitempty"`
+	// The minimum amount of memory required. Only used for `pod` strategy
+	RequestMemory *string `json:"requestMemory,omitempty"`
+	// The maximum amount of CPU required. Only used for `pod` strategy
+	LimitCPU *string `json:"limitCPU,omitempty"`
+	// The maximum amount of memory required. Only used for `pod` strategy
+	LimitMemory *string `json:"limitMemory,omitempty"`
+	// The node selector for the builder pod. Only used for `pod` strategy
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+	// Annotation to use for the builder pod. Only used for `pod` strategy
+	Annotations map[string]string `json:"annotations,omitempty"`
+	// The list of platforms used in order to build a container image.
+	ImagePlatforms []string `json:"platforms,omitempty"`
 }
 
 // BuildConfigurationApplyConfiguration constructs a declarative configuration of the BuildConfiguration type for use with

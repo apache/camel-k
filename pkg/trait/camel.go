@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -235,17 +236,21 @@ func (t *camelTrait) computeUserProperties(e *Environment) []ctrl.Object {
 	// properties have the priority
 	userProperties := ""
 
+	var userPropertiesSb238 strings.Builder
 	for _, prop := range e.collectConfigurationPairs("property") {
 		// properties in resource configuration are expected to be pre-encoded using properties format
-		userProperties += fmt.Sprintf("%s=%s\n", prop.Name, prop.Value)
+		userPropertiesSb238.WriteString(fmt.Sprintf("%s=%s\n", prop.Name, prop.Value))
 	}
+	userProperties += userPropertiesSb238.String()
 
 	if t.Properties != nil {
 		// Merge with properties set in the trait
+		var userPropertiesSb245 strings.Builder
 		for _, prop := range t.Properties {
 			k, v := property.SplitPropertyFileEntry(prop)
-			userProperties += fmt.Sprintf("%s=%s\n", k, v)
+			userPropertiesSb245.WriteString(fmt.Sprintf("%s=%s\n", k, v))
 		}
+		userProperties += userPropertiesSb245.String()
 	}
 
 	if userProperties != "" {

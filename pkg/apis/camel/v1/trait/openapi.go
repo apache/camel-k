@@ -26,6 +26,8 @@ package trait
 //
 // +camel-k:trait=openapi.
 // +camel-k:internal.
+//
+//nolint:godoclint
 type OpenAPITrait struct {
 	PlatformBaseTrait `json:",inline" property:",squash"`
 

@@ -149,7 +149,7 @@ func injectServersIntoMavenSettings(settings string, servers []v1.Server) string
 	return newSettings[:i] + string(content) + newSettings[i:]
 }
 
-func encodeXMLNoHeader(content interface{}) ([]byte, error) {
+func encodeXMLNoHeader(content any) ([]byte, error) {
 	w := &bytes.Buffer{}
 	w.WriteString("\n")
 	e := xml.NewEncoder(w)

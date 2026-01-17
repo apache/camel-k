@@ -21,16 +21,28 @@ package v1
 
 // PipeSpecApplyConfiguration represents a declarative configuration of the PipeSpec type for use
 // with apply.
+//
+// PipeSpec defines the binding between a source and a sink. It can include custom parameters and additional intermediate steps and error handling.
 type PipeSpecApplyConfiguration struct {
-	Integration        *IntegrationSpecApplyConfiguration  `json:"integration,omitempty"`
-	Source             *EndpointApplyConfiguration         `json:"source,omitempty"`
-	Sink               *EndpointApplyConfiguration         `json:"sink,omitempty"`
-	ErrorHandler       *ErrorHandlerSpecApplyConfiguration `json:"errorHandler,omitempty"`
-	Traits             *TraitsApplyConfiguration           `json:"traits,omitempty"`
-	Steps              []EndpointApplyConfiguration        `json:"steps,omitempty"`
-	Replicas           *int32                              `json:"replicas,omitempty"`
-	ServiceAccountName *string                             `json:"serviceAccountName,omitempty"`
-	Dependencies       []string                            `json:"dependencies,omitempty"`
+	// Integration is an optional integration used to specify custom parameters
+	// Deprecated don't use this. Use trait annotations if you need to change any cluster configuration.
+	Integration *IntegrationSpecApplyConfiguration `json:"integration,omitempty"`
+	// Source is the starting point of the integration defined by this Pipe
+	Source *EndpointApplyConfiguration `json:"source,omitempty"`
+	// Sink is the destination of the integration defined by this Pipe
+	Sink *EndpointApplyConfiguration `json:"sink,omitempty"`
+	// ErrorHandler is an optional handler called upon an error occurring in the integration
+	ErrorHandler *ErrorHandlerSpecApplyConfiguration `json:"errorHandler,omitempty"`
+	// the traits needed to customize the depending Integration
+	Traits *TraitsApplyConfiguration `json:"traits,omitempty"`
+	// Steps contains an optional list of intermediate steps that are executed between the Source and the Sink
+	Steps []EndpointApplyConfiguration `json:"steps,omitempty"`
+	// Replicas is the number of desired replicas for the Pipe
+	Replicas *int32 `json:"replicas,omitempty"`
+	// Custom SA to use for the Pipe
+	ServiceAccountName *string `json:"serviceAccountName,omitempty"`
+	// the list of Camel or Maven dependencies required by the Pipe
+	Dependencies []string `json:"dependencies,omitempty"`
 }
 
 // PipeSpecApplyConfiguration constructs a declarative configuration of the PipeSpec type for use with

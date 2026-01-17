@@ -21,12 +21,19 @@ package v1
 
 // BuildahTaskApplyConfiguration represents a declarative configuration of the BuildahTask type for use
 // with apply.
+//
+// BuildahTask is used to configure Buildah.
+//
+// Deprecated: no longer in use.
 type BuildahTaskApplyConfiguration struct {
 	BaseTaskApplyConfiguration    `json:",inline"`
 	PublishTaskApplyConfiguration `json:",inline"`
-	Platform                      *string `json:"platform,omitempty"`
-	Verbose                       *bool   `json:"verbose,omitempty"`
-	ExecutorImage                 *string `json:"executorImage,omitempty"`
+	// The platform of build image
+	Platform *string `json:"platform,omitempty"`
+	// log more information
+	Verbose *bool `json:"verbose,omitempty"`
+	// docker image to use
+	ExecutorImage *string `json:"executorImage,omitempty"`
 }
 
 // BuildahTaskApplyConfiguration constructs a declarative configuration of the BuildahTask type for use with

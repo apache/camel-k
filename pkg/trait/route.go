@@ -216,6 +216,7 @@ func (t *routeTrait) readContentIfExists(e *Environment, secretName string) (str
 		key = strs[1]
 	}
 
+	//nolint:staticcheck
 	secret := kubernetes.LookupSecret(e.Ctx, t.Client, t.service.Namespace, secretName)
 	if secret == nil {
 		return "", fmt.Errorf("%s secret not found in %s namespace, make sure to provide it before the Integration can run", secretName, t.service.Namespace)

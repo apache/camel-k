@@ -25,12 +25,15 @@ package trait
 // It's enabled by default if the integration depends on a Camel component that can expose a HTTP endpoint.
 //
 // +camel-k:trait=service.
+//
+//nolint:godoclint
 type ServiceTrait struct {
 	Trait `json:",inline" property:",squash"`
 
 	// To automatically detect from the code if a Service needs to be created.
 	Auto *bool `json:"auto,omitempty" property:"auto"`
 	// Enable Service to be exposed as NodePort (default `false`).
+	//
 	// Deprecated: Use service type instead.
 	NodePort *bool `json:"nodePort,omitempty" property:"node-port"`
 	// The type of service to be used, either 'ClusterIP', 'NodePort' or 'LoadBalancer'.

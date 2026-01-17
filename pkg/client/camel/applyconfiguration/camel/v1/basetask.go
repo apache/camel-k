@@ -21,8 +21,12 @@ package v1
 
 // BaseTaskApplyConfiguration represents a declarative configuration of the BaseTask type for use
 // with apply.
+//
+// BaseTask is a base for the struct hierarchy.
 type BaseTaskApplyConfiguration struct {
-	Name          *string                               `json:"name,omitempty"`
+	// name of the task
+	Name *string `json:"name,omitempty"`
+	// The configuration that should be used to perform the Build.
 	Configuration *BuildConfigurationApplyConfiguration `json:"configuration,omitempty"`
 }
 

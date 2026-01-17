@@ -39,6 +39,7 @@ The following configuration options are available:
 | service.node-port
 | bool
 | Enable Service to be exposed as NodePort (default `false`).
+
 Deprecated: Use service type instead.
 
 | service.type

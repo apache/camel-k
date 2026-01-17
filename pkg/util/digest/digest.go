@@ -180,13 +180,13 @@ func computeForTraits(hash hash.Hash, traits v1.Traits) error {
 	return nil
 }
 
-func computeForTrait(hash hash.Hash, name string, trait map[string]interface{}) error {
+func computeForTrait(hash hash.Hash, name string, trait map[string]any) error {
 	if _, err := hash.Write([]byte(name + "[")); err != nil {
 		return err
 	}
 	// hash legacy configuration first
 	if trait["configuration"] != nil {
-		if config, ok := trait["configuration"].(map[string]interface{}); ok {
+		if config, ok := trait["configuration"].(map[string]any); ok {
 			if err := computeForTraitProps(hash, config); err != nil {
 				return err
 			}
@@ -203,7 +203,7 @@ func computeForTrait(hash hash.Hash, name string, trait map[string]interface{}) 
 	return nil
 }
 
-func computeForTraitProps(hash hash.Hash, props map[string]interface{}) error {
+func computeForTraitProps(hash hash.Hash, props map[string]any) error {
 	for _, prop := range util.SortedMapKeys(props) {
 		val := props[prop]
 		if _, err := fmt.Fprintf(hash, "%s=%v,", prop, val); err != nil {
@@ -214,12 +214,12 @@ func computeForTraitProps(hash hash.Hash, props map[string]interface{}) error {
 	return nil
 }
 
-func toMap(traits v1.Traits) (map[string]map[string]interface{}, error) {
+func toMap(traits v1.Traits) (map[string]map[string]any, error) {
 	data, err := json.Marshal(traits)
 	if err != nil {
 		return nil, err
 	}
-	traitsMap := make(map[string]map[string]interface{})
+	traitsMap := make(map[string]map[string]any)
 	if err = json.Unmarshal(data, &traitsMap); err != nil {
 		return nil, err
 	}
@@ -296,7 +296,7 @@ func ComputeForSource(s v1.SourceSpec) (string, error) {
 	return digest, nil
 }
 
-func sortedTraitsMapKeys(m map[string]map[string]interface{}) []string {
+func sortedTraitsMapKeys(m map[string]map[string]any) []string {
 	res := make([]string, len(m))
 	i := 0
 	for k := range m {

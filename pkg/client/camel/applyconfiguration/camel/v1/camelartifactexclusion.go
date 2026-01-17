@@ -21,8 +21,12 @@ package v1
 
 // CamelArtifactExclusionApplyConfiguration represents a declarative configuration of the CamelArtifactExclusion type for use
 // with apply.
+//
+// CamelArtifactExclusion represents an exclusion clause.
 type CamelArtifactExclusionApplyConfiguration struct {
-	GroupID    *string `json:"groupId,omitempty"`
+	// Maven Group
+	GroupID *string `json:"groupId,omitempty"`
+	// Maven Artifact
 	ArtifactID *string `json:"artifactId,omitempty"`
 }
 

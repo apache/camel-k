@@ -25,9 +25,14 @@ import (
 
 // FailureRecoveryApplyConfiguration represents a declarative configuration of the FailureRecovery type for use
 // with apply.
+//
+// FailureRecovery defines the attempts to recover a failure.
 type FailureRecoveryApplyConfiguration struct {
-	Attempt     *int         `json:"attempt,omitempty"`
-	AttemptMax  *int         `json:"attemptMax,omitempty"`
+	// attempt number
+	Attempt *int `json:"attempt,omitempty"`
+	// maximum number of attempts
+	AttemptMax *int `json:"attemptMax,omitempty"`
+	// time of the attempt execution
 	AttemptTime *metav1.Time `json:"attemptTime,omitempty"`
 }
 

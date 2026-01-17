@@ -32,9 +32,10 @@ The following configuration options are available:
 
 | deployer.kind
 | string
-| Deprecated: this feature will be removed in future releases.
-Allows to explicitly select the desired deployment kind between `deployment`, `cron-job` or `knative-service`
+| Allows to explicitly select the desired deployment kind between `deployment`, `cron-job` or `knative-service`
 when creating the resources for running the integration.
+
+Deprecated: this feature will be removed in future releases.
 
 | deployer.use-ssa
 | bool

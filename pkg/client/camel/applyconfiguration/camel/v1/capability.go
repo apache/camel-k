@@ -21,11 +21,18 @@ package v1
 
 // CapabilityApplyConfiguration represents a declarative configuration of the Capability type for use
 // with apply.
+//
+// Capability is a particular feature which requires a well known set of dependencies and other properties
+// which are specified in the runtime catalog.
 type CapabilityApplyConfiguration struct {
-	Dependencies        []MavenArtifactApplyConfiguration `json:"dependencies,omitempty"`
-	RuntimeProperties   []CamelPropertyApplyConfiguration `json:"runtimeProperties,omitempty"`
+	// List of required Maven dependencies
+	Dependencies []MavenArtifactApplyConfiguration `json:"dependencies,omitempty"`
+	// Set of required Camel runtime properties
+	RuntimeProperties []CamelPropertyApplyConfiguration `json:"runtimeProperties,omitempty"`
+	// Set of required Camel build time properties
 	BuildTimeProperties []CamelPropertyApplyConfiguration `json:"buildTimeProperties,omitempty"`
-	Metadata            map[string]string                 `json:"metadata,omitempty"`
+	// Set of generic metadata
+	Metadata map[string]string `json:"metadata,omitempty"`
 }
 
 // CapabilityApplyConfiguration constructs a declarative configuration of the Capability type for use with

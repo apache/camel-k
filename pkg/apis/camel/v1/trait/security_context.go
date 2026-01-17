@@ -22,6 +22,8 @@ import corev1 "k8s.io/api/core/v1"
 // The Security Context trait can be used to configure the security setting of the Pod running the application.
 //
 // +camel-k:trait=security-context.
+//
+//nolint:godoclint
 type SecurityContextTrait struct {
 	PlatformBaseTrait `json:",inline" property:",squash"`
 

@@ -250,18 +250,18 @@ func (command *RootCmdOptions) NewCmdClient() (client.Client, error) {
 	return client.NewOutOfClusterClient(command.KubeConfig)
 }
 
-func (command *RootCmdOptions) PrintVerboseOut(cmd *cobra.Command, a ...interface{}) {
+func (command *RootCmdOptions) PrintVerboseOut(cmd *cobra.Command, a ...any) {
 	if command.Verbose {
 		fmt.Fprintln(cmd.OutOrStdout(), a...)
 	}
 }
 
-func (command *RootCmdOptions) PrintfVerboseOutf(cmd *cobra.Command, format string, a ...interface{}) {
+func (command *RootCmdOptions) PrintfVerboseOutf(cmd *cobra.Command, format string, a ...any) {
 	if command.Verbose {
 		fmt.Fprintf(cmd.OutOrStdout(), format, a...)
 	}
 }
-func (command *RootCmdOptions) PrintfVerboseErrf(cmd *cobra.Command, format string, a ...interface{}) {
+func (command *RootCmdOptions) PrintfVerboseErrf(cmd *cobra.Command, format string, a ...any) {
 	if command.Verbose {
 		fmt.Fprintf(cmd.ErrOrStderr(), format, a...)
 	}

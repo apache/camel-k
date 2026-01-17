@@ -30,6 +30,7 @@ import (
 )
 
 // LookupConfigmap will look for any k8s Configmap with a given name in a given namespace.
+//
 // Deprecated: won't be supported in future releases.
 func LookupConfigmap(ctx context.Context, c client.Client, ns string, name string) *corev1.ConfigMap {
 	cm := corev1.ConfigMap{
@@ -66,6 +67,7 @@ func LookupResourceVersion(ctx context.Context, c client.Client, object ctrl.Obj
 }
 
 // LookupSecret will look for any k8s Secret with a given name in a given namespace.
+//
 // Deprecated: won't be supported in future releases.
 func LookupSecret(ctx context.Context, c client.Client, ns string, name string) *corev1.Secret {
 	secret := corev1.Secret{

@@ -98,8 +98,8 @@ func (c *Converter) PropertiesFromString(str string) (map[string]string, error) 
 				}
 			}
 		}
-		parts := strings.Split(query, "&")
-		for _, part := range parts {
+		parts := strings.SplitSeq(query, "&")
+		for part := range parts {
 			kv := strings.SplitN(part, "=", 2)
 			if len(kv) != 2 {
 				return nil, fmt.Errorf("invalid key=value format for string %q", part)

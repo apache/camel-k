@@ -21,11 +21,18 @@ package v1
 
 // RegistrySpecApplyConfiguration represents a declarative configuration of the RegistrySpec type for use
 // with apply.
+//
+// RegistrySpec provides the configuration for the container registry.
 type RegistrySpecApplyConfiguration struct {
-	Insecure     *bool   `json:"insecure,omitempty"`
-	Address      *string `json:"address,omitempty"`
-	Secret       *string `json:"secret,omitempty"`
-	CA           *string `json:"ca,omitempty"`
+	// if the container registry is insecure (ie, http only)
+	Insecure *bool `json:"insecure,omitempty"`
+	// the URI to access
+	Address *string `json:"address,omitempty"`
+	// the secret where credentials are stored
+	Secret *string `json:"secret,omitempty"`
+	// the configmap which stores the Certificate Authority
+	CA *string `json:"ca,omitempty"`
+	// the registry organization
 	Organization *string `json:"organization,omitempty"`
 }
 

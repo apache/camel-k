@@ -114,17 +114,17 @@ func pathToRoot(cmd *cobra.Command) string {
 	return path
 }
 
-func decodeKey(target interface{}, key string, settings map[string]any) error {
-	nodes := strings.Split(key, ".")
+func decodeKey(target any, key string, settings map[string]any) error {
+	nodes := strings.SplitSeq(key, ".")
 
-	for _, node := range nodes {
+	for node := range nodes {
 		v := settings[node]
 
 		if v == nil {
 			return nil
 		}
 
-		if m, ok := v.(map[string]interface{}); ok {
+		if m, ok := v.(map[string]any); ok {
 			settings = m
 		} else {
 			return fmt.Errorf("unable to find node %s", node)
@@ -154,7 +154,7 @@ func decodeKey(target interface{}, key string, settings map[string]any) error {
 	return nil
 }
 
-func decode(target interface{}, v *viper.Viper) func(*cobra.Command, []string) error {
+func decode(target any, v *viper.Viper) func(*cobra.Command, []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		path := pathToRoot(cmd)
 		if err := decodeKey(target, path, v.AllSettings()); err != nil {
@@ -166,7 +166,7 @@ func decode(target interface{}, v *viper.Viper) func(*cobra.Command, []string) e
 }
 
 func stringToSliceHookFunc(comma rune) mapstructure.DecodeHookFunc {
-	return func(f reflect.Kind, t reflect.Kind, data interface{}) (interface{}, error) {
+	return func(f reflect.Kind, t reflect.Kind, data any) (any, error) {
 		if f != reflect.String || t != reflect.Slice {
 			return data, nil
 		}
@@ -191,7 +191,7 @@ func stringToSliceHookFunc(comma rune) mapstructure.DecodeHookFunc {
 	}
 }
 
-func cmdOnly(cmd *cobra.Command, options interface{}) *cobra.Command {
+func cmdOnly(cmd *cobra.Command, options any) *cobra.Command {
 	return cmd
 }
 
@@ -199,7 +199,7 @@ func isOfflineCommand(cmd *cobra.Command) bool {
 	return cmd.Annotations[offlineCommandLabel] == "true"
 }
 
-func clone(dst interface{}, src interface{}) error {
+func clone(dst any, src any) error {
 	if dst == nil {
 		return errors.New("dst cannot be nil")
 	}

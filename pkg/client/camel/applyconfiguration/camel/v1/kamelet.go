@@ -27,11 +27,16 @@ import (
 
 // KameletApplyConfiguration represents a declarative configuration of the Kamelet type for use
 // with apply.
+//
+// Kamelet is the Schema for the kamelets API.
 type KameletApplyConfiguration struct {
 	metav1.TypeMetaApplyConfiguration    `json:",inline"`
 	*metav1.ObjectMetaApplyConfiguration `json:"metadata,omitempty"`
-	Spec                                 *KameletSpecApplyConfiguration   `json:"spec,omitempty"`
-	Status                               *KameletStatusApplyConfiguration `json:"status,omitempty"`
+	// the desired specification
+	Spec *KameletSpecApplyConfiguration `json:"spec,omitempty"`
+	// the actual status of the resource
+	// Deprecated no longer in use
+	Status *KameletStatusApplyConfiguration `json:"status,omitempty"`
 }
 
 // Kamelet constructs a declarative configuration of the Kamelet type for use with
@@ -44,6 +49,7 @@ func Kamelet(name, namespace string) *KameletApplyConfiguration {
 	b.WithAPIVersion("camel.apache.org/v1")
 	return b
 }
+
 func (b KameletApplyConfiguration) IsApplyConfiguration() {}
 
 // WithKind sets the Kind field in the declarative configuration to the given value

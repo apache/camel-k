@@ -25,6 +25,8 @@ import networkingv1 "k8s.io/api/networking/v1"
 // It's enabled by default whenever a Service is added to the integration (through the `service` trait).
 //
 // +camel-k:trait=ingress.
+//
+//nolint:godoclint
 type IngressTrait struct {
 	Trait `json:",inline" property:",squash"`
 
@@ -38,6 +40,7 @@ type IngressTrait struct {
 	// To configure the host exposed by the ingress.
 	Host string `json:"host,omitempty" property:"host"`
 	// To configure the path exposed by the ingress (default `/`).
+	//
 	// Deprecated: In favor of `paths` - left for backward compatibility.
 	Path string `json:"path,omitempty" property:"path"`
 	// To configure the paths exposed by the ingress (default `['/']`).

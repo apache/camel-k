@@ -27,11 +27,18 @@ import (
 
 // IntegrationKitApplyConfiguration represents a declarative configuration of the IntegrationKit type for use
 // with apply.
+//
+// IntegrationKit defines a container image and additional configuration needed to run an `Integration`.
+// An `IntegrationKit` is a generic image generally built from the requirements of an `Integration`, but agnostic to it,
+// in order to be reused by any other `Integration` which has the same required set of capabilities. An `IntegrationKit`
+// may be used for other kits as a base container layer, when the `incremental` build option is enabled.
 type IntegrationKitApplyConfiguration struct {
 	metav1.TypeMetaApplyConfiguration    `json:",inline"`
 	*metav1.ObjectMetaApplyConfiguration `json:"metadata,omitempty"`
-	Spec                                 *IntegrationKitSpecApplyConfiguration   `json:"spec,omitempty"`
-	Status                               *IntegrationKitStatusApplyConfiguration `json:"status,omitempty"`
+	// the desired configuration
+	Spec *IntegrationKitSpecApplyConfiguration `json:"spec,omitempty"`
+	// the actual status
+	Status *IntegrationKitStatusApplyConfiguration `json:"status,omitempty"`
 }
 
 // IntegrationKit constructs a declarative configuration of the IntegrationKit type for use with
@@ -44,6 +51,7 @@ func IntegrationKit(name, namespace string) *IntegrationKitApplyConfiguration {
 	b.WithAPIVersion("camel.apache.org/v1")
 	return b
 }
+
 func (b IntegrationKitApplyConfiguration) IsApplyConfiguration() {}
 
 // WithKind sets the Kind field in the declarative configuration to the given value

@@ -29,18 +29,18 @@ LAST_RELEASED_IMAGE_NAME := camel-k-operator
 LAST_RELEASED_VERSION ?= 2.9.0
 DEFAULT_RUNTIME_VERSION := 3.15.3
 # Kubernetes tooling
-CONTROLLER_GEN_VERSION := v0.19.0
+CONTROLLER_GEN_VERSION := v0.20.0
 CONTROLLER_GEN=$(GOBIN)/controller-gen
-CODEGEN_VERSION := v0.34.1
-OPERATOR_SDK_VERSION := v1.30.0
-KUSTOMIZE_VERSION := v4.5.4
-OPM_VERSION := v1.24.0
+CODEGEN_VERSION := v0.35.0
+OPERATOR_SDK_VERSION := v1.42.0
+KUSTOMIZE_VERSION := v5.7.1
+OPM_VERSION := v1.61.0
 # Golang tooling
 LINTER ?= $(LOCALBIN)/golangci-lint
 DEADCODE ?= $(LOCALBIN)/deadcode
 GOVULNCHECK ?= $(LOCALBIN)/govulncheck
 GOIMPORT ?= $(LOCALBIN)/goimports
-LINTER_VERSION ?= v2.4.0
+LINTER_VERSION ?= v2.8.0
 GOVULNCHECK_VERSION ?= latest
 LINT_GOGC ?= 20
 LINT_DEADLINE ?= 10m
@@ -586,7 +586,7 @@ ifeq (, $(shell command -v kubectl 2> /dev/null))
 endif
 
 kustomize:
-	go install sigs.k8s.io/kustomize/kustomize/v4@$(KUSTOMIZE_VERSION)
+	go install sigs.k8s.io/kustomize/kustomize/v5@$(KUSTOMIZE_VERSION)
 KUSTOMIZE=$(GOBIN)/kustomize
 
 operator-sdk: detect-os

@@ -25,9 +25,14 @@ import (
 
 // FailureApplyConfiguration represents a declarative configuration of the Failure type for use
 // with apply.
+//
+// Failure represent a message specifying the reason and the time of an event failure.
 type FailureApplyConfiguration struct {
-	Reason   *string                            `json:"reason,omitempty"`
-	Time     *metav1.Time                       `json:"time,omitempty"`
+	// a short text specifying the reason
+	Reason *string `json:"reason,omitempty"`
+	// the time when the failure has happened
+	Time *metav1.Time `json:"time,omitempty"`
+	// the recovery attempted for this failure
 	Recovery *FailureRecoveryApplyConfiguration `json:"recovery,omitempty"`
 }
 

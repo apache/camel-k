@@ -20,7 +20,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.19.0
+    controller-gen.kubebuilder.io/version: v0.20.0
   name: pipes.camel.apache.org
 spec:
   group: camel.apache.org
@@ -89,6 +89,7 @@ spec:
                   configuration:
                     description: |-
                       Deprecated:
+
                       Use camel trait (camel.properties) to manage properties
                       Use mount trait (mount.configs) to manage configs
                       Use mount trait (mount.resources) to manage resources
@@ -231,7 +232,8 @@ spec:
                         interceptors:
                           description: |-
                             Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
-                            uses to pre/post process sources
+                            uses to pre/post process sources.
+
                             Deprecated: no longer in use.
                           items:
                             type: string
@@ -269,9 +271,9 @@ spec:
                     type: array
                   template:
                     description: |-
-                      Pod template customization
-                      Deprecated:
-                      Use container, init-containers or owner traits instead
+                      Pod template customization.
+
+                      Deprecated: use container, init-containers or owner traits instead
                     properties:
                       spec:
                         description: the specification
@@ -1172,7 +1174,9 @@ spec:
                                       type: integer
                                   type: object
                                 resizePolicy:
-                                  description: Resources resize policy for the container.
+                                  description: |-
+                                    Resources resize policy for the container.
+                                    This field cannot be set on ephemeral containers.
                                   items:
                                     description: ContainerResizePolicy represents
                                       resource resize policy for the container.
@@ -4241,7 +4245,9 @@ spec:
                                       type: integer
                                   type: object
                                 resizePolicy:
-                                  description: Resources resize policy for the container.
+                                  description: |-
+                                    Resources resize policy for the container.
+                                    This field cannot be set on ephemeral containers.
                                   items:
                                     description: ContainerResizePolicy represents
                                       resource resize policy for the container.
@@ -5915,7 +5921,7 @@ spec:
                                             resources:
                                               description: |-
                                                 resources represents the minimum resources the volume should have.
-                                                If RecoverVolumeExpansionFailure feature is enabled users are allowed to specify resource requirements
+                                                Users are allowed to specify resource requirements
                                                 that are lower than previous value but must still be higher than capacity recorded in the
                                                 status field of the claim.
                                                 More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources
@@ -6812,6 +6818,24 @@ spec:
                                                 description: Kubelet's generated CSRs
                                                   will be addressed to this signer.
                                                 type: string
+                                              userAnnotations:
+                                                additionalProperties:
+                                                  type: string
+                                                description: |-
+                                                  userAnnotations allow pod authors to pass additional information to
+                                                  the signer implementation.  Kubernetes does not restrict or validate this
+                                                  metadata in any way.
+
+                                                  These values are copied verbatim into the `spec.unverifiedUserAnnotations` field of
+                                                  the PodCertificateRequest objects that Kubelet creates.
+
+                                                  Entries are subject to the same validation as object metadata annotations,
+                                                  with the addition that all keys must be domain-prefixed. No restrictions
+                                                  are placed on values, except an overall size limitation on the entire field.
+
+                                                  Signers should document the keys and values they support. Signers should
+                                                  deny requests that contain keys they do not recognize.
+                                                type: object
                                             required:
                                             - keyType
                                             - signerName
@@ -7269,6 +7293,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -7323,6 +7348,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -7336,11 +7362,13 @@ spec:
                           limitCPU:
                             description: |-
                               When using `pod` strategy, the maximum amount of CPU required by the pod builder.
+
                               Deprecated: use TasksRequestCPU instead with task name `builder`.
                             type: string
                           limitMemory:
                             description: |-
                               When using `pod` strategy, the maximum amount of memory required by the pod builder.
+
                               Deprecated: use TasksRequestCPU instead with task name `builder`.
                             type: string
                           mavenProfiles:
@@ -7382,11 +7410,13 @@ spec:
                           requestCPU:
                             description: |-
                               When using `pod` strategy, the minimum amount of CPU required by the pod builder.
+
                               Deprecated: use TasksRequestCPU instead with task name `builder`.
                             type: string
                           requestMemory:
                             description: |-
                               When using `pod` strategy, the minimum amount of memory required by the pod builder.
+
                               Deprecated: use TasksRequestCPU instead with task name `builder`.
                             type: string
                           strategy:
@@ -7435,7 +7465,8 @@ spec:
                           verbose:
                             description: |-
                               Enable verbose logging on build components that support it (e.g. Kaniko build pod).
-                              Deprecated no longer in use
+
+                              Deprecated: no longer in use
                             type: boolean
                         type: object
                       camel:
@@ -7444,6 +7475,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -7499,6 +7531,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -7632,6 +7665,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -7665,6 +7699,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -7678,6 +7713,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -7686,9 +7722,10 @@ spec:
                             type: boolean
                           kind:
                             description: |-
-                              Deprecated: this feature will be removed in future releases.
                               Allows to explicitly select the desired deployment kind between `deployment`, `cron-job` or `knative-service`
                               when creating the resources for running the integration.
+
+                              Deprecated: this feature will be removed in future releases.
                             enum:
                             - deployment
                             - cron-job
@@ -7704,6 +7741,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -7753,6 +7791,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -7779,12 +7818,14 @@ spec:
                         type: object
                       error-handler:
                         description: |-
-                          The configuration of Error Handler trait
+                          The configuration of Error Handler trait.
+
                           Deprecated: no longer in use.
                         properties:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -7802,12 +7843,14 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
                           discoveryCache:
                             description: |-
                               Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`).
+
                               Deprecated: no longer in use.
                             enum:
                             - disabled
@@ -7845,6 +7888,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -7890,6 +7934,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -8036,6 +8081,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -8054,6 +8100,7 @@ spec:
                           path:
                             description: |-
                               To configure the path exposed by the ingress (default `/`).
+
                               Deprecated: In favor of `paths` - left for backward compatibility.
                             type: string
                           pathType:
@@ -8086,6 +8133,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -8118,6 +8166,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -8133,7 +8182,8 @@ spec:
                         type: object
                       jolokia:
                         description: |-
-                          The configuration of Jolokia trait
+                          The configuration of Jolokia trait.
+
                           Deprecated: use jvm.agent instead.
                         properties:
                           CACert:
@@ -8153,6 +8203,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -8232,6 +8283,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -8262,7 +8314,8 @@ spec:
                             type: array
                           printCommand:
                             description: |-
-                              Prints the command used the start the JVM in the container logs (default `true`)
+                              Prints the command used the start the JVM in the container logs (default `true`).
+
                               Deprecated: no longer in use.
                             type: boolean
                         type: object
@@ -8276,6 +8329,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -8311,6 +8365,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -8404,6 +8459,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -8513,6 +8569,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -8567,6 +8624,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -8602,6 +8660,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -8649,6 +8708,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -8692,7 +8752,8 @@ spec:
                         type: object
                       openapi:
                         description: |-
-                          The configuration of OpenAPI trait
+                          The configuration of OpenAPI trait.
+
                           Deprecated: no longer in use.
                         properties:
                           configmaps:
@@ -8704,6 +8765,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -8717,6 +8779,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -8741,6 +8804,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -8770,6 +8834,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -8785,12 +8850,14 @@ spec:
                         type: object
                       pod:
                         description: |-
-                          The configuration of Pod trait
+                          The configuration of Pod trait.
+
                           Deprecated: use init-containers instead.
                         properties:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -8805,6 +8872,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -8833,6 +8901,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -8871,6 +8940,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -8894,10 +8964,12 @@ spec:
                               The order influences the resolution of the current kit for the integration.
                               The kit corresponding to the first package type will be assigned to the
                               integration in case no existing kit that matches the integration exists.
+
                               Deprecated: use `build-mode` instead.
                             items:
                               description: |-
                                 QuarkusPackageType is the type of Quarkus build packaging.
+
                                 Deprecated: use `QuarkusMode` instead.
                               enum:
                               - fast-jar
@@ -8908,11 +8980,13 @@ spec:
                       registry:
                         description: |-
                           The configuration of Registry trait (support removed since version 2.5.0).
+
                           Deprecated: use jvm trait or read documentation.
                         properties:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -8923,7 +8997,8 @@ spec:
                         type: object
                       route:
                         description: |-
-                          The configuration of Route trait
+                          The configuration of Route trait.
+
                           Deprecated: use ingress instead.
                         properties:
                           annotations:
@@ -8938,6 +9013,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -9027,6 +9103,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -9066,6 +9143,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -9081,6 +9159,7 @@ spec:
                           nodePort:
                             description: |-
                               Enable Service to be exposed as NodePort (default `false`).
+
                               Deprecated: Use service type instead.
                             type: boolean
                           ports:
@@ -9104,12 +9183,14 @@ spec:
                         type: object
                       service-binding:
                         description: |-
-                          The configuration of Service Binding trait
+                          The configuration of Service Binding trait.
+
                           Deprecated: no longer in use.
                         properties:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -9143,6 +9224,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -9177,6 +9259,7 @@ spec:
                           configuration:
                             description: |-
                               Legacy trait configuration parameters.
+
                               Deprecated: for backward compatibility.
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
@@ -9459,6 +9542,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -9513,6 +9597,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -9526,11 +9611,13 @@ spec:
                       limitCPU:
                         description: |-
                           When using `pod` strategy, the maximum amount of CPU required by the pod builder.
+
                           Deprecated: use TasksRequestCPU instead with task name `builder`.
                         type: string
                       limitMemory:
                         description: |-
                           When using `pod` strategy, the maximum amount of memory required by the pod builder.
+
                           Deprecated: use TasksRequestCPU instead with task name `builder`.
                         type: string
                       mavenProfiles:
@@ -9571,11 +9658,13 @@ spec:
                       requestCPU:
                         description: |-
                           When using `pod` strategy, the minimum amount of CPU required by the pod builder.
+
                           Deprecated: use TasksRequestCPU instead with task name `builder`.
                         type: string
                       requestMemory:
                         description: |-
                           When using `pod` strategy, the minimum amount of memory required by the pod builder.
+
                           Deprecated: use TasksRequestCPU instead with task name `builder`.
                         type: string
                       strategy:
@@ -9624,7 +9713,8 @@ spec:
                       verbose:
                         description: |-
                           Enable verbose logging on build components that support it (e.g. Kaniko build pod).
-                          Deprecated no longer in use
+
+                          Deprecated: no longer in use
                         type: boolean
                     type: object
                   camel:
@@ -9633,6 +9723,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -9686,6 +9777,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -9819,6 +9911,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -9852,6 +9945,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -9865,6 +9959,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -9873,9 +9968,10 @@ spec:
                         type: boolean
                       kind:
                         description: |-
-                          Deprecated: this feature will be removed in future releases.
                           Allows to explicitly select the desired deployment kind between `deployment`, `cron-job` or `knative-service`
                           when creating the resources for running the integration.
+
+                          Deprecated: this feature will be removed in future releases.
                         enum:
                         - deployment
                         - cron-job
@@ -9891,6 +9987,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -9940,6 +10037,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -9966,12 +10064,14 @@ spec:
                     type: object
                   error-handler:
                     description: |-
-                      The configuration of Error Handler trait
+                      The configuration of Error Handler trait.
+
                       Deprecated: no longer in use.
                     properties:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -9989,12 +10089,14 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       discoveryCache:
                         description: |-
                           Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`).
+
                           Deprecated: no longer in use.
                         enum:
                         - disabled
@@ -10032,6 +10134,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -10077,6 +10180,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -10223,6 +10327,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -10241,6 +10346,7 @@ spec:
                       path:
                         description: |-
                           To configure the path exposed by the ingress (default `/`).
+
                           Deprecated: In favor of `paths` - left for backward compatibility.
                         type: string
                       pathType:
@@ -10273,6 +10379,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -10304,6 +10411,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -10319,7 +10427,8 @@ spec:
                     type: object
                   jolokia:
                     description: |-
-                      The configuration of Jolokia trait
+                      The configuration of Jolokia trait.
+
                       Deprecated: use jvm.agent instead.
                     properties:
                       CACert:
@@ -10339,6 +10448,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -10418,6 +10528,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -10448,7 +10559,8 @@ spec:
                         type: array
                       printCommand:
                         description: |-
-                          Prints the command used the start the JVM in the container logs (default `true`)
+                          Prints the command used the start the JVM in the container logs (default `true`).
+
                           Deprecated: no longer in use.
                         type: boolean
                     type: object
@@ -10462,6 +10574,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -10497,6 +10610,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -10589,6 +10703,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -10698,6 +10813,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -10752,6 +10868,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -10787,6 +10904,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -10833,6 +10951,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -10876,7 +10995,8 @@ spec:
                     type: object
                   openapi:
                     description: |-
-                      The configuration of OpenAPI trait
+                      The configuration of OpenAPI trait.
+
                       Deprecated: no longer in use.
                     properties:
                       configmaps:
@@ -10888,6 +11008,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -10901,6 +11022,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -10925,6 +11047,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -10954,6 +11077,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -10969,12 +11093,14 @@ spec:
                     type: object
                   pod:
                     description: |-
-                      The configuration of Pod trait
+                      The configuration of Pod trait.
+
                       Deprecated: use init-containers instead.
                     properties:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -10989,6 +11115,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -11017,6 +11144,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -11054,6 +11182,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -11077,10 +11206,12 @@ spec:
                           The order influences the resolution of the current kit for the integration.
                           The kit corresponding to the first package type will be assigned to the
                           integration in case no existing kit that matches the integration exists.
+
                           Deprecated: use `build-mode` instead.
                         items:
                           description: |-
                             QuarkusPackageType is the type of Quarkus build packaging.
+
                             Deprecated: use `QuarkusMode` instead.
                           enum:
                           - fast-jar
@@ -11091,11 +11222,13 @@ spec:
                   registry:
                     description: |-
                       The configuration of Registry trait (support removed since version 2.5.0).
+
                       Deprecated: use jvm trait or read documentation.
                     properties:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -11106,7 +11239,8 @@ spec:
                     type: object
                   route:
                     description: |-
-                      The configuration of Route trait
+                      The configuration of Route trait.
+
                       Deprecated: use ingress instead.
                     properties:
                       annotations:
@@ -11121,6 +11255,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -11210,6 +11345,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -11249,6 +11385,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -11264,6 +11401,7 @@ spec:
                       nodePort:
                         description: |-
                           Enable Service to be exposed as NodePort (default `false`).
+
                           Deprecated: Use service type instead.
                         type: boolean
                       ports:
@@ -11287,12 +11425,14 @@ spec:
                     type: object
                   service-binding:
                     description: |-
-                      The configuration of Service Binding trait
+                      The configuration of Service Binding trait.
+
                       Deprecated: no longer in use.
                     properties:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -11326,6 +11466,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -11359,6 +11500,7 @@ spec:
                       configuration:
                         description: |-
                           Legacy trait configuration parameters.
+
                           Deprecated: for backward compatibility.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
@@ -11431,7 +11573,7 @@ spec:
                               observedGeneration:
                                 description: |-
                                   If set, this represents the .metadata.generation that the pod condition was set based upon.
-                                  This is an alpha field. Enable PodObservedGenerationTracking to be able to use this field.
+                                  The PodObservedGenerationTracking feature gate must be enabled to use this field.
                                 format: int64
                                 type: integer
                               reason:

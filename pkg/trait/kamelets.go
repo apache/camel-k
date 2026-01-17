@@ -119,7 +119,7 @@ func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet,
 	var availableKamelets []string
 	var bundledKamelets []string
 
-	for _, kml := range strings.Split(t.List, ",") {
+	for kml := range strings.SplitSeq(t.List, ",") {
 		name := getKameletKey(kml)
 		if !v1.ValidKameletName(name) {
 			// Skip kamelet sink and source id
@@ -354,7 +354,7 @@ func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1.Kamelet) 
 
 func (t *kameletsTrait) getKameletKeys() []string {
 	answer := make([]string, 0)
-	for _, item := range strings.Split(t.List, ",") {
+	for item := range strings.SplitSeq(t.List, ",") {
 		i := getKameletKey(item)
 		if i != "" && v1.ValidKameletName(i) {
 			util.StringSliceUniqueAdd(&answer, i)

@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -280,7 +281,7 @@ func showPipeOutput(cmd *cobra.Command, binding *v1.Pipe, outputFormat string, s
 }
 
 func (o *bindCmdOptions) parseErrorHandler() (*v1.ErrorHandlerSpec, error) {
-	errHandlMap := make(map[string]interface{})
+	errHandlMap := make(map[string]any)
 	errHandlType, errHandlValue, err := parseErrorHandlerByType(o.ErrorHandler)
 	if err != nil {
 		return nil, err
@@ -295,7 +296,7 @@ func (o *bindCmdOptions) parseErrorHandler() (*v1.ErrorHandlerSpec, error) {
 		if err != nil {
 			return nil, err
 		}
-		errHandlMap["sink"] = map[string]interface{}{
+		errHandlMap["sink"] = map[string]any{
 			"endpoint": sinkSpec,
 		}
 	default:
@@ -352,12 +353,8 @@ func (o *bindCmdOptions) decode(res string, key string) (v1.Endpoint, error) {
 	}
 	if len(embeddedProps) > 0 {
 		allProps := make(map[string]string)
-		for k, v := range explicitProps {
-			allProps[k] = v
-		}
-		for k, v := range embeddedProps {
-			allProps[k] = v
-		}
+		maps.Copy(allProps, explicitProps)
+		maps.Copy(allProps, embeddedProps)
 
 		props, err := o.asEndpointProperties(allProps)
 		if err != nil {

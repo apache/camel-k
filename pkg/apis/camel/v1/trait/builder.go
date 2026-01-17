@@ -21,11 +21,14 @@ package trait
 // build and configure IntegrationKits.
 //
 // +camel-k:trait=builder.
+//
+//nolint:godoclint
 type BuilderTrait struct {
 	PlatformBaseTrait `json:",inline" property:",squash"`
 
 	// Enable verbose logging on build components that support it (e.g. Kaniko build pod).
-	// Deprecated no longer in use
+	//
+	// Deprecated: no longer in use
 	Verbose *bool `json:"verbose,omitempty" property:"verbose"`
 	// A list of properties to be provided to the build task
 	Properties []string `json:"properties,omitempty" property:"properties"`
@@ -41,15 +44,19 @@ type BuilderTrait struct {
 	// +kubebuilder:validation:Enum=dependencies;fifo;sequential
 	OrderStrategy string `json:"orderStrategy,omitempty" property:"order-strategy"`
 	// When using `pod` strategy, the minimum amount of CPU required by the pod builder.
+	//
 	// Deprecated: use TasksRequestCPU instead with task name `builder`.
 	RequestCPU string `json:"requestCPU,omitempty" property:"request-cpu"`
 	// When using `pod` strategy, the minimum amount of memory required by the pod builder.
+	//
 	// Deprecated: use TasksRequestCPU instead with task name `builder`.
 	RequestMemory string `json:"requestMemory,omitempty" property:"request-memory"`
 	// When using `pod` strategy, the maximum amount of CPU required by the pod builder.
+	//
 	// Deprecated: use TasksRequestCPU instead with task name `builder`.
 	LimitCPU string `json:"limitCPU,omitempty" property:"limit-cpu"`
 	// When using `pod` strategy, the maximum amount of memory required by the pod builder.
+	//
 	// Deprecated: use TasksRequestCPU instead with task name `builder`.
 	LimitMemory string `json:"limitMemory,omitempty" property:"limit-memory"`
 	// A list of references pointing to configmaps/secrets that contains a maven profile.

@@ -25,15 +25,31 @@ import (
 
 // IntegrationKitSpecApplyConfiguration represents a declarative configuration of the IntegrationKitSpec type for use
 // with apply.
+//
+// IntegrationKitSpec defines a container image and additional configurations required to kick off an `Integration` with certain features.
 type IntegrationKitSpecApplyConfiguration struct {
-	Image         *string                                 `json:"image,omitempty"`
-	Dependencies  []string                                `json:"dependencies,omitempty"`
-	Profile       *camelv1.TraitProfile                   `json:"profile,omitempty"`
-	Traits        *IntegrationKitTraitsApplyConfiguration `json:"traits,omitempty"`
-	Configuration []ConfigurationSpecApplyConfiguration   `json:"configuration,omitempty"`
-	Repositories  []string                                `json:"repositories,omitempty"`
-	Sources       []SourceSpecApplyConfiguration          `json:"sources,omitempty"`
-	Capabilities  []string                                `json:"capabilities,omitempty"`
+	// the container image as identified in the container registry
+	Image *string `json:"image,omitempty"`
+	// a list of Camel dependencies used by this kit
+	Dependencies []string `json:"dependencies,omitempty"`
+	// the profile which is expected by this kit
+	Profile *camelv1.TraitProfile `json:"profile,omitempty"`
+	// traits that the kit will execute
+	Traits *IntegrationKitTraitsApplyConfiguration `json:"traits,omitempty"`
+	// Deprecated:
+	//
+	// Use camel trait (camel.properties) to manage properties
+	// Use mount trait (mount.configs) to manage configs
+	// Use mount trait (mount.resources) to manage resources
+	// Use mount trait (mount.volumes) to manage volumes
+	// configuration used by the kit
+	Configuration []ConfigurationSpecApplyConfiguration `json:"configuration,omitempty"`
+	// Maven repositories that can be used by the kit
+	Repositories []string `json:"repositories,omitempty"`
+	// the sources to add at build time
+	Sources []SourceSpecApplyConfiguration `json:"sources,omitempty"`
+	// features offered by the IntegrationKit
+	Capabilities []string `json:"capabilities,omitempty"`
 }
 
 // IntegrationKitSpecApplyConfiguration constructs a declarative configuration of the IntegrationKitSpec type for use with

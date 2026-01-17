@@ -23,6 +23,8 @@ package trait
 //
 // +camel-k:trait=error-handler.
 // +camel-k:internal.
+//
+//nolint:godoclint
 type ErrorHandlerTrait struct {
 	PlatformBaseTrait `json:",inline" property:",squash"`
 

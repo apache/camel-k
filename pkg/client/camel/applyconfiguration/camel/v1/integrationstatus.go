@@ -27,29 +27,55 @@ import (
 
 // IntegrationStatusApplyConfiguration represents a declarative configuration of the IntegrationStatus type for use
 // with apply.
+//
+// IntegrationStatus defines the observed state of Integration.
 type IntegrationStatusApplyConfiguration struct {
-	ObservedGeneration      *int64                                   `json:"observedGeneration,omitempty"`
-	Phase                   *camelv1.IntegrationPhase                `json:"phase,omitempty"`
-	Digest                  *string                                  `json:"digest,omitempty"`
-	Image                   *string                                  `json:"image,omitempty"`
-	Jar                     *string                                  `json:"jar,omitempty"`
-	Dependencies            []string                                 `json:"dependencies,omitempty"`
-	Profile                 *camelv1.TraitProfile                    `json:"profile,omitempty"`
-	Traits                  *TraitsApplyConfiguration                `json:"traits,omitempty"`
-	IntegrationKit          *corev1.ObjectReference                  `json:"integrationKit,omitempty"`
-	Platform                *string                                  `json:"platform,omitempty"`
-	GeneratedSources        []SourceSpecApplyConfiguration           `json:"generatedSources,omitempty"`
-	RuntimeVersion          *string                                  `json:"runtimeVersion,omitempty"`
-	RuntimeProvider         *camelv1.RuntimeProvider                 `json:"runtimeProvider,omitempty"`
-	Catalog                 *CatalogApplyConfiguration               `json:"catalog,omitempty"`
-	Configuration           []ConfigurationSpecApplyConfiguration    `json:"configuration,omitempty"`
-	Conditions              []IntegrationConditionApplyConfiguration `json:"conditions,omitempty"`
-	Version                 *string                                  `json:"version,omitempty"`
-	Replicas                *int32                                   `json:"replicas,omitempty"`
-	Selector                *string                                  `json:"selector,omitempty"`
-	Capabilities            []string                                 `json:"capabilities,omitempty"`
-	InitializationTimestamp *metav1.Time                             `json:"lastInitTimestamp,omitempty"`
-	DeploymentTimestamp     *metav1.Time                             `json:"lastDeploymentTimestamp,omitempty"`
+	// ObservedGeneration is the most recent generation observed for this Integration.
+	ObservedGeneration *int64 `json:"observedGeneration,omitempty"`
+	// the actual phase
+	Phase *camelv1.IntegrationPhase `json:"phase,omitempty"`
+	// the digest calculated for this Integration
+	Digest *string `json:"digest,omitempty"`
+	// the container image used
+	Image *string `json:"image,omitempty"`
+	// the Java jar dependency to execute (if available)
+	Jar *string `json:"jar,omitempty"`
+	// a list of dependencies needed by the application
+	Dependencies []string `json:"dependencies,omitempty"`
+	// the profile needed to run this Integration
+	Profile *camelv1.TraitProfile `json:"profile,omitempty"`
+	// the traits executed for the Integration
+	Traits *TraitsApplyConfiguration `json:"traits,omitempty"`
+	// the reference of the `IntegrationKit` which is used for this Integration
+	IntegrationKit *corev1.ObjectReference `json:"integrationKit,omitempty"`
+	// The IntegrationPlatform watching this Integration
+	Platform *string `json:"platform,omitempty"`
+	// a list of sources generated for this Integration
+	GeneratedSources []SourceSpecApplyConfiguration `json:"generatedSources,omitempty"`
+	// the runtime version targeted for this Integration
+	RuntimeVersion *string `json:"runtimeVersion,omitempty"`
+	// the runtime provider targeted for this Integration
+	RuntimeProvider *camelv1.RuntimeProvider `json:"runtimeProvider,omitempty"`
+	// the catalog used to build/operate the Integration.
+	Catalog *CatalogApplyConfiguration `json:"catalog,omitempty"`
+	// a list of configuration specification.
+	//
+	// Deprecated: use properties instead.
+	Configuration []ConfigurationSpecApplyConfiguration `json:"configuration,omitempty"`
+	// a list of events happened for the Integration
+	Conditions []IntegrationConditionApplyConfiguration `json:"conditions,omitempty"`
+	// the operator version
+	Version *string `json:"version,omitempty"`
+	// the number of replicas
+	Replicas *int32 `json:"replicas,omitempty"`
+	// label selector
+	Selector *string `json:"selector,omitempty"`
+	// features offered by the Integration
+	Capabilities []string `json:"capabilities,omitempty"`
+	// the timestamp representing the last time when this integration was initialized.
+	InitializationTimestamp *metav1.Time `json:"lastInitTimestamp,omitempty"`
+	// the timestamp representing the last time when this integration was deployed.
+	DeploymentTimestamp *metav1.Time `json:"lastDeploymentTimestamp,omitempty"`
 }
 
 // IntegrationStatusApplyConfiguration constructs a declarative configuration of the IntegrationStatus type for use with

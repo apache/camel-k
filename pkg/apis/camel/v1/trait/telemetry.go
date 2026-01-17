@@ -35,6 +35,8 @@ package trait
 //
 // +camel-k:trait=telemetry.
 // +camel-k:deprecated=2.9.0.
+//
+//nolint:godoclint
 type TelemetryTrait struct {
 	Trait `json:",inline" property:",squash"`
 

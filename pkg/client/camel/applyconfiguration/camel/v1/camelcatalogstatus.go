@@ -25,11 +25,17 @@ import (
 
 // CamelCatalogStatusApplyConfiguration represents a declarative configuration of the CamelCatalogStatus type for use
 // with apply.
+//
+// CamelCatalogStatus defines the observed state of CamelCatalog.
 type CamelCatalogStatusApplyConfiguration struct {
-	ObservedGeneration *int64                                    `json:"observedGeneration,omitempty"`
-	Phase              *camelv1.CamelCatalogPhase                `json:"phase,omitempty"`
-	Conditions         []CamelCatalogConditionApplyConfiguration `json:"conditions,omitempty"`
-	Image              *string                                   `json:"image,omitempty"`
+	// ObservedGeneration is the most recent generation observed for this Catalog.
+	ObservedGeneration *int64 `json:"observedGeneration,omitempty"`
+	// the actual phase
+	Phase *camelv1.CamelCatalogPhase `json:"phase,omitempty"`
+	// a list of events happened for the CamelCatalog
+	Conditions []CamelCatalogConditionApplyConfiguration `json:"conditions,omitempty"`
+	// the container image available for building an application with this catalog
+	Image *string `json:"image,omitempty"`
 }
 
 // CamelCatalogStatusApplyConfiguration constructs a declarative configuration of the CamelCatalogStatus type for use with

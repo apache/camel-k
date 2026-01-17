@@ -183,7 +183,7 @@ func NewContext(buildDir string) Context {
 	return Context{
 		Path:                buildDir,
 		AdditionalArguments: make([]string, 0),
-		AdditionalEntries:   make(map[string]interface{}),
+		AdditionalEntries:   make(map[string]any),
 	}
 }
 
@@ -195,13 +195,13 @@ type Context struct {
 	UserSettings              []byte
 	SettingsSecurity          []byte
 	AdditionalArguments       []string
-	AdditionalEntries         map[string]interface{}
+	AdditionalEntries         map[string]any
 	LocalRepository           string
 }
 
-func (c *Context) AddEntry(id string, entry interface{}) {
+func (c *Context) AddEntry(id string, entry any) {
 	if c.AdditionalEntries == nil {
-		c.AdditionalEntries = make(map[string]interface{})
+		c.AdditionalEntries = make(map[string]any)
 	}
 
 	c.AdditionalEntries[id] = entry
@@ -211,7 +211,7 @@ func (c *Context) AddArgument(argument string) {
 	c.AdditionalArguments = append(c.AdditionalArguments, argument)
 }
 
-func (c *Context) AddArgumentf(format string, args ...interface{}) {
+func (c *Context) AddArgumentf(format string, args ...any) {
 	c.AdditionalArguments = append(c.AdditionalArguments, fmt.Sprintf(format, args...))
 }
 
@@ -328,18 +328,22 @@ func generateMavenContext(path string, args, options []string) error {
 
 func getMavenContext(args, options []string) string {
 	mavenContext := ""
+	var mavenContextSb331 strings.Builder
 	for _, arg := range args {
 		arg = strings.TrimSpace(arg)
 		if arg != "package" && len(arg) != 0 {
-			mavenContext += arg + "\n"
+			mavenContextSb331.WriteString(arg + "\n")
 		}
 	}
+	mavenContext += mavenContextSb331.String()
+	var mavenContextSb337 strings.Builder
 	for _, opt := range options {
 		opt = strings.TrimSpace(opt)
 		if len(opt) != 0 {
-			mavenContext += opt + "\n"
+			mavenContextSb337.WriteString(opt + "\n")
 		}
 	}
+	mavenContext += mavenContextSb337.String()
 
 	return mavenContext
 }

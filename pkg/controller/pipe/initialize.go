@@ -20,6 +20,7 @@ package pipe
 import (
 	"context"
 	"fmt"
+	"maps"
 	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -133,9 +134,7 @@ func findIcon(ctx context.Context, c client.Client, pipe *v1.Pipe) (string, erro
 func patchPipeIconAnnotations(ctx context.Context, c client.Client, pipe *v1.Pipe, icon string) error {
 	clone := pipe.DeepCopy()
 	clone.Annotations = make(map[string]string)
-	for k, v := range pipe.Annotations {
-		clone.Annotations[k] = v
-	}
+	maps.Copy(clone.Annotations, pipe.Annotations)
 	if _, ok := clone.Annotations[v1.AnnotationIcon]; !ok {
 		clone.Annotations[v1.AnnotationIcon] = icon
 	}

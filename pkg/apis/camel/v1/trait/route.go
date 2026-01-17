@@ -31,6 +31,8 @@ package trait
 //
 // +camel-k:trait=route.
 // +camel-k:deprecated=2.6.0.
+//
+//nolint:godoclint
 type RouteTrait struct {
 	Trait `json:",inline" property:",squash"`
 

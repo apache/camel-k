@@ -21,12 +21,19 @@ package v1
 
 // KanikoTaskApplyConfiguration represents a declarative configuration of the KanikoTask type for use
 // with apply.
+//
+// KanikoTask is used to configure Kaniko.
+//
+// Deprecated: no longer in use.
 type KanikoTaskApplyConfiguration struct {
 	BaseTaskApplyConfiguration    `json:",inline"`
 	PublishTaskApplyConfiguration `json:",inline"`
-	Verbose                       *bool                              `json:"verbose,omitempty"`
-	Cache                         *KanikoTaskCacheApplyConfiguration `json:"cache,omitempty"`
-	ExecutorImage                 *string                            `json:"executorImage,omitempty"`
+	// log more information
+	Verbose *bool `json:"verbose,omitempty"`
+	// use a cache
+	Cache *KanikoTaskCacheApplyConfiguration `json:"cache,omitempty"`
+	// docker image to use
+	ExecutorImage *string `json:"executorImage,omitempty"`
 }
 
 // KanikoTaskApplyConfiguration constructs a declarative configuration of the KanikoTask type for use with

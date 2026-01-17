@@ -19,6 +19,7 @@ package v1
 
 import (
 	"path/filepath"
+	"slices"
 	"strconv"
 
 	"github.com/apache/camel-k/v2/pkg/util/sets"
@@ -109,21 +110,16 @@ func (in *IntegrationKit) IsExternal() bool {
 	return in.Labels[IntegrationKitTypeLabel] == IntegrationKitTypeExternal
 }
 
-// Deprecated: synthetic Integration Kits are replaced by syntentic Integrations.
 // IsSynthetic returns true for synthetic IntegrationKits.
+//
+// Deprecated: synthetic Integration Kits are replaced by syntentic Integrations.
 func (in *IntegrationKit) IsSynthetic() bool {
 	return in.Labels[IntegrationKitTypeLabel] == IntegrationKitTypeSynthetic
 }
 
 // HasCapability returns true if the Kit is enabled with such a capability.
 func (in *IntegrationKit) HasCapability(capability string) bool {
-	for _, cap := range in.Spec.Capabilities {
-		if cap == capability {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(in.Spec.Capabilities, capability)
 }
 
 // GetCondition returns the condition with the provided type.

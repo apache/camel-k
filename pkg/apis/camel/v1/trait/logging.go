@@ -30,6 +30,8 @@ package trait
 //
 // +camel-k:trait=logging.
 // +camel-k:deprecated=2.9.0.
+//
+//nolint:godoclint
 type LoggingTrait struct {
 	Trait `json:",inline" property:",squash"`
 

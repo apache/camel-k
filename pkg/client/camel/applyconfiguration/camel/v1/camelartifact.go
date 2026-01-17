@@ -21,13 +21,21 @@ package v1
 
 // CamelArtifactApplyConfiguration represents a declarative configuration of the CamelArtifact type for use
 // with apply.
+//
+// CamelArtifact represent the configuration for a feature offered by Camel.
 type CamelArtifactApplyConfiguration struct {
+	// Base Camel Artifact dependency
 	CamelArtifactDependencyApplyConfiguration `json:",inline"`
-	Schemes                                   []CamelSchemeApplyConfiguration             `json:"schemes,omitempty"`
-	Languages                                 []string                                    `json:"languages,omitempty"`
-	DataFormats                               []string                                    `json:"dataformats,omitempty"`
-	Dependencies                              []CamelArtifactDependencyApplyConfiguration `json:"dependencies,omitempty"`
-	JavaTypes                                 []string                                    `json:"javaTypes,omitempty"`
+	// accepted URI schemes
+	Schemes []CamelSchemeApplyConfiguration `json:"schemes,omitempty"`
+	// accepted languages
+	Languages []string `json:"languages,omitempty"`
+	// accepted data formats
+	DataFormats []string `json:"dataformats,omitempty"`
+	// required dependencies
+	Dependencies []CamelArtifactDependencyApplyConfiguration `json:"dependencies,omitempty"`
+	// the Java types used by the artifact feature (ie, component, data format, ...)
+	JavaTypes []string `json:"javaTypes,omitempty"`
 }
 
 // CamelArtifactApplyConfiguration constructs a declarative configuration of the CamelArtifact type for use with

@@ -25,14 +25,27 @@ import (
 
 // SourceSpecApplyConfiguration represents a declarative configuration of the SourceSpec type for use
 // with apply.
+//
+// SourceSpec defines the configuration for one or more routes to be executed in a certain Camel DSL language.
 type SourceSpecApplyConfiguration struct {
+	// contains configuration related to the source code
 	DataSpecApplyConfiguration `json:",inline"`
-	Language                   *camelv1.Language   `json:"language,omitempty"`
-	Loader                     *string             `json:"loader,omitempty"`
-	Interceptors               []string            `json:"interceptors,omitempty"`
-	Type                       *camelv1.SourceType `json:"type,omitempty"`
-	PropertyNames              []string            `json:"property-names,omitempty"`
-	FromKamelet                *bool               `json:"from-kamelet,omitempty"`
+	// specify which is the language (Camel DSL) used to interpret this source code
+	Language *camelv1.Language `json:"language,omitempty"`
+	// Loader is an optional id of the org.apache.camel.k.RoutesLoader that will
+	// interpret this source at runtime
+	Loader *string `json:"loader,omitempty"`
+	// Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
+	// uses to pre/post process sources.
+	//
+	// Deprecated: no longer in use.
+	Interceptors []string `json:"interceptors,omitempty"`
+	// Type defines the kind of source described by this object
+	Type *camelv1.SourceType `json:"type,omitempty"`
+	// List of property names defined in the source (e.g. if type is "template")
+	PropertyNames []string `json:"property-names,omitempty"`
+	// True if the spec is generated from a Kamelet
+	FromKamelet *bool `json:"from-kamelet,omitempty"`
 }
 
 // SourceSpecApplyConfiguration constructs a declarative configuration of the SourceSpec type for use with

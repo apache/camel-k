@@ -21,10 +21,15 @@ package v1
 
 // CamelCatalogSpecApplyConfiguration represents a declarative configuration of the CamelCatalogSpec type for use
 // with apply.
+//
+// CamelCatalogSpec specify what features a Camel runtime provides.
 type CamelCatalogSpecApplyConfiguration struct {
-	Runtime   *RuntimeSpecApplyConfiguration             `json:"runtime,omitempty"`
+	// the runtime targeted for the catalog
+	Runtime *RuntimeSpecApplyConfiguration `json:"runtime,omitempty"`
+	// artifacts required by this catalog
 	Artifacts map[string]CamelArtifactApplyConfiguration `json:"artifacts,omitempty"`
-	Loaders   map[string]CamelLoaderApplyConfiguration   `json:"loaders,omitempty"`
+	// loaders required by this catalog
+	Loaders map[string]CamelLoaderApplyConfiguration `json:"loaders,omitempty"`
 }
 
 // CamelCatalogSpecApplyConfiguration constructs a declarative configuration of the CamelCatalogSpec type for use with

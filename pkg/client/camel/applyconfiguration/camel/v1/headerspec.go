@@ -21,6 +21,8 @@ package v1
 
 // HeaderSpecApplyConfiguration represents a declarative configuration of the HeaderSpec type for use
 // with apply.
+//
+// HeaderSpec represents the specification for a header used in the Kamelet.
 type HeaderSpecApplyConfiguration struct {
 	Type        *string `json:"type,omitempty"`
 	Title       *string `json:"title,omitempty"`

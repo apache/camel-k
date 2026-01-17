@@ -25,6 +25,7 @@ import (
 
 const (
 	// TraitAnnotationPrefix represents the prefix used for traits annotations.
+	//
 	// Deprecated: use .spec.traits instead.
 	TraitAnnotationPrefix = "trait.camel.apache.org/"
 	// OperatorIDAnnotation operator id annotation label.
@@ -203,7 +204,8 @@ type Traits struct {
 	Deployment *trait.DeploymentTrait `json:"deployment,omitempty" property:"deployment"`
 	// The configuration of Environment trait
 	Environment *trait.EnvironmentTrait `json:"environment,omitempty" property:"environment"`
-	// The configuration of Error Handler trait
+	// The configuration of Error Handler trait.
+	//
 	// Deprecated: no longer in use.
 	ErrorHandler *trait.ErrorHandlerTrait `json:"error-handler,omitempty" property:"error-handler"`
 	// The configuration of GC trait
@@ -218,7 +220,8 @@ type Traits struct {
 	InitContainers *trait.InitContainersTrait `json:"init-containers,omitempty" property:"init-containers"`
 	// The configuration of Istio trait
 	Istio *trait.IstioTrait `json:"istio,omitempty" property:"istio"`
-	// The configuration of Jolokia trait
+	// The configuration of Jolokia trait.
+	//
 	// Deprecated: use jvm.agent instead.
 	Jolokia *trait.JolokiaTrait `json:"jolokia,omitempty" property:"jolokia"`
 	// The configuration of JVM trait
@@ -237,7 +240,8 @@ type Traits struct {
 	Master *trait.MasterTrait `json:"master,omitempty" property:"master"`
 	// The configuration of Mount trait
 	Mount *trait.MountTrait `json:"mount,omitempty" property:"mount"`
-	// The configuration of OpenAPI trait
+	// The configuration of OpenAPI trait.
+	//
 	// Deprecated: no longer in use.
 	OpenAPI *trait.OpenAPITrait `json:"openapi,omitempty" property:"openapi"`
 	// The configuration of Owner trait
@@ -246,7 +250,8 @@ type Traits struct {
 	PDB *trait.PDBTrait `json:"pdb,omitempty" property:"pdb"`
 	// The configuration of Platform trait
 	Platform *trait.PlatformTrait `json:"platform,omitempty" property:"platform"`
-	// The configuration of Pod trait
+	// The configuration of Pod trait.
+	//
 	// Deprecated: use init-containers instead.
 	Pod *trait.PodTrait `json:"pod,omitempty" property:"pod"`
 	// The configuration of Prometheus trait
@@ -256,16 +261,19 @@ type Traits struct {
 	// The configuration of Quarkus trait
 	Quarkus *trait.QuarkusTrait `json:"quarkus,omitempty" property:"quarkus"`
 	// The configuration of Registry trait (support removed since version 2.5.0).
+	//
 	// Deprecated: use jvm trait or read documentation.
 	Registry *trait.RegistryTrait `json:"registry,omitempty" property:"registry"`
-	// The configuration of Route trait
+	// The configuration of Route trait.
+	//
 	// Deprecated: use ingress instead.
 	Route *trait.RouteTrait `json:"route,omitempty" property:"route"`
 	// The configuration of Security Context trait
 	SecurityContext *trait.SecurityContextTrait `json:"security-context,omitempty" property:"security-context"`
 	// The configuration of Service trait
 	Service *trait.ServiceTrait `json:"service,omitempty" property:"service"`
-	// The configuration of Service Binding trait
+	// The configuration of Service Binding trait.
+	//
 	// Deprecated: no longer in use.
 	ServiceBinding *trait.ServiceBindingTrait `json:"service-binding,omitempty" property:"service-binding"`
 	// The configuration of Telemetry trait
@@ -290,15 +298,17 @@ type AddonTrait struct {
 	RawMessage `json:",inline"`
 }
 
-// A TraitSpec contains the configuration of a trait
-// Deprecated: superceded by each Trait type, left for backward compatibility.
+// A TraitSpec contains the configuration of a trait.
+//
+// Deprecated: superseded by each Trait type, left for backward compatibility.
 type TraitSpec struct {
 	// TraitConfiguration parameters configuration
 	Configuration TraitConfiguration `json:"configuration"`
 }
 
-// TraitConfiguration represents the expected configuration for a given trait parameter
-// Deprecated: superceded by each Trait type, left for backward compatibility.
+// TraitConfiguration represents the expected configuration for a given trait parameter.
+//
+// Deprecated: superseded by each Trait type, left for backward compatibility.
 type TraitConfiguration struct {
 	// generic raw message, typically a map containing the keys (trait parameters) and the values (either single text or array)
 	RawMessage `json:",inline"`
@@ -469,7 +479,8 @@ type SourceSpec struct {
 	// interpret this source at runtime
 	Loader string `json:"loader,omitempty"`
 	// Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
-	// uses to pre/post process sources
+	// uses to pre/post process sources.
+	//
 	// Deprecated: no longer in use.
 	Interceptors []string `json:"interceptors,omitempty"`
 	// Type defines the kind of source described by this object

@@ -217,7 +217,7 @@ func (t *gcTrait) garbageCollectResources(e *Environment) error {
 func (t *gcTrait) deleteEachOf(ctx context.Context, deletableGVKs map[schema.GroupVersionKind]struct{}, e *Environment, selector labels.Selector) error {
 	for GVK := range deletableGVKs {
 		resources := unstructured.UnstructuredList{
-			Object: map[string]interface{}{
+			Object: map[string]any{
 				"apiVersion": GVK.GroupVersion().String(),
 				"kind":       GVK.Kind,
 			},

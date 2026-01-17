@@ -50,7 +50,7 @@ func ToYAMLNoManagedFields(value runtime.Object) ([]byte, error) {
 		return nil, err
 	}
 
-	if m, ok := mapdata["metadata"].(map[string]interface{}); ok {
+	if m, ok := mapdata["metadata"].(map[string]any); ok {
 		delete(m, "managedFields")
 	}
 

@@ -43,7 +43,7 @@ type Monitor struct {
 
 func (bm *Monitor) canSchedule(ctx context.Context, c ctrl.Reader, build *v1.Build) (bool, *v1.BuildCondition, error) {
 	var runningBuildsTotal int32
-	runningBuilds.Range(func(_, v interface{}) bool {
+	runningBuilds.Range(func(_, v any) bool {
 		runningBuildsTotal++
 
 		return true

@@ -15,7 +15,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package duck contains duck-types for accessing Keda resources
 package v1alpha1
 
 import (

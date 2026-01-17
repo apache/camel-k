@@ -27,11 +27,15 @@ import (
 
 // PipeApplyConfiguration represents a declarative configuration of the Pipe type for use
 // with apply.
+//
+// Pipe is the Schema for the Pipe API.
 type PipeApplyConfiguration struct {
 	metav1.TypeMetaApplyConfiguration    `json:",inline"`
 	*metav1.ObjectMetaApplyConfiguration `json:"metadata,omitempty"`
-	Spec                                 *PipeSpecApplyConfiguration   `json:"spec,omitempty"`
-	Status                               *PipeStatusApplyConfiguration `json:"status,omitempty"`
+	// the specification of a Pipe
+	Spec *PipeSpecApplyConfiguration `json:"spec,omitempty"`
+	// the status of a Pipe
+	Status *PipeStatusApplyConfiguration `json:"status,omitempty"`
 }
 
 // Pipe constructs a declarative configuration of the Pipe type for use with
@@ -44,6 +48,7 @@ func Pipe(name, namespace string) *PipeApplyConfiguration {
 	b.WithAPIVersion("camel.apache.org/v1")
 	return b
 }
+
 func (b PipeApplyConfiguration) IsApplyConfiguration() {}
 
 // WithKind sets the Kind field in the declarative configuration to the given value

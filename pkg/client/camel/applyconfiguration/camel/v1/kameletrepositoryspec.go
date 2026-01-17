@@ -21,7 +21,10 @@ package v1
 
 // KameletRepositorySpecApplyConfiguration represents a declarative configuration of the KameletRepositorySpec type for use
 // with apply.
+//
+// KameletRepositorySpec defines the location of the Kamelet catalog to use.
 type KameletRepositorySpecApplyConfiguration struct {
+	// the remote repository in the format github:ORG/REPO/PATH_TO_KAMELETS_FOLDER
 	URI *string `json:"uri,omitempty"`
 }
 

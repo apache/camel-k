@@ -25,21 +25,37 @@ import (
 
 // IntegrationKitStatusApplyConfiguration represents a declarative configuration of the IntegrationKitStatus type for use
 // with apply.
+//
+// IntegrationKitStatus defines the observed state of IntegrationKit.
 type IntegrationKitStatusApplyConfiguration struct {
-	ObservedGeneration *int64                                      `json:"observedGeneration,omitempty"`
-	Phase              *camelv1.IntegrationKitPhase                `json:"phase,omitempty"`
-	RootImage          *string                                     `json:"rootImage,omitempty"`
-	BaseImage          *string                                     `json:"baseImage,omitempty"`
-	Image              *string                                     `json:"image,omitempty"`
-	Digest             *string                                     `json:"digest,omitempty"`
-	Artifacts          []ArtifactApplyConfiguration                `json:"artifacts,omitempty"`
-	Failure            *FailureApplyConfiguration                  `json:"failure,omitempty"`
-	RuntimeVersion     *string                                     `json:"runtimeVersion,omitempty"`
-	RuntimeProvider    *camelv1.RuntimeProvider                    `json:"runtimeProvider,omitempty"`
-	Catalog            *CatalogApplyConfiguration                  `json:"catalog,omitempty"`
-	Platform           *string                                     `json:"platform,omitempty"`
-	Version            *string                                     `json:"version,omitempty"`
-	Conditions         []IntegrationKitConditionApplyConfiguration `json:"conditions,omitempty"`
+	// ObservedGeneration is the most recent generation observed for this IntegrationKit.
+	ObservedGeneration *int64 `json:"observedGeneration,omitempty"`
+	// phase of the kit
+	Phase *camelv1.IntegrationKitPhase `json:"phase,omitempty"`
+	// root image used by the kit (the first image from which the incremental image has started, typically a JDK/JRE base image)
+	RootImage *string `json:"rootImage,omitempty"`
+	// base image used by the kit (could be another IntegrationKit)
+	BaseImage *string `json:"baseImage,omitempty"`
+	// actual image name of the kit
+	Image *string `json:"image,omitempty"`
+	// actual image digest of the kit
+	Digest *string `json:"digest,omitempty"`
+	// list of artifacts used by the kit
+	Artifacts []ArtifactApplyConfiguration `json:"artifacts,omitempty"`
+	// failure reason (if any)
+	Failure *FailureApplyConfiguration `json:"failure,omitempty"`
+	// the runtime version for which this kit was configured
+	RuntimeVersion *string `json:"runtimeVersion,omitempty"`
+	// the runtime provider for which this kit was configured
+	RuntimeProvider *camelv1.RuntimeProvider `json:"runtimeProvider,omitempty"`
+	// the catalog used to build/operate the IntegrationKit.
+	Catalog *CatalogApplyConfiguration `json:"catalog,omitempty"`
+	// the platform for which this kit was configured
+	Platform *string `json:"platform,omitempty"`
+	// the Camel K operator version for which this kit was configured
+	Version *string `json:"version,omitempty"`
+	// a list of conditions which happened for the events related the kit
+	Conditions []IntegrationKitConditionApplyConfiguration `json:"conditions,omitempty"`
 }
 
 // IntegrationKitStatusApplyConfiguration constructs a declarative configuration of the IntegrationKitStatus type for use with

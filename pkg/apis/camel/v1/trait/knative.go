@@ -25,6 +25,8 @@ package trait
 // The trait is enabled by default when the Knative profile is active.
 //
 // +camel-k:trait=knative.
+//
+//nolint:godoclint
 type KnativeTrait struct {
 	Trait `json:",inline" property:",squash"`
 

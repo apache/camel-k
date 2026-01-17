@@ -21,7 +21,12 @@ package v1
 
 // IntegrationPlatformKameletSpecApplyConfiguration represents a declarative configuration of the IntegrationPlatformKameletSpec type for use
 // with apply.
+//
+// IntegrationPlatformKameletSpec define the behavior for all the Kamelets controller by the IntegrationPlatform.
+//
+// Deprecated: to be removed in future versions.
 type IntegrationPlatformKameletSpecApplyConfiguration struct {
+	// remote repository used to retrieve Kamelet catalog
 	Repositories []KameletRepositorySpecApplyConfiguration `json:"repositories,omitempty"`
 }
 

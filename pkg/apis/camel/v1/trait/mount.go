@@ -20,6 +20,8 @@ package trait
 // The Mount trait can be used to configure volumes mounted on the Integration Pods.
 //
 // +camel-k:trait=mount.
+//
+//nolint:godoclint
 type MountTrait struct {
 	PlatformBaseTrait `json:",inline" property:",squash"`
 

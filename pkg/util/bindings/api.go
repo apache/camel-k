@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package bindings provides APIs to transform Kubernetes objects into Camel URIs equivalents
+// Package bindings provides APIs to transform Kubernetes objects into Camel URIs equivalents.
 package bindings
 
 import (
@@ -37,8 +37,9 @@ type Binding struct {
 	// URI is the Camel URI equivalent
 	URI string
 	// Step is to support complex mapping such as Camel's EIPs
-	Step map[string]interface{}
-	// Traits is a partial trait specification that should be merged into the integration
+	Step map[string]any
+	// Traits is a partial trait specification that should be merged into the integration.
+	//
 	// Deprecated: will be removed in future releases
 	Traits v1.Traits
 	// ApplicationProperties contain properties that should be set on the integration for the binding to work

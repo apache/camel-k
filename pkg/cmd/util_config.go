@@ -18,6 +18,7 @@ limitations under the License.
 package cmd
 
 import (
+	"maps"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -51,7 +52,7 @@ const (
 // Config is a helper class to manipulate kamel configuration files.
 type Config struct {
 	location string
-	content  map[string]interface{}
+	content  map[string]any
 }
 
 // LoadConfiguration loads a kamel configuration file.
@@ -62,7 +63,7 @@ func LoadConfiguration() (*Config, error) {
 func loadConfiguration(location string) (*Config, error) {
 	config := Config{
 		location: location,
-		content:  make(map[string]interface{}),
+		content:  make(map[string]any),
 	}
 
 	if config.location == "" {
@@ -87,8 +88,8 @@ func loadConfiguration(location string) (*Config, error) {
 }
 
 // Update ---.
-func (cfg *Config) Update(cmd *cobra.Command, nodeID string, data interface{}, changedOnly bool) {
-	values := make(map[string]interface{})
+func (cfg *Config) Update(cmd *cobra.Command, nodeID string, data any, changedOnly bool) {
+	values := make(map[string]any)
 
 	pl := p.NewClient()
 	val := reflect.ValueOf(data).Elem()
@@ -123,13 +124,11 @@ func (cfg *Config) Update(cmd *cobra.Command, nodeID string, data interface{}, c
 }
 
 // SetNode allows to replace a subtree with a given content.
-func (cfg *Config) SetNode(nodeID string, nodeValues map[string]interface{}) {
+func (cfg *Config) SetNode(nodeID string, nodeValues map[string]any) {
 	cfg.Delete(nodeID)
 	node := cfg.navigate(cfg.content, nodeID, true)
 
-	for k, v := range nodeValues {
-		node[k] = v
-	}
+	maps.Copy(node, nodeValues)
 }
 
 // Delete allows to remove a sub tree from the kamel content.
@@ -157,30 +156,30 @@ func (cfg *Config) Save() error {
 	return os.WriteFile(cfg.location, data, io.FilePerm600)
 }
 
-func (cfg *Config) navigate(values map[string]interface{}, prefix string, create bool) map[string]interface{} {
-	nodes := strings.Split(prefix, ".")
+func (cfg *Config) navigate(values map[string]any, prefix string, create bool) map[string]any {
+	nodes := strings.SplitSeq(prefix, ".")
 
-	for _, node := range nodes {
+	for node := range nodes {
 		v := values[node]
 
 		if v == nil {
 			if create {
-				v = make(map[string]interface{})
+				v = make(map[string]any)
 				values[node] = v
 			} else {
 				return nil
 			}
 		}
 
-		if m, ok := v.(map[string]interface{}); ok {
+		if m, ok := v.(map[string]any); ok {
 			values = m
-		} else if mg, ok := v.(map[interface{}]interface{}); ok {
+		} else if mg, ok := v.(map[any]any); ok {
 			converted := cfg.convert(mg)
 			values[node] = converted
 			values = converted
 		} else {
 			if create {
-				child := make(map[string]interface{})
+				child := make(map[string]any)
 				values[node] = child
 
 				return child
@@ -193,8 +192,8 @@ func (cfg *Config) navigate(values map[string]interface{}, prefix string, create
 	return values
 }
 
-func (cfg *Config) convert(m map[interface{}]interface{}) map[string]interface{} {
-	res := make(map[string]interface{})
+func (cfg *Config) convert(m map[any]any) map[string]any {
+	res := make(map[string]any)
 	for k, v := range m {
 		if ks, ok := k.(string); ok {
 			res[ks] = v

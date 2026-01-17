@@ -34,7 +34,7 @@ type YAMLInspector struct {
 
 // Extract extracts all metadata from source spec.
 func (i YAMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
-	definitions := make([]map[string]interface{}, 0)
+	definitions := make([]map[string]any, 0)
 
 	if err := yaml2.Unmarshal([]byte(source.Content), &definitions); err != nil {
 		return err
@@ -66,13 +66,13 @@ func (i YAMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 }
 
 //nolint:nestif
-func (i YAMLInspector) parseDefinition(def map[string]interface{}, meta *Metadata) error {
+func (i YAMLInspector) parseDefinition(def map[string]any, meta *Metadata) error {
 	for k, v := range def {
 		if k == rest {
 			meta.ExposesHTTPServices = true
 			meta.RequiredCapabilities.Add(v1.CapabilityRest)
 			// support contract first openapi
-			if oa, ok := v.(map[interface{}]interface{}); ok {
+			if oa, ok := v.(map[any]any); ok {
 				if _, oaOk := oa["openApi"]; oaOk {
 					if dfDep := i.catalog.GetArtifactByScheme("rest-openapi"); dfDep != nil {
 						meta.AddDependency(dfDep.GetDependencyID())
@@ -86,7 +86,7 @@ func (i YAMLInspector) parseDefinition(def map[string]interface{}, meta *Metadat
 }
 
 //nolint:nestif
-func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata) error {
+func (i YAMLInspector) parseStep(key string, content any, meta *Metadata) error {
 	switch key {
 	case "bean":
 		if bean := i.catalog.GetArtifactByScheme("bean"); bean != nil {
@@ -98,10 +98,10 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 	case "circuitBreaker":
 		meta.RequiredCapabilities.Add(v1.CapabilityCircuitBreaker)
 	case "marshal", "unmarshal":
-		if cm, ok := content.(map[interface{}]interface{}); ok {
+		if cm, ok := content.(map[any]any); ok {
 			if js, jsOk := cm["json"]; jsOk {
 				dataFormatID := defaultJSONDataFormat
-				if jsContent, jsContentOk := js.(map[interface{}]interface{}); jsContentOk {
+				if jsContent, jsContentOk := js.(map[any]any); jsContentOk {
 					if lib, libOk := jsContent["library"]; libOk {
 						dataFormatID = strings.ToLower(fmt.Sprintf("%s", lib))
 					}
@@ -115,7 +115,7 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 		switch t := content.(type) {
 		case string:
 			AddKamelet(meta, kamelet+":"+t)
-		case map[interface{}]interface{}:
+		case map[any]any:
 			if name, ok := t["name"].(string); ok {
 				AddKamelet(meta, kamelet+":"+name)
 			}
@@ -127,7 +127,7 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 	switch t := content.(type) {
 	case string:
 		maybeURI = t
-	case map[interface{}]interface{}:
+	case map[any]any:
 		for k, v := range t {
 			if s, ok := k.(string); ok {
 				if dependency, ok := i.catalog.GetLanguageDependency(s); ok {
@@ -137,7 +137,7 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 
 			switch k {
 			case "steps":
-				if steps, stepsFormatOk := v.([]interface{}); stepsFormatOk {
+				if steps, stepsFormatOk := v.([]any); stepsFormatOk {
 					if err := i.parseStepsParam(steps, meta); err != nil {
 						return err
 					}
@@ -147,7 +147,7 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 					builtURI := vv
 					// Inject parameters into URIs to allow other parts of the operator to inspect them
 					if params, pok := t["parameters"]; pok {
-						if paramMap, pmok := params.(map[interface{}]interface{}); pmok {
+						if paramMap, pmok := params.(map[any]any); pmok {
 							params := make(map[string]string, len(paramMap))
 							for k, v := range paramMap {
 								ks := fmt.Sprintf("%v", k)
@@ -164,7 +164,7 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 					if dependency, ok := i.catalog.GetLanguageDependency(s); ok {
 						meta.AddDependency(dependency)
 					}
-				} else if m, ok := v.(map[interface{}]interface{}); ok {
+				} else if m, ok := v.(map[any]any); ok {
 					if err := i.parseStep("language", m, meta); err != nil {
 						return err
 					}
@@ -182,11 +182,11 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 			default:
 				// Always follow children because from/to uris can be nested
 				if ks, ok := k.(string); ok {
-					if _, ok := v.(map[interface{}]interface{}); ok {
+					if _, ok := v.(map[any]any); ok {
 						if err := i.parseStep(ks, v, meta); err != nil {
 							return err
 						}
-					} else if ls, ok := v.([]interface{}); ok {
+					} else if ls, ok := v.([]any); ok {
 						for _, el := range ls {
 							if err := i.parseStep(ks, el, meta); err != nil {
 								return err
@@ -211,9 +211,9 @@ func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata
 }
 
 // TODO nolint: gocyclo.
-func (i YAMLInspector) parseStepsParam(steps []interface{}, meta *Metadata) error {
+func (i YAMLInspector) parseStepsParam(steps []any, meta *Metadata) error {
 	for _, raw := range steps {
-		if step, stepFormatOk := raw.(map[interface{}]interface{}); stepFormatOk {
+		if step, stepFormatOk := raw.(map[any]any); stepFormatOk {
 			if len(step) != 1 {
 				return fmt.Errorf("unable to parse step: %v", step)
 			}
@@ -241,7 +241,7 @@ func (i YAMLInspector) parseStepsParam(steps []interface{}, meta *Metadata) erro
 // ReplaceFromURI parses the source content and replace the `from` URI configuration with the a new URI.
 // Returns true if it applies a replacement.
 func (i YAMLInspector) ReplaceFromURI(source *v1.SourceSpec, newFromURI string) (bool, error) {
-	definitions := make([]map[string]interface{}, 0)
+	definitions := make([]map[string]any, 0)
 
 	if err := yaml2.Unmarshal([]byte(source.Content), &definitions); err != nil {
 		return false, err
@@ -249,17 +249,17 @@ func (i YAMLInspector) ReplaceFromURI(source *v1.SourceSpec, newFromURI string) 
 
 	// We expect the from in .route.from or .from location
 	for _, routeRaw := range definitions {
-		var from map[interface{}]interface{}
+		var from map[any]any
 		var fromOk bool
-		route, routeOk := routeRaw["route"].(map[interface{}]interface{})
+		route, routeOk := routeRaw["route"].(map[any]any)
 		if routeOk {
-			from, fromOk = route["from"].(map[interface{}]interface{})
+			from, fromOk = route["from"].(map[any]any)
 			if !fromOk {
 				return false, nil
 			}
 		}
 		if from == nil {
-			from, fromOk = routeRaw["from"].(map[interface{}]interface{})
+			from, fromOk = routeRaw["from"].(map[any]any)
 			if !fromOk {
 				return false, nil
 			}

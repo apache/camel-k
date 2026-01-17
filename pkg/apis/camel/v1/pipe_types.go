@@ -137,9 +137,11 @@ const (
 	// PipeConditionReady --.
 	PipeConditionReady PipeConditionType = "Ready"
 	// PipeIntegrationConditionError -- .
+	//
 	// Deprecated: no longer in use.
 	PipeIntegrationConditionError PipeConditionType = "IntegrationError"
 	// PipeIntegrationDeprecationNotice -- .
+	//
 	// Deprecated: no longer in use.
 	PipeIntegrationDeprecationNotice PipeConditionType = "DeprecationNotice"
 )

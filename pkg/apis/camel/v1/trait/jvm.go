@@ -22,6 +22,8 @@ package trait
 // trait is disabled by the platform.
 //
 // +camel-k:trait=jvm.
+//
+//nolint:godoclint
 type JVMTrait struct {
 	Trait `json:",inline" property:",squash"`
 
@@ -29,7 +31,8 @@ type JVMTrait struct {
 	Debug *bool `json:"debug,omitempty" property:"debug"`
 	// Suspends the target JVM immediately before the main class is loaded
 	DebugSuspend *bool `json:"debugSuspend,omitempty" property:"debug-suspend"`
-	// Prints the command used the start the JVM in the container logs (default `true`)
+	// Prints the command used the start the JVM in the container logs (default `true`).
+	//
 	// Deprecated: no longer in use.
 	PrintCommand *bool `json:"printCommand,omitempty" property:"print-command"`
 	// Transport address at which to listen for the newly launched JVM (default `*:5005`)

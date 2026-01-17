@@ -27,7 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/json"
 )
 
-func MergePatch(source interface{}, target interface{}) ([]byte, error) {
+func MergePatch(source any, target any) ([]byte, error) {
 	sourceJSON, err := json.Marshal(source)
 	if err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func MergePatch(source interface{}, target interface{}) ([]byte, error) {
 	default:
 		// Otherwise, for typed objects, remove null fields from the JSON merge patch,
 		// so that values managed by controllers server-side are not deleted.
-		var positivePatch map[string]interface{}
+		var positivePatch map[string]any
 		err = json.Unmarshal(mergePatch, &positivePatch)
 		if err != nil {
 			return nil, err
@@ -76,7 +76,7 @@ func ApplyPatch(source runtime.Object) (*unstructured.Unstructured, error) {
 		if err != nil {
 			return nil, err
 		}
-		var positivePatch map[string]interface{}
+		var positivePatch map[string]any
 		err = json.Unmarshal(sourceJSON, &positivePatch)
 		if err != nil {
 			return nil, err

@@ -21,11 +21,18 @@ package v1
 
 // GitConfigSpecApplyConfiguration represents a declarative configuration of the GitConfigSpec type for use
 // with apply.
+//
+// GitConfigSpec defines the Git configuration of a project.
 type GitConfigSpecApplyConfiguration struct {
-	URL    *string `json:"url,omitempty"`
+	// the URL of the project
+	URL *string `json:"url,omitempty"`
+	// the Kubernetes secret where token is stored
 	Secret *string `json:"secret,omitempty"`
+	// the git branch to check out
 	Branch *string `json:"branch,omitempty"`
-	Tag    *string `json:"tag,omitempty"`
+	// the git tag to check out
+	Tag *string `json:"tag,omitempty"`
+	// the git commit (full SHA) to check out
 	Commit *string `json:"commit,omitempty"`
 }
 

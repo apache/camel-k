@@ -15,16 +15,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package bindings provides APIs to transform Kubernetes objects into Camel URIs equivalents
 package bindings
 
 import "fmt"
 
 // AsYamlDSL construct proper Camel Yaml DSL from given binding.
-func (b Binding) AsYamlDSL() map[string]interface{} {
+func (b Binding) AsYamlDSL() map[string]any {
 	step := b.Step
 	if step == nil {
-		step = map[string]interface{}{
+		step = map[string]any{
 			"to": b.URI,
 		}
 	}

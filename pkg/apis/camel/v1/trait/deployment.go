@@ -26,6 +26,8 @@ import (
 // the integration will run in the cluster.
 //
 // +camel-k:trait=deployment.
+//
+//nolint:godoclint
 type DeploymentTrait struct {
 	PlatformBaseTrait `json:",inline" property:",squash"`
 

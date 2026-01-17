@@ -252,8 +252,8 @@ func EnableKnativeBindInNamespace(ctx context.Context, client client.Client, nam
 		return false, nil
 	}
 
-	var jsonLabelPatch = map[string]interface{}{
-		"metadata": map[string]interface{}{
+	var jsonLabelPatch = map[string]any{
+		"metadata": map[string]any{
 			"labels": map[string]string{"bindings.knative.dev/include": "true"},
 		},
 	}

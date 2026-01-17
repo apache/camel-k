@@ -29,6 +29,8 @@ package trait
 //
 // +camel-k:trait=pod.
 // +camel-k:deprecated=2.8.0.
+//
+//nolint:godoclint
 type PodTrait struct {
 	Trait `json:",inline" property:",squash"`
 }

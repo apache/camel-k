@@ -27,13 +27,21 @@ import (
 
 // IntegrationPlatformConditionApplyConfiguration represents a declarative configuration of the IntegrationPlatformCondition type for use
 // with apply.
+//
+// IntegrationPlatformCondition describes the state of a resource at a certain point.
 type IntegrationPlatformConditionApplyConfiguration struct {
-	Type               *camelv1.IntegrationPlatformConditionType `json:"type,omitempty"`
-	Status             *corev1.ConditionStatus                   `json:"status,omitempty"`
-	LastUpdateTime     *metav1.Time                              `json:"lastUpdateTime,omitempty"`
-	LastTransitionTime *metav1.Time                              `json:"lastTransitionTime,omitempty"`
-	Reason             *string                                   `json:"reason,omitempty"`
-	Message            *string                                   `json:"message,omitempty"`
+	// Type of integration condition.
+	Type *camelv1.IntegrationPlatformConditionType `json:"type,omitempty"`
+	// Status of the condition, one of True, False, Unknown.
+	Status *corev1.ConditionStatus `json:"status,omitempty"`
+	// The last time this condition was updated.
+	LastUpdateTime *metav1.Time `json:"lastUpdateTime,omitempty"`
+	// Last time the condition transitioned from one status to another.
+	LastTransitionTime *metav1.Time `json:"lastTransitionTime,omitempty"`
+	// The reason for the condition's last transition.
+	Reason *string `json:"reason,omitempty"`
+	// A human-readable message indicating details about the transition.
+	Message *string `json:"message,omitempty"`
 }
 
 // IntegrationPlatformConditionApplyConfiguration constructs a declarative configuration of the IntegrationPlatformCondition type for use with

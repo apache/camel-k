@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/apache/camel-k/v2/pkg/cmd/source"
@@ -154,12 +155,8 @@ func createKamelWithModelineCommand(ctx context.Context, args []string) (*cobra.
 		paramAlreadySpecifiedByUser := false
 		if o.Name == "property" || o.Name == "trait" || o.Name == "build-property" {
 			paramComponents := strings.Split(o.Value, "=")
-			for _, paramName := range cliParamNames {
-				if paramName == paramComponents[0] {
-					paramAlreadySpecifiedByUser = true
-
-					break
-				}
+			if slices.Contains(cliParamNames, paramComponents[0]) {
+				paramAlreadySpecifiedByUser = true
 			}
 		}
 

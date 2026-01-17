@@ -28,6 +28,8 @@ package trait
 //
 // +camel-k:trait=jolokia.
 // +camel-k:deprecated=2.8.0.
+//
+//nolint:godoclint
 type JolokiaTrait struct {
 	Trait `json:",inline" property:",squash"`
 

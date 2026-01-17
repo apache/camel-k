@@ -20,6 +20,8 @@ package trait
 // The Camel trait can be used to configure versions of Apache Camel K runtime and related libraries, it cannot be disabled.
 //
 // +camel-k:trait=camel.
+//
+//nolint:godoclint
 type CamelTrait struct {
 	PlatformBaseTrait `json:",inline" property:",squash"`
 

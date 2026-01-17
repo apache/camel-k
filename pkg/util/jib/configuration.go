@@ -33,10 +33,10 @@ const JibDigestFile = "target/jib-image.digest"
 const JibMavenPluginVersionDefault = "3.4.1"
 const JibLayerFilterExtensionMavenVersionDefault = "0.3.0"
 
-// See: https://github.com/GoogleContainerTools/jib/blob/master/jib-maven-plugin/README.md#using-docker-configuration-files
+// JibRegistryConfigEnvVar -- See: https://github.com/GoogleContainerTools/jib/blob/master/jib-maven-plugin/README.md#using-docker-configuration-files.
 const JibRegistryConfigEnvVar = "DOCKER_CONFIG"
 
-// The Jib profile configuration.
+// XMLJibProfile is the Jib profile configuration.
 const XMLJibProfile = `
 <profile>
   <id>jib</id>

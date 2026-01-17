@@ -21,6 +21,8 @@ package v1
 
 // CamelPropertyApplyConfiguration represents a declarative configuration of the CamelProperty type for use
 // with apply.
+//
+// CamelProperty represents a Camel property that may end up in an application.properties file.
 type CamelPropertyApplyConfiguration struct {
 	Key   *string `json:"key,omitempty"`
 	Value *string `json:"value,omitempty"`

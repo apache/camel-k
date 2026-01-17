@@ -33,7 +33,8 @@ The following configuration options are available:
 | builder.verbose
 | bool
 | Enable verbose logging on build components that support it (e.g. Kaniko build pod).
-Deprecated no longer in use
+
+Deprecated: no longer in use
 
 | builder.properties
 | []string
@@ -59,21 +60,25 @@ installed and ready to use on path (ie `/usr/bin/java`).
 | builder.request-cpu
 | string
 | When using `pod` strategy, the minimum amount of CPU required by the pod builder.
+
 Deprecated: use TasksRequestCPU instead with task name `builder`.
 
 | builder.request-memory
 | string
 | When using `pod` strategy, the minimum amount of memory required by the pod builder.
+
 Deprecated: use TasksRequestCPU instead with task name `builder`.
 
 | builder.limit-cpu
 | string
 | When using `pod` strategy, the maximum amount of CPU required by the pod builder.
+
 Deprecated: use TasksRequestCPU instead with task name `builder`.
 
 | builder.limit-memory
 | string
 | When using `pod` strategy, the maximum amount of memory required by the pod builder.
+
 Deprecated: use TasksRequestCPU instead with task name `builder`.
 
 | builder.maven-profiles

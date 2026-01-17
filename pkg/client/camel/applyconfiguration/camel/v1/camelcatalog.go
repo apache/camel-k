@@ -27,11 +27,15 @@ import (
 
 // CamelCatalogApplyConfiguration represents a declarative configuration of the CamelCatalog type for use
 // with apply.
+//
+// CamelCatalog represents the languages, components, data formats and capabilities enabled on a given runtime provider. The catalog may be statically generated.
 type CamelCatalogApplyConfiguration struct {
 	metav1.TypeMetaApplyConfiguration    `json:",inline"`
 	*metav1.ObjectMetaApplyConfiguration `json:"metadata,omitempty"`
-	Status                               *CamelCatalogStatusApplyConfiguration `json:"status,omitempty"`
-	Spec                                 *CamelCatalogSpecApplyConfiguration   `json:"spec,omitempty"`
+	// the actual state of the catalog
+	Status *CamelCatalogStatusApplyConfiguration `json:"status,omitempty"`
+	// the desired state of the catalog
+	Spec *CamelCatalogSpecApplyConfiguration `json:"spec,omitempty"`
 }
 
 // CamelCatalog constructs a declarative configuration of the CamelCatalog type for use with
@@ -44,6 +48,7 @@ func CamelCatalog(name, namespace string) *CamelCatalogApplyConfiguration {
 	b.WithAPIVersion("camel.apache.org/v1")
 	return b
 }
+
 func (b CamelCatalogApplyConfiguration) IsApplyConfiguration() {}
 
 // WithKind sets the Kind field in the declarative configuration to the given value

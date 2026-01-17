@@ -30,7 +30,7 @@ var (
 	replaceURIDoubleQuotedFromF = regexp.MustCompile(`fromF\s*\(\s*"(?:timer|cron|quartz)[^"]*"\s*\)`)
 )
 
-// JavaScriptInspector inspects Java DSL spec.
+// JavaSourceInspector inspects Java DSL spec.
 type JavaSourceInspector struct {
 	baseInspector
 }

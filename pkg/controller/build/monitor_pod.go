@@ -200,7 +200,7 @@ func (action *monitorPodAction) isPodScheduled(pod *corev1.Pod) bool {
 }
 
 func (action *monitorPodAction) sigterm(ctx context.Context, pod *corev1.Pod) error {
-	var containers []corev1.ContainerStatus
+	containers := make([]corev1.ContainerStatus, 0, len(pod.Status.InitContainerStatuses)+len(pod.Status.ContainerStatuses))
 	containers = append(containers, pod.Status.InitContainerStatuses...)
 	containers = append(containers, pod.Status.ContainerStatuses...)
 
@@ -283,7 +283,7 @@ func (action *monitorPodAction) patchPod(ctx context.Context, pod *corev1.Pod, m
 func (action *monitorPodAction) getTerminatedTime(pod *corev1.Pod) metav1.Time {
 	var finishedAt metav1.Time
 
-	var containers []corev1.ContainerStatus
+	containers := make([]corev1.ContainerStatus, 0, len(pod.Status.InitContainerStatuses)+len(pod.Status.ContainerStatuses))
 	containers = append(containers, pod.Status.InitContainerStatuses...)
 	containers = append(containers, pod.Status.ContainerStatuses...)
 
@@ -302,7 +302,7 @@ func (action *monitorPodAction) getTerminatedTime(pod *corev1.Pod) metav1.Time {
 
 // setConditionsFromTerminationMessages sets a condition for all those containers which have been terminated (successfully or not).
 func (action *monitorPodAction) setConditionsFromTerminationMessages(ctx context.Context, pod *corev1.Pod, buildStatus *v1.BuildStatus) {
-	var containers []corev1.ContainerStatus
+	containers := make([]corev1.ContainerStatus, 0, len(pod.Status.InitContainerStatuses)+len(pod.Status.ContainerStatuses))
 	containers = append(containers, pod.Status.InitContainerStatuses...)
 	containers = append(containers, pod.Status.ContainerStatuses...)
 
@@ -360,6 +360,7 @@ func publishTaskName(tasks []v1.Task) string {
 		return t.Custom.Name
 	case t.Jib != nil:
 		return t.Jib.Name
+	//nolint:staticcheck
 	case t.S2i != nil:
 		return t.S2i.Name
 	}

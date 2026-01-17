@@ -25,6 +25,8 @@ import (
 
 // FlowApplyConfiguration represents a declarative configuration of the Flow type for use
 // with apply.
+//
+// Flow is an unstructured object representing a Camel Flow in YAML/JSON DSL.
 type FlowApplyConfiguration struct {
 	camelv1.RawMessage `json:",inline"`
 }

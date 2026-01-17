@@ -21,15 +21,25 @@ package v1
 
 // DataSpecApplyConfiguration represents a declarative configuration of the DataSpec type for use
 // with apply.
+//
+// DataSpec represents the way the source is materialized in the running `Pod`.
 type DataSpecApplyConfiguration struct {
-	Name        *string `json:"name,omitempty"`
-	Path        *string `json:"path,omitempty"`
-	Content     *string `json:"content,omitempty"`
-	RawContent  []byte  `json:"rawContent,omitempty"`
-	ContentRef  *string `json:"contentRef,omitempty"`
-	ContentKey  *string `json:"contentKey,omitempty"`
+	// the name of the specification
+	Name *string `json:"name,omitempty"`
+	// the path where the file is stored
+	Path *string `json:"path,omitempty"`
+	// the source code (plain text)
+	Content *string `json:"content,omitempty"`
+	// the source code (binary)
+	RawContent []byte `json:"rawContent,omitempty"`
+	// the confimap reference holding the source content
+	ContentRef *string `json:"contentRef,omitempty"`
+	// the confimap key holding the source content
+	ContentKey *string `json:"contentKey,omitempty"`
+	// the content type (tipically text or binary)
 	ContentType *string `json:"contentType,omitempty"`
-	Compression *bool   `json:"compression,omitempty"`
+	// if the content is compressed (base64 encrypted)
+	Compression *bool `json:"compression,omitempty"`
 }
 
 // DataSpecApplyConfiguration constructs a declarative configuration of the DataSpec type for use with

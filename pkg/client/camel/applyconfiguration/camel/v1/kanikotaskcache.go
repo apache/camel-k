@@ -21,8 +21,14 @@ package v1
 
 // KanikoTaskCacheApplyConfiguration represents a declarative configuration of the KanikoTaskCache type for use
 // with apply.
+//
+// KanikoTaskCache is used to configure Kaniko cache.
+//
+// Deprecated: no longer in use.
 type KanikoTaskCacheApplyConfiguration struct {
-	Enabled               *bool   `json:"enabled,omitempty"`
+	// true if a cache is enabled
+	Enabled *bool `json:"enabled,omitempty"`
+	// the PVC used to store the cache
 	PersistentVolumeClaim *string `json:"persistentVolumeClaim,omitempty"`
 }
 

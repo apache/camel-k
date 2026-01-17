@@ -21,11 +21,17 @@ package v1
 
 // CamelLoaderApplyConfiguration represents a declarative configuration of the CamelLoader type for use
 // with apply.
+//
+// CamelLoader represents the configuration required to load a DSL.
 type CamelLoaderApplyConfiguration struct {
+	// the base Maven artifact required
 	MavenArtifactApplyConfiguration `json:",inline"`
-	Languages                       []string                          `json:"languages,omitempty"`
-	Dependencies                    []MavenArtifactApplyConfiguration `json:"dependencies,omitempty"`
-	Metadata                        map[string]string                 `json:"metadata,omitempty"`
+	// a list of DSLs supported
+	Languages []string `json:"languages,omitempty"`
+	// a list of additional dependencies required beside the base one
+	Dependencies []MavenArtifactApplyConfiguration `json:"dependencies,omitempty"`
+	// the metadata of the loader
+	Metadata map[string]string `json:"metadata,omitempty"`
 }
 
 // CamelLoaderApplyConfiguration constructs a declarative configuration of the CamelLoader type for use with

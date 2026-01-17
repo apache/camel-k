@@ -19,6 +19,7 @@ package trait
 
 import (
 	"fmt"
+	"maps"
 	"strconv"
 	"strings"
 
@@ -131,7 +132,7 @@ func (t *serviceTrait) Apply(e *Environment) error {
 			default:
 				return fmt.Errorf("unsupported service type: %s", *t.Type)
 			}
-		} else if ptr.Deref(t.NodePort, false) {
+		} else if ptr.Deref(t.NodePort, false) { //nolint:staticcheck
 			t.L.ForIntegration(e.Integration).Infof("Integration %s/%s should no more use the flag node-port as it is deprecated, use type instead", e.Integration.Namespace, e.Integration.Name)
 			serviceType = corev1.ServiceTypeNodePort
 		}
@@ -146,9 +147,7 @@ func (t *serviceTrait) getServiceFor(itName, itNamespace string) *corev1.Service
 	labels := map[string]string{
 		v1.IntegrationLabel: itName,
 	}
-	for k, v := range t.Labels {
-		labels[k] = v
-	}
+	maps.Copy(labels, t.Labels)
 	ports := t.getServicePorts()
 
 	return &corev1.Service{

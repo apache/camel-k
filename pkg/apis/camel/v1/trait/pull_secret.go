@@ -29,6 +29,8 @@ package trait
 // If your registry does not need authentication for pulling images, you can disable this trait.
 //
 // +camel-k:trait=pull-secret.
+//
+//nolint:godoclint
 type PullSecretTrait struct {
 	Trait `json:",inline" property:",squash"`
 

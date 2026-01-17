@@ -25,7 +25,12 @@ import (
 
 // TraitConfigurationApplyConfiguration represents a declarative configuration of the TraitConfiguration type for use
 // with apply.
+//
+// TraitConfiguration represents the expected configuration for a given trait parameter.
+//
+// Deprecated: superseded by each Trait type, left for backward compatibility.
 type TraitConfigurationApplyConfiguration struct {
+	// generic raw message, typically a map containing the keys (trait parameters) and the values (either single text or array)
 	camelv1.RawMessage `json:",inline"`
 }
 

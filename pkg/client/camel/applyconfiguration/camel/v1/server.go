@@ -25,6 +25,8 @@ import (
 
 // ServerApplyConfiguration represents a declarative configuration of the Server type for use
 // with apply.
+//
+// Server see link:https://maven.apache.org/settings.html[Maven settings].
 type ServerApplyConfiguration struct {
 	ID            *string             `json:"id,omitempty"`
 	Username      *string             `json:"username,omitempty"`

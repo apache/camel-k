@@ -25,12 +25,19 @@ import (
 
 // PipeStatusApplyConfiguration represents a declarative configuration of the PipeStatus type for use
 // with apply.
+//
+// PipeStatus specify the status of a Pipe.
 type PipeStatusApplyConfiguration struct {
-	ObservedGeneration *int64                            `json:"observedGeneration,omitempty"`
-	Phase              *camelv1.PipePhase                `json:"phase,omitempty"`
-	Conditions         []PipeConditionApplyConfiguration `json:"conditions,omitempty"`
-	Replicas           *int32                            `json:"replicas,omitempty"`
-	Selector           *string                           `json:"selector,omitempty"`
+	// ObservedGeneration is the most recent generation observed for this Pipe.
+	ObservedGeneration *int64 `json:"observedGeneration,omitempty"`
+	// Phase --
+	Phase *camelv1.PipePhase `json:"phase,omitempty"`
+	// Conditions --
+	Conditions []PipeConditionApplyConfiguration `json:"conditions,omitempty"`
+	// Replicas is the number of actual replicas of the pipe
+	Replicas *int32 `json:"replicas,omitempty"`
+	// Selector allows to identify pods belonging to the pipe
+	Selector *string `json:"selector,omitempty"`
 }
 
 // PipeStatusApplyConfiguration constructs a declarative configuration of the PipeStatus type for use with

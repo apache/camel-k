@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package duck contains a partial schema of the Strimzi APIs
+// Package v1beta2 contains a partial schema of the Strimzi APIs
 // +kubebuilder:object:generate=true
 // +groupName=kafka.strimzi.io
 package v1beta2

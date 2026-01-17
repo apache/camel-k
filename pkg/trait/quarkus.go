@@ -19,6 +19,7 @@ package trait
 
 import (
 	"fmt"
+	"slices"
 	"sort"
 
 	"github.com/rs/xid"
@@ -172,6 +173,7 @@ func (t *quarkusTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 		condition, nil
 }
 
+//nolint:staticcheck
 func (t *quarkusTrait) adaptDeprecatedFields() *TraitCondition {
 	if t.PackageTypes != nil {
 		message := "The package-type parameter is deprecated and may be removed in future releases. Make sure to use mode parameter instead."
@@ -477,13 +479,7 @@ func (t *quarkusTrait) isEmbedded(e *Environment, source v1.SourceSpec) bool {
 }
 
 func (t *quarkusTrait) containsMode(m traitv1.QuarkusMode) bool {
-	for _, mode := range t.Modes {
-		if mode == m {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(t.Modes, m)
 }
 
 func packageType(mode traitv1.QuarkusMode) quarkusPackageType {

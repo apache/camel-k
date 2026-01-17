@@ -27,11 +27,15 @@ import (
 
 // IntegrationProfileApplyConfiguration represents a declarative configuration of the IntegrationProfile type for use
 // with apply.
+//
+// IntegrationProfile is the resource used to apply user defined settings to the Camel K operator behavior.
+// It defines the behavior of all Custom Resources (`IntegrationKit`, `Integration`, `Kamelet`) in the given namespace.
 type IntegrationProfileApplyConfiguration struct {
 	metav1.TypeMetaApplyConfiguration    `json:",inline"`
 	*metav1.ObjectMetaApplyConfiguration `json:"metadata,omitempty"`
-	Spec                                 *IntegrationProfileSpecApplyConfiguration   `json:"spec,omitempty"`
-	Status                               *IntegrationProfileStatusApplyConfiguration `json:"status,omitempty"`
+	Spec                                 *IntegrationProfileSpecApplyConfiguration `json:"spec,omitempty"`
+	// Deprecated: no longer in use.
+	Status *IntegrationProfileStatusApplyConfiguration `json:"status,omitempty"`
 }
 
 // IntegrationProfile constructs a declarative configuration of the IntegrationProfile type for use with
@@ -44,6 +48,7 @@ func IntegrationProfile(name, namespace string) *IntegrationProfileApplyConfigur
 	b.WithAPIVersion("camel.apache.org/v1")
 	return b
 }
+
 func (b IntegrationProfileApplyConfiguration) IsApplyConfiguration() {}
 
 // WithKind sets the Kind field in the declarative configuration to the given value
