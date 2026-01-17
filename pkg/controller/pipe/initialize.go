@@ -99,7 +99,9 @@ func propagateIcon(ctx context.Context, c client.Client, l log.Logger, pipe *v1.
 
 	// We must patch this here as we're changing the resource annotations and not the resource status
 	err = patchPipeIconAnnotations(ctx, c, pipe, icon)
-	l.Errorf(err, "some error happened while patching icon annotation for Pipe %q", pipe.Name)
+	if err != nil {
+		l.Errorf(err, "some error happened while patching icon annotation for Pipe %q", pipe.Name)
+	}
 }
 
 func findIcon(ctx context.Context, c client.Client, pipe *v1.Pipe) (string, error) {

@@ -213,10 +213,10 @@ func enqueueRequestsFromConfigFunc(ctx context.Context, c client.Client, res ctr
 
 	for _, integration := range list.Items {
 		found := false
-		if integration.Spec.Traits.Mount == nil || !ptr.Deref(integration.Spec.Traits.Mount.HotReload, false) {
+		if integration.Status.Traits == nil || integration.Status.Traits.Mount == nil || !ptr.Deref(integration.Status.Traits.Mount.HotReload, false) {
 			continue
 		}
-		for _, c := range integration.Spec.Traits.Mount.Configs {
+		for _, c := range integration.Status.Traits.Mount.Configs {
 			if conf, parseErr := utilResource.ParseConfig(c); parseErr == nil {
 				if conf.StorageType() == storageType && conf.Name() == res.GetName() {
 					found = true
@@ -225,7 +225,7 @@ func enqueueRequestsFromConfigFunc(ctx context.Context, c client.Client, res ctr
 				}
 			}
 		}
-		for _, r := range integration.Spec.Traits.Mount.Resources {
+		for _, r := range integration.Status.Traits.Mount.Resources {
 			if conf, parseErr := utilResource.ParseConfig(r); parseErr == nil {
 				if conf.StorageType() == storageType && conf.Name() == res.GetName() {
 					found = true
