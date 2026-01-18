@@ -395,11 +395,9 @@ func TestApplyInitContainerWithCACert(t *testing.T) {
 				Traits: v1.Traits{
 					JVM: &trait.JVMTrait{
 						CACertificates: []trait.CACertConfig{
-							{
-								CertPath:     "/etc/camel/conf.d/_secrets/my-ca/ca.crt",
-								PasswordPath: "/etc/camel/conf.d/_secrets/truststore-pass/password",
-							},
+							{CertPath: "/etc/camel/conf.d/_secrets/my-ca/ca.crt"},
 						},
+						TruststorePasswordPath: "/etc/camel/conf.d/_secrets/truststore-pass/password",
 					},
 				},
 			},
@@ -468,19 +466,11 @@ func TestApplyInitContainerWithMultipleCACerts(t *testing.T) {
 				Traits: v1.Traits{
 					JVM: &trait.JVMTrait{
 						CACertificates: []trait.CACertConfig{
-							{
-								CertPath:     "/etc/camel/conf.d/_secrets/ca1/ca.crt",
-								PasswordPath: "/etc/camel/conf.d/_secrets/pass1/password",
-							},
-							{
-								CertPath:     "/etc/camel/conf.d/_secrets/ca2/ca.crt",
-								PasswordPath: "/etc/camel/conf.d/_secrets/pass2/password",
-							},
-							{
-								CertPath:     "/etc/camel/conf.d/_secrets/ca3/ca.crt",
-								PasswordPath: "/etc/camel/conf.d/_secrets/pass3/password",
-							},
+							{CertPath: "/etc/camel/conf.d/_secrets/ca1/ca.crt"},
+							{CertPath: "/etc/camel/conf.d/_secrets/ca2/ca.crt"},
+							{CertPath: "/etc/camel/conf.d/_secrets/ca3/ca.crt"},
 						},
+						TruststorePasswordPath: "/etc/camel/conf.d/_secrets/truststore/password",
 					},
 				},
 			},
@@ -527,11 +517,8 @@ func TestApplyInitContainerWithMultipleCACerts(t *testing.T) {
 	assert.Contains(t, commandStr, "/etc/camel/conf.d/_secrets/ca3/ca.crt")
 	assert.Contains(t, commandStr, "&&")
 
-	firstPasswordCount := strings.Count(commandStr, "/etc/camel/conf.d/_secrets/pass1/password")
-	assert.Equal(t, 3, firstPasswordCount, "All 3 keytool commands should use the first certificate's password")
-
-	assert.NotContains(t, commandStr, "storepass:file /etc/camel/conf.d/_secrets/pass2/password")
-	assert.NotContains(t, commandStr, "storepass:file /etc/camel/conf.d/_secrets/pass3/password")
+	truststorePasswordCount := strings.Count(commandStr, "/etc/camel/conf.d/_secrets/truststore/password")
+	assert.Equal(t, 3, truststorePasswordCount, "All 3 keytool commands should use the truststore password")
 }
 
 func TestApplyInitContainerWithCACertsBackwardCompatibility(t *testing.T) {
@@ -564,13 +551,11 @@ func TestApplyInitContainerWithCACertsBackwardCompatibility(t *testing.T) {
 				Traits: v1.Traits{
 					JVM: &trait.JVMTrait{
 						CACertificates: []trait.CACertConfig{
-							{
-								CertPath:     "/etc/camel/conf.d/_secrets/ca1/ca.crt",
-								PasswordPath: "/etc/camel/conf.d/_secrets/pass1/password",
-							},
+							{CertPath: "/etc/camel/conf.d/_secrets/ca1/ca.crt"},
 						},
-						CACert:         "/etc/camel/conf.d/_secrets/ca2/ca.crt",
-						CACertPassword: "/etc/camel/conf.d/_secrets/pass2/password",
+						TruststorePasswordPath: "/etc/camel/conf.d/_secrets/truststore/password",
+						CACert:                 "/etc/camel/conf.d/_secrets/ca2/ca.crt",
+						CACertPassword:         "/etc/camel/conf.d/_secrets/pass2/password",
 					},
 				},
 			},
@@ -639,10 +624,7 @@ func TestApplyInitContainerWithBaseTruststore(t *testing.T) {
 				Traits: v1.Traits{
 					JVM: &trait.JVMTrait{
 						CACertificates: []trait.CACertConfig{
-							{
-								CertPath:     "/etc/camel/conf.d/_secrets/my-ca/ca.crt",
-								PasswordPath: "/etc/camel/conf.d/_secrets/truststore-pass/password",
-							},
+							{CertPath: "/etc/camel/conf.d/_secrets/my-ca/ca.crt"},
 						},
 						BaseTruststore: &trait.BaseTruststore{
 							TruststorePath: "/opt/java/openjdk/lib/security/cacerts",

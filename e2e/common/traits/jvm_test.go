@@ -92,23 +92,26 @@ func TestJVMTrait(t *testing.T) {
 		})
 
 		t.Run("JVM trait multiple CA certs", func(t *testing.T) {
-			// Test the new ca-certificates field with multiple certificates, each with its own password
+			// Test the new ca-certificates field with multiple certificates
 			cert1Pem, err := generateSelfSignedCert()
 			require.NoError(t, err)
 			cert2Pem, err := generateSelfSignedCert()
 			require.NoError(t, err)
 
-			// Create secrets with both cert and password together
+			// Create secrets with certificates
 			caCert1Data := make(map[string]string)
 			caCert1Data["ca.crt"] = string(cert1Pem)
-			caCert1Data["password"] = "test-password-1"
 			err = CreatePlainTextSecret(t, ctx, ns, "test-ca-cert-1", caCert1Data)
 			require.NoError(t, err)
 
 			caCert2Data := make(map[string]string)
 			caCert2Data["ca.crt"] = string(cert2Pem)
-			caCert2Data["password"] = "test-password-2"
 			err = CreatePlainTextSecret(t, ctx, ns, "test-ca-cert-2", caCert2Data)
+			require.NoError(t, err)
+
+			truststorePassData := make(map[string]string)
+			truststorePassData["password"] = "truststore-password"
+			err = CreatePlainTextSecret(t, ctx, ns, "truststore-pass-multi", truststorePassData)
 			require.NoError(t, err)
 
 			name := RandomizedSuffixName("multicacert")
@@ -117,11 +120,10 @@ func TestJVMTrait(t *testing.T) {
 				"--name", name,
 				"-t", "mount.configs=secret:test-ca-cert-1",
 				"-t", "mount.configs=secret:test-ca-cert-2",
-				// Using new ca-certificates field: each certificate with its own password path
+				"-t", "mount.configs=secret:truststore-pass-multi",
 				"-t", "jvm.ca-certificates[0].cert-path=/etc/camel/conf.d/_secrets/test-ca-cert-1/ca.crt",
-				"-t", "jvm.ca-certificates[0].password-path=/etc/camel/conf.d/_secrets/test-ca-cert-1/password",
 				"-t", "jvm.ca-certificates[1].cert-path=/etc/camel/conf.d/_secrets/test-ca-cert-2/ca.crt",
-				"-t", "jvm.ca-certificates[1].password-path=/etc/camel/conf.d/_secrets/test-ca-cert-2/password",
+				"-t", "jvm.truststore-password-path=/etc/camel/conf.d/_secrets/truststore-pass-multi/password",
 			).Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong*2).Should(Equal(corev1.PodRunning))
@@ -141,10 +143,9 @@ func TestJVMTrait(t *testing.T) {
 			certPem, err := generateSelfSignedCert()
 			require.NoError(t, err)
 
-			// Create secret with cert and password
+			// Create secret with certificate
 			caCertData := make(map[string]string)
 			caCertData["ca.crt"] = string(certPem)
-			caCertData["password"] = "test-password-456"
 			err = CreatePlainTextSecret(t, ctx, ns, "test-ca-sys", caCertData)
 			require.NoError(t, err)
 
@@ -160,11 +161,9 @@ func TestJVMTrait(t *testing.T) {
 				"--name", name,
 				"-t", "mount.configs=secret:test-ca-sys",
 				"-t", "mount.configs=secret:base-ts-password",
-				// Using new base-truststore field with JDK cacerts as base
 				"-t", "jvm.base-truststore.truststore-path=/opt/java/openjdk/lib/security/cacerts",
 				"-t", "jvm.base-truststore.password-path=/etc/camel/conf.d/_secrets/base-ts-password/password",
 				"-t", "jvm.ca-certificates[0].cert-path=/etc/camel/conf.d/_secrets/test-ca-sys/ca.crt",
-				"-t", "jvm.ca-certificates[0].password-path=/etc/camel/conf.d/_secrets/test-ca-sys/password",
 			).Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -184,11 +183,15 @@ func TestJVMTrait(t *testing.T) {
 			certPem, err := generateSelfSignedCert()
 			require.NoError(t, err)
 
-			// Create secret with both cert and password
+			// Create secret with certificate
 			caCertData := make(map[string]string)
 			caCertData["ca.crt"] = string(certPem)
-			caCertData["password"] = "changeit"
 			err = CreatePlainTextSecret(t, ctx, ns, "test-ca-single", caCertData)
+			require.NoError(t, err)
+
+			truststorePassData := make(map[string]string)
+			truststorePassData["password"] = "truststore-password"
+			err = CreatePlainTextSecret(t, ctx, ns, "truststore-pass-single", truststorePassData)
 			require.NoError(t, err)
 
 			name := RandomizedSuffixName("singlecert")
@@ -196,9 +199,9 @@ func TestJVMTrait(t *testing.T) {
 				"./files/Java.java",
 				"--name", name,
 				"-t", "mount.configs=secret:test-ca-single",
-				// Using new ca-certificates field with explicit password
+				"-t", "mount.configs=secret:truststore-pass-single",
 				"-t", "jvm.ca-certificates[0].cert-path=/etc/camel/conf.d/_secrets/test-ca-single/ca.crt",
-				"-t", "jvm.ca-certificates[0].password-path=/etc/camel/conf.d/_secrets/test-ca-single/password",
+				"-t", "jvm.truststore-password-path=/etc/camel/conf.d/_secrets/truststore-pass-single/password",
 			).Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))

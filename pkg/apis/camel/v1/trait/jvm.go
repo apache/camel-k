@@ -17,12 +17,10 @@ limitations under the License.
 
 package trait
 
-// CACertConfig associates a CA certificate with its password file.
+// CACertConfig specifies a CA certificate to import into the truststore.
 type CACertConfig struct {
 	// Path to the PEM-encoded CA certificate file to import.
 	CertPath string `json:"certPath,omitempty" property:"cert-path"`
-	// Path to a file containing the password for importing this certificate.
-	PasswordPath string `json:"passwordPath,omitempty" property:"password-path"`
 }
 
 // BaseTruststore represents an existing truststore to use as the base for adding certificates.
@@ -62,6 +60,8 @@ type JVMTrait struct {
 	CACertificates []CACertConfig `json:"caCertificates,omitempty" property:"ca-certificates"`
 	// Optional base truststore to use as the starting point for adding certificates.
 	BaseTruststore *BaseTruststore `json:"baseTruststore,omitempty" property:"base-truststore"`
+	// Path to a file containing the password for the generated truststore. Required when using ca-certificates without base-truststore.
+	TruststorePasswordPath string `json:"truststorePasswordPath,omitempty" property:"truststore-password-path"`
 	// The path where the generated truststore will be mounted (default `/etc/camel/conf.d/_truststore`).
 	CACertMountPath string `json:"caCertMountPath,omitempty" property:"ca-cert-mount-path"`
 	// Deprecated: Use CACertificates instead. Path to a PEM-encoded CA certificate file.

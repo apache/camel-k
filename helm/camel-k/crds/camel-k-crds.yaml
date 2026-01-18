@@ -4749,16 +4749,12 @@ spec:
                         description: A list of CA certificates to import into the
                           truststore. Certificates must be mounted via the mount trait.
                         items:
-                          description: CACertConfig associates a CA certificate with
-                            its password file.
+                          description: CACertConfig specifies a CA certificate to
+                            import into the truststore.
                           properties:
                             certPath:
                               description: Path to the PEM-encoded CA certificate
                                 file to import.
-                              type: string
-                            passwordPath:
-                              description: Path to a file containing the password
-                                for importing this certificate.
                               type: string
                           type: object
                         type: array
@@ -4802,6 +4798,11 @@ spec:
                           Prints the command used the start the JVM in the container logs (default `true`)
                           Deprecated: no longer in use.
                         type: boolean
+                      truststorePasswordPath:
+                        description: Path to a file containing the password for the
+                          generated truststore. Required when using ca-certificates
+                          without base-truststore.
+                        type: string
                     type: object
                   kamelets:
                     description: The configuration of Kamelets trait
@@ -7196,16 +7197,12 @@ spec:
                         description: A list of CA certificates to import into the
                           truststore. Certificates must be mounted via the mount trait.
                         items:
-                          description: CACertConfig associates a CA certificate with
-                            its password file.
+                          description: CACertConfig specifies a CA certificate to
+                            import into the truststore.
                           properties:
                             certPath:
                               description: Path to the PEM-encoded CA certificate
                                 file to import.
-                              type: string
-                            passwordPath:
-                              description: Path to a file containing the password
-                                for importing this certificate.
                               type: string
                           type: object
                         type: array
@@ -7249,6 +7246,11 @@ spec:
                           Prints the command used the start the JVM in the container logs (default `true`)
                           Deprecated: no longer in use.
                         type: boolean
+                      truststorePasswordPath:
+                        description: Path to a file containing the password for the
+                          generated truststore. Required when using ca-certificates
+                          without base-truststore.
+                        type: string
                     type: object
                   kamelets:
                     description: The configuration of Kamelets trait
@@ -9545,16 +9547,12 @@ spec:
                         description: A list of CA certificates to import into the
                           truststore. Certificates must be mounted via the mount trait.
                         items:
-                          description: CACertConfig associates a CA certificate with
-                            its password file.
+                          description: CACertConfig specifies a CA certificate to
+                            import into the truststore.
                           properties:
                             certPath:
                               description: Path to the PEM-encoded CA certificate
                                 file to import.
-                              type: string
-                            passwordPath:
-                              description: Path to a file containing the password
-                                for importing this certificate.
                               type: string
                           type: object
                         type: array
@@ -9598,6 +9596,11 @@ spec:
                           Prints the command used the start the JVM in the container logs (default `true`)
                           Deprecated: no longer in use.
                         type: boolean
+                      truststorePasswordPath:
+                        description: Path to a file containing the password for the
+                          generated truststore. Required when using ca-certificates
+                          without base-truststore.
+                        type: string
                     type: object
                   kamelets:
                     description: The configuration of Kamelets trait
@@ -11871,16 +11874,12 @@ spec:
                         description: A list of CA certificates to import into the
                           truststore. Certificates must be mounted via the mount trait.
                         items:
-                          description: CACertConfig associates a CA certificate with
-                            its password file.
+                          description: CACertConfig specifies a CA certificate to
+                            import into the truststore.
                           properties:
                             certPath:
                               description: Path to the PEM-encoded CA certificate
                                 file to import.
-                              type: string
-                            passwordPath:
-                              description: Path to a file containing the password
-                                for importing this certificate.
                               type: string
                           type: object
                         type: array
@@ -11924,6 +11923,11 @@ spec:
                           Prints the command used the start the JVM in the container logs (default `true`)
                           Deprecated: no longer in use.
                         type: boolean
+                      truststorePasswordPath:
+                        description: Path to a file containing the password for the
+                          generated truststore. Required when using ca-certificates
+                          without base-truststore.
+                        type: string
                     type: object
                   kamelets:
                     description: The configuration of Kamelets trait
@@ -21031,16 +21035,12 @@ spec:
                         description: A list of CA certificates to import into the
                           truststore. Certificates must be mounted via the mount trait.
                         items:
-                          description: CACertConfig associates a CA certificate with
-                            its password file.
+                          description: CACertConfig specifies a CA certificate to
+                            import into the truststore.
                           properties:
                             certPath:
                               description: Path to the PEM-encoded CA certificate
                                 file to import.
-                              type: string
-                            passwordPath:
-                              description: Path to a file containing the password
-                                for importing this certificate.
                               type: string
                           type: object
                         type: array
@@ -21084,6 +21084,11 @@ spec:
                           Prints the command used the start the JVM in the container logs (default `true`)
                           Deprecated: no longer in use.
                         type: boolean
+                      truststorePasswordPath:
+                        description: Path to a file containing the password for the
+                          generated truststore. Required when using ca-certificates
+                          without base-truststore.
+                        type: string
                     type: object
                   kamelets:
                     description: The configuration of Kamelets trait
@@ -23311,16 +23316,12 @@ spec:
                         description: A list of CA certificates to import into the
                           truststore. Certificates must be mounted via the mount trait.
                         items:
-                          description: CACertConfig associates a CA certificate with
-                            its password file.
+                          description: CACertConfig specifies a CA certificate to
+                            import into the truststore.
                           properties:
                             certPath:
                               description: Path to the PEM-encoded CA certificate
                                 file to import.
-                              type: string
-                            passwordPath:
-                              description: Path to a file containing the password
-                                for importing this certificate.
                               type: string
                           type: object
                         type: array
@@ -23364,6 +23365,11 @@ spec:
                           Prints the command used the start the JVM in the container logs (default `true`)
                           Deprecated: no longer in use.
                         type: boolean
+                      truststorePasswordPath:
+                        description: Path to a file containing the password for the
+                          generated truststore. Required when using ca-certificates
+                          without base-truststore.
+                        type: string
                     type: object
                   kamelets:
                     description: The configuration of Kamelets trait
@@ -33834,16 +33840,12 @@ spec:
                               the truststore. Certificates must be mounted via the
                               mount trait.
                             items:
-                              description: CACertConfig associates a CA certificate
-                                with its password file.
+                              description: CACertConfig specifies a CA certificate
+                                to import into the truststore.
                               properties:
                                 certPath:
                                   description: Path to the PEM-encoded CA certificate
                                     file to import.
-                                  type: string
-                                passwordPath:
-                                  description: Path to a file containing the password
-                                    for importing this certificate.
                                   type: string
                               type: object
                             type: array
@@ -33887,6 +33889,11 @@ spec:
                               Prints the command used the start the JVM in the container logs (default `true`)
                               Deprecated: no longer in use.
                             type: boolean
+                          truststorePasswordPath:
+                            description: Path to a file containing the password for
+                              the generated truststore. Required when using ca-certificates
+                              without base-truststore.
+                            type: string
                         type: object
                       kamelets:
                         description: The configuration of Kamelets trait
@@ -36046,16 +36053,12 @@ spec:
                         description: A list of CA certificates to import into the
                           truststore. Certificates must be mounted via the mount trait.
                         items:
-                          description: CACertConfig associates a CA certificate with
-                            its password file.
+                          description: CACertConfig specifies a CA certificate to
+                            import into the truststore.
                           properties:
                             certPath:
                               description: Path to the PEM-encoded CA certificate
                                 file to import.
-                              type: string
-                            passwordPath:
-                              description: Path to a file containing the password
-                                for importing this certificate.
                               type: string
                           type: object
                         type: array
@@ -36099,6 +36102,11 @@ spec:
                           Prints the command used the start the JVM in the container logs (default `true`)
                           Deprecated: no longer in use.
                         type: boolean
+                      truststorePasswordPath:
+                        description: Path to a file containing the password for the
+                          generated truststore. Required when using ca-certificates
+                          without base-truststore.
+                        type: string
                     type: object
                   kamelets:
                     description: The configuration of Kamelets trait
