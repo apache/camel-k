@@ -91,33 +91,38 @@ func (t *initContainersTrait) Configure(e *Environment) (bool, *TraitCondition, 
 			}
 			t.tasks = append(t.tasks, agentDownloadTask)
 		}
-		// Set the CA cert truststore init container if configured
 		if ok && jvm.hasCACerts() {
-			var allCommands []string
+			if err := jvm.validateCACertConfig(); err != nil {
+				return false, nil, err
+			}
 
-			var truststorePassPath string
+			var allCommands []string
+			importPassPath := jvm.getTruststorePasswordPath()
+
 			if jvm.hasBaseTruststore() {
 				baseTruststore := jvm.getBaseTruststore()
-				truststorePassPath = baseTruststore.PasswordPath
 				copyCmd := fmt.Sprintf("cp %s %s", baseTruststore.TruststorePath, jvm.getTrustStorePath())
 				allCommands = append(allCommands, copyCmd)
-			} else {
-				certEntries := jvm.getAllCACertEntries()
-				if len(certEntries) > 0 {
-					truststorePassPath = certEntries[0].PasswordPath
-				}
+				importPassPath = baseTruststore.PasswordPath
 			}
 
 			for i, entry := range jvm.getAllCACertEntries() {
 				cmd := fmt.Sprintf(
 					"keytool -importcert -noprompt -alias custom-ca-%d -storepass:file %s -keystore %s -file %s",
-					i, truststorePassPath, jvm.getTrustStorePath(), entry.CertPath,
+					i, importPassPath, jvm.getTrustStorePath(), entry.CertPath,
 				)
 				allCommands = append(allCommands, cmd)
 			}
 
+			if jvm.hasBaseTruststore() && jvm.TruststorePasswordPath != "" {
+				storepasswdCmd := fmt.Sprintf(
+					"keytool -storepasswd -keystore %s -storepass:file %s -new \"$(cat %s)\"",
+					jvm.getTrustStorePath(), jvm.getBaseTruststore().PasswordPath, jvm.TruststorePasswordPath,
+				)
+				allCommands = append(allCommands, storepasswdCmd)
+			}
+
 			fullCommand := strings.Join(allCommands, " && ")
-			// Wrap in bash shell when there are multiple commands or shell features are used
 			if len(allCommands) > 1 || jvm.hasBaseTruststore() {
 				fullCommand = fmt.Sprintf("/bin/bash -c \"%s\"", fullCommand)
 			}

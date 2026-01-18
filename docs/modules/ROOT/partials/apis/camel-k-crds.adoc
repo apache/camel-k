@@ -6666,7 +6666,7 @@ The list of manifest platforms to use to build a container image (default `linux
 
 * <<#_camel_apache_org_v1_trait_JVMTrait, JVMTrait>>
 
-CACertConfig associates a CA certificate with its password file.
+CACertConfig specifies a CA certificate to import into the truststore.
 
 [cols="2,2a",options="header"]
 |===
@@ -6679,13 +6679,6 @@ string
 
 
 Path to the PEM-encoded CA certificate file to import.
-
-|`passwordPath` +
-string
-|
-
-
-Path to a file containing the password for importing this certificate.
 
 
 |===
@@ -7911,6 +7904,13 @@ A list of CA certificates to import into the truststore. Certificates must be mo
 
 
 Optional base truststore to use as the starting point for adding certificates.
+
+|`truststorePasswordPath` +
+string
+|
+
+
+Path to a file containing the password for the generated truststore. Required when using ca-certificates without base-truststore.
 
 |`caCertMountPath` +
 string

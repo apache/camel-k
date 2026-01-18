@@ -71,6 +71,10 @@ Deprecated: no longer in use.
 | github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait.BaseTruststore
 | Optional base truststore to use as the starting point for adding certificates.
 
+| jvm.truststore-password-path
+| string
+| Path to a file containing the password for the generated truststore. Required when using ca-certificates without base-truststore.
+
 | jvm.ca-cert-mount-path
 | string
 | The path where the generated truststore will be mounted (default `/etc/camel/conf.d/_truststore`).
@@ -118,7 +122,9 @@ $ kamel run --resource configmap:my-dep -t jvm.classpath=/etc/camel/resources/my
 
 == Trusting Custom CA Certificates
 
-When connecting to services that use TLS with certificates signed by a private CA (e.g., internal Elasticsearch, Kafka, or databases), you can use the `ca-cert` option to add the CA certificate to the JVM's truststore.
+When connecting to services that use TLS with certificates signed by a private CA (e.g., internal Elasticsearch, Kafka, or databases), you can use the `ca-certificates` option to add CA certificates to the JVM's truststore.
+
+=== Single Certificate
 
 First, create Kubernetes Secrets containing the CA certificate and truststore password:
 
@@ -135,20 +141,48 @@ Then mount the secrets using the mount trait and reference the file paths:
 $ kamel run MyRoute.java \
   -t mount.configs=secret:my-private-ca \
   -t mount.configs=secret:my-truststore-pwd \
-  -t jvm.ca-cert=/etc/camel/conf.d/_secrets/my-private-ca/ca.crt \
-  -t jvm.ca-cert-password=/etc/camel/conf.d/_secrets/my-truststore-pwd/password
+  -t jvm.ca-certificates[0].cert-path=/etc/camel/conf.d/_secrets/my-private-ca/ca.crt \
+  -t jvm.truststore-password-path=/etc/camel/conf.d/_secrets/my-truststore-pwd/password
 ----
 
-If your secret uses a different key name for the certificate:
+=== Multiple Certificates
+
+You can add multiple CA certificates to the truststore:
+
+[source,console]
+----
+$ kamel run MyRoute.java \
+  -t mount.configs=secret:ca1 \
+  -t mount.configs=secret:ca2 \
+  -t mount.configs=secret:truststore-pwd \
+  -t jvm.ca-certificates[0].cert-path=/etc/camel/conf.d/_secrets/ca1/ca.crt \
+  -t jvm.ca-certificates[1].cert-path=/etc/camel/conf.d/_secrets/ca2/ca.crt \
+  -t jvm.truststore-password-path=/etc/camel/conf.d/_secrets/truststore-pwd/password
+----
+
+=== Using a Base Truststore (Preserving JDK Public CAs)
+
+To preserve the JDK's default public CA certificates while adding your custom certificates, use the `base-truststore` option:
 
 [source,console]
 ----
 $ kamel run MyRoute.java \
   -t mount.configs=secret:my-private-ca \
-  -t mount.configs=secret:my-truststore-pwd \
-  -t jvm.ca-cert=/etc/camel/conf.d/_secrets/my-private-ca/custom-ca.pem \
-  -t jvm.ca-cert-password=/etc/camel/conf.d/_secrets/my-truststore-pwd/password
+  -t mount.configs=secret:cacerts-pwd \
+  -t jvm.base-truststore.truststore-path=/opt/java/openjdk/lib/security/cacerts \
+  -t jvm.base-truststore.password-path=/etc/camel/conf.d/_secrets/cacerts-pwd/password \
+  -t jvm.ca-certificates[0].cert-path=/etc/camel/conf.d/_secrets/my-private-ca/ca.crt
 ----
+
+NOTE: When using `base-truststore`, you can optionally provide `truststore-password-path` to set a different password for the output truststore. If not provided, the base truststore password is used.
+
+=== Truststore Password Resolution
+
+The truststore password is determined using this priority:
+
+1. `truststore-password-path` (if explicitly provided)
+2. `base-truststore.password-path` (if base-truststore is configured)
+3. Validation error (password is required when using `ca-certificates`)
 
 This will automatically:
 
@@ -156,4 +190,17 @@ This will automatically:
 2. Generate a JVM truststore using an init container
 3. Configure the JVM to use the generated truststore via `-Djavax.net.ssl.trustStore`
 
-NOTE: The `ca-cert-password` option is **required** when using `ca-cert`. Both values must be file paths to the mounted secrets.
+=== Deprecated Syntax (Backward Compatible)
+
+The legacy `ca-cert` and `ca-cert-password` options are still supported but deprecated:
+
+[source,console]
+----
+$ kamel run MyRoute.java \
+  -t mount.configs=secret:my-private-ca \
+  -t mount.configs=secret:my-truststore-pwd \
+  -t jvm.ca-cert=/etc/camel/conf.d/_secrets/my-private-ca/ca.crt \
+  -t jvm.ca-cert-password=/etc/camel/conf.d/_secrets/my-truststore-pwd/password
+----
+
+NOTE: We recommend migrating to the new `ca-certificates` syntax for better multi-certificate support and explicit truststore password configuration.

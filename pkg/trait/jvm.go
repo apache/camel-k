@@ -398,18 +398,9 @@ func (t *jvmTrait) configureCaCert() []string {
 		return nil
 	}
 
-	// Determine which password to use for the truststore:
-	// If base truststore exists, use its password (we keep the original truststore password)
-	// Otherwise, use the first certificate's password
-	var truststorePassPath string
-	if t.hasBaseTruststore() {
-		truststorePassPath = t.getBaseTruststore().PasswordPath
-	} else {
-		entries := t.getAllCACertEntries()
-		if len(entries) == 0 {
-			return nil
-		}
-		truststorePassPath = entries[0].PasswordPath
+	truststorePassPath := t.getTruststorePasswordPath()
+	if truststorePassPath == "" {
+		return nil
 	}
 
 	return []string{
