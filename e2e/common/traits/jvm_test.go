@@ -91,36 +91,122 @@ func TestJVMTrait(t *testing.T) {
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Hello World!"))
 		})
 
-		t.Run("JVM trait CA cert", func(t *testing.T) {
-			// Generate a valid self-signed certificate
-			certPem, err := generateSelfSignedCert()
+		t.Run("JVM trait multiple CA certs", func(t *testing.T) {
+			// Test the new ca-certificates field with multiple certificates
+			cert1Pem, err := generateSelfSignedCert()
+			require.NoError(t, err)
+			cert2Pem, err := generateSelfSignedCert()
 			require.NoError(t, err)
 
-			caCertData := make(map[string]string)
-			caCertData["ca.crt"] = string(certPem)
-
-			err = CreatePlainTextSecret(t, ctx, ns, "test-ca-cert", caCertData)
+			// Create secrets with certificates
+			caCert1Data := make(map[string]string)
+			caCert1Data["ca.crt"] = string(cert1Pem)
+			err = CreatePlainTextSecret(t, ctx, ns, "test-ca-cert-1", caCert1Data)
 			require.NoError(t, err)
 
-			passwordData := make(map[string]string)
-			passwordData["password"] = "test-password-123"
-			err = CreatePlainTextSecret(t, ctx, ns, "test-ca-password", passwordData)
+			caCert2Data := make(map[string]string)
+			caCert2Data["ca.crt"] = string(cert2Pem)
+			err = CreatePlainTextSecret(t, ctx, ns, "test-ca-cert-2", caCert2Data)
 			require.NoError(t, err)
 
-			name := RandomizedSuffixName("cacert")
+			truststorePassData := make(map[string]string)
+			truststorePassData["password"] = "truststore-password"
+			err = CreatePlainTextSecret(t, ctx, ns, "truststore-pass-multi", truststorePassData)
+			require.NoError(t, err)
+
+			name := RandomizedSuffixName("multicacert")
 			g.Expect(KamelRun(t, ctx, ns,
 				"./files/Java.java",
 				"--name", name,
-				"-t", "mount.configs=secret:test-ca-cert",
-				"-t", "mount.configs=secret:test-ca-password",
-				"-t", "jvm.ca-cert=/etc/camel/conf.d/_secrets/test-ca-cert/ca.crt",
-				"-t", "jvm.ca-cert-password=/etc/camel/conf.d/_secrets/test-ca-password/password",
+				"-t", "mount.configs=secret:test-ca-cert-1",
+				"-t", "mount.configs=secret:test-ca-cert-2",
+				"-t", "mount.configs=secret:truststore-pass-multi",
+				"-t", "jvm.ca-certificates[0].cert-path=/etc/camel/conf.d/_secrets/test-ca-cert-1/ca.crt",
+				"-t", "jvm.ca-certificates[1].cert-path=/etc/camel/conf.d/_secrets/test-ca-cert-2/ca.crt",
+				"-t", "jvm.truststore-password-path=/etc/camel/conf.d/_secrets/truststore-pass-multi/password",
+			).Execute()).To(Succeed())
+
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong*2).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+
+			pod := IntegrationPod(t, ctx, ns, name)()
+			g.Expect(pod).NotTo(BeNil())
+			initContainerNames := make([]string, 0)
+			for _, c := range pod.Spec.InitContainers {
+				initContainerNames = append(initContainerNames, c.Name)
+			}
+			g.Expect(initContainerNames).To(ContainElement("generate-truststore"))
+		})
+
+		t.Run("JVM trait CA cert with base truststore", func(t *testing.T) {
+			// Test the new base-truststore field (replaces ca-cert-use-system-truststore)
+			certPem, err := generateSelfSignedCert()
+			require.NoError(t, err)
+
+			// Create secret with certificate
+			caCertData := make(map[string]string)
+			caCertData["ca.crt"] = string(certPem)
+			err = CreatePlainTextSecret(t, ctx, ns, "test-ca-sys", caCertData)
+			require.NoError(t, err)
+
+			// Create secret for base truststore password (JDK cacerts uses "changeit")
+			baseTsPassData := make(map[string]string)
+			baseTsPassData["password"] = "changeit"
+			err = CreatePlainTextSecret(t, ctx, ns, "base-ts-password", baseTsPassData)
+			require.NoError(t, err)
+
+			name := RandomizedSuffixName("syscacert")
+			g.Expect(KamelRun(t, ctx, ns,
+				"./files/Java.java",
+				"--name", name,
+				"-t", "mount.configs=secret:test-ca-sys",
+				"-t", "mount.configs=secret:base-ts-password",
+				"-t", "jvm.base-truststore.truststore-path=/opt/java/openjdk/lib/security/cacerts",
+				"-t", "jvm.base-truststore.password-path=/etc/camel/conf.d/_secrets/base-ts-password/password",
+				"-t", "jvm.ca-certificates[0].cert-path=/etc/camel/conf.d/_secrets/test-ca-sys/ca.crt",
 			).Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
-			// Verify init container was added
+			pod := IntegrationPod(t, ctx, ns, name)()
+			g.Expect(pod).NotTo(BeNil())
+			initContainerNames := make([]string, 0)
+			for _, c := range pod.Spec.InitContainers {
+				initContainerNames = append(initContainerNames, c.Name)
+			}
+			g.Expect(initContainerNames).To(ContainElement("generate-truststore"))
+		})
+
+		t.Run("JVM trait CA cert single certificate", func(t *testing.T) {
+			// Test single certificate with the new ca-certificates field
+			certPem, err := generateSelfSignedCert()
+			require.NoError(t, err)
+
+			// Create secret with certificate
+			caCertData := make(map[string]string)
+			caCertData["ca.crt"] = string(certPem)
+			err = CreatePlainTextSecret(t, ctx, ns, "test-ca-single", caCertData)
+			require.NoError(t, err)
+
+			truststorePassData := make(map[string]string)
+			truststorePassData["password"] = "truststore-password"
+			err = CreatePlainTextSecret(t, ctx, ns, "truststore-pass-single", truststorePassData)
+			require.NoError(t, err)
+
+			name := RandomizedSuffixName("singlecert")
+			g.Expect(KamelRun(t, ctx, ns,
+				"./files/Java.java",
+				"--name", name,
+				"-t", "mount.configs=secret:test-ca-single",
+				"-t", "mount.configs=secret:truststore-pass-single",
+				"-t", "jvm.ca-certificates[0].cert-path=/etc/camel/conf.d/_secrets/test-ca-single/ca.crt",
+				"-t", "jvm.truststore-password-path=/etc/camel/conf.d/_secrets/truststore-pass-single/password",
+			).Execute()).To(Succeed())
+
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+
 			pod := IntegrationPod(t, ctx, ns, name)()
 			g.Expect(pod).NotTo(BeNil())
 			initContainerNames := make([]string, 0)

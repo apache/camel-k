@@ -722,8 +722,10 @@ func TestApplyJvmTraitAgentFail(t *testing.T) {
 
 func TestApplyJvmTraitWithCACert(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-	trait.CACert = "/etc/camel/conf.d/_secrets/my-ca/ca.crt"
-	trait.CACertPassword = "/etc/camel/conf.d/_secrets/truststore-pass/password"
+	trait.CACertificates = []traitv1.CACertConfig{
+		{CertPath: "/etc/camel/conf.d/_secrets/my-ca/ca.crt"},
+	}
+	trait.TruststorePasswordPath = "/etc/camel/conf.d/_secrets/truststore-pass/password"
 
 	d := appsv1.Deployment{
 		Spec: appsv1.DeploymentSpec{
@@ -749,31 +751,15 @@ func TestApplyJvmTraitWithCACert(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Args, "-Djavax.net.ssl.trustStore=/etc/camel/conf.d/_truststore/truststore.jks")
-	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Args, "-Djavax.net.ssl.trustStorePassword=$(TRUSTSTORE_PASSWORD)")
-}
-
-func TestValidateCACertConfig(t *testing.T) {
-	trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-
-	trait.CACert = ""
-	err := trait.validateCACertConfig()
-	require.NoError(t, err)
-
-	trait.CACert = "/etc/camel/conf.d/_secrets/my-ca/ca.crt"
-	trait.CACertPassword = ""
-	err = trait.validateCACertConfig()
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "ca-cert-password is required")
-
-	trait.CACertPassword = "/etc/camel/conf.d/_secrets/truststore-pass/password"
-	err = trait.validateCACertConfig()
-	require.NoError(t, err)
+	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Args, "-Djavax.net.ssl.trustStorePassword=$(cat /etc/camel/conf.d/_secrets/truststore-pass/password)")
 }
 
 func TestApplyJvmTraitWithCustomCACertMountPath(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-	trait.CACert = "/etc/camel/conf.d/_secrets/my-ca/ca.crt"
-	trait.CACertPassword = "/etc/camel/conf.d/_secrets/truststore-pass/password"
+	trait.CACertificates = []traitv1.CACertConfig{
+		{CertPath: "/etc/camel/conf.d/_secrets/my-ca/ca.crt"},
+	}
+	trait.TruststorePasswordPath = "/etc/camel/conf.d/_secrets/truststore-pass/password"
 	trait.CACertMountPath = "/custom/truststore/path"
 
 	d := appsv1.Deployment{
@@ -800,5 +786,439 @@ func TestApplyJvmTraitWithCustomCACertMountPath(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Args, "-Djavax.net.ssl.trustStore=/custom/truststore/path/truststore.jks")
-	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Args, "-Djavax.net.ssl.trustStorePassword=$(TRUSTSTORE_PASSWORD)")
+	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Args, "-Djavax.net.ssl.trustStorePassword=$(cat /etc/camel/conf.d/_secrets/truststore-pass/password)")
+}
+
+func TestGetAllCACertEntries(t *testing.T) {
+	trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+
+	trait.CACertificates = []traitv1.CACertConfig{
+		{CertPath: "/path/to/ca1.crt"},
+		{CertPath: "/path/to/ca2.crt"},
+	}
+	trait.CACert = ""
+	trait.CACertPassword = ""
+	entries := trait.getAllCACertEntries()
+	assert.Len(t, entries, 2)
+	assert.Equal(t, "/path/to/ca1.crt", entries[0].CertPath)
+	assert.Equal(t, "/path/to/ca2.crt", entries[1].CertPath)
+
+	trait.CACertificates = nil
+	trait.CACert = "/path/to/legacy.crt"
+	trait.CACertPassword = "/path/to/legacy-pass"
+	entries = trait.getAllCACertEntries()
+	assert.Len(t, entries, 1)
+	assert.Equal(t, "/path/to/legacy.crt", entries[0].CertPath)
+
+	trait.CACertificates = []traitv1.CACertConfig{
+		{CertPath: "/path/to/ca1.crt"},
+	}
+	trait.CACert = "/path/to/ca2.crt"
+	trait.CACertPassword = "/path/to/pass2"
+	entries = trait.getAllCACertEntries()
+	assert.Len(t, entries, 2)
+
+	trait.CACertificates = nil
+	trait.CACert = ""
+	trait.CACertPassword = ""
+	entries = trait.getAllCACertEntries()
+	assert.Len(t, entries, 0)
+}
+
+func TestHasCACerts(t *testing.T) {
+	trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+
+	trait.CACertificates = nil
+	trait.CACert = ""
+	assert.False(t, trait.hasCACerts())
+
+	trait.CACertificates = []traitv1.CACertConfig{
+		{CertPath: "/path/to/ca1.crt"},
+	}
+	trait.CACert = ""
+	assert.True(t, trait.hasCACerts())
+
+	trait.CACertificates = nil
+	trait.CACert = "/path/to/legacy.crt"
+	assert.True(t, trait.hasCACerts())
+
+	trait.CACertificates = []traitv1.CACertConfig{
+		{CertPath: "/path/to/ca1.crt"},
+	}
+	trait.CACert = "/path/to/ca2.crt"
+	assert.True(t, trait.hasCACerts())
+}
+
+func TestHasBaseTruststore(t *testing.T) {
+	trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+
+	trait.BaseTruststore = nil
+	assert.False(t, trait.hasBaseTruststore())
+
+	trait.BaseTruststore = &traitv1.BaseTruststore{}
+	assert.False(t, trait.hasBaseTruststore())
+
+	trait.BaseTruststore = &traitv1.BaseTruststore{
+		TruststorePath: "/path/to/cacerts",
+	}
+	assert.False(t, trait.hasBaseTruststore())
+
+	trait.BaseTruststore = &traitv1.BaseTruststore{
+		PasswordPath: "/path/to/pass",
+	}
+	assert.False(t, trait.hasBaseTruststore())
+
+	trait.BaseTruststore = &traitv1.BaseTruststore{
+		TruststorePath: "/opt/java/openjdk/lib/security/cacerts",
+		PasswordPath:   "/path/to/pass",
+	}
+	assert.True(t, trait.hasBaseTruststore())
+}
+
+func TestGetTruststorePasswordPath(t *testing.T) {
+	trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+
+	trait.TruststorePasswordPath = ""
+	trait.BaseTruststore = nil
+	trait.CACert = ""
+	trait.CACertPassword = ""
+	assert.Equal(t, "", trait.getTruststorePasswordPath())
+
+	trait.TruststorePasswordPath = "/path/to/user-provided-pass"
+	trait.BaseTruststore = &traitv1.BaseTruststore{
+		TruststorePath: "/path/to/cacerts",
+		PasswordPath:   "/path/to/base-pass",
+	}
+	trait.CACert = "/path/to/legacy.crt"
+	trait.CACertPassword = "/path/to/legacy-pass"
+	assert.Equal(t, "/path/to/user-provided-pass", trait.getTruststorePasswordPath())
+
+	trait.TruststorePasswordPath = "/path/to/user-provided-pass"
+	trait.BaseTruststore = nil
+	trait.CACert = "/path/to/legacy.crt"
+	trait.CACertPassword = "/path/to/legacy-pass"
+	assert.Equal(t, "/path/to/user-provided-pass", trait.getTruststorePasswordPath())
+
+	trait.TruststorePasswordPath = ""
+	trait.BaseTruststore = nil
+	trait.CACert = "/path/to/legacy.crt"
+	trait.CACertPassword = "/path/to/legacy-pass"
+	assert.Equal(t, "/path/to/legacy-pass", trait.getTruststorePasswordPath())
+
+	trait.TruststorePasswordPath = "/path/to/user-provided-pass"
+	trait.BaseTruststore = &traitv1.BaseTruststore{
+		TruststorePath: "/path/to/cacerts",
+	}
+	trait.CACert = ""
+	trait.CACertPassword = ""
+	assert.Equal(t, "/path/to/user-provided-pass", trait.getTruststorePasswordPath())
+
+	trait.TruststorePasswordPath = ""
+	trait.BaseTruststore = &traitv1.BaseTruststore{
+		TruststorePath: "/path/to/cacerts",
+	}
+	trait.CACert = "/path/to/legacy.crt"
+	trait.CACertPassword = "/path/to/legacy-pass"
+	assert.Equal(t, "/path/to/legacy-pass", trait.getTruststorePasswordPath())
+
+	trait.TruststorePasswordPath = ""
+	trait.BaseTruststore = &traitv1.BaseTruststore{
+		TruststorePath: "/path/to/cacerts",
+	}
+	trait.CACert = ""
+	trait.CACertPassword = ""
+	assert.Equal(t, "", trait.getTruststorePasswordPath())
+}
+
+func TestValidateCACertConfig(t *testing.T) {
+	trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+
+	trait.CACertificates = nil
+	trait.CACert = ""
+	trait.CACertPassword = ""
+	trait.BaseTruststore = nil
+	trait.TruststorePasswordPath = ""
+	assert.NoError(t, trait.validateCACertConfig())
+
+	trait.CACertificates = []traitv1.CACertConfig{
+		{CertPath: "/path/to/ca.crt"},
+	}
+	trait.TruststorePasswordPath = "/path/to/truststore-pass"
+	assert.NoError(t, trait.validateCACertConfig())
+
+	trait.CACertificates = []traitv1.CACertConfig{
+		{CertPath: "/path/to/ca.crt"},
+	}
+	trait.TruststorePasswordPath = ""
+	trait.BaseTruststore = nil
+	assert.Error(t, trait.validateCACertConfig())
+	assert.Contains(t, trait.validateCACertConfig().Error(), "truststore-password-path is required")
+
+	trait.CACertificates = []traitv1.CACertConfig{
+		{CertPath: "/path/to/ca.crt"},
+	}
+	trait.TruststorePasswordPath = ""
+	trait.BaseTruststore = &traitv1.BaseTruststore{
+		TruststorePath: "/path/to/cacerts",
+		PasswordPath:   "/path/to/base-pass",
+	}
+	assert.NoError(t, trait.validateCACertConfig())
+
+	trait.CACertificates = []traitv1.CACertConfig{
+		{CertPath: "/path/to/ca.crt"},
+	}
+	trait.TruststorePasswordPath = "/path/to/truststore-pass"
+	trait.BaseTruststore = nil
+	assert.NoError(t, trait.validateCACertConfig())
+
+	trait.CACertificates = []traitv1.CACertConfig{
+		{CertPath: "/path/to/ca.crt"},
+	}
+	trait.TruststorePasswordPath = ""
+	trait.BaseTruststore = nil
+	trait.CACert = "/path/to/legacy.crt"
+	trait.CACertPassword = "/path/to/legacy-pass"
+	assert.Error(t, trait.validateCACertConfig())
+	assert.Contains(t, trait.validateCACertConfig().Error(), "truststore-password-path is required")
+
+	trait.CACertificates = nil
+	trait.CACert = "/path/to/ca.crt"
+	trait.CACertPassword = ""
+	trait.TruststorePasswordPath = ""
+	assert.Error(t, trait.validateCACertConfig())
+
+	trait.CACert = "/path/to/ca.crt"
+	trait.CACertPassword = "/path/to/pass"
+	assert.NoError(t, trait.validateCACertConfig())
+
+	trait.CACert = ""
+	trait.CACertPassword = ""
+	trait.BaseTruststore = &traitv1.BaseTruststore{
+		TruststorePath: "/path/to/cacerts",
+	}
+	assert.Error(t, trait.validateCACertConfig())
+
+	trait.BaseTruststore = &traitv1.BaseTruststore{
+		TruststorePath: "/path/to/cacerts",
+		PasswordPath:   "/path/to/pass",
+	}
+	assert.NoError(t, trait.validateCACertConfig())
+}
+
+func TestAllCACertScenarios(t *testing.T) {
+	t.Run("Scenario1_NothingConfigured", func(t *testing.T) {
+		trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+		trait.CACertificates = nil
+		trait.TruststorePasswordPath = ""
+		trait.BaseTruststore = nil
+		trait.CACert = ""
+		trait.CACertPassword = ""
+
+		assert.False(t, trait.hasCACerts())
+		assert.Equal(t, "", trait.getTruststorePasswordPath())
+	})
+
+	t.Run("Scenario2_CACertificatesNoPassword", func(t *testing.T) {
+		trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+		trait.CACertificates = []traitv1.CACertConfig{
+			{CertPath: "/path/to/cert"},
+		}
+		trait.TruststorePasswordPath = ""
+		trait.BaseTruststore = nil
+		trait.CACert = ""
+		trait.CACertPassword = ""
+
+		assert.True(t, trait.hasCACerts())
+		assert.Equal(t, "", trait.getTruststorePasswordPath())
+		err := trait.validateCACertConfig()
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "truststore-password-path is required")
+	})
+
+	t.Run("Scenario3_CACertificatesWithTruststorePassword", func(t *testing.T) {
+		trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+		trait.CACertificates = []traitv1.CACertConfig{
+			{CertPath: "/path/to/cert"},
+		}
+		trait.TruststorePasswordPath = "/path/to/ts-pass"
+		trait.BaseTruststore = nil
+		trait.CACert = ""
+		trait.CACertPassword = ""
+
+		assert.True(t, trait.hasCACerts())
+		assert.Equal(t, "/path/to/ts-pass", trait.getTruststorePasswordPath())
+		assert.NoError(t, trait.validateCACertConfig())
+	})
+
+	t.Run("Scenario4_CACertificatesWithBaseTruststore", func(t *testing.T) {
+		trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+		trait.CACertificates = []traitv1.CACertConfig{
+			{CertPath: "/path/to/cert"},
+		}
+		trait.TruststorePasswordPath = ""
+		trait.BaseTruststore = &traitv1.BaseTruststore{
+			TruststorePath: "/path/to/cacerts",
+			PasswordPath:   "/path/to/base-pass",
+		}
+		trait.CACert = ""
+		trait.CACertPassword = ""
+
+		assert.True(t, trait.hasCACerts())
+		assert.True(t, trait.hasBaseTruststore())
+		assert.Equal(t, "/path/to/base-pass", trait.getTruststorePasswordPath())
+		assert.NoError(t, trait.validateCACertConfig())
+	})
+
+	t.Run("Scenario5_AllPasswordSourcesTruststorePasswordWins", func(t *testing.T) {
+		trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+		trait.CACertificates = []traitv1.CACertConfig{
+			{CertPath: "/path/to/cert"},
+		}
+		trait.TruststorePasswordPath = "/path/to/ts-pass"
+		trait.BaseTruststore = &traitv1.BaseTruststore{
+			TruststorePath: "/path/to/cacerts",
+			PasswordPath:   "/path/to/base-pass",
+		}
+		trait.CACert = ""
+		trait.CACertPassword = ""
+
+		assert.True(t, trait.hasCACerts())
+		assert.True(t, trait.hasBaseTruststore())
+		assert.Equal(t, "/path/to/ts-pass", trait.getTruststorePasswordPath())
+		assert.NoError(t, trait.validateCACertConfig())
+	})
+
+	t.Run("Scenario6_CACertificatesWithLegacyNoExplicitPassword", func(t *testing.T) {
+		trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+		trait.CACertificates = []traitv1.CACertConfig{
+			{CertPath: "/path/to/cert"},
+		}
+		trait.TruststorePasswordPath = ""
+		trait.BaseTruststore = nil
+		trait.CACert = "/path/to/legacy-cert"
+		trait.CACertPassword = "/path/to/legacy-pass"
+
+		assert.True(t, trait.hasCACerts())
+		assert.Equal(t, "/path/to/legacy-pass", trait.getTruststorePasswordPath())
+		err := trait.validateCACertConfig()
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "truststore-password-path is required")
+	})
+
+	t.Run("Scenario7_LegacyOnly", func(t *testing.T) {
+		trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+		trait.CACertificates = nil
+		trait.TruststorePasswordPath = ""
+		trait.BaseTruststore = nil
+		trait.CACert = "/path/to/legacy-cert"
+		trait.CACertPassword = "/path/to/legacy-pass"
+
+		assert.True(t, trait.hasCACerts())
+		assert.Equal(t, "/path/to/legacy-pass", trait.getTruststorePasswordPath())
+		assert.NoError(t, trait.validateCACertConfig())
+	})
+
+	t.Run("Scenario8_LegacyWithoutPassword", func(t *testing.T) {
+		trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+		trait.CACertificates = nil
+		trait.TruststorePasswordPath = ""
+		trait.BaseTruststore = nil
+		trait.CACert = "/path/to/legacy-cert"
+		trait.CACertPassword = ""
+
+		assert.True(t, trait.hasCACerts())
+		assert.Equal(t, "", trait.getTruststorePasswordPath())
+		err := trait.validateCACertConfig()
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "ca-cert-password is required")
+	})
+
+	t.Run("Scenario9_BaseTruststoreOnlyNoCerts", func(t *testing.T) {
+		trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+		trait.CACertificates = nil
+		trait.TruststorePasswordPath = ""
+		trait.BaseTruststore = &traitv1.BaseTruststore{
+			TruststorePath: "/path/to/cacerts",
+			PasswordPath:   "/path/to/base-pass",
+		}
+		trait.CACert = ""
+		trait.CACertPassword = ""
+
+		assert.False(t, trait.hasCACerts())
+		assert.True(t, trait.hasBaseTruststore())
+		assert.Equal(t, "/path/to/base-pass", trait.getTruststorePasswordPath())
+		assert.NoError(t, trait.validateCACertConfig())
+	})
+
+	t.Run("Scenario10_IncompleteBaseTruststoreWithTsPassword", func(t *testing.T) {
+		trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+		trait.CACertificates = []traitv1.CACertConfig{
+			{CertPath: "/path/to/cert"},
+		}
+		trait.TruststorePasswordPath = "/path/to/ts-pass"
+		trait.BaseTruststore = &traitv1.BaseTruststore{
+			TruststorePath: "/path/to/cacerts",
+			PasswordPath:   "",
+		}
+		trait.CACert = ""
+		trait.CACertPassword = ""
+
+		assert.True(t, trait.hasCACerts())
+		assert.False(t, trait.hasBaseTruststore())
+		assert.Equal(t, "/path/to/ts-pass", trait.getTruststorePasswordPath())
+
+		err := trait.validateCACertConfig()
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "base-truststore: both truststore-path and password-path are required")
+	})
+
+	t.Run("Scenario11_IncompleteBaseTruststoreNoTsPassword", func(t *testing.T) {
+		trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+		trait.CACertificates = []traitv1.CACertConfig{
+			{CertPath: "/path/to/cert"},
+		}
+		trait.TruststorePasswordPath = ""
+		trait.BaseTruststore = &traitv1.BaseTruststore{
+			TruststorePath: "/path/to/cacerts",
+			PasswordPath:   "",
+		}
+		trait.CACert = ""
+		trait.CACertPassword = ""
+
+		assert.True(t, trait.hasCACerts())
+		assert.False(t, trait.hasBaseTruststore())
+		assert.Equal(t, "", trait.getTruststorePasswordPath())
+		err := trait.validateCACertConfig()
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "base-truststore: both truststore-path and password-path are required")
+	})
+
+	t.Run("Scenario12_EmptyCACertificatesArray", func(t *testing.T) {
+		trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+		trait.CACertificates = []traitv1.CACertConfig{}
+		trait.TruststorePasswordPath = ""
+		trait.BaseTruststore = nil
+		trait.CACert = ""
+		trait.CACertPassword = ""
+
+		assert.False(t, trait.hasCACerts())
+		assert.Equal(t, "", trait.getTruststorePasswordPath())
+		assert.NoError(t, trait.validateCACertConfig())
+	})
+
+	t.Run("Scenario13_CACertificatesEntryMissingCertPath", func(t *testing.T) {
+		trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+		trait.CACertificates = []traitv1.CACertConfig{
+			{CertPath: ""},
+		}
+		trait.TruststorePasswordPath = "/path/to/ts-pass"
+		trait.BaseTruststore = nil
+		trait.CACert = ""
+		trait.CACertPassword = ""
+
+		assert.True(t, trait.hasCACerts())
+		err := trait.validateCACertConfig()
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "cert-path is required")
+	})
 }

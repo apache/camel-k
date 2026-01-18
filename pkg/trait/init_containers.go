@@ -91,20 +91,45 @@ func (t *initContainersTrait) Configure(e *Environment) (bool, *TraitCondition, 
 			}
 			t.tasks = append(t.tasks, agentDownloadTask)
 		}
-		// Set the CA cert truststore init container if configured
-		if ok && jvm.hasCACert() {
+		if ok && jvm.hasCACerts() {
 			if err := jvm.validateCACertConfig(); err != nil {
 				return false, nil, err
 			}
-			// keytool reads password from file using -storepass:file
-			keytoolCmd := fmt.Sprintf(
-				"keytool -importcert -noprompt -alias custom-ca -storepass:file %s -keystore %s -file %s",
-				jvm.getCACertPasswordPath(), jvm.getTrustStorePath(), jvm.getCACertPath(),
-			)
+
+			var allCommands []string
+			importPassPath := jvm.getTruststorePasswordPath()
+
+			if jvm.hasBaseTruststore() {
+				baseTruststore := jvm.getBaseTruststore()
+				copyCmd := fmt.Sprintf("cp %s %s", baseTruststore.TruststorePath, jvm.getTrustStorePath())
+				allCommands = append(allCommands, copyCmd)
+				importPassPath = baseTruststore.PasswordPath
+			}
+
+			for i, entry := range jvm.getAllCACertEntries() {
+				cmd := fmt.Sprintf(
+					"keytool -importcert -noprompt -alias custom-ca-%d -storepass:file %s -keystore %s -file %s",
+					i, importPassPath, jvm.getTrustStorePath(), entry.CertPath,
+				)
+				allCommands = append(allCommands, cmd)
+			}
+
+			if jvm.hasBaseTruststore() && jvm.TruststorePasswordPath != "" {
+				storepasswdCmd := fmt.Sprintf(
+					"keytool -storepasswd -keystore %s -storepass:file %s -new \"$(cat %s)\"",
+					jvm.getTrustStorePath(), jvm.getBaseTruststore().PasswordPath, jvm.TruststorePasswordPath,
+				)
+				allCommands = append(allCommands, storepasswdCmd)
+			}
+
+			fullCommand := strings.Join(allCommands, " && ")
+			if len(allCommands) > 1 || jvm.hasBaseTruststore() {
+				fullCommand = fmt.Sprintf("/bin/bash -c \"%s\"", fullCommand)
+			}
 			caCertTask := containerTask{
 				name:    "generate-truststore",
 				image:   defaults.BaseImage(),
-				command: keytoolCmd,
+				command: fullCommand,
 			}
 			t.tasks = append(t.tasks, caCertTask)
 		}

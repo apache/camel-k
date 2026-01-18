@@ -205,7 +205,7 @@ func (t *mountTrait) configureVolumesAndMounts(
 		}
 
 		// Mount CA cert truststore volume if configured
-		if ok && jvm.hasCACert() {
+		if ok && jvm.hasCACerts() {
 			mountPath := jvm.getCACertMountPath()
 
 			// EmptyDir volume for truststore output

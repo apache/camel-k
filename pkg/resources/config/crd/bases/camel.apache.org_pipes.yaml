@@ -8261,21 +8261,44 @@ spec:
                             items:
                               type: string
                             type: array
+                          baseTruststore:
+                            description: Optional base truststore to use as the starting
+                              point for adding certificates.
+                            properties:
+                              passwordPath:
+                                description: Path to a file containing the password
+                                  for the base truststore.
+                                type: string
+                              truststorePath:
+                                description: Path to the base truststore file.
+                                type: string
+                            type: object
                           caCert:
-                            description: |-
-                              Path to a PEM-encoded CA certificate file.
-                              Example: "/etc/camel/conf.d/_secrets/my-ca/ca.crt"
+                            description: 'Deprecated: Use CACertificates instead.
+                              Path to a PEM-encoded CA certificate file.'
                             type: string
                           caCertMountPath:
-                            description: |-
-                              The path where the generated truststore will be mounted.
-                              Default: "/etc/camel/conf.d/_truststore"
+                            description: The path where the generated truststore will
+                              be mounted (default `/etc/camel/conf.d/_truststore`).
                             type: string
                           caCertPassword:
-                            description: |-
-                              Required when caCert is set. Path to a file containing the truststore password.
-                              Example: "/etc/camel/conf.d/_secrets/truststore-pass/password"
+                            description: 'Deprecated: Use CACertificates instead.
+                              Path to a file containing the truststore password.'
                             type: string
+                          caCertificates:
+                            description: A list of CA certificates to import into
+                              the truststore. Certificates must be mounted via the
+                              mount trait.
+                            items:
+                              description: CACertConfig specifies a CA certificate
+                                to import into the truststore.
+                              properties:
+                                certPath:
+                                  description: Path to the PEM-encoded CA certificate
+                                    file to import.
+                                  type: string
+                              type: object
+                            type: array
                           classpath:
                             description: Additional JVM classpath (use `Linux` classpath
                               separator)
@@ -8318,6 +8341,11 @@ spec:
 
                               Deprecated: no longer in use.
                             type: boolean
+                          truststorePasswordPath:
+                            description: Path to a file containing the password for
+                              the generated truststore. Required when using ca-certificates
+                              without base-truststore.
+                            type: string
                         type: object
                       kamelets:
                         description: The configuration of Kamelets trait
@@ -10506,21 +10534,43 @@ spec:
                         items:
                           type: string
                         type: array
+                      baseTruststore:
+                        description: Optional base truststore to use as the starting
+                          point for adding certificates.
+                        properties:
+                          passwordPath:
+                            description: Path to a file containing the password for
+                              the base truststore.
+                            type: string
+                          truststorePath:
+                            description: Path to the base truststore file.
+                            type: string
+                        type: object
                       caCert:
-                        description: |-
-                          Path to a PEM-encoded CA certificate file.
-                          Example: "/etc/camel/conf.d/_secrets/my-ca/ca.crt"
+                        description: 'Deprecated: Use CACertificates instead. Path
+                          to a PEM-encoded CA certificate file.'
                         type: string
                       caCertMountPath:
-                        description: |-
-                          The path where the generated truststore will be mounted.
-                          Default: "/etc/camel/conf.d/_truststore"
+                        description: The path where the generated truststore will
+                          be mounted (default `/etc/camel/conf.d/_truststore`).
                         type: string
                       caCertPassword:
-                        description: |-
-                          Required when caCert is set. Path to a file containing the truststore password.
-                          Example: "/etc/camel/conf.d/_secrets/truststore-pass/password"
+                        description: 'Deprecated: Use CACertificates instead. Path
+                          to a file containing the truststore password.'
                         type: string
+                      caCertificates:
+                        description: A list of CA certificates to import into the
+                          truststore. Certificates must be mounted via the mount trait.
+                        items:
+                          description: CACertConfig specifies a CA certificate to
+                            import into the truststore.
+                          properties:
+                            certPath:
+                              description: Path to the PEM-encoded CA certificate
+                                file to import.
+                              type: string
+                          type: object
+                        type: array
                       classpath:
                         description: Additional JVM classpath (use `Linux` classpath
                           separator)
@@ -10563,6 +10613,11 @@ spec:
 
                           Deprecated: no longer in use.
                         type: boolean
+                      truststorePasswordPath:
+                        description: Path to a file containing the password for the
+                          generated truststore. Required when using ca-certificates
+                          without base-truststore.
+                        type: string
                     type: object
                   kamelets:
                     description: The configuration of Kamelets trait
