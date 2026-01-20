@@ -770,6 +770,33 @@ func TestYAMLFromWithMultiRouteReplaceURI(t *testing.T) {
 	assert.Equal(t, expectedYamlFromMultiCronReplacement, sourceSpec.Content)
 }
 
+const yamlNoChanges = `- from:
+    parameters:
+      host: some value
+    steps:
+    - to: direct:hello
+    uri: sftp
+`
+
+func TestYAMLDontReplaceURI(t *testing.T) {
+	inspector := newTestYAMLInspector(t)
+
+	sourceSpec := &v1.SourceSpec{
+		DataSpec: v1.DataSpec{
+			Name:    "test.yaml",
+			Content: yamlNoChanges,
+		},
+	}
+	replaced, err := inspector.ReplaceFromURI(
+		sourceSpec,
+		"direct:newURI?hello=world",
+	)
+	assert.Nil(t, err)
+	assert.False(t, replaced)
+	// Assert no changes
+	assert.Equal(t, yamlNoChanges, sourceSpec.Content)
+}
+
 func TestYAMLRESTContractFirst(t *testing.T) {
 	yamlContractFirst := `
 - rest:
