@@ -59,7 +59,6 @@ rules:
   - get
   - list
   - patch
-  # - update
 - apiGroups:
   - sources.knative.dev
   resources:
@@ -70,11 +69,11 @@ rules:
   - get
   - list
   - patch
-  # - update
-# - apiGroups:
-#   - ""
-#   resources:
-#   - namespaces
-#   verbs:
-#   - get
-#   - patch
+# Required by EnableKnativeBindInNamespace
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+  - patch

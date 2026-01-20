@@ -97,3 +97,10 @@ rules:
   - routes/custom-host
   verbs:
   - create
+  # Required by GetOpenshiftUser and GetOpenshiftSecurityContextRestricted
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
