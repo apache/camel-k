@@ -184,6 +184,8 @@ func (t *cronTrait) autoConfigure(e *Environment) error {
 }
 
 func (t *cronTrait) Apply(e *Environment) error {
+	replaced := false
+	var err error
 	//nolint: nestif
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityCron)
@@ -198,7 +200,8 @@ func (t *cronTrait) Apply(e *Environment) error {
 			return nil
 		}
 		// Will change the "from" URI in order to execute the task just once
-		if err := t.changeSourcesCronURI(e); err != nil {
+		replaced, err = t.changeSourcesCronURI(e)
+		if err != nil {
 			return err
 		}
 		cronComponentArtifact := e.CamelCatalog.GetArtifactByScheme("timer")
@@ -217,17 +220,19 @@ func (t *cronTrait) Apply(e *Environment) error {
 
 		cronJob := t.getCronJobFor(e)
 		e.Resources.Add(cronJob)
+		conditionMessage := "CronJob name is %s" + cronJob.Name
+		if replaced {
+			conditionMessage += "; notice that the routes \"from\" parameter were changed to " +
+				"\"" + overriddenFromURI + "\" in order to be able to trigger the Camel application as a CronJob."
+		}
 
 		e.Integration.Status.SetCondition(
 			v1.IntegrationConditionCronJobAvailable,
 			corev1.ConditionTrue,
 			v1.IntegrationConditionCronJobAvailableReason,
-			fmt.Sprintf(
-				"CronJob name is %s. Notice that the routes \"from\" parameter was changed to "+
-					"\"%s\" in order to be able to trigger the Camel application as a CronJob.",
-				cronJob.Name,
-				overriddenFromURI,
-			))
+			conditionMessage,
+		)
+
 	}
 
 	return nil
@@ -530,17 +535,20 @@ func checkedStringToUint64(str string) uint64 {
 
 // changeSourcesCronURI is in charge to change the value of the from route with a component that executes
 // the workload just once.
-func (t *cronTrait) changeSourcesCronURI(e *Environment) error {
+func (t *cronTrait) changeSourcesCronURI(e *Environment) (bool, error) {
+	anyRouteReplaced := false
 	for _, src := range e.Integration.AllSources() {
 		dslInspector := source.InspectorForLanguage(e.CamelCatalog, src.InferLanguage())
 		replaced, err := dslInspector.ReplaceFromURI(&src, overriddenFromURI)
+		if err != nil {
+			return false, fmt.Errorf("wasn't able to replace cron uri trigger in source %s", src.Name)
+		}
 		if replaced {
+			anyRouteReplaced = replaced
 			// replace generated source
 			e.Integration.Status.AddOrReplaceGeneratedSources(src)
-		} else if err != nil {
-			return fmt.Errorf("wasn't able to replace cron uri trigger in source %s", src.Name)
 		}
 	}
 
-	return nil
+	return anyRouteReplaced, nil
 }
