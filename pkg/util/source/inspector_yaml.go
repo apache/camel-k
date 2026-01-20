@@ -264,10 +264,11 @@ func (i YAMLInspector) ReplaceFromURI(source *v1.SourceSpec, newFromURI string) 
 				return false, nil
 			}
 		}
-		delete(from, "parameters")
+		// only replace those components that can be turned into a cron job
 		oldURI, ok := from["uri"].(string)
 		if ok && (strings.HasPrefix(oldURI, "timer") || strings.HasPrefix(oldURI, "cron") || strings.HasPrefix(oldURI, "quartz")) {
 			from["uri"] = newFromURI
+			delete(from, "parameters")
 		}
 	}
 
