@@ -27,6 +27,7 @@ import (
 	"os/signal"
 	"path"
 	"reflect"
+	"strconv"
 	"strings"
 	"syscall"
 
@@ -191,10 +192,9 @@ func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	//nolint:goconst
 	if o.OutputFormat != "" {
 		// let the command work in offline mode
-		cmd.Annotations[offlineCommandLabel] = "true"
+		cmd.Annotations[offlineCommandLabel] = strconv.FormatBool(true)
 	}
 
 	// backup the values from values belonging to kamel.run by coping the
@@ -737,7 +737,7 @@ func (o *runCmdOptions) applyAnnotations(it *v1.Integration) {
 		}
 	}
 	if o.DontRunAfterBuild {
-		it.Annotations[v1.IntegrationDontRunAfterBuildAnnotation] = "true"
+		it.Annotations[v1.IntegrationDontRunAfterBuildAnnotation] = strconv.FormatBool(true)
 	}
 }
 

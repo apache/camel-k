@@ -24,6 +24,7 @@ package common
 
 import (
 	"context"
+	"strconv"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -88,7 +89,7 @@ func TestPipe(t *testing.T) {
 				g.Eventually(IntegrationLogs(t, ctx, ns, "no-error-binding"), TestTimeoutShort).
 					Should(And(
 						ContainSubstring("[integrationLogger]"),
-						ContainSubstring("true"),
+						ContainSubstring(strconv.FormatBool(true)),
 					))
 
 			})

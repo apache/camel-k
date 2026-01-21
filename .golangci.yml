@@ -45,6 +45,11 @@ linters:
     - wsl
     - wsl_v5
   settings:
+    goconst:
+      min-len: 4
+      min-occurrences: 5
+      ignore-calls: true
+      numbers: false
     lll:
       line-length: 170
     mnd:

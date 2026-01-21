@@ -232,7 +232,6 @@ func (t *cronTrait) Apply(e *Environment) error {
 			v1.IntegrationConditionCronJobAvailableReason,
 			conditionMessage,
 		)
-
 	}
 
 	return nil

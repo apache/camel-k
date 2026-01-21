@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"maps"
+	"strconv"
 	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -95,7 +96,7 @@ type bindCmdOptions struct {
 func (o *bindCmdOptions) preRunE(cmd *cobra.Command, args []string) error {
 	if o.OutputFormat != "" {
 		// let the command work in offline mode
-		cmd.Annotations[offlineCommandLabel] = "true"
+		cmd.Annotations[offlineCommandLabel] = strconv.FormatBool(true)
 	}
 
 	return o.preRun(cmd, args)

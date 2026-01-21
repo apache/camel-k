@@ -24,6 +24,7 @@ package common
 
 import (
 	"context"
+	"strconv"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -47,7 +48,7 @@ func TestIstioTrait(t *testing.T) {
 			pod := IntegrationPod(t, ctx, ns, name)()
 			g.Expect(pod.ObjectMeta.Annotations).NotTo(BeNil())
 			annotations := pod.ObjectMeta.Annotations
-			g.Expect(annotations["sidecar.istio.io/inject"]).To(Equal("true"))
+			g.Expect(annotations["sidecar.istio.io/inject"]).To(Equal(strconv.FormatBool(true)))
 			g.Expect(annotations["traffic.sidecar.istio.io/includeOutboundIPRanges"]).To(Equal("10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"))
 		})
 	})

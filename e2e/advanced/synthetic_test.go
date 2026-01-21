@@ -24,6 +24,7 @@ package advanced
 
 import (
 	"context"
+	"strconv"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -63,12 +64,12 @@ func TestSyntheticIntegrationFromDeployment(t *testing.T) {
 		// Install Camel K with the proper configuration support
 		InstallOperatorWithConf(t, ctx, g, ns, "", false,
 			map[string]string{
-				"CAMEL_K_SYNTHETIC_INTEGRATIONS": "true",
+				"CAMEL_K_SYNTHETIC_INTEGRATIONS": strconv.FormatBool(true),
 			},
 		)
 		g.Eventually(OperatorPodHas(t, ctx, ns, func(op *corev1.Pod) bool {
 			if envVar := envvar.Get(op.Spec.Containers[0].Env, "CAMEL_K_SYNTHETIC_INTEGRATIONS"); envVar != nil {
-				return envVar.Value == "true"
+				return envVar.Value == strconv.FormatBool(true)
 			}
 			return false
 
