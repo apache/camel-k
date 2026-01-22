@@ -180,6 +180,17 @@ rules:
   verbs:
   - get
   - list
+# Service Accounts (dynamic SA creation)
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - watch
 # Roles and RoleBindings
 - apiGroups:
   - rbac.authorization.k8s.io
@@ -192,3 +203,4 @@ rules:
   - get
   - list
   - patch
+  - watch

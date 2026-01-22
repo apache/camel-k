@@ -193,6 +193,7 @@ rules:
   - get
   - list
   - patch
+  - watch
 # Service Accounts (dynamic SA creation)
 - apiGroups:
   - ""
@@ -203,6 +204,7 @@ rules:
   - delete
   - get
   - list
+  - watch
 # Required to check if a ServiceAccount can access other namespaces resources
 - apiGroups:
   - authorization.k8s.io
