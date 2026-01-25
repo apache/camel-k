@@ -30,6 +30,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/io"
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/ptr"
 
 	git "github.com/go-git/go-git/v5"
@@ -117,7 +118,10 @@ func (t *gitOpsTrait) pushGitOpsItInGitRepo(ctx context.Context, it *v1.Integrat
 	nowDate := time.Now().Format("20060102-150405")
 	branchName := t.BranchPush
 	if branchName == "" {
-		branchName = "cicd/candidate-release-" + nowDate
+		// NOTE: this is important to guarantee idempotency. We make sure not to create
+		// more than one branch from different reconciliation cycles.
+		branchNameDate := it.Status.DeploymentTimestamp.Format("20060102-150405")
+		branchName = "cicd/candidate-release-" + branchNameDate
 	}
 	commitMessage := "feat(ci): build completed on " + nowDate
 	branchRef := plumbing.NewBranchReferenceName(branchName)
@@ -175,9 +179,26 @@ func (t *gitOpsTrait) pushGitOpsItInGitRepo(ctx context.Context, it *v1.Integrat
 		RefSpecs: []config.RefSpec{
 			config.RefSpec(branchRef + ":" + branchRef),
 		},
+		// Note: this is needed to make the task idempotent without returning any error.
+		// Even if more parallel reconciliations are kicked off, we always push the same content,
+		// possibly more than once, without risking to raise an error.
+		Force: true,
 	}
 
-	return repo.Push(gitPushOptions)
+	err = repo.Push(gitPushOptions)
+	if err != nil {
+		return err
+	}
+
+	// Publish a condition to notify the change was pushed to the branch
+	it.Status.SetCondition(
+		v1.IntegrationConditionType("GitPushed"),
+		corev1.ConditionTrue,
+		"PushedToGit",
+		"Integration changes pushed to branch "+branchName,
+	)
+
+	return nil
 }
 
 // gitConf returns the git repo configuration where to pull the project from. If no value is provided, then, it takes
