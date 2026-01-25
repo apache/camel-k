@@ -32,6 +32,7 @@ spec:
     container:
       requestMemory: 256Mi
     gitops:
+      enabled: true
       url: https://github.com/my-org/my-camel-apps.git
       secret: my-gh-token
       branchPush: cicd-listener
@@ -154,6 +155,7 @@ spec:
       - my-env=dev
 ...
     gitops:
+      enabled: true
       url: https://github.com/my-org/my-camel-apps.git
       secret: my-gh-token
       branchPush: cicd-listener-test
@@ -174,6 +176,7 @@ spec:
       properties:
       - my-env=test
     gitops:
+      enabled: true
       url: https://github.com/my-org/my-camel-apps.git
       secret: my-gh-token
       branchPush: cicd-listener-prod
