@@ -316,7 +316,7 @@ func (t *mountTrait) configureCamelVolumesAndMounts(e *Environment, vols *[]core
 
 // mountResource add the resource to volumes and mounts and return the final path where the resource is mounted.
 func (t *mountTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.VolumeMount, icnts *[]corev1.Container, conf *utilResource.Config) string {
-	refName := sanitizeVolumeName(conf.Name(), vols)
+	refName, confName := sanitizeVolumeName(conf.Name(), vols)
 	dstDir := conf.DestinationPath()
 	dstFile := ""
 	if conf.DestinationPath() != "" {
@@ -326,8 +326,8 @@ func (t *mountTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.VolumeM
 			dstFile = conf.Key()
 		}
 	}
-	vol := getVolume(refName, string(conf.StorageType()), refName, conf.Key(), dstFile)
-	mntPath := getMountPoint(refName, dstDir, string(conf.StorageType()), string(conf.ContentType()))
+	vol := getVolume(refName, string(conf.StorageType()), confName, conf.Key(), dstFile)
+	mntPath := getMountPoint(confName, dstDir, string(conf.StorageType()), string(conf.ContentType()))
 	readOnly := (conf.StorageType() != utilResource.StorageTypePVC)
 
 	mnt := getMount(refName, mntPath, dstFile, readOnly)
