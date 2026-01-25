@@ -26,18 +26,19 @@ import (
 	"time"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"knative.dev/pkg/ptr"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"k8s.io/utils/ptr"
 
 	git "github.com/go-git/go-git/v5"
 )
 
 func TestGitOpsAddAction(t *testing.T) {
 	trait, _ := newGitOpsTrait().(*gitOpsTrait)
-	trait.Enabled = ptr.Bool(true)
+	trait.Enabled = ptr.To(true)
 	env := &Environment{
 		Integration: &v1.Integration{
 			Status: v1.IntegrationStatus{
@@ -72,12 +73,18 @@ func TestGitOpsPushRepoDefault(t *testing.T) {
 		Git:     conf,
 		Sources: []v1.SourceSpec{v1.NewSourceSpec("Test.java", "bogus, irrelevant for test", v1.LanguageJavaSource)},
 	}
+	now := metav1.Now().Rfc3339Copy()
 	it.Status = v1.IntegrationStatus{
-		Image: "my-img-recently-baked",
+		Image:               "my-img-recently-baked",
+		DeploymentTimestamp: &now,
 	}
 
 	err = trait.pushGitOpsItInGitRepo(context.TODO(), &it, tmpGitDir, "fake")
 	require.NoError(t, err)
+	assert.Contains(t,
+		it.Status.GetCondition(v1.IntegrationConditionType("GitPushed")).Message,
+		"Integration changes pushed to branch cicd/candidate-release",
+	)
 
 	lastCommitMessage, err := getLastCommitMessage(tmpGitDir)
 	require.NoError(t, err)

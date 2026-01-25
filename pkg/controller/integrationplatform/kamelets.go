@@ -29,7 +29,7 @@ import (
 	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"knative.dev/pkg/ptr"
+	"k8s.io/utils/ptr"
 
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/util"
@@ -234,8 +234,8 @@ func loadKamelet(path string, platform *v1.IntegrationPlatform) (*v1.Kamelet, er
 			Kind:               platform.Kind,
 			Name:               platform.Name,
 			UID:                platform.UID,
-			Controller:         ptr.Bool(true),
-			BlockOwnerDeletion: ptr.Bool(true),
+			Controller:         ptr.To(true),
+			BlockOwnerDeletion: ptr.To(true),
 		},
 	}
 	kamelet.SetOwnerReferences(references)
