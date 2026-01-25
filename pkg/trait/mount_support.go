@@ -146,17 +146,20 @@ func createPVC(e *Environment, volumeParts []string) error {
 
 // sanitizeVolumeName ensures the provided name is unique among the volumes.
 // If `name` already exists, it appends -1, -2, etc. until a unique name is found.
-func sanitizeVolumeName(name string, vols *[]corev1.Volume) string {
-	name = kubernetes.SanitizeLabel(name)
-	if !volumeExists(name, vols) {
-		return name
+// It returns the sanitizedName and the configuration name accordingly.
+func sanitizeVolumeName(name string, vols *[]corev1.Volume) (string, string) {
+	sanitName := kubernetes.SanitizeLabel(name)
+	if !volumeExists(sanitName, vols) {
+		return sanitName, name
 	}
 
 	suffix := 1
 	for {
-		candidate := fmt.Sprintf("%s-%d", name, suffix)
+		candidate := fmt.Sprintf("%s-%d", sanitName, suffix)
 		if !volumeExists(candidate, vols) {
-			return candidate
+			newConfName := fmt.Sprintf("%s-%d", name, suffix)
+
+			return candidate, newConfName
 		}
 		suffix++
 	}
