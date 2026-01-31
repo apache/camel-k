@@ -544,6 +544,13 @@ spec:
 status: {}
 `
 
+const allKustItContent = `apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: prod-namespace
+resources:
+- ../../../my-it-test/overlays/prod-namespace/
+`
+
 func TestIntegrationGitOps(t *testing.T) {
 	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
 	srcPlatform.Status.Version = defaults.Version
@@ -609,6 +616,11 @@ func TestIntegrationGitOps(t *testing.T) {
 	patchIt, err := os.ReadFile(filepath.Join(tmpDir, "my-it-test", "overlays", "prod-namespace", "patch-integration.yaml"))
 	require.NoError(t, err)
 	assert.Equal(t, expectedGitOpsItPatch, string(patchIt))
+
+	// Verify also the "all" profile
+	allIts, err := os.ReadFile(filepath.Join(tmpDir, "all", "overlays", "prod-namespace", "kustomization.yaml"))
+	require.NoError(t, err)
+	assert.Equal(t, allKustItContent, string(allIts))
 }
 
 const expectedGitOpsPipe = `apiVersion: camel.apache.org/v1
@@ -696,6 +708,13 @@ spec:
 status: {}
 `
 
+const allKustPipeContent = `apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: prod-namespace
+resources:
+- ../../../my-pipe-test/overlays/prod-namespace/
+`
+
 func TestPipeGitOps(t *testing.T) {
 	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
 	srcPlatform.Status.Version = defaults.Version
@@ -769,4 +788,9 @@ func TestPipeGitOps(t *testing.T) {
 	patchPipe, err := os.ReadFile(filepath.Join(tmpDir, "my-pipe-test", "overlays", "prod-namespace", "patch-pipe.yaml"))
 	require.NoError(t, err)
 	assert.Equal(t, expectedGitOpsPipePatch, string(patchPipe))
+
+	// Verify also the "all" profile
+	allPipes, err := os.ReadFile(filepath.Join(tmpDir, "all", "overlays", "prod-namespace", "kustomization.yaml"))
+	require.NoError(t, err)
+	assert.Equal(t, allKustPipeContent, string(allPipes))
 }
