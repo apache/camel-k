@@ -276,7 +276,57 @@ patches:
 		}
 	}
 
-	return err
+	return createOrAppendAll(destinationDir, dstIt.Name, namespaceDest)
+}
+
+// createOrAppendAll create or append this integration into an "all" directory. Useful for
+// those CICD which wants to include all Integrations at once.
+func createOrAppendAll(destinationDir, resourceName, resourceNamespace string) error {
+	allpath := filepath.Join(destinationDir, "all", "overlays", resourceNamespace)
+	err := os.MkdirAll(allpath, io.FilePerm755)
+	if err != nil {
+		return err
+	}
+	kustomizeFile := filepath.Join(allpath, "kustomization.yaml")
+	if _, err = os.Stat(kustomizeFile); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	resource := "- ../../../" + resourceName + "/overlays/" + resourceNamespace + "/"
+	//nolint:nestif
+	if os.IsNotExist(err) {
+		// does not exist, create a new file
+		kustCnt := `apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: ` + resourceNamespace + `
+resources:
+- ../../../` + resourceName + `/overlays/` + resourceNamespace + `/
+`
+		if err := os.WriteFile(kustomizeFile, []byte(kustCnt), io.FilePerm755); err != nil {
+			return err
+		}
+	} else {
+		// Append this integration with overlay (if it does not exist already)
+		data, err := os.ReadFile(kustomizeFile)
+		if err != nil {
+			return nil
+		}
+
+		contentStr := string(data)
+
+		if !strings.Contains(contentStr, resource) {
+			f, err := os.OpenFile(kustomizeFile, os.O_APPEND|os.O_WRONLY, io.FilePerm755)
+			if err != nil {
+				return nil
+			}
+			defer f.Close()
+
+			if _, err := f.WriteString(resource); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 func dirExists(path string) bool {
@@ -417,7 +467,7 @@ patches:
 		}
 	}
 
-	return err
+	return createOrAppendAll(destinationDir, dstPipe.Name, namespaceDest)
 }
 
 // GitToken read the first secret data provided by the Integration Git Secret.
