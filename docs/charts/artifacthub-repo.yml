@@ -1,0 +1,7 @@
+owners: # (optional, used to claim repository ownership)
+  - name: acosentino
+    email: acosentino@apache.org
+  - name: gansheer
+    email: gaelle.fournier.work@gmail.com
+  - name: pcongiusti
+    email: pcongiusti@apache.org
