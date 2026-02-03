@@ -177,6 +177,16 @@ rules:
   - get
   - list
 - apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - watch
+- apiGroups:
   - rbac.authorization.k8s.io
   resources:
   - roles
@@ -187,6 +197,7 @@ rules:
   - get
   - list
   - patch
+  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role

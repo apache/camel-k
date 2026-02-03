@@ -186,6 +186,7 @@ rules:
   - get
   - list
   - patch
+  - watch
 - apiGroups:
   - ""
   resources:
@@ -195,6 +196,7 @@ rules:
   - delete
   - get
   - list
+  - watch
 - apiGroups:
   - authorization.k8s.io
   resources:
