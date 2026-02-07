@@ -40,18 +40,13 @@ type GitOpsTrait struct {
 	// the git branch to push to. If omitted, the operator will push to a new branch named as `cicd/release-candidate-<datetime>`.
 	BranchPush string `json:"branchPush,omitempty" property:"branch-push"`
 	// a list of overlays to provide (default {"dev","stag","prod"}).
-	// +kubebuilder:default={"dev","stag","prod"}
 	Overlays []string `json:"overlays,omitempty" property:"overlays"`
 	// a flag (default, false) to overwrite any existing overlay.
-	// +kubebuilder:default=false
 	OverwriteOverlay bool `json:"overwriteOverlay,omitempty" property:"overwrite-overlay"`
 	// The root path where to store Kustomize overlays (default `integrations`).
-	// +kubebuilder:default="integrations"
 	IntegrationDirectory string `json:"integrationDirectory,omitempty" property:"integration-directory"`
 	// The name used to commit the GitOps changes (default `Camel K Operator`).
-	// +kubebuilder:default="Camel K Operator"
 	CommiterName string `json:"committerName,omitempty" property:"committed-name"`
 	// The email used to commit the GitOps changes (default `camel-k-operator@apache.org`).
-	// +kubebuilder:default="camel-k-operator@apache.org"
 	CommiterEmail string `json:"committerEmail,omitempty" property:"committed-email"`
 }

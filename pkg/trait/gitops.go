@@ -135,7 +135,7 @@ func (t *gitOpsTrait) pushGitOpsItInGitRepo(ctx context.Context, it *v1.Integrat
 	}
 
 	// Generate Kustomize content (it may override upstream content)
-	ciCdDir := filepath.Join(dir, t.IntegrationDirectory)
+	ciCdDir := filepath.Join(dir, t.getIntegrationsDirectory())
 	err = os.MkdirAll(ciCdDir, io.FilePerm755)
 	if err != nil {
 		return err
@@ -146,23 +146,23 @@ func (t *gitOpsTrait) pushGitOpsItInGitRepo(ctx context.Context, it *v1.Integrat
 		return err
 	}
 
-	for _, overlay := range t.Overlays {
+	for _, overlay := range t.getOverlays() {
 		destIntegration := util.EditIntegration(it, kit, overlay, "")
-		err = util.AppendKustomizeIntegration(destIntegration, ciCdDir, t.OverwriteOverlay)
+		err = util.AppendKustomizeIntegration(destIntegration, ciCdDir, t.getOverwriteOverlay())
 		if err != nil {
 			return err
 		}
 	}
 
 	// Commit and push new content
-	_, err = w.Add(t.IntegrationDirectory)
+	_, err = w.Add(t.getIntegrationsDirectory())
 	if err != nil {
 		return err
 	}
 	_, err = w.Commit(commitMessage, &git.CommitOptions{
 		Author: &object.Signature{
-			Name:  t.CommiterName,
-			Email: t.CommiterEmail,
+			Name:  t.getCommitterName(),
+			Email: t.getCommitterEmail(),
 			When:  time.Now(),
 		},
 	})
@@ -226,4 +226,45 @@ func (t *gitOpsTrait) gitConf(it *v1.Integration) v1.GitConfigSpec {
 	}
 
 	return gitConf
+}
+
+// Return the trait overlays or a default value.
+func (t *gitOpsTrait) getOverlays() []string {
+	if t.Overlays == nil {
+		return []string{"dev", "stag", "prod"}
+	}
+
+	return t.Overlays
+}
+
+// Return the trait overwrite overlay parameter or a default value.
+func (t *gitOpsTrait) getOverwriteOverlay() bool {
+	return t.OverwriteOverlay
+}
+
+// Return the trait Integrations directory parameter or a default value.
+func (t *gitOpsTrait) getIntegrationsDirectory() string {
+	if t.IntegrationDirectory == "" {
+		return "integrations"
+	}
+
+	return t.IntegrationDirectory
+}
+
+// Return the trait committer name parameter or a default value.
+func (t *gitOpsTrait) getCommitterName() string {
+	if t.CommiterName == "" {
+		return "Camel K Operator"
+	}
+
+	return t.CommiterName
+}
+
+// Return the trait committer email parameter or a default value.
+func (t *gitOpsTrait) getCommitterEmail() string {
+	if t.CommiterEmail == "" {
+		return "camel-k-operator@apache.org"
+	}
+
+	return t.CommiterEmail
 }
