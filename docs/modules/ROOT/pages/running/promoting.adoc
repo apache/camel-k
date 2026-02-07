@@ -80,6 +80,12 @@ The result will be a directory with the following structure:
 ```
 $ tree /tmp/integrations/
 /tmp/integrations/
+├── all
+│   └── overlays
+│       ├── production
+│       │   └── kustomization.yaml
+│       └── staging
+│           └── kustomization.yaml
 └── promote-server
     ├── base
     │   ├── integration.yaml
@@ -93,9 +99,9 @@ $ tree /tmp/integrations/
     │       └── patch-integration.yaml
     └── routes
         └── PromoteServer.java
-
-6 directories, 7 files
 ```
+The `all` directory contains an overlay structure for all the Integrations that are included in this project. This is of great help when you want to use the `promote` tool to append any other Integration to the same project. Beside adding the Integration specific resources (as described in the next paragraph), we include a `all` profile and add in the `kustomization.yaml` file the specific overlay of each new Integration added. Running `kubectl apply -k /tmp/integrations/all/overlays/production` will include all the Integrations added in such a profile.
+
 The `promote-server` directory contains the Integration named as `promote-server` (the one we created in the previous chapter). Then, you can see a *base* directory which contains the base Integration custom resource. Additionally you will find the *staging* and *production* overlays which contains the patches you may want to apply in each given environment.
 
 ```
