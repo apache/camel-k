@@ -1117,12 +1117,10 @@ spec:
                         description: the git commit (full SHA) to check out.
                         type: string
                       committerEmail:
-                        default: camel-k-operator@apache.org
                         description: The email used to commit the GitOps changes (default
                           `camel-k-operator@apache.org`).
                         type: string
                       committerName:
-                        default: Camel K Operator
                         description: The name used to commit the GitOps changes (default
                           `Camel K Operator`).
                         type: string
@@ -1138,21 +1136,15 @@ spec:
                           traits share this common property.
                         type: boolean
                       integrationDirectory:
-                        default: integrations
                         description: The root path where to store Kustomize overlays
                           (default `integrations`).
                         type: string
                       overlays:
-                        default:
-                        - dev
-                        - stag
-                        - prod
                         description: a list of overlays to provide (default {"dev","stag","prod"}).
                         items:
                           type: string
                         type: array
                       overwriteOverlay:
-                        default: false
                         description: a flag (default, false) to overwrite any existing
                           overlay.
                         type: boolean
@@ -3626,12 +3618,10 @@ spec:
                         description: the git commit (full SHA) to check out.
                         type: string
                       committerEmail:
-                        default: camel-k-operator@apache.org
                         description: The email used to commit the GitOps changes (default
                           `camel-k-operator@apache.org`).
                         type: string
                       committerName:
-                        default: Camel K Operator
                         description: The name used to commit the GitOps changes (default
                           `Camel K Operator`).
                         type: string
@@ -3647,21 +3637,15 @@ spec:
                           traits share this common property.
                         type: boolean
                       integrationDirectory:
-                        default: integrations
                         description: The root path where to store Kustomize overlays
                           (default `integrations`).
                         type: string
                       overlays:
-                        default:
-                        - dev
-                        - stag
-                        - prod
                         description: a list of overlays to provide (default {"dev","stag","prod"}).
                         items:
                           type: string
                         type: array
                       overwriteOverlay:
-                        default: false
                         description: a flag (default, false) to overwrite any existing
                           overlay.
                         type: boolean
