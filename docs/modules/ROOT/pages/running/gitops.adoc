@@ -45,8 +45,14 @@ NOTE: There are more options to configure on the `gitops` trait. Feel free to ha
 
 As soon as the build of the Integration is completed, the operator will prepare the commit with the overlays. The structure would be like the following directory tree:
 
-```
+```bash
 /integrations/
+├── all
+│   └── overlays
+│       ├── production
+│       │   └── kustomization.yaml
+│       └── staging
+│           └── kustomization.yaml
 └── sample
     ├── base
     │   ├── integration.yaml
@@ -60,7 +66,6 @@ As soon as the build of the Integration is completed, the operator will prepare 
     │       └── patch-integration.yaml
     └── routes
         └── XYZ.java
-
 ```
 
 The above structure could be used directly with `kubectl` (eg, `kubectl apply -k /tmp/integrations/sample/overlays/production`) or any CICD capable of running a similar deployment strategy.
@@ -114,8 +119,8 @@ As you're pushing the changes on a branch, you may want to use the branch and cr
 
 argo-cd.readthedocs.io[ArgoCD] is one of the most popular CICD choices around. Once you have stored the project in a Git repository, if you're using a CICD technology like ArgoCD you can run your *production* pipeline as:
 
-```
-argocd app create my-ck-it-prod --repo https://git-server/repo/integrations/sample.git --path overlays/production --dest-server https://kubernetes.default.svc --dest-namespace prod
+```bash
+argocd app create my-sample-prod --repo https://git-server/repo/integrations/sample.git --path integrations/sample/overlays/production --dest-server https://kubernetes.default.svc --dest-namespace prod
 ```
 
 From this moment onward any change can be performed on the repository and it will be automatically refreshed by the CICD pipeline accordingly.
@@ -128,7 +133,52 @@ The GitOps feature makes it possible to have a physical separated cluster for ea
 
 === Single repository for multiple Camel applications
 
-You can have a single repository that will contain all your Integrations. If you have noticed, the Integrations will be added to an `integrations` root directory (you can configure it if you need). This is on purpose, as you may want a single repo with all your Kubernetes resources and some CICD just watching at them. So, the `integrations` will contain all your Integrations built and ready to run.
+You can have a single repository that will contain "all" your Integrations. If you have noticed, the Integrations will be added to an `integrations` root directory (you can configure it if you need). This is on purpose, as you may want a single repo with all your Kubernetes resources and some CICD just watching at them. So, the `integrations` will contain all your Integrations built and ready to run.
+
+Let's have a look again at the tree structure:
+
+```bash
+/integrations/
+├── all
+│   └── overlays
+│       ├── production
+│       │   └── kustomization.yaml
+│       └── staging
+│           └── kustomization.yaml
+└── sample1
+    ...
+    ├── overlays
+    │   ├── production
+            ...
+    │   └── staging
+            ...
+└── sample2
+    ...
+│   └── overlays
+│       ├── production
+        ...
+│       └── staging
+        ...
+```
+
+Notice the `all` directory which contains the same overlays structure as the Integrations. The `kustomization.yaml` contains a list of all the Integrations provided in this repository:
+
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: production
+resources:
+- ../../../sample-1/overlays/production/
+- ../../../sample-2/overlays/production/
+```
+
+Your single repository containing all Integrations can be therefore referenced in a unique CICD. In the case of ArgoCD, it would be something like:
+
+```bash
+argocd app create my-integrations-prod --repo https://git-server/repo/integrations.git --path integrations/all/overlays/production --dest-server https://kubernetes.default.svc --dest-namespace prod
+```
+
+This pipeline is in charge to control **all** your Integration in a single place, which could be something you really want to achieve if you have a large number of Integrations that you want to synchronize in a single place.
 
 NOTE: this is the approach suggested in https://developers.redhat.com/e-books/path-gitops["The Path to GitOps"] book.
 
