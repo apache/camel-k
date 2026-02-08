@@ -24,7 +24,7 @@ PROJECT_PATH := $(patsubst %/,%,$(dir $(MKFILE_PATH)))
 LOCALBIN := $(PROJECT_PATH)/bin
 
 VERSIONFILE := pkg/util/defaults/defaults.go
-VERSION ?= 2.9.1-SNAPSHOT
+VERSION ?= 2.9.1
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
 LAST_RELEASED_VERSION ?= 2.9.0
 DEFAULT_RUNTIME_VERSION := 3.15.3
