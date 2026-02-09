@@ -67,17 +67,24 @@ runs:
           | grep -v "github.com/apache/camel-k/v2/cmd/util"  > coverage.mod.out
         go tool cover -func=coverage.mod.out -o=coverage.mod.out
         grep -o -P '(?<=\(statements\))(.+)(?=%)' coverage.mod.out | xargs > coverage
-        touch badge.out
-        curl -sf https://gobinaries.com/github.com/AlexBeauchemin/gobadge@v0.2.0 | PREFIX=. sh
-        chmod +x gobadge
-        ./gobadge -filename=coverage -target=badge.out
 
-    - name: Convert badge to adoc
+    - name: Convert coverage to adoc
       shell: bash
       run: |
-        replacement=$(grep -o 'https://[^)]*' badge.out)
-        target="(?:https:\/\/img\.shields\.io\/badge\/Coverage).*?(?=\.svg)"
-        perl -i -pe "s|${target}|${replacement}|g" README.adoc
+        COVERAGE=$(cat coverage)
+        COVERAGE_INT=${COVERAGE%.*}
+
+        if [ "$COVERAGE_INT" -lt 40 ]; then
+          COLOR="red"
+        elif [ "$COVERAGE_INT" -lt 70 ]; then
+          COLOR="yellow"
+        else
+          COLOR="green"
+        fi
+
+        sed -i \
+          "s|https://img.shields.io/badge/Coverage-.*\.svg|https://img.shields.io/badge/Coverage-${COVERAGE}-${COLOR}.svg|g" \
+          README.md
 
     # Git push
     - name: Push changes
