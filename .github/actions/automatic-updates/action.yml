@@ -84,7 +84,7 @@ runs:
 
         sed -i \
           "s|https://img.shields.io/badge/Coverage-.*\.svg|https://img.shields.io/badge/Coverage-${COVERAGE}-${COLOR}.svg|g" \
-          README.md
+          README.adoc
 
     # Git push
     - name: Push changes
