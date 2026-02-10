@@ -25,7 +25,7 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/tools/record"
+	"k8s.io/client-go/tools/events"
 
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -56,7 +56,7 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 		&reconcileCatalog{
 			client:   c,
 			scheme:   mgr.GetScheme(),
-			recorder: mgr.GetEventRecorderFor("camel-k-catalog-controller"),
+			recorder: mgr.GetEventRecorder("camel-k-catalog-controller"),
 		},
 		schema.GroupVersionKind{
 			Group:   v1.SchemeGroupVersion.Group,
@@ -106,7 +106,7 @@ type reconcileCatalog struct {
 	// that reads objects from the cache and writes to the API server
 	client   client.Client
 	scheme   *runtime.Scheme
-	recorder record.EventRecorder
+	recorder events.EventRecorder
 }
 
 // Reconcile reads that state of the cluster for a catalog object and makes changes based

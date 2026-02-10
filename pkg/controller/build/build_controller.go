@@ -26,7 +26,6 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/tools/record"
 
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -39,6 +38,7 @@ import (
 	camelevent "github.com/apache/camel-k/v2/pkg/event"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/monitoring"
+	"k8s.io/client-go/tools/events"
 )
 
 const (
@@ -58,7 +58,7 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 			client:   c,
 			reader:   mgr.GetAPIReader(),
 			scheme:   mgr.GetScheme(),
-			recorder: mgr.GetEventRecorderFor("camel-k-build-controller"),
+			recorder: mgr.GetEventRecorder("camel-k-build-controller"),
 		},
 		schema.GroupVersionKind{
 			Group:   v1.SchemeGroupVersion.Group,
@@ -104,7 +104,7 @@ type reconcileBuild struct {
 	// like in the builds scheduling critical section
 	reader   ctrl.Reader
 	scheme   *runtime.Scheme
-	recorder record.EventRecorder
+	recorder events.EventRecorder
 }
 
 // Reconcile reads that state of the cluster for a Build object and makes changes based on the state read

@@ -17,8 +17,8 @@ limitations under the License.
 
 package event
 
-import "k8s.io/client-go/tools/record"
+import "k8s.io/client-go/tools/events"
 
 type Injectable interface {
-	InjectRecorder(recorder record.EventRecorder)
+	InjectRecorder(recorder events.EventRecorder)
 }
