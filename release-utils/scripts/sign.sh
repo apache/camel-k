@@ -26,7 +26,7 @@ dir=$1
 
 pushd $dir
 
-for f in $(ls | grep -e ".*tar.gz$");
+for f in $(ls);
 do
     sha512sum -b $f > $f.sha512
     gpg --output $f.asc --armor --detach-sig $f
