@@ -20,6 +20,7 @@ package internal
 import (
 	"context"
 
+	"k8s.io/apimachinery/pkg/runtime"
 	controller "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -35,5 +36,9 @@ func (c *FakeStatusWriter) Create(ctx context.Context, obj controller.Object, su
 }
 
 func (c *FakeStatusWriter) Update(ctx context.Context, obj controller.Object, opts ...controller.SubResourceUpdateOption) error {
+	return nil
+}
+
+func (c *FakeStatusWriter) Apply(ctx context.Context, conf runtime.ApplyConfiguration, opts ...controller.SubResourceApplyOption) error {
 	return nil
 }
