@@ -20,7 +20,7 @@ package build
 import (
 	"context"
 
-	"k8s.io/client-go/tools/record"
+	"k8s.io/client-go/tools/events"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
@@ -47,7 +47,7 @@ type Action interface {
 type baseAction struct {
 	client   client.Client
 	L        log.Logger
-	recorder record.EventRecorder
+	recorder events.EventRecorder
 }
 
 func (action *baseAction) InjectClient(client client.Client) {
@@ -58,6 +58,6 @@ func (action *baseAction) InjectLogger(log log.Logger) {
 	action.L = log
 }
 
-func (action *baseAction) InjectRecorder(recorder record.EventRecorder) {
+func (action *baseAction) InjectRecorder(recorder events.EventRecorder) {
 	action.recorder = recorder
 }

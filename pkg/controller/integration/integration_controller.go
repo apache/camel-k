@@ -31,7 +31,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/tools/record"
+	"k8s.io/client-go/tools/events"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -78,7 +78,7 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 		&reconcileIntegration{
 			client:   c,
 			scheme:   mgr.GetScheme(),
-			recorder: mgr.GetEventRecorderFor("camel-k-integration-controller"),
+			recorder: mgr.GetEventRecorder("camel-k-integration-controller"),
 		},
 		schema.GroupVersionKind{
 			Group:   v1.SchemeGroupVersion.Group,
@@ -455,7 +455,7 @@ type reconcileIntegration struct {
 	// that reads objects from the cache and writes to the API server
 	client   client.Client
 	scheme   *runtime.Scheme
-	recorder record.EventRecorder
+	recorder events.EventRecorder
 }
 
 // Reconcile reads that state of the cluster for an Integration object and makes changes based on the state read
