@@ -227,10 +227,9 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 
 	synthEnvVal, synth := os.LookupEnv("CAMEL_K_SYNTHETIC_INTEGRATIONS")
 	if synth && synthEnvVal == "true" {
-		log.Info("Starting the synthetic Integration manager")
+		log.Info("Starting the synthetic Integration manager. " +
+			"WARNING: this is a deprecated feature and will be removed in future versions, use Camel Dashboard project instead.")
 		exitOnError(synthetic.ManageSyntheticIntegrations(ctx, ctrlClient, mgr.GetCache()), "synthetic Integration manager error")
-	} else {
-		log.Info("Synthetic Integration manager not configured, skipping")
 	}
 	log.Info("Starting the manager")
 	exitOnError(mgr.Start(ctx), "manager exited non-zero")
