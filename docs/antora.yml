@@ -15,7 +15,6 @@
 # limitations under the License.
 #
 
-# Another part of this distributed component is in camel-k-runtime docs
 name: camel-k
 title: Camel K
 version: next

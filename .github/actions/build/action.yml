@@ -73,13 +73,13 @@ runs:
     if: github.event_name == 'pull_request'
     shell: bash
     run: |
-      COVERAGE_OPTS="-covermode=count -coverprofile=coverage.out -coverpkg=./..." make build
+      COVERAGE_OPTS="-covermode=count -coverprofile=oldcoverage.out -coverpkg=./..." make build
       # Remove mock and generated code from account
-      grep -v "github.com/apache/camel-k/v2/pkg/client" coverage.out \
+      grep -v "github.com/apache/camel-k/v2/pkg/client" oldcoverage.out \
         | grep -v "zz_generated" \
-        | grep -v "github.com/apache/camel-k/v2/cmd/util"  > coverage.mod.out
-      go tool cover -func=coverage.mod.out -o=coverage.mod.out
-      grep -o -P '(?<=\(statements\))(.+)(?=%)' coverage.mod.out | xargs > /tmp/${{ inputs.artifact-name }}/coverage_old
+        | grep -v "github.com/apache/camel-k/v2/cmd/util"  > oldcoverage.mod.out
+      go tool cover -func=oldcoverage.mod.out -o=oldcoverage.mod.out
+      grep -o -P '(?<=\(statements\))(.+)(?=%)' oldcoverage.mod.out | xargs > /tmp/${{ inputs.artifact-name }}/coverage_old
 
   - uses: actions/upload-artifact@v4
     if: github.event_name == 'pull_request'
