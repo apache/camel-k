@@ -43,54 +43,6 @@ EOF
 
 By default, the Prometheus instance discovers applications to be monitored in the same namespace. You can use the `podMonitorNamespaceSelector` field from the `Prometheus` resource to enable cross-namespace monitoring. You may also need to specify a ServiceAccount with the `serviceAccountName` field, that's bound to a Role with the necessary permissions.
 
-[[openshift]]
-=== OpenShift
-
-Starting OpenShift 4.3, the Prometheus Operator, that's already deployed as part of the monitoring stack, can be used to https://docs.openshift.com/container-platform/4.3/monitoring/monitoring-your-own-services.html[monitor application services].
-This needs to be enabled by following these instructions:
-
-. Check whether the `cluster-monitoring-config` ConfigMap object exists in the `openshift-monitoring` project:
-
-  $ oc -n openshift-monitoring edit configmap cluster-monitoring-config
-
-. If it does not exist, create it:
-
-  $ oc -n openshift-monitoring create configmap cluster-monitoring-config
-
-. Start editing the cluster-monitoring-config ConfigMap:
-
-  $ oc -n openshift-monitoring edit configmap cluster-monitoring-config
-
-. Set the `enableUserWorkload` setting to `true` under `data/config.yaml`:
-+
-[source,yaml]
-----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: cluster-monitoring-config
-  namespace: openshift-monitoring
-data:
-  config.yaml: |
-    enableUserWorkload: true
-----
-Note that, in OpenShift versions from 4.3 to 4.5, the configuration is as following:
-+
-[source,yaml]
-----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: cluster-monitoring-config
-  namespace: openshift-monitoring
-data:
-  config.yaml: |
-    techPreviewUserWorkload:
-      enabled: true
-----
-
-On OpenShift versions prior to 4.3, or if you do not want to change your cluster monitoring stack configuration, you can refer to the <<Kubernetes>> section in order to deploy a separate Prometheus Operator instance.
-
 === What's Next
 
 - xref:observability/monitoring/operator.adoc[Camel K operator monitoring]
