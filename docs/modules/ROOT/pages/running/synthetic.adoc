@@ -1,5 +1,7 @@
 = Synthetic Integrations
 
+WARNING: the feature is deprecated and replaced by https://camel-tooling.github.io/camel-dashboard/docs/[Camel Dashboard monitoring] instead, see the new project official documentation.
+
 You may have already a Camel application running on your cluster. You may have created it via a manual deployment, a CICD or any other deployment mechanism you have in place. Since the Camel K operator is meant to operate any Camel application out there, then, you will be able to import it and monitor in a similar fashion of any other Camel K **managed Integration**. These Integrations are known as **Synthetic Integrations**
 
 == Importing existing Camel applications
