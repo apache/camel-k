@@ -28,6 +28,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
 const (
@@ -132,11 +133,9 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 			APIVersion: appsv1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      e.Integration.Name,
-			Namespace: e.Integration.Namespace,
-			Labels: map[string]string{
-				v1.IntegrationLabel: e.Integration.Name,
-			},
+			Name:        e.Integration.Name,
+			Namespace:   e.Integration.Namespace,
+			Labels:      kubernetes.DeploymentLabels(e.Integration.Name),
 			Annotations: annotations,
 		},
 		Spec: appsv1.DeploymentSpec{

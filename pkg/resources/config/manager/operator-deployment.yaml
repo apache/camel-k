@@ -72,6 +72,11 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+            # Used to automatically enable Camel Dashboard project monitoring
+            # Keep the default value or change it to the same label used by the dashboard
+            # Note: remove the variable to disable the feature.
+            - name: CAMEL_DASHBOARD_APP_LABEL
+              value: "camel.apache.org/app"
           livenessProbe:
             httpGet:
               path: /healthz

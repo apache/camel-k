@@ -136,7 +136,7 @@ func TestApplyDeploymentTraitWithProgressDeadline(t *testing.T) {
 	assert.Equal(t, int32(120), *deployment.Spec.ProgressDeadlineSeconds)
 }
 
-func TestApplyDeploymentTraitWitRecresteStrategy(t *testing.T) {
+func TestApplyDeploymentTraitWitRecreateStrategy(t *testing.T) {
 	deploymentTrait, environment := createNominalDeploymentTest()
 	maxSurge := intstr.FromInt(10)
 
@@ -322,4 +322,16 @@ func createNominalDeploymentTest() (*deploymentTrait, *Environment) {
 	environment.Platform.ResyncStatusFullConfig()
 
 	return trait, environment
+}
+
+func TestApplyDeploymentWithCamelDashboardLabel(t *testing.T) {
+	t.Setenv(kubernetes.CamelDashboardAppLabelEnvVar, "my-dashboard-label")
+
+	deploymentTrait, environment := createNominalDeploymentTest()
+	err := deploymentTrait.Apply(environment)
+	require.NoError(t, err)
+
+	deployment := environment.Resources.GetDeployment(func(deployment *appsv1.Deployment) bool { return true })
+	assert.NotNil(t, deployment)
+	assert.Equal(t, "integration-name", deployment.Labels["my-dashboard-label"])
 }

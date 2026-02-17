@@ -34,6 +34,7 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/source"
 	"github.com/apache/camel-k/v2/pkg/util/uri"
 )
@@ -261,11 +262,9 @@ func (t *cronTrait) getCronJobFor(e *Environment) *batchv1.CronJob {
 			APIVersion: batchv1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      e.Integration.Name,
-			Namespace: e.Integration.Namespace,
-			Labels: map[string]string{
-				v1.IntegrationLabel: e.Integration.Name,
-			},
+			Name:        e.Integration.Name,
+			Namespace:   e.Integration.Namespace,
+			Labels:      kubernetes.DeploymentLabels(e.Integration.Name),
 			Annotations: e.Integration.Annotations,
 		},
 		Spec: batchv1.CronJobSpec{
