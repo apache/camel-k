@@ -67,6 +67,10 @@ The following environment variables can be configured on the operator Deployment
 |`false`
 |When set to `true`, enables synthetic Integration support for managing external workloads.
 
+|`CAMEL_DASHBOARD_APP_LABEL`
+|`camel.apache.org/app`
+|If it exists, the operator add this label beside regular Camel K labels in order to let the Camel Dashboard discover and monitor the application.
+
 |`LOG_LEVEL`
 |`info`
 |The log level for the operator. Valid values: `debug`, `info`, `warn`, `error`.
