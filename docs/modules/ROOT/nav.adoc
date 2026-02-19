@@ -92,7 +92,7 @@
 ** xref:scaling/pipe.adoc[Pipes]
 * Observability
 ** xref:observability/dashboard.adoc[Camel Dashboard]
-*** xref:observability/operator-logging.adoc[Operator logging]
+** xref:observability/operator-logging.adoc[Operator logging]
 ** xref:observability/monitoring.adoc[Monitoring]
 *** xref:observability/monitoring/operator.adoc[Operator]
 *** xref:observability/monitoring/integration.adoc[Integration]
