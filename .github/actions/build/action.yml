@@ -73,6 +73,7 @@ runs:
     if: github.event_name == 'pull_request'
     shell: bash
     run: |
+      go clean -cache -testcache
       COVERAGE_OPTS="-covermode=count -coverprofile=oldcoverage.out -coverpkg=./..." make build
       # Remove mock and generated code from account
       grep -v "github.com/apache/camel-k/v2/pkg/client" oldcoverage.out \
