@@ -76,6 +76,8 @@ type IntegrationStatusApplyConfiguration struct {
 	InitializationTimestamp *metav1.Time `json:"lastInitTimestamp,omitempty"`
 	// the timestamp representing the last time when this integration was deployed.
 	DeploymentTimestamp *metav1.Time `json:"lastDeploymentTimestamp,omitempty"`
+	// the timestamp representing the last time when this integration was built.
+	BuildTimestamp *metav1.Time `json:"lastBuildTimestamp,omitempty"`
 }
 
 // IntegrationStatusApplyConfiguration constructs a declarative configuration of the IntegrationStatus type for use with
@@ -276,5 +278,13 @@ func (b *IntegrationStatusApplyConfiguration) WithInitializationTimestamp(value 
 // If called multiple times, the DeploymentTimestamp field is set to the value of the last call.
 func (b *IntegrationStatusApplyConfiguration) WithDeploymentTimestamp(value metav1.Time) *IntegrationStatusApplyConfiguration {
 	b.DeploymentTimestamp = &value
+	return b
+}
+
+// WithBuildTimestamp sets the BuildTimestamp field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the BuildTimestamp field is set to the value of the last call.
+func (b *IntegrationStatusApplyConfiguration) WithBuildTimestamp(value metav1.Time) *IntegrationStatusApplyConfiguration {
+	b.BuildTimestamp = &value
 	return b
 }

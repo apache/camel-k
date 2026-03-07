@@ -76,6 +76,7 @@ func TestGitOpsPushRepoDefault(t *testing.T) {
 	now := metav1.Now().Rfc3339Copy()
 	it.Status = v1.IntegrationStatus{
 		Image:               "my-img-recently-baked",
+		BuildTimestamp:      &now,
 		DeploymentTimestamp: &now,
 	}
 
@@ -89,7 +90,7 @@ func TestGitOpsPushRepoDefault(t *testing.T) {
 	lastCommitMessage, err := getLastCommitMessage(tmpGitDir)
 	require.NoError(t, err)
 	assert.Contains(t, lastCommitMessage, "feat(ci): build complete")
-	branchName, err := getBranchName(tmpGitDir)
+	branchName, err := getBranchNameFromDir(tmpGitDir)
 	require.NoError(t, err)
 	assert.Contains(t, branchName, "cicd/candidate-release")
 	remoteUrl, err := getRemoteURL(tmpGitDir)
@@ -157,8 +158,8 @@ func getLastCommitMessage(dirPath string) (string, error) {
 	return commit.Message, nil
 }
 
-// getBranchName returns the branch name of a given directory.
-func getBranchName(dirPath string) (string, error) {
+// getBranchNameFromDir returns the branch name of a given directory.
+func getBranchNameFromDir(dirPath string) (string, error) {
 	repo, err := git.PlainOpen(dirPath)
 	if err != nil {
 		return "", err

@@ -370,6 +370,18 @@ func (in *Integration) IsSynthetic() bool {
 	return in.Annotations[IntegrationSyntheticLabel] == "true"
 }
 
+// SetBuildOrDeploymentPhase set the proper building phase and the related timestamps.
+func (in *Integration) SetBuildOrDeploymentPhase() {
+	now := metav1.Now().Rfc3339Copy()
+	in.Status.BuildTimestamp = &now
+	if in.Annotations[IntegrationDontRunAfterBuildAnnotation] == IntegrationDontRunAfterBuildAnnotationTrueValue {
+		in.Status.Phase = IntegrationPhaseBuildComplete
+	} else {
+		in.Status.DeploymentTimestamp = &now
+		in.Status.Phase = IntegrationPhaseDeploying
+	}
+}
+
 // GetCondition returns the condition with the provided type.
 func (in *IntegrationStatus) GetCondition(condType IntegrationConditionType) *IntegrationCondition {
 	for i := range in.Conditions {
