@@ -34,6 +34,8 @@ type GitConfigSpecApplyConfiguration struct {
 	Tag *string `json:"tag,omitempty"`
 	// the git commit (full SHA) to check out
 	Commit *string `json:"commit,omitempty"`
+	// the path you want to use for your project. If provided, it must be an existing directory on the Git repository.
+	Path *string `json:"path,omitempty"`
 }
 
 // GitConfigSpecApplyConfiguration constructs a declarative configuration of the GitConfigSpec type for use with
@@ -79,5 +81,13 @@ func (b *GitConfigSpecApplyConfiguration) WithTag(value string) *GitConfigSpecAp
 // If called multiple times, the Commit field is set to the value of the last call.
 func (b *GitConfigSpecApplyConfiguration) WithCommit(value string) *GitConfigSpecApplyConfiguration {
 	b.Commit = &value
+	return b
+}
+
+// WithPath sets the Path field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Path field is set to the value of the last call.
+func (b *GitConfigSpecApplyConfiguration) WithPath(value string) *GitConfigSpecApplyConfiguration {
+	b.Path = &value
 	return b
 }

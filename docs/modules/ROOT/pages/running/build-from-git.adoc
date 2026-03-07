@@ -48,6 +48,9 @@ kamel run --git https://github.com/michalvavrik/sample.git --git-tag v1.2.3
 
 # Clone the project and checkout specific commit (full SHA)
 kamel run --git https://github.com/michalvavrik/sample.git --git-commit f2b9bd064a62263ab53b3bfe6ac2b71e68dba45b
+
+# Clone specific path (likely a directory containing the module project you want to build)
+kamel run --git https://github.com/michalvavrik/sample.git --git-path path/to/my/module
 ```
 
 === Using YAML Configuration
@@ -63,7 +66,10 @@ spec:
     # branch: feature/xyz    # Use specific branch
     # tag: v1.2.3         # Or use specific tag
     # commit: f2b9bd064a62263ab53b3bfe6ac2b71e68dba45b  # Or use specific commit
+    # path: path/to/my/module
 ```
+
+NOTE: the `path` option can be used in combination with any other git option such as tag, commit or branch.
 
 == Rebuild
 

@@ -2288,6 +2288,13 @@ string
 
 the git commit (full SHA) to check out
 
+|`path` +
+string
+|
+
+
+the path you want to use for your project. If provided, it must be an existing directory on the Git repository.
+
 
 |===
 
