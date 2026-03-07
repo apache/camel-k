@@ -18,9 +18,11 @@ limitations under the License.
 package builder
 
 import (
+	"os"
 	"path/filepath"
 
 	util "github.com/apache/camel-k/v2/pkg/util/gitops"
+	"github.com/apache/camel-k/v2/pkg/util/io"
 )
 
 func init() {
@@ -63,7 +65,28 @@ func cloneProject(ctx *builderContext) error {
 			return err
 		}
 	}
-	_, err := util.CloneGitProject(*ctx.Build.Git, filepath.Join(ctx.Path, "maven"), secretToken)
 
-	return err
+	projectPath := filepath.Join(ctx.Path, "maven")
+	gitClonePath := projectPath
+
+	// If the user wants to use a specific path, then, we need to clone the entire project first
+	// and later copy the requested path to the project path, which is what the operator will use to
+	// build the project
+	if ctx.Build.Git.Path != "" {
+		gitClonePath = filepath.Join(ctx.Path, "repo")
+	}
+	if _, err := util.CloneGitProject(*ctx.Build.Git, gitClonePath, secretToken); err != nil {
+		return err
+	}
+	if ctx.Build.Git.Path != "" {
+		selectedPath := filepath.Join(gitClonePath, ctx.Build.Git.Path)
+		_, err := os.Stat(selectedPath)
+		if err != nil {
+			return err
+		}
+		// only select the given path as a maven project to use
+		return io.CopyDir(selectedPath, projectPath)
+	}
+
+	return nil
 }

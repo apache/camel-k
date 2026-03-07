@@ -173,3 +173,24 @@ func TestGitCloneCommit(t *testing.T) {
 	require.NoError(t, err)
 	assert.Contains(t, f.Name(), "this_is_expected_commit")
 }
+
+func TestGitPublicRepoWithPath(t *testing.T) {
+	tmpGitDir := t.TempDir()
+
+	ctx := &builderContext{
+		C:    context.TODO(),
+		Path: tmpGitDir,
+		Build: v1.BuilderTask{
+			Git: &v1.GitConfigSpec{
+				URL:  "https://github.com/squakez/sample.git",
+				Path: "src/main/resources/camel",
+			},
+		},
+	}
+
+	err := cloneProject(ctx)
+	require.NoError(t, err)
+	f, err := os.Stat(path.Join(tmpGitDir, "maven", "test.yaml"))
+	require.NoError(t, err)
+	assert.Contains(t, f.Name(), "test.yaml")
+}

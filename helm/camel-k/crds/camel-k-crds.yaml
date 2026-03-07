@@ -359,6 +359,11 @@ spec:
                             commit:
                               description: the git commit (full SHA) to check out
                               type: string
+                            path:
+                              description: the path you want to use for your project.
+                                If provided, it must be an existing directory on the
+                                Git repository.
+                              type: string
                             secret:
                               description: the Kubernetes secret where token is stored
                               type: string
@@ -1283,6 +1288,11 @@ spec:
                               type: string
                             commit:
                               description: the git commit (full SHA) to check out
+                              type: string
+                            path:
+                              description: the path you want to use for your project.
+                                If provided, it must be an existing directory on the
+                                Git repository.
                               type: string
                             secret:
                               description: the Kubernetes secret where token is stored
@@ -13224,6 +13234,10 @@ spec:
                     type: string
                   commit:
                     description: the git commit (full SHA) to check out
+                    type: string
+                  path:
+                    description: the path you want to use for your project. If provided,
+                      it must be an existing directory on the Git repository.
                     type: string
                   secret:
                     description: the Kubernetes secret where token is stored
@@ -26098,6 +26112,10 @@ spec:
                         type: string
                       commit:
                         description: the git commit (full SHA) to check out
+                        type: string
+                      path:
+                        description: the path you want to use for your project. If
+                          provided, it must be an existing directory on the Git repository.
                         type: string
                       secret:
                         description: the Kubernetes secret where token is stored

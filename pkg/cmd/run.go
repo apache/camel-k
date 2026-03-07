@@ -115,6 +115,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().String("git-branch", "", "Git branch to checkout when using --git option")
 	cmd.Flags().String("git-tag", "", "Git tag to checkout when using --git option")
 	cmd.Flags().String("git-commit", "", "Git commit (full SHA) to checkout when using --git option")
+	cmd.Flags().String("git-path", "", "Git path (likely a project module) to checkout when using --git option")
 	cmd.Flags().Bool("save", false, "Save the run parameters into the default kamel configuration file (kamel-config.yaml)")
 	cmd.Flags().Bool("dont-run-after-build", false, "Only build, don't run the application. "+
 		"You can run \"kamel deploy\" to run a built Integration.")
@@ -143,6 +144,7 @@ type runCmdOptions struct {
 	GitBranch          string `mapstructure:"git-branch"          yaml:",omitempty"`
 	GitTag             string `mapstructure:"git-tag"             yaml:",omitempty"`
 	GitCommit          string `mapstructure:"git-commit"          yaml:",omitempty"`
+	GitPath            string `mapstructure:"git-path"            yaml:",omitempty"`
 	Profile            string `mapstructure:"profile"             yaml:",omitempty"`
 	IntegrationProfile string `mapstructure:"integration-profile" yaml:",omitempty"`
 	OperatorID         string `mapstructure:"operator-id"         yaml:",omitempty"`
@@ -598,6 +600,7 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 			Tag:    o.GitTag,
 			Branch: o.GitBranch,
 			Commit: o.GitCommit,
+			Path:   o.GitPath,
 		}
 	} else {
 		return nil, errors.New("you must provide a source, an image or a git repository parameters")

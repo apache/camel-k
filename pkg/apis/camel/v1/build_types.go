@@ -132,6 +132,8 @@ type GitConfigSpec struct {
 	Tag string `json:"tag,omitempty"`
 	// the git commit (full SHA) to check out
 	Commit string `json:"commit,omitempty"`
+	// the path you want to use for your project. If provided, it must be an existing directory on the Git repository.
+	Path string `json:"path,omitempty"`
 }
 
 // MavenBuildSpec defines the Maven configuration plus additional repositories to use.
