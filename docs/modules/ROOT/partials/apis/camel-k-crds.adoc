@@ -3728,6 +3728,13 @@ the timestamp representing the last time when this integration was initialized.
 
 the timestamp representing the last time when this integration was deployed.
 
+|`lastBuildTimestamp` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.35/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+the timestamp representing the last time when this integration was built.
+
 
 |===
 

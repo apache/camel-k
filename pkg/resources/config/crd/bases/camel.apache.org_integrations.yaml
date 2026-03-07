@@ -9511,6 +9511,11 @@ spec:
               jar:
                 description: the Java jar dependency to execute (if available)
                 type: string
+              lastBuildTimestamp:
+                description: the timestamp representing the last time when this integration
+                  was built.
+                format: date-time
+                type: string
               lastDeploymentTimestamp:
                 description: the timestamp representing the last time when this integration
                   was deployed.

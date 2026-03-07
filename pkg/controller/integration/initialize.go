@@ -73,13 +73,7 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1.Inte
 	}
 
 	if integration.Status.Image != "" {
-		if integration.Annotations[v1.IntegrationDontRunAfterBuildAnnotation] == v1.IntegrationDontRunAfterBuildAnnotationTrueValue {
-			integration.Status.Phase = v1.IntegrationPhaseBuildComplete
-		} else {
-			now := metav1.Now().Rfc3339Copy()
-			integration.Status.DeploymentTimestamp = &now
-			integration.Status.Phase = v1.IntegrationPhaseDeploying
-		}
+		integration.SetBuildOrDeploymentPhase()
 
 		return integration, nil
 	}

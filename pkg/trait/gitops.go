@@ -59,7 +59,7 @@ func (t *gitOpsTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		return false, nil, nil
 	}
 
-	return e.IntegrationInPhase(v1.IntegrationPhaseDeploying), nil, nil
+	return e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseBuildComplete), nil, nil
 }
 
 func (t *gitOpsTrait) Apply(e *Environment) error {
@@ -118,10 +118,10 @@ func (t *gitOpsTrait) pushGitOpsItInGitRepo(ctx context.Context, it *v1.Integrat
 	nowDate := time.Now().Format("20060102-150405")
 	branchName := t.BranchPush
 	if branchName == "" {
-		// NOTE: this is important to guarantee idempotency. We make sure not to create
-		// more than one branch from different reconciliation cycles.
-		branchNameDate := it.Status.DeploymentTimestamp.Format("20060102-150405")
-		branchName = "cicd/candidate-release-" + branchNameDate
+		branchName, err = getBranchName(&it.Status)
+		if err != nil {
+			return err
+		}
 	}
 	commitMessage := "feat(ci): build completed on " + nowDate
 	branchRef := plumbing.NewBranchReferenceName(branchName)
@@ -267,4 +267,16 @@ func (t *gitOpsTrait) getCommitterEmail() string {
 	}
 
 	return t.CommiterEmail
+}
+
+// getBranchName returns the branch name to use based on the timestamp.
+func getBranchName(status *v1.IntegrationStatus) (string, error) {
+	if status.BuildTimestamp == nil {
+		return "", errors.New("no Build timestamp available in Integration status")
+	}
+	// NOTE: this is important to guarantee idempotency. We make sure not to create
+	// more than one branch from different reconciliation cycles.
+	branchNameDate := status.BuildTimestamp.Format("20060102-150405")
+
+	return "cicd/candidate-release-" + branchNameDate, nil
 }
