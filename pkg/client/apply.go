@@ -85,7 +85,11 @@ func (a *ServerOrClientSideApplier) serverSideApply(ctx context.Context, resourc
 	if err != nil {
 		return err
 	}
-	if err = a.Client.Patch(ctx, target, ctrl.Apply, ctrl.ForceOwnership, ctrl.FieldOwner("camel-k-operator")); err != nil {
+	data, err := json.Marshal(target.Object)
+	if err != nil {
+		return err
+	}
+	if err = a.Client.Patch(ctx, target, ctrl.RawPatch(types.ApplyPatchType, data), ctrl.ForceOwnership, ctrl.FieldOwner("camel-k-operator")); err != nil {
 		return fmt.Errorf("error during apply resource: %s/%s: %w", resource.GetNamespace(), resource.GetName(), err)
 	}
 

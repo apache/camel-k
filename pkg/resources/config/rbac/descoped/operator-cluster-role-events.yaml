@@ -23,7 +23,9 @@ metadata:
     app: "camel-k"
 rules:
 - apiGroups:
+  # Deprecated: this legacy group is replaced by events.k8s.io from version 2.10.0 onward
   - ""
+  - "events.k8s.io"
   resources:
   - events
   verbs:
