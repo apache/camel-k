@@ -60,7 +60,7 @@ The following environment variables can be configured on the operator Deployment
 |The operator ID used to identify which operator instance manages specific resources. Can also be set via `OPERATOR_ID`.
 
 |`KAMEL_BASE_IMAGE`
-|`eclipse-temurin:17-jdk`
+|`eclipse-temurin:17-jdk@sha256:<digest>`
 |The base image used for building Integration images. Can also be set via `RELATED_IMAGE_BASE`.
 
 |`CAMEL_K_SYNTHETIC_INTEGRATIONS`
