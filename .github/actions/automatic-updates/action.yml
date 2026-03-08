@@ -54,7 +54,8 @@ runs:
     - name: Run project refresh actions
       shell: bash
       run: |
-        make generate codegen update-docs
+        # run 'generate' separately from 'codegen' so that changes to Makefile are reflected
+        make generate && make codegen update-docs
 
     # Coverage badge
     - name: Run Test and get coverage badge
