@@ -192,6 +192,11 @@ func TestBuilderTrait(t *testing.T) {
 			// Check logs
 			g.Eventually(Logs(t, ctx, integrationKitNamespace, builderKitName, corev1.PodLogOptions{Container: "custom1"})).Should(ContainSubstring(`generated-bytecode.jar`))
 			g.Eventually(Logs(t, ctx, integrationKitNamespace, builderKitName, corev1.PodLogOptions{Container: "custom2"})).Should(ContainSubstring(`<artifactId>camel-k-integration</artifactId>`))
+
+			// Verify base image uses a digest for reproducible builds (see #5986)
+			jibLogs := Logs(t, ctx, integrationKitNamespace, builderKitName, corev1.PodLogOptions{Container: "jib"})()
+			g.Expect(jibLogs).ToNot(BeEmpty())
+			g.Expect(jibLogs).ToNot(ContainSubstring("does not use a specific image digest"))
 		})
 
 		t.Run("Run custom pipeline task error", func(t *testing.T) {
