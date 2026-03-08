@@ -183,7 +183,6 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	return t.feedContainer(container, args, e)
 }
 
-//nolint:nestif
 func (t *jvmTrait) feedContainer(container *corev1.Container, args []string, e *Environment) error {
 	// If user provided the jar, we will execute on the container something like
 	// java -Dxyx ... -cp ... -jar my-app.jar
@@ -203,10 +202,6 @@ func (t *jvmTrait) feedContainer(container *corev1.Container, args []string, e *
 		if kit != nil {
 			// managed Integrations
 			kitDepsDirs := kit.Status.GetDependenciesPaths()
-			if kitDepsDirs.IsEmpty() {
-				// Use legacy Camel Quarkus expected structure
-				kitDepsDirs = getLegacyCamelQuarkusDependenciesPaths()
-			}
 			classpathItems = getClasspath(kitDepsDirs, classpathItems)
 		}
 		args = append(args, "-cp", classpathItems)
@@ -379,17 +374,6 @@ func (t *jvmTrait) prepareHTTPProxy(container *corev1.Container) ([]string, erro
 	}
 
 	return args, nil
-}
-
-// Deprecated: to be removed as soon as version 2.3.x is no longer supported.
-func getLegacyCamelQuarkusDependenciesPaths() *sets.Set {
-	s := sets.NewSet()
-	s.Add("dependencies/*")
-	s.Add("dependencies/lib/boot/*")
-	s.Add("dependencies/lib/main/*")
-	s.Add("dependencies/quarkus/*")
-
-	return s
 }
 
 // configureCACert configures the CA certificate truststore and returns the JVM arguments.
