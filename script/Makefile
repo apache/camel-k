@@ -50,7 +50,9 @@ DEBUG_MODE ?= false
 BASE_IMAGE_NAME := eclipse-temurin
 BASE_IMAGE_VERSION := 17-jdk
 OFFICIAL_IMAGE_VERSION := 17-jdk
-BASE_IMAGE := $(BASE_IMAGE_NAME):$(BASE_IMAGE_VERSION)
+BASE_IMAGE_SHA_VERSION := 17-jdk
+BASE_IMAGE_SHA := sha256:b624cb9175b71aaeb654dd9def666035332d5abf70318537c1a46e61564dbecd
+BASE_IMAGE := $(BASE_IMAGE_NAME):$(BASE_IMAGE_VERSION)$(if $(filter $(BASE_IMAGE_VERSION),$(BASE_IMAGE_SHA_VERSION)),@$(BASE_IMAGE_SHA),)
 LOCAL_REPOSITORY := /etc/maven/m2
 OPENSHIFT_REGISTRY := image-registry.openshift-image-registry.svc:5000
 IMAGE_NAME ?= docker.io/apache/camel-k
@@ -218,6 +220,7 @@ codegen:
 generate: codegen-tools-install
 	@# We better force the developer to generate all the resources everytime as
 	@# it happens we tend to forget some code generation in the past
+	./script/update_base_image_sha.sh $(BASE_IMAGE_NAME):$(BASE_IMAGE_VERSION)
 	./script/clone_kamelets.sh
 	cd pkg/apis && $(CONTROLLER_GEN) paths="./..." object
 	./script/gen_client.sh
