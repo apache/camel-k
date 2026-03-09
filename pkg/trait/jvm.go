@@ -381,13 +381,13 @@ func (t *jvmTrait) prepareHTTPProxy(container *corev1.Container) ([]string, erro
 	return args, nil
 }
 
-// Deprecated: to be removed as soon as version 2.3.x is no longer supported.
+// Deprecated: to be removed in v3.x.
 func getLegacyCamelQuarkusDependenciesPaths() *sets.Set {
 	s := sets.NewSet()
 	s.Add("dependencies/*")
 	s.Add("dependencies/lib/boot/*")
 	s.Add("dependencies/lib/main/*")
-	s.Add("dependencies/quarkus/*")
+	// s.Add("dependencies/quarkus/*")
 
 	return s
 }

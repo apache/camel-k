@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/apache/camel-k/v2/pkg/util/sets"
 	corev1 "k8s.io/api/core/v1"
@@ -212,7 +213,10 @@ func (in *IntegrationKitStatus) GetDependenciesPaths() *sets.Set {
 	s := sets.NewSet()
 	for _, dep := range in.Artifacts {
 		path := filepath.Dir(dep.Target)
-		s.Add(path + "/*")
+		// Solves https://github.com/apache/camel-k/issues/6498
+		if !strings.HasSuffix(path, "/quarkus") {
+			s.Add(path + "/*")
+		}
 	}
 
 	return s
