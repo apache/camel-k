@@ -199,6 +199,7 @@ func generateQuarkusProjectCommon(runtimeProvider v1.RuntimeProvider, runtimeVer
 			GroupID:    "io.quarkus",
 			ArtifactID: "quarkus-maven-plugin",
 			Version:    quarkusPlatformVersion,
+			Extensions: true,
 			Executions: []maven.Execution{
 				{
 					ID: "build-integration",
