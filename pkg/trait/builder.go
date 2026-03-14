@@ -128,6 +128,9 @@ func (t *builderTrait) configureForQuarkus(trait Trait, e *Environment, conditio
 		if nativeBuilderImage == "" {
 			// default from the catalog
 			nativeBuilderImage = e.CamelCatalog.GetQuarkusToolingImage()
+			// GraalVM expected version is 25.0.0 starting from Quarkus 3.31
+			// As we cannot change the catalog, until we reach 3.x, we can patch it here
+			nativeBuilderImage = strings.ReplaceAll(nativeBuilderImage, "jdk-21", "jdk-25")
 		}
 
 		// it should be performed as the last custom task
