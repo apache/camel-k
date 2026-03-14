@@ -140,6 +140,7 @@ rules:
   - get
   - list
   - patch
+  - watch
 - apiGroups:
   - storage.k8s.io
   resources:
