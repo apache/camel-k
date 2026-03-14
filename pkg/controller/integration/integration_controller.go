@@ -505,6 +505,7 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 		NewInitializeAction(),
 		NewBuildAction(),
 		newBuildKitAction(),
+		NewBuildCompleteAction(),
 	}
 
 	if instance.IsSynthetic() {

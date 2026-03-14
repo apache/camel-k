@@ -42,7 +42,7 @@ func TestGitOpsAddAction(t *testing.T) {
 	env := &Environment{
 		Integration: &v1.Integration{
 			Status: v1.IntegrationStatus{
-				Phase: v1.IntegrationPhaseDeploying,
+				Phase: v1.IntegrationPhaseBuildComplete,
 			},
 		},
 		PostActions: []func(*Environment) error{},
