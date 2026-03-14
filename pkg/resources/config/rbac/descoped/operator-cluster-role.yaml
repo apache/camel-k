@@ -143,6 +143,7 @@ rules:
   - get
   - list
   - patch
+  - watch
 # Required by mount trait
 - apiGroups:
   - storage.k8s.io
