@@ -73,7 +73,7 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1.Inte
 	}
 
 	if integration.Status.Image != "" {
-		integration.SetBuildOrDeploymentPhase()
+		integration.SetDeployingPhase()
 
 		return integration, nil
 	}
