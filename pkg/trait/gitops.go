@@ -59,7 +59,7 @@ func (t *gitOpsTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		return false, nil, nil
 	}
 
-	return e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseBuildComplete), nil, nil
+	return e.IntegrationInPhase(v1.IntegrationPhaseBuildComplete), nil, nil
 }
 
 func (t *gitOpsTrait) Apply(e *Environment) error {

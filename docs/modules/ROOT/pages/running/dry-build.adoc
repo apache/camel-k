@@ -24,12 +24,12 @@ As the patching on an Integration custom resource can be boring, we've introduce
 [[undeploy]]
 == Undeploy an application
 
-Specular to that, we have the **undeploy** operation. If at any point in time you want to bring the Integration back to its original status, then just patch its phase to an empty string (which represent the `Initialization` phase). The operator will take care to revert it and to clean all the resources associated.
+Specular to that, we have the **undeploy** operation. If at any point in time you want to bring the Integration back to its original status, then just patch its phase to the `Undeploying` phase. The operator will take care to revert it and to clean all the resources associated.
 
 It would be something like:
 
 ```bash
-kubectl patch it my-app --type=merge --subresource=status   -p '{"status":{"phase":""}}'
+kubectl patch it my-app --type=merge --subresource=status   -p '{"status":{"phase":"Undeploying"}}'
 ```
 
 Also here, you will find handy the `kamel undeploy` CLI command. It also expects one ore more Integration names you want to undeploy. The `kamel undeploy` and the patch to "" are equivalent.

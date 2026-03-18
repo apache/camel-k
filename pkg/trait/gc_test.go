@@ -162,7 +162,7 @@ func TestGarbageCollectPreserveResourcesWithSameGeneration(t *testing.T) {
 
 func TestGarbageCollectUndeploying(t *testing.T) {
 	gcTrait, environment := createNominalGCTest()
-	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildComplete
+	environment.Integration.Status.Phase = v1.IntegrationPhaseUnDeploying
 
 	// Simulate undeploy scenario: DeploymentTimestamp set means integration was previously deployed
 	now := metav1.Now()
@@ -391,54 +391,6 @@ func TestCanResourceBeDeleted(t *testing.T) {
 		},
 	)
 	assert.True(t, canBeDeleted(it, resThisItOwner))
-}
-
-func TestHasNeverDeployed(t *testing.T) {
-	tests := []struct {
-		name                string
-		deploymentTimestamp *metav1.Time
-		readyCondition      *v1.IntegrationCondition
-		expected            bool
-	}{
-		{
-			name:                "never deployed - both checks nil",
-			deploymentTimestamp: nil,
-			readyCondition:      nil,
-			expected:            true,
-		},
-		{
-			name:                "deployed - DeploymentTimestamp set",
-			deploymentTimestamp: ptr.To(metav1.Now()),
-			readyCondition:      nil,
-			expected:            false,
-		},
-		{
-			name:                "deployed - Ready FirstTruthyTime set",
-			deploymentTimestamp: nil,
-			readyCondition: &v1.IntegrationCondition{
-				Type:            v1.IntegrationConditionReady,
-				Status:          corev1.ConditionTrue,
-				FirstTruthyTime: ptr.To(metav1.Now()),
-			},
-			expected: false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			integration := &v1.Integration{
-				Status: v1.IntegrationStatus{
-					DeploymentTimestamp: tt.deploymentTimestamp,
-				},
-			}
-			if tt.readyCondition != nil {
-				integration.Status.Conditions = []v1.IntegrationCondition{*tt.readyCondition}
-			}
-
-			result := hasNeverDeployed(integration)
-			assert.Equal(t, tt.expected, result)
-		})
-	}
 }
 
 func TestGarbageCollectDryBuildSkipsGC(t *testing.T) {

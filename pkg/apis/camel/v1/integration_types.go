@@ -177,6 +177,8 @@ const (
 	IntegrationPhaseBuildComplete IntegrationPhase = "Build Complete"
 	// IntegrationPhaseDeploying --.
 	IntegrationPhaseDeploying IntegrationPhase = "Deploying"
+	// IntegrationPhaseUnDeploying --.
+	IntegrationPhaseUnDeploying IntegrationPhase = "Undeploying"
 	// IntegrationPhaseRunning --.
 	IntegrationPhaseRunning IntegrationPhase = "Running"
 	// IntegrationPhaseError --.

@@ -98,7 +98,7 @@ func (o *undeployCmdOptions) undeployIntegrations(cmd *cobra.Command, c k8sclien
 			continue
 		}
 		it := i
-		it.Status.Phase = v1.IntegrationPhaseInitialization
+		it.Status.Phase = v1.IntegrationPhaseUnDeploying
 		if err := c.Status().Update(o.Context, &it); err != nil {
 			return undeployed, fmt.Errorf("could not undeploy %s in namespace %s: %w", it.Name, o.Namespace, err)
 		}

@@ -204,7 +204,7 @@ func TestIntegrationBuildRunningBuildSucceeded(t *testing.T) {
 	handledIt, err := a.Handle(context.TODO(), it)
 	require.NoError(t, err)
 	require.NotNil(t, handledIt)
-	assert.Equal(t, v1.IntegrationPhaseDeploying, handledIt.Status.Phase)
+	assert.Equal(t, v1.IntegrationPhaseBuildComplete, handledIt.Status.Phase)
 	assert.Equal(t, "my-image@123456", handledIt.Status.Image)
 	assert.Equal(t, "/deploy/my.jar", handledIt.Status.Jar)
 }

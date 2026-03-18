@@ -115,23 +115,14 @@ func (t *gcTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 
 	// We need to execute this trait only when all resources have been created and
 	// deployed with a new generation if there is was any change during the Integration drift.
-	return e.IntegrationInRunningPhases() || e.IntegrationInPhase(v1.IntegrationPhaseBuildComplete), nil, nil
+	return e.IntegrationInRunningPhases() || e.IntegrationInPhase(v1.IntegrationPhaseUnDeploying), nil, nil
 }
 
 func (t *gcTrait) Apply(e *Environment) error {
 	// Garbage collection runs when:
 	// 1. Generation > 1: resource was updated, clean up old generation resources
-	// 2. BuildComplete phase AND integration has previously been deployed: undeploy scenario
-	shouldRunGC := e.Integration.GetGeneration() > 1
-
-	if !shouldRunGC && e.IntegrationInPhase(v1.IntegrationPhaseBuildComplete) {
-		// Only run GC if integration was previously deployed (undeploy case)
-		if !hasNeverDeployed(e.Integration) {
-			shouldRunGC = true
-		}
-	}
-
-	if shouldRunGC {
+	// 2. undeploy scenario
+	if e.Integration.GetGeneration() > 1 || e.IntegrationInPhase(v1.IntegrationPhaseUnDeploying) {
 		// Register a post action that deletes the existing resources that are labelled
 		// with the previous integration generation(s).
 		// We make the assumption generation is a monotonically increasing strictly positive integer,
@@ -204,8 +195,7 @@ func (t *gcTrait) garbageCollectResources(e *Environment) error {
 
 	// On undeploy, delete all resources regardless of generation.
 	// On generation upgrade, filter to only delete old resources.
-	isUndeploying := e.IntegrationInPhase(v1.IntegrationPhaseBuildComplete) && !hasNeverDeployed(e.Integration)
-	if !isUndeploying {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseUnDeploying) {
 		selector = selector.Add(*generation)
 	}
 
@@ -263,23 +253,6 @@ func canBeDeleted(it *v1.Integration, u unstructured.Unstructured) bool {
 	}
 
 	return false
-}
-
-// hasNeverDeployed returns true if the integration has never been deployed.
-// Checks both DeploymentTimestamp and Ready condition for reliability.
-func hasNeverDeployed(integration *v1.Integration) bool {
-	// Primary check: DeploymentTimestamp is set when deployment is triggered
-	if integration.Status.DeploymentTimestamp != nil && !integration.Status.DeploymentTimestamp.IsZero() {
-		return false // has been deployed
-	}
-
-	// Secondary check: Ready condition becomes true only after successful deployment
-	readyCond := integration.Status.GetCondition(v1.IntegrationConditionReady)
-	if readyCond != nil && readyCond.FirstTruthyTime != nil && !readyCond.FirstTruthyTime.IsZero() {
-		return false
-	}
-
-	return true
 }
 
 // getDeletableTypes returns the list of deletable types resources, inspecting the rules for which the operator SA is allowed in the

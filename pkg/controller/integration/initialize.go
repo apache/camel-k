@@ -47,7 +47,8 @@ func (action *initializeAction) Name() string {
 
 // CanHandle tells whether this action can handle the integration.
 func (action *initializeAction) CanHandle(integration *v1.Integration) bool {
-	return integration.Status.Phase == v1.IntegrationPhaseInitialization
+	return integration.Status.Phase == v1.IntegrationPhaseInitialization ||
+		integration.Status.Phase == v1.IntegrationPhaseUnDeploying
 }
 
 // Handle handles the integrations.
@@ -58,10 +59,17 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1.Inte
 		return action.importFromExternalApp(integration)
 	}
 
-	if integration.Spec.Git != nil {
+	// Only move to the build submitted when we're initializing, never on undeploying
+	if integration.Status.Phase == v1.IntegrationPhaseInitialization && integration.Spec.Git != nil {
 		integration.Status.Phase = v1.IntegrationPhaseBuildSubmitted
 
 		return integration, nil
+	}
+
+	// We must clear deployment conditions when undeploying.
+	if integration.Status.Phase == v1.IntegrationPhaseUnDeploying {
+		integration.Status.Replicas = nil
+		integration.Status.RemoveCondition(v1.IntegrationConditionReady)
 	}
 
 	if _, err := trait.Apply(ctx, action.client, integration, nil); err != nil {
@@ -72,12 +80,6 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1.Inte
 		return integration, err
 	}
 
-	if integration.Status.Image != "" {
-		integration.SetBuildOrDeploymentPhase()
-
-		return integration, nil
-	}
-
 	if integration.Status.IntegrationKit == nil {
 		ikt, err := action.lookupIntegrationKit(ctx, integration)
 		if err != nil {
@@ -85,6 +87,12 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1.Inte
 		}
 
 		integration.SetIntegrationKit(ikt)
+	}
+
+	if integration.Status.Image != "" {
+		integration.SetBuildCompletePhase()
+
+		return integration, nil
 	}
 
 	integration.Status.Phase = v1.IntegrationPhaseBuildingKit
