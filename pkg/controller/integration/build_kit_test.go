@@ -125,7 +125,7 @@ func TestCamelBuildKitKitSetOnIntegration(t *testing.T) {
 	a.InjectClient(c)
 	handledIt, err = a.Handle(context.TODO(), it)
 	require.NoError(t, err)
-	assert.Equal(t, v1.IntegrationPhaseDeploying, handledIt.Status.Phase)
+	assert.Equal(t, v1.IntegrationPhaseBuildComplete, handledIt.Status.Phase)
 
 	// Move IntegrationKit phase to ready status
 	it.Status.Phase = v1.IntegrationPhaseBuildingKit
@@ -243,7 +243,7 @@ func TestCamelBuildKitKitLookupExistingKit(t *testing.T) {
 	handledIt, err = a.Handle(context.TODO(), it)
 	require.NoError(t, err)
 	assert.NotNil(t, handledIt)
-	assert.Equal(t, v1.IntegrationPhaseDeploying, handledIt.Status.Phase)
+	assert.Equal(t, v1.IntegrationPhaseBuildComplete, handledIt.Status.Phase)
 	assert.Equal(t, ik.Name, it.Status.IntegrationKit.Name)
 	assert.Equal(t, ik.Namespace, it.Status.IntegrationKit.Namespace)
 	// Found a matching kit (error)

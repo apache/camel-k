@@ -63,8 +63,7 @@ func (action *monitorAction) Name() string {
 func (action *monitorAction) CanHandle(integration *v1.Integration) bool {
 	return integration.Status.Phase == v1.IntegrationPhaseDeploying ||
 		integration.Status.Phase == v1.IntegrationPhaseRunning ||
-		integration.Status.Phase == v1.IntegrationPhaseError ||
-		integration.Status.Phase == v1.IntegrationPhaseBuildComplete
+		integration.Status.Phase == v1.IntegrationPhaseError
 }
 
 //nolint:nestif
@@ -155,15 +154,6 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		return integration, nil
 	}
 	action.checkTraitAnnotationsDeprecatedNotice(integration)
-
-	if integration.Status.Phase == v1.IntegrationPhaseBuildComplete {
-		// The following status fields are only filled during execution.
-		// We must remove them to clear any previous execution status.
-		integration.Status.Replicas = nil
-		integration.Status.RemoveCondition(v1.IntegrationConditionReady)
-
-		return integration, nil
-	}
 
 	return action.monitorPods(ctx, environment, integration)
 }
