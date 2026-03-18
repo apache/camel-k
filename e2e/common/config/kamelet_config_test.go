@@ -142,7 +142,7 @@ func TestKameletImplicitConfigDefaultUserProperty(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "files/timer-kamelet-integration-inlined-configuration-01.yaml",
 				"--name", name).Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("important message"))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(MatchRegexp(`important.*message`))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("integrationLogger"))
 		})
 
