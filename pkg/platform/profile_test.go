@@ -74,7 +74,8 @@ func TestFindIntegrationProfileWithNamespace(t *testing.T) {
 			Name:      "test",
 			Namespace: "ns",
 			Annotations: map[string]string{
-				v1.IntegrationProfileAnnotation:          "custom",
+				v1.IntegrationProfileAnnotation: "custom",
+				//nolint:staticcheck
 				v1.IntegrationProfileNamespaceAnnotation: "other",
 			},
 		},

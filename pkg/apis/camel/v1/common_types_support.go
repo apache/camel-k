@@ -188,6 +188,8 @@ func GetIntegrationProfileAnnotation(obj metav1.Object) string {
 }
 
 // GetIntegrationProfileNamespaceAnnotation to safely get the integration profile namespace annotation value.
+//
+// Deprecated: won't be supported in future releases.
 func GetIntegrationProfileNamespaceAnnotation(obj metav1.Object) string {
 	return GetAnnotation(IntegrationProfileNamespaceAnnotation, obj)
 }

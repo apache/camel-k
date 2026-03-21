@@ -8356,16 +8356,7 @@ spec:
     singular: integrationprofile
   scope: Namespaced
   versions:
-  - additionalPrinterColumns:
-    - description: The integration profile phase
-      jsonPath: .status.phase
-      name: Phase
-      type: string
-    - description: The default runtime version
-      jsonPath: .status.build.runtimeVersion
-      name: Default runtime
-      type: string
-    name: v1
+  - name: v1
     schema:
       openAPIV3Schema:
         description: |-
@@ -8680,8 +8671,9 @@ spec:
                     type: string
                 type: object
               kamelet:
-                description: configuration to be executed to all Kamelets controlled
-                  by this IntegrationProfile
+                description: |-
+                  configuration to be executed to all Kamelets controlled by this IntegrationProfile
+                  Deprecated: to be removed in future versions.
                 properties:
                   repositories:
                     description: remote repository used to retrieve Kamelet catalog
@@ -11050,8 +11042,9 @@ spec:
                   type: object
                 type: array
               kamelet:
-                description: configuration to be executed to all Kamelets controlled
-                  by this IntegrationProfile
+                description: |-
+                  configuration to be executed to all Kamelets controlled by this IntegrationProfile
+                  Deprecated: to be removed in future versions.
                 properties:
                   repositories:
                     description: remote repository used to retrieve Kamelet catalog

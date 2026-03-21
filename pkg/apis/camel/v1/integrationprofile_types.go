@@ -32,6 +32,8 @@ type IntegrationProfileSpec struct {
 	// list of traits to be executed for all the Integration/IntegrationKits built from this IntegrationProfile
 	Traits Traits `json:"traits,omitempty"`
 	// configuration to be executed to all Kamelets controlled by this IntegrationProfile
+	//
+	// Deprecated: to be removed in future versions.
 	Kamelet IntegrationProfileKameletSpec `json:"kamelet,omitempty"`
 }
 
@@ -52,8 +54,6 @@ type IntegrationProfileStatus struct {
 // +kubebuilder:resource:path=integrationprofiles,scope=Namespaced,shortName=ipr,categories=kamel;camel
 // +kubebuilder:subresource:status
 // +kubebuilder:storageversion
-// +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The integration profile phase"
-// +kubebuilder:printcolumn:name="Default runtime",type=string,JSONPath=`.status.build.runtimeVersion`,description="The default runtime version"
 
 // IntegrationProfile is the resource used to apply user defined settings to the Camel K operator behavior.
 // It defines the behavior of all Custom Resources (`IntegrationKit`, `Integration`, `Kamelet`) in the given namespace.
@@ -95,6 +95,8 @@ type IntegrationProfileBuildSpec struct {
 }
 
 // IntegrationProfileKameletSpec define the behavior for all the Kamelets controller by the IntegrationProfile.
+//
+// Deprecated: to be removed in future versions.
 type IntegrationProfileKameletSpec struct {
 	// remote repository used to retrieve Kamelet catalog
 	Repositories []KameletRepositorySpec `json:"repositories,omitempty"`
