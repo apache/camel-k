@@ -36,7 +36,7 @@ runs:
       check-latest: true
   - id: setup-kubectl
     name: Set up Kubectl
-    uses: azure/setup-kubectl@v4
+    uses: azure/setup-kubectl@776406bce94f63e41d621b960d78ee25c8b76ede
   - id: minikube-start
     name: Start minikube
     uses: medyagh/setup-minikube@v0.0.18
