@@ -6046,6 +6046,13 @@ The configuration of Error Handler trait.
 
 Deprecated: no longer in use.
 
+|`gateway` +
+*xref:#_camel_apache_org_v1_trait_GatewayTrait[GatewayTrait]*
+|
+
+
+The configuration of Istio trait
+
 |`gc` +
 *xref:#_camel_apache_org_v1_trait_GCTrait[GCTrait]*
 |
@@ -7326,6 +7333,39 @@ The GC Trait garbage-collects all resources that are no longer necessary upon in
 Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`).
 
 Deprecated: no longer in use.
+
+
+|===
+
+[#_camel_apache_org_v1_trait_GatewayTrait]
+=== GatewayTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The Gateway trait can be used to expose the service associated with the integration
+to the outside world with a Kubernetes Gateway API.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`className` +
+string
+|
+
+
+The class name to use for the gateway configuration.
 
 
 |===
@@ -9688,6 +9728,7 @@ The list of taints to tolerate, in the form `Key[=Value]:Effect[:Seconds]`
 * <<#_camel_apache_org_v1_trait_AffinityTrait, AffinityTrait>>
 * <<#_camel_apache_org_v1_trait_CronTrait, CronTrait>>
 * <<#_camel_apache_org_v1_trait_GCTrait, GCTrait>>
+* <<#_camel_apache_org_v1_trait_GatewayTrait, GatewayTrait>>
 * <<#_camel_apache_org_v1_trait_GitOpsTrait, GitOpsTrait>>
 * <<#_camel_apache_org_v1_trait_HealthTrait, HealthTrait>>
 * <<#_camel_apache_org_v1_trait_IngressTrait, IngressTrait>>

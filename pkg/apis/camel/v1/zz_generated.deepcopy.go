@@ -3231,6 +3231,11 @@ func (in *Traits) DeepCopyInto(out *Traits) {
 		*out = new(trait.ErrorHandlerTrait)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.Gateway != nil {
+		in, out := &in.Gateway, &out.Gateway
+		*out = new(trait.GatewayTrait)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.GC != nil {
 		in, out := &in.GC, &out.GC
 		*out = new(trait.GCTrait)

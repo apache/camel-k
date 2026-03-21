@@ -29,6 +29,7 @@ func init() {
 	AddToTraits(newDeployerTrait)
 	AddToTraits(newDeploymentTrait)
 	AddToTraits(newEnvironmentTrait)
+	AddToTraits(newGatewayTrait)
 	AddToTraits(newGCTrait)
 	AddToTraits(newGitTrait)
 	AddToTraits(newGitOpsTrait)

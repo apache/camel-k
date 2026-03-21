@@ -182,6 +182,18 @@ rules:
   - get
   - list
   - patch
+# Required by gateway trait
+- apiGroups:
+  - gateway.networking.k8s.io
+  resources:
+  - gateways
+  - httproutes
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
 # Roles and RoleBindings
 - apiGroups:
   - rbac.authorization.k8s.io

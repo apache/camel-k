@@ -50,6 +50,8 @@ type TraitsApplyConfiguration struct {
 	//
 	// Deprecated: no longer in use.
 	ErrorHandler *trait.ErrorHandlerTrait `json:"error-handler,omitempty"`
+	// The configuration of Istio trait
+	Gateway *trait.GatewayTrait `json:"gateway,omitempty"`
 	// The configuration of GC trait
 	GC *trait.GCTrait `json:"gc,omitempty"`
 	// The configuration of GitOps trait
@@ -215,6 +217,14 @@ func (b *TraitsApplyConfiguration) WithEnvironment(value trait.EnvironmentTrait)
 // If called multiple times, the ErrorHandler field is set to the value of the last call.
 func (b *TraitsApplyConfiguration) WithErrorHandler(value trait.ErrorHandlerTrait) *TraitsApplyConfiguration {
 	b.ErrorHandler = &value
+	return b
+}
+
+// WithGateway sets the Gateway field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Gateway field is set to the value of the last call.
+func (b *TraitsApplyConfiguration) WithGateway(value trait.GatewayTrait) *TraitsApplyConfiguration {
+	b.Gateway = &value
 	return b
 }
 

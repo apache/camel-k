@@ -336,6 +336,12 @@ test-telemetry:
 	go test -timeout 30m -v ./e2e/telemetry -tags=integration $(GOTESTFMT)
 
 #
+# Gateway tests that require the configuration of a gateway (Envoy)
+#
+test-gateway:
+	go test -timeout 10m -v ./e2e/gateway -tags=integration $(GOTESTFMT)
+
+#
 # Quarkus native test (requires certain CPU and memory conditions)
 #
 test-quarkus-native:

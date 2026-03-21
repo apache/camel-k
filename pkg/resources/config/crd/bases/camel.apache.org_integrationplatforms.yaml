@@ -1078,6 +1078,24 @@ spec:
                           in application properties
                         type: string
                     type: object
+                  gateway:
+                    description: The configuration of Istio trait
+                    properties:
+                      className:
+                        description: The class name to use for the gateway configuration.
+                        type: string
+                      configuration:
+                        description: |-
+                          Legacy trait configuration parameters.
+
+                          Deprecated: for backward compatibility.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                    type: object
                   gc:
                     description: The configuration of GC trait
                     properties:
@@ -3578,6 +3596,24 @@ spec:
                         description: The error handler ref name provided or found
                           in application properties
                         type: string
+                    type: object
+                  gateway:
+                    description: The configuration of Istio trait
+                    properties:
+                      className:
+                        description: The class name to use for the gateway configuration.
+                        type: string
+                      configuration:
+                        description: |-
+                          Legacy trait configuration parameters.
+
+                          Deprecated: for backward compatibility.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
                     type: object
                   gc:
                     description: The configuration of GC trait
