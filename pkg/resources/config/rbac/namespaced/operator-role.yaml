@@ -163,6 +163,18 @@ rules:
   - get
   - list
   - patch
+# Required by gateway trait
+- apiGroups:
+  - gateway.networking.k8s.io
+  resources:
+  - gateways
+  - httproutes
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
 # Required by mount trait
 - apiGroups:
   - ""

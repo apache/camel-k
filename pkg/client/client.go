@@ -110,7 +110,7 @@ func (c *defaultClient) GetCurrentNamespace(kubeConfig string) (string, error) {
 func NewOutOfClusterClient(kubeconfig string) (Client, error) {
 	initialize(kubeconfig)
 	// using fast discovery from outside the cluster
-	return NewClient(true)
+	return NewClient(false)
 }
 
 // NewClient creates a new k8s client that can be used from outside or in the cluster.
@@ -134,7 +134,6 @@ func NewClientWithConfig(fastDiscovery bool, cfg *rest.Config) (Client, error) {
 	var err error
 	clientScheme := scheme.Scheme
 	if !clientScheme.IsVersionRegistered(v1.SchemeGroupVersion) {
-		// Setup Scheme for all resources
 		err = apis.AddToScheme(clientScheme)
 		if err != nil {
 			return nil, err

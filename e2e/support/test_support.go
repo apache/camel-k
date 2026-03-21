@@ -64,6 +64,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
 	"k8s.io/utils/ptr"
+	gwv1 "sigs.k8s.io/gateway-api/apis/v1"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
@@ -153,7 +154,6 @@ func TestContext() context.Context {
 }
 
 func TestClient(t *testing.T) client.Client {
-
 	if testClient != nil {
 		return testClient
 	}
@@ -1055,7 +1055,7 @@ func IntegrationSpecProfile(t *testing.T, ctx context.Context, ns string, name s
 func IntegrationStatusCapabilities(t *testing.T, ctx context.Context, ns string, name string) func() []string {
 	return func() []string {
 		it := Integration(t, ctx, ns, name)()
-		if it == nil || &it.Status == nil {
+		if it == nil {
 			return nil
 		}
 		return it.Status.Capabilities
@@ -1910,7 +1910,7 @@ func BuildPhase(t *testing.T, ctx context.Context, ns, name string) func() v1.Bu
 func BuildConditions(t *testing.T, ctx context.Context, ns, name string) func() []v1.BuildCondition {
 	return func() []v1.BuildCondition {
 		build := Build(t, ctx, ns, name)()
-		if build != nil && &build.Status != nil && build.Status.Conditions != nil {
+		if build != nil && build.Status.Conditions != nil {
 			return build.Status.Conditions
 		}
 		return nil
@@ -1920,7 +1920,7 @@ func BuildConditions(t *testing.T, ctx context.Context, ns, name string) func() 
 func BuildCondition(t *testing.T, ctx context.Context, ns string, name string, conditionType v1.BuildConditionType) func() *v1.BuildCondition {
 	return func() *v1.BuildCondition {
 		build := Build(t, ctx, ns, name)()
-		if build != nil && &build.Status != nil && build.Status.Conditions != nil {
+		if build != nil && build.Status.Conditions != nil {
 			return build.Status.GetCondition(conditionType)
 		}
 		return &v1.BuildCondition{}
@@ -3127,5 +3127,47 @@ func ScaledObject(t *testing.T, ctx context.Context, ns, name string) func() *ke
 			return nil
 		}
 		return &scaledObject
+	}
+}
+
+// MinikubeTunnel is used to temporarily tunnel Minikube and return a function to stop after it's used.
+func MinikubeTunnel(t *testing.T, ctx context.Context) func() {
+	log.Info("** Started Minikube tunnel")
+	cmd := exec.CommandContext(ctx,
+		"minikube", "tunnel",
+	)
+
+	if err := cmd.Start(); err != nil {
+		t.Fatalf("failed to start minikube tunnel: %v", err)
+	}
+
+	// Give tunnel a moment to establish
+	time.Sleep(2 * time.Second)
+
+	// Return a cleanup function
+	return func() {
+		log.Info("** Stopping Minikube tunnel")
+		if err := cmd.Process.Kill(); err != nil {
+			t.Logf("failed to kill minikube tunnel: %v", err)
+		}
+	}
+}
+
+// Gateway returns the gateway with the given name.
+func Gateway(t *testing.T, ctx context.Context, ns string, name string) func() *gwv1.Gateway {
+	return func() *gwv1.Gateway {
+		gw := gwv1.Gateway{}
+		key := ctrl.ObjectKey{
+			Namespace: ns,
+			Name:      name,
+		}
+		err := TestClient(t).Get(ctx, key, &gw)
+		if err != nil && k8serrors.IsNotFound(err) {
+			return nil
+		} else if err != nil {
+			failTest(t, err)
+		}
+
+		return &gw
 	}
 }

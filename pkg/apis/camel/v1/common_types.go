@@ -208,6 +208,8 @@ type Traits struct {
 	//
 	// Deprecated: no longer in use.
 	ErrorHandler *trait.ErrorHandlerTrait `json:"error-handler,omitempty" property:"error-handler"`
+	// The configuration of Istio trait
+	Gateway *trait.GatewayTrait `json:"gateway,omitempty" property:"gateway"`
 	// The configuration of GC trait
 	GC *trait.GCTrait `json:"gc,omitempty" property:"gc"`
 	// The configuration of GitOps trait
