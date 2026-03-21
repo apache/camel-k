@@ -112,6 +112,7 @@ func (t *podTrait) Apply(e *Environment) error {
 	return nil
 }
 
+//nolint:staticcheck
 func (t *podTrait) applyChangesTo(podSpec *corev1.PodSpec, changes v1.PodSpec) (*corev1.PodSpec, error) {
 	patch, err := json.Marshal(changes)
 	if err != nil {

@@ -31,6 +31,7 @@ type IntegrationProfileSpecApplyConfiguration struct {
 	// list of traits to be executed for all the Integration/IntegrationKits built from this IntegrationProfile
 	Traits *TraitsApplyConfiguration `json:"traits,omitempty"`
 	// configuration to be executed to all Kamelets controlled by this IntegrationProfile
+	// Deprecated: to be removed in future versions.
 	Kamelet *IntegrationProfileKameletSpecApplyConfiguration `json:"kamelet,omitempty"`
 }
 

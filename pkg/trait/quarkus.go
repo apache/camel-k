@@ -289,6 +289,7 @@ func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType quarkusPack
 	if v, ok := integration.Annotations[v1.IntegrationProfileAnnotation]; ok {
 		v1.SetAnnotation(&kit.ObjectMeta, v1.IntegrationProfileAnnotation, v)
 
+		//nolint:staticcheck
 		if v, ok := e.Integration.Annotations[v1.IntegrationProfileNamespaceAnnotation]; ok {
 			v1.SetAnnotation(&kit.ObjectMeta, v1.IntegrationProfileNamespaceAnnotation, v)
 		} else {

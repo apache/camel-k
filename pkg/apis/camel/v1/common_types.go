@@ -35,6 +35,8 @@ const (
 	// IntegrationProfileAnnotation integration profile id annotation label.
 	IntegrationProfileAnnotation = "camel.apache.org/integration-profile.id"
 	// IntegrationProfileNamespaceAnnotation integration profile id annotation label.
+	//
+	// Deprecated: won't be supported in future releases.
 	IntegrationProfileNamespaceAnnotation = "camel.apache.org/integration-profile.namespace"
 	// IntegrationDontRunAfterBuildAnnotation -- .
 	IntegrationDontRunAfterBuildAnnotation = "camel.apache.org/dont-run-after-build"

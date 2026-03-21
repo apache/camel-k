@@ -3053,7 +3053,6 @@ IntegrationPlatformConditionType defines the type of condition.
 * <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
 
 IntegrationPlatformKameletSpec define the behavior for all the Kamelets controller by the IntegrationPlatform.
-
 Deprecated: to be removed in future versions.
 
 [cols="2,2a",options="header"]
@@ -3345,6 +3344,7 @@ IntegrationProfileConditionType defines the type of condition.
 * <<#_camel_apache_org_v1_IntegrationProfileSpec, IntegrationProfileSpec>>
 
 IntegrationProfileKameletSpec define the behavior for all the Kamelets controller by the IntegrationProfile.
+Deprecated: to be removed in future versions.
 
 [cols="2,2a",options="header"]
 |===
@@ -3406,6 +3406,7 @@ list of traits to be executed for all the Integration/IntegrationKits built from
 
 
 configuration to be executed to all Kamelets controlled by this IntegrationProfile
+Deprecated: to be removed in future versions.
 
 
 |===
@@ -5122,6 +5123,7 @@ string
 * <<#_camel_apache_org_v1_PodSpecTemplate, PodSpecTemplate>>
 
 PodSpec defines a group of Kubernetes resources.
+Deprecated: to be removed in future versions.
 
 [cols="2,2a",options="header"]
 |===
@@ -5223,6 +5225,7 @@ PodSecurityContext
 * <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
 
 PodSpecTemplate represent a template used to deploy an Integration `Pod`.
+Deprecated: to be removed in future versions.
 
 [cols="2,2a",options="header"]
 |===

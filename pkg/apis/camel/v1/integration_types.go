@@ -306,12 +306,16 @@ type IntegrationCondition struct {
 }
 
 // PodSpecTemplate represent a template used to deploy an Integration `Pod`.
+//
+// Deprecated: to be removed in future versions.
 type PodSpecTemplate struct {
 	// the specification
 	Spec PodSpec `json:"spec,omitempty"`
 }
 
 // PodSpec defines a group of Kubernetes resources.
+//
+// Deprecated: to be removed in future versions.
 type PodSpec struct {
 	// AutomountServiceAccountToken
 	AutomountServiceAccountToken *bool `json:"automountServiceAccountToken,omitempty" protobuf:"varint,21,opt,name=automountServiceAccountToken"`

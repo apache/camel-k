@@ -324,7 +324,9 @@ func isIntegrationKitResetRequired(integration *v1.Integration, kit *v1.Integrat
 		return true
 	}
 
+	//nolint:staticcheck
 	if v1.GetIntegrationProfileNamespaceAnnotation(integration) != "" &&
+		//nolint:staticcheck
 		v1.GetIntegrationProfileNamespaceAnnotation(integration) != v1.GetIntegrationProfileNamespaceAnnotation(kit) {
 		// Integration profile namespace for the integration has changed. Reset integration kit
 		// so new profile can be applied

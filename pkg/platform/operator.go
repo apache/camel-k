@@ -283,6 +283,7 @@ func (f FilteringFuncs[T]) Update(e event.TypedUpdateEvent[T]) bool {
 		// Always force reconciliation when the object gets attached to a new integration profile
 		return true
 	}
+	//nolint:staticcheck
 	if camelv1.GetIntegrationProfileNamespaceAnnotation(e.ObjectOld) != camelv1.GetIntegrationProfileNamespaceAnnotation(e.ObjectNew) {
 		// Always force reconciliation when the object gets attached to a new integration profile
 		return true

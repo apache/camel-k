@@ -120,6 +120,7 @@ func (action *buildAction) createBuild(ctx context.Context, kit *v1.IntegrationK
 	if v, ok := kit.Annotations[v1.IntegrationProfileAnnotation]; ok {
 		annotations[v1.IntegrationProfileAnnotation] = v
 
+		//nolint:staticcheck
 		if v, ok := kit.Annotations[v1.IntegrationProfileNamespaceAnnotation]; ok {
 			annotations[v1.IntegrationProfileNamespaceAnnotation] = v
 		}

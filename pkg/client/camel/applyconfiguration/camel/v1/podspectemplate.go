@@ -23,6 +23,7 @@ package v1
 // with apply.
 //
 // PodSpecTemplate represent a template used to deploy an Integration `Pod`.
+// Deprecated: to be removed in future versions.
 type PodSpecTemplateApplyConfiguration struct {
 	// the specification
 	Spec *PodSpecApplyConfiguration `json:"spec,omitempty"`

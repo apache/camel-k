@@ -726,6 +726,7 @@ func (o *runCmdOptions) applyAnnotations(it *v1.Integration) {
 	if o.IntegrationProfile != "" {
 		if strings.Contains(o.IntegrationProfile, "/") {
 			namespacedName := strings.SplitN(o.IntegrationProfile, "/", 2)
+			//nolint:staticcheck
 			v1.SetAnnotation(&it.ObjectMeta, v1.IntegrationProfileNamespaceAnnotation, namespacedName[0])
 			v1.SetAnnotation(&it.ObjectMeta, v1.IntegrationProfileAnnotation, namespacedName[1])
 		} else {
