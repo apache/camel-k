@@ -77,6 +77,7 @@ func (o *versionCmdOptions) preRunE(cmd *cobra.Command, args []string) error {
 	if !o.Operator && !o.All {
 		// let the command to work in offline mode
 		cmd.Annotations[offlineCommandLabel] = "true"
+	} else {
 		fmt.Fprintf(cmd.OutOrStdout(), "Operator version discovery is deprecated. It will be removed from future releases.\n")
 	}
 
