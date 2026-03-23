@@ -4379,6 +4379,12 @@ spec:
                         description: Can be used to enable or disable a trait. All
                           traits share this common property.
                         type: boolean
+                      listeners:
+                        description: The listeners in the format "port;protocol" (default,
+                          "8080;HTTP").
+                        items:
+                          type: string
+                        type: array
                     type: object
                   gc:
                     description: The configuration of GC trait
@@ -6898,6 +6904,12 @@ spec:
                         description: Can be used to enable or disable a trait. All
                           traits share this common property.
                         type: boolean
+                      listeners:
+                        description: The listeners in the format "port;protocol" (default,
+                          "8080;HTTP").
+                        items:
+                          type: string
+                        type: array
                     type: object
                   gc:
                     description: The configuration of GC trait
@@ -8709,6 +8721,7 @@ spec:
               kamelet:
                 description: |-
                   configuration to be executed to all Kamelets controlled by this IntegrationProfile
+
                   Deprecated: to be removed in future versions.
                 properties:
                   repositories:
@@ -9309,6 +9322,12 @@ spec:
                         description: Can be used to enable or disable a trait. All
                           traits share this common property.
                         type: boolean
+                      listeners:
+                        description: The listeners in the format "port;protocol" (default,
+                          "8080;HTTP").
+                        items:
+                          type: string
+                        type: array
                     type: object
                   gc:
                     description: The configuration of GC trait
@@ -11098,6 +11117,7 @@ spec:
               kamelet:
                 description: |-
                   configuration to be executed to all Kamelets controlled by this IntegrationProfile
+
                   Deprecated: to be removed in future versions.
                 properties:
                   repositories:
@@ -11706,6 +11726,12 @@ spec:
                         description: Can be used to enable or disable a trait. All
                           traits share this common property.
                         type: boolean
+                      listeners:
+                        description: The listeners in the format "port;protocol" (default,
+                          "8080;HTTP").
+                        items:
+                          type: string
+                        type: array
                     type: object
                   gc:
                     description: The configuration of GC trait
@@ -20964,6 +20990,12 @@ spec:
                         description: Can be used to enable or disable a trait. All
                           traits share this common property.
                         type: boolean
+                      listeners:
+                        description: The listeners in the format "port;protocol" (default,
+                          "8080;HTTP").
+                        items:
+                          type: string
+                        type: array
                     type: object
                   gc:
                     description: The configuration of GC trait
@@ -23321,6 +23353,12 @@ spec:
                         description: Can be used to enable or disable a trait. All
                           traits share this common property.
                         type: boolean
+                      listeners:
+                        description: The listeners in the format "port;protocol" (default,
+                          "8080;HTTP").
+                        items:
+                          type: string
+                        type: array
                     type: object
                   gc:
                     description: The configuration of GC trait
@@ -33942,6 +33980,12 @@ spec:
                             description: Can be used to enable or disable a trait.
                               All traits share this common property.
                             type: boolean
+                          listeners:
+                            description: The listeners in the format "port;protocol"
+                              (default, "8080;HTTP").
+                            items:
+                              type: string
+                            type: array
                         type: object
                       gc:
                         description: The configuration of GC trait
@@ -36226,6 +36270,12 @@ spec:
                         description: Can be used to enable or disable a trait. All
                           traits share this common property.
                         type: boolean
+                      listeners:
+                        description: The listeners in the format "port;protocol" (default,
+                          "8080;HTTP").
+                        items:
+                          type: string
+                        type: array
                     type: object
                   gc:
                     description: The configuration of GC trait

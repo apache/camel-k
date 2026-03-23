@@ -23,6 +23,7 @@ package v1
 // with apply.
 //
 // IntegrationProfileKameletSpec define the behavior for all the Kamelets controller by the IntegrationProfile.
+//
 // Deprecated: to be removed in future versions.
 type IntegrationProfileKameletSpecApplyConfiguration struct {
 	// remote repository used to retrieve Kamelet catalog
