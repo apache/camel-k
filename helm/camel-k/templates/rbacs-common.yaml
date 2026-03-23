@@ -19,7 +19,7 @@ kind: Role
 metadata:
   labels:
     app: camel-k
-  name: camel-k-builder
+  name: {{ include "camel-k.fullname" . }}-builder
 rules:
 - apiGroups:
   - camel.apache.org
@@ -61,7 +61,7 @@ kind: Role
 metadata:
   labels:
     app: camel-k
-  name: camel-k-builder-openshift
+  name: {{ include "camel-k.fullname" . }}-builder-openshift
 rules:
 - apiGroups:
   - ""
@@ -112,7 +112,7 @@ kind: Role
 metadata:
   labels:
     app: camel-k
-  name: camel-k-kamelet-viewer
+  name: {{ include "camel-k.fullname" . }}-kamelet-viewer
 rules:
 - apiGroups:
   - camel.apache.org
@@ -128,39 +128,39 @@ kind: RoleBinding
 metadata:
   labels:
     app: camel-k
-  name: camel-k-builder
+  name: {{ include "camel-k.fullname" . }}-builder
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: camel-k-builder
+  name: {{ include "camel-k.fullname" . }}-builder
 subjects:
 - kind: ServiceAccount
-  name: camel-k-builder
+  name: {{ include "camel-k.fullname" . }}-builder
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   labels:
     app: camel-k
-  name: camel-k-builder-openshift
+  name: {{ include "camel-k.fullname" . }}-builder-openshift
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: camel-k-builder-openshift
+  name: {{ include "camel-k.fullname" . }}-builder-openshift
 subjects:
 - kind: ServiceAccount
-  name: camel-k-builder
+  name: {{ include "camel-k.fullname" . }}-builder
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   labels:
     app: camel-k
-  name: camel-k-kamelet-viewer
+  name: {{ include "camel-k.fullname" . }}-kamelet-viewer
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: camel-k-kamelet-viewer
+  name: {{ include "camel-k.fullname" . }}-kamelet-viewer
 subjects:
 - apiGroup: rbac.authorization.k8s.io
   kind: Group

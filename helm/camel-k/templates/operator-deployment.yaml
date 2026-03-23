@@ -26,12 +26,12 @@ metadata:
   annotations:
     {{ toYaml . | nindent 4 }}
   {{- end }}
-  name: camel-k-operator
+  name: {{ include "camel-k.fullname" . }}-operator
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: camel-k-operator
+      name: {{ include "camel-k.fullname" . }}-operator
   strategy:
     type: Recreate
   template:
@@ -39,7 +39,7 @@ spec:
       labels:
         app: camel-k
         camel.apache.org/component: operator
-        name: camel-k-operator
+        name: {{ include "camel-k.fullname" . }}-operator
     spec:
     {{- if .Values.operator.imagePullSecrets }}
       imagePullSecrets:
@@ -111,7 +111,7 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: camel-k-operator
+      serviceAccountName: {{ include "camel-k.fullname" . }}-operator
       {{- with .Values.operator.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
