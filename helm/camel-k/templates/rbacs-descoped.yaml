@@ -20,7 +20,7 @@ kind: ClusterRole
 metadata:
   labels:
     app: camel-k
-  name: camel-k-operator
+  name: {{ include "camel-k.fullname" . }}-operator
 rules:
 - apiGroups:
   - camel.apache.org
@@ -210,7 +210,7 @@ kind: ClusterRole
 metadata:
   labels:
     app: camel-k
-  name: camel-k-operator-events
+  name: {{ include "camel-k.fullname" . }}-operator-events
 rules:
 - apiGroups:
   - ""
@@ -229,7 +229,7 @@ kind: ClusterRole
 metadata:
   labels:
     app: camel-k
-  name: camel-k-operator-keda
+  name: {{ include "camel-k.fullname" . }}-operator-keda
 rules:
 - apiGroups:
   - keda.sh
@@ -248,7 +248,7 @@ kind: ClusterRole
 metadata:
   labels:
     app: camel-k
-  name: camel-k-operator-knative
+  name: {{ include "camel-k.fullname" . }}-operator-knative
 rules:
 - apiGroups:
   - serving.knative.dev
@@ -307,7 +307,7 @@ kind: ClusterRole
 metadata:
   labels:
     app: camel-k
-  name: camel-k-operator-leases
+  name: {{ include "camel-k.fullname" . }}-operator-leases
 rules:
 - apiGroups:
   - coordination.k8s.io
@@ -327,7 +327,7 @@ kind: ClusterRole
 metadata:
   labels:
     app: camel-k
-  name: camel-k-operator-openshift
+  name: {{ include "camel-k.fullname" . }}-operator-openshift
 rules:
 - apiGroups:
   - camel.apache.org
@@ -416,7 +416,7 @@ kind: ClusterRole
 metadata:
   labels:
     app: camel-k
-  name: camel-k-operator-podmonitors
+  name: {{ include "camel-k.fullname" . }}-operator-podmonitors
 rules:
 - apiGroups:
   - monitoring.coreos.com
@@ -434,7 +434,7 @@ kind: ClusterRole
 metadata:
   labels:
     app: camel-k
-  name: camel-k-operator-strimzi
+  name: {{ include "camel-k.fullname" . }}-operator-strimzi
 rules:
 - apiGroups:
   - kafka.strimzi.io
@@ -451,14 +451,14 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     app: camel-k
-  name: camel-k-operator
+  name: {{ include "camel-k.fullname" . }}-operator
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: camel-k-operator
+  name: {{ include "camel-k.fullname" . }}-operator
 subjects:
 - kind: ServiceAccount
-  name: camel-k-operator
+  name: {{ include "camel-k.fullname" . }}-operator
   namespace: '{{ .Release.Namespace }}'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -466,14 +466,14 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     app: camel-k
-  name: camel-k-operator-events
+  name: {{ include "camel-k.fullname" . }}-operator-events
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: camel-k-operator-events
+  name: {{ include "camel-k.fullname" . }}-operator-events
 subjects:
 - kind: ServiceAccount
-  name: camel-k-operator
+  name: {{ include "camel-k.fullname" . }}-operator
   namespace: '{{ .Release.Namespace }}'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -481,14 +481,14 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     app: camel-k
-  name: camel-k-operator-keda
+  name: {{ include "camel-k.fullname" . }}-operator-keda
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: camel-k-operator-keda
+  name: {{ include "camel-k.fullname" . }}-operator-keda
 subjects:
 - kind: ServiceAccount
-  name: camel-k-operator
+  name: {{ include "camel-k.fullname" . }}-operator
   namespace: '{{ .Release.Namespace }}'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -496,14 +496,14 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     app: camel-k
-  name: camel-k-operator-knative
+  name: {{ include "camel-k.fullname" . }}-operator-knative
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: camel-k-operator-knative
+  name: {{ include "camel-k.fullname" . }}-operator-knative
 subjects:
 - kind: ServiceAccount
-  name: camel-k-operator
+  name: {{ include "camel-k.fullname" . }}-operator
   namespace: '{{ .Release.Namespace }}'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -511,14 +511,14 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     app: camel-k
-  name: camel-k-operator-leases
+  name: {{ include "camel-k.fullname" . }}-operator-leases
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: camel-k-operator-leases
+  name: {{ include "camel-k.fullname" . }}-operator-leases
 subjects:
 - kind: ServiceAccount
-  name: camel-k-operator
+  name: {{ include "camel-k.fullname" . }}-operator
   namespace: '{{ .Release.Namespace }}'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -526,14 +526,14 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     app: camel-k
-  name: camel-k-operator-openshift
+  name: {{ include "camel-k.fullname" . }}-operator-openshift
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: camel-k-operator-openshift
+  name: {{ include "camel-k.fullname" . }}-operator-openshift
 subjects:
 - kind: ServiceAccount
-  name: camel-k-operator
+  name: {{ include "camel-k.fullname" . }}-operator
   namespace: '{{ .Release.Namespace }}'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -541,14 +541,14 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     app: camel-k
-  name: camel-k-operator-podmonitors
+  name: {{ include "camel-k.fullname" . }}-operator-podmonitors
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: camel-k-operator-podmonitors
+  name: {{ include "camel-k.fullname" . }}-operator-podmonitors
 subjects:
 - kind: ServiceAccount
-  name: camel-k-operator
+  name: {{ include "camel-k.fullname" . }}-operator
   namespace: '{{ .Release.Namespace }}'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -556,13 +556,13 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     app: camel-k
-  name: camel-k-operator-strimzi
+  name: {{ include "camel-k.fullname" . }}-operator-strimzi
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: camel-k-operator-strimzi
+  name: {{ include "camel-k.fullname" . }}-operator-strimzi
 subjects:
 - kind: ServiceAccount
-  name: camel-k-operator
+  name: {{ include "camel-k.fullname" . }}-operator
   namespace: '{{ .Release.Namespace }}'
 {{- end }}
