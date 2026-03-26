@@ -40,4 +40,4 @@ asciidoc:
     operator-fwk-api-version: 0.41.0
     knative-api-version: 0.48.1
     service-binding-op-version: ""
-    prometheus-op-version: 0.90.0
+    prometheus-op-version: 0.90.1
