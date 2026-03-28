@@ -526,7 +526,7 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 
 		newTarget, err := a.Handle(ctx, target)
 		if err != nil {
-			camelevent.NotifyIntegrationError(ctx, r.client, r.recorder, &instance, newTarget, err)
+			camelevent.NotifyError(r.recorder, &instance, target, instance.Name, instance.Kind, err)
 			// Update the integration (mostly just to update its phase) if the new instance is returned
 			if newTarget != nil {
 				_ = r.update(ctx, &instance, newTarget, &targetLog)
@@ -537,7 +537,7 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 
 		if newTarget != nil {
 			if err := r.update(ctx, &instance, newTarget, &targetLog); err != nil {
-				camelevent.NotifyIntegrationError(ctx, r.client, r.recorder, &instance, newTarget, err)
+				camelevent.NotifyError(r.recorder, &instance, target, target.Name, target.Kind, err)
 
 				return reconcile.Result{}, err
 			}

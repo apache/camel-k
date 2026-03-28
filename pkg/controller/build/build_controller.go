@@ -193,7 +193,7 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 
 		newTarget, err := a.Handle(ctx, target)
 		if err != nil {
-			camelevent.NotifyBuildError(ctx, r.client, r.recorder, &instance, newTarget, err)
+			camelevent.NotifyError(r.recorder, &instance, newTarget, instance.Name, instance.Kind, err)
 
 			return reconcile.Result{}, err
 		}
@@ -232,7 +232,7 @@ func (r *reconcileBuild) update(ctx context.Context, l log.Logger, base *v1.Buil
 	target.Status.ObservedGeneration = base.Generation
 
 	if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(base)); err != nil {
-		camelevent.NotifyBuildError(ctx, r.client, r.recorder, base, target, err)
+		camelevent.NotifyError(r.recorder, base, target, target.Name, target.Kind, err)
 
 		return err
 	}
