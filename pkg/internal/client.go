@@ -75,11 +75,9 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 		WithStatusSubresource(&v1.IntegrationKit{}).
 		Build()
 
-	//nolint:staticcheck
-	camelClientset := fakecamelclientset.NewSimpleClientset(filterObjects(scheme, initObjs, func(gvk schema.GroupVersionKind) bool {
+	camelClientset := fakecamelclientset.NewClientset(filterObjects(scheme, initObjs, func(gvk schema.GroupVersionKind) bool {
 		return strings.Contains(gvk.Group, "camel")
 	})...)
-	//nolint:staticcheck
 	clientset := fakeclientset.NewSimpleClientset(filterObjects(scheme, initObjs, func(gvk schema.GroupVersionKind) bool {
 		return !strings.Contains(gvk.Group, "camel") && !strings.Contains(gvk.Group, "knative")
 	})...)
