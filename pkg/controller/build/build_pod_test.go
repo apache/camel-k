@@ -29,7 +29,6 @@ import (
 )
 
 func TestNewBuildPodConfiguration(t *testing.T) {
-
 	ctx := context.TODO()
 	c, err := internal.NewFakeClient()
 	require.NoError(t, err)
