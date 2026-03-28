@@ -176,7 +176,7 @@ func (r *reconcileIntegrationPlatform) Reconcile(ctx context.Context, request re
 
 		target, err = a.Handle(ctx, target)
 		if err != nil {
-			camelevent.NotifyIntegrationPlatformError(ctx, r.client, r.recorder, &instance, target, err)
+			camelevent.NotifyError(r.recorder, &instance, target, instance.Name, instance.Kind, err)
 
 			return reconcile.Result{}, err
 		}
@@ -185,7 +185,7 @@ func (r *reconcileIntegrationPlatform) Reconcile(ctx context.Context, request re
 			target.Status.ObservedGeneration = instance.Generation
 
 			if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(&instance)); err != nil {
-				camelevent.NotifyIntegrationPlatformError(ctx, r.client, r.recorder, &instance, target, err)
+				camelevent.NotifyError(r.recorder, &instance, target, target.Name, target.Kind, err)
 
 				return reconcile.Result{}, err
 			}

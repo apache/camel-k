@@ -210,7 +210,7 @@ func (action *monitorRoutineAction) updateBuildStatus(ctx context.Context, build
 	p, err := patch.MergePatch(build, target)
 	if err != nil {
 		action.L.Errorf(err, "Cannot patch build status: %s", build.Name)
-		event.NotifyBuildError(ctx, action.client, action.recorder, build, target, err)
+		event.NotifyError(action.recorder, build, target, target.Name, target.Kind, err)
 
 		return err
 	}
@@ -225,7 +225,7 @@ func (action *monitorRoutineAction) updateBuildStatus(ctx context.Context, build
 		err = action.client.Status().Patch(ctx, target, ctrl.RawPatch(types.MergePatchType, p))
 		if err != nil {
 			action.L.Errorf(err, "Cannot update build status: %s", build.Name)
-			event.NotifyBuildError(ctx, action.client, action.recorder, build, target, err)
+			event.NotifyError(action.recorder, build, target, target.Name, target.Kind, err)
 
 			return err
 		}

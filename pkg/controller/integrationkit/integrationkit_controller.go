@@ -285,14 +285,14 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 		newTarget, err := a.Handle(ctx, target)
 
 		if err != nil {
-			camelevent.NotifyIntegrationKitError(ctx, r.client, r.recorder, &instance, newTarget, err)
+			camelevent.NotifyError(r.recorder, &instance, target, instance.Name, instance.Kind, err)
 
 			return reconcile.Result{}, err
 		}
 
 		if newTarget != nil {
 			if res, err := r.update(ctx, &instance, newTarget); err != nil {
-				camelevent.NotifyIntegrationKitError(ctx, r.client, r.recorder, &instance, newTarget, err)
+				camelevent.NotifyError(r.recorder, &instance, target, target.Name, target.Kind, err)
 
 				return res, err
 			}

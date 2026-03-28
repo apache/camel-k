@@ -175,7 +175,7 @@ func (r *reconcileCatalog) Reconcile(ctx context.Context, request reconcile.Requ
 		target, err = a.Handle(ctx, target)
 
 		if err != nil {
-			camelevent.NotifyCamelCatalogError(ctx, r.client, r.recorder, &instance, target, err)
+			camelevent.NotifyError(r.recorder, &instance, target, instance.Name, instance.Kind, err)
 
 			return reconcile.Result{}, err
 		}
@@ -184,7 +184,7 @@ func (r *reconcileCatalog) Reconcile(ctx context.Context, request reconcile.Requ
 			target.Status.ObservedGeneration = instance.GetGeneration()
 
 			if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(&instance)); err != nil {
-				camelevent.NotifyCamelCatalogError(ctx, r.client, r.recorder, &instance, target, err)
+				camelevent.NotifyError(r.recorder, &instance, target, target.Name, target.Kind, err)
 
 				return reconcile.Result{}, err
 			}

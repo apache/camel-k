@@ -200,7 +200,7 @@ func (r *ReconcilePipe) Reconcile(ctx context.Context, request reconcile.Request
 
 		target, err = a.Handle(ctx, target)
 		if err != nil {
-			camelevent.NotifyPipeError(ctx, r.client, r.recorder, &instance, target, err)
+			camelevent.NotifyError(r.recorder, &instance, target, instance.Name, instance.Kind, err)
 			// Update the binding (mostly just to update its phase) if the new instance is returned
 			if target != nil {
 				_ = r.update(ctx, &instance, target, &targetLog)
@@ -211,7 +211,7 @@ func (r *ReconcilePipe) Reconcile(ctx context.Context, request reconcile.Request
 
 		if target != nil {
 			if err := r.update(ctx, &instance, target, &targetLog); err != nil {
-				camelevent.NotifyPipeError(ctx, r.client, r.recorder, &instance, target, err)
+				camelevent.NotifyError(r.recorder, &instance, target, target.Name, target.Kind, err)
 
 				return reconcile.Result{}, err
 			}
@@ -231,7 +231,7 @@ func (r *ReconcilePipe) update(ctx context.Context, base *v1.Pipe, target *v1.Pi
 	target.Status.ObservedGeneration = base.Generation
 
 	if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(base)); err != nil {
-		camelevent.NotifyPipeError(ctx, r.client, r.recorder, base, target, err)
+		camelevent.NotifyError(r.recorder, base, target, target.Name, target.Kind, err)
 
 		return err
 	}
