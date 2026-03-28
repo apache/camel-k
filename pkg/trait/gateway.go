@@ -121,7 +121,7 @@ func buildGateway(name, namespace, className string, listeners []string) (*gwv1.
 		listenerName := fmt.Sprintf("%s-%d", name, port)
 		gwListeners = append(gwListeners, gwv1.Listener{
 			Name:     gwv1.SectionName(listenerName),
-			Port:     gwv1.PortNumber(port),
+			Port:     port,
 			Protocol: gwv1.ProtocolType(protocol),
 			AllowedRoutes: &gwv1.AllowedRoutes{
 				Namespaces: &gwv1.RouteNamespaces{
@@ -133,7 +133,7 @@ func buildGateway(name, namespace, className string, listeners []string) (*gwv1.
 
 	return &gwv1.Gateway{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: gwv1.SchemeGroupVersion.String(),
+			APIVersion: gwv1.GroupVersion.String(),
 			Kind:       "Gateway",
 		},
 		ObjectMeta: metav1.ObjectMeta{
@@ -156,14 +156,13 @@ func buildHTTPRoute(routeName, gatewayName, serviceName, namespace string, servi
 	rules := make([]gwv1.HTTPRouteRule, 0, len(servicePorts))
 
 	for _, p := range servicePorts {
-		port := gwv1.PortNumber(p)
 		rule := gwv1.HTTPRouteRule{
 			BackendRefs: []gwv1.HTTPBackendRef{
 				{
 					BackendRef: gwv1.BackendRef{
 						BackendObjectReference: gwv1.BackendObjectReference{
 							Name: gwv1.ObjectName(serviceName),
-							Port: ptr.To(port),
+							Port: ptr.To(p),
 						},
 					},
 				},
@@ -175,7 +174,7 @@ func buildHTTPRoute(routeName, gatewayName, serviceName, namespace string, servi
 
 	return &gwv1.HTTPRoute{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: gwv1.SchemeGroupVersion.String(),
+			APIVersion: gwv1.GroupVersion.String(),
 			Kind:       "HTTPRoute",
 		},
 		ObjectMeta: metav1.ObjectMeta{
