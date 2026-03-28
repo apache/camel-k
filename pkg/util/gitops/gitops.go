@@ -319,7 +319,7 @@ resources:
 			}
 			defer f.Close()
 
-			if _, err := f.WriteString(resource); err != nil {
+			if _, err := f.WriteString(resource + "\n"); err != nil {
 				return err
 			}
 		}
