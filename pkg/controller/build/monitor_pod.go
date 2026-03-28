@@ -144,8 +144,20 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		// Account for the Build metrics
 		observeBuildResult(build, build.Status.Phase, buildCreator, duration)
 
-		// operator supported publishing tasks should provide the digest in the builder command process execution
+		// operator supported publishing tasks should provide the image name and digest in the builder command process execution
 		if !operatorSupportedPublishingStrategy(build.Spec.Tasks) {
+			build.Status.Image = publishTaskImage(build.Spec.Tasks)
+			if build.Status.Image == "" {
+				// Image not available
+				build.Status.Phase = v1.BuildPhaseError
+				build.Status.SetCondition(
+					"ContainerImageAvailable",
+					corev1.ConditionFalse,
+					"ContainerImageAvailable",
+					publishTaskName(build.Spec.Tasks)+
+						" publishing task completed but no image is available",
+				)
+			}
 			build.Status.Digest = publishTaskDigest(build.Spec.Tasks, pod.Status.ContainerStatuses)
 			if build.Status.Digest == "" {
 				// Likely to happen for users provided publishing tasks and not providing the digest image among statuses
@@ -375,6 +387,15 @@ func publishTaskDigest(tasks []v1.Task, cntStates []corev1.ContainerStatus) stri
 		if container.Name == taskName {
 			return container.State.Terminated.Message
 		}
+	}
+
+	return ""
+}
+
+func publishTaskImage(tasks []v1.Task) string {
+	t := publishTask(tasks)
+	if t != nil && t.Custom != nil {
+		return t.Custom.PublishingImage
 	}
 
 	return ""

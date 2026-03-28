@@ -309,6 +309,10 @@ func notifyIfConditionUpdated(recorder events.EventRecorder, newResource runtime
 		tail := ""
 		if cond.GetMessage() != "" {
 			tail = ": " + cond.GetMessage()
+			// NOTE: Kubernetes events does not allow more than 1024 chars, we cut the trailing part.
+			if len(tail) > 800 { // leave room for prefix
+				tail = tail[:800] + "..."
+			}
 		}
 		recorder.Eventf(newResource, nil, corev1.EventTypeNormal, reason, "Condition %q is %q for %s %s%s",
 			cond.GetType(), cond.GetStatus(), resourceType, name, tail)

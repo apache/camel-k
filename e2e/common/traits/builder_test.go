@@ -231,3 +231,23 @@ func TestBuilderTrait(t *testing.T) {
 		})
 	})
 }
+
+func TestCustomPipelineBuildah(t *testing.T) {
+	t.Parallel()
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		t.Run("Run Buildah custom publish task", func(t *testing.T) {
+			name := RandomizedSuffixName("java")
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java",
+				"--name", name,
+				"-t", "builder.strategy=pod",
+				"-t", "builder.base-image=docker.io/library/eclipse-temurin:17",
+				"-t", `builder.tasks=my-buildah;quay.io/buildah/stable;/bin/bash -c \"cd context && buildah bud --storage-driver=vfs --tls-verify=false -t $(INTEGRATION_KIT_IMAGE) . && buildah push --storage-driver=vfs --digestfile=/dev/termination-log --tls-verify=false $(INTEGRATION_KIT_IMAGE) docker://$(INTEGRATION_KIT_IMAGE)";0`,
+				"-t", "builder.tasks-filter=builder,package,my-buildah",
+			).Execute()).To(Succeed())
+
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("Magicstring!"))
+		})
+	})
+}
