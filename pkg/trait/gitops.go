@@ -20,8 +20,10 @@ package trait
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -32,6 +34,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/ptr"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	git "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
@@ -104,6 +107,15 @@ func (t *gitOpsTrait) pushGitOpsRepo(ctx context.Context, it *v1.Integration, to
 // to a new branch.
 func (t *gitOpsTrait) pushGitOpsItInGitRepo(ctx context.Context, it *v1.Integration, dir, token string) error {
 	gitConf := t.gitConf(it)
+
+	pipe, err := t.findOwnerPipe(ctx, it)
+	if err != nil {
+		return err
+	} else if pipe != nil && gitConf.URL == "" {
+		// Pipes have no .spec.git fallback, so the URL must be provided via the trait
+		return errors.New("gitops trait requires a git URL when used with a Pipe")
+	}
+
 	// Clone repo
 	repo, err := util.CloneGitProject(gitConf, dir, token)
 	if err != nil {
@@ -146,11 +158,21 @@ func (t *gitOpsTrait) pushGitOpsItInGitRepo(ctx context.Context, it *v1.Integrat
 		return err
 	}
 
-	for _, overlay := range t.getOverlays() {
-		destIntegration := util.EditIntegration(it, kit, overlay, "")
-		err = util.AppendKustomizeIntegration(destIntegration, ciCdDir, t.getOverwriteOverlay())
-		if err != nil {
-			return err
+	if pipe != nil {
+		for _, overlay := range t.getOverlays() {
+			destPipe := util.EditPipe(pipe, it, kit, overlay, "")
+			err = util.AppendKustomizePipe(destPipe, ciCdDir, t.getOverwriteOverlay())
+			if err != nil {
+				return err
+			}
+		}
+	} else {
+		for _, overlay := range t.getOverlays() {
+			destIntegration := util.EditIntegration(it, kit, overlay, "")
+			err = util.AppendKustomizeIntegration(destIntegration, ciCdDir, t.getOverwriteOverlay())
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -191,14 +213,35 @@ func (t *gitOpsTrait) pushGitOpsItInGitRepo(ctx context.Context, it *v1.Integrat
 	}
 
 	// Publish a condition to notify the change was pushed to the branch
+	resourceKind := v1.IntegrationKind
+	if pipe != nil {
+		resourceKind = v1.PipeKind
+	}
 	it.Status.SetCondition(
 		v1.IntegrationConditionType("GitPushed"),
 		corev1.ConditionTrue,
 		"PushedToGit",
-		"Integration changes pushed to branch "+branchName,
+		fmt.Sprintf("%s changes pushed to branch %s", resourceKind, branchName),
 	)
 
 	return nil
+}
+
+// findOwnerPipe checks if the Integration was created by a Pipe and returns it.
+func (t *gitOpsTrait) findOwnerPipe(ctx context.Context, it *v1.Integration) (*v1.Pipe, error) {
+	for _, o := range it.OwnerReferences {
+		if o.Kind == v1.PipeKind && strings.HasPrefix(o.APIVersion, v1.SchemeGroupVersion.Group) {
+			pipe := &v1.Pipe{}
+			key := ctrl.ObjectKey{Namespace: it.Namespace, Name: o.Name}
+			if err := t.Client.Get(ctx, key, pipe); err != nil {
+				return nil, fmt.Errorf("could not load Pipe %q: %w", o.Name, err)
+			}
+
+			return pipe, nil
+		}
+	}
+
+	return nil, nil
 }
 
 // gitConf returns the git repo configuration where to pull the project from. If no value is provided, then, it takes
