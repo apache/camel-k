@@ -26,6 +26,7 @@ import (
 	"time"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/go-git/go-git/v5/plumbing/object"
@@ -186,4 +187,93 @@ func getRemoteURL(dirPath string) (string, error) {
 	}
 
 	return urls[0], nil
+}
+
+func newPipeGitOpsTraitTestSetup(t *testing.T) (*gitOpsTrait, v1.Pipe, v1.Integration) {
+	t.Helper()
+	trait, _ := newGitOpsTrait().(*gitOpsTrait)
+	trait.IntegrationDirectory = "integrations"
+
+	pipe := v1.NewPipe("default", "test-pipe")
+	pipe.UID = "pipe-uid-123"
+	pipe.Spec = v1.PipeSpec{
+		Source: v1.Endpoint{URI: ptr.To("timer:foo")},
+		Sink:   v1.Endpoint{URI: ptr.To("log:bar")},
+	}
+
+	it := v1.NewIntegration("default", "test-pipe")
+	it.OwnerReferences = []metav1.OwnerReference{
+		{
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       v1.PipeKind,
+			Name:       pipe.Name,
+			UID:        pipe.UID,
+		},
+	}
+	now := metav1.Now().Rfc3339Copy()
+	it.Status = v1.IntegrationStatus{
+		Image:          "my-pipe-img",
+		BuildTimestamp: &now,
+	}
+
+	fakeClient, err := internal.NewFakeClient(&pipe)
+	require.NoError(t, err)
+	trait.Client = fakeClient
+
+	return trait, pipe, it
+}
+
+func TestGitOpsPushRepoPipe(t *testing.T) {
+	trait, pipe, it := newPipeGitOpsTraitTestSetup(t)
+	trait.Overlays = []string{"dev", "prod"}
+	srcGitDir := t.TempDir()
+	tmpGitDir := t.TempDir()
+	err := initFakeGitRepo(srcGitDir)
+	require.NoError(t, err)
+	trait.URL = srcGitDir
+
+	err = trait.pushGitOpsItInGitRepo(context.TODO(), &it, tmpGitDir, "fake")
+	require.NoError(t, err)
+
+	assert.Contains(t,
+		it.Status.GetCondition(v1.IntegrationConditionType("GitPushed")).Message,
+		"Pipe changes pushed to branch cicd/candidate-release",
+	)
+
+	// Verify branch and commit
+	lastCommitMessage, err := getLastCommitMessage(tmpGitDir)
+	require.NoError(t, err)
+	assert.Contains(t, lastCommitMessage, "feat(ci): build complete")
+	branchName, err := getBranchNameFromDir(tmpGitDir)
+	require.NoError(t, err)
+	assert.Contains(t, branchName, "cicd/candidate-release")
+
+	// Verify pipe.yaml in base (not integration.yaml)
+	_, err = os.Stat(filepath.Join(tmpGitDir, "integrations", pipe.Name, "base", "pipe.yaml"))
+	require.NoError(t, err)
+	_, err = os.Stat(filepath.Join(tmpGitDir, "integrations", pipe.Name, "base", "integration.yaml"))
+	assert.True(t, os.IsNotExist(err), "integration.yaml should not exist for Pipe gitops")
+
+	// Verify overlay directories with patch-pipe.yaml
+	for _, overlay := range []string{"dev", "prod"} {
+		overlayDir := filepath.Join(tmpGitDir, "integrations", pipe.Name, "overlays", overlay)
+		gitopsDir, err := os.Stat(overlayDir)
+		require.NoError(t, err)
+		assert.True(t, gitopsDir.IsDir())
+		_, err = os.Stat(filepath.Join(overlayDir, "patch-pipe.yaml"))
+		require.NoError(t, err, "patch-pipe.yaml should exist in overlay %s", overlay)
+		// Verify "all" profile is generated
+		allKust := filepath.Join(tmpGitDir, "integrations", "all", "overlays", overlay, "kustomization.yaml")
+		_, err = os.Stat(allKust)
+		require.NoError(t, err, "all profile kustomization.yaml should exist for overlay %s", overlay)
+	}
+}
+
+func TestGitOpsPipeRequiresURL(t *testing.T) {
+	trait, _, it := newPipeGitOpsTraitTestSetup(t)
+	// No URL configured, no it.Spec.Git fallback
+	tmpGitDir := t.TempDir()
+	err := trait.pushGitOpsItInGitRepo(context.TODO(), &it, tmpGitDir, "fake")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "gitops trait requires a git URL when used with a Pipe")
 }

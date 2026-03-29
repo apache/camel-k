@@ -1,7 +1,7 @@
 [[gitops]]
 = Camel GitOps
 
-Once your build is complete, you can configure the operator to run an opinionated GitOps strategy. Camel K has a built-in feature which allow the operator to push a branch on a given Git repository with the latest Integration candidate release built. In order to set the context, this would be the scenario:
+Once your build is complete, you can configure the operator to run an opinionated GitOps strategy. Camel K has a built-in feature which allow the operator to push a branch on a given Git repository with the latest Integration or Pipe candidate release built. In order to set the context, this would be the scenario:
 
 1. The dev operator builds the application from Git source
 2. The dev operator push the container image
@@ -43,7 +43,31 @@ spec:
 
 NOTE: There are more options to configure on the `gitops` trait. Feel free to have a look and learn on the trait documentation page directly.
 
-As soon as the build of the Integration is completed, the operator will prepare the commit with the overlays. The structure would be like the following directory tree:
+The same trait can be used on a Pipe:
+
+```yaml
+apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  name: timer-to-log
+spec:
+  source:
+    uri: timer:foo
+  sink:
+    uri: log:bar
+  traits:
+    gitops:
+      enabled: true
+      url: https://github.com/my-org/my-camel-apps.git
+      secret: my-gh-token
+      overlays:
+        - staging
+        - production
+```
+
+NOTE: When used with a Pipe, the `url` and `secret` trait parameters are required.
+
+As soon as the build is completed, the operator will prepare the commit with the overlays. For an Integration, the structure would be like the following directory tree:
 
 ```bash
 /integrations/
@@ -70,7 +94,30 @@ As soon as the build of the Integration is completed, the operator will prepare 
 
 The above structure could be used directly with `kubectl` (eg, `kubectl apply -k /tmp/integrations/sample/overlays/production`) or any CICD capable of running a similar deployment strategy.
 
-The important thing to notice is that the **base** Integration is adding the container image that we've just built and any other trait which is required for the application to run correctly (and without the need to be rebuilt) on another environment:
+For a Pipe, the structure is similar but uses `pipe.yaml` and `patch-pipe.yaml` instead:
+
+```bash
+/pipes/
+├── all
+│   └── overlays
+│       ├── production
+│       │   └── kustomization.yaml
+│       └── staging
+│           └── kustomization.yaml
+└── timer-to-log
+    ├── base
+    │   ├── pipe.yaml
+    │   └── kustomization.yaml
+    └── overlays
+        ├── production
+        │   ├── kustomization.yaml
+        │   └── patch-pipe.yaml
+        └── staging
+            ├── kustomization.yaml
+            └── patch-pipe.yaml
+```
+
+The important thing to notice is that the **base** resource (Integration or Pipe) is adding the container image that we've just built and any other trait which is required for the application to run correctly (and without the need to be rebuilt) on another environment:
 
 ```yaml
 apiVersion: camel.apache.org/v1
@@ -184,7 +231,9 @@ NOTE: this is the approach suggested in https://developers.redhat.com/e-books/pa
 
 === Push to the same repository you've used to build
 
-If you're building application from Git and you want to push the changes back to the same, then, you don't need to configure the Git repository for `gitops` trait. If nothing is specified, the trait will get the configuration from `.spec.git` Integration. This approach may be good when you want to have a single repository containing all aspects of an application. In this case we suggest to use a directory named `ci` or `cicd` as a convention to store your GitOps configuration.
+If you're building application from Git and you want to push the changes back to the same repository, then, you don't need to configure the Git repository for `gitops` trait. If nothing is specified, the trait will get the configuration from `.spec.git` Integration. This approach may be good when you want to have a single repository containing all aspects of an application. In this case we suggest to use a directory named `ci` or `cicd` as a convention to store your GitOps configuration.
+
+NOTE: This does not apply to Pipes, which must always specify the `url` on the `gitops` trait.
 
 === Chain of GitOps environments
 

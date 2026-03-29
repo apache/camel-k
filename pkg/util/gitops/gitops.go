@@ -163,6 +163,10 @@ func EditPipe(kb *v1.Pipe, it *v1.Integration, kit *v1.IntegrationKit, toNamespa
 		traits.Container = &traitv1.ContainerTrait{}
 	}
 	traits.Container.Image = contImage
+	// We make sure not to propagate further the gitops trait
+	// to avoid infinite loops. If the user wants to do a chain based
+	// strategy, she can use the patch-pipe and continue the chain on purpose
+	traits.GitOps = nil
 	if kit != nil {
 		// We must provide the classpath expected for the IntegrationKit. This is calculated dynamically and
 		// would get lost when creating the non managed build Integration. For this reason

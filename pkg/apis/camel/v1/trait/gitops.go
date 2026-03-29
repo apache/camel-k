@@ -17,9 +17,9 @@ limitations under the License.
 
 package trait
 
-// The GitOps Trait is used to configure the repository where you want to push a GitOps Kustomize overlay configuration of the Integration built.
+// The GitOps Trait is used to configure the repository where you want to push a GitOps Kustomize overlay configuration of the Integration or Pipe built.
 // If the trait is enabled but no pull configuration is provided, then, the operator will use the values stored in Integration `.spec.git` field used
-// to pull the project.
+// to pull the project. When used with a Pipe, the `url` and `secret` parameters are required as Pipes do not have a `.spec.git` fallback.
 //
 // +camel-k:trait=gitops.
 //
