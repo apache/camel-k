@@ -19,7 +19,7 @@ FROM $CK_BASE_IMAGE AS base
 
 ARG IMAGE_ARCH
 
-ARG MAVEN_DEFAULT_VERSION="3.8.6"
+ARG MAVEN_DEFAULT_VERSION="3.9.14"
 ARG MAVEN_HOME="/usr/share/maven"
 ARG MAVEN_DIST_URL="https://archive.apache.org/dist/maven/maven-3/${MAVEN_DEFAULT_VERSION}/binaries/apache-maven-${MAVEN_DEFAULT_VERSION}-bin.zip"
 ARG MVNW_DIR="/usr/share/maven/mvnw/"
