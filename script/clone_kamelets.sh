@@ -16,17 +16,15 @@
 # limitations under the License.
 
 location=$(dirname $0)
-
-GO111MODULE=on
+KAMELET_VERSION="v4.18.1"
 
 # Entering the api module
 cd $location/../pkg/apis/camel/v1
 
 echo "Cloning Kamelets from apache-kamelets repository..."
 
-# TODO: use a fixed tag instad of main starting from apache kamelets 4.15.0 release
-wget -q -O kamelet_types.go  https://raw.githubusercontent.com/apache/camel-kamelets/refs/heads/main/crds/pkg/apis/camel/v1/kamelet_types.go
-wget -q -O kamelet_types_support.go  https://raw.githubusercontent.com/apache/camel-kamelets/refs/heads/main/crds/pkg/apis/camel/v1/kamelet_types_support.go
+wget -q -O kamelet_types.go  https://raw.githubusercontent.com/apache/camel-kamelets/refs/tags/$KAMELET_VERSION/crds/pkg/apis/camel/v1/kamelet_types.go
+wget -q -O kamelet_types_support.go  https://raw.githubusercontent.com/apache/camel-kamelets/refs/tags/$KAMELET_VERSION/crds/pkg/apis/camel/v1/kamelet_types_support.go
 
 # Add a short autogen comment here
 comment="// DO NOT EDIT: this file was automatically copied from apache/camel-kamelets/crds project"
