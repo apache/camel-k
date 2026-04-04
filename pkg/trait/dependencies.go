@@ -94,6 +94,12 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 		return err
 	}
 
+	if e.IntegrationProfile != nil {
+		for _, d := range e.IntegrationProfile.Spec.Dependencies {
+			dependencies.Add(d)
+		}
+	}
+
 	// Add dependencies back to integration
 	dependencies.Each(func(item string) bool {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, item)

@@ -345,3 +345,53 @@ func TestRestDepsQuarkus(t *testing.T) {
 		},
 	)
 }
+
+func TestIntegrationProfileDependency(t *testing.T) {
+	catalog, err := camel.QuarkusCatalog()
+	require.NoError(t, err)
+
+	e := &Environment{
+		Catalog:      NewEnvironmentTestCatalog(),
+		CamelCatalog: catalog,
+		Integration: &v1.Integration{
+			Spec: v1.IntegrationSpec{
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:    "flow.java",
+							Content: `rest().route().to("log:bar");`,
+						},
+						Language: v1.LanguageJavaSource,
+					},
+				},
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseInitialization,
+			},
+		},
+		IntegrationProfile: &v1.IntegrationProfile{
+			Spec: v1.IntegrationProfileSpec{
+				Dependencies: []string{
+					"profileDependency1", "profileDependency2",
+				},
+			},
+		},
+	}
+
+	trait := newDependenciesTrait()
+	enabled, condition, err := trait.Configure(e)
+	require.NoError(t, err)
+	assert.Nil(t, condition)
+	assert.True(t, enabled)
+
+	err = trait.Apply(e)
+	require.NoError(t, err)
+	assert.Subset(
+		t,
+		e.Integration.Status.Dependencies,
+		[]string{
+			"profileDependency1",
+			"profileDependency2",
+		},
+	)
+}

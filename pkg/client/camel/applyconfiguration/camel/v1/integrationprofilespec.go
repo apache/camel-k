@@ -30,6 +30,8 @@ type IntegrationProfileSpecApplyConfiguration struct {
 	Build *IntegrationProfileBuildSpecApplyConfiguration `json:"build,omitempty"`
 	// list of traits to be executed for all the Integration/IntegrationKits built from this IntegrationProfile
 	Traits *TraitsApplyConfiguration `json:"traits,omitempty"`
+	// a list of dependencies needed by the application
+	Dependencies []string `json:"dependencies,omitempty"`
 	// configuration to be executed to all Kamelets controlled by this IntegrationProfile
 	//
 	// Deprecated: to be removed in future versions.
@@ -55,6 +57,16 @@ func (b *IntegrationProfileSpecApplyConfiguration) WithBuild(value *IntegrationP
 // If called multiple times, the Traits field is set to the value of the last call.
 func (b *IntegrationProfileSpecApplyConfiguration) WithTraits(value *TraitsApplyConfiguration) *IntegrationProfileSpecApplyConfiguration {
 	b.Traits = value
+	return b
+}
+
+// WithDependencies adds the given value to the Dependencies field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, values provided by each call will be appended to the Dependencies field.
+func (b *IntegrationProfileSpecApplyConfiguration) WithDependencies(values ...string) *IntegrationProfileSpecApplyConfiguration {
+	for i := range values {
+		b.Dependencies = append(b.Dependencies, values[i])
+	}
 	return b
 }
 

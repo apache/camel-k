@@ -350,6 +350,11 @@ spec:
                       process
                     type: string
                 type: object
+              dependencies:
+                description: a list of dependencies needed by the application
+                items:
+                  type: string
+                type: array
               kamelet:
                 description: |-
                   configuration to be executed to all Kamelets controlled by this IntegrationProfile
@@ -2745,6 +2750,11 @@ spec:
                   - status
                   - type
                   type: object
+                type: array
+              dependencies:
+                description: a list of dependencies needed by the application
+                items:
+                  type: string
                 type: array
               kamelet:
                 description: |-

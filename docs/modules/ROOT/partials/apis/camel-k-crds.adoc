@@ -3402,6 +3402,13 @@ specify how to build the Integration/IntegrationKits
 
 list of traits to be executed for all the Integration/IntegrationKits built from this IntegrationProfile
 
+|`dependencies` +
+[]string
+|
+
+
+a list of dependencies needed by the application
+
 |`kamelet` +
 *xref:#_camel_apache_org_v1_IntegrationProfileKameletSpec[IntegrationProfileKameletSpec]*
 |
