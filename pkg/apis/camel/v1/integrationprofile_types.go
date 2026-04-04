@@ -31,6 +31,8 @@ type IntegrationProfileSpec struct {
 	Build IntegrationProfileBuildSpec `json:"build,omitempty"`
 	// list of traits to be executed for all the Integration/IntegrationKits built from this IntegrationProfile
 	Traits Traits `json:"traits,omitempty"`
+	// a list of dependencies needed by the application
+	Dependencies []string `json:"dependencies,omitempty"`
 	// configuration to be executed to all Kamelets controlled by this IntegrationProfile
 	//
 	// Deprecated: to be removed in future versions.

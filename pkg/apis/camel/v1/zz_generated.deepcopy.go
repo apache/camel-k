@@ -1754,6 +1754,11 @@ func (in *IntegrationProfileSpec) DeepCopyInto(out *IntegrationProfileSpec) {
 	*out = *in
 	in.Build.DeepCopyInto(&out.Build)
 	in.Traits.DeepCopyInto(&out.Traits)
+	if in.Dependencies != nil {
+		in, out := &in.Dependencies, &out.Dependencies
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	in.Kamelet.DeepCopyInto(&out.Kamelet)
 }
 

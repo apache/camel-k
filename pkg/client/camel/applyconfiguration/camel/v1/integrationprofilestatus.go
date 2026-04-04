@@ -59,6 +59,16 @@ func (b *IntegrationProfileStatusApplyConfiguration) WithTraits(value *TraitsApp
 	return b
 }
 
+// WithDependencies adds the given value to the Dependencies field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, values provided by each call will be appended to the Dependencies field.
+func (b *IntegrationProfileStatusApplyConfiguration) WithDependencies(values ...string) *IntegrationProfileStatusApplyConfiguration {
+	for i := range values {
+		b.IntegrationProfileSpecApplyConfiguration.Dependencies = append(b.IntegrationProfileSpecApplyConfiguration.Dependencies, values[i])
+	}
+	return b
+}
+
 // WithKamelet sets the Kamelet field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Kamelet field is set to the value of the last call.
