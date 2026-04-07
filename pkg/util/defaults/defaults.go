@@ -23,13 +23,13 @@ package defaults
 
 const (
 	// Version --
-	Version = "2.10.0-SNAPSHOT"
+	Version = "2.10.0"
 
 	// DefaultRuntimeVersion --
 	DefaultRuntimeVersion = "3.15.3"
 
 	// baseImage --
-	baseImage = "eclipse-temurin:17-jdk@sha256:2cffc61cde3d5bd27a764c87508eb7714856fe396ab56a0f37e180a9e876bca2"
+	baseImage = "eclipse-temurin:21-jdk"
 
 	// LocalRepository --
 	LocalRepository = "/etc/maven/m2"
