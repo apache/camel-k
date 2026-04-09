@@ -29,7 +29,7 @@ const (
 	DefaultRuntimeVersion = "3.15.3"
 
 	// baseImage --
-	baseImage = "eclipse-temurin:17-jdk@sha256:cc8d306395be4a8375277887d83e9e77eae05c26b6eba8ef320e5f0640e3a1fe"
+	baseImage = "eclipse-temurin:17-jdk@sha256:2ff0b91aaa4cb5dc35b4760c37fe064390a486dcd90b361caa72b55d598601f3"
 
 	// LocalRepository --
 	LocalRepository = "/etc/maven/m2"
