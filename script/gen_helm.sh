@@ -34,3 +34,8 @@ printf "{{- end }}\n" >> ./helm/camel-k/templates/rbacs-namespaced.yaml
 printf "{{- if eq .Values.operator.global \"true\" }}\n" >> ./helm/camel-k/templates/rbacs-descoped.yaml
 kustomize build ./pkg/resources/config/helm/descoped/. >> ./helm/camel-k/templates/rbacs-descoped.yaml
 printf "{{- end }}\n" >> ./helm/camel-k/templates/rbacs-descoped.yaml
+
+# [Helm] Camel-K Operator sharding - https://github.com/apache/camel-k/issues/6533
+sed -i -E "s/^([[:space:]]*)name: camel-k-(.*)$/\1name: {{ include \"camel-k.fullname\" . }}-\2/" ./helm/camel-k/templates/rbacs-common.yaml
+sed -i -E "s/^([[:space:]]*)name: camel-k-(.*)$/\1name: {{ include \"camel-k.fullname\" . }}-\2/" ./helm/camel-k/templates/rbacs-namespaced.yaml
+sed -i -E "s/^([[:space:]]*)name: camel-k-(.*)$/\1name: {{ include \"camel-k.fullname\" . }}-\2/" ./helm/camel-k/templates/rbacs-descoped.yaml
