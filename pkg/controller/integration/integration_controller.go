@@ -74,32 +74,20 @@ func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
 }
 
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
+	baseActions := []Action{
+		NewPlatformSetupAction(),
+		NewInitializeAction(),
+		NewBuildAction(),
+		newBuildKitAction(),
+		NewBuildCompleteAction(),
+	}
 	return monitoring.NewInstrumentedReconciler(
 		&reconcileIntegration{
-			client:   c,
-			scheme:   mgr.GetScheme(),
-			recorder: mgr.GetEventRecorder("camel-k-integration-controller"),
-			syntheticActions: append(
-				[]Action{
-					NewPlatformSetupAction(),
-					NewInitializeAction(),
-					NewBuildAction(),
-					newBuildKitAction(),
-					NewBuildCompleteAction(),
-				},
-				NewMonitorSyntheticAction(),
-			),
-			nonSyntheticActions: append(
-				[]Action{
-					NewPlatformSetupAction(),
-					NewInitializeAction(),
-					NewBuildAction(),
-					newBuildKitAction(),
-					NewBuildCompleteAction(),
-				},
-				NewMonitorAction(),
-				NewMonitorUnknownAction(),
-			),
+			client:              c,
+			scheme:              mgr.GetScheme(),
+			recorder:            mgr.GetEventRecorder("camel-k-integration-controller"),
+			syntheticActions:    append(append([]Action{}, baseActions...), NewMonitorSyntheticAction()),
+			nonSyntheticActions: append(append([]Action{}, baseActions...), NewMonitorAction(), NewMonitorUnknownAction()),
 		},
 		schema.GroupVersionKind{
 			Group:   v1.SchemeGroupVersion.Group,
