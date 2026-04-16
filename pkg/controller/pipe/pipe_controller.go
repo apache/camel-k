@@ -44,8 +44,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/monitoring"
 )
 
-type actionFactory func() Action
-
 // Add creates a new Pipe Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
@@ -58,9 +56,9 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 			client:   c,
 			scheme:   mgr.GetScheme(),
 			recorder: mgr.GetEventRecorder("camel-k-pipe-controller"),
-			actionFactories: []actionFactory{
-				NewInitializeAction,
-				NewMonitorAction,
+			actions: []Action{
+				NewInitializeAction(),
+				NewMonitorAction(),
 			},
 		},
 		schema.GroupVersionKind{
@@ -138,19 +136,10 @@ var _ reconcile.Reconciler = &ReconcilePipe{}
 type ReconcilePipe struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the API server
-	client          client.Client
-	scheme          *runtime.Scheme
-	recorder        events.EventRecorder
-	actionFactories []actionFactory
-}
-
-func (r *ReconcilePipe) newActions() []Action {
-	actions := make([]Action, 0, len(r.actionFactories))
-	for _, newAction := range r.actionFactories {
-		actions = append(actions, newAction())
-	}
-
-	return actions
+	client   client.Client
+	scheme   *runtime.Scheme
+	recorder events.EventRecorder
+	actions  []Action
 }
 
 // Reconcile reads that state of the cluster for a Pipe object and makes changes based
@@ -194,14 +183,12 @@ func (r *ReconcilePipe) Reconcile(ctx context.Context, request reconcile.Request
 		return reconcile.Result{}, nil
 	}
 
-	actions := r.newActions()
-
 	var err error
 
 	target := instance.DeepCopy()
 	targetLog := rlog.ForPipe(target)
 
-	for _, a := range actions {
+	for _, a := range r.actions {
 		a.InjectClient(r.client)
 		a.InjectLogger(targetLog)
 

@@ -24,26 +24,33 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestNewActions(t *testing.T) {
+func TestActions(t *testing.T) {
 	reconciler := reconcileIntegration{
-		baseActionFactories: []actionFactory{
-			NewPlatformSetupAction,
-			NewInitializeAction,
-			NewBuildAction,
-			newBuildKitAction,
-			NewBuildCompleteAction,
-		},
-		syntheticActionFactories: []actionFactory{
-			NewMonitorSyntheticAction,
-		},
-		nonSyntheticActionFactories: []actionFactory{
-			NewMonitorAction,
-			NewMonitorUnknownAction,
-		},
+		syntheticActions: append(
+			[]Action{
+				NewPlatformSetupAction(),
+				NewInitializeAction(),
+				NewBuildAction(),
+				newBuildKitAction(),
+				NewBuildCompleteAction(),
+			},
+			NewMonitorSyntheticAction(),
+		),
+		nonSyntheticActions: append(
+			[]Action{
+				NewPlatformSetupAction(),
+				NewInitializeAction(),
+				NewBuildAction(),
+				newBuildKitAction(),
+				NewBuildCompleteAction(),
+			},
+			NewMonitorAction(),
+			NewMonitorUnknownAction(),
+		),
 	}
 
 	t.Run("non-synthetic", func(t *testing.T) {
-		actions := reconciler.newActions(false)
+		actions := reconciler.nonSyntheticActions
 		require.Len(t, actions, 7)
 
 		assert.IsType(t, &platformSetupAction{}, actions[0])
@@ -53,18 +60,17 @@ func TestNewActions(t *testing.T) {
 		assert.IsType(t, &buildCompleteAction{}, actions[4])
 		assert.IsType(t, &monitorAction{}, actions[5])
 		assert.IsType(t, &monitorUnknownAction{}, actions[6])
-
-		nextActions := reconciler.newActions(false)
-		assert.NotSame(t, actions[0], nextActions[0])
 	})
 
 	t.Run("synthetic", func(t *testing.T) {
-		actions := reconciler.newActions(true)
+		actions := reconciler.syntheticActions
 		require.Len(t, actions, 6)
 
+		assert.IsType(t, &platformSetupAction{}, actions[0])
+		assert.IsType(t, &initializeAction{}, actions[1])
+		assert.IsType(t, &buildAction{}, actions[2])
+		assert.IsType(t, &buildKitAction{}, actions[3])
+		assert.IsType(t, &buildCompleteAction{}, actions[4])
 		assert.IsType(t, &monitorSyntheticAction{}, actions[5])
-
-		nextActions := reconciler.newActions(true)
-		assert.NotSame(t, actions[0], nextActions[0])
 	})
 }

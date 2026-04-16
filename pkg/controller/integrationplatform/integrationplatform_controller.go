@@ -40,8 +40,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/monitoring"
 )
 
-type actionFactory func() Action
-
 // Add creates a new IntegrationPlatform Controller and adds it to the Manager. The Manager will set fields
 // on the Controller and Start it when the Manager is Started.
 func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
@@ -55,10 +53,10 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 			reader:   mgr.GetAPIReader(),
 			scheme:   mgr.GetScheme(),
 			recorder: mgr.GetEventRecorder("camel-k-integration-platform-controller"),
-			actionFactories: []actionFactory{
-				NewInitializeAction,
-				NewCreateAction,
-				NewMonitorAction,
+			actions: []Action{
+				NewInitializeAction(),
+				NewCreateAction(),
+				NewMonitorAction(),
 			},
 		},
 		schema.GroupVersionKind{
@@ -111,19 +109,10 @@ type reconcileIntegrationPlatform struct {
 	// that reads objects from the cache and writes to the API server
 	client client.Client
 	// Non-caching client
-	reader          ctrl.Reader
-	scheme          *runtime.Scheme
-	recorder        events.EventRecorder
-	actionFactories []actionFactory
-}
-
-func (r *reconcileIntegrationPlatform) newActions() []Action {
-	actions := make([]Action, 0, len(r.actionFactories))
-	for _, newAction := range r.actionFactories {
-		actions = append(actions, newAction())
-	}
-
-	return actions
+	reader   ctrl.Reader
+	scheme   *runtime.Scheme
+	recorder events.EventRecorder
+	actions  []Action
 }
 
 // Reconcile reads that state of the cluster for a IntegrationPlatform object and makes changes based
@@ -167,15 +156,13 @@ func (r *reconcileIntegrationPlatform) Reconcile(ctx context.Context, request re
 		return reconcile.Result{}, nil
 	}
 
-	actions := r.newActions()
-
 	var targetPhase v1.IntegrationPlatformPhase
 	var err error
 
 	target := instance.DeepCopy()
 	targetLog := rlog.ForIntegrationPlatform(target)
 
-	for _, a := range actions {
+	for _, a := range r.actions {
 		a.InjectClient(r.client)
 		a.InjectLogger(targetLog)
 

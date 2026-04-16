@@ -24,21 +24,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestNewActions(t *testing.T) {
+func TestActions(t *testing.T) {
 	reconciler := ReconcilePipe{
-		actionFactories: []actionFactory{
-			NewInitializeAction,
-			NewMonitorAction,
+		actions: []Action{
+			NewInitializeAction(),
+			NewMonitorAction(),
 		},
 	}
 
-	actions := reconciler.newActions()
-	require.Len(t, actions, 2)
-
-	assert.IsType(t, &initializeAction{}, actions[0])
-	assert.IsType(t, &monitorAction{}, actions[1])
-
-	nextActions := reconciler.newActions()
-	assert.NotSame(t, actions[0], nextActions[0])
-	assert.NotSame(t, actions[1], nextActions[1])
+	require.Len(t, reconciler.actions, 2)
+	assert.IsType(t, &initializeAction{}, reconciler.actions[0])
+	assert.IsType(t, &monitorAction{}, reconciler.actions[1])
 }

@@ -48,8 +48,6 @@ const (
 	requeueAfterDuration = 2 * time.Second
 )
 
-type actionFactory func() Action
-
 // Add creates a new IntegrationKit Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
@@ -62,11 +60,11 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 			client:   c,
 			scheme:   mgr.GetScheme(),
 			recorder: mgr.GetEventRecorder("camel-k-integration-kit-controller"),
-			actionFactories: []actionFactory{
-				NewInitializeAction,
-				NewBuildAction,
-				NewMonitorAction,
-				NewErrorAction,
+			actions: []Action{
+				NewInitializeAction(),
+				NewBuildAction(),
+				NewMonitorAction(),
+				NewErrorAction(),
 			},
 		},
 		schema.GroupVersionKind{
@@ -188,19 +186,10 @@ var _ reconcile.Reconciler = &reconcileIntegrationKit{}
 type reconcileIntegrationKit struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the API server
-	client          client.Client
-	scheme          *runtime.Scheme
-	recorder        events.EventRecorder
-	actionFactories []actionFactory
-}
-
-func (r *reconcileIntegrationKit) newActions() []Action {
-	actions := make([]Action, 0, len(r.actionFactories))
-	for _, newAction := range r.actionFactories {
-		actions = append(actions, newAction())
-	}
-
-	return actions
+	client   client.Client
+	scheme   *runtime.Scheme
+	recorder events.EventRecorder
+	actions  []Action
 }
 
 // Reconcile reads that state of the cluster for a IntegrationKit object and makes changes based on the state read
@@ -281,11 +270,9 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 		return reconcile.Result{}, err
 	}
 
-	actions := r.newActions()
-
 	targetPhase := instance.Status.Phase
 
-	for _, a := range actions {
+	for _, a := range r.actions {
 		a.InjectClient(r.client)
 		a.InjectLogger(targetLog)
 

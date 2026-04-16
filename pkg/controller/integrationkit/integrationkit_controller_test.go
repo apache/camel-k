@@ -24,27 +24,19 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestNewActions(t *testing.T) {
+func TestActions(t *testing.T) {
 	reconciler := reconcileIntegrationKit{
-		actionFactories: []actionFactory{
-			NewInitializeAction,
-			NewBuildAction,
-			NewMonitorAction,
-			NewErrorAction,
+		actions: []Action{
+			NewInitializeAction(),
+			NewBuildAction(),
+			NewMonitorAction(),
+			NewErrorAction(),
 		},
 	}
 
-	actions := reconciler.newActions()
-	require.Len(t, actions, 4)
-
-	assert.IsType(t, &initializeAction{}, actions[0])
-	assert.IsType(t, &buildAction{}, actions[1])
-	assert.IsType(t, &monitorAction{}, actions[2])
-	assert.IsType(t, &errorAction{}, actions[3])
-
-	nextActions := reconciler.newActions()
-	assert.NotSame(t, actions[0], nextActions[0])
-	assert.NotSame(t, actions[1], nextActions[1])
-	assert.NotSame(t, actions[2], nextActions[2])
-	assert.NotSame(t, actions[3], nextActions[3])
+	require.Len(t, reconciler.actions, 4)
+	assert.IsType(t, &initializeAction{}, reconciler.actions[0])
+	assert.IsType(t, &buildAction{}, reconciler.actions[1])
+	assert.IsType(t, &monitorAction{}, reconciler.actions[2])
+	assert.IsType(t, &errorAction{}, reconciler.actions[3])
 }
