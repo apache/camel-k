@@ -20,25 +20,22 @@ package catalog
 import (
 	"testing"
 
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestNewActions(t *testing.T) {
+func TestActions(t *testing.T) {
+	c, err := internal.NewFakeClient()
+	require.NoError(t, err)
+
 	reconciler := reconcileCatalog{
-		actionFactories: []actionFactory{
-			NewInitializeAction,
-			NewMonitorAction,
-		},
+		actions: newCatalogActions(c),
 	}
 
-	actions := reconciler.newActions()
-	require.Len(t, actions, 2)
-
-	assert.IsType(t, &initializeAction{}, actions[0])
-	assert.IsType(t, &monitorAction{}, actions[1])
-
-	nextActions := reconciler.newActions()
-	assert.NotSame(t, actions[0], nextActions[0])
-	assert.NotSame(t, actions[1], nextActions[1])
+	require.Len(t, reconciler.actions, 2)
+	assert.IsType(t, &initializeAction{}, reconciler.actions[0])
+	assert.IsType(t, &monitorAction{}, reconciler.actions[1])
+	assert.Same(t, c, reconciler.actions[0].(*initializeAction).client)
+	assert.Same(t, c, reconciler.actions[1].(*monitorAction).client)
 }

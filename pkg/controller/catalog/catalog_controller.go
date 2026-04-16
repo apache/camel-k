@@ -45,8 +45,6 @@ const (
 	requeueAfterDuration = 5 * time.Second
 )
 
-type actionFactory func() Action
-
 // Add creates a new Catalog Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
@@ -59,10 +57,7 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 			client:   c,
 			scheme:   mgr.GetScheme(),
 			recorder: mgr.GetEventRecorder("camel-k-catalog-controller"),
-			actionFactories: []actionFactory{
-				NewInitializeAction,
-				NewMonitorAction,
-			},
+			actions:  newCatalogActions(c),
 		},
 		schema.GroupVersionKind{
 			Group:   v1.SchemeGroupVersion.Group,
@@ -70,6 +65,19 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 			Kind:    v1.CamelCatalogKind,
 		},
 	)
+}
+
+func newCatalogActions(c client.Client) []Action {
+	actions := []Action{
+		NewInitializeAction(),
+		NewMonitorAction(),
+	}
+
+	for _, action := range actions {
+		action.InjectClient(c)
+	}
+
+	return actions
 }
 
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
@@ -110,19 +118,10 @@ var _ reconcile.Reconciler = &reconcileCatalog{}
 type reconcileCatalog struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the API server
-	client          client.Client
-	scheme          *runtime.Scheme
-	recorder        events.EventRecorder
-	actionFactories []actionFactory
-}
-
-func (r *reconcileCatalog) newActions() []Action {
-	actions := make([]Action, 0, len(r.actionFactories))
-	for _, newAction := range r.actionFactories {
-		actions = append(actions, newAction())
-	}
-
-	return actions
+	client   client.Client
+	scheme   *runtime.Scheme
+	recorder events.EventRecorder
+	actions  []Action
 }
 
 // Reconcile reads that state of the cluster for a catalog object and makes changes based
@@ -166,18 +165,14 @@ func (r *reconcileCatalog) Reconcile(ctx context.Context, request reconcile.Requ
 		return reconcile.Result{}, nil
 	}
 
-	actions := r.newActions()
-
 	var targetPhase v1.CamelCatalogPhase
 	var err error
 
 	target := instance.DeepCopy()
 	targetLog := rlog.ForCatalog(target)
+	ctx = contextWithLogger(ctx, targetLog)
 
-	for _, a := range actions {
-		a.InjectClient(r.client)
-		a.InjectLogger(targetLog)
-
+	for _, a := range r.actions {
 		if !a.CanHandle(target) {
 			continue
 		}
