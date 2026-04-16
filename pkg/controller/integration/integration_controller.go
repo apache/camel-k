@@ -58,8 +58,6 @@ import (
 
 const retryMonitoring = 5
 
-type actionFactory func() Action
-
 func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
 	err := mgr.GetFieldIndexer().IndexField(ctx, &corev1.Pod{}, "status.phase",
 		func(obj ctrl.Object) []string {
@@ -81,20 +79,27 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 			client:   c,
 			scheme:   mgr.GetScheme(),
 			recorder: mgr.GetEventRecorder("camel-k-integration-controller"),
-			baseActionFactories: []actionFactory{
-				NewPlatformSetupAction,
-				NewInitializeAction,
-				NewBuildAction,
-				newBuildKitAction,
-				NewBuildCompleteAction,
-			},
-			syntheticActionFactories: []actionFactory{
-				NewMonitorSyntheticAction,
-			},
-			nonSyntheticActionFactories: []actionFactory{
-				NewMonitorAction,
-				NewMonitorUnknownAction,
-			},
+			syntheticActions: append(
+				[]Action{
+					NewPlatformSetupAction(),
+					NewInitializeAction(),
+					NewBuildAction(),
+					newBuildKitAction(),
+					NewBuildCompleteAction(),
+				},
+				NewMonitorSyntheticAction(),
+			),
+			nonSyntheticActions: append(
+				[]Action{
+					NewPlatformSetupAction(),
+					NewInitializeAction(),
+					NewBuildAction(),
+					newBuildKitAction(),
+					NewBuildCompleteAction(),
+				},
+				NewMonitorAction(),
+				NewMonitorUnknownAction(),
+			),
 		},
 		schema.GroupVersionKind{
 			Group:   v1.SchemeGroupVersion.Group,
@@ -469,29 +474,11 @@ var _ reconcile.Reconciler = &reconcileIntegration{}
 type reconcileIntegration struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the API server
-	client                      client.Client
-	scheme                      *runtime.Scheme
-	recorder                    events.EventRecorder
-	baseActionFactories         []actionFactory
-	syntheticActionFactories    []actionFactory
-	nonSyntheticActionFactories []actionFactory
-}
-
-func (r *reconcileIntegration) newActions(synthetic bool) []Action {
-	factories := make([]actionFactory, 0, len(r.baseActionFactories)+len(r.syntheticActionFactories))
-	factories = append(factories, r.baseActionFactories...)
-	if synthetic {
-		factories = append(factories, r.syntheticActionFactories...)
-	} else {
-		factories = append(factories, r.nonSyntheticActionFactories...)
-	}
-
-	actions := make([]Action, 0, len(factories))
-	for _, newAction := range factories {
-		actions = append(actions, newAction())
-	}
-
-	return actions
+	client              client.Client
+	scheme              *runtime.Scheme
+	recorder            events.EventRecorder
+	syntheticActions    []Action
+	nonSyntheticActions []Action
 }
 
 // Reconcile reads that state of the cluster for an Integration object and makes changes based on the state read
@@ -536,7 +523,10 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 	target := instance.DeepCopy()
 	targetLog := rlog.ForIntegration(target)
 
-	actions := r.newActions(instance.IsSynthetic())
+	actions := r.nonSyntheticActions
+	if instance.IsSynthetic() {
+		actions = r.syntheticActions
+	}
 
 	for _, a := range actions {
 		a.InjectClient(r.client)
