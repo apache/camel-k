@@ -25,11 +25,10 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
-type actionLoggerKey struct{}
-
 // Action --.
 type Action interface {
 	client.Injectable
+	log.Injectable
 
 	// a user friendly name for the action
 	Name() string
@@ -43,21 +42,13 @@ type Action interface {
 
 type baseAction struct {
 	client client.Client
+	L      log.Logger
 }
 
 func (action *baseAction) InjectClient(client client.Client) {
 	action.client = client
 }
 
-func contextWithLogger(ctx context.Context, logger log.Logger) context.Context {
-	return context.WithValue(ctx, actionLoggerKey{}, logger)
-}
-
-func loggerFromContext(ctx context.Context, catalog *v1.CamelCatalog) log.Logger {
-	logger, ok := ctx.Value(actionLoggerKey{}).(log.Logger)
-	if ok {
-		return logger
-	}
-
-	return Log.ForCatalog(catalog)
+func (action *baseAction) InjectLogger(log log.Logger) {
+	action.L = log
 }
