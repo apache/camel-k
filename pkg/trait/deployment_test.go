@@ -325,7 +325,7 @@ func createNominalDeploymentTest() (*deploymentTrait, *Environment) {
 }
 
 func TestApplyDeploymentWithCamelDashboardLabel(t *testing.T) {
-	t.Setenv(kubernetes.CamelDashboardAppLabelEnvVar, "my-dashboard-label")
+	t.Setenv(kubernetes.CamelMonitorOperatorLabelEnvVar, "my-dashboard-label")
 
 	deploymentTrait, environment := createNominalDeploymentTest()
 	err := deploymentTrait.Apply(environment)
