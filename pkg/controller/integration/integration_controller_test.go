@@ -30,7 +30,7 @@ import (
 )
 
 func TestActions(t *testing.T) {
-	baseActions := []Action{
+	base := []Action{
 		NewPlatformSetupAction(),
 		NewInitializeAction(),
 		NewBuildAction(),
@@ -38,12 +38,12 @@ func TestActions(t *testing.T) {
 		NewBuildCompleteAction(),
 	}
 	reconciler := reconcileIntegration{
-		syntheticActions:    append(append([]Action{}, baseActions...), NewMonitorSyntheticAction()),
-		nonSyntheticActions: append(append([]Action{}, baseActions...), NewMonitorAction(), NewMonitorUnknownAction()),
+		syntheticActions: append(append([]Action{}, base...), NewMonitorSyntheticAction()),
+		baseActions:      append(append([]Action{}, base...), NewMonitorAction(), NewMonitorUnknownAction()),
 	}
 
 	t.Run("non-synthetic", func(t *testing.T) {
-		actions := reconciler.nonSyntheticActions
+		actions := reconciler.baseActions
 		require.Len(t, actions, 7)
 
 		assert.IsType(t, &platformSetupAction{}, actions[0])

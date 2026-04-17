@@ -74,20 +74,21 @@ func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
 }
 
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
-	baseActions := []Action{
+	base := []Action{
 		NewPlatformSetupAction(),
 		NewInitializeAction(),
 		NewBuildAction(),
 		newBuildKitAction(),
 		NewBuildCompleteAction(),
 	}
+
 	return monitoring.NewInstrumentedReconciler(
 		&reconcileIntegration{
-			client:              c,
-			scheme:              mgr.GetScheme(),
-			recorder:            mgr.GetEventRecorder("camel-k-integration-controller"),
-			syntheticActions:    append(append([]Action{}, baseActions...), NewMonitorSyntheticAction()),
-			nonSyntheticActions: append(append([]Action{}, baseActions...), NewMonitorAction(), NewMonitorUnknownAction()),
+			client:           c,
+			scheme:           mgr.GetScheme(),
+			recorder:         mgr.GetEventRecorder("camel-k-integration-controller"),
+			syntheticActions: append(append([]Action{}, base...), NewMonitorSyntheticAction()),
+			baseActions:      append(append([]Action{}, base...), NewMonitorAction(), NewMonitorUnknownAction()),
 		},
 		schema.GroupVersionKind{
 			Group:   v1.SchemeGroupVersion.Group,
@@ -462,11 +463,11 @@ var _ reconcile.Reconciler = &reconcileIntegration{}
 type reconcileIntegration struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the API server
-	client              client.Client
-	scheme              *runtime.Scheme
-	recorder            events.EventRecorder
-	syntheticActions    []Action
-	nonSyntheticActions []Action
+	client           client.Client
+	scheme           *runtime.Scheme
+	recorder         events.EventRecorder
+	syntheticActions []Action
+	baseActions      []Action
 }
 
 // Reconcile reads that state of the cluster for an Integration object and makes changes based on the state read
@@ -511,7 +512,7 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 	target := instance.DeepCopy()
 	targetLog := rlog.ForIntegration(target)
 
-	actions := r.nonSyntheticActions
+	actions := r.baseActions
 	if instance.IsSynthetic() {
 		actions = r.syntheticActions
 	}
