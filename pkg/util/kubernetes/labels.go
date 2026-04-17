@@ -23,7 +23,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-const CamelDashboardAppLabelEnvVar = "CAMEL_DASHBOARD_APP_LABEL"
+const CamelMonitorOperatorLabelEnvVar = "CAMEL_MONITOR_OPERATOR_LABEL"
 
 // DeploymentLabels returns the fixed labels assigned to each Camel workload.
 func DeploymentLabels(integrationName string) map[string]string {
@@ -31,7 +31,7 @@ func DeploymentLabels(integrationName string) map[string]string {
 		// Required by Camel K
 		v1.IntegrationLabel: integrationName,
 	}
-	camelDashboardLabel, ok := os.LookupEnv(CamelDashboardAppLabelEnvVar)
+	camelDashboardLabel, ok := os.LookupEnv(CamelMonitorOperatorLabelEnvVar)
 	if ok && camelDashboardLabel != "" {
 		// Will automatically enable App discovery by Camel Dashboard
 		labels[camelDashboardLabel] = integrationName
