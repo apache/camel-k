@@ -57,6 +57,10 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 			client:   c,
 			scheme:   mgr.GetScheme(),
 			recorder: mgr.GetEventRecorder("camel-k-catalog-controller"),
+			actions: []Action{
+				NewInitializeAction(),
+				NewMonitorAction(),
+			},
 		},
 		schema.GroupVersionKind{
 			Group:   v1.SchemeGroupVersion.Group,
@@ -107,6 +111,7 @@ type reconcileCatalog struct {
 	client   client.Client
 	scheme   *runtime.Scheme
 	recorder events.EventRecorder
+	actions  []Action
 }
 
 // Reconcile reads that state of the cluster for a catalog object and makes changes based
@@ -150,18 +155,13 @@ func (r *reconcileCatalog) Reconcile(ctx context.Context, request reconcile.Requ
 		return reconcile.Result{}, nil
 	}
 
-	actions := []Action{
-		NewInitializeAction(),
-		NewMonitorAction(),
-	}
-
 	var targetPhase v1.CamelCatalogPhase
 	var err error
 
 	target := instance.DeepCopy()
 	targetLog := rlog.ForCatalog(target)
 
-	for _, a := range actions {
+	for _, a := range r.actions {
 		a.InjectClient(r.client)
 		a.InjectLogger(targetLog)
 
