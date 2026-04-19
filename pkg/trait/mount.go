@@ -61,7 +61,9 @@ func (t *mountTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil || !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
-
+	if e.Integration.IsSynthetic() {
+		return false, NewIntegrationConditionPlatformDisabledWithMessage("Mount", "synthetic integration"), nil
+	}
 	// Validate resources and pvcs
 	for _, c := range t.Configs {
 		if !strings.HasPrefix(c, "configmap:") && !strings.HasPrefix(c, "secret:") {

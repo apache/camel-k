@@ -34,38 +34,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
-func TestCollectConfigurationValues(t *testing.T) {
-	e := Environment{
-		Integration: &v1.Integration{
-			Spec: v1.IntegrationSpec{
-				Configuration: []v1.ConfigurationSpec{
-					{Type: "configmap", Value: "my-cm-integration"},
-					{Type: "env", Value: "my-env-integration"},
-				},
-			},
-		},
-		IntegrationKit: &v1.IntegrationKit{
-			Spec: v1.IntegrationKitSpec{
-				Configuration: []v1.ConfigurationSpec{
-					{Type: "configmap", Value: "my-cm-kit"},
-					{Type: "property", Value: "my-p-kit"},
-				},
-			},
-		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Configuration: []v1.ConfigurationSpec{
-					{Type: "configmap", Value: "my-cm-platform"},
-					{Type: "secret", Value: "my-secret-platform"},
-					{Type: "property", Value: "my-p-platform"},
-					{Type: "env", Value: "my-env-platform"},
-				},
-			},
-		},
-	}
-	e.Platform.ResyncStatusFullConfig()
-}
-
 func TestCollectConfigurationPairs(t *testing.T) {
 	e := Environment{
 		Integration: &v1.Integration{
@@ -84,24 +52,12 @@ func TestCollectConfigurationPairs(t *testing.T) {
 				},
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Configuration: []v1.ConfigurationSpec{
-					{Type: "property", Value: "p1=platform"},
-					{Type: "property", Value: "p2=platform"},
-					{Type: "property", Value: "p3=platform"},
-					{Type: "property", Value: "p4=platform"},
-				},
-			},
-		},
 	}
-	e.Platform.ResyncStatusFullConfig()
 
 	pairs := e.collectConfigurationPairs("property")
 	assert.Equal(t, pairs, []variable{
 		{Name: "p1", Value: "integration"},
 		{Name: "p2", Value: "kit"},
-		{Name: "p3", Value: "platform"},
 		{Name: "p4", Value: "integration"},
 	})
 }
@@ -184,7 +140,6 @@ func TestDetermineControllerStrategySyntheticKitForceKnative(t *testing.T) {
 		},
 		Auto: ptr.To(false),
 	}
-	e.Platform.ResyncStatusFullConfig()
 	_, _, err := e.Catalog.apply(e)
 	require.NoError(t, err)
 
@@ -239,23 +194,11 @@ func createTestEnvironment(t *testing.T, profile v1.TraitProfile) *Environment {
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterKubernetes,
-				Build: v1.IntegrationPlatformBuildSpec{
-					RuntimeVersion: catalog.Runtime.Version,
-				},
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:       pl,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
-
-	environment.Platform.ResyncStatusFullConfig()
 
 	_, _, err = traitCatalog.apply(environment)
 	require.NoError(t, err)
@@ -293,20 +236,11 @@ func createNonManagedBuildTestEnvironment(t *testing.T, profile v1.TraitProfile)
 				},
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterKubernetes,
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:       pl,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
-
-	environment.Platform.ResyncStatusFullConfig()
 
 	_, _, err = traitCatalog.apply(environment)
 	require.NoError(t, err)

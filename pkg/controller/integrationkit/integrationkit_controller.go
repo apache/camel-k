@@ -247,19 +247,14 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 		}
 
 		// Platform is always local to the kit
-		pl, err := platform.GetForResource(ctx, r.client, target)
-		if err != nil || pl.Status.Phase != v1.IntegrationPlatformPhaseReady {
+		pl, _ := platform.GetForResource(ctx, r.client, target)
+		if pl != nil && pl.Status.Phase != v1.IntegrationPlatformPhaseReady {
 			target.Status.Phase = v1.IntegrationKitPhaseWaitingForPlatform
 		} else {
 			target.Status.Phase = v1.IntegrationKitPhaseInitialization
 		}
 
 		if instance.Status.Phase != target.Status.Phase {
-			if err != nil {
-				rlog.Debugf("Error occurred while searching for platform. Cannot advance phase until cleared: %v", err)
-				target.Status.SetErrorCondition(v1.IntegrationKitConditionPlatformAvailable, v1.IntegrationKitConditionPlatformAvailableReason, err)
-			}
-
 			if pl != nil {
 				target.SetIntegrationPlatform(pl)
 			}
@@ -267,7 +262,7 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 			return r.update(ctx, &instance, target)
 		}
 
-		return reconcile.Result{}, err
+		return reconcile.Result{}, nil
 	}
 
 	targetPhase := instance.Status.Phase

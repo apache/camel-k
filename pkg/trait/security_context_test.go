@@ -172,25 +172,11 @@ func createPodSettingContextEnvironment(t *testing.T, profile v1.TraitProfile) *
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "ns",
-			},
-			Spec: v1.IntegrationPlatformSpec{
-				Build: v1.IntegrationPlatformBuildSpec{
-					Registry:       v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion: catalog.Runtime.Version,
-				},
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:       pl,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	return &environment
 }
@@ -229,34 +215,17 @@ func createOpenshiftPodSettingContextEnvironment(t *testing.T, profile v1.TraitP
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseDeploying,
 			},
-			Spec: v1.IntegrationSpec{
-				Profile: profile,
-			},
 		},
 		IntegrationKit: &v1.IntegrationKit{
 			Status: v1.IntegrationKitStatus{
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "ns",
-			},
-			Spec: v1.IntegrationPlatformSpec{
-				Build: v1.IntegrationPlatformBuildSpec{
-					Registry:       v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion: catalog.Runtime.Version,
-				},
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:       pl,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	return &environment
 }

@@ -93,21 +93,11 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-				},
-				Profile: v1.TraitProfileKnative,
-			},
-		},
+		Platform:       pl,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      k8sutils.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	c, err := newFakeClient("ns")
 	require.NoError(t, err)
@@ -221,22 +211,11 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-				},
-				Profile: v1.TraitProfileKnative,
-			},
-		},
+		Platform:       pl,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      k8sutils.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
-
 	c, err := newFakeClient("ns")
 	require.NoError(t, err)
 
@@ -334,25 +313,11 @@ func TestKnativeTriggerExplicitFilterConfig(t *testing.T) {
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-				Profile: v1.TraitProfileKnative,
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:       pl,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      k8sutils.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	// don't care about conditions in this unit test
 	_, _, err = traitCatalog.apply(&environment)
@@ -434,25 +399,11 @@ func TestKnativeTriggerExplicitFilterConfigNoEventTypeFilter(t *testing.T) {
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-				Profile: v1.TraitProfileKnative,
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:       pl,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      k8sutils.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	// don't care about conditions in this unit test
 	_, _, err = traitCatalog.apply(&environment)
@@ -531,25 +482,11 @@ func TestKnativeTriggerDefaultEventTypeFilter(t *testing.T) {
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-				Profile: v1.TraitProfileKnative,
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:       pl,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      k8sutils.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	// don't care about conditions in this unit test
 	_, _, err = traitCatalog.apply(&environment)
@@ -628,25 +565,11 @@ func TestKnativeTriggerDefaultEventTypeFilterDisabled(t *testing.T) {
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-				Profile: v1.TraitProfileKnative,
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:       pl,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      k8sutils.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	// don't care about conditions in this unit test
 	_, _, err = traitCatalog.apply(&environment)
@@ -728,25 +651,11 @@ func TestKnativeMultipleTrigger(t *testing.T) {
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-				Profile: v1.TraitProfileKnative,
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:       pl,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      k8sutils.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	// don't care about conditions in this unit test
 	_, _, err = traitCatalog.apply(&environment)
@@ -866,25 +775,11 @@ func TestKnativeMultipleTriggerAdditionalFilterConfig(t *testing.T) {
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-				Profile: v1.TraitProfileKnative,
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:       pl,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      k8sutils.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	// don't care about conditions in this unit test
 	_, _, err = traitCatalog.apply(&environment)
@@ -1001,25 +896,11 @@ func TestKnativeTriggerNoEventType(t *testing.T) {
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-				Profile: v1.TraitProfileKnative,
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:       pl,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      k8sutils.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	// don't care about conditions in this unit test
 	_, _, err = traitCatalog.apply(&environment)
@@ -1098,25 +979,11 @@ func TestKnativeTriggerNoServingAvailable(t *testing.T) {
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-				Profile: v1.TraitProfileKnative,
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:       pl,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      k8sutils.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	// don't care about conditions in this unit test
 	_, _, err = traitCatalog.apply(&environment)
@@ -1269,21 +1136,11 @@ func TestKnativeEnabled(t *testing.T) {
 				},
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-				},
-				Profile: v1.TraitProfileKnative,
-			},
-		},
+		Platform:       pl,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      k8sutils.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	// configure the init trait
 	init := NewInitTrait()
@@ -1340,21 +1197,11 @@ func TestKnativeNotEnabled(t *testing.T) {
 				},
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-				},
-				Profile: v1.TraitProfileKnative,
-			},
-		},
+		Platform:       pl,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      k8sutils.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	// configure the init trait
 	init := NewInitTrait()
@@ -1416,25 +1263,11 @@ func NewFakeEnvironment(t *testing.T, source v1.SourceSpec) Environment {
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-				Profile: v1.TraitProfileKnative,
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:       pl,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      k8sutils.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	return environment
 }
@@ -1471,24 +1304,11 @@ func NewFakeEnvironmentForSyntheticKit(t *testing.T) Environment {
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-				},
-				Profile: v1.TraitProfileKnative,
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:       pl,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      k8sutils.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	return environment
 }
@@ -1791,19 +1611,10 @@ func createEnvironmentMissingEventingCRDs() *Environment {
 				Phase: v1.IntegrationPhaseInitialization,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "namespace",
-			},
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterKubernetes,
-				Profile: v1.TraitProfileKubernetes,
-			},
-		},
+		Platform:              pl,
 		Resources:             kubernetes.NewCollection(),
 		ApplicationProperties: make(map[string]string),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	return environment
 }
@@ -1828,19 +1639,10 @@ func TestKnativeAutoConfiguration(t *testing.T) {
 				Phase: v1.IntegrationPhaseInitialization,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "namespace",
-			},
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterKubernetes,
-				Profile: v1.TraitProfileKubernetes,
-			},
-		},
+		Platform:              pl,
 		Resources:             kubernetes.NewCollection(),
 		ApplicationProperties: make(map[string]string),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	trait, _ := newKnativeTrait().(*knativeTrait)
 	environment.Integration.Spec.Sources = []v1.SourceSpec{

@@ -150,15 +150,18 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 	targetLog := rlog.ForBuild(target)
 
 	var actions []Action
-	ip, err := platform.GetForResource(ctx, r.client, &instance)
-	if err != nil {
-		rlog.Error(err, "Could not find a platform bound to this Build")
 
-		return reconcile.Result{}, err
+	pl := platform.SingletonPlatform
+	ip, err := platform.GetForResource(ctx, r.client, &instance)
+	if err == nil {
+		// NOTE: whatever is the error we don't really care. If a deprecated platform exists, then
+		// we use it. Otherwise we use the conf coming from env var
+		pl = platform.FromIntegrationPlatform(ip)
 	}
+
 	buildMonitor := Monitor{
-		maxRunningBuilds:   ip.Status.Build.MaxRunningBuilds,
-		buildOrderStrategy: ip.Status.Build.BuildConfiguration.OrderStrategy,
+		maxRunningBuilds:   pl.MaxRunningBuilds,
+		buildOrderStrategy: pl.BuildConfiguration.OrderStrategy,
 	}
 
 	switch instance.BuilderConfiguration().Strategy {

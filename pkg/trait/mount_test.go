@@ -43,7 +43,6 @@ func TestMountVolumesEmpty(t *testing.T) {
 
 	environment := getNominalEnv(t, traitCatalog)
 	environment.Integration.Spec.Traits = v1.Traits{} // empty traits
-	environment.Platform.ResyncStatusFullConfig()
 
 	conditions, traits, err := traitCatalog.apply(environment)
 
@@ -66,7 +65,6 @@ func TestMountVolumesEmpty(t *testing.T) {
 func TestMountVolumesIntegrationPhaseDeploying(t *testing.T) {
 	traitCatalog := NewCatalog(nil)
 	environment := getNominalEnv(t, traitCatalog)
-	environment.Platform.ResyncStatusFullConfig()
 
 	conditions, traits, err := traitCatalog.apply(environment)
 
@@ -118,7 +116,6 @@ func TestEmptyDirVolumeIntegrationPhaseDeploying(t *testing.T) {
 	environment.Integration.Spec.Traits.Mount = &traitv1.MountTrait{
 		EmptyDirs: []string{"my-empty-dir:/some/path"},
 	}
-	environment.Platform.ResyncStatusFullConfig()
 	conditions, traits, err := traitCatalog.apply(environment)
 
 	require.NoError(t, err)
@@ -169,7 +166,6 @@ func TestEmptyDirVolumeWithSizeLimitIntegrationPhaseDeploying(t *testing.T) {
 	environment.Integration.Spec.Traits.Mount = &traitv1.MountTrait{
 		EmptyDirs: []string{"my-empty-dir:/some/path:450Mi"},
 	}
-	environment.Platform.ResyncStatusFullConfig()
 	conditions, traits, err := traitCatalog.apply(environment)
 
 	require.NoError(t, err)
@@ -216,7 +212,6 @@ func TestMountVolumesIntegrationPhaseInitialization(t *testing.T) {
 
 	environment := getNominalEnv(t, traitCatalog)
 	environment.Integration.Status.Phase = v1.IntegrationPhaseInitialization
-	environment.Platform.ResyncStatusFullConfig()
 
 	conditions, traits, err := traitCatalog.apply(environment)
 
@@ -286,19 +281,7 @@ func getNominalEnv(t *testing.T, traitCatalog *Catalog) *Environment {
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:       pl,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
@@ -566,7 +549,6 @@ func TestMountVolumesInitContainers(t *testing.T) {
 	environment.Integration.Spec.Traits.InitContainers = &traitv1.InitContainersTrait{
 		InitTasks: []string{"init;my-init-image:1.2.3;echo hello"},
 	}
-	environment.Platform.ResyncStatusFullConfig()
 	conditions, traits, err := traitCatalog.apply(environment)
 
 	require.NoError(t, err)
@@ -620,7 +602,6 @@ func TestAgentVolume(t *testing.T) {
 	environment.Integration.Spec.Traits.JVM = &traitv1.JVMTrait{
 		Agents: []string{"my-agent;my-url"},
 	}
-	environment.Platform.ResyncStatusFullConfig()
 	conditions, traits, err := traitCatalog.apply(environment)
 
 	require.NoError(t, err)
@@ -670,7 +651,6 @@ func TestMountMultipleKeysSameSecret(t *testing.T) {
 			"secret:my-secret/truststore.password",
 		},
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	conditions, traits, err := traitCatalog.apply(environment)
 
@@ -732,7 +712,6 @@ func TestCACertVolume(t *testing.T) {
 		CACert:         "/etc/camel/conf.d/_secrets/my-ca/ca.crt",
 		CACertPassword: "/etc/camel/conf.d/_secrets/truststore-pass/password",
 	}
-	environment.Platform.ResyncStatusFullConfig()
 	conditions, traits, err := traitCatalog.apply(environment)
 
 	require.NoError(t, err)

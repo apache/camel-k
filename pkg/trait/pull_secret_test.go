@@ -53,8 +53,6 @@ func TestPullSecret(t *testing.T) {
 
 func TestPullSecretDoesNothingWhenNotSetOnPlatform(t *testing.T) {
 	e, _ := getEnvironmentAndDeployment(t)
-	e.Platform = &v1.IntegrationPlatform{}
-
 	trait := newPullSecretTrait()
 	enabled, condition, err := trait.Configure(e)
 	require.NoError(t, err)

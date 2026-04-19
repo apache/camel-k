@@ -283,17 +283,6 @@ func (in *Integration) SetOperatorID(operatorID string) {
 	SetAnnotation(&in.ObjectMeta, OperatorIDAnnotation, operatorID)
 }
 
-func (in *Integration) SetIntegrationPlatform(platform *IntegrationPlatform) {
-	cs := corev1.ConditionTrue
-
-	if platform.Status.Phase != IntegrationPlatformPhaseReady {
-		cs = corev1.ConditionFalse
-	}
-
-	in.Status.SetCondition(IntegrationConditionPlatformAvailable, cs, IntegrationConditionPlatformAvailableReason, platform.Namespace+"/"+platform.Name)
-	in.Status.Platform = platform.Name
-}
-
 func (in *Integration) SetIntegrationKit(kit *IntegrationKit) {
 	if kit == nil {
 		in.Status.IntegrationKit = nil
@@ -328,15 +317,18 @@ func (in *Integration) SetIntegrationKit(kit *IntegrationKit) {
 	in.Status.Image = image
 }
 
-func (in *Integration) GetIntegrationKitNamespace(p *IntegrationPlatform) string {
+// GetIntegrationKitNamespace returns the namespace of the kit. You must provide a fallback platform
+// namespace where the new Kit is going to be created (ie, the older IntegrationPlatform namespace) or
+// the operator namespace.
+func (in *Integration) GetIntegrationKitNamespace(platformNamespace string) string {
 	if in.Status.IntegrationKit != nil && in.Status.IntegrationKit.Namespace != "" {
 		return in.Status.IntegrationKit.Namespace
 	}
 	if in.Spec.IntegrationKit != nil && in.Spec.IntegrationKit.Namespace != "" {
 		return in.Spec.IntegrationKit.Namespace
 	}
-	if p != nil {
-		return p.Namespace
+	if platformNamespace != "" {
+		return platformNamespace
 	}
 
 	return in.Namespace

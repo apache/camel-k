@@ -53,7 +53,6 @@ func TestMasterOn(t *testing.T) {
 				Phase: v1.IntegrationPhaseInitialization,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKnative,
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
@@ -66,25 +65,10 @@ func TestMasterOn(t *testing.T) {
 				Traits: v1.Traits{},
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-				Profile: v1.TraitProfileKnative,
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	mt := NewMasterTrait()
 	mt.InjectClient(client)
@@ -147,7 +131,6 @@ func TestMasterOff(t *testing.T) {
 				Phase: v1.IntegrationPhaseInitialization,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKnative,
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
@@ -160,25 +143,10 @@ func TestMasterOff(t *testing.T) {
 				Traits: v1.Traits{},
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-				Profile: v1.TraitProfileKnative,
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	mt := NewMasterTrait()
 	mt.InjectClient(client)
@@ -211,7 +179,6 @@ func TestMasterAuto(t *testing.T) {
 				Phase: v1.IntegrationPhaseInitialization,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKnative,
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
@@ -223,25 +190,10 @@ func TestMasterAuto(t *testing.T) {
 				},
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-				Profile: v1.TraitProfileKnative,
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	mt := NewMasterTrait()
 	mt.InjectClient(client)
@@ -290,7 +242,6 @@ func TestMasterTraitDeprecationWarning(t *testing.T) {
 				Phase: v1.IntegrationPhaseInitialization,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKnative,
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
@@ -303,25 +254,10 @@ func TestMasterTraitDeprecationWarning(t *testing.T) {
 				Traits: v1.Traits{},
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-				Profile: v1.TraitProfileKnative,
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	mt := NewMasterTrait()
 	mt.InjectClient(client)

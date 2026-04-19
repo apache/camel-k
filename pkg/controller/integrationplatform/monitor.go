@@ -137,6 +137,13 @@ func (action *monitorAction) Handle(ctx context.Context, platform *v1.Integratio
 		)
 	}
 
+	platform.Status.SetCondition(
+		v1.IntegrationPlatformConditionType("IntegrationPlatformDeprecated"),
+		corev1.ConditionTrue,
+		"DeprecationNotice",
+		"The IntegrationPlatform custom resource is deprecated. Please, configure operator environment variables instead.",
+	)
+
 	return platform, nil
 }
 

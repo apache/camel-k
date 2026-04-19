@@ -31,6 +31,7 @@ import (
 	"sync"
 	"testing"
 
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
 	. "github.com/onsi/gomega/gstruct"
@@ -104,8 +105,9 @@ func InstallOperatorWithConf(t *testing.T, ctx context.Context, g *WithT, ns, op
 	ExpectExecSucceed(t, g,
 		Make(t, makeRule, args...),
 	)
-	// Let's make sure the operator has been deployed
+	// Let's make sure the operator has been deployed and the platform ready
 	g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
+	g.Eventually(PlatformPhase(t, ctx, ns)).Should(Equal(v1.IntegrationPlatformPhaseReady))
 }
 
 // UninstallOperator will delete operator resources from namespace (keeps CRDs).

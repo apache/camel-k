@@ -21,7 +21,9 @@ import (
 	"context"
 
 	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/platform"
 	logutil "github.com/apache/camel-k/v2/pkg/util/log"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // OperatorStartupOptionalTools tries to install optional tools at operator startup and warns if something goes wrong.
@@ -30,5 +32,17 @@ func OperatorStartupOptionalTools(ctx context.Context, c client.Client, namespac
 	if err := OpenShiftConsoleDownloadLink(ctx, c); err != nil {
 		log.Info("Cannot install OpenShift CLI download link: skipping.")
 		log.Debug("Error while installing OpenShift CLI download link", "error", err)
+	}
+	// If the container registry is configured as MINIKUBE, we try to get the proper container registry, providing a warning notice as well
+	if platform.SingletonPlatform.Registry.Address == "MINIKUBE" {
+		log.Info("WARN: container registry is configured to use Minikube container registry extension. " +
+			"Mind that this is fine only for development purposes, move to a real container registry instead!")
+		svc, err := c.CoreV1().Services("kube-system").Get(ctx, "registry", metav1.GetOptions{})
+		if err != nil {
+			log.Error(err, "Could not get a Minikube container registry. Make sure to enable the addon properly.")
+		}
+		platform.SingletonPlatform.Registry.Address = svc.Spec.ClusterIP
+		platform.SingletonPlatform.Registry.Insecure = true
+		log.Info("Container registry address setting changed to " + platform.SingletonPlatform.Registry.Address + " (insecure=true)")
 	}
 }

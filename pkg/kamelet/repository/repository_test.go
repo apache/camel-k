@@ -149,7 +149,7 @@ func TestNewRepositoryWithCamelKamelets(t *testing.T) {
 	require.NoError(t, err)
 	list, err := repo.List(ctx)
 	require.NoError(t, err)
-	assert.Greater(t, len(list), 2)
+	assert.Equal(t, len(list), 2)
 	k1, err := repo.Get(ctx, "kamelet1")
 	require.NoError(t, err)
 	assert.Equal(t, "kamelet1", k1.Name)
@@ -189,27 +189,27 @@ func createTestContext(uris ...string) []runtime.Object {
 			},
 		},
 	}
-	if len(uris) > 0 {
-		repos := make([]v1.KameletRepositorySpec, 0, len(uris))
-		for _, uri := range uris {
-			repos = append(repos, v1.KameletRepositorySpec{
-				URI: uri,
-			})
-		}
-		res = append(res, &v1.IntegrationPlatform{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "test",
-				Name:      "camel-k",
-			},
-			Status: v1.IntegrationPlatformStatus{
-				IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
-					Kamelet: v1.IntegrationPlatformKameletSpec{
-						Repositories: repos,
-					},
-				},
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		})
-	}
+
 	return res
+}
+
+func TestNewWitURIs(t *testing.T) {
+	ctx := context.Background()
+	fakeClient := fake.NewSimpleClientset(createTestContext("none")...)
+	repo, err := NewWithURIs(ctx, fakeClient, []v1.KameletRepositorySpec{
+		{URI: "github:squakez/ck-kamelet-test-repo/kamelets"},
+	}, "test")
+	require.NoError(t, err)
+	list, err := repo.List(ctx)
+	require.NoError(t, err)
+	assert.Len(t, list, 3)
+	k1, err := repo.Get(ctx, "kamelet1")
+	require.NoError(t, err)
+	assert.Equal(t, "kamelet1", k1.Name)
+	k2, err := repo.Get(ctx, "kamelet2")
+	require.NoError(t, err)
+	assert.Equal(t, "kamelet2", k2.Name)
+	k3, err := repo.Get(ctx, "timer-custom-source")
+	require.NoError(t, err)
+	assert.Equal(t, "timer-custom-source", k3.Name)
 }

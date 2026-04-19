@@ -21,9 +21,7 @@ import (
 	"os"
 	"testing"
 
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/internal"
-	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -34,8 +32,7 @@ const cmdBind = "bind"
 func initializeBindCmdOptions(t *testing.T) (*bindCmdOptions, *cobra.Command, RootCmdOptions) {
 	t.Helper()
 
-	defaultIntegrationPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
-	fakeClient, _ := internal.NewFakeClient(&defaultIntegrationPlatform)
+	fakeClient, _ := internal.NewFakeClient()
 
 	options, rootCmd := kamelTestPreAddCommandInitWithClient(fakeClient)
 	bindCmdOptions := addTestBindCmd(*options, rootCmd)

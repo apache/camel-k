@@ -44,7 +44,7 @@ func (action *monitorUnknownAction) CanHandle(integration *v1.Integration) bool 
 
 func (action *monitorUnknownAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
 	// Run traits that are enabled for the phase
-	environment, err := trait.Apply(ctx, action.client, integration, nil)
+	_, err := trait.Apply(ctx, action.client, integration, nil)
 	if err != nil {
 		integration.Status.Phase = v1.IntegrationPhaseError
 		integration.SetReadyCondition(corev1.ConditionFalse,
@@ -53,20 +53,10 @@ func (action *monitorUnknownAction) Handle(ctx context.Context, integration *v1.
 		return integration, err
 	}
 	// We're good to monitor this again
-	if environment.Platform != nil && environment.Platform.Status.Phase == v1.IntegrationPlatformPhaseReady {
-		if integration.Annotations[v1.IntegrationDontRunAfterBuildAnnotation] == v1.IntegrationDontRunAfterBuildAnnotationTrueValue {
-			integration.Status.Phase = v1.IntegrationPhaseBuildComplete
-		} else {
-			integration.Status.Phase = v1.IntegrationPhaseRunning
-		}
-		integration.Status.SetCondition(
-			v1.IntegrationConditionPlatformAvailable,
-			corev1.ConditionTrue,
-			v1.IntegrationConditionPlatformAvailableReason,
-			environment.Platform.Namespace+"/"+environment.Platform.Name,
-		)
-
-		return integration, nil
+	if integration.Annotations[v1.IntegrationDontRunAfterBuildAnnotation] == v1.IntegrationDontRunAfterBuildAnnotationTrueValue {
+		integration.Status.Phase = v1.IntegrationPhaseBuildComplete
+	} else {
+		integration.Status.Phase = v1.IntegrationPhaseRunning
 	}
 
 	return integration, nil

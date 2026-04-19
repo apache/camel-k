@@ -190,3 +190,52 @@ func TestDecodeValueSourceInvalid(t *testing.T) {
 	}
 
 }
+
+func TestBuildStrategy_Validate(t *testing.T) {
+	tests := []struct {
+		name      string
+		input     BuildStrategy
+		wantError bool
+	}{
+		{"valid routine", BuildStrategyRoutine, false},
+		{"valid pod", BuildStrategyPod, false},
+		{"invalid strategy", BuildStrategy("wrong"), true},
+		{"empty strategy", BuildStrategy(""), true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.input.Validate()
+			if tt.wantError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+func TestBuildOrderStrategy_Validate(t *testing.T) {
+	tests := []struct {
+		name      string
+		input     BuildOrderStrategy
+		wantError bool
+	}{
+		{"valid dependencies", BuildOrderStrategyDependencies, false},
+		{"valid fifo", BuildOrderStrategyFIFO, false},
+		{"valid sequential", BuildOrderStrategySequential, false},
+		{"invalid strategy", BuildOrderStrategy("wrong"), true},
+		{"empty strategy", BuildOrderStrategy(""), true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.input.Validate()
+			if tt.wantError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}

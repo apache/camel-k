@@ -34,19 +34,7 @@ import (
 )
 
 func TestIntegrationExecutedTrait(t *testing.T) {
-	ip := v1.IntegrationPlatform{}
-	ip.Namespace = "ns"
-	ip.Name = "ck"
-	ip.Status = v1.IntegrationPlatformStatus{
-		IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
-			Build: v1.IntegrationPlatformBuildSpec{
-				RuntimeProvider: v1.RuntimeProviderQuarkus,
-				RuntimeVersion:  defaults.DefaultRuntimeVersion,
-			},
-		},
-		Phase: v1.IntegrationPlatformPhaseReady,
-	}
-	c, err := internal.NewFakeClient(&ip)
+	c, err := internal.NewFakeClient()
 	require.NoError(t, err)
 	catalog := NewCatalog(c)
 	env := Environment{
@@ -66,9 +54,6 @@ func TestIntegrationExecutedTrait(t *testing.T) {
 				Name:      "it",
 				Namespace: "ns",
 			},
-			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKubernetes,
-			},
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseRunning,
 				Conditions: []v1.IntegrationCondition{
@@ -79,7 +64,7 @@ func TestIntegrationExecutedTrait(t *testing.T) {
 				},
 			},
 		},
-		Platform:  &ip,
+		Platform:  pl,
 		Resources: kubernetes.NewCollection(),
 	}
 

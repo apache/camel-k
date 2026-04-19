@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"errors"
 	"fmt"
 	"sort"
 	"strings"
@@ -99,14 +98,7 @@ func (c *Catalog) apply(environment *Environment) ([]*TraitCondition, *v1.Traits
 	traits := c.traitsFor(environment)
 	environment.ConfiguredTraits = traits
 
-	applicable := false
 	for _, trait := range traits {
-		if !environment.PlatformInPhase(v1.IntegrationPlatformPhaseReady) && trait.RequiresIntegrationPlatform() {
-			c.L.Debugf("Skipping trait because of missing integration platform: %s", trait.ID())
-
-			continue
-		}
-		applicable = true
 		enabled, condition, err := trait.Configure(environment)
 		if condition != nil {
 			traitsConditions = append(traitsConditions, condition)
@@ -134,10 +126,6 @@ func (c *Catalog) apply(environment *Environment) ([]*TraitCondition, *v1.Traits
 		return traitsConditions, &ts, err
 	}
 	traitsConditions = append(traitsConditions, cs)
-
-	if !applicable && environment.PlatformInPhase(v1.IntegrationPlatformPhaseReady) {
-		return traitsConditions, nil, errors.New("no trait can be executed because of no ready platform found")
-	}
 
 	for _, processor := range environment.PostProcessors {
 		err := processor(environment)

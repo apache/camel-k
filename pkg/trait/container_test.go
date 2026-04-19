@@ -35,9 +35,17 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/internal"
+	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
+
+var defaultPlatform = platform.Platform{
+	PublishStrategy:     v1.IntegrationPlatformBuildPublishStrategyJib,
+	Registry:            v1.RegistrySpec{Address: "registry"},
+	BuildRuntimeVersion: defaults.DefaultRuntimeVersion,
+}
 
 func TestContainerWithDefaults(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
@@ -67,24 +75,11 @@ func TestContainerWithDefaults(t *testing.T) {
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:       defaultPlatform,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	conditions, traits, err := traitCatalog.apply(&environment)
 
@@ -146,27 +141,11 @@ func TestContainerWithOpenshift(t *testing.T) {
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "ns",
-			},
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:       defaultPlatform,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	conditions, traits, err := traitCatalog.apply(&environment)
 
@@ -218,24 +197,11 @@ func TestContainerWithCustomName(t *testing.T) {
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:       defaultPlatform,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	conditions, traits, err := traitCatalog.apply(&environment)
 
@@ -285,25 +251,11 @@ func TestContainerWithCustomImage(t *testing.T) {
 				},
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:       defaultPlatform,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
-
 	conditions, traits, err := traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
@@ -355,25 +307,11 @@ func TestContainerWithCustomImageAndIntegrationKit(t *testing.T) {
 				},
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:       defaultPlatform,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
-
 	conditions, traits, err := traitCatalog.apply(&environment)
 	require.Error(t, err)
 	assert.Empty(t, traits)
@@ -404,21 +342,10 @@ func TestContainerWithImagePullPolicy(t *testing.T) {
 				},
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Build: v1.IntegrationPlatformBuildSpec{
-					RuntimeVersion: catalog.Runtime.Version,
-				},
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:  defaultPlatform,
 		Resources: kubernetes.NewCollection(),
 	}
 	environment.Integration.Status.Phase = v1.IntegrationPhaseDeploying
-	environment.Platform.ResyncStatusFullConfig()
-
 	conditions, traits, err := traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
@@ -470,21 +397,10 @@ func TestDeploymentContainerPorts(t *testing.T) {
 				},
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Build: v1.IntegrationPlatformBuildSpec{
-					RuntimeVersion: catalog.Runtime.Version,
-				},
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:  defaultPlatform,
 		Resources: kubernetes.NewCollection(),
 	}
 	environment.Integration.Status.Phase = v1.IntegrationPhaseDeploying
-	environment.Platform.ResyncStatusFullConfig()
-
 	_, _, err = traitCatalog.apply(&environment)
 	require.NoError(t, err)
 	container := environment.GetIntegrationContainer()
@@ -536,20 +452,10 @@ func TestKnativeServiceContainerPorts(t *testing.T) {
 				},
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Build: v1.IntegrationPlatformBuildSpec{
-					RuntimeVersion: catalog.Runtime.Version,
-				},
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:  defaultPlatform,
 		Resources: kubernetes.NewCollection(),
 	}
 	environment.Integration.Status.Phase = v1.IntegrationPhaseDeploying
-	environment.Platform.ResyncStatusFullConfig()
 
 	_, _, err = traitCatalog.apply(&environment)
 	require.NoError(t, err)
@@ -767,25 +673,11 @@ func createSettingContextEnvironment(t *testing.T, profile v1.TraitProfile) *Env
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "ns",
-			},
-			Spec: v1.IntegrationPlatformSpec{
-				Build: v1.IntegrationPlatformBuildSpec{
-					Registry:       v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion: catalog.Runtime.Version,
-				},
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:       defaultPlatform,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	return &environment
 }

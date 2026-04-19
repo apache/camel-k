@@ -25,7 +25,6 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
@@ -57,24 +56,10 @@ func NewIstioTestEnv(t *testing.T, d *appsv1.Deployment, s *serving.Service, ena
 				Traits: v1.Traits{},
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "ns",
-			},
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					RuntimeVersion: catalog.Runtime.Version,
-				},
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:  pl,
 		EnvVars:   make([]corev1.EnvVar, 0),
 		Resources: kubernetes.NewCollection(s, d),
 	}
-	env.Platform.ResyncStatusFullConfig()
 
 	if enabled {
 		env.Integration.Spec.Traits.Istio = &traitv1.IstioTrait{

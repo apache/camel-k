@@ -38,9 +38,15 @@ import (
 )
 
 const (
-	BuilderServiceAccount = "camel-k-builder"
-
-	defaultBuildTimeout = 5 * time.Minute
+	DefaultPlatformName                    = "camel-k"
+	BuilderServiceAccount                  = "camel-k-builder"
+	DefaultBuildTimeout                    = 5 * time.Minute
+	DefaultBuildStrategy                   = v1.BuildStrategyRoutine
+	DefaultBuildOrderStrategy              = v1.BuildOrderStrategyDependencies
+	DefaultPublishStrategy                 = v1.IntegrationPlatformBuildPublishStrategyJib
+	DefaultMavenCLIOptions                 = "-V,--no-transfer-progress,-Dstyle.color=never"
+	DefaultMaxRunningBuildsPodStrategy     = 10
+	DefaultMaxRunningBuildsRoutineStrategy = 3
 )
 
 // ConfigureDefaults fills with default values all missing details about the integration platform.
@@ -73,8 +79,10 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		case err != nil:
 			return err
 		case isOpenShift:
+			//nolint:staticcheck
 			p.Status.Cluster = v1.IntegrationPlatformClusterOpenShift
 		default:
+			//nolint:staticcheck
 			p.Status.Cluster = v1.IntegrationPlatformClusterKubernetes
 		}
 	}
@@ -304,7 +312,7 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 	// Build timeout
 	if p.Status.Build.GetTimeout().Duration == 0 {
 		p.Status.Build.Timeout = &metav1.Duration{
-			Duration: defaultBuildTimeout,
+			Duration: DefaultBuildTimeout,
 		}
 	} else {
 		d := p.Status.Build.GetTimeout().Truncate(time.Second)

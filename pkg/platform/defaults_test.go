@@ -35,7 +35,7 @@ import (
 func TestIntegrationPlatformDefaults(t *testing.T) {
 	ip := v1.IntegrationPlatform{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      DefaultPlatformName,
+			Name:      "camel-k",
 			Namespace: "ns",
 		},
 	}
@@ -60,7 +60,7 @@ func TestIntegrationPlatformDefaults(t *testing.T) {
 func TestApplyGlobalPlatformSpec(t *testing.T) {
 	global := v1.IntegrationPlatform{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      DefaultPlatformName,
+			Name:      "camel-k",
 			Namespace: "ns",
 		},
 		Spec: v1.IntegrationPlatformSpec{
@@ -206,7 +206,7 @@ func TestPlatformS2IUpdateDefaultLocalPlatformSpec(t *testing.T) {
 func TestRetainLocalPlatformSpec(t *testing.T) {
 	global := v1.IntegrationPlatform{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      DefaultPlatformName,
+			Name:      "camel-k",
 			Namespace: "ns",
 		},
 		Spec: v1.IntegrationPlatformSpec{

@@ -15,18 +15,14 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-#
-# rbac resources applicable for all kubernetes platforms
-#
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-resources:
-- builder-role.yaml
-- builder-role-openshift.yaml
-- kamelets-viewer-role.yaml
-- minikube-registry-clusterrole.yaml
-- builder-role-binding.yaml
-- builder-role-binding-openshift.yaml
-- kamelets-viewer-role-binding.yaml
-- minikube-registry-clusterrole-binding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: minikube-registry-reader
+  labels:
+    app: "camel-k"
+rules:
+  - apiGroups: [""]
+    resources: ["services"]
+    resourceNames: ["registry"]
+    verbs: ["get"]

@@ -63,6 +63,12 @@ spec:
               value: "camel-k"
             - name: OPERATOR_ID
               value: "camel-k"
+            # NOTE: this value must be changed properly with a real
+            # container registry value. In development Minikube environment
+            # you can use constant "MINIKUBE" to dynamically look and load the
+            # registry add-on which has to be installed previously on the cluster.
+            - name: REGISTRY_ADDRESS
+              value: MINIKUBE
             - name: POD_NAME
               valueFrom:
                 fieldRef:

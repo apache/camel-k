@@ -2975,6 +2975,8 @@ the maximum amount of parallel running pipelines started by this operator instan
 
 IntegrationPlatformCluster is the kind of orchestration cluster the platform is installed into.
 
+Deprecated: no longer in use.
+
 
 [#_camel_apache_org_v1_IntegrationPlatformCondition]
 === IntegrationPlatformCondition

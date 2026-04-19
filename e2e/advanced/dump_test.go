@@ -52,7 +52,6 @@ func TestKamelCLIDump(t *testing.T) {
 			g.Eventually(IntegrationLogs(t, ctx, ns, "yaml")).Should(ContainSubstring("Magicstring!"))
 
 			dump := GetOutputString(Kamel(t, ctx, "dump", "-n", ns))
-			g.Expect(dump).To(ContainSubstring("Found 1 platforms"))
 			g.Expect(dump).To(ContainSubstring("Found 1 integrations"))
 			g.Expect(dump).To(ContainSubstring("name: yaml"))
 			g.Expect(dump).To(ContainSubstring("Magicstring!"))

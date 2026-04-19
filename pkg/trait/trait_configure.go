@@ -32,15 +32,6 @@ import (
 
 // Configure reads trait configurations from environment and applies them to catalog.
 func (c *Catalog) Configure(env *Environment) error {
-	if env.Platform != nil {
-		if err := c.configureTraits(env.Platform.Status.Traits); err != nil {
-			return err
-		}
-		// Deprecated: to be removed in future version
-		if err := c.configureTraitsFromAnnotations(env.Platform.Annotations); err != nil {
-			return err
-		}
-	}
 	if env.IntegrationProfile != nil {
 		if err := c.configureTraits(env.IntegrationProfile.Spec.Traits); err != nil {
 			return err

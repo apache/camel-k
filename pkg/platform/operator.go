@@ -39,6 +39,7 @@ const (
 	OperatorWatchNamespaceEnvVariable = "WATCH_NAMESPACE"
 	operatorNamespaceEnvVariable      = "NAMESPACE"
 	operatorPodNameEnvVariable        = "POD_NAME"
+	OperatorBuildStrategyEnvVar       = "BUILD_STRATEGY"
 )
 
 const OperatorLockName = "camel-k-lock"
@@ -118,24 +119,9 @@ func IsNamespaceLocked(ctx context.Context, c ctrl.Reader, namespace string) (bo
 		return false, nil
 	}
 
-	platforms, err := ListPlatforms(ctx, c, namespace)
-	if err != nil {
+	lease := coordination.Lease{}
+	if err := c.Get(ctx, ctrl.ObjectKey{Namespace: namespace, Name: OperatorLockName}, &lease); err == nil || !k8serrors.IsNotFound(err) {
 		return true, err
-	}
-
-	for _, platform := range platforms.Items {
-		lease := coordination.Lease{}
-
-		var operatorLockName string
-		if platform.Name != "" {
-			operatorLockName = GetOperatorLockName(platform.Name)
-		} else {
-			operatorLockName = OperatorLockName
-		}
-
-		if err := c.Get(ctx, ctrl.ObjectKey{Namespace: namespace, Name: operatorLockName}, &lease); err == nil || !k8serrors.IsNotFound(err) {
-			return true, err
-		}
 	}
 
 	return false, nil

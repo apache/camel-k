@@ -109,7 +109,7 @@ func (t *camelTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		)
 	}
 
-	return true, cond, nil
+	return !e.IntegrationInPhase(v1.IntegrationPhaseBuildComplete), cond, nil
 }
 
 func (t *camelTrait) Apply(e *Environment) error {
@@ -179,7 +179,7 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment) error {
 		// the required versions (camel and runtime) are not expressed as
 		// semver constraints
 		if exactVersionRegexp.MatchString(t.runtimeVersion) {
-			mavenSpec := e.Platform.Status.Build.Maven
+			mavenSpec := e.Platform.Maven.MavenSpec
 			var extraRepositories []string
 			if e.Integration != nil && e.Integration.Spec.Repositories != nil {
 				extraRepositories = append(extraRepositories, e.Integration.Spec.Repositories...)
@@ -188,7 +188,7 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment) error {
 				extraRepositories = append(extraRepositories, e.IntegrationKit.Spec.Repositories...)
 			}
 			catalog, err = camel.CreateCatalog(e.Ctx, e.Client, catalogNamespace,
-				mavenSpec, e.Platform.Status.Build.GetTimeout().Duration, runtime, extraRepositories)
+				mavenSpec, e.Platform.BuildTimeout, runtime, extraRepositories)
 			if err != nil {
 				return err
 			}
@@ -221,8 +221,8 @@ func determineRuntimeVersion(e *Environment) (string, error) {
 	if e.IntegrationProfile != nil && e.IntegrationProfile.Spec.Build.RuntimeVersion != "" {
 		return e.IntegrationProfile.Spec.Build.RuntimeVersion, nil
 	}
-	if e.Platform != nil && e.Platform.Status.Build.RuntimeVersion != "" {
-		return e.Platform.Status.Build.RuntimeVersion, nil
+	if e.Platform.BuildRuntimeVersion != "" {
+		return e.Platform.BuildRuntimeVersion, nil
 	}
 
 	return "", errors.New("unable to determine runtime version")

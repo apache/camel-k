@@ -27,6 +27,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -189,18 +190,8 @@ func createNominalCamelTest(withSources bool) (*camelTrait, *Environment) {
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "namespace",
-			},
-			Status: v1.IntegrationPlatformStatus{
-				IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
-					Build: v1.IntegrationPlatformBuildSpec{
-						RuntimeProvider: v1.RuntimeProviderQuarkus,
-						RuntimeVersion:  "0.0.1",
-					},
-				},
-			},
+		Platform: platform.Platform{
+			BuildRuntimeVersion: "0.0.1",
 		},
 		Resources:             kubernetes.NewCollection(),
 		ApplicationProperties: make(map[string]string),

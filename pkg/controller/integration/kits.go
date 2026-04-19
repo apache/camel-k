@@ -36,9 +36,10 @@ import (
 )
 
 func lookupKitsForIntegration(ctx context.Context, c client.Client, integration *v1.Integration, options ...ctrl.ListOption) ([]v1.IntegrationKit, error) {
-	pl, err := platform.GetForResource(ctx, c, integration)
-	if err != nil && !k8serrors.IsNotFound(err) {
-		return nil, err
+	platformKitNamespace := platform.GetOperatorNamespace()
+	pl, _ := platform.GetForResource(ctx, c, integration)
+	if pl != nil {
+		platformKitNamespace = pl.Namespace
 	}
 
 	kitTypes, err := labels.NewRequirement(v1.IntegrationKitTypeLabel, selection.In, []string{
@@ -50,7 +51,7 @@ func lookupKitsForIntegration(ctx context.Context, c client.Client, integration 
 	}
 
 	defaultListOptions := []ctrl.ListOption{
-		ctrl.InNamespace(integration.GetIntegrationKitNamespace(pl)),
+		ctrl.InNamespace(integration.GetIntegrationKitNamespace(platformKitNamespace)),
 		ctrl.MatchingLabels{
 			kubernetes.CamelLabelRuntimeVersion:  integration.Status.RuntimeVersion,
 			kubernetes.CamelLabelRuntimeProvider: string(integration.Status.RuntimeProvider),

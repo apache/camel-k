@@ -164,24 +164,6 @@ func TestCamelBuildKitKitLookupExistingKit(t *testing.T) {
 			},
 		},
 	}
-	ip := &v1.IntegrationPlatform{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: v1.SchemeGroupVersion.String(),
-			Kind:       v1.IntegrationPlatformKind,
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: "ns",
-			Name:      "camel-k",
-		},
-		Status: v1.IntegrationPlatformStatus{
-			IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
-				Build: v1.IntegrationPlatformBuildSpec{
-					RuntimeVersion: defaults.DefaultRuntimeVersion,
-				},
-			},
-			Phase: v1.IntegrationPlatformPhaseReady,
-		},
-	}
 	ik := &v1.IntegrationKit{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1.SchemeGroupVersion.String(),
@@ -220,7 +202,7 @@ func TestCamelBuildKitKitLookupExistingKit(t *testing.T) {
 	hash, err := digest.ComputeForIntegration(it, nil, nil)
 	require.NoError(t, err)
 	it.Status.Digest = hash
-	c, err := internal.NewFakeClient(it, ik, ip, catalog)
+	c, err := internal.NewFakeClient(it, ik, catalog)
 	require.NoError(t, err)
 
 	a := buildKitAction{}
@@ -237,7 +219,7 @@ func TestCamelBuildKitKitLookupExistingKit(t *testing.T) {
 	// Found a matching kit (ready)
 	it.Status.Phase = v1.IntegrationPhaseBuildingKit
 	ik.Status.Phase = v1.IntegrationKitPhaseReady
-	c, err = internal.NewFakeClient(it, ik, ip, catalog)
+	c, err = internal.NewFakeClient(it, ik, catalog)
 	require.NoError(t, err)
 	a.InjectClient(c)
 	handledIt, err = a.Handle(context.TODO(), it)
@@ -249,7 +231,7 @@ func TestCamelBuildKitKitLookupExistingKit(t *testing.T) {
 	// Found a matching kit (error)
 	it.Status.Phase = v1.IntegrationPhaseBuildingKit
 	ik.Status.Phase = v1.IntegrationKitPhaseError
-	c, err = internal.NewFakeClient(it, ik, ip, catalog)
+	c, err = internal.NewFakeClient(it, ik, catalog)
 	require.NoError(t, err)
 	a.InjectClient(c)
 	handledIt, err = a.Handle(context.TODO(), it)
@@ -275,24 +257,6 @@ func TestCamelBuildKitKitLookupNoMatchingKits(t *testing.T) {
 				Provider: v1.RuntimeProviderQuarkus,
 				Version:  defaults.DefaultRuntimeVersion,
 			},
-		},
-	}
-	ip := &v1.IntegrationPlatform{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: v1.SchemeGroupVersion.String(),
-			Kind:       v1.IntegrationPlatformKind,
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: "ns",
-			Name:      "camel-k",
-		},
-		Status: v1.IntegrationPlatformStatus{
-			IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
-				Build: v1.IntegrationPlatformBuildSpec{
-					RuntimeVersion: defaults.DefaultRuntimeVersion,
-				},
-			},
-			Phase: v1.IntegrationPlatformPhaseReady,
 		},
 	}
 	ik := &v1.IntegrationKit{
@@ -333,7 +297,7 @@ func TestCamelBuildKitKitLookupNoMatchingKits(t *testing.T) {
 	hash, err := digest.ComputeForIntegration(it, nil, nil)
 	require.NoError(t, err)
 	it.Status.Digest = hash
-	c, err := internal.NewFakeClient(it, ik, ip, catalog)
+	c, err := internal.NewFakeClient(it, ik, catalog)
 	require.NoError(t, err)
 
 	a := buildKitAction{}

@@ -18,7 +18,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -26,7 +25,6 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/internal"
-	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
@@ -57,42 +55,12 @@ func addTestPromoteCmd(options RootCmdOptions, rootCmd *cobra.Command) *promoteC
 	return promoteOptions
 }
 
-func TestIntegrationNotCompatible(t *testing.T) {
-	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
-	srcPlatform.Status.Version = defaults.Version
-	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
-	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
-	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
-	dstPlatform.Status.Version = "0.0.1"
-	dstPlatform.Status.Build.RuntimeVersion = "0.0.1"
-	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
-	defaultIntegration, defaultKit := nominalIntegration("my-it-test")
-	srcCatalog := createTestCamelCatalog(srcPlatform)
-	dstCatalog := createTestCamelCatalog(dstPlatform)
-
-	_, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
-	_, err := ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-n", "default")
-	require.Error(t, err)
-	assert.Equal(t,
-		fmt.Sprintf("could not verify operators compatibility: source (%s) and destination (0.0.1) Camel K operator versions are not compatible", defaults.Version),
-		err.Error(),
-	)
-}
-
 func TestIntegrationDryRun(t *testing.T) {
-	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
-	srcPlatform.Status.Version = defaults.Version
-	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
-	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
-	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
-	dstPlatform.Status.Version = defaults.Version
-	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
-	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	defaultIntegration, defaultKit := nominalIntegration("my-it-test")
-	srcCatalog := createTestCamelCatalog(srcPlatform)
-	dstCatalog := createTestCamelCatalog(dstPlatform)
+	srcCatalog := createTestCamelCatalog("default", v1.RuntimeProviderQuarkus, defaults.DefaultRuntimeVersion)
+	dstCatalog := createTestCamelCatalog("prod-namespace", v1.RuntimeProviderQuarkus, defaults.DefaultRuntimeVersion)
 
-	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
+	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
 	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
 	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
 	require.NoError(t, err)
@@ -134,20 +102,12 @@ func nominalIntegration(name string) (v1.Integration, v1.IntegrationKit) {
 }
 
 func TestPipeDryRun(t *testing.T) {
-	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
-	srcPlatform.Status.Version = defaults.Version
-	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
-	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
-	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
-	dstPlatform.Status.Version = defaults.Version
-	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
-	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	defaultKB := nominalPipe("my-pipe-test")
 	defaultIntegration, defaultKit := nominalIntegration("my-pipe-test")
-	srcCatalog := createTestCamelCatalog(srcPlatform)
-	dstCatalog := createTestCamelCatalog(dstPlatform)
+	srcCatalog := createTestCamelCatalog("default", v1.RuntimeProviderQuarkus, defaults.DefaultRuntimeVersion)
+	dstCatalog := createTestCamelCatalog("prod-namespace", v1.RuntimeProviderQuarkus, defaults.DefaultRuntimeVersion)
 
-	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultKB, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
+	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &defaultKB, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
 	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-pipe-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
 	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
 	require.NoError(t, err)
@@ -176,21 +136,13 @@ func nominalPipe(name string) v1.Pipe {
 	return kb
 }
 
-func createTestCamelCatalog(platform v1.IntegrationPlatform) v1.CamelCatalog {
-	c := v1.NewCamelCatalog(platform.Namespace, defaults.DefaultRuntimeVersion)
-	c.Spec = v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Provider: platform.Status.Build.RuntimeProvider, Version: platform.Status.Build.RuntimeVersion}}
+func createTestCamelCatalog(ns string, runtimeProvider v1.RuntimeProvider, version string) v1.CamelCatalog {
+	c := v1.NewCamelCatalog(ns, defaults.DefaultRuntimeVersion)
+	c.Spec = v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Provider: runtimeProvider, Version: version}}
 	return c
 }
 
 func TestIntegrationWithMetadataDryRun(t *testing.T) {
-	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
-	srcPlatform.Status.Version = defaults.Version
-	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
-	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
-	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
-	dstPlatform.Status.Version = defaults.Version
-	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
-	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	defaultIntegration, defaultKit := nominalIntegration("my-it-test")
 	defaultIntegration.Annotations = map[string]string{
 		"camel.apache.org/operator.id": "camel-k",
@@ -199,10 +151,10 @@ func TestIntegrationWithMetadataDryRun(t *testing.T) {
 	defaultIntegration.Labels = map[string]string{
 		"my-label": "my-value",
 	}
-	srcCatalog := createTestCamelCatalog(srcPlatform)
-	dstCatalog := createTestCamelCatalog(dstPlatform)
+	srcCatalog := createTestCamelCatalog("default", v1.RuntimeProviderQuarkus, defaults.DefaultRuntimeVersion)
+	dstCatalog := createTestCamelCatalog("prod-namespace", v1.RuntimeProviderQuarkus, defaults.DefaultRuntimeVersion)
 
-	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
+	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
 	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
 	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
 	require.NoError(t, err)
@@ -228,14 +180,6 @@ status: {}
 }
 
 func TestPipeWithMetadataDryRun(t *testing.T) {
-	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
-	srcPlatform.Status.Version = defaults.Version
-	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
-	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
-	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
-	dstPlatform.Status.Version = defaults.Version
-	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
-	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	defaultKB := nominalPipe("my-pipe-test")
 	defaultKB.Annotations = map[string]string{
 		"camel.apache.org/operator.id": "camel-k",
@@ -245,10 +189,10 @@ func TestPipeWithMetadataDryRun(t *testing.T) {
 		"my-label": "my-value",
 	}
 	defaultIntegration, defaultKit := nominalIntegration("my-pipe-test")
-	srcCatalog := createTestCamelCatalog(srcPlatform)
-	dstCatalog := createTestCamelCatalog(dstPlatform)
+	srcCatalog := createTestCamelCatalog("default", v1.RuntimeProviderQuarkus, defaults.DefaultRuntimeVersion)
+	dstCatalog := createTestCamelCatalog("prod-namespace", v1.RuntimeProviderQuarkus, defaults.DefaultRuntimeVersion)
 
-	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultKB, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
+	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &defaultKB, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
 	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-pipe-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
 	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
 	require.NoError(t, err)
@@ -276,59 +220,35 @@ status: {}
 }
 
 func TestItImageOnly(t *testing.T) {
-	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
-	srcPlatform.Status.Version = defaults.Version
-	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
-	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
-	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
-	dstPlatform.Status.Version = defaults.Version
-	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
-	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	defaultIntegration, defaultKit := nominalIntegration("my-it-test")
-	srcCatalog := createTestCamelCatalog(srcPlatform)
-	dstCatalog := createTestCamelCatalog(dstPlatform)
+	srcCatalog := createTestCamelCatalog("default", v1.RuntimeProviderQuarkus, defaults.DefaultRuntimeVersion)
+	dstCatalog := createTestCamelCatalog("prod-namespace", v1.RuntimeProviderQuarkus, defaults.DefaultRuntimeVersion)
 
-	_, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
+	_, promoteCmd, _ := initializePromoteCmdOptions(t, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
 	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-i", "-n", "default")
 	require.NoError(t, err)
 	assert.Equal(t, "my-special-image\n", output)
 }
 
 func TestPipeImageOnly(t *testing.T) {
-	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
-	srcPlatform.Status.Version = defaults.Version
-	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
-	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
-	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
-	dstPlatform.Status.Version = defaults.Version
-	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
-	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	defaultKB := nominalPipe("my-pipe-test")
 	defaultIntegration, defaultKit := nominalIntegration("my-pipe-test")
-	srcCatalog := createTestCamelCatalog(srcPlatform)
-	dstCatalog := createTestCamelCatalog(dstPlatform)
+	srcCatalog := createTestCamelCatalog("default", v1.RuntimeProviderQuarkus, defaults.DefaultRuntimeVersion)
+	dstCatalog := createTestCamelCatalog("prod-namespace", v1.RuntimeProviderQuarkus, defaults.DefaultRuntimeVersion)
 
-	_, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultKB, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
+	_, promoteCmd, _ := initializePromoteCmdOptions(t, &defaultKB, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
 	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-pipe-test", "--to", "prod-namespace", "-i", "-n", "default")
 	require.NoError(t, err)
 	assert.Equal(t, "my-special-image\n", output)
 }
 
 func TestIntegrationToOperatorId(t *testing.T) {
-	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
-	srcPlatform.Status.Version = defaults.Version
-	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
-	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
-	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
-	dstPlatform.Status.Version = defaults.Version
-	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
-	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	defaultIntegration, defaultKit := nominalIntegration("my-it-test")
-	srcCatalog := createTestCamelCatalog(srcPlatform)
-	dstCatalog := createTestCamelCatalog(dstPlatform)
+	srcCatalog := createTestCamelCatalog("default", v1.RuntimeProviderQuarkus, defaults.DefaultRuntimeVersion)
+	dstCatalog := createTestCamelCatalog("prod-namespace", v1.RuntimeProviderQuarkus, defaults.DefaultRuntimeVersion)
 
 	// Verify default (missing) operator Id
-	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
+	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
 	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "-x", "my-prod-operator", "-o", "yaml", "--to", "prod")
 	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
 	require.NoError(t, err)
@@ -353,7 +273,7 @@ status: {}
 	defaultIntegration.Annotations = map[string]string{
 		"camel.apache.org/operator.id": "camel-k",
 	}
-	promoteCmdOptions, promoteCmd, _ = initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
+	promoteCmdOptions, promoteCmd, _ = initializePromoteCmdOptions(t, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
 	output, err = ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "-x", "my-prod-operator", "-o", "yaml", "--to", "prod")
 	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
 	require.NoError(t, err)
@@ -377,14 +297,6 @@ status: {}
 }
 
 func TestIntegrationWithSavedTraitsDryRun(t *testing.T) {
-	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
-	srcPlatform.Status.Version = defaults.Version
-	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
-	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
-	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
-	dstPlatform.Status.Version = defaults.Version
-	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
-	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	defaultIntegration, defaultKit := nominalIntegration("my-it-test")
 	defaultIntegration.Status.Traits = &v1.Traits{
 		Service: &trait.ServiceTrait{
@@ -393,10 +305,10 @@ func TestIntegrationWithSavedTraitsDryRun(t *testing.T) {
 			},
 		},
 	}
-	srcCatalog := createTestCamelCatalog(srcPlatform)
-	dstCatalog := createTestCamelCatalog(dstPlatform)
+	srcCatalog := createTestCamelCatalog("default", v1.RuntimeProviderQuarkus, defaults.DefaultRuntimeVersion)
+	dstCatalog := createTestCamelCatalog("prod-namespace", v1.RuntimeProviderQuarkus, defaults.DefaultRuntimeVersion)
 
-	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
+	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
 	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
 	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
 	require.NoError(t, err)
@@ -420,14 +332,6 @@ status: {}
 }
 
 func TestPipeWithSavedTraitsDryRun(t *testing.T) {
-	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
-	srcPlatform.Status.Version = defaults.Version
-	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
-	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
-	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
-	dstPlatform.Status.Version = defaults.Version
-	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
-	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	defaultKB := nominalPipe("my-pipe-test")
 	defaultKB.Annotations = map[string]string{
 		"camel.apache.org/operator.id": "camel-k",
@@ -437,10 +341,10 @@ func TestPipeWithSavedTraitsDryRun(t *testing.T) {
 		"my-label": "my-value",
 	}
 	defaultIntegration, defaultKit := nominalIntegration("my-pipe-test")
-	srcCatalog := createTestCamelCatalog(srcPlatform)
-	dstCatalog := createTestCamelCatalog(dstPlatform)
+	srcCatalog := createTestCamelCatalog("default", v1.RuntimeProviderQuarkus, defaults.DefaultRuntimeVersion)
+	dstCatalog := createTestCamelCatalog("prod-namespace", v1.RuntimeProviderQuarkus, defaults.DefaultRuntimeVersion)
 
-	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultKB, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
+	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &defaultKB, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
 	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-pipe-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
 	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
 	require.NoError(t, err)
@@ -552,14 +456,6 @@ resources:
 `
 
 func TestIntegrationGitOps(t *testing.T) {
-	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
-	srcPlatform.Status.Version = defaults.Version
-	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
-	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
-	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
-	dstPlatform.Status.Version = defaults.Version
-	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
-	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	defaultIntegration, defaultKit := nominalIntegration("my-it-test")
 	defaultIntegration.Status.Traits = &v1.Traits{
 		Affinity: &trait.AffinityTrait{
@@ -599,12 +495,12 @@ func TestIntegrationGitOps(t *testing.T) {
 			Taints: []string{"taint1:true"},
 		},
 	}
-	srcCatalog := createTestCamelCatalog(srcPlatform)
-	dstCatalog := createTestCamelCatalog(dstPlatform)
+	srcCatalog := createTestCamelCatalog("default", v1.RuntimeProviderQuarkus, defaults.DefaultRuntimeVersion)
+	dstCatalog := createTestCamelCatalog("prod-namespace", v1.RuntimeProviderQuarkus, defaults.DefaultRuntimeVersion)
 
 	tmpDir := t.TempDir()
 
-	_, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
+	_, promoteCmd, _ := initializePromoteCmdOptions(t, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
 	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "--export-gitops-dir", tmpDir, "-n", "default")
 	require.NoError(t, err)
 	assert.Contains(t, output, `Exported a Kustomize based Gitops directory`)
@@ -716,14 +612,6 @@ resources:
 `
 
 func TestPipeGitOps(t *testing.T) {
-	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
-	srcPlatform.Status.Version = defaults.Version
-	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
-	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
-	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
-	dstPlatform.Status.Version = defaults.Version
-	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
-	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	defaultPipe := nominalPipe("my-pipe-test")
 	defaultPipe.Annotations = map[string]string{
 		"camel.apache.org/operator.id": "camel-k",
@@ -771,12 +659,12 @@ func TestPipeGitOps(t *testing.T) {
 			Taints: []string{"taint1:true"},
 		},
 	}
-	srcCatalog := createTestCamelCatalog(srcPlatform)
-	dstCatalog := createTestCamelCatalog(dstPlatform)
+	srcCatalog := createTestCamelCatalog("default", v1.RuntimeProviderQuarkus, defaults.DefaultRuntimeVersion)
+	dstCatalog := createTestCamelCatalog("prod-namespace", v1.RuntimeProviderQuarkus, defaults.DefaultRuntimeVersion)
 
 	tmpDir := t.TempDir()
 
-	_, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultPipe, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
+	_, promoteCmd, _ := initializePromoteCmdOptions(t, &defaultPipe, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
 	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-pipe-test", "--to", "prod-namespace", "--export-gitops-dir", tmpDir, "-n", "default")
 	require.NoError(t, err)
 	assert.Contains(t, output, `Exported a Kustomize based Gitops directory`)

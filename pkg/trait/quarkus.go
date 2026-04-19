@@ -30,6 +30,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/builder"
+	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -75,18 +76,20 @@ var (
 
 // Retrieves the settings of the given language from the Camel catalog.
 func getLanguageSettings(e *Environment, language v1.Language) languageSettings {
-	if loader, ok := e.CamelCatalog.Loaders[string(language)]; ok {
-		native, nExists := loader.Metadata["native"]
-		if !nExists {
-			return getLegacyLanguageSettings(language)
-		}
-		sourcesRequiredAtBuildTime, sExists := loader.Metadata["sources-required-at-build-time"]
-		deprecated, dpExists := loader.Metadata["deprecated"]
+	if e.CamelCatalog != nil {
+		if loader, ok := e.CamelCatalog.Loaders[string(language)]; ok {
+			native, nExists := loader.Metadata["native"]
+			if !nExists {
+				return getLegacyLanguageSettings(language)
+			}
+			sourcesRequiredAtBuildTime, sExists := loader.Metadata["sources-required-at-build-time"]
+			deprecated, dpExists := loader.Metadata["deprecated"]
 
-		return languageSettings{
-			native:                     native == boolean.TrueString,
-			sourcesRequiredAtBuildTime: sExists && sourcesRequiredAtBuildTime == boolean.TrueString,
-			deprecated:                 dpExists && deprecated == boolean.TrueString,
+			return languageSettings{
+				native:                     native == boolean.TrueString,
+				sourcesRequiredAtBuildTime: sExists && sourcesRequiredAtBuildTime == boolean.TrueString,
+				deprecated:                 dpExists && deprecated == boolean.TrueString,
+			}
 		}
 	}
 
@@ -268,7 +271,7 @@ func (t *quarkusTrait) applyWhileBuildingKit(e *Environment) {
 
 func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType quarkusPackageType) *v1.IntegrationKit {
 	integration := e.Integration
-	kit := v1.NewIntegrationKit(integration.GetIntegrationKitNamespace(e.Platform), fmt.Sprintf("kit-%s", xid.New()))
+	kit := v1.NewIntegrationKit(integration.GetIntegrationKitNamespace(e.Platform.CatalogNamespace), fmt.Sprintf("kit-%s", xid.New()))
 
 	kit.Labels = map[string]string{
 		v1.IntegrationKitTypeLabel:            v1.IntegrationKitTypePlatform,
@@ -320,8 +323,9 @@ func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType quarkusPack
 func propagateKitTraits(e *Environment) v1.IntegrationKitTraits {
 	kitTraits := v1.IntegrationKitTraits{}
 
-	if e.Platform != nil {
-		propagate(fmt.Sprintf("platform %q", e.Platform.Name), e.Platform.Status.Traits, &kitTraits)
+	ip, err := platform.GetForResource(e.Ctx, e.Client, e.Integration)
+	if ip != nil && err != nil {
+		propagate(fmt.Sprintf("platform %q", ip.Name), ip.Status.Traits, &kitTraits)
 	}
 
 	if e.IntegrationProfile != nil {

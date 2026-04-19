@@ -69,9 +69,11 @@ func (t *jvmTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 
 		return false, NewIntegrationCondition("JVM", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, TraitConfigurationReason, notice), nil
 	}
-
 	if (e.IntegrationKit != nil && !e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady)) || !e.IntegrationInRunningPhases() {
 		return false, nil, nil
+	}
+	if e.Integration != nil && e.Integration.IsSynthetic() {
+		return false, NewIntegrationConditionPlatformDisabledWithMessage("JVM", "synthetic integration"), nil
 	}
 
 	//nolint: staticcheck
@@ -247,7 +249,7 @@ func (t *jvmTrait) getIntegrationKit(e *Environment) (*v1.IntegrationKit, error)
 
 	if kit == nil && e.Integration.Status.IntegrationKit != nil {
 		name := e.Integration.Status.IntegrationKit.Name
-		ns := e.Integration.GetIntegrationKitNamespace(e.Platform)
+		ns := e.Integration.GetIntegrationKitNamespace(e.Platform.CatalogNamespace)
 		k, err := kubernetes.GetIntegrationKit(e.Ctx, t.Client, name, ns)
 		if err != nil {
 			return nil, fmt.Errorf("unable to find integration kit %s/%s: %w", ns, name, err)

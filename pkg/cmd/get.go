@@ -84,7 +84,7 @@ func (o *getCmdOptions) run(cmd *cobra.Command, args []string) error {
 	for _, integration := range integrationList.Items {
 		kit := ""
 		if integration.Status.IntegrationKit != nil {
-			ns := integration.GetIntegrationKitNamespace(nil)
+			ns := integration.GetIntegrationKitNamespace("")
 			kit = fmt.Sprintf("%s/%s", ns, integration.Status.IntegrationKit.Name)
 		}
 		fmt.Fprintf(w, "%s\t%s\t%s\n", integration.Name, string(integration.Status.Phase), kit)

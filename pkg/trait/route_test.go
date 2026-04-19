@@ -153,26 +153,16 @@ func createTestRouteEnvironment(t *testing.T, name string) *Environment {
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseDeploying,
 			},
-			Spec: v1.IntegrationSpec{},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileOpenShift,
+			},
 		},
 		IntegrationKit: &v1.IntegrationKit{
 			Status: v1.IntegrationKitStatus{
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:       pl,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources: kubernetes.NewCollection(
@@ -198,7 +188,6 @@ func createTestRouteEnvironment(t *testing.T, name string) *Environment {
 			},
 		),
 	}
-	res.Platform.ResyncStatusFullConfig()
 	return res
 }
 

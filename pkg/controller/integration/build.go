@@ -103,22 +103,22 @@ func (action *buildAction) createBuild(ctx context.Context, it *v1.Integration) 
 		annotations[v1.OperatorIDAnnotation] = operatorID
 	}
 
-	timeout := env.Platform.Status.Build.GetTimeout()
+	timeout := env.Platform.BuildTimeout
 
 	// We may need to change certain builder configuration values
 	buildConfig := v1.ConfigurationTasksByName(env.Pipeline, "builder")
 	if buildConfig.IsEmpty() {
 		// default to IntegrationPlatform configuration
-		buildConfig = &env.Platform.Status.Build.BuildConfiguration
+		buildConfig = &env.Platform.BuildConfiguration
 	} else {
 		if buildConfig.Strategy == "" {
 			// we always need to define a strategy, so we default to platform if none
-			buildConfig.Strategy = env.Platform.Status.Build.BuildConfiguration.Strategy
+			buildConfig.Strategy = env.Platform.BuildConfiguration.Strategy
 		}
 
 		if buildConfig.OrderStrategy == "" {
 			// we always need to define an order strategy, so we default to platform if none
-			buildConfig.OrderStrategy = env.Platform.Status.Build.BuildConfiguration.OrderStrategy
+			buildConfig.OrderStrategy = env.Platform.BuildConfiguration.OrderStrategy
 		}
 	}
 
@@ -147,7 +147,7 @@ func (action *buildAction) createBuild(ctx context.Context, it *v1.Integration) 
 		},
 		Spec: v1.BuildSpec{
 			Tasks:   env.Pipeline,
-			Timeout: timeout,
+			Timeout: metav1.Duration{Duration: timeout},
 		},
 	}
 

@@ -307,19 +307,9 @@ func createNominalDeploymentTest() (*deploymentTrait, *Environment) {
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "namespace",
-			},
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Profile: v1.TraitProfileKnative,
-			},
-		},
 		Resources:             kubernetes.NewCollection(),
 		ApplicationProperties: make(map[string]string),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 
 	return trait, environment
 }

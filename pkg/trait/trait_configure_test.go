@@ -35,7 +35,6 @@ func TestTraitConfiguration(t *testing.T) {
 	env := Environment{
 		Integration: &v1.Integration{
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKubernetes,
 				Traits: v1.Traits{
 					Logging: &traitv1.LoggingTrait{
 						JSON:            ptr.To(true),
@@ -75,7 +74,6 @@ func TestTraitConfigurationFromAnnotations(t *testing.T) {
 				},
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKubernetes,
 				Traits: v1.Traits{
 					Cron: &traitv1.CronTrait{
 						Fallback:          ptr.To(true),
@@ -102,75 +100,10 @@ func TestFailOnWrongTraitAnnotations(t *testing.T) {
 					v1.TraitAnnotationPrefix + "cron.missing-property": "the-value",
 				},
 			},
-			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKubernetes,
-			},
 		},
 	}
 	c := NewCatalog(nil)
 	assert.Error(t, c.Configure(&env))
-}
-
-func TestTraitConfigurationOverrideRulesFromAnnotations(t *testing.T) {
-	env := Environment{
-		Platform: &v1.IntegrationPlatform{
-			ObjectMeta: metav1.ObjectMeta{
-				Annotations: map[string]string{
-					v1.TraitAnnotationPrefix + "cron.components": "cmp2",
-					v1.TraitAnnotationPrefix + "cron.schedule":   "schedule2",
-				},
-			},
-			Spec: v1.IntegrationPlatformSpec{
-				Traits: v1.Traits{
-					Cron: &traitv1.CronTrait{
-						Components:        "cmp1",
-						Schedule:          "schedule1",
-						ConcurrencyPolicy: "policy1",
-					},
-				},
-			},
-		},
-		IntegrationKit: &v1.IntegrationKit{
-			ObjectMeta: metav1.ObjectMeta{
-				Annotations: map[string]string{
-					v1.TraitAnnotationPrefix + "cron.components":         "cmp3",
-					v1.TraitAnnotationPrefix + "cron.concurrency-policy": "policy2",
-					v1.TraitAnnotationPrefix + "builder.verbose":         boolean.TrueString,
-				},
-			},
-			Spec: v1.IntegrationKitSpec{
-				Traits: v1.IntegrationKitTraits{
-					Builder: &traitv1.BuilderTrait{
-						Verbose: ptr.To(false),
-					},
-				},
-			},
-		},
-		Integration: &v1.Integration{
-			ObjectMeta: metav1.ObjectMeta{
-				Annotations: map[string]string{
-					v1.TraitAnnotationPrefix + "cron.components":         "cmp4",
-					v1.TraitAnnotationPrefix + "cron.concurrency-policy": "policy4",
-				},
-			},
-			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKubernetes,
-				Traits: v1.Traits{
-					Cron: &traitv1.CronTrait{
-						ConcurrencyPolicy: "policy3",
-					},
-				},
-			},
-		},
-	}
-	c := NewCatalog(nil)
-	require.NoError(t, c.Configure(&env))
-	ct, _ := c.GetTrait("cron").(*cronTrait)
-	assert.Equal(t, "schedule2", ct.Schedule)
-	assert.Equal(t, "cmp4", ct.Components)
-	assert.Equal(t, "policy4", ct.ConcurrencyPolicy)
-	bt, _ := c.GetTrait("builder").(*builderTrait)
-	assert.True(t, *bt.Verbose)
 }
 
 func TestTraitListConfigurationFromAnnotations(t *testing.T) {
@@ -181,9 +114,6 @@ func TestTraitListConfigurationFromAnnotations(t *testing.T) {
 					v1.TraitAnnotationPrefix + "jolokia.options":       `["opt1", "opt2"]`,
 					v1.TraitAnnotationPrefix + "camel.runtime-version": "1.2.3",
 				},
-			},
-			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKubernetes,
 			},
 		},
 	}
@@ -202,9 +132,6 @@ func TestTraitSplitConfiguration(t *testing.T) {
 				Annotations: map[string]string{
 					v1.TraitAnnotationPrefix + "owner.target-labels": "[\"opt1\", \"opt2\"]",
 				},
-			},
-			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKubernetes,
 			},
 		},
 	}

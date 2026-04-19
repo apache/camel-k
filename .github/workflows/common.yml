@@ -82,6 +82,35 @@ jobs:
       run: |
         DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-common
 
+  # This job will replace the previous one when we've settled any possible issue
+  # with IntegrationPlatform deprecation
+  common-platformless:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+        submodules: recursive
+
+    - name: Infra setting
+      uses: ./.github/actions/infra-setting
+
+    - name: Install operator
+      shell: bash
+      run: |
+        kubectl create ns camel-k
+        kubectl apply -k install/overlays/kubernetes/descoped/ --server-side --force-conflicts
+        kubectl wait --for=condition=available deployment/camel-k-operator -n camel-k --timeout=60s
+        # Install Apache Kamelets catalog
+        curl -sL "https://repo1.maven.org/maven2/org/apache/camel/kamelets/camel-kamelets/4.18.1/camel-kamelets-4.18.1.jar" > /tmp/camel-kamelets.jar
+        unzip /tmp/camel-kamelets.jar -d /tmp && kubectl apply -f /tmp/kamelets -n camel-k
+
+    - name: Run test
+      shell: bash
+      run: |
+        DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-common
+
   advanced:
     runs-on: ubuntu-latest
     steps:

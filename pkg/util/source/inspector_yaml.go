@@ -210,7 +210,6 @@ func (i YAMLInspector) parseStep(key string, content any, meta *Metadata) error 
 	return nil
 }
 
-// TODO nolint: gocyclo.
 func (i YAMLInspector) parseStepsParam(steps []any, meta *Metadata) error {
 	for _, raw := range steps {
 		if step, stepFormatOk := raw.(map[any]any); stepFormatOk {

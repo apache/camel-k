@@ -29,7 +29,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -210,7 +209,7 @@ type Environment struct {
 	// The client to the API server
 	Client client.Client
 	// The active Platform
-	Platform *v1.IntegrationPlatform
+	Platform platform.Platform
 	// The active IntegrationProfile
 	IntegrationProfile *v1.IntegrationProfile
 	// The current Integration
@@ -277,14 +276,6 @@ func (e *Environment) IntegrationKitInPhase(phases ...v1.IntegrationKitPhase) bo
 	return slices.Contains(phases, e.IntegrationKit.Status.Phase)
 }
 
-func (e *Environment) PlatformInPhase(phases ...v1.IntegrationPlatformPhase) bool {
-	if e.Platform == nil {
-		return false
-	}
-
-	return slices.Contains(phases, e.Platform.Status.Phase)
-}
-
 func (e *Environment) InPhase(c v1.IntegrationKitPhase, i v1.IntegrationPhase) bool {
 	return e.IntegrationKitInPhase(c) && e.IntegrationInPhase(i)
 }
@@ -305,10 +296,6 @@ func (e *Environment) DetermineProfile() v1.TraitProfile {
 
 	if e.IntegrationKit != nil && e.IntegrationKit.Spec.Profile != "" {
 		return e.IntegrationKit.Spec.Profile
-	}
-
-	if e.Platform != nil {
-		return platform.GetTraitProfile(e.Platform)
 	}
 
 	return v1.DefaultTraitProfile
@@ -387,9 +374,8 @@ func (e *Environment) GetIntegrationPodSpec() *corev1.PodSpec {
 }
 
 func (e *Environment) DetermineCatalogNamespace() string {
-	// Catalog is expected to be together with the platform
-	if e.Platform != nil && e.Platform.Namespace != "" {
-		return e.Platform.Namespace
+	if e.Platform.CatalogNamespace != "" {
+		return e.Platform.CatalogNamespace
 	}
 	if e.Integration != nil && e.Integration.Status.IntegrationKit != nil && e.Integration.Status.IntegrationKit.Namespace != "" {
 		return e.Integration.Status.IntegrationKit.Namespace
@@ -490,7 +476,7 @@ type variable struct {
 }
 
 func (e *Environment) collectConfigurationPairs(configurationType string) []variable {
-	return collectConfigurationPairs(configurationType, e.Platform, e.IntegrationKit, e.Integration)
+	return collectConfigurationPairs(configurationType, e.IntegrationKit, e.Integration)
 }
 
 func (e *Environment) GetIntegrationContainerName() string {

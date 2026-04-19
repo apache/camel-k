@@ -25,12 +25,12 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/internal"
+	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
@@ -40,7 +40,6 @@ func TestDefaultEnvironment(t *testing.T) {
 	require.NoError(t, err)
 
 	env := mockEnvironment(catalog)
-	env.Platform.ResyncStatusFullConfig()
 
 	conditions, traits, err := NewEnvironmentTestCatalog().apply(&env)
 	require.NoError(t, err)
@@ -90,7 +89,6 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 			ContainerMeta: ptr.To(true),
 		},
 	}
-	env.Platform.ResyncStatusFullConfig()
 
 	conditions, traits, err := NewEnvironmentTestCatalog().apply(&env)
 	require.NoError(t, err)
@@ -131,8 +129,6 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 		},
 	}
 
-	env.Platform.ResyncStatusFullConfig()
-
 	conditions, traits, err := NewEnvironmentTestCatalog().apply(&env)
 	require.NoError(t, err)
 	assert.NotEmpty(t, traits)
@@ -171,7 +167,6 @@ func TestCustomEnvVars(t *testing.T) {
 			Vars: []string{"key1=val1", "key2 = val2"},
 		},
 	}
-	env.Platform.ResyncStatusFullConfig()
 
 	conditions, traits, err := NewEnvironmentTestCatalog().apply(&env)
 	require.NoError(t, err)
@@ -206,7 +201,6 @@ func TestValueSourceEnvVars(t *testing.T) {
 			Vars: []string{"MY_VAR_1=secret:my-sec/my-sec-value", "MY_VAR_2=configmap:my-cm/my-cm-value"},
 		},
 	}
-	env.Platform.ResyncStatusFullConfig()
 
 	conditions, traits, err := NewEnvironmentTestCatalog().apply(&env)
 	require.NoError(t, err)
@@ -249,28 +243,15 @@ func mockEnvironment(catalog *camel.RuntimeCatalog) Environment {
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseDeploying,
 			},
-			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileOpenShift,
-			},
+			Spec: v1.IntegrationSpec{},
 		},
 		IntegrationKit: &v1.IntegrationKit{
 			Status: v1.IntegrationKitStatus{
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "ns",
-			},
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					RuntimeVersion: catalog.Runtime.Version,
-				},
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
+		Platform: platform.Platform{
+			BuildRuntimeVersion: catalog.GetRuntimeVersion(),
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),

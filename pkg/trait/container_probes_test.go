@@ -29,6 +29,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/internal"
+	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
@@ -47,15 +48,8 @@ func newTestProbesEnv(t *testing.T, integration *v1.Integration) Environment {
 		Catalog:      traitCatalog,
 		CamelCatalog: catalog,
 		Client:       client,
-		Platform: &v1.IntegrationPlatform{
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-				IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
-					Build: v1.IntegrationPlatformBuildSpec{
-						RuntimeVersion: catalog.Runtime.Version,
-					},
-				},
-			},
+		Platform: platform.Platform{
+			BuildRuntimeVersion: catalog.Runtime.Version,
 		},
 		IntegrationKit:        &v1.IntegrationKit{},
 		Integration:           integration,

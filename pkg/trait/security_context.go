@@ -51,6 +51,9 @@ func (t *securityContextTrait) Configure(e *Environment) (bool, *TraitCondition,
 	if e.Integration == nil {
 		return false, nil, nil
 	}
+	if e.Integration.IsSynthetic() {
+		return false, NewIntegrationConditionPlatformDisabledWithMessage("SecurityContext", "synthetic integration"), nil
+	}
 	if !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}

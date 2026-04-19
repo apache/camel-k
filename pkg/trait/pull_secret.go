@@ -89,7 +89,7 @@ func (t *pullSecretTrait) autoConfigure(e *Environment) error {
 			}
 		}
 		isOperatorGlobal := platform.IsCurrentOperatorGlobal()
-		isKitExternal := e.Integration.GetIntegrationKitNamespace(e.Platform) != e.Integration.Namespace
+		isKitExternal := e.Integration.GetIntegrationKitNamespace(e.Platform.CatalogNamespace) != e.Integration.Namespace
 		needsDelegation := isOpenShift && isOperatorGlobal && isKitExternal
 		t.ImagePullerDelegation = &needsDelegation
 	}
@@ -126,22 +126,8 @@ func (t *pullSecretTrait) delegateImagePuller(e *Environment) error {
 }
 
 func (t *pullSecretTrait) newImagePullerRoleBinding(e *Environment) *rbacv1.RoleBinding {
-	targetNamespace := e.Integration.GetIntegrationKitNamespace(e.Platform)
-	var references []metav1.OwnerReference
-	if e.Platform != nil && e.Platform.Namespace == targetNamespace {
-		controller := true
-		blockOwnerDeletion := true
-		references = []metav1.OwnerReference{
-			{
-				APIVersion:         e.Platform.APIVersion,
-				Kind:               e.Platform.Kind,
-				Name:               e.Platform.Name,
-				UID:                e.Platform.UID,
-				Controller:         &controller,
-				BlockOwnerDeletion: &blockOwnerDeletion,
-			},
-		}
-	}
+	targetNamespace := e.Integration.GetIntegrationKitNamespace(e.Platform.CatalogNamespace)
+
 	serviceAccount := e.Integration.Spec.ServiceAccountName
 	if serviceAccount == "" {
 		serviceAccount = "default"
@@ -153,9 +139,8 @@ func (t *pullSecretTrait) newImagePullerRoleBinding(e *Environment) *rbacv1.Role
 			APIVersion: rbacv1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace:       targetNamespace,
-			Name:            fmt.Sprintf("camel-k-puller-%s-%s", e.Integration.Namespace, serviceAccount),
-			OwnerReferences: references,
+			Namespace: targetNamespace,
+			Name:      fmt.Sprintf("camel-k-puller-%s-%s", e.Integration.Namespace, serviceAccount),
 		},
 		RoleRef: rbacv1.RoleRef{
 			Kind: "ClusterRole",
@@ -172,12 +157,12 @@ func (t *pullSecretTrait) newImagePullerRoleBinding(e *Environment) *rbacv1.Role
 }
 
 func (t *pullSecretTrait) resolveSecret(e *Environment) (string, error) {
-	secret := e.Platform.Status.Build.Registry.Secret
+	secret := e.Platform.Registry.Secret
 	if secret == "" {
 		return "", nil
 	}
 
-	key := ctrl.ObjectKey{Namespace: e.Platform.Namespace, Name: secret}
+	key := ctrl.ObjectKey{Namespace: e.Platform.Registry.Organization, Name: secret}
 	obj := corev1.Secret{}
 	if err := t.Client.Get(e.Ctx, key, &obj); err != nil {
 		return "", err

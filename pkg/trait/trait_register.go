@@ -49,7 +49,6 @@ func init() {
 	AddToTraits(newMountTrait)
 	AddToTraits(newOwnerTrait)
 	AddToTraits(newPdbTrait)
-	AddToTraits(newPlatformTrait)
 	AddToTraits(newPodTrait)
 	AddToTraits(newPrometheusTrait)
 	AddToTraits(newPullSecretTrait)

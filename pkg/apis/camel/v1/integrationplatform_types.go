@@ -99,12 +99,18 @@ type IntegrationPlatformList struct {
 }
 
 // IntegrationPlatformCluster is the kind of orchestration cluster the platform is installed into.
+//
+// Deprecated: no longer in use.
 type IntegrationPlatformCluster string
 
 const (
 	// IntegrationPlatformClusterOpenShift is used when targeting an OpenShift cluster.
+	//
+	// Deprecated: no longer in use.
 	IntegrationPlatformClusterOpenShift IntegrationPlatformCluster = "OpenShift"
 	// IntegrationPlatformClusterKubernetes is used when targeting a Kubernetes cluster.
+	//
+	// Deprecated: no longer in use.
 	IntegrationPlatformClusterKubernetes IntegrationPlatformCluster = "Kubernetes"
 )
 
