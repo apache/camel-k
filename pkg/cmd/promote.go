@@ -90,22 +90,6 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("could not retrieve cluster client: %w", err)
 	}
-	if !o.isDryRun() {
-		// Skip these checks if in dry mode
-		opSource, err := operatorInfo(o.Context, c, o.Namespace)
-		if err != nil {
-			return fmt.Errorf("could not retrieve info for Camel K operator source: %w", err)
-		}
-		opDest, err := operatorInfo(o.Context, c, o.To)
-		if err != nil {
-			return fmt.Errorf("could not retrieve info for Camel K operator destination: %w", err)
-		}
-
-		err = checkOpsCompatibility(cmd, opSource, opDest)
-		if err != nil {
-			return fmt.Errorf("could not verify operators compatibility: %w", err)
-		}
-	}
 
 	promotePipe := false
 	var sourceIntegration *v1.Integration
@@ -192,20 +176,6 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func checkOpsCompatibility(cmd *cobra.Command, source, dest map[string]string) error {
-	if !compatibleVersions(source["Version"], dest["Version"], cmd) {
-		return fmt.Errorf("source (%s) and destination (%s) Camel K operator versions are not compatible", source["Version"], dest["Version"])
-	}
-	if !compatibleVersions(source["Runtime Version"], dest["Runtime Version"], cmd) {
-		return fmt.Errorf("source (%s) and destination (%s) Camel K runtime versions are not compatible", source["Runtime Version"], dest["Runtime Version"])
-	}
-	if source["Registry Address"] != dest["Registry Address"] {
-		return fmt.Errorf("source (%s) and destination (%s) Camel K container images registries are not the same", source["Registry Address"], dest["Registry Address"])
-	}
-
-	return nil
-}
-
 func (o *promoteCmdOptions) getPipe(c client.Client, name string) (*v1.Pipe, error) {
 	it := v1.NewPipe(o.Namespace, name)
 	key := k8sclient.ObjectKey{
@@ -229,10 +199,6 @@ func (o *promoteCmdOptions) getIntegrationKit(c client.Client, ref *corev1.Objec
 
 func (o *promoteCmdOptions) replaceResource(res k8sclient.Object) (bool, error) {
 	return kubernetes.ReplaceResource(o.Context, o._client, res)
-}
-
-func (o *promoteCmdOptions) isDryRun() bool {
-	return o.OutputFormat != "" || o.Image
 }
 
 func showImageOnly(cmd *cobra.Command, integration *v1.Integration) {

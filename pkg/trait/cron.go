@@ -91,6 +91,9 @@ func (t *cronTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if !ptr.Deref(t.Enabled, true) {
 		return false, NewIntegrationConditionUserDisabled("Cron"), nil
 	}
+	if e.Integration.IsSynthetic() {
+		return false, NewIntegrationConditionPlatformDisabledWithMessage("Cron", "synthetic integration"), nil
+	}
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}

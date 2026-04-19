@@ -21,16 +21,13 @@ import (
 	"context"
 	"fmt"
 
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/util/camel"
-
+	"github.com/spf13/cobra"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
-	"github.com/Masterminds/semver"
-	"github.com/spf13/cobra"
-
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
-	platformutil "github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 )
 
@@ -137,11 +134,12 @@ func (o *versionCmdOptions) displayOperatorVersion(cmd *cobra.Command, c client.
 // Deprecated: to be removed in future versions.
 func operatorInfo(ctx context.Context, c client.Client, namespace string) (map[string]string, error) {
 	infos := make(map[string]string)
-	platform, err := platformutil.GetOrFindLocal(ctx, c, namespace)
+
+	pl, err := platform.GetOrFindLocal(ctx, c, namespace)
 	if err != nil && k8serrors.IsNotFound(err) {
 		// find default operator platform in any namespace
-		if defaultPlatform, _ := platformutil.LookupForPlatformName(ctx, c, platformutil.DefaultPlatformName); defaultPlatform != nil {
-			platform = defaultPlatform
+		if defaultPlatform, _ := platform.LookupForPlatformName(ctx, c, platform.DefaultPlatformName); defaultPlatform != nil {
+			pl = defaultPlatform
 		} else {
 			return nil, err
 		}
@@ -149,14 +147,14 @@ func operatorInfo(ctx context.Context, c client.Client, namespace string) (map[s
 		return nil, err
 	}
 
-	infos["Name"] = platform.Name
-	infos["Version"] = platform.Status.Version
-	infos["Publish strategy"] = string(platform.Status.Build.PublishStrategy)
-	infos["Runtime version"] = platform.Status.Build.RuntimeVersion
-	infos["Registry address"] = platform.Status.Build.Registry.Address
-	infos["Git commit"] = platform.Status.Info["gitCommit"]
+	infos["Name"] = pl.Name
+	infos["Version"] = pl.Status.Version
+	infos["Publish strategy"] = string(pl.Status.Build.PublishStrategy)
+	infos["Runtime version"] = pl.Status.Build.RuntimeVersion
+	infos["Registry address"] = pl.Status.Build.Registry.Address
+	infos["Git commit"] = pl.Status.Info["gitCommit"]
 
-	catalog, err := camel.LoadCatalog(ctx, c, platform.Namespace, v1.RuntimeSpec{Version: platform.Status.Build.RuntimeVersion, Provider: platform.Status.Build.RuntimeProvider})
+	catalog, err := camel.LoadCatalog(ctx, c, pl.Namespace, v1.RuntimeSpec{Version: pl.Status.Build.RuntimeVersion, Provider: pl.Status.Build.RuntimeProvider})
 	if err != nil {
 		return nil, err
 	}
@@ -167,33 +165,4 @@ func operatorInfo(ctx context.Context, c client.Client, namespace string) (map[s
 	}
 
 	return infos, nil
-}
-
-func operatorVersion(ctx context.Context, c client.Client, namespace string) (string, error) {
-	infos, err := operatorInfo(ctx, c, namespace)
-	if err != nil {
-		return "", err
-	}
-
-	return infos[infoVersion], nil
-}
-
-func compatibleVersions(aVersion, bVersion string, cmd *cobra.Command) bool {
-	if aVersion == bVersion {
-		return true
-	}
-	a, err := semver.NewVersion(aVersion)
-	if err != nil {
-		fmt.Fprintln(cmd.ErrOrStderr(), "Could not parse '"+aVersion+"' (error:", err.Error()+")")
-
-		return false
-	}
-	b, err := semver.NewVersion(bVersion)
-	if err != nil {
-		fmt.Fprintln(cmd.ErrOrStderr(), "Could not parse '"+bVersion+"' (error:", err.Error()+")")
-
-		return false
-	}
-	// We consider compatible when major and minor are equals
-	return a.Major() == b.Major() && a.Minor() == b.Minor()
 }

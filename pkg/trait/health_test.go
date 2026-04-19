@@ -31,6 +31,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/internal"
+	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
@@ -55,7 +56,6 @@ func TestHealthTrait(t *testing.T) {
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKubernetes,
 				Traits: v1.Traits{
 					Health: &trait.HealthTrait{
 						Trait: trait.Trait{
@@ -72,24 +72,15 @@ func TestHealthTrait(t *testing.T) {
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
+		Platform: platform.Platform{
+			PublishStrategy:     v1.IntegrationPlatformBuildPublishStrategyJib,
+			Registry:            v1.RegistrySpec{Address: "registry"},
+			BuildRuntimeVersion: catalog.Runtime.Version,
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
-	environment.Platform.ResyncStatusFullConfig()
 	_, _, err = traitCatalog.apply(&environment)
 	require.NoError(t, err)
 
@@ -107,7 +98,6 @@ func TestHealthTrait(t *testing.T) {
 	environment.Integration.Spec.Traits.Health.ReadinessProbeEnabled = ptr.To(false)
 	environment.Integration.Spec.Traits.Health.StartupProbeEnabled = ptr.To(true)
 
-	environment.Platform.ResyncStatusFullConfig()
 	_, _, err = traitCatalog.apply(&environment)
 	require.NoError(t, err)
 	d = environment.Resources.GetDeploymentForIntegration(environment.Integration)

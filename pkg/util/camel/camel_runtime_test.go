@@ -22,24 +22,18 @@ import (
 	"os"
 	"strings"
 	"testing"
-	"time"
-
-	"github.com/apache/camel-k/v2/pkg/internal"
-	"github.com/apache/camel-k/v2/pkg/util/boolean"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/internal"
+	"github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/maven"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestCreateCatalog(t *testing.T) {
-	ip := v1.IntegrationPlatform{}
-	ip.Status.Build.Timeout = &metav1.Duration{
-		Duration: 5 * time.Minute,
-	}
 	c, err := internal.NewFakeClient()
 	require.NoError(t, err)
 	// use local Maven executable in tests
@@ -55,8 +49,8 @@ func TestCreateCatalog(t *testing.T) {
 		context.TODO(),
 		c,
 		"",
-		ip.Status.Build.Maven,
-		ip.Status.Build.GetTimeout().Duration,
+		platform.SingletonPlatform.Maven.MavenSpec,
+		platform.SingletonPlatform.BuildTimeout,
 		v1.RuntimeSpec{Provider: v1.RuntimeProviderQuarkus, Version: defaults.DefaultRuntimeVersion},
 		nil,
 	)

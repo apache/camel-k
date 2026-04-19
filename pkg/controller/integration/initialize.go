@@ -22,11 +22,9 @@ import (
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 )
@@ -81,11 +79,7 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1.Inte
 	}
 
 	if integration.Status.IntegrationKit == nil {
-		ikt, err := action.lookupIntegrationKit(ctx, integration)
-		if err != nil {
-			return nil, err
-		}
-
+		ikt := action.lookupIntegrationKit(integration)
 		integration.SetIntegrationKit(ikt)
 	}
 
@@ -106,25 +100,15 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1.Inte
 	return integration, nil
 }
 
-func (action *initializeAction) lookupIntegrationKit(ctx context.Context, integration *v1.Integration) (*v1.IntegrationKit, error) {
+func (action *initializeAction) lookupIntegrationKit(integration *v1.Integration) *v1.IntegrationKit {
 	if integration.Spec.IntegrationKit == nil || integration.Spec.IntegrationKit.Name == "" {
-		return nil, nil
+		return nil
 	}
 
 	kitNamespace := integration.Spec.IntegrationKit.Namespace
 	kitName := integration.Spec.IntegrationKit.Name
 
-	if kitNamespace == "" {
-		pl, err := platform.GetForResource(ctx, action.client, integration)
-		if err != nil && !k8serrors.IsNotFound(err) {
-			return nil, err
-		}
-		if pl != nil {
-			kitNamespace = pl.Namespace
-		}
-	}
-
-	return v1.NewIntegrationKit(kitNamespace, kitName), nil
+	return v1.NewIntegrationKit(kitNamespace, kitName)
 }
 
 func (action *initializeAction) importFromExternalApp(integration *v1.Integration) (*v1.Integration, error) {

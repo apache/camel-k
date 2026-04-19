@@ -28,11 +28,8 @@ import (
 	"github.com/spf13/viper"
 	"golang.org/x/term"
 
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-
 	"github.com/apache/camel-k/v2/pkg/client"
 	v1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/util/defaults"
 )
 
 const kamelCommandLongDescription = `Apache Camel K is a lightweight integration platform, born on Kubernetes, with serverless
@@ -194,33 +191,9 @@ func (command *RootCmdOptions) preRun(cmd *cobra.Command, _ []string) error {
 				return err
 			}
 		}
-		// Check that the Kamel CLI matches that of the operator.
-		// The check relies on the version reported in the IntegrationPlatform status,
-		// which requires the operator is running and the IntegrationPlatform resource
-		// reconciled. Hence the compatibility check is skipped for the install and the operator command.
-		// Furthermore, there can be any incompatibilities, as the install command deploys
-		// the operator version it's compatible with.
-		if cmd.Use != builderCommand && cmd.Use != operatorCommand {
-			checkAndShowCompatibilityWarning(command.Context, cmd, c, command.Namespace)
-		}
 	}
 
 	return nil
-}
-
-func checkAndShowCompatibilityWarning(ctx context.Context, cmd *cobra.Command, c client.Client, namespace string) {
-	operatorVersion, err := operatorVersion(ctx, c, namespace)
-	if err != nil {
-		if k8serrors.IsNotFound(err) {
-			fmt.Fprintf(cmd.ErrOrStderr(), "No IntegrationPlatform resource in %s namespace\n", namespace)
-		} else {
-			fmt.Fprintf(cmd.ErrOrStderr(), "Unable to retrieve the operator version: %s\n", err.Error())
-		}
-	} else {
-		if operatorVersion != "" && !compatibleVersions(operatorVersion, defaults.Version, cmd) {
-			fmt.Fprintf(cmd.ErrOrStderr(), "You're using Camel K %s client with a %s cluster operator, it's recommended to use the same version to improve compatibility.\n\n", defaults.Version, operatorVersion)
-		}
-	}
 }
 
 // GetCmdClient returns the client that can be used from command line tools.

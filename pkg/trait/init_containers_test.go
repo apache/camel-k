@@ -332,22 +332,9 @@ func TestApplyInitContainerWithAgents(t *testing.T) {
 				Phase: v1.IntegrationPhaseRunning,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform: pl,
 	}
 	environment.Resources.Add(deployment)
-	environment.Platform.ResyncStatusFullConfig()
 	_, _, err := traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
@@ -405,22 +392,9 @@ func TestApplyInitContainerWithCACert(t *testing.T) {
 				Phase: v1.IntegrationPhaseRunning,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform: pl,
 	}
 	environment.Resources.Add(deployment)
-	environment.Platform.ResyncStatusFullConfig()
 	_, _, err := traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
@@ -478,22 +452,9 @@ func TestApplyInitContainerWithMultipleCACerts(t *testing.T) {
 				Phase: v1.IntegrationPhaseRunning,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform: pl,
 	}
 	environment.Resources.Add(deployment)
-	environment.Platform.ResyncStatusFullConfig()
 	_, _, err := traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
@@ -563,22 +524,9 @@ func TestApplyInitContainerWithCACertsBackwardCompatibility(t *testing.T) {
 				Phase: v1.IntegrationPhaseRunning,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform: pl,
 	}
 	environment.Resources.Add(deployment)
-	environment.Platform.ResyncStatusFullConfig()
 	_, _, err := traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
@@ -637,22 +585,9 @@ func TestApplyInitContainerWithBaseTruststore(t *testing.T) {
 				Phase: v1.IntegrationPhaseRunning,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform: pl,
 	}
 	environment.Resources.Add(deployment)
-	environment.Platform.ResyncStatusFullConfig()
 	_, _, err := traitCatalog.apply(&environment)
 
 	require.NoError(t, err)

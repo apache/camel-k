@@ -28,11 +28,6 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-const (
-	// DefaultPlatformName is the standard name used for the integration platform.
-	DefaultPlatformName = "camel-k"
-)
-
 // LookupForPlatformName finds integration platform with given operator id as name in any namespace.
 func LookupForPlatformName(ctx context.Context, c k8sclient.Reader, name string) (*v1.IntegrationPlatform, error) {
 	platformList := v1.NewIntegrationPlatformList()
@@ -203,8 +198,10 @@ func GetTraitProfile(p *v1.IntegrationPlatform) v1.TraitProfile {
 	}
 
 	switch p.Status.Cluster {
+	//nolint:staticcheck
 	case v1.IntegrationPlatformClusterKubernetes:
 		return v1.TraitProfileKubernetes
+	//nolint:staticcheck
 	case v1.IntegrationPlatformClusterOpenShift:
 		return v1.TraitProfileOpenShift
 	}

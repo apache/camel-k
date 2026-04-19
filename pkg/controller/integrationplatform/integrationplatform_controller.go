@@ -25,13 +25,11 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/tools/events"
 
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
@@ -50,7 +48,6 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	return monitoring.NewInstrumentedReconciler(
 		&reconcileIntegrationPlatform{
 			client:   c,
-			reader:   mgr.GetAPIReader(),
 			scheme:   mgr.GetScheme(),
 			recorder: mgr.GetEventRecorder("camel-k-integration-platform-controller"),
 		},
@@ -63,37 +60,34 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 }
 
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
-	c, err := controller.New("integrationplatform-controller", mgr, controller.Options{Reconciler: r})
-	if err != nil {
-		return err
-	}
+	b := builder.ControllerManagedBy(mgr).
+		Named("integrationplatform-controller").
+		// Watch for changes to primary resource IntegrationPlatform
+		For(&v1.IntegrationPlatform{}, builder.WithPredicates(
+			platform.FilteringFuncs[ctrl.Object]{
+				UpdateFunc: func(e event.UpdateEvent) bool {
+					oldItp, ok := e.ObjectOld.(*v1.IntegrationPlatform)
+					if !ok {
+						return false
+					}
+					newItp, ok := e.ObjectNew.(*v1.IntegrationPlatform)
+					if !ok {
+						return false
+					}
 
-	// Watch for changes to primary resource IntegrationPlatform
-	err = c.Watch(
-		source.Kind(
-			mgr.GetCache(),
-			&v1.IntegrationPlatform{},
-			&handler.TypedEnqueueRequestForObject[*v1.IntegrationPlatform]{},
-			platform.FilteringFuncs[*v1.IntegrationPlatform]{
-				UpdateFunc: func(e event.TypedUpdateEvent[*v1.IntegrationPlatform]) bool {
 					// Ignore updates to the integration platform status in which case metadata.Generation
 					// does not change, or except when the integration platform phase changes as it's used
 					// to transition from one phase to another
-					return e.ObjectOld.Generation != e.ObjectNew.Generation ||
-						e.ObjectOld.Status.Phase != e.ObjectNew.Status.Phase
+					return oldItp.Generation != newItp.Generation ||
+						oldItp.Status.Phase != newItp.Status.Phase
 				},
-				DeleteFunc: func(e event.TypedDeleteEvent[*v1.IntegrationPlatform]) bool {
+				DeleteFunc: func(e event.DeleteEvent) bool {
 					// Evaluates to false if the object has been confirmed deleted
 					return !e.DeleteStateUnknown
 				},
-			},
-		),
-	)
-	if err != nil {
-		return err
-	}
+			}))
 
-	return nil
+	return b.Complete(r)
 }
 
 var _ reconcile.Reconciler = &reconcileIntegrationPlatform{}
@@ -102,9 +96,7 @@ var _ reconcile.Reconciler = &reconcileIntegrationPlatform{}
 type reconcileIntegrationPlatform struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the API server
-	client client.Client
-	// Non-caching client
-	reader   ctrl.Reader
+	client   client.Client
 	scheme   *runtime.Scheme
 	recorder events.EventRecorder
 }

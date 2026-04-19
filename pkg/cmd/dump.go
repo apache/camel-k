@@ -157,27 +157,12 @@ func dumpNamespace(ctx context.Context, c client.Client, ns string, out io.Write
 		fmt.Fprintf(out, "---\n%s\n---\n", string(data))
 	}
 
-	// IntegrationPlatforms
-	pls, err := camelClient.CamelV1().IntegrationPlatforms(ns).List(ctx, metav1.ListOptions{})
-	if err != nil {
-		return err
-	}
-	fmt.Fprintf(out, "Found %d platforms:\n", len(pls.Items))
-	for _, p := range pls.Items {
-		ref := p
-		pdata, err := kubernetes.ToYAML(&ref)
-		if err != nil {
-			return err
-		}
-		fmt.Fprintf(out, "---\n%s\n---\n", string(pdata))
-	}
-
 	// CamelCatalogs
 	cat, err := camelClient.CamelV1().CamelCatalogs(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(out, "Found %d catalogs:\n", len(pls.Items))
+	fmt.Fprintf(out, "Found %d catalogs:\n", len(cat.Items))
 	for _, c := range cat.Items {
 		ref := c
 		cdata, err := kubernetes.ToYAML(&ref)

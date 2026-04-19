@@ -39,7 +39,6 @@ import (
 
 func TestKeda(t *testing.T) {
 	environment := nominalEnv(t)
-	environment.Platform.ResyncStatusFullConfig()
 	traitCatalog := environment.Catalog
 
 	_, _, err := traitCatalog.apply(&environment)
@@ -121,7 +120,6 @@ func TestKedaAutoDiscovery(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			environment := autoDiscoveryEnvWithSource(t, tt.source, tt.manualTrigger, tt.autoMetadata)
-			environment.Platform.ResyncStatusFullConfig()
 			traitCatalog := environment.Catalog
 
 			_, _, err := traitCatalog.apply(&environment)
@@ -160,7 +158,6 @@ func TestKedaAuthentication(t *testing.T) {
 			},
 		},
 	}
-	environment.Platform.ResyncStatusFullConfig()
 	traitCatalog := environment.Catalog
 
 	_, _, err := traitCatalog.apply(&environment)
@@ -282,19 +279,7 @@ func nominalEnv(t *testing.T) Environment {
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:       pl,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
@@ -356,19 +341,7 @@ func autoDiscoveryEnvWithSource(t *testing.T, source string, manualTrigger *trai
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  catalog.Runtime.Version,
-				},
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:       defaultPlatform,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),

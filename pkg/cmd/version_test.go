@@ -21,9 +21,7 @@ import (
 	"fmt"
 	"testing"
 
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/internal"
-	"github.com/apache/camel-k/v2/pkg/platform"
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
@@ -80,45 +78,4 @@ func TestVersionClientVerbose(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, versionCmdOptions.Verbose)
 	assert.Contains(t, output, fmt.Sprintf("Camel K Client %s\nGit Commit: %s\n", defaults.Version, defaults.GitCommit))
-}
-
-func TestOperatorVersionVerbose(t *testing.T) {
-	platform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
-	platform.Status.Version = defaults.Version
-	platform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
-	platform.Status.Phase = v1.IntegrationPlatformPhaseReady
-	catalog := v1.NewCamelCatalog(platform.Namespace, defaults.DefaultRuntimeVersion)
-	catalog.Spec = v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Provider: platform.Status.Build.RuntimeProvider, Version: platform.Status.Build.RuntimeVersion}}
-	// mocked catalog versions
-	catalog.Spec.Runtime.Metadata = map[string]string{
-		"camel-quarkus.version": "2.16.0",
-		"camel.version":         "3.20.1",
-		"quarkus.version":       "2.16.0.Final",
-	}
-
-	versionCmdOptions, rootCmd, _ := initializeVersionCmdOptions(t, &platform, &catalog)
-	output, err := ExecuteCommand(rootCmd, cmdVersion, "-v", "--operator")
-	require.NoError(t, err)
-	assert.True(t, versionCmdOptions.Verbose)
-	assert.Contains(t, output, fmt.Sprintf("Camel K Operator %s\n", defaults.Version))
-	assert.Contains(t, output, fmt.Sprintf("Camel version: %s\n", catalog.Spec.GetCamelVersion()))
-	assert.Contains(t, output, fmt.Sprintf("Camel Quarkus version: %s\n", catalog.Spec.GetCamelQuarkusVersion()))
-	assert.Contains(t, output, fmt.Sprintf("Quarkus version: %s\n", catalog.Spec.GetQuarkusVersion()))
-}
-
-func TestCompatibleVersions(t *testing.T) {
-	_, rootCmd, _ := initializeVersionCmdOptions(t)
-	assert.True(t, compatibleVersions("1.3.0", "1.3.0", rootCmd))
-	assert.True(t, compatibleVersions("1.3.0", "1.3.1", rootCmd))
-	assert.True(t, compatibleVersions("1.3.0", "1.3.0-SNAPSHOT", rootCmd))
-	assert.False(t, compatibleVersions("1.3.0", "1.2.0", rootCmd))
-	assert.False(t, compatibleVersions("1.3.0", "2.3.0", rootCmd))
-	assert.False(t, compatibleVersions("1.3.0", "dsadsa", rootCmd))
-	assert.False(t, compatibleVersions("dsadsa", "1.3.4", rootCmd))
-}
-
-func TestCompatibleVersionsNonSemver(t *testing.T) {
-	_, rootCmd, _ := initializeVersionCmdOptions(t)
-	assert.True(t, compatibleVersions("1.3.0.special-version", "1.3.0.special-version", rootCmd))
-	assert.False(t, compatibleVersions("1.3.1.special-version", "1.3.0.special-version", rootCmd))
 }

@@ -18,6 +18,8 @@ limitations under the License.
 package v1
 
 import (
+	"fmt"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -222,4 +224,14 @@ func (c *IntegrationPlatformCondition) GetReason() string {
 // GetMessage --.
 func (c *IntegrationPlatformCondition) GetMessage() string {
 	return c.Message
+}
+
+// Validate checks the strategy is supported.
+func (b IntegrationPlatformBuildPublishStrategy) Validate() error {
+	switch b {
+	case IntegrationPlatformBuildPublishStrategyS2I, IntegrationPlatformBuildPublishStrategyJib:
+		return nil
+	default:
+		return fmt.Errorf("invalid IntegrationPlatformBuildPublishStrategy: %q", b)
+	}
 }

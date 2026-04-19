@@ -24,7 +24,6 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	camel "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -47,86 +46,42 @@ type KameletRepository interface {
 	String() string
 }
 
-// New creates a KameletRepository for the given namespaces.
-// Kamelets are first looked up in all the given namespaces, in the order they appear.
-// If one namespace defines an IntegrationPlatform (only the first IntegrationPlatform in state "Ready" found),
-// then all kamelet repository URIs defined in the IntegrationPlatform are included.
-func New(ctx context.Context, client camel.Interface, namespaces ...string) (KameletRepository, error) {
-	namespaces = makeDistinctNonEmpty(namespaces)
-	platform, err := lookupPlatform(ctx, client, namespaces...)
-	if err != nil {
-		return nil, err
-	}
-
-	return NewForPlatform(ctx, client, platform, namespaces...)
+// NeNewWithURIsw creates a KameletRepository for the given namespaces and any additional external catalog.
+//
+// Deprecated: to be removed when dropping support of IntegrationPlatform.
+func NewWithURIs(ctx context.Context, client camel.Interface, externalRepos []v1.KameletRepositorySpec, namespaces ...string) (KameletRepository, error) {
+	return newRepo(ctx, client, externalRepos, namespaces...)
 }
 
-// NewForPlatform creates a KameletRepository for the given namespaces and platform.
-// Kamelets are first looked up in all the given namespaces, in the order they appear,
-// then repositories defined in the platform are looked up.
-func NewForPlatform(ctx context.Context, client camel.Interface, platform *v1.IntegrationPlatform, namespaces ...string) (KameletRepository, error) {
+// New creates a KameletRepository for the given namespaces.
+func New(ctx context.Context, client camel.Interface, namespaces ...string) (KameletRepository, error) {
+	return newRepo(ctx, client, nil, namespaces...)
+}
+
+func newRepo(ctx context.Context, client camel.Interface, externalRepos []v1.KameletRepositorySpec, namespaces ...string) (KameletRepository, error) {
 	namespaces = makeDistinctNonEmpty(namespaces)
 	repoImpls := make([]KameletRepository, 0)
 	for _, namespace := range namespaces {
 		// Add first a namespace local repository for each namespace
 		repoImpls = append(repoImpls, newKubernetesKameletRepository(client, namespace))
 	}
-	if platform != nil {
-		repos := getRepositoriesFromPlatform(platform)
-		for _, repoURI := range repos {
-			repoImpl, err := newFromURI(ctx, repoURI)
-			if err != nil {
-				return nil, err
-			}
-			repoImpls = append(repoImpls, repoImpl)
-		}
-	} else {
-		// Add default repo
-		defaultRepoImpl, err := newFromURI(ctx, DefaultRemoteRepository)
+	// Deprecated: we will need to remove this part when
+	// dropping support for IntegrationPlatform.
+	for _, ext := range externalRepos {
+		repo, err := newFromURI(ctx, ext.URI)
 		if err != nil {
 			return nil, err
 		}
-		repoImpls = append(repoImpls, defaultRepoImpl)
+		repoImpls = append(repoImpls, repo)
 	}
+	// Add default repo
+	defaultRepoImpl, err := newFromURI(ctx, DefaultRemoteRepository)
+	if err != nil {
+		return nil, err
+	}
+	repoImpls = append(repoImpls, defaultRepoImpl)
 
 	return newCompositeKameletRepository(repoImpls...), nil
-}
-
-func lookupPlatform(ctx context.Context, client camel.Interface, namespaces ...string) (*v1.IntegrationPlatform, error) {
-	for _, namespace := range namespaces {
-		pls, err := client.CamelV1().IntegrationPlatforms(namespace).List(ctx, metav1.ListOptions{})
-		if err != nil {
-			return nil, err
-		}
-		for _, pl := range pls.Items {
-			if pl.Status.Phase == v1.IntegrationPlatformPhaseReady {
-				return &pl, nil
-			}
-		}
-		if len(pls.Items) > 0 {
-			// If none is ready, return the first one
-			return &pls.Items[0], nil
-		}
-	}
-
-	return nil, nil
-}
-
-func getRepositoriesFromPlatform(platform *v1.IntegrationPlatform) []string {
-	if platform == nil {
-		return nil
-	}
-	repos := platform.Status.Kamelet.Repositories
-	if len(repos) == 0 {
-		// Maybe not reconciled yet
-		repos = platform.Spec.Kamelet.Repositories
-	}
-	res := make([]string, 0, len(repos))
-	for _, repo := range repos {
-		res = append(res, repo.URI)
-	}
-
-	return res
 }
 
 func newFromURI(ctx context.Context, uri string) (KameletRepository, error) {

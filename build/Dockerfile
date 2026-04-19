@@ -39,7 +39,7 @@ RUN tar -xC ${MVNW_DIR} -f ${MVNW_DIR}mvnw.tar \
 # Used by mvnw to download maven dist into it
 ENV MAVEN_USER_HOME="${MAVEN_HOME}"
 # Install a default mvnw distribution at build time
-RUN ${MVNW_DIR}/mvnw --version
+RUN ${MVNW_DIR}mvnw --version
 
 ADD build/_maven_output ${MVN_REPO}
 # Fix https://github.com/moby/moby/issues/37965
@@ -56,7 +56,7 @@ USER 1001:0
 
 ADD build/_output/bin/kamel-${IMAGE_ARCH} /usr/local/bin/kamel
 
-FROM golang:1.22 AS go
+FROM golang:1.25 AS go
 
 RUN go install github.com/go-delve/delve/cmd/dlv@latest
 

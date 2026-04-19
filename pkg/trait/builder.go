@@ -214,16 +214,15 @@ func (t *builderTrait) Apply(e *Environment) error {
 	var pipelineTasks []v1.Task
 
 	// task configuration resources
-	defaultBuildConf := &v1.BuildConfiguration{}
-	if e.Platform != nil {
-		defaultBuildConf = &e.Platform.Status.Build.BuildConfiguration
-	}
+	defaultBuildConf := &e.Platform.BuildConfiguration
+
 	tasksConf, err := t.parseTasksConf(defaultBuildConf)
 	if err != nil {
 		return err
 	}
 
 	imageName := getImageName(e)
+
 	// Building task
 	builderTask, err := t.builderTask(e, taskConfOrDefault(tasksConf, "builder"))
 	if err != nil {
@@ -266,7 +265,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 
 	// Publishing task
 	tag := getTag(e)
-	switch e.Platform.Status.Build.PublishStrategy {
+	switch e.Platform.PublishStrategy {
 	case v1.IntegrationPlatformBuildPublishStrategyJib:
 		jibTask := v1.Task{Jib: &v1.JibTask{
 			BaseTask: v1.BaseTask{
@@ -276,7 +275,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 			PublishTask: v1.PublishTask{
 				BaseImage: t.getBaseImage(e),
 				Image:     imageName,
-				Registry:  e.Platform.Status.Build.Registry,
+				Registry:  e.Platform.Registry,
 			},
 		}}
 		if t.ImagePlatforms != nil {
@@ -346,9 +345,7 @@ func failIntegrationKit(e *Environment, conditionType v1.IntegrationKitCondition
 }
 
 func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfiguration) (*v1.BuilderTask, error) {
-	maven := v1.MavenBuildSpec{
-		MavenSpec: e.Platform.Status.Build.Maven,
-	}
+	maven := e.Platform.Maven
 
 	// Add Maven repositories defined in the IntegrationKit or Integration
 	if e.IntegrationKit != nil {
@@ -486,18 +483,19 @@ func getImageName(e *Environment) string {
 	} else {
 		imageName = fmt.Sprintf("%s:%s", e.Integration.Name, e.Integration.ResourceVersion)
 	}
-	organization := e.Platform.Status.Build.Registry.Organization
+	organization := e.Platform.Registry.Organization
 	if organization == "" {
-		organization = e.Platform.Namespace
+		// default organization name to catalog namespace (same as deprecated IntegrationPlatform namespace)
+		organization = e.Platform.CatalogNamespace
 	}
 
-	return e.Platform.Status.Build.Registry.Address + "/" + organization + "/camel-k-" + imageName
+	return e.Platform.Registry.Address + "/" + organization + "/camel-k-" + imageName
 }
 
 func (t *builderTrait) getBaseImage(e *Environment) string {
 	baseImage := t.BaseImage
 	if baseImage == "" {
-		baseImage = e.Platform.Status.Build.BaseImage
+		baseImage = e.Platform.BuildBaseImage
 	}
 
 	return baseImage
@@ -508,7 +506,7 @@ func (t *builderTrait) determineCustomTasks(e *Environment, builderTask *v1.Buil
 
 	realBuildStrategy := builderTask.Configuration.Strategy
 	if realBuildStrategy == "" {
-		realBuildStrategy = e.Platform.Status.Build.BuildConfiguration.Strategy
+		realBuildStrategy = e.Platform.BuildConfiguration.Strategy
 	}
 
 	if len(t.Tasks) > 0 && realBuildStrategy != v1.BuildStrategyPod {
@@ -701,8 +699,8 @@ func publishingOrUserTask(t v1.Task) bool {
 // Will set a default platform if either specified in the trait or the platform/profile configuration.
 func (t *builderTrait) setPlatform(e *Environment) {
 	if t.ImagePlatforms == nil {
-		if e.Platform != nil && e.Platform.Status.Build.BuildConfiguration.ImagePlatforms != nil {
-			t.ImagePlatforms = e.Platform.Status.Build.BuildConfiguration.ImagePlatforms
+		if e.Platform.BuildConfiguration.ImagePlatforms != nil {
+			t.ImagePlatforms = e.Platform.BuildConfiguration.ImagePlatforms
 		}
 	}
 }

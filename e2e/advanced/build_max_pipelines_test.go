@@ -199,7 +199,8 @@ func TestMaxBuildLimitWaitingBuilds(t *testing.T) {
 	})
 }
 
-func doKitBuildInNamespace(t *testing.T, ctx context.Context, g *WithT, name string, ns string, testTimeout time.Duration, options kitOptions, buildPhase v1.BuildPhase, kitPhase v1.IntegrationKitPhase) {
+func doKitBuildInNamespace(t *testing.T, ctx context.Context, g *WithT, name string, ns string,
+	testTimeout time.Duration, options kitOptions, buildPhase v1.BuildPhase, kitPhase v1.IntegrationKitPhase) {
 	buildKitArgs := []string{"kit", "create", name, "-n", ns}
 	for _, dependency := range options.dependencies {
 		buildKitArgs = append(buildKitArgs, "-d", dependency)

@@ -52,24 +52,6 @@ func TestIntegrationBuildSubmitted(t *testing.T) {
 			Phase: v1.IntegrationPhaseBuildSubmitted,
 		},
 	}
-	platform := &v1.IntegrationPlatform{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: v1.SchemeGroupVersion.String(),
-			Kind:       v1.IntegrationPlatformKind,
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: "ns",
-			Name:      "camel-k",
-		},
-		Status: v1.IntegrationPlatformStatus{
-			Phase: v1.IntegrationPlatformPhaseReady,
-			IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
-				Build: v1.IntegrationPlatformBuildSpec{
-					RuntimeVersion: defaults.DefaultRuntimeVersion,
-				},
-			},
-		},
-	}
 	catalog := &v1.CamelCatalog{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1.SchemeGroupVersion.String(),
@@ -86,7 +68,7 @@ func TestIntegrationBuildSubmitted(t *testing.T) {
 			},
 		},
 	}
-	c, err := internal.NewFakeClient(it, platform, catalog)
+	c, err := internal.NewFakeClient(it, catalog)
 	require.NoError(t, err)
 
 	a := buildAction{}

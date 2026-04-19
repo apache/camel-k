@@ -59,7 +59,6 @@ func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint b
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileOpenShift,
 				Traits: v1.Traits{
 					Logging: &traitv1.LoggingTrait{
 						Color:           ptr.To(color),
@@ -76,22 +75,7 @@ func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint b
 				Phase: v1.IntegrationKitPhaseBuildSubmitted,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "ns",
-			},
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterOpenShift,
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-				IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
-					Build: v1.IntegrationPlatformBuildSpec{
-						RuntimeVersion: c.Runtime.Version,
-					},
-				},
-			},
-		},
+		Platform:       pl,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),

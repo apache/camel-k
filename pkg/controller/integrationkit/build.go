@@ -136,16 +136,16 @@ func (action *buildAction) createBuild(ctx context.Context, kit *v1.IntegrationK
 	buildConfig := v1.ConfigurationTasksByName(env.Pipeline, "builder")
 	if buildConfig.IsEmpty() {
 		// default to IntegrationPlatform configuration
-		buildConfig = &env.Platform.Status.Build.BuildConfiguration
+		buildConfig = &env.Platform.BuildConfiguration
 	} else {
 		if buildConfig.Strategy == "" {
 			// we always need to define a strategy, so we default to platform if none
-			buildConfig.Strategy = env.Platform.Status.Build.BuildConfiguration.Strategy
+			buildConfig.Strategy = env.Platform.BuildConfiguration.Strategy
 		}
 
 		if buildConfig.OrderStrategy == "" {
 			// we always need to define an order strategy, so we default to platform if none
-			buildConfig.OrderStrategy = env.Platform.Status.Build.BuildConfiguration.OrderStrategy
+			buildConfig.OrderStrategy = env.Platform.BuildConfiguration.OrderStrategy
 		}
 	}
 
@@ -171,18 +171,16 @@ func (action *buildAction) createBuild(ctx context.Context, kit *v1.IntegrationK
 		},
 	}
 
-	timeout := env.Platform.Status.Build.GetTimeout()
-	if layout := labels[v1.IntegrationKitLayoutLabel]; env.Platform.Spec.Build.Timeout == nil && layout == v1.IntegrationKitLayoutNativeSources {
-		if timeout.Duration < minNativeBuildTimeout {
+	timeout := env.Platform.BuildTimeout
+	if layout := labels[v1.IntegrationKitLayoutLabel]; timeout == platform.DefaultBuildTimeout && layout == v1.IntegrationKitLayoutNativeSources {
+		if timeout < minNativeBuildTimeout {
 			log.Infof("Forcing the Build %s/%s with a timeout of %s as the platform value of %s is considered too low for a Quarkus native build. "+
 				"Adjust the platform settings accordingly as you may even need a higher timeout value.",
-				build.Namespace, build.Name, minNativeBuildTimeout, &timeout.Duration)
-			timeout = metav1.Duration{
-				Duration: minNativeBuildTimeout,
-			}
+				build.Namespace, build.Name, minNativeBuildTimeout, &timeout)
+			timeout = minNativeBuildTimeout
 		}
 	}
-	build.Spec.Timeout = timeout
+	build.Spec.Timeout = metav1.Duration{Duration: timeout}
 
 	// Set the integration kit instance as the owner and controller
 	if err := controllerutil.SetControllerReference(kit, build, action.client.GetScheme()); err != nil {

@@ -30,57 +30,38 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/internal"
+	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
 func TestBuilderTraitNotAppliedBecauseOfNilKit(t *testing.T) {
-	environments := []*Environment{
-		createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine),
-	}
-
-	for _, e := range environments {
-		e := e // pin
-		e.IntegrationKit = nil
-
-		t.Run(string(e.Platform.Status.Cluster), func(t *testing.T) {
-			trait, _ := newBuilderTrait().(*builderTrait)
-
-			configure, conditions, err := trait.Configure(e)
-			assert.False(t, configure)
-			assert.Empty(t, conditions)
-			require.NoError(t, err)
-			assert.Nil(t, e.GetTrait("builder"))
-			assert.Empty(t, e.Pipeline)
-		})
-	}
+	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
+	env.IntegrationKit = nil
+	trait, _ := newBuilderTrait().(*builderTrait)
+	configure, conditions, err := trait.Configure(env)
+	assert.False(t, configure)
+	assert.Empty(t, conditions)
+	require.NoError(t, err)
+	assert.Nil(t, env.GetTrait("builder"))
+	assert.Empty(t, env.Pipeline)
 }
 
 func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
-	environments := []*Environment{
-		createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine),
-	}
-
-	for _, e := range environments {
-		e := e // pin
-		e.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseInitialization
-
-		t.Run(string(e.Platform.Status.Cluster), func(t *testing.T) {
-			conditions, traits, err := NewBuilderTestCatalog().apply(e)
-
-			require.NoError(t, err)
-			assert.NotEmpty(t, conditions)
-			assert.Empty(t, traits)
-			assert.NotEmpty(t, e.ExecutedTraits)
-			assert.Nil(t, e.GetTrait("builder"))
-			assert.Empty(t, e.Pipeline)
-		})
-	}
+	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
+	env.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseInitialization
+	conditions, traits, err := NewBuilderTestCatalog().apply(env)
+	require.NoError(t, err)
+	assert.NotEmpty(t, conditions)
+	assert.Empty(t, traits)
+	assert.NotEmpty(t, env.ExecutedTraits)
+	assert.Nil(t, env.GetTrait("builder"))
+	assert.Empty(t, env.Pipeline)
 }
 
 func TestJibBuilderTrait(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
+	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
 	conditions, traits, err := NewBuilderTestCatalog().apply(env)
 
 	require.NoError(t, err)
@@ -97,7 +78,7 @@ func TestJibBuilderTrait(t *testing.T) {
 	assert.NotEmpty(t, env.Pipeline[2].Jib.Registry)
 }
 
-func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.IntegrationPlatformBuildPublishStrategy, buildStrategy v1.BuildStrategy) *Environment {
+func createBuilderTestEnv(buildStrategy v1.BuildStrategy) *Environment {
 	c, err := camel.DefaultCatalog()
 	if err != nil {
 		panic(err)
@@ -127,30 +108,19 @@ func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.Int
 			},
 		},
 		IntegrationKit: itk,
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: cluster,
-				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy: strategy,
-					Registry:        v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:  defaults.DefaultRuntimeVersion,
-					RuntimeProvider: v1.RuntimeProviderQuarkus,
-					BuildConfiguration: v1.BuildConfiguration{
-						Strategy: buildStrategy,
-					},
-					BaseImage: "root-jdk-image",
-				},
+		Platform: platform.Platform{
+			Registry:            v1.RegistrySpec{Address: "registry"},
+			PublishStrategy:     platform.DefaultPublishStrategy,
+			BuildRuntimeVersion: defaults.DefaultRuntimeVersion,
+			BuildConfiguration: v1.BuildConfiguration{
+				Strategy: buildStrategy,
 			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
+			BuildBaseImage: "root-jdk-image",
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
-
-	res.Platform.ResyncStatusFullConfig()
 
 	return res
 }
@@ -160,7 +130,7 @@ func NewBuilderTestCatalog() *Catalog {
 }
 
 func TestMavenPropertyBuilderTrait(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
+	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Properties = append(builderTrait.Properties, "build-time-prop1=build-time-value1")
 
@@ -176,7 +146,7 @@ func createNominalBuilderTraitTest() *builderTrait {
 }
 
 func TestCustomTaskBuilderTrait(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyPod)
+	env := createBuilderTestEnv(v1.BuildStrategyPod)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
 
@@ -199,7 +169,7 @@ func TestCustomTaskBuilderTrait(t *testing.T) {
 }
 
 func TestCustomTaskBuilderTraitValidStrategyOverride(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
+	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
 	builderTrait.Strategy = "pod"
@@ -217,7 +187,7 @@ func TestCustomTaskBuilderTraitValidStrategyOverride(t *testing.T) {
 }
 
 func TestCustomTaskBuilderTraitInvalidStrategy(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
+	env := createBuilderTestEnv(v1.BuildStrategyRoutine)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
 
@@ -231,7 +201,7 @@ func TestCustomTaskBuilderTraitInvalidStrategy(t *testing.T) {
 }
 
 func TestCustomTaskBuilderTraitInvalidStrategyOverride(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyPod)
+	env := createBuilderTestEnv(v1.BuildStrategyPod)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
 	builderTrait.Strategy = "routine"
@@ -246,7 +216,7 @@ func TestCustomTaskBuilderTraitInvalidStrategyOverride(t *testing.T) {
 }
 
 func TestMavenProfilesBuilderTrait(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
+	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.MavenProfiles = []string{"configmap:maven-profile/owasp-profile.xml", "secret:maven-profile-secret"}
 
@@ -273,7 +243,7 @@ func TestMavenProfilesBuilderTrait(t *testing.T) {
 }
 
 func TestInvalidMavenProfilesBuilderTrait(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
+	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.MavenProfiles = []string{"fakeprofile"}
 
@@ -402,7 +372,7 @@ func TestUserTaskMultiCommands(t *testing.T) {
 }
 
 func TestBuilderDeprecatedParams(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
+	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.LimitCPU = "100m"
 	builderTrait.RequestCPU = "100m"
@@ -436,7 +406,7 @@ func TestExistsTaskRequest(t *testing.T) {
 }
 
 func TestBuilderWithNoNodeSelector(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
+	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
 	builderTrait := createNominalBuilderTraitTest()
 
 	active, condition, err := builderTrait.Configure(env)
@@ -453,7 +423,7 @@ func TestBuilderWithNoNodeSelector(t *testing.T) {
 }
 
 func TestBuilderWithNodeSelector(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
+	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.NodeSelector = map[string]string{
 		"size": "large",
@@ -473,7 +443,7 @@ func TestBuilderWithNodeSelector(t *testing.T) {
 }
 
 func TestBuilderWithAnnotations(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
+	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Annotations = map[string]string{
 		"annotation": "value",
@@ -493,7 +463,7 @@ func TestBuilderWithAnnotations(t *testing.T) {
 }
 
 func TestBuilderNoTasksFilter(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyPod)
+	env := createBuilderTestEnv(v1.BuildStrategyPod)
 	builderTrait := createNominalBuilderTraitTest()
 
 	err := builderTrait.Apply(env)
@@ -504,7 +474,7 @@ func TestBuilderNoTasksFilter(t *testing.T) {
 }
 
 func TestBuilderTasksFilterNotExistingTasks(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyPod)
+	env := createBuilderTestEnv(v1.BuildStrategyPod)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.TasksFilter = "builder,missing-task"
 
@@ -514,7 +484,7 @@ func TestBuilderTasksFilterNotExistingTasks(t *testing.T) {
 }
 
 func TestBuilderTasksFilterMissingPublishTasks(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyPod)
+	env := createBuilderTestEnv(v1.BuildStrategyPod)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.TasksFilter = "builder,package"
 
@@ -524,7 +494,7 @@ func TestBuilderTasksFilterMissingPublishTasks(t *testing.T) {
 }
 
 func TestBuilderTasksFilterOperatorTasks(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyPod)
+	env := createBuilderTestEnv(v1.BuildStrategyPod)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.TasksFilter = "builder,package,jib"
 
@@ -535,7 +505,7 @@ func TestBuilderTasksFilterOperatorTasks(t *testing.T) {
 }
 
 func TestBuilderTasksFilterAndReorderOperatorTasks(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyPod)
+	env := createBuilderTestEnv(v1.BuildStrategyPod)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.TasksFilter = "package,builder,jib"
 
@@ -546,7 +516,7 @@ func TestBuilderTasksFilterAndReorderOperatorTasks(t *testing.T) {
 }
 
 func TestBuilderTasksFilterAndReorderCustomTasks(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyPod)
+	env := createBuilderTestEnv(v1.BuildStrategyPod)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Tasks = append(builderTrait.Tasks, `my-custom-publish;alpine;mvn test`)
 	builderTrait.Tasks = append(builderTrait.Tasks, "my-custom-task;alpine;ls")
@@ -559,7 +529,7 @@ func TestBuilderTasksFilterAndReorderCustomTasks(t *testing.T) {
 }
 
 func TestBuilderTasksNodeSelectorPlatformBuildStrategyPod(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyPod)
+	env := createBuilderTestEnv(v1.BuildStrategyPod)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.NodeSelector = map[string]string{
 		"kubernetes.io/arch": "amd64",
@@ -654,7 +624,7 @@ func TestBuilderMatchesTasks(t *testing.T) {
 }
 
 func TestBuilderTraitPlatforms(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
+	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.ImagePlatforms = []string{"linux/amd64", "linux/arm64"}
 	err := builderTrait.Apply(env)
@@ -664,7 +634,7 @@ func TestBuilderTraitPlatforms(t *testing.T) {
 }
 
 func TestBuilderTraitOrderStrategy(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
+	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.OrderStrategy = "fifo"
 	err := builderTrait.Apply(env)

@@ -20,6 +20,7 @@ package trait
 import (
 	"testing"
 
+	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -109,6 +110,7 @@ func createNominalQuarkusTest() (*quarkusTrait, *Environment) {
 	client, _ := internal.NewFakeClient()
 
 	environment := &Environment{
+		Client:       client,
 		Catalog:      NewCatalog(client),
 		CamelCatalog: &camel.RuntimeCatalog{},
 		Integration: &v1.Integration{
@@ -133,7 +135,7 @@ func createNominalQuarkusTest() (*quarkusTrait, *Environment) {
 				Package: &v1.BuilderTask{},
 			},
 		},
-		Platform: &v1.IntegrationPlatform{},
+		Platform: platform.Platform{},
 	}
 
 	return trait, environment

@@ -26,8 +26,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
 
-	routev1 "github.com/openshift/api/route/v1"
-
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -36,6 +34,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/internal"
+	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/resources"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
@@ -47,7 +46,7 @@ const (
 )
 
 func TestOpenShiftTraits(t *testing.T) {
-	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, `from("timer:my-timer").to("log:info");`)
+	env := createTestEnv(t, `from("timer:my-timer").to("log:info");`)
 	res := processTestEnv(t, env)
 
 	assert.NotEmpty(t, env.ExecutedTraits)
@@ -60,51 +59,8 @@ func TestOpenShiftTraits(t *testing.T) {
 	}))
 }
 
-func TestOpenShiftTraitsWithWeb(t *testing.T) {
-	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, `from("netty-http:http").to("log:info");`)
-	res := processTestEnv(t, env)
-	assert.NotNil(t, env.GetTrait("deployment"))
-	assert.NotNil(t, env.GetTrait("service"))
-	assert.NotNil(t, env.GetTrait("route"))
-	assert.NotNil(t, env.GetTrait("owner"))
-	assert.NotNil(t, res.GetDeployment(func(deployment *appsv1.Deployment) bool {
-		return deployment.Name == TestDeploymentName
-	}))
-	assert.NotNil(t, res.GetService(func(svc *corev1.Service) bool {
-		return svc.Name == TestDeploymentName
-	}))
-	assert.NotNil(t, res.GetRoute(func(svc *routev1.Route) bool {
-		return svc.Name == TestDeploymentName
-	}))
-}
-
-func TestOpenShiftTraitsWithWebAndConfig(t *testing.T) {
-	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, `from("netty-http:http").to("log:info");`)
-	res := processTestEnv(t, env)
-	assert.NotNil(t, env.GetTrait("service"))
-	assert.NotNil(t, env.GetTrait("route"))
-	assert.NotNil(t, res.GetService(func(svc *corev1.Service) bool {
-		return svc.Name == TestDeploymentName && svc.Spec.Ports[0].TargetPort.StrVal == "http"
-	}))
-}
-
-func TestOpenShiftTraitsWithWebAndDisabledTrait(t *testing.T) {
-	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, `from("netty-http:http").to("log:info");`)
-	env.Integration.Spec.Traits.Service = &traitv1.ServiceTrait{
-		Trait: traitv1.Trait{
-			Enabled: ptr.To(false),
-		},
-	}
-	res := processTestEnv(t, env)
-	assert.Nil(t, env.GetTrait("service"))
-	assert.Nil(t, env.GetTrait("route")) // No route without service
-	assert.Nil(t, res.GetService(func(svc *corev1.Service) bool {
-		return true
-	}))
-}
-
 func TestKubernetesTraits(t *testing.T) {
-	env := createTestEnv(t, v1.IntegrationPlatformClusterKubernetes, `from("timer:tick").to("log:info");`)
+	env := createTestEnv(t, `from("timer:tick").to("log:info");`)
 	res := processTestEnv(t, env)
 	assert.NotNil(t, env.GetTrait("deployment"))
 	assert.Nil(t, env.GetTrait("service"))
@@ -116,7 +72,7 @@ func TestKubernetesTraits(t *testing.T) {
 }
 
 func TestKubernetesTraitsWithWeb(t *testing.T) {
-	env := createTestEnv(t, v1.IntegrationPlatformClusterKubernetes, `from("servlet:http").to("log:info");`)
+	env := createTestEnv(t, `from("servlet:http").to("log:info");`)
 	res := processTestEnv(t, env)
 	assert.NotNil(t, env.GetTrait("deployment"))
 	assert.NotNil(t, env.GetTrait("service"))
@@ -131,17 +87,21 @@ func TestKubernetesTraitsWithWeb(t *testing.T) {
 }
 
 func TestTraitHierarchyDecode(t *testing.T) {
-	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "")
-
-	env.Platform.Spec.Traits.KnativeService = &traitv1.KnativeServiceTrait{
-		Trait: traitv1.Trait{
-			Enabled: ptr.To(false),
+	env := createTestEnv(t, "")
+	env.IntegrationProfile = &v1.IntegrationProfile{
+		Spec: v1.IntegrationProfileSpec{
+			Traits: v1.Traits{
+				KnativeService: &traitv1.KnativeServiceTrait{
+					Trait: traitv1.Trait{
+						Enabled: ptr.To(false),
+					},
+					MinScale: ptr.To(1),
+					MaxScale: ptr.To(10),
+					Target:   ptr.To(15),
+				},
+			},
 		},
-		MinScale: ptr.To(1),
-		MaxScale: ptr.To(10),
-		Target:   ptr.To(15),
 	}
-	env.Platform.ResyncStatusFullConfig()
 
 	env.Integration.Spec.Traits.KnativeService = &traitv1.KnativeServiceTrait{
 		Trait: traitv1.Trait{
@@ -249,7 +209,7 @@ func processTestEnv(t *testing.T, env *Environment) *kubernetes.Collection {
 	return env.Resources
 }
 
-func createTestEnv(t *testing.T, cluster v1.IntegrationPlatformCluster, script string) *Environment {
+func createTestEnv(t *testing.T, script string) *Environment {
 	t.Helper()
 
 	client, _ := internal.NewFakeClient()
@@ -285,22 +245,11 @@ func createTestEnv(t *testing.T, cluster v1.IntegrationPlatformCluster, script s
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
-		Platform: &v1.IntegrationPlatform{
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: cluster,
-				Build: v1.IntegrationPlatformBuildSpec{
-					RuntimeVersion: catalog.Runtime.Version,
-				},
-			},
-			Status: v1.IntegrationPlatformStatus{
-				Phase: v1.IntegrationPlatformPhaseReady,
-			},
-		},
+		Platform:       pl,
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
-	res.Platform.ResyncStatusFullConfig()
 	return res
 }
 
@@ -309,7 +258,7 @@ func NewTraitTestCatalog() *Catalog {
 }
 
 func TestExecutedTraitsCondition(t *testing.T) {
-	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "from('timer:test').to('log:info')")
+	env := createTestEnv(t, "from('timer:test').to('log:info')")
 	catalog := NewTraitTestCatalog()
 	conditions, traits, err := catalog.apply(env)
 	require.NoError(t, err)
@@ -351,31 +300,16 @@ func testDefaultIntegrationPhaseTraitsSetting(t *testing.T, phase v1.Integration
 			},
 		},
 	}
-	platform := &v1.IntegrationPlatform{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "my-platform",
-			Namespace: "ns",
-		},
-		Status: v1.IntegrationPlatformStatus{
-			IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
-				Build: v1.IntegrationPlatformBuildSpec{
-					RuntimeProvider: v1.RuntimeProviderQuarkus,
-					RuntimeVersion:  defaults.DefaultRuntimeVersion,
-				},
-			},
-			Phase: v1.IntegrationPlatformPhaseReady,
-		},
-	}
 	// Load the default catalog
 	camelCatalogData, err := resources.Resource(fmt.Sprintf("/resources/camel-catalog-%s.yaml", defaults.DefaultRuntimeVersion))
 	require.NoError(t, err)
 	var cat v1.CamelCatalog
 	err = yaml.Unmarshal(camelCatalogData, &cat)
 	require.NoError(t, err)
-	cat.SetAnnotations(platform.Annotations)
-	cat.SetNamespace(platform.Namespace)
+	cat.Namespace = "default"
+	platform.SingletonPlatform.CatalogNamespace = cat.Namespace
 
-	client, err := internal.NewFakeClient(platform, &cat)
+	client, err := internal.NewFakeClient(&cat)
 	require.NoError(t, err)
 	env, err := Apply(context.Background(), client, it, nil)
 	require.NoError(t, err)
@@ -397,10 +331,6 @@ func TestDefaultIntegrationNoneTraitsSetting(t *testing.T) {
 
 func TestDefaultIntegrationInitTraitsSetting(t *testing.T) {
 	testDefaultIntegrationPhaseTraitsSetting(t, v1.IntegrationPhaseInitialization)
-}
-
-func TestDefaultIntegrationWaitingPlatformTraitsSetting(t *testing.T) {
-	testDefaultIntegrationPhaseTraitsSetting(t, v1.IntegrationPhaseWaitingForPlatform)
 }
 
 func TestDefaultIntegrationBuildingKitTraitsSetting(t *testing.T) {
@@ -457,31 +387,16 @@ func TestIntegrationTraitsSetting(t *testing.T) {
 			},
 		},
 	}
-	platform := &v1.IntegrationPlatform{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "my-platform",
-			Namespace: "ns",
-		},
-		Status: v1.IntegrationPlatformStatus{
-			IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
-				Build: v1.IntegrationPlatformBuildSpec{
-					RuntimeProvider: v1.RuntimeProviderQuarkus,
-					RuntimeVersion:  defaults.DefaultRuntimeVersion,
-				},
-			},
-			Phase: v1.IntegrationPlatformPhaseReady,
-		},
-	}
 	// Load the default catalog
 	camelCatalogData, err := resources.Resource(fmt.Sprintf("/resources/camel-catalog-%s.yaml", defaults.DefaultRuntimeVersion))
 	require.NoError(t, err)
 	var cat v1.CamelCatalog
 	err = yaml.Unmarshal(camelCatalogData, &cat)
 	require.NoError(t, err)
-	cat.SetAnnotations(platform.Annotations)
-	cat.SetNamespace(platform.Namespace)
+	cat.Namespace = "default"
+	platform.SingletonPlatform.CatalogNamespace = cat.Namespace
 
-	client, err := internal.NewFakeClient(platform, &cat)
+	client, err := internal.NewFakeClient(&cat)
 	require.NoError(t, err)
 	env, err := Apply(context.Background(), client, it, nil)
 	require.NoError(t, err)

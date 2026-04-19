@@ -564,7 +564,6 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 		IntegrationKit: integrationKit,
 		Configuration:  make([]v1.ConfigurationSpec, 0),
 		Repositories:   o.Repositories,
-		Profile:        v1.TraitProfileByName(o.Profile),
 	}
 
 	o.applyLabels(integration)

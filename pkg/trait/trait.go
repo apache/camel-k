@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
 
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -34,6 +35,8 @@ import (
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+var logOnce sync.Once
 
 func Apply(ctx context.Context, c client.Client, integration *v1.Integration, kit *v1.IntegrationKit) (*Environment, error) {
 	var ilog log.Logger
@@ -135,13 +138,23 @@ func newEnvironment(ctx context.Context, c client.Client, integration *v1.Integr
 		}
 	}
 
+	envPlatform := platform.SingletonPlatform
+	if pl != nil {
+		// Fallback to any existing IntegrationPlatform. This is deprecated though.
+		envPlatform = platform.FromIntegrationPlatform(pl)
+		logOnce.Do(func() {
+			log.Info("The operator detected the presence of a DEPRECATED IntegrationPlatform resource (" +
+				pl.Namespace + "/" + pl.Name + "). You need to remove it and replace any configuration with environment variables instead")
+		})
+	}
+
 	//
 	// kit can still be nil if integration kit is yet
 	// to finish building and be assigned to the integration
 	//
 	env := Environment{
 		Ctx:                   ctx,
-		Platform:              pl,
+		Platform:              envPlatform,
 		IntegrationProfile:    ipr,
 		Client:                c,
 		IntegrationKit:        kit,
@@ -164,7 +177,6 @@ func NewSyntheticEnvironment(ctx context.Context, c client.Client, integration *
 
 	env := Environment{
 		Ctx:                   ctx,
-		Platform:              nil,
 		IntegrationProfile:    nil,
 		Client:                c,
 		IntegrationKit:        kit,
