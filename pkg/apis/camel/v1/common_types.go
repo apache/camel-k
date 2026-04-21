@@ -527,6 +527,20 @@ type DataSpec struct {
 	Compression bool `json:"compression,omitempty"`
 }
 
+// RecoverySpec defines how to recover from a failure.
+type RecoverySpec struct {
+	// the minimum duration to wait before the next attempt
+	MinDuration *metav1.Duration `json:"minDuration,omitempty"`
+	// the maximum duration to wait before the next attempt
+	MaxDuration *metav1.Duration `json:"maxDuration,omitempty"`
+	// the factor to multiply the duration before the next attempt
+	Factor *int `json:"factor,omitempty"`
+	// the maximum number of attempts
+	MaxAttempts *int `json:"maxAttempts,omitempty"`
+	// whether to use jitter for the backoff
+	Jitter *bool `json:"jitter,omitempty"`
+}
+
 // Language represents a supported language (Camel DSL).
 type Language string
 

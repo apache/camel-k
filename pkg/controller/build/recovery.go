@@ -30,19 +30,40 @@ import (
 
 const (
 	defaultRecoveryBackoffMinDuration = 5 * time.Second
-	defaultRecoveryBackoffMaxDuration = 1 * time.Second
+	defaultRecoveryBackoffMaxDuration = 1 * time.Minute
 	defaultRecoveryBackoffFactor      = 2
 	defaultRecoveryMaxAttempt         = 5
+	defaultUseJitter                  = true
 )
 
-func newErrorRecoveryAction() Action {
-	// TODO: externalize options
+func newErrorRecoveryAction(recoverySpec v1.RecoverySpec) Action {
+	minimum := defaultRecoveryBackoffMinDuration
+	if recoverySpec.MinDuration != nil {
+		minimum = recoverySpec.MinDuration.Duration
+	}
+	maximum := defaultRecoveryBackoffMaxDuration
+	if recoverySpec.MaxDuration != nil {
+		maximum = recoverySpec.MaxDuration.Duration
+	}
+	factor := defaultRecoveryBackoffFactor
+	if recoverySpec.Factor != nil {
+		factor = *recoverySpec.Factor
+	}
+	maxAttempts := defaultRecoveryMaxAttempt
+	if recoverySpec.MaxAttempts != nil {
+		maxAttempts = *recoverySpec.MaxAttempts
+	}
+	useJitter := defaultUseJitter
+	if recoverySpec.Jitter != nil {
+		useJitter = *recoverySpec.Jitter
+	}
 	return &errorRecoveryAction{
+		maxAttempts: maxAttempts,
 		backOff: backoff.Backoff{
-			Min:    defaultRecoveryBackoffMinDuration,
-			Max:    defaultRecoveryBackoffMaxDuration,
-			Factor: defaultRecoveryBackoffFactor,
-			Jitter: false,
+			Min:    minimum,
+			Max:    maximum,
+			Factor: float64(factor),
+			Jitter: useJitter,
 		},
 	}
 }
@@ -50,7 +71,8 @@ func newErrorRecoveryAction() Action {
 type errorRecoveryAction struct {
 	baseAction
 
-	backOff backoff.Backoff
+	backOff     backoff.Backoff
+	maxAttempts int
 }
 
 func (action *errorRecoveryAction) Name() string {
@@ -67,16 +89,17 @@ func (action *errorRecoveryAction) Handle(ctx context.Context, build *v1.Build) 
 			Reason: build.Status.Error,
 			Time:   metav1.Now(),
 			Recovery: v1.FailureRecovery{
-				AttemptMax: defaultRecoveryMaxAttempt,
+				AttemptMax: action.maxAttempts,
 			},
 		}
 
 		return build, nil
 	}
 
-	if build.Status.Failure.Recovery.Attempt >= build.Status.Failure.Recovery.AttemptMax {
+	// Support infinite attempts via any value < 0:
+	maxAttempts := build.Status.Failure.Recovery.AttemptMax
+	if maxAttempts >= 0 && build.Status.Failure.Recovery.Attempt >= maxAttempts {
 		build.Status.Phase = v1.BuildPhaseError
-
 		return build, nil
 	}
 

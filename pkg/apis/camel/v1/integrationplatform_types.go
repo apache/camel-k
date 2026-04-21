@@ -130,6 +130,8 @@ type IntegrationPlatformBuildSpec struct {
 	BaseImage string `json:"baseImage,omitempty"`
 	// the image registry used to push/pull Integration images
 	Registry RegistrySpec `json:"registry,omitempty"`
+	// the recovery spec for the build
+	Recovery RecoverySpec `json:"recovery,omitempty"`
 	// the timeout (in seconds) to use when creating the build tools container image.
 	//
 	// Deprecated: no longer in use

@@ -167,7 +167,7 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 			newInitializePodAction(r.reader),
 			newScheduleAction(r.reader, buildMonitor),
 			newMonitorPodAction(r.reader),
-			newErrorRecoveryAction(),
+			newErrorRecoveryAction(ip.Spec.Build.Recovery),
 			newErrorAction(),
 		}
 	case v1.BuildStrategyRoutine:
@@ -175,7 +175,7 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 			newInitializeRoutineAction(),
 			newScheduleAction(r.reader, buildMonitor),
 			newMonitorRoutineAction(),
-			newErrorRecoveryAction(),
+			newErrorRecoveryAction(ip.Spec.Build.Recovery),
 			newErrorAction(),
 		}
 	}
