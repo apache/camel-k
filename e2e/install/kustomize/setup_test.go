@@ -97,6 +97,7 @@ func TestKustomizeNamespaced(t *testing.T) {
 		g.Eventually(PlatformHas(t, ctx, ns, func(pl *v1.IntegrationPlatform) bool {
 			return pl.Status.Build.Registry.Address == KAMEL_INSTALL_REGISTRY
 		}), TestTimeoutShort).Should(BeTrue())
+		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutShort).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		// Test a simple integration is running
 		g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml").Execute()).To(Succeed())
@@ -196,6 +197,7 @@ func TestKustomizeDescoped(t *testing.T) {
 			Equal(DefaultOperatorSecurityContext().AllowPrivilegeEscalation),
 		)
 		g.Eventually(Platform(t, ctx, ns)).ShouldNot(BeNil())
+		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutShort).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		// We need a different namespace from the global operator
 		WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsIntegration string) {

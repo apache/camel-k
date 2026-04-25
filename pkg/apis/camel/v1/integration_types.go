@@ -184,6 +184,8 @@ const (
 	// IntegrationPhaseError --.
 	IntegrationPhaseError IntegrationPhase = "Error"
 	// IntegrationPhaseUnknown --.
+	//
+	// Deprecated: no longer in use.
 	IntegrationPhaseUnknown IntegrationPhase = "Unknown"
 
 	// IntegrationConditionReady --.

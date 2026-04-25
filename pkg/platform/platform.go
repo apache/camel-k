@@ -29,6 +29,8 @@ import (
 )
 
 // LookupForPlatformName finds integration platform with given operator id as name in any namespace.
+//
+//nolint:staticcheck
 func LookupForPlatformName(ctx context.Context, c k8sclient.Reader, name string) (*v1.IntegrationPlatform, error) {
 	platformList := v1.NewIntegrationPlatformList()
 
@@ -49,6 +51,7 @@ func LookupForPlatformName(ctx context.Context, c k8sclient.Reader, name string)
 	return nil, nil
 }
 
+//nolint:staticcheck
 func GetForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.Object) (*v1.IntegrationPlatform, error) {
 	var ip *v1.IntegrationPlatform
 	var err error
@@ -84,15 +87,15 @@ func GetForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.Object)
 
 	return ip, nil
 }
-func GetForName(ctx context.Context, c k8sclient.Reader, namespace string, name string) (*v1.IntegrationPlatform, error) {
-	return getOrFindAny(ctx, c, namespace, name)
-}
 
+//nolint:staticcheck
 func GetOrFindLocal(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.IntegrationPlatform, error) {
 	return findLocal(ctx, c, namespace)
 }
 
 // getOrFindAny returns the named platform or any other platform in the local namespace or the global one.
+//
+//nolint:staticcheck
 func getOrFindAny(ctx context.Context, c k8sclient.Reader, namespace string, name string) (*v1.IntegrationPlatform, error) {
 	if name != "" {
 		pl, err := get(ctx, c, namespace, name)
@@ -105,6 +108,8 @@ func getOrFindAny(ctx context.Context, c k8sclient.Reader, namespace string, nam
 }
 
 // get returns the given platform in the given namespace or the global one.
+//
+//nolint:staticcheck
 func get(ctx context.Context, c k8sclient.Reader, namespace string, name string) (*v1.IntegrationPlatform, error) {
 	p, err := kubernetes.GetIntegrationPlatform(ctx, c, name, namespace)
 	if err != nil && k8serrors.IsNotFound(err) {
@@ -118,6 +123,8 @@ func get(ctx context.Context, c k8sclient.Reader, namespace string, name string)
 }
 
 // findAny returns the currently installed platform or any platform existing in local or operator namespace.
+//
+//nolint:staticcheck
 func findAny(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.IntegrationPlatform, error) {
 	p, err := findLocal(ctx, c, namespace)
 	if err != nil && k8serrors.IsNotFound(err) {
@@ -131,6 +138,8 @@ func findAny(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.Int
 }
 
 // findLocal returns the currently installed platform or any platform existing in local namespace.
+//
+//nolint:staticcheck
 func findLocal(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.IntegrationPlatform, error) {
 	log.Debugf("Finding available platforms in namespace %s", namespace)
 
@@ -185,11 +194,15 @@ func ListPlatforms(ctx context.Context, c k8sclient.Reader, namespace string) (*
 }
 
 // IsActive determines if the given platform is being used.
+//
+//nolint:staticcheck
 func IsActive(p *v1.IntegrationPlatform) bool {
 	return p.Status.Phase != v1.IntegrationPlatformPhaseNone
 }
 
 // GetTraitProfile returns the current profile of the platform (if present) or returns the default one for the cluster.
+//
+//nolint:staticcheck
 func GetTraitProfile(p *v1.IntegrationPlatform) v1.TraitProfile {
 	if p.Status.Profile != "" {
 		return p.Status.Profile

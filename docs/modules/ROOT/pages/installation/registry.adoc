@@ -10,6 +10,46 @@ For the reason above it's important that you provide a container registry which 
 
 For any other platform that do not provide a default container registry, then, a container registry must be provided accordingly.
 
+You will need to add or edit any existing registry environment variable configuration according your installation method. These are the variables you can configure:
+
+[cols="1,3,2", options="header"]
+|===
+| Name | Description | Default Value
+
+| REGISTRY_ADDRESS
+| Address (URL, hostname or IP address) of the container registry.
+|
+
+| REGISTRY_SVC_NAMESPACE
+| Kubernetes namespace where the container registry service is deployed.
+|
+
+| REGISTRY_SVC_NAME
+| Name of the Kubernetes service exposing the container registry.
+|
+
+| REGISTRY_INSECURE
+| Whether to allow insecure (non-TLS) connections to the registry.
+| false
+
+| REGISTRY_SECRET
+| Name of the Kubernetes secret used for registry authentication.
+|
+
+| REGISTRY_CA_CONFIGMAP
+| Name of the ConfigMap containing the registry CA certificate.
+|
+
+| REGISTRY_ORGANIZATION
+| Organization or namespace within the registry used for images.
+| <operator-namespace>
+
+|===
+
+You need to provide at least the `REGISTRY_ADDRESS` parameter or `REGISTRY_SVC_NAME` (and additionally `REGISTRY_SVC_NAMESPACE` if the registry is in a namespace different from the operator namespace).
+
+NOTE: if you configure `REGISTRY_SVC_NAME` you need to make sure the the Service with the given name can be read by the operator, assigning the proper RBAC privileges.
+
 [[how-to-configure]]
 == How to configure Camel K container registry
 
@@ -29,30 +69,10 @@ NOTE: you must include `--docker-server docker.io` value also if you're using Do
 
 As each registry may have a slightly different way of securing the access you can use the generic guidelines provided in and adjust accordingly (more information in the xref:installation/registry/registry-secret.adoc[Secret registry configuration] guide). We expect that at the end of the process you have a public address (1) an _organization_ (2) (optional, see details below) and a _secret_ (3) values that will be used to configure the registry.
 
-You will need to create or edit any existing `IntegrationPlatform` custom resource with the values as expected in the `.spec.build.registry`.
-
-[source,yaml]
-----
-apiVersion: camel.apache.org/v1
-kind: IntegrationPlatform
-metadata:
-  labels:
-    app: camel-k
-  name: camel-k
-spec:
-  build:
-    registry:
-      address: <my-registry-address>
-      organization: <my-organization> (optional)
-      secret: <my-secret-credentials>
-----
-
-The changes will be immediately reconciled and the operator will be able to push and pull resources in a secure manner.
-
 [[organization]]
 === Role of the organization parameter
 
-The `organization` parameter is optional. When it's missing, the operator will use the namespace name to create an image within such organization name. When you're using an container registry you may be limited to store image in a given organization only. In this case, you must provide the name of such `organization` with this option.
+The `organization` parameter is optional. When it's missing, the operator will use the operator namespace name to create an image within such organization name. When you're using an container registry you may be limited to store image in a given organization only. In this case, you must provide the name of such `organization` with this option.
 
 [[requirements]]
 == Container registry requirements

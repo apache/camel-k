@@ -47,7 +47,7 @@ The Build is the another custom resource you want to look at if your Integration
 [[troubleshoot-other-cr]]
 == Checking other custom resources
 
-If you're still in trouble, other resources that can help you understand a little better the situation of your configuration are `IntegrationPlatform` (`kubectl get IntegrationPlatform`) and `CamelCatalog` (`kubectl get CamelCatalog`). If they are in phase error, for any reason, you will discover that looking at their status.
+If you're still in trouble, another resource that can help you understand a little better the situation of your configuration is `CamelCatalog` (`kubectl get CamelCatalog`). If they are in phase error, for any reason, you will discover that looking at their status.
 
 [[troubleshoot-operator-log]]
 == Checking Camel K operator or builder pod log
@@ -61,14 +61,8 @@ NOTE: use `--log-level` parameter to change the level of operator log, if needed
 [[troubleshoot-maven-build]]
 == Get verbose Maven traces
 
-Camel K uses Maven behind the scenes for building the Camel application. By default, we're setting the log level to minimum in order to avoid polluting Operator or builder Pods logs. Whether you're running the build from the operator (default build strategy `routine`) or from a builder Pod ( build strategy `pod`), you can turn the Maven log to be more verbose and be able to get some reason why the Maven build is failing. In order to do that you need to change the configuration of your IntegrationPlatform and set the following Maven configuration:
+Camel K uses Maven behind the scenes for building the Camel application. By default, we're setting the log level to minimum in order to avoid polluting Operator or builder Pods logs. Whether you're running the build from the operator (default build strategy `routine`) or from a builder Pod ( build strategy `pod`), you can turn the Maven log to be more verbose and be able to get some reason why the Maven build is failing. In order to do that you need to change the configuration of your `MAVEN_CLI_OPTIONS` and set the following Maven configuration:
 ```
-...
-  spec:
-    build:
-      maven:
-        cliOptions:
-        - -eX
-...
+MAVEN_CLI_OPTIONS: -eX, ...
 ```
 With this configuration you will tell Maven to execute verbosely and provide some low level detail of any building error (ie, a missing dependency or the like). Accessing the operator or builder Pod logs will give you a better diagnose why some Camel application can't build.

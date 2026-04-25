@@ -39,12 +39,12 @@ func TestActions(t *testing.T) {
 	}
 	reconciler := reconcileIntegration{
 		syntheticActions: append(append([]Action{}, base...), NewMonitorSyntheticAction()),
-		baseActions:      append(append([]Action{}, base...), NewMonitorAction(), NewMonitorUnknownAction()),
+		baseActions:      append(append([]Action{}, base...), NewMonitorAction()),
 	}
 
 	t.Run("non-synthetic", func(t *testing.T) {
 		actions := reconciler.baseActions
-		require.Len(t, actions, 7)
+		require.Len(t, actions, 6)
 
 		assert.IsType(t, &platformSetupAction{}, actions[0])
 		assert.IsType(t, &initializeAction{}, actions[1])
@@ -52,7 +52,6 @@ func TestActions(t *testing.T) {
 		assert.IsType(t, &buildKitAction{}, actions[3])
 		assert.IsType(t, &buildCompleteAction{}, actions[4])
 		assert.IsType(t, &monitorAction{}, actions[5])
-		assert.IsType(t, &monitorUnknownAction{}, actions[6])
 	})
 
 	t.Run("synthetic", func(t *testing.T) {

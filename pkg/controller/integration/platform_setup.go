@@ -82,6 +82,8 @@ func (action *platformSetupAction) Handle(ctx context.Context, integration *v1.I
 }
 
 // determineBestTraitProfile tries to detect the best trait profile for the integration.
+//
+//nolint:staticcheck
 func determineBestTraitProfile(c client.Client, integration *v1.Integration, p *v1.IntegrationPlatform) (v1.TraitProfile, error) {
 	if integration.Spec.Profile != "" {
 		return integration.Spec.Profile, nil

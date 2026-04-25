@@ -34,9 +34,13 @@ type Action interface {
 	Name() string
 
 	// returns true if the action can handle the integration platform
+	//
+	//nolint:staticcheck
 	CanHandle(platform *v1.IntegrationPlatform) bool
 
 	// executes the handling function
+	//
+	//nolint:staticcheck
 	Handle(ctx context.Context, platform *v1.IntegrationPlatform) (*v1.IntegrationPlatform, error)
 }
 

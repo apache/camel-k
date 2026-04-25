@@ -15,14 +15,26 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: minikube-registry-reader
-  labels:
-    app: "camel-k"
-rules:
-  - apiGroups: [""]
-    resources: ["services"]
-    resourceNames: ["registry"]
-    verbs: ["get"]
+# Adding the default registry as expected for Minikube registry addon
+# IMPORTANT: don't use this in a production environment and change the values to a production grade registry instead
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: REGISTRY_SVC_NAMESPACE
+    value: "kube-system"
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: REGISTRY_SVC_NAME
+    value: "registry"
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: REGISTRY_INSECURE
+    value: "true"
+# You can also set directly the registry address
+# - op: add
+#   path: /spec/template/spec/containers/0/env/-
+#   value:
+#     name: REGISTRY_ADDRESS
+#     value: "my-registry.io"

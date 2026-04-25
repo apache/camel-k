@@ -70,16 +70,10 @@ The local registry is then listening on port `5001`, so we can push the docker i
 Assuming that you want to use a snapshot version (created with `make images`), simply create a tag with the proper host
 then push it to the local registry with the following commands:
 
-Finally, configure the IntegrationPlatform as:
-[source,yaml]
-----
-apiVersion: camel.apache.org/v1
-kind: IntegrationPlatform
-metadata:
-  name: camel-k
-spec:
-  build:
-    registry:
-      address: kind-registry:5000
-      insecure: true
-----
+
+Now you can provide the secret to the Camel K operator via:
+
+```
+REGISTRY_ADDRESS: kind-registry:5000
+REGISTRY_INSECURE: true
+```

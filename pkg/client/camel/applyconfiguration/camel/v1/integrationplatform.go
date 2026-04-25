@@ -32,6 +32,8 @@ import (
 // It defines the behavior of all Custom Resources (`IntegrationKit`, `Integration`, `Kamelet`) in the given namespace.
 // When the Camel K operator is installed in `global` mode,
 // you will need to specify an `IntegrationPlatform` in each namespace where you want the Camel K operator to be executed.
+//
+// Deprecated: see documentation to switch to environment variable based configuration.
 type IntegrationPlatformApplyConfiguration struct {
 	metav1.TypeMetaApplyConfiguration    `json:",inline"`
 	*metav1.ObjectMetaApplyConfiguration `json:"metadata,omitempty"`

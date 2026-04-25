@@ -51,6 +51,8 @@ const (
 
 // ConfigureDefaults fills with default values all missing details about the integration platform.
 // Defaults are set in the status fields, not in the spec.
+//
+//nolint:staticcheck
 func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPlatform, verbose bool) error {
 	// Reset the state to initial values
 	p.ResyncStatusFullConfig()
@@ -125,8 +127,8 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 	return nil
 }
 
+//nolint:staticcheck
 func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPlatform) error {
-	//nolint:staticcheck
 	if p.Status.Cluster == v1.IntegrationPlatformClusterOpenShift &&
 		p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyS2I &&
 		p.Status.Build.Registry.Address == "" {
@@ -141,6 +143,7 @@ func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPl
 	return nil
 }
 
+//nolint:staticcheck
 func configureForOpenShiftS2i(ctx context.Context, c client.Client, p *v1.IntegrationPlatform) error {
 	log.Debugf("Integration Platform %s [%s]: setting registry address", p.Name, p.Namespace)
 	// Default to using OpenShift internal container images registry when using a strategy other than S2I
@@ -182,6 +185,7 @@ func configureForOpenShiftS2i(ctx context.Context, c client.Client, p *v1.Integr
 	return nil
 }
 
+//nolint:staticcheck
 func applyGlobalPlatformDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPlatform) error {
 	operatorNamespace := GetOperatorNamespace()
 	if operatorNamespace != "" {
@@ -198,6 +202,7 @@ func applyGlobalPlatformDefaults(ctx context.Context, c client.Client, p *v1.Int
 	return nil
 }
 
+//nolint:staticcheck
 func applyPlatformSpec(source *v1.IntegrationPlatform, target *v1.IntegrationPlatform) {
 	if target.Status.Cluster == "" {
 		target.Status.Cluster = source.Status.Cluster
@@ -287,6 +292,7 @@ func applyPlatformSpec(source *v1.IntegrationPlatform, target *v1.IntegrationPla
 	}
 }
 
+//nolint:staticcheck
 func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 	if p.Status.Build.RuntimeVersion == "" {
 		log.Debugf("Integration Platform %s [%s]: setting runtime version", p.Name, p.Namespace)
@@ -363,6 +369,7 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 	return nil
 }
 
+//nolint:staticcheck
 func setStatusAdditionalInfo(platform *v1.IntegrationPlatform) {
 	platform.Status.Info = make(map[string]string)
 	log.Debugf("Integration Platform %s [%s]: setting status info", platform.Name, platform.Namespace)
@@ -371,6 +378,7 @@ func setStatusAdditionalInfo(platform *v1.IntegrationPlatform) {
 	platform.Status.Info["gitCommit"] = defaults.GitCommit
 }
 
+//nolint:staticcheck
 func createServiceCaBundleConfigMap(ctx context.Context, client client.Client, p *v1.IntegrationPlatform) (*corev1.ConfigMap, error) {
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
@@ -390,6 +398,7 @@ func createServiceCaBundleConfigMap(ctx context.Context, client client.Client, p
 	return cm, nil
 }
 
+//nolint:staticcheck
 func createBuilderRegistryRoleBinding(ctx context.Context, client client.Client, p *v1.IntegrationPlatform) error {
 	rb := &rbacv1.RoleBinding{
 		ObjectMeta: metav1.ObjectMeta{

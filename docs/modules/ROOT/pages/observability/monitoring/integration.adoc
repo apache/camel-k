@@ -15,28 +15,7 @@ The Prometheus trait can be enabled when running an integration, e.g.:
 $ kamel run -t prometheus.enabled=true
 ----
 
-Alternatively, the Prometheus trait can be enabled globally once, by updating the integration platform, e.g.:
-
-[source,console]
-----
-$ kubectl patch ip camel-k --type=merge -p '{"spec":{"traits":{"prometheus":{"configuration":{"enabled":true}}}}}'
-----
-
-Or by directly editing the `IntegrationPlatform` resource, e.g.:
-
-[source, yaml]
-----
-apiVersion: camel.apache.org/v1
-kind: IntegrationPlatform
-metadata:
-  name: camel-k
-spec:
-  traits:
-    prometheus:
-      configuration:
-        enabled: true # <1>
-----
-<1> Activates the Prometheus trait at the platform level
+Alternatively, the Prometheus trait can be enabled globally once, by updating the IntegrationProfile.
 
 The Camel Quarkus Micrometer Metrics extension is responsible for collecting and exposing metrics in the https://github.com/OpenObservability/OpenMetrics[OpenMetrics] text format.
 

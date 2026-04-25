@@ -54,22 +54,24 @@ type Platform struct {
 // getEnvPlatform is in charge to parse the environment variables of the operator and return the Platform object.
 func getEnvPlatform() Platform {
 	registry := registry()
-	if registry.Address == "" {
+	// The operator will eventually try to get the registry address from a service, if provided
+	if registry.Address == "" && GetEnvOrDefault("REGISTRY_SVC_NAME", "") == "" {
 		// TODO: fail fast exiting the program when we don't support IntegrationPlatform.
-		log.Info("failed to initialize singleton platform from environment variables: missing mandatory env var REGISTRY_ADDRESS. " +
+		log.Info("failed to initialize singleton platform from environment variables: missing mandatory env var REGISTRY_ADDRESS or " +
+			"REGISTRY_SVC_NAME (and REGISTRY_SVC_NAMESPACE). " +
 			"Mind that this will be required when we stop supporting IntegrationPlatform in future releases.")
 	}
 
 	return Platform{
 		CatalogNamespace:    GetOperatorNamespace(),
-		BuildRuntimeVersion: getEnvOrDefault("BUILD_RUNTIME_VERSION", defaults.DefaultRuntimeVersion),
+		BuildRuntimeVersion: GetEnvOrDefault("BUILD_RUNTIME_VERSION", defaults.DefaultRuntimeVersion),
 		BuildTimeout:        buildTimeout(),
 		BuildConfiguration: v1.BuildConfiguration{
 			Strategy:       buildStrategy(),
 			OrderStrategy:  orderStrategy(),
 			ImagePlatforms: imagePlatforms(),
 		},
-		BuildBaseImage:  getEnvOrDefault("BUILD_BASE_IMAGE", defaults.BaseImage()),
+		BuildBaseImage:  GetEnvOrDefault("BUILD_BASE_IMAGE", defaults.BaseImage()),
 		PublishStrategy: publishStrategy(),
 		Registry:        registry,
 		Maven: v1.MavenBuildSpec{
@@ -80,7 +82,7 @@ func getEnvPlatform() Platform {
 	}
 }
 
-func getEnvOrDefault(key string, def string) string {
+func GetEnvOrDefault(key string, def string) string {
 	env, exists := os.LookupEnv(key)
 	if exists {
 		return env
@@ -99,7 +101,7 @@ func getEnvOrDefaultSlice(key string, def string) []string {
 }
 
 func buildTimeout() time.Duration {
-	buildTimeoutSeconds := getEnvOrDefault("BUILD_TIMEOUT_SECONDS", "")
+	buildTimeoutSeconds := GetEnvOrDefault("BUILD_TIMEOUT_SECONDS", "")
 	if buildTimeoutSeconds != "" {
 		seconds, err := strconv.Atoi(buildTimeoutSeconds)
 		if err == nil {
@@ -113,7 +115,7 @@ func buildTimeout() time.Duration {
 }
 
 func buildStrategy() v1.BuildStrategy {
-	buildStrategy := getEnvOrDefault("BUILD_STRATEGY", "")
+	buildStrategy := GetEnvOrDefault("BUILD_STRATEGY", "")
 	if buildStrategy != "" {
 		bs := v1.BuildStrategy(buildStrategy)
 		if err := bs.Validate(); err == nil {
@@ -126,7 +128,7 @@ func buildStrategy() v1.BuildStrategy {
 }
 
 func maxRunningBuilds() int32 {
-	maxRunningBuildsString := getEnvOrDefault("MAX_RUNNING_BUILDS", "")
+	maxRunningBuildsString := GetEnvOrDefault("MAX_RUNNING_BUILDS", "")
 	if maxRunningBuildsString != "" {
 		val, err := strconv.ParseInt(maxRunningBuildsString, 10, 32)
 		if err == nil {
@@ -144,7 +146,7 @@ func maxRunningBuilds() int32 {
 }
 
 func orderStrategy() v1.BuildOrderStrategy {
-	buildOrderStrategy := getEnvOrDefault("BUILD_ORDER_STRATEGY", "")
+	buildOrderStrategy := GetEnvOrDefault("BUILD_ORDER_STRATEGY", "")
 	if buildOrderStrategy != "" {
 		bs := v1.BuildOrderStrategy(buildOrderStrategy)
 		if err := bs.Validate(); err == nil {
@@ -157,7 +159,7 @@ func orderStrategy() v1.BuildOrderStrategy {
 }
 
 func publishStrategy() v1.IntegrationPlatformBuildPublishStrategy {
-	publishStrategy := getEnvOrDefault("PUBLISH_STRATEGY", "")
+	publishStrategy := GetEnvOrDefault("PUBLISH_STRATEGY", "")
 	if publishStrategy != "" {
 		ps := v1.IntegrationPlatformBuildPublishStrategy(publishStrategy)
 		if err := ps.Validate(); err == nil {
@@ -170,7 +172,7 @@ func publishStrategy() v1.IntegrationPlatformBuildPublishStrategy {
 }
 
 func imagePlatforms() []string {
-	buildImagePlatforms := getEnvOrDefault("BUILD_IMAGE_PLATFORMS", "")
+	buildImagePlatforms := GetEnvOrDefault("BUILD_IMAGE_PLATFORMS", "")
 	if buildImagePlatforms != "" {
 		return strings.Split(buildImagePlatforms, ",")
 	}
@@ -186,24 +188,24 @@ func imagePlatforms() []string {
 }
 
 func registry() v1.RegistrySpec {
-	insecure, err := strconv.ParseBool(getEnvOrDefault("REGISTRY_INSECURE", "false"))
+	insecure, err := strconv.ParseBool(GetEnvOrDefault("REGISTRY_INSECURE", "false"))
 	if err != nil {
 		insecure = false
 		log.Error(err, "could not parse REGISTRY_INSECURE environment variable, fallback to true")
 	}
 	registry := v1.RegistrySpec{
 		Insecure:     insecure,
-		Address:      getEnvOrDefault("REGISTRY_ADDRESS", ""),
-		Secret:       getEnvOrDefault("REGISTRY_SECRET", ""),
-		CA:           getEnvOrDefault("REGISTRY_CA_CONFIGMAP", ""),
-		Organization: getEnvOrDefault("REGISTRY_ORGANIZATION", ""),
+		Address:      GetEnvOrDefault("REGISTRY_ADDRESS", ""),
+		Secret:       GetEnvOrDefault("REGISTRY_SECRET", ""),
+		CA:           GetEnvOrDefault("REGISTRY_CA_CONFIGMAP", ""),
+		Organization: GetEnvOrDefault("REGISTRY_ORGANIZATION", ""),
 	}
 
 	return registry
 }
 
 func repositories() []v1.Repository {
-	csvRepos := getEnvOrDefault("MAVEN_REPOSITORIES", "")
+	csvRepos := GetEnvOrDefault("MAVEN_REPOSITORIES", "")
 	if csvRepos != "" {
 		parts := strings.Split(csvRepos, ",")
 
@@ -244,7 +246,7 @@ func mavenSpec() v1.MavenSpec {
 // valueSource expects any var to contain <configmap|secret>:<my-name>@<my-key>.
 func valueSource(envName string) (v1.ValueSource, error) {
 	valueSource := v1.ValueSource{}
-	vs := getEnvOrDefault(envName, "")
+	vs := GetEnvOrDefault(envName, "")
 	if vs != "" {
 		// Split kind from the rest
 		parts := strings.SplitN(vs, ":", 2)
@@ -287,7 +289,7 @@ func valueSource(envName string) (v1.ValueSource, error) {
 // caSecrets expects a csv like my-secret-1@key-a,mysecret2@key2.
 func caSecrets() []corev1.SecretKeySelector {
 	var caSecrets []corev1.SecretKeySelector
-	val := getEnvOrDefault("MAVEN_CA_SECRETS", "")
+	val := GetEnvOrDefault("MAVEN_CA_SECRETS", "")
 	if val != "" {
 		secrets := strings.SplitSeq(val, ",")
 		for secret := range secrets {
@@ -309,6 +311,7 @@ func caSecrets() []corev1.SecretKeySelector {
 	return caSecrets
 }
 
+//nolint:staticcheck
 func FromIntegrationPlatform(itp *v1.IntegrationPlatform) Platform {
 	return Platform{
 		CatalogNamespace:    itp.GetNamespace(),

@@ -22,3 +22,9 @@ resources:
 - operator-deployment.yaml
 - operator-service-account.yaml
 - builder-service-account.yaml
+
+patches:
+  - path: add-registry-envvars.yaml
+    target:
+      kind: Deployment
+      name: camel-k-operator

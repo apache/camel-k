@@ -33,16 +33,20 @@ func OperatorStartupOptionalTools(ctx context.Context, c client.Client, namespac
 		log.Info("Cannot install OpenShift CLI download link: skipping.")
 		log.Debug("Error while installing OpenShift CLI download link", "error", err)
 	}
-	// If the container registry is configured as MINIKUBE, we try to get the proper container registry, providing a warning notice as well
-	if platform.SingletonPlatform.Registry.Address == "MINIKUBE" {
-		log.Info("WARN: container registry is configured to use Minikube container registry extension. " +
-			"Mind that this is fine only for development purposes, move to a real container registry instead!")
-		svc, err := c.CoreV1().Services("kube-system").Get(ctx, "registry", metav1.GetOptions{})
+	// Check the presence of a registry service configuration, and, if it exists, calculate the address
+	registryServiceName := platform.GetEnvOrDefault("REGISTRY_SVC_NAME", "")
+	if registryServiceName != "" {
+		registryServiceNamespace := platform.GetEnvOrDefault("REGISTRY_SVC_NAMESPACE", "")
+		if registryServiceNamespace == "" {
+			// fallback to operator namespace
+			registryServiceNamespace = platform.GetOperatorNamespace()
+		}
+		svc, err := c.CoreV1().Services(registryServiceNamespace).Get(ctx, registryServiceName, metav1.GetOptions{})
 		if err != nil {
-			log.Error(err, "Could not get a Minikube container registry. Make sure to enable the addon properly.")
+			log.Error(err, "Could not get any container registry %s in namespace %s. "+
+				"If you're targeting Minikube, make sure to enable the registry addon first!",
+				registryServiceNamespace, registryServiceName)
 		}
 		platform.SingletonPlatform.Registry.Address = svc.Spec.ClusterIP
-		platform.SingletonPlatform.Registry.Insecure = true
-		log.Info("Container registry address setting changed to " + platform.SingletonPlatform.Registry.Address + " (insecure=true)")
 	}
 }

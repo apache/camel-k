@@ -117,6 +117,8 @@ func NotifyIntegrationKitUpdated(ctx context.Context, c client.Client, recorder 
 }
 
 // NotifyIntegrationPlatformUpdated automatically generates events when an integration platform changes.
+//
+//nolint:staticcheck
 func NotifyIntegrationPlatformUpdated(ctx context.Context, c client.Client, recorder events.EventRecorder, old, newResource *v1.IntegrationPlatform) {
 	if newResource == nil {
 		return

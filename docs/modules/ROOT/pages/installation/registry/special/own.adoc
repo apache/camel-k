@@ -15,8 +15,6 @@ With this topology we may expect that the container registry is operated in the 
 
 This is the approach used by Minikube. Basically it deploys a container registry as a Pod, and you can use the service cluster IP. We cannot use the service URL as it won't be available in the Kubernetes components which are in charge to run the Deployment (it does not use Service/Pod cluster DNS). However, it can use the Cluster IP which is available throughout all the cluster or any Ingress which would expose the service publicly.
 
-NOTE: if you make sure that the registry cluster IP does not change over time or you use a public address, the approach could be used for production use cases.
-
 The following example can be used as a base for your solution and should not be considered for production use cases as it does not configure any storage neither any security measure:
 
 ```yaml
@@ -65,20 +63,13 @@ NAME       TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
 registry   ClusterIP   10.96.112.40   <none>        80/TCP    23h
 ```
 
-Now you can use such value into your IntegrationPlatform:
+Now you can use such value into your environment variable configuration:
 
-[source,yaml]
-----
-apiVersion: camel.apache.org/v1
-kind: IntegrationPlatform
-metadata:
-  name: camel-k
-spec:
-  build:
-    registry:
-      address: 10.96.112.40
-      insecure: true
-----
+```
+REGISTRY_INSECURE: true
+REGISTRY_SVC_NAMESPACE: <the namespace where the pod is running>
+REGISTRY_SVC_NAME: registry
+```
 
 The above installation should be able to push and pull Integration images correctly.
 

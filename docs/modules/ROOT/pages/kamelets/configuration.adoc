@@ -229,7 +229,7 @@ The operator will be able to automatically pick the right version and use it at 
 
 === Kamelet namespace
 
-A Kamelet can be installed in any cluster namespace. By default, the operator will expect the Kamelet to be in the same namespace of the Integration (or Pipe), the operator namespace (where the bundled kamelets are stored) or any other repository defined in the `IntegrationPlatform`. If you want to use a Kamelet stored in another namespace, you will need to use the `kameletNamespace` parameter. For example, say you have a dedicated namespace called `kamelets` where you're installing your cluster Kamelets.
+A Kamelet can be installed in any cluster namespace. By default, the operator will expect the Kamelet to be in the same namespace of the Integration (or Pipe) or the operator namespace (where the bundled Kamelets are stored). If you want to use a Kamelet stored in another namespace, you will need to use the `kameletNamespace` parameter. For example, say you have a dedicated namespace called `kamelets` where you're installing your cluster Kamelets.
 
 NOTE: namespace Kamelets is an exclusive feature of Camel K.
 
