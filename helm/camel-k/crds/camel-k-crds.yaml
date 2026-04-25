@@ -572,7 +572,10 @@ spec:
                                 type: object
                               type: array
                             servers:
-                              description: Servers (auth)
+                              description: |-
+                                Servers (auth)
+
+                                Deprecated: no longer in use.
                               items:
                                 description: Server see link:https://maven.apache.org/settings.html[Maven
                                   settings].
@@ -1502,7 +1505,10 @@ spec:
                                 type: object
                               type: array
                             servers:
-                              description: Servers (auth)
+                              description: |-
+                                Servers (auth)
+
+                                Deprecated: no longer in use.
                               items:
                                 description: Server see link:https://maven.apache.org/settings.html[Maven
                                   settings].

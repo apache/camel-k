@@ -144,7 +144,9 @@ type MavenBuildSpec struct {
 	// additional repositories
 	Repositories []Repository `json:"repositories,omitempty"`
 	// Servers (auth)
-	Servers []Server `json:"servers,omitempty"`
+	//
+	// Deprecated: no longer in use.
+	DeprecatedServers []Server `json:"servers,omitempty"`
 }
 
 // PublishTask image publish configuration.

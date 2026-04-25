@@ -4578,6 +4578,8 @@ additional repositories
 
 Servers (auth)
 
+Deprecated: no longer in use.
+
 
 |===
 

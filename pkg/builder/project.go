@@ -18,20 +18,15 @@ limitations under the License.
 package builder
 
 import (
-	"bytes"
 	"encoding/xml"
 	"fmt"
 	"os"
-	"regexp"
-	"strings"
 
 	"github.com/apache/camel-k/v2/pkg/util/io"
 
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/jvm"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/log"
 	"github.com/apache/camel-k/v2/pkg/util/maven"
 )
 
@@ -103,7 +98,6 @@ func generateProjectSettings(ctx *builderContext) error {
 	if err != nil {
 		return err
 	}
-	val = injectServersIntoMavenSettings(val, ctx.Build.Maven.Servers)
 	if val != "" {
 		ctx.Maven.UserSettings = []byte(val)
 	}
@@ -127,73 +121,6 @@ func generateProjectSettings(ctx *builderContext) error {
 	}
 
 	return nil
-}
-
-func injectServersIntoMavenSettings(settings string, servers []v1.Server) string {
-	if len(servers) < 1 {
-		return settings
-	}
-	newSettings, i := getServerTagIndex(settings)
-	if i < 0 {
-		log.Infof("Could not find a place to store Server information in Maven settings, skipping")
-
-		return settings
-	}
-	content, err := encodeXMLNoHeader(servers)
-	if err != nil {
-		log.Infof("Could not marshall extra Servers into Maven settings, skipping")
-
-		return settings
-	}
-
-	return newSettings[:i] + string(content) + newSettings[i:]
-}
-
-func encodeXMLNoHeader(content any) ([]byte, error) {
-	w := &bytes.Buffer{}
-	w.WriteString("\n")
-	e := xml.NewEncoder(w)
-	e.Indent("    ", "  ")
-
-	if err := e.Encode(content); err != nil {
-		return []byte{}, err
-	}
-	w.WriteString("\n  ")
-
-	return w.Bytes(), nil
-}
-
-// Return Index of </server> Tag in val. Creates Tag if necessary.
-func getServerTagIndex(val string) (string, int) {
-	serversTag := "\n  <servers></servers>\n"
-	val = strings.Replace(val, "<servers/>", serversTag, 1)
-	endServerTag := "</servers>"
-	i := strings.Index(val, endServerTag)
-	if i > 0 {
-		return val, i
-	}
-	// create necessary tags
-	tags := []string{"</proxies>", "<proxies/>", "</offline>", "<offline/>", "</usePluginRegistry>", "<usePluginRegistry/>", "</interactiveMode>", "<interactiveMode/>", "</localRepository>", "<localRepository/>"}
-	i = -1
-	for _, tag := range tags {
-		i = strings.Index(val, tag)
-		if i > 0 {
-			i += len(tag)
-
-			break
-		}
-	}
-	if i < 0 {
-		regexp := regexp.MustCompile(`<settings.*>`)
-		loc := regexp.FindStringIndex(val)
-		if loc == nil {
-			return val, i
-		}
-		i = loc[1]
-	}
-	val = val[:i] + serversTag + val[i:]
-
-	return val, strings.Index(val, endServerTag)
 }
 
 func injectDependencies(ctx *builderContext) error {

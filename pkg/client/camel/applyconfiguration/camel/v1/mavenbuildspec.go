@@ -33,7 +33,9 @@ type MavenBuildSpecApplyConfiguration struct {
 	// additional repositories
 	Repositories []RepositoryApplyConfiguration `json:"repositories,omitempty"`
 	// Servers (auth)
-	Servers []ServerApplyConfiguration `json:"servers,omitempty"`
+	//
+	// Deprecated: no longer in use.
+	DeprecatedServers []ServerApplyConfiguration `json:"servers,omitempty"`
 }
 
 // MavenBuildSpecApplyConfiguration constructs a declarative configuration of the MavenBuildSpec type for use with
@@ -139,15 +141,15 @@ func (b *MavenBuildSpecApplyConfiguration) WithRepositories(values ...*Repositor
 	return b
 }
 
-// WithServers adds the given value to the Servers field in the declarative configuration
+// WithDeprecatedServers adds the given value to the DeprecatedServers field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
-// If called multiple times, values provided by each call will be appended to the Servers field.
-func (b *MavenBuildSpecApplyConfiguration) WithServers(values ...*ServerApplyConfiguration) *MavenBuildSpecApplyConfiguration {
+// If called multiple times, values provided by each call will be appended to the DeprecatedServers field.
+func (b *MavenBuildSpecApplyConfiguration) WithDeprecatedServers(values ...*ServerApplyConfiguration) *MavenBuildSpecApplyConfiguration {
 	for i := range values {
 		if values[i] == nil {
-			panic("nil value passed to WithServers")
+			panic("nil value passed to WithDeprecatedServers")
 		}
-		b.Servers = append(b.Servers, *values[i])
+		b.DeprecatedServers = append(b.DeprecatedServers, *values[i])
 	}
 	return b
 }
