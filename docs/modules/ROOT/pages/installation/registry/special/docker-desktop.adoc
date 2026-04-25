@@ -26,14 +26,7 @@ Once the configuration changed, the Docker daemon must be restarted to take the 
 
 Finally, you can install the Camel-K operator with the insecure registry properly configured as:
 
-```yaml
-apiVersion: camel.apache.org/v1
-kind: IntegrationPlatform
-metadata:
-  name: camel-k
-spec:
-  build:
-    registry:
-      address: host.docker.internal:5000
-      insecure: true
+```
+REGISTRY_ADDRESS: host.docker.internal:5000
+REGISTRY_INSECURE: true
 ```

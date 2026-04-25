@@ -70,7 +70,7 @@ NOTE: altough not recommeded, you can use `mvn:org.apache.camel` group id to ski
 ```
 kamel run -d mvn:com.google.guava:guava:26.0-jre Integration.java
 ```
-Note that if your dependencies belong to a private repository, this repository needs to be defined. See xref:installation/advanced/maven.adoc[Configure maven].
+Note that if your dependencies belong to a private repository, this repository needs to be defined. See xref:installation/builds.adoc[Configure Builds].
 
 [[dependencies-kind-jitpack]]
 === Jitpack dependencies

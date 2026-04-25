@@ -39,10 +39,12 @@ func (action *initializeAction) Name() string {
 	return "initialize"
 }
 
+//nolint:staticcheck
 func (action *initializeAction) CanHandle(platform *v1.IntegrationPlatform) bool {
 	return platform.Status.Phase == v1.IntegrationPlatformPhaseNone
 }
 
+//nolint:staticcheck
 func (action *initializeAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (*v1.IntegrationPlatform, error) {
 	action.L.Info("Initializing IntegrationPlatform")
 	if err := platformutil.ConfigureDefaults(ctx, action.client, platform, true); err != nil {

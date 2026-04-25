@@ -15,13 +15,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package controller
-
-import (
-	//nolint:staticcheck
-	"github.com/apache/camel-k/v2/pkg/controller/integrationplatform"
-)
-
-func init() {
-	addToManager = append(addToManager, integrationplatform.Add)
-}
+// Deprecated: IntegrationPlatform resource will be removed in the future.
+package integrationplatform

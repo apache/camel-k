@@ -1,8 +1,5 @@
 = Integration Profiles
 
-Any running Camel K Integration is associated to a shared IntegrationPlatform resource that contains general configuration options.
-The integration platform is located in the operator namespace and typically uses the same name as the operator id that this platform belongs to.
-
 Users may add an IntegrationProfile resource to any namespace. The profile holds custom settings which can be applied to all Integrations.
 
 The profile must be explicitly selected by an annotation referencing the integration profile name (any resource belonging to the "camel.apache.org" group can select a particular profile configuration).

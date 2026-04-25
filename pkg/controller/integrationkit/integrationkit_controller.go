@@ -135,7 +135,9 @@ func add(_ context.Context, mgr manager.Manager, r reconcile.Reconciler) error {
 	err = c.Watch(
 		source.Kind(
 			mgr.GetCache(),
+			//nolint:staticcheck
 			&v1.IntegrationPlatform{},
+			//nolint:staticcheck
 			handler.TypedEnqueueRequestsFromMapFunc(func(ctx context.Context, itp *v1.IntegrationPlatform) []reconcile.Request {
 				var requests []reconcile.Request
 				if itp.Status.Phase == v1.IntegrationPlatformPhaseReady {

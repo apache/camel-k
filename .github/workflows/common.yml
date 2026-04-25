@@ -103,8 +103,8 @@ jobs:
         kubectl apply -k install/overlays/kubernetes/descoped/ --server-side --force-conflicts
         kubectl wait --for=condition=available deployment/camel-k-operator -n camel-k --timeout=60s
         # Install Apache Kamelets catalog
-        curl -sL "https://repo1.maven.org/maven2/org/apache/camel/kamelets/camel-kamelets/4.18.1/camel-kamelets-4.18.1.jar" > /tmp/camel-kamelets.jar
-        unzip /tmp/camel-kamelets.jar -d /tmp && kubectl apply -f /tmp/kamelets -n camel-k
+        mvn -q dependency:copy -Dartifact=org.apache.camel.kamelets:camel-kamelets:4.18.1:jar -Dmdep.useBaseVersion=true -DoutputDirectory=/tmp
+        unzip /tmp/camel-kamelets-4.18.1.jar -d /tmp && kubectl apply -f /tmp/kamelets -n camel-k
 
     - name: Run test
       shell: bash

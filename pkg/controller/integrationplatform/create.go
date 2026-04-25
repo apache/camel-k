@@ -46,10 +46,12 @@ func (action *createAction) Name() string {
 	return "create"
 }
 
+//nolint:staticcheck
 func (action *createAction) CanHandle(platform *v1.IntegrationPlatform) bool {
 	return platform.Status.Phase == v1.IntegrationPlatformPhaseCreating
 }
 
+//nolint:staticcheck
 func (action *createAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (*v1.IntegrationPlatform, error) {
 	runtimeSpec := v1.RuntimeSpec{
 		Version:  platform.Status.Build.RuntimeVersion,
@@ -108,6 +110,7 @@ func loadCatalog(ctx context.Context, c client.Client, namespace string, runtime
 	return nil, nil
 }
 
+//nolint:staticcheck
 func (action *createAction) handleBundledCatalog(ctx context.Context, platform *v1.IntegrationPlatform, catalog *v1.CamelCatalog) (*v1.IntegrationPlatform, error) {
 	var camelVersion string
 	// Create the catalog only if it was not yet created
@@ -136,6 +139,7 @@ func (action *createAction) handleBundledCatalog(ctx context.Context, platform *
 	return platform, nil
 }
 
+//nolint:staticcheck
 func (action *createAction) handleNewCatalog(ctx context.Context, platform *v1.IntegrationPlatform,
 	catalog *v1.CamelCatalog, runtimeSpec v1.RuntimeSpec) (*v1.IntegrationPlatform, error) {
 	var camelVersion string
@@ -165,6 +169,7 @@ func (action *createAction) handleNewCatalog(ctx context.Context, platform *v1.I
 	return platform, nil
 }
 
+//nolint:staticcheck
 func installKamelets(ctx context.Context, c client.Client, platform *v1.IntegrationPlatform) (*v1.IntegrationPlatform, error) {
 	// We bundle the Kamelets driven by the catalog
 	if defaults.InstallDefaultKamelets() {

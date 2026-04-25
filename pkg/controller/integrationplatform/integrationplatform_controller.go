@@ -68,13 +68,16 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	b := builder.ControllerManagedBy(mgr).
 		Named("integrationplatform-controller").
 		// Watch for changes to primary resource IntegrationPlatform
+		//nolint:staticcheck
 		For(&v1.IntegrationPlatform{}, builder.WithPredicates(
 			platform.FilteringFuncs[ctrl.Object]{
 				UpdateFunc: func(e event.UpdateEvent) bool {
+					//nolint:staticcheck
 					oldItp, ok := e.ObjectOld.(*v1.IntegrationPlatform)
 					if !ok {
 						return false
 					}
+					//nolint:staticcheck
 					newItp, ok := e.ObjectNew.(*v1.IntegrationPlatform)
 					if !ok {
 						return false
@@ -126,6 +129,7 @@ func (r *reconcileIntegrationPlatform) Reconcile(ctx context.Context, request re
 	}
 
 	// Fetch the IntegrationPlatform instance
+	//nolint:staticcheck
 	var instance v1.IntegrationPlatform
 
 	if err := r.client.Get(ctx, request.NamespacedName, &instance); err != nil {

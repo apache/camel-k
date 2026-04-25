@@ -24,7 +24,7 @@ If all is good, in a few seconds (there is no build involved) you should have yo
 [[camel-runtime-discovery]]
 == Camel Runtime version discovery
 
-Every Camel application requires a `CamelCatalog` object to know how to perform certain runtime configuration. When you run a **self managed build Integrations** there is no easy way to automatically discover for which runtime your application was built. In this case, we suggest you to specify the `camel.runtime-version` trait in order to improve the compatibility between the operator configuration and the specific runtime you're running. If no runtime version is specified, then, as default, the operator will use the one specified in the IntegrationPlatform.
+Every Camel application requires a `CamelCatalog` object to know how to perform certain runtime configuration. When you run a **self managed build Integrations** there is no easy way to automatically discover for which runtime your application was built. In this case, we suggest you to specify the `camel.runtime-version` trait in order to improve the compatibility between the operator configuration and the specific runtime you're running. If no runtime version is specified, then, as default, the operator will use the one specified in the `BUILD_RUNTIME_VERSION` env var.
 
 [[traits]]
 == Trait configuration

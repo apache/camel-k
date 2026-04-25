@@ -1,0 +1,179 @@
+= Configuring Maven Builds
+
+Camel K builds are performed by https://maven.apache.org/[Apache Maven]. For this reason it may requires certain Maven best practices that will make your application to run faster, more secure and more resiliently. The Maven configuration is defined via operator environment variables. Have a look at the following sections to discover how to configure Maven build in Camel K.
+
+[[env-var-config]]
+== Available configuration
+
+Here a quick resume of the parameters you can configure as environment variables of the Camel K operator for your builds:
+
+[cols="1,3,2", options="header"]
+|===
+| Name | Description | Default
+
+| BUILD_RUNTIME_VERSION
+| Version of the runtime used for builds.
+| The Camel K runtime specified by the Camel K operator version released
+
+| BUILD_TIMEOUT_SECONDS
+| Timeout (in seconds) for a build before it is terminated.
+| `300`
+
+| BUILD_STRATEGY
+| Strategy used to perform builds (`routine` or `pod`).
+| `routine`
+
+| BUILD_ORDER_STRATEGY
+| Strategy used to determine build execution order (`fifo`, `dependencies`, `sequential`).
+| `dependencies`
+
+| BUILD_BASE_IMAGE
+| Base container image used during the build process.
+| The jdk base specified by the Camel K operator version released
+
+| PUBLISH_STRATEGY
+| Strategy used to publish built artifacts/images.
+| `jib`
+
+| BUILD_IMAGE_PLATFORMS
+| Comma-separated list of target platforms for the build (e.g. `linux/amd64,linux/arm64`).
+| auto-detected
+
+| MAX_RUNNING_BUILDS
+| Maximum number of builds that can run concurrently.
+| `3` if build strategy is `routine`, `10` if `pod`
+
+|===
+
+Certain configuration can be also specified via trait configuration on xref:traits:builder.adoc[`builder`] and xref:traits:builder.adoc[`camel`] trait. Those values have precedence over global configuration.
+
+Beside the values above, you can also configure specifically Maven using the following environment variables:
+
+[cols="1,3,2", options="header"]
+|===
+| Name | Description | Default
+
+| MAVEN_SETTINGS
+| Configmap or Secret Maven `settings.xml` configuration used to define repositories, mirrors, and credentials.
+|
+
+| MAVEN_SETTINGS_SECURITY
+| Configmap or Secret Maven `settings-security.xml` configuration used for decrypting encrypted credentials in `settings.xml`.
+|
+
+| MAVEN_CA_SECRETS
+| Comma separated list or reference to secrets containing custom CA certificates to trust when connecting to Maven repositories over TLS.
+|
+
+| MAVEN_CLI_OPTIONS
+| Comma separated list of command-line options passed to Maven (e.g. `-B`, `-U`, `-DskipTests`).
+| -V,--no-transfer-progress,-Dstyle.color=never
+
+| MAVEN_REPOSITORIES
+| Comma separated list of Maven repository definitions (Repository format: `<repository-url>[@snapshots][@noreleases][@id=<value>][@name=<value>][@checksumpolicy=<value>]` - appends `@`-separated attributes to configure behavior (e.g. `http://my-nexus:8081/repository/public@id=my-repo@snapshots`)).
+|
+
+|===
+
+NOTE: if no maven settings is specified, the system will fallback to the Maven central repository.
+
+[[maven-settings]]
+== Maven Settings and Settings Security
+
+In general you can https://maven.apache.org/settings.html[tune Maven] with any parameter expected by `settings.xml` configuration file. Once you have the file ready you can create a Configmap or a Secret in order to use it in your Camel K installation:
+
+```
+kubectl create cm my-maven-proxy --from-file settings.xml
+```
+
+Once the Configmap/Secret is ready, then, you can configure it in your Camel K operator directly at installation time (see specific installation method details). The ConfigMap or Secret can then be also referenced in the operator environment variables:
+
+```
+MAVEN_SETTINGS: <configmap|secret>:<my-name>@<my-key>
+```
+
+specifically in the example above:
+
+```
+MAVEN_SETTINGS: configmap:maven-settings@settings.xml
+```
+
+If your project also requires a Maven Settings Security in a `settings-security.xml` file (as described in https://maven.apache.org/guides/mini/guide-encryption.html[the official Maven Password Encryption guide]), you can create a ConfigMap or Secret for that file:
+
+[source,console]
+----
+$ kubectl create configmap maven-settings-security --from-file=settings-security.xml
+----
+
+Similarly as for MAVEN_SETTINGS, the operator can read the MAVEN_SETTINGS_SECURITY configuration as an environment variable:
+
+```
+MAVEN_SETTINGS_SECURITY: <configmap|secret>:<my-name>@<my-key>
+```
+
+specifically in the example above:
+
+```
+MAVEN_SETTINGS_SECURITY: configmap:maven-settings-security@settings-security.xml
+```
+
+[[maven-proxy]]
+== Maven Repository Manager (Proxy)
+
+An production grade best practice we suggest is to provide a https://maven.apache.org/repository-management.html[Maven Repository Manager] that acts as an intermediary between the cluster and the various artifacts repositories that may be required by Camel K.
+
+If your company has already one available in the cluster, you should use it. If not, we suggest you to take the opportunity and xref:installation/advanced/maven-proxy.adoc[run a Maven proxy beside your Camel K operator]. There are many benefits by introducing a proxy, above all the reduction in the time required to download dependencies (which are cached in the proxy) and inherently the egress bandwidth cost saving.
+
+You can create a `settings.xml` file and configure it as illustrated in the chapter above:
+
+```xml
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+    <mirrors>
+        <mirror>
+            <id>camel-k-maven-repository-manager</id>
+            <name>Maven Repository Manager</name>
+            <url>MAVEN_PROXY_URL[:MAVEN_PROXY_PORT]/</url>
+            <mirrorOf>*</mirrorOf>
+        </mirror>
+    </mirrors>
+</settings>
+```
+
+You can use any id or name. What's important is the location where to expect the service and the `mirrorOf` configuration which specifies that this service acts as a proxy for any repository required by the operator build. See the next paragraph to learn how to apply this configuration to your Camel K operator.
+
+[[http-proxy]]
+== HTTP Proxy
+
+HTTP proxy can be configured on the Camel K operator Deployment, with the usual `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY` environment variables.
+
+The operator automatically configures Maven according to the values of these variables.
+
+See the xref:installation/advanced/http-proxy.adoc[HTTP proxy] documentation for more details.
+
+The generated configuration can be overwritten in the <<maven-settings>> if necessary.
+
+[[ca-certificates]]
+== CA Certificates
+
+The CA certificates, used by the Maven commands to connect to the remote Maven repositories, can be provided in a Secret.
+
+The `kubectl` CLI provides a convenient command, to create a Secret from a file, e.g.:
+
+[source,console]
+----
+$ kubectl create secret generic maven-ca-certs --from-file=ca.crt
+----
+
+The Secret can contain X.509 certificates, and PKCS#7 formatted certificate chains. A JKS formatted keystore is automatically created to store the CA certificate(s), and configured to be used as a trusted certificate(s) by the Maven commands. The root CA certificates are also imported into the created keystore.
+
+The created Secret can then be referenced in the MAVEN_CA_SECRETS environment variable as a comma separated list of values:
+
+```
+MAVEN_CA_SECRETS: my-secret-1@key-a,mysecret2@key2
+```
+
+and in the specific example:
+
+```
+MAVEN_CA_SECRETS: maven-ca-certs@ca.crt
+```

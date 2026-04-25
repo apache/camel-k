@@ -379,6 +379,8 @@ func extractAsArray(value string) []string {
 }
 
 // NewSpecTraitsOptionsForIntegrationAndPlatform will merge traits giving priority to Integration, Profile and Platform respectively.
+//
+//nolint:staticcheck
 func NewSpecTraitsOptionsForIntegrationAndPlatform(
 	c client.Client, i *v1.Integration, itp *v1.IntegrationProfile, pl *v1.IntegrationPlatform) (Options, error) {
 	mergedTraits := v1.Traits{}

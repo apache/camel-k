@@ -80,6 +80,8 @@ type IntegrationPlatformStatus struct {
 // It defines the behavior of all Custom Resources (`IntegrationKit`, `Integration`, `Kamelet`) in the given namespace.
 // When the Camel K operator is installed in `global` mode,
 // you will need to specify an `IntegrationPlatform` in each namespace where you want the Camel K operator to be executed.
+//
+// Deprecated: see documentation to switch to environment variable based configuration.
 type IntegrationPlatform struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

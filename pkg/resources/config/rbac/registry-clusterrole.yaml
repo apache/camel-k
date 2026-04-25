@@ -15,16 +15,14 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
 metadata:
-  name: minikube-registry-reader-binding
+  name: registry-reader
   labels:
     app: "camel-k"
-subjects:
-- kind: ServiceAccount
-  name: camel-k-operator
-roleRef:
-  kind: ClusterRole
-  name: minikube-registry-reader
-  apiGroup: rbac.authorization.k8s.io
+rules:
+  - apiGroups: [""]
+    resources: ["services"]
+    resourceNames: ["registry"]
+    verbs: ["get"]

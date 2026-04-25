@@ -50,6 +50,8 @@ const (
 
 // installKameletCatalog installs the version Apache Kamelet Catalog into the specified namespace.
 // It returns the number of Kamelets installed and errored if successful.
+//
+//nolint:staticcheck
 func installKameletCatalog(ctx context.Context, c client.Client, platform *v1.IntegrationPlatform, version string) (int, int, error) {
 	// Prepare directory to contains kamelets
 	kameletDir, err := prepareKameletDirectory()
@@ -83,6 +85,7 @@ func prepareKameletDirectory() (string, error) {
 	return kameletDir, err
 }
 
+//nolint:staticcheck
 func downloadKameletDependency(ctx context.Context, c client.Client, platform *v1.IntegrationPlatform, version, kameletsDir string) error {
 	p := maven.NewProjectWithGAV("org.apache.camel.k.kamelets", "kamelets-catalog", defaults.Version)
 	mc := maven.NewContext(kameletsDir)
@@ -158,6 +161,7 @@ func extractKameletsFromDependency(ctx context.Context, version, kameletsDir str
 	return util.RunAndLog(ctx, cmd, maven.LogHandler, maven.LogHandler)
 }
 
+//nolint:staticcheck
 func applyKamelets(ctx context.Context, c client.Client, platform *v1.IntegrationPlatform, kameletDir string) (int, int, error) {
 	appliedKam := 0
 	erroredKam := 0
@@ -198,6 +202,7 @@ func applyKamelets(ctx context.Context, c client.Client, platform *v1.Integratio
 	return appliedKam, erroredKam, nil
 }
 
+//nolint:staticcheck
 func loadKamelet(path string, platform *v1.IntegrationPlatform) (*v1.Kamelet, error) {
 	yamlContent, err := util.ReadFile(path)
 	if err != nil {

@@ -33,22 +33,13 @@ oc policy add-role-to-user registry-editor -z camel-k-builder -n camel-k
 
 NOTE: `-z` identifies a Service Account.
 
-== Configure the IntegrationPlatform
+== Configure the registry
 
-Now you should have all the authorizations required to pull and push containers to the image registry. In order to do that you will need to provide the Secret created above into your IntegrationPlatform configuration:
+Now you should have all the authorizations required to pull and push containers to the image registry. In order to do that you will need to provide the Secret created above into your environment variable configuration:
 
-[source,yaml]
-----
-apiVersion: camel.apache.org/v1
-kind: IntegrationPlatform
-metadata:
-  name: camel-k
-  namespace: camel-k
-spec:
-  build:
-    registry:
-      address: image-registry.openshift-image-registry.svc:5000
-      secret: ocp-registry
-----
+```
+REGISTRY_ADDRESS: image-registry.openshift-image-registry.svc:5000
+REGISTRY_SECRET: ocp-registry
+```
 
 NOTE: make sure to use the same address provided in the secret above.

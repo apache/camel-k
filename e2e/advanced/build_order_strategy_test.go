@@ -36,7 +36,6 @@ import (
 )
 
 func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
-	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		InstallOperator(t, ctx, g, ns)
 
@@ -112,7 +111,6 @@ func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
 }
 
 func TestRunBuildOrderStrategyFIFO(t *testing.T) {
-	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		InstallOperator(t, ctx, g, ns)
 		// Update platform with parameters required by this test
@@ -140,6 +138,10 @@ func TestRunBuildOrderStrategyFIFO(t *testing.T) {
 		g.Expect(KamelRun(t, ctx, ns, "files/timer-source.yaml",
 			"--name", integrationZ,
 		).Execute()).To(Succeed())
+
+		g.Eventually(IntegrationKit(t, ctx, ns, integrationA)).ShouldNot(BeNil())
+		g.Eventually(IntegrationKit(t, ctx, ns, integrationB)).ShouldNot(BeNil())
+		g.Eventually(IntegrationKit(t, ctx, ns, integrationZ)).ShouldNot(BeNil())
 
 		integrationKitNameA := IntegrationKit(t, ctx, ns, integrationA)()
 		g.Eventually(BuildPhase(t, ctx, ns, integrationKitNameA), TestTimeoutShort).Should(Equal(v1.BuildPhaseRunning))

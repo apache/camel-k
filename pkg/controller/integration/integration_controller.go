@@ -56,8 +56,6 @@ import (
 	utilResource "github.com/apache/camel-k/v2/pkg/util/resource"
 )
 
-const retryMonitoring = 5
-
 func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
 	err := mgr.GetFieldIndexer().IndexField(ctx, &corev1.Pod{}, "status.phase",
 		func(obj ctrl.Object) []string {
@@ -88,7 +86,7 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 			scheme:           mgr.GetScheme(),
 			recorder:         mgr.GetEventRecorder("camel-k-integration-controller"),
 			syntheticActions: append(append([]Action{}, base...), NewMonitorSyntheticAction()),
-			baseActions:      append(append([]Action{}, base...), NewMonitorAction(), NewMonitorUnknownAction()),
+			baseActions:      append(append([]Action{}, base...), NewMonitorAction()),
 		},
 		schema.GroupVersionKind{
 			Group:   v1.SchemeGroupVersion.Group,
@@ -259,6 +257,7 @@ func enqueueRequestsFromConfigFunc(ctx context.Context, c client.Client, res ctr
 	return requests
 }
 
+//nolint:staticcheck
 func integrationPlatformEnqueueRequestsFromMapFunc(ctx context.Context, c client.Client, p *v1.IntegrationPlatform) []reconcile.Request {
 	var requests []reconcile.Request
 
@@ -352,8 +351,10 @@ func watchIntegrationResources(c client.Client, b *builder.Builder) {
 		})).
 		// Watch for IntegrationPlatform phase transitioning to ready and enqueue
 		// requests for any integrations that are in phase waiting for platform
+		//nolint:staticcheck
 		Watches(&v1.IntegrationPlatform{},
 			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
+				//nolint:staticcheck
 				p, ok := a.(*v1.IntegrationPlatform)
 				if !ok {
 					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve IntegrationPlatform")
@@ -543,11 +544,6 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 				camelevent.NotifyError(r.recorder, &instance, target, target.Name, target.Kind, err)
 
 				return reconcile.Result{}, err
-			}
-
-			if newTarget.Status.Phase == v1.IntegrationPhaseUnknown {
-				// Wait for some time before trying to monitor again
-				return reconcile.Result{RequeueAfter: retryMonitoring * time.Second}, nil
 			}
 		}
 

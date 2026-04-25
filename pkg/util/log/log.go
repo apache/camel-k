@@ -125,6 +125,8 @@ func (l Logger) ForIntegrationKit(target *v1.IntegrationKit) Logger {
 }
 
 // ForIntegrationPlatform --.
+//
+//nolint:staticcheck
 func (l Logger) ForIntegrationPlatform(target *v1.IntegrationPlatform) Logger {
 	return l.WithValues(
 		"api-version", target.APIVersion,

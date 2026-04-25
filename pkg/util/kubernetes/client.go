@@ -34,6 +34,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
+//nolint:staticcheck
 func GetIntegrationPlatform(context context.Context, client ctrl.Reader, name string, namespace string) (*v1.IntegrationPlatform, error) {
 	platform := v1.NewIntegrationPlatform(namespace, name)
 	log.Debugf("Integration Platform [name: %s], [namespace: %s], [objectkey: %s]", name, namespace, ctrl.ObjectKeyFromObject(&platform))

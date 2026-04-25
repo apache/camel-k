@@ -137,21 +137,6 @@ func TestMonitorFailureIntegration(t *testing.T) {
 	assert.Equal(t, v1.IntegrationConditionInitializationFailedReason, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
 }
 
-func TestMonitorIntegrationRecoverFromUnknown(t *testing.T) {
-	c, it, err := nominalEnvironment()
-	it.Status.Phase = v1.IntegrationPhaseUnknown
-	require.NoError(t, err)
-
-	a := monitorUnknownAction{}
-	a.InjectLogger(log.Log)
-	a.InjectClient(c)
-	assert.Equal(t, "monitor-unknown", a.Name())
-	assert.True(t, a.CanHandle(it))
-	handledIt, err := a.Handle(context.TODO(), it)
-	require.NoError(t, err)
-	assert.Equal(t, v1.IntegrationPhaseRunning, handledIt.Status.Phase)
-}
-
 func nominalEnvironment() (client.Client, *v1.Integration, error) {
 	catalog := &v1.CamelCatalog{
 		TypeMeta: metav1.TypeMeta{

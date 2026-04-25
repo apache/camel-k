@@ -43,10 +43,12 @@ func (action *monitorAction) Name() string {
 	return "monitor"
 }
 
+//nolint:staticcheck
 func (action *monitorAction) CanHandle(platform *v1.IntegrationPlatform) bool {
 	return platform.Status.Phase == v1.IntegrationPlatformPhaseReady || platform.Status.Phase == v1.IntegrationPlatformPhaseError
 }
 
+//nolint:staticcheck
 func (action *monitorAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (*v1.IntegrationPlatform, error) {
 	runtimeVersion := specOrDefault(platform.Spec.Build.RuntimeVersion)
 	if platform.Status.Build.RuntimeVersion != runtimeVersion {
@@ -184,6 +186,7 @@ func (action *monitorAction) checkKameletsCatalogRepoDeprecatedNotice(platform *
 	}
 }
 
+//nolint:staticcheck
 func (action *monitorAction) checkMavenSettings(platform *v1.IntegrationPlatform) {
 	if platform.Status.Build.Maven.Settings.ConfigMapKeyRef != nil ||
 		platform.Status.Build.Maven.Settings.SecretKeyRef != nil {

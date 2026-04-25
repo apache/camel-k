@@ -3,6 +3,8 @@
 
 The *IntegrationPlatform* CR is the resource used to control the behavior of the Camel K Operator.
 
+NOTE: this custom resource is deprecated since version 2.11.0
+
 [source,go]
 ----
 type IntegrationPlatform struct {

@@ -19,24 +19,10 @@ Alternatively, you can also start an instance with the `registry` addon in one c
 minikube start --addons registry
 ```
 
-Once the registry is available, you can check the IP address by typing:
+Once the registry is available, you can reference the namespace and service registry as:
 
 ```
-$ kubectl -n kube-system get service registry -o jsonpath='{.spec.clusterIP}'
-10.100.107.57
+REGISTRY_INSECURE: true
+REGISTRY_SVC_NAMESPACE: kube-system
+REGISTRY_SVC_NAME: registry
 ```
-
-Now you can use such value into your IntegrationPlatform:
-
-[source,yaml]
-----
-apiVersion: camel.apache.org/v1
-kind: IntegrationPlatform
-metadata:
-  name: camel-k
-spec:
-  build:
-    registry:
-      address: 10.100.107.57
-      insecure: true
-----
