@@ -2366,8 +2366,8 @@ func (in *MavenBuildSpec) DeepCopyInto(out *MavenBuildSpec) {
 		*out = make([]Repository, len(*in))
 		copy(*out, *in)
 	}
-	if in.Servers != nil {
-		in, out := &in.Servers, &out.Servers
+	if in.DeprecatedServers != nil {
+		in, out := &in.DeprecatedServers, &out.DeprecatedServers
 		*out = make([]Server, len(*in))
 		for i := range *in {
 			(*in)[i].DeepCopyInto(&(*out)[i])

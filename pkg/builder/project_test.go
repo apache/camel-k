@@ -18,10 +18,7 @@ limitations under the License.
 package builder
 
 import (
-	"regexp"
 	"testing"
-
-	"github.com/apache/camel-k/v2/pkg/util/boolean"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -31,9 +28,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/internal"
-	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
-	"github.com/apache/camel-k/v2/pkg/util/maven"
 )
 
 const customSettings = `<?xml version="1.0" encoding="UTF-8"?>
@@ -431,68 +426,4 @@ func TestMavenSettingsWithSettingsSecurityFromSecret(t *testing.T) {
 
 	assert.Equal(t, []byte("setting-data"), ctx.Maven.UserSettings)
 	assert.Equal(t, []byte("setting-security-data"), ctx.Maven.SettingsSecurity)
-}
-
-func TestInjectEmptyServersIntoDefaultMavenSettings(t *testing.T) {
-	settings, err := maven.NewSettings(maven.DefaultRepositories)
-	require.NoError(t, err)
-
-	content, err := util.EncodeXML(settings)
-	require.NoError(t, err)
-
-	contentStr := string(content)
-	newSettings := injectServersIntoMavenSettings(contentStr, nil)
-
-	assert.Equal(t, contentStr, newSettings)
-}
-
-func TestInjectServersIntoDefaultMavenSettings(t *testing.T) {
-	settings, err := maven.NewSettings(maven.DefaultRepositories)
-	require.NoError(t, err)
-
-	servers := []v1.Server{
-		{
-			ID:       "image-repository",
-			Username: "jpoth",
-			Password: "changeit",
-			Configuration: v1.Properties{
-				"allowInsecureRegistries": boolean.FalseString,
-			},
-		},
-	}
-
-	content, err := util.EncodeXML(settings)
-	require.NoError(t, err)
-
-	contentStr := string(content)
-	newSettings := injectServersIntoMavenSettings(contentStr, servers)
-
-	settings.Servers = servers
-	expectedNewSettings, err := util.EncodeXML(settings)
-	require.NoError(t, err)
-
-	expectedNewSettingsStr := string(expectedNewSettings)
-	assert.Equal(t, expectedNewSettingsStr, newSettings)
-}
-
-func TestInjectServersIntoCustomMavenSettings(t *testing.T) {
-	servers := []v1.Server{
-		{
-			ID:       "image-repository",
-			Username: "jpoth",
-			Password: "changeit",
-			Configuration: v1.Properties{
-				"allowInsecureRegistries": boolean.FalseString,
-			},
-		},
-	}
-
-	newSettings := injectServersIntoMavenSettings(customSettings, servers)
-
-	assert.Equal(t, removeWhitespaces(expectedCustomSettingsWithExtraServers), removeWhitespaces(newSettings))
-}
-
-func removeWhitespaces(s string) string {
-	re := regexp.MustCompile(`\s`)
-	return re.ReplaceAllString(s, "")
 }
