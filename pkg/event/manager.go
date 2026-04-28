@@ -20,6 +20,7 @@ package event
 import (
 	"context"
 	"fmt"
+	"reflect"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -203,7 +204,7 @@ func NotifyError(recorder events.EventRecorder, old, newResource runtime.Object,
 	reason := kind + "Error"
 	action := kind + "Reconciliation"
 	res := old
-	if newResource != nil {
+	if newResource != nil && !reflect.ValueOf(newResource).IsNil() {
 		res = newResource
 	}
 	if res == nil {
