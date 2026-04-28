@@ -1,6 +1,6 @@
 = Configure Integrations
 
-Camel K is highly configurable and attempts to be as much as automatic as possible in order to provide a nice development experience. However, as soon as you start playing harder you will need to provide more tuning to your applications. In this section we're exploring specifically Integration configuration, make sure not to get confused with the xref:installation/advanced/builds.adoc[Builds configuration] section, which influences the general building and publishing behavior.
+Camel K is highly configurable and attempts to be as much as automatic as possible in order to provide a nice development experience. However, as soon as you start playing harder you will need to provide more tuning to your applications. In this section we're exploring specifically Integration configuration, make sure not to get confused with the xref:installation/builds.adoc[Builds configuration] section, which influences the general building and publishing behavior.
 
 We can distinguish a series of different configurations for an Integration:
 
