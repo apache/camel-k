@@ -77,8 +77,8 @@ github.com/go-git/go-git-fixtures/v4 v4.3.2-0.20231010084843-55a94097c399 h1:eMj
 github.com/go-git/go-git-fixtures/v4 v4.3.2-0.20231010084843-55a94097c399/go.mod h1:1OCfN199q1Jm3HZlxleg+Dw/mwps2Wbk9frAWm+4FII=
 github.com/go-git/go-git/v5 v5.18.0 h1:O831KI+0PR51hM2kep6T8k+w0/LIAD490gvqMCvL5hM=
 github.com/go-git/go-git/v5 v5.18.0/go.mod h1:pW/VmeqkanRFqR6AljLcs7EA7FbZaN5MQqO7oZADXpo=
-github.com/go-jose/go-jose/v3 v3.0.4 h1:Wp5HA7bLQcKnf6YYao/4kpRpVMp/yf6+pJKV8WFSaNY=
-github.com/go-jose/go-jose/v3 v3.0.4/go.mod h1:5b+7YgP7ZICgJDBdfjZaIt+H/9L9T/YQrVfLAMboGkQ=
+github.com/go-jose/go-jose/v3 v3.0.5 h1:BLLJWbC4nMZOfuPVxoZIxeYsn6Nl2r1fITaJ78UQlVQ=
+github.com/go-jose/go-jose/v3 v3.0.5/go.mod h1:5b+7YgP7ZICgJDBdfjZaIt+H/9L9T/YQrVfLAMboGkQ=
 github.com/go-logr/logr v0.2.0/go.mod h1:z6/tIYblkpsD+a4lm/fGIIU9mZ+XfAiaFtq7xTgseGU=
 github.com/go-logr/logr v1.2.2/go.mod h1:jdQByPbusPIv2/zmleS9BjJVeZ6kBagPoEUsqbVz/1A=
 github.com/go-logr/logr v1.4.3 h1:CjnDlHq8ikf6E492q6eKboGOC0T8CDaOvkHCIg8idEI=
@@ -489,8 +489,8 @@ k8s.io/kube-openapi v0.0.0-20260317180543-43fb72c5454a h1:xCeOEAOoGYl2jnJoHkC3hk
 k8s.io/kube-openapi v0.0.0-20260317180543-43fb72c5454a/go.mod h1:uGBT7iTA6c6MvqUvSXIaYZo9ukscABYi2btjhvgKGZ0=
 k8s.io/utils v0.0.0-20260210185600-b8788abfbbc2 h1:AZYQSJemyQB5eRxqcPky+/7EdBj0xi3g0ZcxxJ7vbWU=
 k8s.io/utils v0.0.0-20260210185600-b8788abfbbc2/go.mod h1:xDxuJ0whA3d0I4mf/C4ppKHxXynQ+fxnkmQH0vTHnuk=
-knative.dev/eventing v0.48.2 h1:+9oi64QI1U8T1b7Hz6UFla1HA/SKoln/MPdEI2QeUJc=
-knative.dev/eventing v0.48.2/go.mod h1:NOSy8GPDTkGZvN0Kj3aNaP75CbEMW6BbXHfL+Hf/LYc=
+knative.dev/eventing v0.49.0 h1:Gole9D1AXnZVBCzoqO00/5n8MApy8rRJpTHYXvUFfQc=
+knative.dev/eventing v0.49.0/go.mod h1:5lsUu0xHPLQpfVW7kmYXB7uRCUOnGGPsE87rx3hrRsM=
 knative.dev/networking v0.0.0-20260422140718-e9578ef11562 h1:3roePSDRNthOFDxwTISYPt2IYEXXVramzpHnH0NMGYs=
 knative.dev/networking v0.0.0-20260422140718-e9578ef11562/go.mod h1:aQO2gITPzLwMPCV9S57rHrb1Zt2mUAYSGLbb/7nqzW0=
 knative.dev/pkg v0.0.0-20260422015212-ec452872dcc1 h1:bO5X2bugzMqoVltm2n16mHpAdpSR0HRWeAKzHUL2Cgk=
