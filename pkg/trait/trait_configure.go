@@ -27,6 +27,7 @@ import (
 	"github.com/go-viper/mapstructure/v2"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util"
 )
 
@@ -46,7 +47,15 @@ func (c *Catalog) Configure(env *Environment) error {
 			return err
 		}
 	}
+	//nolint:nestif
 	if env.Integration != nil {
+		ip, err := platform.GetForResource(env.Ctx, env.Client, env.Integration)
+		if ip != nil && err == nil {
+			if err := c.configureTraits(ip.Status.Traits); err != nil {
+				return err
+			}
+		}
+
 		if err := c.configureTraits(env.Integration.Spec.Traits); err != nil {
 			return err
 		}

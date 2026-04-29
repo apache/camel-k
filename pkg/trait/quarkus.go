@@ -324,7 +324,7 @@ func propagateKitTraits(e *Environment) v1.IntegrationKitTraits {
 	kitTraits := v1.IntegrationKitTraits{}
 
 	ip, err := platform.GetForResource(e.Ctx, e.Client, e.Integration)
-	if ip != nil && err != nil {
+	if ip != nil && err == nil {
 		propagate(fmt.Sprintf("platform %q", ip.Name), ip.Status.Traits, &kitTraits)
 	}
 
