@@ -16,7 +16,7 @@ require (
 	github.com/jpillora/backoff v1.0.0
 	github.com/magiconair/properties v1.8.10
 	github.com/mattn/go-shellwords v1.0.13
-	github.com/onsi/gomega v1.39.1
+	github.com/onsi/gomega v1.40.0
 	// go get github.com/openshift/api@release-4.21
 	github.com/openshift/api v0.0.0-20250820105013-6282350d0c39
 	github.com/operator-framework/api v0.42.0
