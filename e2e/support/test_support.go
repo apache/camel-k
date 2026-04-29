@@ -2861,6 +2861,10 @@ func deleteTestNamespace(t *testing.T, ctx context.Context, ns ctrl.Object) {
 		return
 	}
 
+	// Check for error logs before deleting the test namespace
+	g := gomega.NewWithT(t)
+	g.Expect(OperatorLogs(t, ctx, ns.GetName())()).ShouldNot(gomega.ContainSubstring(`"level":"error"`))
+
 	var oc bool
 	var err error
 	if oc, err = openshift.IsOpenShift(TestClient(t)); err != nil {
