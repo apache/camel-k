@@ -69,6 +69,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	"go.uber.org/zap/zapcore"
 
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1"
 	messaging "knative.dev/eventing/pkg/apis/messaging/v1"
@@ -2811,6 +2812,8 @@ func userCleanup(t *testing.T) {
 
 func invokeUserTestCode(t *testing.T, ctx context.Context, ns string, doRun func(context.Context, *gomega.WithT, string)) {
 	defer func() {
+		// Check for error logs before deleting the test namespace
+		checkOperatorErrorLogs(t, ctx, ns)
 		DumpNamespace(t, ctx, ns)
 		// Also dump the operator namespace in case it's common
 		DumpNamespace(t, ctx, "camel-k")
@@ -2818,6 +2821,51 @@ func invokeUserTestCode(t *testing.T, ctx context.Context, ns string, doRun func
 
 	g := gomega.NewWithT(t)
 	doRun(ctx, g, ns)
+}
+
+func checkOperatorErrorLogs(t *testing.T, ctx context.Context, ns string) {
+	// Get the operator pod
+	pod := OperatorPod(t, ctx, ns)()
+	if pod == nil {
+		// Try to get the global operator pod if no namespaced operator
+		pod = OperatorPodGlobal(t, ctx)()
+		if pod == nil {
+			t.Logf("Warning: could not find operator pod to check for error logs")
+			return
+		}
+	}
+
+	// Check if containers are ready before fetching logs
+	for _, container := range pod.Status.ContainerStatuses {
+		if !container.Ready || container.State.Waiting != nil {
+			// Container may not be ready, skip error log check
+			return
+		}
+	}
+
+	logOptions := &corev1.PodLogOptions{
+		Container: pod.Spec.Containers[0].Name,
+	}
+	logs, err := StructuredLogs(t, ctx, pod.Namespace, pod.Name, logOptions, true)
+	if err != nil {
+		t.Logf("Warning: could not fetch structured logs for error checking: %v", err)
+		return
+	}
+	
+	var errorEntries []util.LogEntry
+	for _, entry := range logs {
+		if entry.Level == zapcore.ErrorLevel {
+			errorEntries = append(errorEntries, entry)
+		}
+	}
+
+	if len(errorEntries) > 0 {		
+		t.Logf("ERROR: Found %d error log entries in operator logs:", len(errorEntries))
+		for _, entry := range errorEntries {
+			t.Logf("  - [%s] %s: %s", entry.Timestamp.Format(time.RFC3339), entry.LoggerName, entry.Message)
+		}
+		t.Errorf("Found %d error log entries in operator logs for namespace %s", len(errorEntries), ns)
+	}
 }
 
 func deleteKnativeBroker(t *testing.T, ctx context.Context, ns metav1.Object) {
