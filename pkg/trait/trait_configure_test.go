@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -28,11 +29,16 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 )
 
 func TestTraitConfiguration(t *testing.T) {
+	cl, err := internal.NewFakeClient()
+	require.NoError(t, err)
 	env := Environment{
+		Ctx:    context.Background(),
+		Client: cl,
 		Integration: &v1.Integration{
 			Spec: v1.IntegrationSpec{
 				Traits: v1.Traits{
@@ -65,7 +71,11 @@ func TestTraitConfiguration(t *testing.T) {
 }
 
 func TestTraitConfigurationFromAnnotations(t *testing.T) {
+	cl, err := internal.NewFakeClient()
+	require.NoError(t, err)
 	env := Environment{
+		Ctx:    context.Background(),
+		Client: cl,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
@@ -93,7 +103,11 @@ func TestTraitConfigurationFromAnnotations(t *testing.T) {
 }
 
 func TestFailOnWrongTraitAnnotations(t *testing.T) {
+	cl, err := internal.NewFakeClient()
+	require.NoError(t, err)
 	env := Environment{
+		Ctx:    context.Background(),
+		Client: cl,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
@@ -107,7 +121,11 @@ func TestFailOnWrongTraitAnnotations(t *testing.T) {
 }
 
 func TestTraitListConfigurationFromAnnotations(t *testing.T) {
+	cl, err := internal.NewFakeClient()
+	require.NoError(t, err)
 	env := Environment{
+		Ctx:    context.Background(),
+		Client: cl,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
@@ -126,7 +144,11 @@ func TestTraitListConfigurationFromAnnotations(t *testing.T) {
 }
 
 func TestTraitSplitConfiguration(t *testing.T) {
+	cl, err := internal.NewFakeClient()
+	require.NoError(t, err)
 	env := Environment{
+		Ctx:    context.Background(),
+		Client: cl,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
