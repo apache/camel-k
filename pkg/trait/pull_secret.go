@@ -67,6 +67,7 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, *TraitCondition, erro
 		}
 	}
 
+	//nolint:staticcheck
 	return t.SecretName != "" || ptr.Deref(t.ImagePullerDelegation, false), nil, nil
 }
 func (t *pullSecretTrait) autoConfigure(e *Environment) error {
@@ -79,6 +80,7 @@ func (t *pullSecretTrait) autoConfigure(e *Environment) error {
 		t.SecretName = s
 	}
 
+	//nolint:staticcheck
 	if t.ImagePullerDelegation == nil {
 		var isOpenShift bool
 		if t.Client != nil {
@@ -105,6 +107,7 @@ func (t *pullSecretTrait) Apply(e *Environment) error {
 			})
 		})
 	}
+	//nolint:staticcheck
 	if ptr.Deref(t.ImagePullerDelegation, false) {
 		if err := t.delegateImagePuller(e); err != nil {
 			return err
