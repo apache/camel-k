@@ -421,9 +421,7 @@ spec:
                                 type: string
                               type: array
                             extension:
-                              description: |-
-                                The Maven build extensions.
-                                See https://maven.apache.org/guides/mini/guide-using-extensions.html.
+                              description: 'Deprecated: no longer in use.'
                               items:
                                 description: MavenArtifact defines a GAV (Group:Artifact:Type:Version:Classifier)
                                   Maven artifact.
@@ -1354,9 +1352,7 @@ spec:
                                 type: string
                               type: array
                             extension:
-                              description: |-
-                                The Maven build extensions.
-                                See https://maven.apache.org/guides/mini/guide-using-extensions.html.
+                              description: 'Deprecated: no longer in use.'
                               items:
                                 description: MavenArtifact defines a GAV (Group:Artifact:Type:Version:Classifier)
                                   Maven artifact.

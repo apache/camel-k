@@ -4656,8 +4656,7 @@ Note that the root CA certificates are also imported into the created keystore.
 |
 
 
-The Maven build extensions.
-See https://maven.apache.org/guides/mini/guide-using-extensions.html.
+Deprecated: no longer in use.
 
 |`cliOptions` +
 []string

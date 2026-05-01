@@ -105,15 +105,15 @@ func (b *MavenBuildSpecApplyConfiguration) WithCASecrets(values ...corev1.Secret
 	return b
 }
 
-// WithExtension adds the given value to the Extension field in the declarative configuration
+// WithDeprecatedExtension adds the given value to the DeprecatedExtension field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
-// If called multiple times, values provided by each call will be appended to the Extension field.
-func (b *MavenBuildSpecApplyConfiguration) WithExtension(values ...*MavenArtifactApplyConfiguration) *MavenBuildSpecApplyConfiguration {
+// If called multiple times, values provided by each call will be appended to the DeprecatedExtension field.
+func (b *MavenBuildSpecApplyConfiguration) WithDeprecatedExtension(values ...*MavenArtifactApplyConfiguration) *MavenBuildSpecApplyConfiguration {
 	for i := range values {
 		if values[i] == nil {
-			panic("nil value passed to WithExtension")
+			panic("nil value passed to WithDeprecatedExtension")
 		}
-		b.MavenSpecApplyConfiguration.Extension = append(b.MavenSpecApplyConfiguration.Extension, *values[i])
+		b.MavenSpecApplyConfiguration.DeprecatedExtension = append(b.MavenSpecApplyConfiguration.DeprecatedExtension, *values[i])
 	}
 	return b
 }

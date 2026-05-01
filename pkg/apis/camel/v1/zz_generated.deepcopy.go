@@ -2411,8 +2411,8 @@ func (in *MavenSpec) DeepCopyInto(out *MavenSpec) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
-	if in.Extension != nil {
-		in, out := &in.Extension, &out.Extension
+	if in.DeprecatedExtension != nil {
+		in, out := &in.DeprecatedExtension, &out.DeprecatedExtension
 		*out = make([]MavenArtifact, len(*in))
 		copy(*out, *in)
 	}
