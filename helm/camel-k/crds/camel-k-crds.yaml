@@ -5477,15 +5477,16 @@ spec:
                           traits share this common property.
                         type: boolean
                       imagePullerDelegation:
-                        description: When using a global operator with a shared platform,
-                          this enables delegation of the `system:image-puller` cluster
-                          role on the operator namespace to the integration service
-                          account.
+                        description: |-
+                          When using a global operator with a shared platform, this enables delegation of the `system:image-puller`
+                          cluster role on the operator namespace to the integration service account.
+
+                          Deprecated: may be removed in future releases.
                         type: boolean
                       secretName:
                         description: The pull secret name to set on the Pod. If left
-                          empty this is automatically taken from the `IntegrationPlatform`
-                          registry configuration.
+                          empty this is automatically taken from the platform registry
+                          configuration.
                         type: string
                     type: object
                   quarkus:
@@ -8000,15 +8001,16 @@ spec:
                           traits share this common property.
                         type: boolean
                       imagePullerDelegation:
-                        description: When using a global operator with a shared platform,
-                          this enables delegation of the `system:image-puller` cluster
-                          role on the operator namespace to the integration service
-                          account.
+                        description: |-
+                          When using a global operator with a shared platform, this enables delegation of the `system:image-puller`
+                          cluster role on the operator namespace to the integration service account.
+
+                          Deprecated: may be removed in future releases.
                         type: boolean
                       secretName:
                         description: The pull secret name to set on the Pod. If left
-                          empty this is automatically taken from the `IntegrationPlatform`
-                          registry configuration.
+                          empty this is automatically taken from the platform registry
+                          configuration.
                         type: string
                     type: object
                   quarkus:
@@ -10421,15 +10423,16 @@ spec:
                           traits share this common property.
                         type: boolean
                       imagePullerDelegation:
-                        description: When using a global operator with a shared platform,
-                          this enables delegation of the `system:image-puller` cluster
-                          role on the operator namespace to the integration service
-                          account.
+                        description: |-
+                          When using a global operator with a shared platform, this enables delegation of the `system:image-puller`
+                          cluster role on the operator namespace to the integration service account.
+
+                          Deprecated: may be removed in future releases.
                         type: boolean
                       secretName:
                         description: The pull secret name to set on the Pod. If left
-                          empty this is automatically taken from the `IntegrationPlatform`
-                          registry configuration.
+                          empty this is automatically taken from the platform registry
+                          configuration.
                         type: string
                     type: object
                   quarkus:
@@ -12828,15 +12831,16 @@ spec:
                           traits share this common property.
                         type: boolean
                       imagePullerDelegation:
-                        description: When using a global operator with a shared platform,
-                          this enables delegation of the `system:image-puller` cluster
-                          role on the operator namespace to the integration service
-                          account.
+                        description: |-
+                          When using a global operator with a shared platform, this enables delegation of the `system:image-puller`
+                          cluster role on the operator namespace to the integration service account.
+
+                          Deprecated: may be removed in future releases.
                         type: boolean
                       secretName:
                         description: The pull secret name to set on the Pod. If left
-                          empty this is automatically taken from the `IntegrationPlatform`
-                          registry configuration.
+                          empty this is automatically taken from the platform registry
+                          configuration.
                         type: string
                     type: object
                   quarkus:
@@ -22092,15 +22096,16 @@ spec:
                           traits share this common property.
                         type: boolean
                       imagePullerDelegation:
-                        description: When using a global operator with a shared platform,
-                          this enables delegation of the `system:image-puller` cluster
-                          role on the operator namespace to the integration service
-                          account.
+                        description: |-
+                          When using a global operator with a shared platform, this enables delegation of the `system:image-puller`
+                          cluster role on the operator namespace to the integration service account.
+
+                          Deprecated: may be removed in future releases.
                         type: boolean
                       secretName:
                         description: The pull secret name to set on the Pod. If left
-                          empty this is automatically taken from the `IntegrationPlatform`
-                          registry configuration.
+                          empty this is automatically taken from the platform registry
+                          configuration.
                         type: string
                     type: object
                   quarkus:
@@ -24455,15 +24460,16 @@ spec:
                           traits share this common property.
                         type: boolean
                       imagePullerDelegation:
-                        description: When using a global operator with a shared platform,
-                          this enables delegation of the `system:image-puller` cluster
-                          role on the operator namespace to the integration service
-                          account.
+                        description: |-
+                          When using a global operator with a shared platform, this enables delegation of the `system:image-puller`
+                          cluster role on the operator namespace to the integration service account.
+
+                          Deprecated: may be removed in future releases.
                         type: boolean
                       secretName:
                         description: The pull secret name to set on the Pod. If left
-                          empty this is automatically taken from the `IntegrationPlatform`
-                          registry configuration.
+                          empty this is automatically taken from the platform registry
+                          configuration.
                         type: string
                     type: object
                   quarkus:
@@ -35086,14 +35092,15 @@ spec:
                               All traits share this common property.
                             type: boolean
                           imagePullerDelegation:
-                            description: When using a global operator with a shared
-                              platform, this enables delegation of the `system:image-puller`
-                              cluster role on the operator namespace to the integration
-                              service account.
+                            description: |-
+                              When using a global operator with a shared platform, this enables delegation of the `system:image-puller`
+                              cluster role on the operator namespace to the integration service account.
+
+                              Deprecated: may be removed in future releases.
                             type: boolean
                           secretName:
                             description: The pull secret name to set on the Pod. If
-                              left empty this is automatically taken from the `IntegrationPlatform`
+                              left empty this is automatically taken from the platform
                               registry configuration.
                             type: string
                         type: object
@@ -37372,15 +37379,16 @@ spec:
                           traits share this common property.
                         type: boolean
                       imagePullerDelegation:
-                        description: When using a global operator with a shared platform,
-                          this enables delegation of the `system:image-puller` cluster
-                          role on the operator namespace to the integration service
-                          account.
+                        description: |-
+                          When using a global operator with a shared platform, this enables delegation of the `system:image-puller`
+                          cluster role on the operator namespace to the integration service account.
+
+                          Deprecated: may be removed in future releases.
                         type: boolean
                       secretName:
                         description: The pull secret name to set on the Pod. If left
-                          empty this is automatically taken from the `IntegrationPlatform`
-                          registry configuration.
+                          empty this is automatically taken from the platform registry
+                          configuration.
                         type: string
                     type: object
                   quarkus:

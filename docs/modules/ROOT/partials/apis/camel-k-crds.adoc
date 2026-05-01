@@ -9132,9 +9132,6 @@ The `PodMonitor` resource labels, applicable when `pod-monitor` is `true`.
 The Pull Secret trait sets a pull secret on the pod,
 to allow Kubernetes to retrieve the container image from an external registry.
 
-The pull secret can be specified manually or, in case you've configured authentication for an external container registry
-on the `IntegrationPlatform`, the same secret is used to pull images.
-
 It's enabled by default whenever you configure authentication for an external container registry,
 so it assumes that external registries are private.
 
@@ -9158,14 +9155,17 @@ string
 |
 
 
-The pull secret name to set on the Pod. If left empty this is automatically taken from the `IntegrationPlatform` registry configuration.
+The pull secret name to set on the Pod. If left empty this is automatically taken from the platform registry configuration.
 
 |`imagePullerDelegation` +
 bool
 |
 
 
-When using a global operator with a shared platform, this enables delegation of the `system:image-puller` cluster role on the operator namespace to the integration service account.
+When using a global operator with a shared platform, this enables delegation of the `system:image-puller`
+cluster role on the operator namespace to the integration service account.
+
+Deprecated: may be removed in future releases.
 
 |`auto` +
 bool
