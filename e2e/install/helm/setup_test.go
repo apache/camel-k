@@ -32,15 +32,12 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	. "github.com/onsi/gomega"
 )
 
 func TestHelmInstallation(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		containerRegistry, ok := os.LookupEnv("KAMEL_INSTALL_REGISTRY")
-		g.Expect(ok).To(BeTrue(), "You must provide a registry address in KAMEL_INSTALL_REGISTRY env variable")
 		// Let's make sure no CRD is yet available in the cluster
 		// as we must make the procedure to install them accordingly
 		g.Eventually(CRDs(t)).Should(BeNil(), "No Camel K CRDs should be previously installed for this test")
@@ -52,14 +49,14 @@ func TestHelmInstallation(t *testing.T) {
 				"install",
 				"camel-k",
 				fmt.Sprintf("../../../docs/charts/camel-k-%s.tgz", defaults.Version),
-				"--set",
-				fmt.Sprintf("platform.build.registry.address=%s", containerRegistry),
-				"--set",
-				"platform.build.registry.insecure=true",
-				"--set",
-				fmt.Sprintf("operator.operatorId=%s", operatorID),
-				"-n",
-				ns,
+				"--set", "operator.env[0].name=REGISTRY_SVC_NAMESPACE",
+				"--set", "operator.env[0].value=kube-system",
+				"--set", "operator.env[1].name=REGISTRY_SVC_NAME",
+				"--set", "operator.env[1].value=registry",
+				"--set", "operator.env[2].name=REGISTRY_INSECURE",
+				"--set-string", "operator.env[2].value=true",
+				"--set", fmt.Sprintf("operator.operatorId=%s", operatorID),
+				"-n", ns,
 				"--force",
 			),
 		)
@@ -73,8 +70,6 @@ func TestHelmInstallation(t *testing.T) {
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.Capabilities).To(Equal(DefaultOperatorSecurityContext().Capabilities))
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.SeccompProfile).To(Equal(DefaultOperatorSecurityContext().SeccompProfile))
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation).To(Equal(DefaultOperatorSecurityContext().AllowPrivilegeEscalation))
-
-		g.Eventually(PlatformPhase(t, ctx, ns)).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		// Test a simple route
 		t.Run("simple route", func(t *testing.T) {

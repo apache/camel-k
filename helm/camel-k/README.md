@@ -1,11 +1,21 @@
 # Camel K
 
-Apache Camel K is a lightweight integration platform, born on Kubernetes, with serverless superpowers: the easiest way to build and manage your Camel applications on Kubernetes. This chart deploys the Camel K operator and all resources needed to natively run Apache Camel Integrations on any Kubernetes cluster.
+Apache Camel K is the lightweight integration platform for Kubernetes: the easiest way to build and manage your Camel applications on Kubernetes. This chart deploys the Camel K operator and all resources needed to natively run Apache Camel Integrations on any Kubernetes cluster.
 
 ## Prerequisites
 
-- Kubernetes 1.11+
-- Container Image Registry installed and configured for pull
+- A container image registry installed and configured for pull
+- For production environments, a registry secret containing the access to container registry
+
+### Minikube
+
+Minikube offers a container registry addon, which it makes very well suited for local Camel K development and testing purposes:
+
+```bash
+$ minikube addons enable registry
+```
+
+You can use the container registry Service `registry` in namespace `kube-system` to configure in Camel K.
 
 ## Installation procedure
 
@@ -17,69 +27,31 @@ $ helm repo add camel-k https://apache.github.io/camel-k/charts
 
 ## Install the operator
 
-```bash
-$ helm install camel-k camel-k/camel-k
-```
-
-## Set the container registry configuration
-
-A regular installation requires you to provide a registry used by Camel K to build application containers. See official [Camel K registry documentation](https://camel.apache.org/camel-k/next/installation/registry/registry.html) or move to next section to run on a local Minikube cluster.
-
-Create an `itp.yaml` file like:
-
-```yaml
-apiVersion: camel.apache.org/v1
-kind: IntegrationPlatform
-metadata:
-  labels:
-    app: camel-k
-  name: camel-k
-spec:
-  build:
-    registry:
-      address: <my-registry-address>
-      organization: <my-organization>
-      secret: <my-secret-credentials>
-```
-
-and save the resource to the cluster with `kubectl apply -f itp.yaml`.
-
-### Minikube
-
-Minikube offers a container registry addon, which it makes very well suited for local Camel K development and testing purposes. You can see the cluster IP registry addon using the following script:
+When installing the operator you must at least include the container registry to use (either the address or the service to use):
 
 ```bash
-$ minikube addons enable registry
-$ kubectl -n kube-system get service registry -o jsonpath='{.spec.clusterIP}'
+$ helm install camel-k camel-k/camel-k --set global=true \
+  --set operator.env[0].name=REGISTRY_ADDRESS \
+  --set operator.env[0].value=<my-registry-address> \
+  --set operator.env[1].name=REGISTRY_SECRET \
+  --set operator.env[1].value=<my-registry-secret>
 ```
 
-Then you can provide the IntegrationPlatform as `itp.yaml`:
+In the case of a local registry available (for example, in Minikube):
 
-```yaml
-apiVersion: camel.apache.org/v1
-kind: IntegrationPlatform
-metadata:
-  labels:
-    app: camel-k
-  name: camel-k
-spec:
-  build:
-    registry:
-      address: <REGISTRY_ADDRESS>
-      insecure: true
+```bash
+$ helm install camel-k camel-k/camel-k --set global=true \
+  --set operator.env[0].name=REGISTRY_SVC_NAMESPACE \
+  --set operator.env[0].value=kube-system \
+  --set operator.env[1].name=REGISTRY_SVC_NAME \
+  --set operator.env[1].value=registry \
+  --set operator.env[2].name=REGISTRY_INSECURE \
+  --set-string operator.env[2].value=true
 ```
 
-and save the resource to the cluster with `kubectl apply -f itp.yaml`.
+> **Note**: the installation RBAC provide the setting to access the Service in the namespace, you need to provide the specific RBAC if using another Service.
 
 ## Test your installation
-
-Verify the IntegrationPlatform is in Ready status:
-
-```bash
-kubectl get itp
-NAME      PHASE   BUILD STRATEGY   PUBLISH STRATEGY   REGISTRY ADDRESS   DEFAULT RUNTIME
-camel-k   Ready   routine          Jib                10.100.107.57      3.8.1
-```
 
 Create a simple testing "Hello World" Integration as `test.yaml`:
 
@@ -120,15 +92,9 @@ test   Running        True    quarkus            3.8.1             3.8.1        
 
 For any problem, check it out the official [troubleshooting guide](https://camel.apache.org/camel-k/next/troubleshooting/troubleshooting.html) or the [documentation](https://camel.apache.org/camel-k/next/index.html).
 
-## Knative configuration
-
-Camel K offers the possibility to run serverless Integrations in conjunction with [Knative operator](https://knative.dev). Once Knative and Camel K are installed on the same platform, you can configure Knative resources to be played by Camel K.
-
-See instructions [how to enable Knative on Camel K](https://camel.apache.org/camel-k/next/installation/knative.html).
-
 ## Additional installation time configuration
 
-The [configuration](#configuration) section lists additional parameters that can be set during installation.
+The [configuration](#configuration) section lists additional parameters that can be set during installation. From version 2.11.0 onward, the majority of parameters are expected to be configured via environment variables. See official documentation on Apache website for a full list.
 
 > **Tip**: List all releases using `helm list`
 
@@ -171,11 +137,18 @@ The following table lists the most commonly configured parameters of the Camel K
 
 |           Parameter                    |             Description                                                   |            Default             |
 |----------------------------------------|---------------------------------------------------------------------------|--------------------------------|
+| `operator.operatorId`                  | The id of the Camel K operator                                            | `camel-k`                      |
 | `operator.global`                      | Indicates if the operator should watch all namespaces                     | `false`                        |
+| `operator.image`                       | The container image to use to run the operator                            | <the official image>           |
 | `operator.nodeSelector`                | The nodeSelector to use for the operator                                  |                                |
 | `operator.resources`                   | The resource requests and limits to use for the operator                  |                                |
 | `operator.securityContext`             | The (container-related) securityContext to use for the operator           |                                |
 | `operator.tolerations`                 | The list of tolerations to use for the operator                           |                                |
+| `operator.imagePullSecret`             | The id of the Camel K operator                                            |                                |
+| `operator.annotations`                 | The list of annotations to include to the operator Deployment             |                                |
+| `operator.serviceAccount.annotations`  | The list of annotations to include to the operator Service Account        |                                |
+| `extraEnv`                             | Extra env var on the operator Deployment (deprecated, use `env`)          |                                |
+| `env`                                  | The operator configuration via environment variables                      |                                |
 
 ## Contributing
 
