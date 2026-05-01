@@ -48,9 +48,8 @@ type MavenSpecApplyConfiguration struct {
 	// and configured to be used as a trusted certificate(s) by the Maven commands.
 	// Note that the root CA certificates are also imported into the created keystore.
 	CASecrets []corev1.SecretKeySelector `json:"caSecrets,omitempty"`
-	// The Maven build extensions.
-	// See https://maven.apache.org/guides/mini/guide-using-extensions.html.
-	Extension []MavenArtifactApplyConfiguration `json:"extension,omitempty"`
+	// Deprecated: no longer in use.
+	DeprecatedExtension []MavenArtifactApplyConfiguration `json:"extension,omitempty"`
 	// The CLI options that are appended to the list of arguments for Maven commands,
 	// e.g., `-V,--no-transfer-progress,-Dstyle.color=never`.
 	// See https://maven.apache.org/ref/3.9.14/maven-embedder/cli.html.
@@ -124,15 +123,15 @@ func (b *MavenSpecApplyConfiguration) WithCASecrets(values ...corev1.SecretKeySe
 	return b
 }
 
-// WithExtension adds the given value to the Extension field in the declarative configuration
+// WithDeprecatedExtension adds the given value to the DeprecatedExtension field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
-// If called multiple times, values provided by each call will be appended to the Extension field.
-func (b *MavenSpecApplyConfiguration) WithExtension(values ...*MavenArtifactApplyConfiguration) *MavenSpecApplyConfiguration {
+// If called multiple times, values provided by each call will be appended to the DeprecatedExtension field.
+func (b *MavenSpecApplyConfiguration) WithDeprecatedExtension(values ...*MavenArtifactApplyConfiguration) *MavenSpecApplyConfiguration {
 	for i := range values {
 		if values[i] == nil {
-			panic("nil value passed to WithExtension")
+			panic("nil value passed to WithDeprecatedExtension")
 		}
-		b.Extension = append(b.Extension, *values[i])
+		b.DeprecatedExtension = append(b.DeprecatedExtension, *values[i])
 	}
 	return b
 }

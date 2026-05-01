@@ -258,12 +258,6 @@ func applyPlatformSpec(source *v1.IntegrationPlatform, target *v1.IntegrationPla
 		}
 	}
 
-	if len(source.Status.Build.Maven.Extension) > 0 && len(target.Status.Build.Maven.Extension) == 0 {
-		log.Debugf("Integration Platform %s [%s]: setting Maven extensions", target.Name, target.Namespace)
-		target.Status.Build.Maven.Extension = make([]v1.MavenArtifact, len(source.Status.Build.Maven.Extension))
-		copy(target.Status.Build.Maven.Extension, source.Status.Build.Maven.Extension)
-	}
-
 	if target.Status.Build.Registry.Address == "" && source.Status.Build.Registry.Address != "" {
 		log.Debugf("Integration Platform %s [%s]: setting registry", target.Name, target.Namespace)
 		source.Status.Build.Registry.DeepCopyInto(&target.Status.Build.Registry)

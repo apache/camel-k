@@ -136,8 +136,6 @@ func generateQuarkusProject(ctx *builderContext) error {
 		ctx.Build.Runtime.Version,
 		ctx.Build.Runtime.Metadata["quarkus.version"],
 	)
-	// Add Maven build extensions
-	p.Build.Extensions = &ctx.Build.Maven.Extension
 	// Add Maven repositories
 	p.Repositories = append(p.Repositories, ctx.Build.Maven.Repositories...)
 	p.PluginRepositories = append(p.PluginRepositories, ctx.Build.Maven.Repositories...)
