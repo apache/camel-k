@@ -24,6 +24,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/log"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
@@ -137,6 +138,15 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 		}
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
+	}
+
+	// controller-runtime strips TypeMeta from objects returned by client.Get
+	// (kubernetes-sigs/controller-runtime#1735). The new events.EventRecorder
+	// goes through reference.GetReference, which calls GetObjectKind() and
+	// nil-derefs without TypeMeta. Repopulate it so the event recorder works.
+	instance.TypeMeta = metav1.TypeMeta{
+		Kind:       v1.BuildKind,
+		APIVersion: v1.SchemeGroupVersion.String(),
 	}
 
 	// Only process resources assigned to the operator
