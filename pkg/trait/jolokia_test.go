@@ -72,6 +72,7 @@ func TestApplyJolokiaTraitNominalShouldSucceed(t *testing.T) {
 
 func TestApplyJolokiaTraitForOpenShiftProfileShouldSucceed(t *testing.T) {
 	trait, environment := createNominalJolokiaTest()
+	//nolint:staticcheck
 	environment.IntegrationKit.Spec.Profile = v1.TraitProfileOpenShift
 
 	err := trait.Apply(environment)
@@ -162,9 +163,6 @@ func createNominalJolokiaTest() (*jolokiaTrait, *Environment) {
 			},
 		},
 		IntegrationKit: &v1.IntegrationKit{
-			Spec: v1.IntegrationKitSpec{
-				Profile: v1.TraitProfileKubernetes,
-			},
 			Status: v1.IntegrationKitStatus{
 				Artifacts: []v1.Artifact{
 					{

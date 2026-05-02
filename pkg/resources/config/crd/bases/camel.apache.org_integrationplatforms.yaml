@@ -510,6 +510,8 @@ spec:
                 description: |-
                   the profile you wish to use. It will apply certain traits which are required by the specific profile chosen.
                   It usually relates the Cluster with the optional definition of special profiles (ie, Knative)
+
+                  Deprecated: may be removed in future releases.
                 type: string
               traits:
                 description: list of traits to be executed for all the Integration/IntegrationKits
@@ -3035,6 +3037,8 @@ spec:
                 description: |-
                   the profile you wish to use. It will apply certain traits which are required by the specific profile chosen.
                   It usually relates the Cluster with the optional definition of special profiles (ie, Knative)
+
+                  Deprecated: may be removed in future releases.
                 type: string
               traits:
                 description: list of traits to be executed for all the Integration/IntegrationKits

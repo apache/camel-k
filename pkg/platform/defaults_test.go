@@ -47,7 +47,6 @@ func TestIntegrationPlatformDefaults(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, v1.IntegrationPlatformClusterKubernetes, ip.Status.Cluster)
-	assert.Equal(t, v1.TraitProfile(""), ip.Status.Profile)
 	assert.Equal(t, v1.BuildStrategyRoutine, ip.Status.Build.BuildConfiguration.Strategy)
 	assert.Equal(t, v1.BuildOrderStrategyDependencies, ip.Status.Build.BuildConfiguration.OrderStrategy)
 	assert.Equal(t, defaults.BaseImage(), ip.Status.Build.BaseImage)
@@ -86,7 +85,6 @@ func TestApplyGlobalPlatformSpec(t *testing.T) {
 				},
 			},
 			Cluster: v1.IntegrationPlatformClusterOpenShift,
-			Profile: v1.TraitProfileOpenShift,
 		},
 	}
 
@@ -108,7 +106,6 @@ func TestApplyGlobalPlatformSpec(t *testing.T) {
 	applyPlatformSpec(&global, &ip)
 
 	assert.Equal(t, v1.IntegrationPlatformClusterOpenShift, ip.Status.Cluster)
-	assert.Equal(t, v1.TraitProfileOpenShift, ip.Status.Profile)
 	assert.Equal(t, v1.BuildStrategyRoutine, ip.Status.Build.BuildConfiguration.Strategy)
 	assert.Equal(t, v1.BuildOrderStrategyFIFO, ip.Status.Build.BuildConfiguration.OrderStrategy)
 	assert.Equal(t, int32(3), ip.Status.Build.MaxRunningBuilds) // default for build strategy routine
@@ -232,7 +229,6 @@ func TestRetainLocalPlatformSpec(t *testing.T) {
 				},
 			},
 			Cluster: v1.IntegrationPlatformClusterOpenShift,
-			Profile: v1.TraitProfileOpenShift,
 		},
 	}
 
@@ -267,7 +263,6 @@ func TestRetainLocalPlatformSpec(t *testing.T) {
 				},
 			},
 			Cluster: v1.IntegrationPlatformClusterKubernetes,
-			Profile: v1.TraitProfileKnative,
 		},
 	}
 
@@ -276,7 +271,6 @@ func TestRetainLocalPlatformSpec(t *testing.T) {
 	applyPlatformSpec(&global, &ip)
 
 	assert.Equal(t, v1.IntegrationPlatformClusterKubernetes, ip.Status.Cluster)
-	assert.Equal(t, v1.TraitProfileKnative, ip.Status.Profile)
 	assert.Equal(t, v1.BuildStrategyPod, ip.Status.Build.BuildConfiguration.Strategy)
 	assert.Equal(t, v1.BuildOrderStrategyFIFO, ip.Status.Build.BuildConfiguration.OrderStrategy)
 	assert.Equal(t, int32(1), ip.Status.Build.MaxRunningBuilds)

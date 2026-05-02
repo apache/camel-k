@@ -2627,6 +2627,8 @@ a list of Camel dependencies used by this kit
 
 the profile which is expected by this kit
 
+Deprecated: may be removed in future releases.
+
 |`traits` +
 *xref:#_camel_apache_org_v1_IntegrationKitTraits[IntegrationKitTraits]*
 |
@@ -3115,6 +3117,8 @@ what kind of cluster you're running (ie, plain Kubernetes or OpenShift)
 the profile you wish to use. It will apply certain traits which are required by the specific profile chosen.
 It usually relates the Cluster with the optional definition of special profiles (ie, Knative)
 
+Deprecated: may be removed in future releases.
+
 |`build` +
 *xref:#_camel_apache_org_v1_IntegrationPlatformBuildSpec[IntegrationPlatformBuildSpec]*
 |
@@ -3535,6 +3539,8 @@ the list of Camel or Maven dependencies required by the Integration
 
 the profile needed to run this Integration
 
+Deprecated: may be removed in future releases.
+
 |`traits` +
 *xref:#_camel_apache_org_v1_Traits[Traits]*
 |
@@ -3642,6 +3648,8 @@ a list of dependencies needed by the application
 
 
 the profile needed to run this Integration
+
+Deprecated: may be removed in future releases.
 
 |`traits` +
 *xref:#_camel_apache_org_v1_Traits[Traits]*

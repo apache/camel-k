@@ -251,7 +251,6 @@ func TestCronDeps(t *testing.T) {
 				Phase: v1.IntegrationPhaseInitialization,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKnative,
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
@@ -313,7 +312,6 @@ func TestCronMultipleScheduleFallback(t *testing.T) {
 				Phase: v1.IntegrationPhaseInitialization,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKnative,
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
@@ -379,7 +377,6 @@ func TestCronDepsFallback(t *testing.T) {
 				Phase: v1.IntegrationPhaseInitialization,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKnative,
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{

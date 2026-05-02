@@ -2832,7 +2832,10 @@ spec:
                 description: the container image as identified in the container registry
                 type: string
               profile:
-                description: the profile which is expected by this kit
+                description: |-
+                  the profile which is expected by this kit
+
+                  Deprecated: may be removed in future releases.
                 type: string
               repositories:
                 description: Maven repositories that can be used by the kit
@@ -3800,6 +3803,8 @@ spec:
                 description: |-
                   the profile you wish to use. It will apply certain traits which are required by the specific profile chosen.
                   It usually relates the Cluster with the optional definition of special profiles (ie, Knative)
+
+                  Deprecated: may be removed in future releases.
                 type: string
               traits:
                 description: list of traits to be executed for all the Integration/IntegrationKits
@@ -6325,6 +6330,8 @@ spec:
                 description: |-
                   the profile you wish to use. It will apply certain traits which are required by the specific profile chosen.
                   It usually relates the Cluster with the optional definition of special profiles (ie, Knative)
+
+                  Deprecated: may be removed in future releases.
                 type: string
               traits:
                 description: list of traits to be executed for all the Integration/IntegrationKits
@@ -13403,7 +13410,10 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               profile:
-                description: the profile needed to run this Integration
+                description: |-
+                  the profile needed to run this Integration
+
+                  Deprecated: may be removed in future releases.
                 type: string
               replicas:
                 default: 1
@@ -22771,7 +22781,10 @@ spec:
                 description: The IntegrationPlatform watching this Integration
                 type: string
               profile:
-                description: the profile needed to run this Integration
+                description: |-
+                  the profile needed to run this Integration
+
+                  Deprecated: may be removed in future releases.
                 type: string
               replicas:
                 description: the number of replicas
@@ -26334,7 +26347,10 @@ spec:
                     type: object
                     x-kubernetes-map-type: atomic
                   profile:
-                    description: the profile needed to run this Integration
+                    description: |-
+                      the profile needed to run this Integration
+
+                      Deprecated: may be removed in future releases.
                     type: string
                   replicas:
                     default: 1

@@ -67,6 +67,8 @@ func newKnativeTrait() Trait {
 }
 
 // IsAllowedInProfile overrides default.
+//
+//nolint:staticcheck
 func (t *knativeTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 	return profile.Equal(v1.TraitProfileKnative)
 }

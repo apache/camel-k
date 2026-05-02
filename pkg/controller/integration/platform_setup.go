@@ -68,6 +68,7 @@ func (action *platformSetupAction) Handle(ctx context.Context, integration *v1.I
 		if err != nil {
 			return nil, err
 		}
+		//nolint:staticcheck
 		integration.Status.Profile = profile
 	}
 

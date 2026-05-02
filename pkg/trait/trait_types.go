@@ -88,7 +88,11 @@ type Trait interface {
 	RequiresIntegrationPlatform() bool
 
 	// IsAllowedInProfile tells if the trait supports the given profile
-	IsAllowedInProfile(traitProfile v1.TraitProfile) bool
+	//
+	// NOTE: when removing, we can just remove the call and the upstream calls as well.
+	//
+	// Deprecated: may be removed in future releases.
+	IsAllowedInProfile(traitProfile v1.TraitProfile) bool //nolint:staticcheck
 
 	// Order is the order in which the trait should be executed in the normal flow
 	Order() int
@@ -171,7 +175,7 @@ func (trait *BaseTrait) RequiresIntegrationPlatform() bool {
 }
 
 // IsAllowedInProfile returns true for any profile by default.
-func (trait *BaseTrait) IsAllowedInProfile(v1.TraitProfile) bool {
+func (trait *BaseTrait) IsAllowedInProfile(v1.TraitProfile) bool { //nolint:staticcheck
 	return true
 }
 
@@ -284,6 +288,8 @@ func (e *Environment) InPhase(c v1.IntegrationKitPhase, i v1.IntegrationPhase) b
 // First looking at the Integration.Spec for a Profile,
 // next looking at the IntegrationKit.Spec
 // and lastly the Platform Profile.
+//
+//nolint:staticcheck
 func (e *Environment) DetermineProfile() v1.TraitProfile {
 	if e.Integration != nil {
 		if e.Integration.Status.Profile != "" {

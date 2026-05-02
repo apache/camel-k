@@ -43,6 +43,8 @@ type IntegrationStatusApplyConfiguration struct {
 	// a list of dependencies needed by the application
 	Dependencies []string `json:"dependencies,omitempty"`
 	// the profile needed to run this Integration
+	//
+	// Deprecated: may be removed in future releases.
 	Profile *camelv1.TraitProfile `json:"profile,omitempty"`
 	// the traits executed for the Integration
 	Traits *TraitsApplyConfiguration `json:"traits,omitempty"`

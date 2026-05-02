@@ -170,6 +170,7 @@ func createTestEnvironment(t *testing.T, profile v1.TraitProfile) *Environment {
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
+				//nolint:staticcheck
 				Profile: profile,
 				Sources: []v1.SourceSpec{
 					{
@@ -228,6 +229,7 @@ func createNonManagedBuildTestEnvironment(t *testing.T, profile v1.TraitProfile)
 				Phase:           v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
+				//nolint:staticcheck
 				Profile: profile,
 				Traits: v1.Traits{
 					Container: &trait.ContainerTrait{

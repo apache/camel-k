@@ -170,6 +170,8 @@ type FailureRecovery struct {
 }
 
 // TraitProfile represents lists of traits that are enabled for the specific installation/integration.
+//
+// Deprecated: may be removed in future releases.
 type TraitProfile string
 
 const (

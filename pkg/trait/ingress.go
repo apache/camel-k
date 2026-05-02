@@ -49,6 +49,8 @@ func newIngressTrait() Trait {
 }
 
 // IsAllowedInProfile overrides default.
+//
+//nolint:staticcheck
 func (t *ingressTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 	return profile.Equal(v1.TraitProfileKubernetes)
 }

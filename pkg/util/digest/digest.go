@@ -73,6 +73,7 @@ func ComputeForIntegration(integration *v1.Integration, configmapVersions []stri
 		}
 	}
 	// Profile is relevant
+	//nolint:staticcheck
 	if _, err := hash.Write([]byte(integration.Spec.Profile)); err != nil {
 		return "", err
 	}

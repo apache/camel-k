@@ -31,6 +31,8 @@ type IntegrationPlatformSpec struct {
 	Cluster IntegrationPlatformCluster `json:"cluster,omitempty"`
 	// the profile you wish to use. It will apply certain traits which are required by the specific profile chosen.
 	// It usually relates the Cluster with the optional definition of special profiles (ie, Knative)
+	//
+	// Deprecated: may be removed in future releases.
 	Profile TraitProfile `json:"profile,omitempty"`
 	// specify how to build the Integration/IntegrationKits
 	Build IntegrationPlatformBuildSpec `json:"build,omitempty"`

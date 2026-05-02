@@ -173,7 +173,6 @@ func TestMonitorDriftConfiguration(t *testing.T) {
 					Name: "override",
 				},
 			},
-			Profile: v1.TraitProfileKnative,
 		},
 		Status: v1.IntegrationPlatformStatus{
 			IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
@@ -208,7 +207,6 @@ func TestMonitorDriftConfiguration(t *testing.T) {
 	assert.Equal(t, defaults.DefaultRuntimeVersion, answer.Status.Build.RuntimeVersion)
 	assert.Equal(t, v1.RuntimeProviderQuarkus, answer.Status.Build.RuntimeProvider)
 	assert.Equal(t, "3.2.1", answer.Status.Build.RuntimeCoreVersion)
-	assert.Equal(t, v1.TraitProfileKnative, answer.Status.Profile)
 	assert.Equal(t, "override", answer.Status.Traits.Container.Name)
 }
 

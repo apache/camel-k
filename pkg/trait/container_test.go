@@ -66,9 +66,6 @@ func TestContainerWithDefaults(t *testing.T) {
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseDeploying,
 			},
-			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKubernetes,
-			},
 		},
 		IntegrationKit: &v1.IntegrationKit{
 			Status: v1.IntegrationKitStatus{
@@ -132,9 +129,6 @@ func TestContainerWithOpenshift(t *testing.T) {
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseDeploying,
 			},
-			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKubernetes,
-			},
 		},
 		IntegrationKit: &v1.IntegrationKit{
 			Status: v1.IntegrationKitStatus{
@@ -184,7 +178,6 @@ func TestContainerWithCustomName(t *testing.T) {
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKubernetes,
 				Traits: v1.Traits{
 					Container: &traitv1.ContainerTrait{
 						Name: "my-container-name",
@@ -243,7 +236,6 @@ func TestContainerWithCustomImage(t *testing.T) {
 				Phase: v1.IntegrationPhaseInitialization,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKubernetes,
 				Traits: v1.Traits{
 					Container: &traitv1.ContainerTrait{
 						Image: "foo/bar:1.0.0",
@@ -295,7 +287,6 @@ func TestContainerWithCustomImageAndIntegrationKit(t *testing.T) {
 				Phase: v1.IntegrationPhaseInitialization,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKubernetes,
 				Traits: v1.Traits{
 					Container: &traitv1.ContainerTrait{
 						Image: "foo/bar:1.0.0",
@@ -334,7 +325,6 @@ func TestContainerWithImagePullPolicy(t *testing.T) {
 		IntegrationKit: &v1.IntegrationKit{},
 		Integration: &v1.Integration{
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKubernetes,
 				Traits: v1.Traits{
 					Container: &traitv1.ContainerTrait{
 						ImagePullPolicy: "Always",
@@ -372,7 +362,6 @@ func TestDeploymentContainerPorts(t *testing.T) {
 		IntegrationKit: &v1.IntegrationKit{},
 		Integration: &v1.Integration{
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKubernetes,
 				Traits: v1.Traits{
 					Container: &traitv1.ContainerTrait{
 						Port:        8081,
@@ -427,6 +416,7 @@ func TestKnativeServiceContainerPorts(t *testing.T) {
 		IntegrationKit: &v1.IntegrationKit{},
 		Integration: &v1.Integration{
 			Spec: v1.IntegrationSpec{
+				//nolint:staticcheck
 				Profile: v1.TraitProfileKnative,
 				Traits: v1.Traits{
 					Container: &traitv1.ContainerTrait{
@@ -665,6 +655,7 @@ func createSettingContextEnvironment(t *testing.T, profile v1.TraitProfile) *Env
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
+				//nolint:staticcheck
 				Profile: profile,
 			},
 		},
