@@ -58,9 +58,10 @@ type BindingProvider interface {
 
 //nolint:containedctx
 type BindingContext struct {
-	Ctx                context.Context
-	Client             client.Client
-	Namespace          string
+	Ctx       context.Context
+	Client    client.Client
+	Namespace string
+	//nolint:staticcheck
 	Profile            v1.TraitProfile
 	Metadata           map[string]string
 	ServiceAccountName string

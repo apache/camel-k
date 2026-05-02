@@ -130,7 +130,10 @@ spec:
                 description: the container image as identified in the container registry
                 type: string
               profile:
-                description: the profile which is expected by this kit
+                description: |-
+                  the profile which is expected by this kit
+
+                  Deprecated: may be removed in future releases.
                 type: string
               repositories:
                 description: Maven repositories that can be used by the kit

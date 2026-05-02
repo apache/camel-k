@@ -69,6 +69,8 @@ type IntegrationSpec struct {
 	// the list of Camel or Maven dependencies required by the Integration
 	Dependencies []string `json:"dependencies,omitempty"`
 	// the profile needed to run this Integration
+	//
+	// Deprecated: may be removed in future releases.
 	Profile TraitProfile `json:"profile,omitempty"`
 	// the traits needed to run this Integration
 	Traits Traits `json:"traits,omitempty"`
@@ -104,6 +106,8 @@ type IntegrationStatus struct {
 	// a list of dependencies needed by the application
 	Dependencies []string `json:"dependencies,omitempty"`
 	// the profile needed to run this Integration
+	//
+	// Deprecated: may be removed in future releases.
 	Profile TraitProfile `json:"profile,omitempty"`
 	// the traits executed for the Integration
 	Traits *Traits `json:"traits,omitempty"`

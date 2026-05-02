@@ -65,7 +65,6 @@ func TestServiceWithDefaults(t *testing.T) {
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKubernetes,
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
@@ -151,7 +150,6 @@ func TestService(t *testing.T) {
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKubernetes,
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
@@ -240,7 +238,6 @@ func TestServiceWithCustomContainerName(t *testing.T) {
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKubernetes,
 				Traits: v1.Traits{
 					Service: &traitv1.ServiceTrait{
 						Trait: traitv1.Trait{
@@ -309,7 +306,6 @@ func TestServiceWithNodePort(t *testing.T) {
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKubernetes,
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
@@ -391,6 +387,7 @@ func TestServiceWithKnativeServiceEnabled(t *testing.T) {
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
+				//nolint:staticcheck
 				Profile: v1.TraitProfileKnative,
 				Sources: []v1.SourceSpec{
 					{

@@ -194,7 +194,10 @@ spec:
                     type: object
                     x-kubernetes-map-type: atomic
                   profile:
-                    description: the profile needed to run this Integration
+                    description: |-
+                      the profile needed to run this Integration
+
+                      Deprecated: may be removed in future releases.
                     type: string
                   replicas:
                     default: 1

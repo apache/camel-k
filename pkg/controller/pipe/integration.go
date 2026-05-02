@@ -104,6 +104,7 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, pipe *v1.Pipe) (
 	if err != nil {
 		return nil, err
 	}
+	//nolint:staticcheck
 	it.Spec.Profile = profile
 
 	if pipe.Spec.ServiceAccountName != "" {
@@ -261,6 +262,7 @@ func configureBinding(integration *v1.Integration, bindings ...*bindings.Binding
 	return nil
 }
 
+//nolint:staticcheck
 func determineTraitProfile(ctx context.Context, c client.Client, binding *v1.Pipe) (v1.TraitProfile, error) {
 	pl, err := platform.GetForResource(ctx, c, binding)
 	if err != nil && !k8serrors.IsNotFound(err) {

@@ -79,6 +79,8 @@ func (c *Catalog) traitsFor(environment *Environment) []Trait {
 //
 // Traits may depend on the result of previously executed ones,
 // so care must be taken while changing the lists order.
+//
+//nolint:staticcheck
 func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
 	var res []Trait
 	for _, t := range c.AllTraits() {

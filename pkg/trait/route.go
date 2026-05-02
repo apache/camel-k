@@ -53,6 +53,8 @@ func newRouteTrait() Trait {
 }
 
 // IsAllowedInProfile overrides default.
+//
+//nolint:staticcheck
 func (t *routeTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 	return profile.Equal(v1.TraitProfileOpenShift)
 }

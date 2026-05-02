@@ -164,6 +164,7 @@ func createPodSettingContextEnvironment(t *testing.T, profile v1.TraitProfile) *
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
+				//nolint:staticcheck
 				Profile: profile,
 			},
 		},

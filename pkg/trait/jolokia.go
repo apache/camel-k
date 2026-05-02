@@ -138,6 +138,7 @@ func (t *jolokiaTrait) getPort() int32 {
 	return t.Port
 }
 
+//nolint:staticcheck
 func (t *jolokiaTrait) setDefaultJolokiaOption(options map[string]string, profile v1.TraitProfile) {
 	// Do not override existing option
 	if options["host"] == "" {

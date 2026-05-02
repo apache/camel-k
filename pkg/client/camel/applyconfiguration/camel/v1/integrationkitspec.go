@@ -33,6 +33,8 @@ type IntegrationKitSpecApplyConfiguration struct {
 	// a list of Camel dependencies used by this kit
 	Dependencies []string `json:"dependencies,omitempty"`
 	// the profile which is expected by this kit
+	//
+	// Deprecated: may be removed in future releases.
 	Profile *camelv1.TraitProfile `json:"profile,omitempty"`
 	// traits that the kit will execute
 	Traits *IntegrationKitTraitsApplyConfiguration `json:"traits,omitempty"`
