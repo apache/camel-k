@@ -18,7 +18,7 @@ limitations under the License.
 package apis
 
 import (
-	"github.com/apache/camel-k/v2/pkg/apis/duck/strimzi/v1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/duck/strimzi/v1"
 )
 
 func init() {
