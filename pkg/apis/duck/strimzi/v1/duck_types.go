@@ -15,13 +15,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1beta2
+package v1
 
 import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 const (
 	StrimziGroup            = "kafka.strimzi.io"
-	StrimziVersion          = "v1beta2"
+	StrimziVersion          = "v1"
 	StrimziKindTopic        = "KafkaTopic"
 	StrimziKindKafkaCluster = "Kafka"
 

@@ -20,31 +20,29 @@ limitations under the License.
 package fake
 
 import (
-	v1beta2 "github.com/apache/camel-k/v2/pkg/apis/duck/strimzi/v1beta2"
-	strimziv1beta2 "github.com/apache/camel-k/v2/pkg/client/strimzi/clientset/internalclientset/typed/strimzi/v1beta2"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/duck/strimzi/v1"
+	strimziv1 "github.com/apache/camel-k/v2/pkg/client/strimzi/clientset/internalclientset/typed/strimzi/v1"
 	gentype "k8s.io/client-go/gentype"
 )
 
 // fakeKafkaTopics implements KafkaTopicInterface
 type fakeKafkaTopics struct {
-	*gentype.FakeClientWithList[*v1beta2.KafkaTopic, *v1beta2.KafkaTopicList]
-	Fake *FakeKafkaV1beta2
+	*gentype.FakeClientWithList[*v1.KafkaTopic, *v1.KafkaTopicList]
+	Fake *FakeKafkaV1
 }
 
-func newFakeKafkaTopics(fake *FakeKafkaV1beta2, namespace string) strimziv1beta2.KafkaTopicInterface {
+func newFakeKafkaTopics(fake *FakeKafkaV1, namespace string) strimziv1.KafkaTopicInterface {
 	return &fakeKafkaTopics{
-		gentype.NewFakeClientWithList[*v1beta2.KafkaTopic, *v1beta2.KafkaTopicList](
+		gentype.NewFakeClientWithList[*v1.KafkaTopic, *v1.KafkaTopicList](
 			fake.Fake,
 			namespace,
-			v1beta2.SchemeGroupVersion.WithResource("kafkatopics"),
-			v1beta2.SchemeGroupVersion.WithKind("KafkaTopic"),
-			func() *v1beta2.KafkaTopic { return &v1beta2.KafkaTopic{} },
-			func() *v1beta2.KafkaTopicList { return &v1beta2.KafkaTopicList{} },
-			func(dst, src *v1beta2.KafkaTopicList) { dst.ListMeta = src.ListMeta },
-			func(list *v1beta2.KafkaTopicList) []*v1beta2.KafkaTopic { return gentype.ToPointerSlice(list.Items) },
-			func(list *v1beta2.KafkaTopicList, items []*v1beta2.KafkaTopic) {
-				list.Items = gentype.FromPointerSlice(items)
-			},
+			v1.SchemeGroupVersion.WithResource("kafkatopics"),
+			v1.SchemeGroupVersion.WithKind("KafkaTopic"),
+			func() *v1.KafkaTopic { return &v1.KafkaTopic{} },
+			func() *v1.KafkaTopicList { return &v1.KafkaTopicList{} },
+			func(dst, src *v1.KafkaTopicList) { dst.ListMeta = src.ListMeta },
+			func(list *v1.KafkaTopicList) []*v1.KafkaTopic { return gentype.ToPointerSlice(list.Items) },
+			func(list *v1.KafkaTopicList, items []*v1.KafkaTopic) { list.Items = gentype.FromPointerSlice(items) },
 		),
 		fake,
 	}
