@@ -22,7 +22,7 @@ import (
 	"testing"
 
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/apis/duck/strimzi/v1beta2"
+	strimziv1 "github.com/apache/camel-k/v2/pkg/apis/duck/strimzi/v1"
 	"github.com/apache/camel-k/v2/pkg/client/strimzi/clientset/internalclientset/fake"
 	"github.com/apache/camel-k/v2/pkg/internal"
 
@@ -70,13 +70,13 @@ func TestStrimziLookup(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	cluster := v1beta2.Kafka{
+	cluster := strimziv1.Kafka{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
 			Name:      "myclusterx",
 		},
-		Status: v1beta2.KafkaStatus{
-			Listeners: []v1beta2.KafkaStatusListener{
+		Status: strimziv1.KafkaStatus{
+			Listeners: []strimziv1.KafkaStatusListener{
 				{
 					Name: "tls",
 				},
@@ -88,12 +88,12 @@ func TestStrimziLookup(t *testing.T) {
 		},
 	}
 
-	topic := v1beta2.KafkaTopic{
+	topic := strimziv1.KafkaTopic{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
 			Name:      "mytopicy",
 			Labels: map[string]string{
-				v1beta2.StrimziKafkaClusterLabel: "myclusterx",
+				strimziv1.StrimziKafkaClusterLabel: "myclusterx",
 			},
 		},
 	}
@@ -130,13 +130,13 @@ func TestStrimziLookupByTopicName(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	cluster := v1beta2.Kafka{
+	cluster := strimziv1.Kafka{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
 			Name:      "myclusterx",
 		},
-		Status: v1beta2.KafkaStatus{
-			Listeners: []v1beta2.KafkaStatusListener{
+		Status: strimziv1.KafkaStatus{
+			Listeners: []strimziv1.KafkaStatusListener{
 				{
 					Name: "tls",
 				},
@@ -148,15 +148,15 @@ func TestStrimziLookupByTopicName(t *testing.T) {
 		},
 	}
 
-	topic := v1beta2.KafkaTopic{
+	topic := strimziv1.KafkaTopic{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
 			Name:      "mytopicy",
 			Labels: map[string]string{
-				v1beta2.StrimziKafkaClusterLabel: "myclusterx",
+				strimziv1.StrimziKafkaClusterLabel: "myclusterx",
 			},
 		},
-		Status: v1beta2.KafkaTopicStatus{
+		Status: strimziv1.KafkaTopicStatus{
 			TopicName: "my-topic-name",
 		},
 	}
@@ -193,13 +193,13 @@ func TestStrimziKafkaCR(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	cluster := v1beta2.Kafka{
+	cluster := strimziv1.Kafka{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
 			Name:      "my-kafka",
 		},
-		Status: v1beta2.KafkaStatus{
-			Listeners: []v1beta2.KafkaStatusListener{
+		Status: strimziv1.KafkaStatus{
+			Listeners: []strimziv1.KafkaStatusListener{
 				{
 					Name: "tls",
 				},
@@ -246,13 +246,13 @@ func TestStrimziPassThrough(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	cluster := v1beta2.Kafka{
+	cluster := strimziv1.Kafka{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
 			Name:      "my-kafka",
 		},
-		Status: v1beta2.KafkaStatus{
-			Listeners: []v1beta2.KafkaStatusListener{
+		Status: strimziv1.KafkaStatus{
+			Listeners: []strimziv1.KafkaStatusListener{
 				{
 					Name: "tls",
 				},

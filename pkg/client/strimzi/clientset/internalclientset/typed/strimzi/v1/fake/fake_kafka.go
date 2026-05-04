@@ -20,29 +20,29 @@ limitations under the License.
 package fake
 
 import (
-	v1beta2 "github.com/apache/camel-k/v2/pkg/apis/duck/strimzi/v1beta2"
-	strimziv1beta2 "github.com/apache/camel-k/v2/pkg/client/strimzi/clientset/internalclientset/typed/strimzi/v1beta2"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/duck/strimzi/v1"
+	strimziv1 "github.com/apache/camel-k/v2/pkg/client/strimzi/clientset/internalclientset/typed/strimzi/v1"
 	gentype "k8s.io/client-go/gentype"
 )
 
 // fakeKafkas implements KafkaInterface
 type fakeKafkas struct {
-	*gentype.FakeClientWithList[*v1beta2.Kafka, *v1beta2.KafkaList]
-	Fake *FakeKafkaV1beta2
+	*gentype.FakeClientWithList[*v1.Kafka, *v1.KafkaList]
+	Fake *FakeKafkaV1
 }
 
-func newFakeKafkas(fake *FakeKafkaV1beta2, namespace string) strimziv1beta2.KafkaInterface {
+func newFakeKafkas(fake *FakeKafkaV1, namespace string) strimziv1.KafkaInterface {
 	return &fakeKafkas{
-		gentype.NewFakeClientWithList[*v1beta2.Kafka, *v1beta2.KafkaList](
+		gentype.NewFakeClientWithList[*v1.Kafka, *v1.KafkaList](
 			fake.Fake,
 			namespace,
-			v1beta2.SchemeGroupVersion.WithResource("kafkas"),
-			v1beta2.SchemeGroupVersion.WithKind("Kafka"),
-			func() *v1beta2.Kafka { return &v1beta2.Kafka{} },
-			func() *v1beta2.KafkaList { return &v1beta2.KafkaList{} },
-			func(dst, src *v1beta2.KafkaList) { dst.ListMeta = src.ListMeta },
-			func(list *v1beta2.KafkaList) []*v1beta2.Kafka { return gentype.ToPointerSlice(list.Items) },
-			func(list *v1beta2.KafkaList, items []*v1beta2.Kafka) { list.Items = gentype.FromPointerSlice(items) },
+			v1.SchemeGroupVersion.WithResource("kafkas"),
+			v1.SchemeGroupVersion.WithKind("Kafka"),
+			func() *v1.Kafka { return &v1.Kafka{} },
+			func() *v1.KafkaList { return &v1.KafkaList{} },
+			func(dst, src *v1.KafkaList) { dst.ListMeta = src.ListMeta },
+			func(list *v1.KafkaList) []*v1.Kafka { return gentype.ToPointerSlice(list.Items) },
+			func(list *v1.KafkaList, items []*v1.Kafka) { list.Items = gentype.FromPointerSlice(items) },
 		),
 		fake,
 	}

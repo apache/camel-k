@@ -44,7 +44,7 @@ $(go env GOPATH)/bin/client-gen \
 	--output-pkg=github.com/apache/camel-k/v2/pkg/client/camel/clientset
 
 $(go env GOPATH)/bin/client-gen \
-  --input strimzi/v1beta2 \
+  --input strimzi/v1 \
   --go-header-file=../../script/headers/default.txt \
   --input-base=github.com/apache/camel-k/v2/pkg/apis/duck \
   --output-dir=./strimzi/clientset/ \

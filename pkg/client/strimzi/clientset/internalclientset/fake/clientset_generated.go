@@ -21,8 +21,8 @@ package fake
 
 import (
 	clientset "github.com/apache/camel-k/v2/pkg/client/strimzi/clientset/internalclientset"
-	kafkav1beta2 "github.com/apache/camel-k/v2/pkg/client/strimzi/clientset/internalclientset/typed/strimzi/v1beta2"
-	fakekafkav1beta2 "github.com/apache/camel-k/v2/pkg/client/strimzi/clientset/internalclientset/typed/strimzi/v1beta2/fake"
+	kafkav1 "github.com/apache/camel-k/v2/pkg/client/strimzi/clientset/internalclientset/typed/strimzi/v1"
+	fakekafkav1 "github.com/apache/camel-k/v2/pkg/client/strimzi/clientset/internalclientset/typed/strimzi/v1/fake"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
@@ -100,7 +100,7 @@ var (
 	_ testing.FakeClient  = &Clientset{}
 )
 
-// KafkaV1beta2 retrieves the KafkaV1beta2Client
-func (c *Clientset) KafkaV1beta2() kafkav1beta2.KafkaV1beta2Interface {
-	return &fakekafkav1beta2.FakeKafkaV1beta2{Fake: &c.Fake}
+// KafkaV1 retrieves the KafkaV1Client
+func (c *Clientset) KafkaV1() kafkav1.KafkaV1Interface {
+	return &fakekafkav1.FakeKafkaV1{Fake: &c.Fake}
 }

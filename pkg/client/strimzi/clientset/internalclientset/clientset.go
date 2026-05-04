@@ -23,7 +23,7 @@ import (
 	fmt "fmt"
 	http "net/http"
 
-	kafkav1beta2 "github.com/apache/camel-k/v2/pkg/client/strimzi/clientset/internalclientset/typed/strimzi/v1beta2"
+	kafkav1 "github.com/apache/camel-k/v2/pkg/client/strimzi/clientset/internalclientset/typed/strimzi/v1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"
@@ -31,18 +31,18 @@ import (
 
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
-	KafkaV1beta2() kafkav1beta2.KafkaV1beta2Interface
+	KafkaV1() kafkav1.KafkaV1Interface
 }
 
 // Clientset contains the clients for groups.
 type Clientset struct {
 	*discovery.DiscoveryClient
-	kafkaV1beta2 *kafkav1beta2.KafkaV1beta2Client
+	kafkaV1 *kafkav1.KafkaV1Client
 }
 
-// KafkaV1beta2 retrieves the KafkaV1beta2Client
-func (c *Clientset) KafkaV1beta2() kafkav1beta2.KafkaV1beta2Interface {
-	return c.kafkaV1beta2
+// KafkaV1 retrieves the KafkaV1Client
+func (c *Clientset) KafkaV1() kafkav1.KafkaV1Interface {
+	return c.kafkaV1
 }
 
 // Discovery retrieves the DiscoveryClient
@@ -89,7 +89,7 @@ func NewForConfigAndClient(c *rest.Config, httpClient *http.Client) (*Clientset,
 
 	var cs Clientset
 	var err error
-	cs.kafkaV1beta2, err = kafkav1beta2.NewForConfigAndClient(&configShallowCopy, httpClient)
+	cs.kafkaV1, err = kafkav1.NewForConfigAndClient(&configShallowCopy, httpClient)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func NewForConfigOrDie(c *rest.Config) *Clientset {
 // New creates a new Clientset for the given RESTClient.
 func New(c rest.Interface) *Clientset {
 	var cs Clientset
-	cs.kafkaV1beta2 = kafkav1beta2.New(c)
+	cs.kafkaV1 = kafkav1.New(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClient(c)
 	return &cs
