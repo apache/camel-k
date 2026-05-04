@@ -5954,6 +5954,8 @@ generic raw message, typically a map containing the keys (trait parameters) and 
 
 TraitProfile represents lists of traits that are enabled for the specific installation/integration.
 
+Deprecated: may be removed in future releases.
+
 
 [#_camel_apache_org_v1_TraitSpec]
 === TraitSpec
