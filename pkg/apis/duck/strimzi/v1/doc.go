@@ -15,13 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package apis
-
-import (
-	"github.com/apache/camel-k/v2/pkg/apis/duck/strimzi/v1beta2"
-)
-
-func init() {
-	// Register the types with the Scheme so the components can map objects to GroupVersionKinds and back
-	AddToSchemes = append(AddToSchemes, v1beta2.SchemeBuilder.AddToScheme)
-}
+// Package v1 contains a partial schema of the Strimzi APIs
+// +kubebuilder:object:generate=true
+// +groupName=kafka.strimzi.io
+package v1
