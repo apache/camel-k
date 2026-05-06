@@ -2811,6 +2811,8 @@ func userCleanup(t *testing.T) {
 
 func invokeUserTestCode(t *testing.T, ctx context.Context, ns string, doRun func(context.Context, *gomega.WithT, string)) {
 	defer func() {
+		// Check for error logs before deleting the test namespace
+		checkOperatorErrorLogs(t, ctx, ns)
 		DumpNamespace(t, ctx, ns)
 		// Also dump the operator namespace in case it's common
 		DumpNamespace(t, ctx, "camel-k")
@@ -2818,6 +2820,11 @@ func invokeUserTestCode(t *testing.T, ctx context.Context, ns string, doRun func
 
 	g := gomega.NewWithT(t)
 	doRun(ctx, g, ns)
+}
+
+func checkOperatorErrorLogs(t *testing.T, ctx context.Context, ns string) {
+	g := gomega.NewWithT(t)
+	g.Expect(OperatorLogs(t, ctx, ns)()).ShouldNot(gomega.ContainSubstring(`"level":"error"`))
 }
 
 func deleteKnativeBroker(t *testing.T, ctx context.Context, ns metav1.Object) {
