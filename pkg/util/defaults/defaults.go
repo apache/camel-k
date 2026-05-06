@@ -23,19 +23,19 @@ package defaults
 
 const (
 	// Version --
-	Version = "2.11.0-SNAPSHOT"
+	Version = "2.11.0-nightly"
 
 	// DefaultRuntimeVersion --
 	DefaultRuntimeVersion = "3.15.3"
 
 	// baseImage --
-	baseImage = "eclipse-temurin:17-jdk@sha256:aae0b1494a5637b2c1b933080088ccc196dec7ffb83ce1cd524211ea4f640ff4"
+	baseImage = "eclipse-temurin:21-jdk"
 
 	// LocalRepository --
 	LocalRepository = "/etc/maven/m2"
 
 	// ImageName --
-	ImageName = "docker.io/apache/camel-k"
+	ImageName = "docker.io/testcamelk/camel-k"
 
 	// OpenShiftRegistryAddress --
 	OpenShiftRegistryAddress = "image-registry.openshift-image-registry.svc:5000"
