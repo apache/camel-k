@@ -239,7 +239,7 @@ func (t *camelTrait) computeUserProperties(e *Environment) []ctrl.Object {
 	var userPropertiesSb238 strings.Builder
 	for _, prop := range e.collectConfigurationPairs("property") {
 		// properties in resource configuration are expected to be pre-encoded using properties format
-		userPropertiesSb238.WriteString(fmt.Sprintf("%s=%s\n", prop.Name, prop.Value))
+		fmt.Fprintf(&userPropertiesSb238, "%s=%s\n", prop.Name, prop.Value)
 	}
 	userProperties += userPropertiesSb238.String()
 
@@ -248,7 +248,7 @@ func (t *camelTrait) computeUserProperties(e *Environment) []ctrl.Object {
 		var userPropertiesSb245 strings.Builder
 		for _, prop := range t.Properties {
 			k, v := property.SplitPropertyFileEntry(prop)
-			userPropertiesSb245.WriteString(fmt.Sprintf("%s=%s\n", k, v))
+			fmt.Fprintf(&userPropertiesSb245, "%s=%s\n", k, v)
 		}
 		userProperties += userPropertiesSb245.String()
 	}

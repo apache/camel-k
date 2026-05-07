@@ -80,7 +80,7 @@ func AppendParameters(uri string, params map[string]string) string {
 	sort.Strings(keys)
 	var uriSb81 strings.Builder
 	for _, k := range keys {
-		uriSb81.WriteString(fmt.Sprintf("%s%s=%s", prefix, url.QueryEscape(k), url.QueryEscape(params[k])))
+		fmt.Fprintf(&uriSb81, "%s%s=%s", prefix, url.QueryEscape(k), url.QueryEscape(params[k]))
 		prefix = "&"
 	}
 	uri += uriSb81.String()

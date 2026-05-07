@@ -145,7 +145,7 @@ func (t *cronTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	}
 
 	if t.Schedule != "" {
-		t.Enabled = ptr.To(true)
+		t.Enabled = new(true)
 	}
 
 	return ptr.Deref(t.Enabled, false), nil, nil
@@ -177,7 +177,7 @@ func (t *cronTrait) autoConfigure(e *Environment) error {
 		}
 		for _, fromURI := range fromURIs {
 			if uri.GetComponent(fromURI) == genericCronComponent {
-				t.Fallback = ptr.To(true)
+				t.Fallback = new(true)
 
 				break
 			}

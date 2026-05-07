@@ -91,7 +91,7 @@ func (t *masterTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		return false, nil, err
 	}
 	if enabled {
-		t.Enabled = ptr.To(enabled)
+		t.Enabled = new(enabled)
 		if t.ResourceName == nil {
 			val := e.Integration.Name + "-lock"
 			t.ResourceName = &val

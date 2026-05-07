@@ -46,6 +46,8 @@ import (
 	util "github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
+const knativeService = "Service"
+
 func CreateSubscription(channelReference corev1.ObjectReference, serviceName string, path string) *messaging.Subscription {
 	return &messaging.Subscription{
 		TypeMeta: metav1.TypeMeta{
@@ -65,7 +67,7 @@ func CreateSubscription(channelReference corev1.ObjectReference, serviceName str
 			Subscriber: &duckv1.Destination{
 				Ref: &duckv1.KReference{
 					APIVersion: serving.SchemeGroupVersion.String(),
-					Kind:       "Service",
+					Kind:       knativeService,
 					Name:       serviceName,
 				},
 				URI: &apis.URL{
@@ -80,7 +82,7 @@ func CreateSubscription(channelReference corev1.ObjectReference, serviceName str
 func CreateServiceTrigger(brokerReference corev1.ObjectReference, serviceName string, eventType string, path string, attributes map[string]string) (*eventing.Trigger, error) {
 	subscriberRef := duckv1.KReference{
 		APIVersion: "v1",
-		Kind:       "Service",
+		Kind:       knativeService,
 		Name:       serviceName,
 	}
 
@@ -91,7 +93,7 @@ func CreateServiceTrigger(brokerReference corev1.ObjectReference, serviceName st
 func CreateKnativeServiceTrigger(brokerReference corev1.ObjectReference, serviceName string, eventType string, path string, attributes map[string]string) (*eventing.Trigger, error) {
 	subscriberRef := duckv1.KReference{
 		APIVersion: serving.SchemeGroupVersion.String(),
-		Kind:       "Service",
+		Kind:       knativeService,
 		Name:       serviceName,
 	}
 
@@ -214,7 +216,7 @@ func getSinkURI(ctx context.Context, c client.Client, sink *corev1.ObjectReferen
 
 	objIdentifier := fmt.Sprintf("\"%s/%s\" (%s)", u.GetNamespace(), u.GetName(), u.GroupVersionKind())
 	// Special case v1/Service allowing it to be addressable
-	if u.GroupVersionKind().Kind == "Service" && u.GroupVersionKind().Group == "" && u.GroupVersionKind().Version == "v1" {
+	if u.GroupVersionKind().Kind == knativeService && u.GroupVersionKind().Group == "" && u.GroupVersionKind().Version == "v1" {
 		return fmt.Sprintf("http://%s.%s.svc/", u.GetName(), u.GetNamespace()), nil
 	}
 

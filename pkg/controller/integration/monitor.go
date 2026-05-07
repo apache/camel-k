@@ -335,7 +335,7 @@ func getIntegrationSecretAndConfigmapResourceVersions(ctx context.Context, clien
 				if conf.StorageType() == utilResource.StorageTypeConfigmap {
 					cm := corev1.ConfigMap{
 						TypeMeta: metav1.TypeMeta{
-							Kind:       "ConfigMap",
+							Kind:       corev1.ResourceConfigMaps.String(),
 							APIVersion: corev1.SchemeGroupVersion.String(),
 						},
 						ObjectMeta: metav1.ObjectMeta{
@@ -347,7 +347,7 @@ func getIntegrationSecretAndConfigmapResourceVersions(ctx context.Context, clien
 				} else if conf.StorageType() == utilResource.StorageTypeSecret {
 					sec := corev1.Secret{
 						TypeMeta: metav1.TypeMeta{
-							Kind:       "Secret",
+							Kind:       corev1.ResourceSecrets.String(),
 							APIVersion: corev1.SchemeGroupVersion.String(),
 						},
 						ObjectMeta: metav1.ObjectMeta{

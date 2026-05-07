@@ -108,10 +108,10 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, *TraitCondition, 
 	}
 
 	if strategy == ControllerStrategyKnativeService {
-		t.Enabled = ptr.To(true)
+		t.Enabled = new(true)
 	} else if e.IntegrationInPhase(v1.IntegrationPhaseRunning, v1.IntegrationPhaseError) {
 		condition := e.Integration.Status.GetCondition(v1.IntegrationConditionKnativeServiceAvailable)
-		t.Enabled = ptr.To(condition != nil && condition.Status == corev1.ConditionTrue)
+		t.Enabled = new(condition != nil && condition.Status == corev1.ConditionTrue)
 	}
 
 	return ptr.Deref(t.Enabled, false), nil, nil

@@ -229,7 +229,7 @@ func (c *CamelCatalogSpec) HasCapability(capability string) bool {
 // GetDependencyID returns a Camel K recognizable maven dependency for the artifact.
 func (in *CamelArtifact) GetDependencyID() string {
 	switch {
-	case in.GroupID == "org.apache.camel.quarkus" && strings.HasPrefix(in.ArtifactID, "camel-quarkus-"):
+	case in.GroupID == MavenQuarkusGroupID && strings.HasPrefix(in.ArtifactID, "camel-quarkus-"):
 		return "camel:" + in.ArtifactID[14:]
 	case in.Version == "":
 		return "mvn:" + in.GroupID + ":" + in.ArtifactID

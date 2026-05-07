@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -128,7 +127,7 @@ func (t *securityContextTrait) getUser(e *Environment) (*int64, error) {
 
 func (t *securityContextTrait) getRunAsNonRoot() *bool {
 	if t.RunAsNonRoot == nil {
-		return ptr.To(defaultPodRunAsNonRoot)
+		return new(defaultPodRunAsNonRoot)
 	}
 
 	return t.RunAsNonRoot

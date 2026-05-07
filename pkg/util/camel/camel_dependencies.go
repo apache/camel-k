@@ -168,7 +168,7 @@ func addCamelComponent(project *maven.Project, catalog *RuntimeCatalog, dependen
 		if !strings.HasPrefix(artifactID, "camel-") {
 			artifactID = "camel-quarkus-" + artifactID
 		}
-		project.AddDependencyGAV("org.apache.camel.quarkus", artifactID, "")
+		project.AddDependencyGAV(v1.MavenQuarkusGroupID, artifactID, "")
 	} else {
 		if !strings.HasPrefix(artifactID, "camel-") {
 			artifactID = "camel-" + artifactID
@@ -190,7 +190,7 @@ func addCamelQuarkusComponent(project *maven.Project, dependency string) {
 	if !strings.HasPrefix(artifactID, "camel-quarkus-") {
 		artifactID = "camel-quarkus-" + artifactID
 	}
-	project.AddDependencyGAV("org.apache.camel.quarkus", artifactID, "")
+	project.AddDependencyGAV(v1.MavenQuarkusGroupID, artifactID, "")
 }
 
 func addMavenDependency(project *maven.Project, dependency string) {
