@@ -230,6 +230,9 @@ func writeFields(t *types.Type, traitID string, content *[]string) {
 	res = append(res, "|Property | Type | Description", "")
 	writeMembers(t, traitID, &res)
 	res = append(res, "|===", "", adocConfigurationMarkerEnd)
+	res = append(res, "")
+	res = append(res, "NOTE: the variable names are \"snake case\" if you're using in `kamel` CLI, for example `trait.myParam` has to be translated as `-t trait.my-param`")
+	res = append(res, "")
 	res = append(res, post...)
 	*content = res
 }
@@ -245,7 +248,14 @@ func writeMembers(t *types.Type, traitID string, content *[]string) {
 		if strings.Contains(prop, "squash") {
 			writeMembers(m.Type, traitID, &res)
 		} else {
-			res = append(res, "| "+traitID+"."+prop)
+			// get the json instead of property
+			json := reflect.StructTag(m.Tags).Get("json")
+			if json == "" {
+				continue
+			}
+			jsonName := strings.Split(json, ",")[0]
+
+			res = append(res, "| "+traitID+"."+jsonName)
 			res = append(res, "| "+strings.TrimPrefix(m.Type.Name.Name, "*"))
 			first := true
 			for _, l := range filterOutTagsAndComments(m.CommentLines) {
