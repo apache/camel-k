@@ -153,7 +153,6 @@ func (r *reconcileIntegrationPlatform) Reconcile(ctx context.Context, request re
 	}
 
 	var targetPhase v1.IntegrationPlatformPhase
-	var err error
 
 	target := instance.DeepCopy()
 	targetLog := rlog.ForIntegrationPlatform(target)
@@ -170,29 +169,29 @@ func (r *reconcileIntegrationPlatform) Reconcile(ctx context.Context, request re
 
 		phaseFrom := target.Status.Phase
 
-		target, err = a.Handle(ctx, target)
+		newTarget, err := a.Handle(ctx, target)
 		if err != nil {
 			camelevent.NotifyError(r.recorder, &instance, target, instance.Name, instance.Kind, err)
 
 			return reconcile.Result{}, err
 		}
 
-		if target != nil {
-			target.Status.ObservedGeneration = instance.Generation
+		if newTarget != nil {
+			newTarget.Status.ObservedGeneration = instance.Generation
 
-			if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(&instance)); err != nil {
-				camelevent.NotifyError(r.recorder, &instance, target, target.Name, target.Kind, err)
+			if err := r.client.Status().Patch(ctx, newTarget, ctrl.MergeFrom(&instance)); err != nil {
+				camelevent.NotifyError(r.recorder, &instance, newTarget, newTarget.Name, newTarget.Kind, err)
 
 				return reconcile.Result{}, err
 			}
 
-			targetPhase = target.Status.Phase
+			targetPhase = newTarget.Status.Phase
 
 			if targetPhase != phaseFrom {
 				targetLog.Info(
 					"State transition",
 					"phase-from", phaseFrom,
-					"phase-to", target.Status.Phase,
+					"phase-to", newTarget.Status.Phase,
 				)
 			}
 		}
