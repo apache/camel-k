@@ -196,7 +196,7 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 
 		newTarget, err := a.Handle(ctx, target)
 		if err != nil {
-			camelevent.NotifyError(r.recorder, &instance, newTarget, instance.Name, instance.Kind, err)
+			camelevent.NotifyError(r.recorder, &instance, target, instance.Name, instance.Kind, err)
 
 			return reconcile.Result{}, err
 		}

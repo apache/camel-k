@@ -21,32 +21,10 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/apache/camel-k/v2/pkg/internal"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
-
-// fakeRecorder implements events.EventRecorder and captures calls.
-type fakeRecorder struct {
-	called    bool
-	obj       runtime.Object
-	eventtype string
-	reason    string
-	action    string
-	message   string
-}
-
-func (f *fakeRecorder) Eventf(obj runtime.Object, old runtime.Object, eventtype, reason, action, note string, args ...interface{}) {
-	f.called = true
-	f.obj = obj
-	f.eventtype = eventtype
-	f.reason = reason
-	f.action = action
-	f.message = fmt.Sprintf(note, args...)
-}
-
-// Unused but required to satisfy interface
-func (f *fakeRecorder) Event(obj runtime.Object, old runtime.Object, eventtype, reason, action, note string) {
-}
 
 func TestNotifyError(t *testing.T) {
 	err := fmt.Errorf("boom")
@@ -86,37 +64,37 @@ func TestNotifyError(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rec := &fakeRecorder{}
+			rec := &internal.FakeRecorder{}
 
 			NotifyError(rec, tt.old, tt.new, "my-name", "MyKind", err)
 
-			if tt.expectCalled != rec.called {
-				t.Fatalf("expected called=%v, got %v", tt.expectCalled, rec.called)
+			if tt.expectCalled != rec.Called {
+				t.Fatalf("expected called=%v, got %v", tt.expectCalled, rec.Called)
 			}
 
 			if !tt.expectCalled {
 				return
 			}
 
-			if rec.obj != tt.expectedObj {
-				t.Errorf("expected object %v, got %v", tt.expectedObj, rec.obj)
+			if rec.Obj != tt.expectedObj {
+				t.Errorf("expected object %v, got %v", tt.expectedObj, rec.Obj)
 			}
 
-			if rec.eventtype != corev1.EventTypeWarning {
-				t.Errorf("expected event type %s, got %s", corev1.EventTypeWarning, rec.eventtype)
+			if rec.Eventtype != corev1.EventTypeWarning {
+				t.Errorf("expected event type %s, got %s", corev1.EventTypeWarning, rec.Eventtype)
 			}
 
-			if rec.reason != "MyKindError" {
-				t.Errorf("unexpected reason: %s", rec.reason)
+			if rec.Reason != "MyKindError" {
+				t.Errorf("unexpected reason: %s", rec.Reason)
 			}
 
-			if rec.action != "MyKindReconciliation" {
-				t.Errorf("unexpected action: %s", rec.action)
+			if rec.Action != "MyKindReconciliation" {
+				t.Errorf("unexpected action: %s", rec.Action)
 			}
 
 			expectedMsg := "Cannot reconcile MyKind my-name: boom"
-			if rec.message != expectedMsg {
-				t.Errorf("expected message %q, got %q", expectedMsg, rec.message)
+			if rec.Message != expectedMsg {
+				t.Errorf("expected message %q, got %q", expectedMsg, rec.Message)
 			}
 		})
 	}
