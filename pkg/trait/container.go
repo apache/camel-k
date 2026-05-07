@@ -93,7 +93,7 @@ func (t *containerTrait) Configure(e *Environment) (bool, *TraitCondition, error
 	if ptr.Deref(t.Auto, true) {
 		if t.Expose == nil {
 			if e.Resources.GetServiceForIntegration(e.Integration) != nil {
-				t.Expose = ptr.To(true)
+				t.Expose = new(true)
 			}
 		}
 	}
@@ -420,7 +420,7 @@ func (t *containerTrait) getContainerName() string {
 
 func (t *containerTrait) getRunAsNonRoot() *bool {
 	if t.RunAsNonRoot == nil {
-		return ptr.To(defaultContainerRunAsNonRoot)
+		return new(defaultContainerRunAsNonRoot)
 	}
 
 	return t.RunAsNonRoot
@@ -436,7 +436,7 @@ func (t *containerTrait) getSeccompProfileType() corev1.SeccompProfileType {
 
 func (t *containerTrait) getAllowPrivilegeEscalation() *bool {
 	if t.AllowPrivilegeEscalation == nil {
-		return ptr.To(defaultContainerAllowPrivilegeEscalation)
+		return new(defaultContainerAllowPrivilegeEscalation)
 	}
 
 	return t.AllowPrivilegeEscalation

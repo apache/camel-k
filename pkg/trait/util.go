@@ -360,7 +360,6 @@ func ExtractAndMaybeDeleteTraits(c client.Client, annotations map[string]string,
 // return an array with the values or with the single value passed as a parameter.
 func extractAsArray(value string) []string {
 	if strings.HasPrefix(value, "[") && strings.HasSuffix(value, "]") {
-		//nolint: prealloc // cannot prealloc as SplitSeq is an iterator
 		var arrayValue []string
 		data := value[1 : len(value)-1]
 		vals := strings.SplitSeq(data, ",")

@@ -20,6 +20,7 @@ package camel
 import (
 	"testing"
 
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -53,7 +54,7 @@ func TestRuntimeContainsEmbeddedArtifacts(t *testing.T) {
 
 	artifact := catalog.GetArtifactByScheme("knative")
 	assert.Equal(t, 1, len(artifact.Schemes))
-	assert.Equal(t, "org.apache.camel.quarkus", artifact.GroupID)
+	assert.Equal(t, v1.MavenQuarkusGroupID, artifact.GroupID)
 	assert.Equal(t, "camel-quarkus-knative", artifact.ArtifactID)
 
 	scheme, found := catalog.GetScheme("knative")

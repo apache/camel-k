@@ -31,7 +31,7 @@ func GetClusterTypeServiceURI(svc *corev1.Service) string {
 loop:
 	for _, port := range svc.Spec.Ports {
 		if port.Port != 80 { // Assuming HTTP default port
-			urlSb30.WriteString(fmt.Sprintf(":%d", port.Port))
+			fmt.Fprintf(&urlSb30, ":%d", port.Port)
 
 			break loop
 		}

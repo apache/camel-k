@@ -34,6 +34,7 @@ import (
 )
 
 const (
+	serviceKind       = "Service"
 	serviceTraitID    = "service"
 	serviceTraitOrder = 1500
 )
@@ -65,7 +66,7 @@ func (t *serviceTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	}
 	if !ptr.Deref(t.Enabled, true) {
 		return false, NewIntegrationCondition(
-			"Service",
+			serviceKind,
 			v1.IntegrationConditionServiceAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionServiceNotAvailableReason,
@@ -77,7 +78,7 @@ func (t *serviceTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	if e.GetTrait(knativeServiceTraitID) != nil {
 		knativeServiceTrait, _ := e.GetTrait(knativeServiceTraitID).(*knativeServiceTrait)
 		if ptr.Deref(knativeServiceTrait.Enabled, true) {
-			return false, NewIntegrationConditionPlatformDisabledWithMessage("Service", "knative-service trait has priority over this trait"), nil
+			return false, NewIntegrationConditionPlatformDisabledWithMessage(serviceKind, "knative-service trait has priority over this trait"), nil
 		}
 	}
 
@@ -92,7 +93,7 @@ func (t *serviceTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 		var condition *TraitCondition
 		if err != nil {
 			condition = NewIntegrationCondition(
-				"Service",
+				serviceKind,
 				v1.IntegrationConditionServiceAvailable,
 				corev1.ConditionFalse,
 				v1.IntegrationConditionServiceNotAvailableReason,
@@ -102,7 +103,7 @@ func (t *serviceTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 			return false, condition, err
 		}
 
-		t.Enabled = ptr.To(exposeHTTPServices)
+		t.Enabled = new(exposeHTTPServices)
 	}
 
 	servicePorts, err := t.parseServicePorts()

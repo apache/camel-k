@@ -188,7 +188,7 @@ func (t *ingressTrait) getPaths(service *corev1.Service) []networkingv1.HTTPIngr
 
 func (t *ingressTrait) getPathType() *networkingv1.PathType {
 	if t.PathType == nil {
-		return ptr.To(defaultPathTypePrefix)
+		return new(defaultPathTypePrefix)
 	}
 
 	return t.PathType

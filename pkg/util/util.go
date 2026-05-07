@@ -488,8 +488,8 @@ func ConfigTreePropertySplit(property string) []string {
 		if len(cur) > 0 {
 			tmp = append(tmp, cur)
 		}
-		for i := len(tmp) - 1; i >= 0; i-- {
-			res = append(res, tmp[i])
+		for _, v := range slices.Backward(tmp) {
+			res = append(res, v)
 		}
 	}
 

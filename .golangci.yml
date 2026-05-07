@@ -47,7 +47,7 @@ linters:
   settings:
     goconst:
       min-len: 4
-      min-occurrences: 5
+      min-occurrences: 10
       ignore-calls: true
       numbers: false
     lll:

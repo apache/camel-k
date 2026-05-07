@@ -243,7 +243,7 @@ func (action *monitorAction) addPlainQuarkusCatalog(ctx context.Context, catalog
 		clonedCatalog.Spec.Runtime.Provider = v1.RuntimeProviderPlainQuarkus
 		clonedCatalog.Spec.Runtime.Dependencies = []v1.MavenArtifact{
 			{
-				GroupID:    "org.apache.camel.quarkus",
+				GroupID:    v1.MavenQuarkusGroupID,
 				ArtifactID: "camel-quarkus-core",
 			},
 		}
@@ -254,7 +254,7 @@ func (action *monitorAction) addPlainQuarkusCatalog(ctx context.Context, catalog
 			clonedCatalog.Spec.Runtime.Capabilities["knative"] = v1.Capability{
 				Dependencies: []v1.MavenArtifact{
 					{
-						GroupID:    "org.apache.camel.quarkus",
+						GroupID:    v1.MavenQuarkusGroupID,
 						ArtifactID: "camel-quarkus-knative",
 					},
 				},
@@ -263,15 +263,15 @@ func (action *monitorAction) addPlainQuarkusCatalog(ctx context.Context, catalog
 			clonedCatalog.Spec.Runtime.Capabilities["master"] = v1.Capability{
 				Dependencies: []v1.MavenArtifact{
 					{
-						GroupID:    "org.apache.camel.quarkus",
+						GroupID:    v1.MavenQuarkusGroupID,
 						ArtifactID: "camel-quarkus-master",
 					},
 					{
-						GroupID:    "org.apache.camel.quarkus",
+						GroupID:    v1.MavenQuarkusGroupID,
 						ArtifactID: "camel-quarkus-kubernetes",
 					},
 					{
-						GroupID:    "org.apache.camel.quarkus",
+						GroupID:    v1.MavenQuarkusGroupID,
 						ArtifactID: "camel-quarkus-kubernetes-cluster-service",
 					},
 				},
@@ -283,11 +283,11 @@ func (action *monitorAction) addPlainQuarkusCatalog(ctx context.Context, catalog
 			clonedCatalog.Spec.Runtime.Capabilities["jolokia"] = v1.Capability{
 				Dependencies: []v1.MavenArtifact{
 					{
-						GroupID:    "org.apache.camel.quarkus",
+						GroupID:    v1.MavenQuarkusGroupID,
 						ArtifactID: "camel-quarkus-jaxb",
 					},
 					{
-						GroupID:    "org.apache.camel.quarkus",
+						GroupID:    v1.MavenQuarkusGroupID,
 						ArtifactID: "camel-quarkus-management",
 					},
 					{

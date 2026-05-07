@@ -115,7 +115,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 		hasKnativeEndpoint := len(t.ChannelSources) > 0 || len(t.ChannelSinks) > 0 ||
 			len(t.EndpointSources) > 0 || len(t.EndpointSinks) > 0 ||
 			len(t.EventSources) > 0 || len(t.EventSinks) > 0
-		t.Enabled = ptr.To(hasKnativeEndpoint)
+		t.Enabled = new(hasKnativeEndpoint)
 	}
 
 	if ptr.Deref(t.Enabled, false) {

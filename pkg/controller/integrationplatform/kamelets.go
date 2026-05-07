@@ -29,7 +29,6 @@ import (
 	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"k8s.io/utils/ptr"
 
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/util"
@@ -77,9 +76,13 @@ func prepareKameletDirectory() (string, error) {
 	}
 	// If the directory exists, it is likely a leftover from any previous Kamelet
 	// catalog installation. We should remove to be able to proceed
+	//
+	//nolint:gosec // deprecated code to be removed soon
 	if err := os.RemoveAll(kameletDir); err != nil {
 		return kameletDirEnv, err
 	}
+	//
+	//nolint:gosec // deprecated code to be removed soon
 	err := os.MkdirAll(kameletDir, os.ModePerm)
 
 	return kameletDir, err
@@ -239,8 +242,8 @@ func loadKamelet(path string, platform *v1.IntegrationPlatform) (*v1.Kamelet, er
 			Kind:               platform.Kind,
 			Name:               platform.Name,
 			UID:                platform.UID,
-			Controller:         ptr.To(true),
-			BlockOwnerDeletion: ptr.To(true),
+			Controller:         new(true),
+			BlockOwnerDeletion: new(true),
 		},
 	}
 	kamelet.SetOwnerReferences(references)

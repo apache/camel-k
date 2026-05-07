@@ -28,7 +28,6 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/utils/ptr"
 )
 
 // IsOpenShift returns true if we are connected to a OpenShift cluster.
@@ -88,11 +87,11 @@ func GetOpenshiftSecurityContextRestricted(ctx context.Context, client kubernete
 
 	sc := corev1.SecurityContext{
 		RunAsUser:    uid,
-		RunAsNonRoot: ptr.To(true),
+		RunAsNonRoot: new(true),
 		SeccompProfile: &corev1.SeccompProfile{
 			Type: corev1.SeccompProfileTypeRuntimeDefault,
 		},
-		AllowPrivilegeEscalation: ptr.To(false),
+		AllowPrivilegeEscalation: new(false),
 		Capabilities:             &corev1.Capabilities{Drop: []corev1.Capability{"ALL"}},
 	}
 

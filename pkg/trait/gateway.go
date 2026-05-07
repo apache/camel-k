@@ -162,7 +162,7 @@ func buildHTTPRoute(routeName, gatewayName, serviceName, namespace string, servi
 					BackendRef: gwv1.BackendRef{
 						BackendObjectReference: gwv1.BackendObjectReference{
 							Name: gwv1.ObjectName(serviceName),
-							Port: ptr.To(p),
+							Port: new(p),
 						},
 					},
 				},
