@@ -79,4 +79,7 @@ One of `Exact`, `Prefix`, `ImplementationSpecific` (default to `Prefix`).
 NOTE: the variable names are "snake case" if you're using in `kamel` CLI, for example `trait.myParam` has to be translated as `-t trait.my-param`
 
 
+NOTE: the variable names are "snake case" if you're using in `kamel` CLI, for example `trait.myParam` has to be translated as `-t trait.my-param`
+
+
 NOTE: the variables names are "snake case" if you're using in `kamel` CLI, for example `trait.myParam` has to be translated as `-t trait.my-param`

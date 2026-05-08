@@ -133,6 +133,9 @@ if you need to execute them. Useful only with `pod` strategy.
 NOTE: the variable names are "snake case" if you're using in `kamel` CLI, for example `trait.myParam` has to be translated as `-t trait.my-param`
 
 
+NOTE: the variable names are "snake case" if you're using in `kamel` CLI, for example `trait.myParam` has to be translated as `-t trait.my-param`
+
+
 NOTE: the variables names are "snake case" if you're using in `kamel` CLI, for example `trait.myParam` has to be translated as `-t trait.my-param`
 
 
