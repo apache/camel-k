@@ -229,10 +229,11 @@ func writeFields(t *types.Type, traitID string, content *[]string) {
 	res = append(res, "[cols=\"2m,1m,5a\"]", "|===")
 	res = append(res, "|Property | Type | Description", "")
 	writeMembers(t, traitID, &res)
-	res = append(res, "|===", "", adocConfigurationMarkerEnd)
+	res = append(res, "|===")
 	res = append(res, "")
 	res = append(res, "NOTE: the variable names are \"snake case\" if you're using in `kamel` CLI, for example `trait.myParam` has to be translated as `-t trait.my-param`")
 	res = append(res, "")
+	res = append(res, "", adocConfigurationMarkerEnd)
 	res = append(res, post...)
 	*content = res
 }
