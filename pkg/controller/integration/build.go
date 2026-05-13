@@ -122,7 +122,6 @@ func (action *buildAction) createBuild(ctx context.Context, it *v1.Integration) 
 	// The build operation, when executed as a Pod, should be executed by a container image containing the
 	// `kamel builder` command. Likely the same image running the operator should be fine.
 	buildConfig.ToolImage = platform.OperatorImage
-	buildConfig.BuilderPodNamespace = it.Namespace
 	v1.SetBuilderConfigurationTasks(env.Pipeline, buildConfig)
 
 	// We need to ensure the presence of the camel-k-builder service account
