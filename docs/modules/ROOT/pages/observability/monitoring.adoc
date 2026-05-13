@@ -1,14 +1,16 @@
 [[monitoring]]
-= Camel K Monitoring
+= Camel K Operator Monitoring
 
-The Camel K monitoring architecture relies on https://prometheus.io[Prometheus] and the eponymous operator.
+The Camel K Operator monitoring architecture relies on https://prometheus.io[Prometheus] and the eponymous operator.
 
 The https://prometheus-operator.dev[Prometheus Operator] serves to make running Prometheus on top of Kubernetes as easy as possible, while preserving Kubernetes-native configuration options.
+
+NOTE: the Camel K Integration monitoring part is deprecated in favour of xref:observability/dashboard.adoc[Camel Dashboard].
 
 [[prerequisites]]
 == Prerequisites
 
-To take full advantage of the Camel K monitoring capabilities, it is recommended to have a Prometheus Operator instance, that can be configured to integrate the Camel K operator and integrations.
+To take full advantage of the Camel K operator monitoring capabilities, it is recommended to have a Prometheus Operator instance, that can be configured to integrate the Camel K operator and integrations.
 
 [[kubernetes]]
 === Kubernetes
@@ -22,7 +24,7 @@ Alternatively, you can quickly deploy the Prometheus operator by running:
 $ kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/bundle.yaml
 ----
 
-WARNING: Beware this installs the operator in the `default` namespace. You must download the file locally and replace the `namespace` fields to deploy the resources into another namespace. This also installs the version from the `main` branch, which you can change in the URL by choosing a stable release version.
+NOTE: the above script installs the operator in the `default` namespace. You must download the file locally and replace the `namespace` fields to deploy the resources into another namespace. This also installs the version from the `main` branch, which you can change in the URL by choosing a stable release version.
 
 Then, you can create a `Prometheus` resource, that the operator will use as configuration to deploy a managed Prometheus instance:
 
