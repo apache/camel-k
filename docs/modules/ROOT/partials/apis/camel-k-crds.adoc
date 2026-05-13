@@ -604,6 +604,8 @@ string
 
 The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
 
+Deprecated: no longer in use.
+
 |`strategy` +
 *xref:#_camel_apache_org_v1_BuildStrategy[BuildStrategy]*
 |

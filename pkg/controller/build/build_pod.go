@@ -50,7 +50,7 @@ func newBuildPod(ctx context.Context, client client.Client, build *v1.Build) *co
 		// get pod security context from security context constraint configuration in namespace
 		//nolint:staticcheck
 		if task.S2i != nil {
-			podSecurityContextConstrained, _ := openshift.GetOpenshiftPodSecurityContextRestricted(ctx, client, build.BuilderPodNamespace())
+			podSecurityContextConstrained, _ := openshift.GetOpenshiftPodSecurityContextRestricted(ctx, client, build.Namespace)
 			if podSecurityContextConstrained != nil {
 				podSecurityContext = podSecurityContextConstrained
 			}
@@ -62,7 +62,7 @@ func newBuildPod(ctx context.Context, client client.Client, build *v1.Build) *co
 			Kind:       "Pod",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: build.BuilderPodNamespace(),
+			Namespace: build.Namespace,
 			Name:      buildPodName(build),
 			Labels: map[string]string{
 				"camel.apache.org/build":     build.Name,
@@ -151,7 +151,7 @@ func deleteBuilderPod(ctx context.Context, c ctrl.Writer, build *v1.Build) error
 			Kind:       "Pod",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: build.BuilderPodNamespace(),
+			Namespace: build.Namespace,
 			Name:      buildPodName(build),
 		},
 	}
@@ -166,7 +166,7 @@ func deleteBuilderPod(ctx context.Context, c ctrl.Writer, build *v1.Build) error
 
 func getBuilderPod(ctx context.Context, c ctrl.Reader, build *v1.Build) (*corev1.Pod, error) {
 	pod := corev1.Pod{}
-	err := c.Get(ctx, ctrl.ObjectKey{Namespace: build.BuilderPodNamespace(), Name: buildPodName(build)}, &pod)
+	err := c.Get(ctx, ctrl.ObjectKey{Namespace: build.Namespace, Name: buildPodName(build)}, &pod)
 	if err != nil && k8serrors.IsNotFound(err) {
 		return nil, nil
 	}
@@ -222,7 +222,7 @@ func addBuildTaskToPod(ctx context.Context, client client.Client, build *v1.Buil
 
 	// get security context from security context constraint configuration in namespace
 	if taskName == "s2i" {
-		securityContextConstrained, _ := openshift.GetOpenshiftSecurityContextRestricted(ctx, client, build.BuilderPodNamespace())
+		securityContextConstrained, _ := openshift.GetOpenshiftSecurityContextRestricted(ctx, client, build.Namespace)
 		if securityContextConstrained != nil {
 			container.SecurityContext = securityContextConstrained
 		}

@@ -31,7 +31,9 @@ type BuildConfigurationApplyConfiguration struct {
 	// The container image to be used to run the build.
 	ToolImage *string `json:"toolImage,omitempty"`
 	// The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-	BuilderPodNamespace *string `json:"operatorNamespace,omitempty"`
+	//
+	// Deprecated: no longer in use.
+	DeprecatedBuilderPodNamespace *string `json:"operatorNamespace,omitempty"`
 	// the strategy to adopt
 	Strategy *camelv1.BuildStrategy `json:"strategy,omitempty"`
 	// the build order strategy to adopt
@@ -66,11 +68,11 @@ func (b *BuildConfigurationApplyConfiguration) WithToolImage(value string) *Buil
 	return b
 }
 
-// WithBuilderPodNamespace sets the BuilderPodNamespace field in the declarative configuration to the given value
+// WithDeprecatedBuilderPodNamespace sets the DeprecatedBuilderPodNamespace field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the BuilderPodNamespace field is set to the value of the last call.
-func (b *BuildConfigurationApplyConfiguration) WithBuilderPodNamespace(value string) *BuildConfigurationApplyConfiguration {
-	b.BuilderPodNamespace = &value
+// If called multiple times, the DeprecatedBuilderPodNamespace field is set to the value of the last call.
+func (b *BuildConfigurationApplyConfiguration) WithDeprecatedBuilderPodNamespace(value string) *BuildConfigurationApplyConfiguration {
+	b.DeprecatedBuilderPodNamespace = &value
 	return b
 }
 
