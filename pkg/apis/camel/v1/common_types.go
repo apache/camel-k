@@ -49,7 +49,9 @@ type BuildConfiguration struct {
 	// The container image to be used to run the build.
 	ToolImage string `json:"toolImage,omitempty"`
 	// The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-	BuilderPodNamespace string `json:"operatorNamespace,omitempty"`
+	//
+	// Deprecated: no longer in use.
+	DeprecatedBuilderPodNamespace string `json:"operatorNamespace,omitempty"`
 	// the strategy to adopt
 	Strategy BuildStrategy `json:"strategy,omitempty" property:"strategy"`
 	// the build order strategy to adopt
