@@ -144,14 +144,17 @@ func TestRunBuildOrderStrategyFIFO(t *testing.T) {
 		g.Eventually(IntegrationKit(t, ctx, ns, integrationZ)).ShouldNot(BeNil())
 
 		integrationKitNameA := IntegrationKit(t, ctx, ns, integrationA)()
+		g.Eventually(Build(t, ctx, ns, integrationKitNameA)).ShouldNot(BeNil())
 		g.Eventually(BuildPhase(t, ctx, ns, integrationKitNameA), TestTimeoutShort).Should(Equal(v1.BuildPhaseRunning))
 
 		g.Eventually(IntegrationPhase(t, ctx, ns, integrationB)).Should(Equal(v1.IntegrationPhaseBuildingKit))
 		integrationKitNameB := IntegrationKit(t, ctx, ns, integrationB)()
+		g.Eventually(Build(t, ctx, ns, integrationKitNameB)).ShouldNot(BeNil())
 		g.Eventually(BuildPhase(t, ctx, ns, integrationKitNameB), TestTimeoutShort).Should(Equal(v1.BuildPhaseRunning))
 
 		g.Eventually(IntegrationPhase(t, ctx, ns, integrationZ)).Should(Equal(v1.IntegrationPhaseBuildingKit))
 		integrationKitNameZ := IntegrationKit(t, ctx, ns, integrationZ)()
+		g.Eventually(Build(t, ctx, ns, integrationKitNameZ)).ShouldNot(BeNil())
 		g.Eventually(BuildPhase(t, ctx, ns, integrationKitNameZ), TestTimeoutShort).Should(Equal(v1.BuildPhaseRunning))
 
 		g.Eventually(BuildPhase(t, ctx, ns, integrationKitNameA), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
