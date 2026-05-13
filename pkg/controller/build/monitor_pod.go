@@ -33,7 +33,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes/log"
 )
@@ -69,25 +68,13 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		return nil, err
 	}
 
-	//nolint:nestif
 	if pod == nil {
 		switch build.Status.Phase {
 		case v1.BuildPhasePending:
 			pod = newBuildPod(ctx, action.client, build)
-			// If the Builder Pod is in the Build namespace, we can set the ownership to it. If not (global operator mode)
-			// we set the ownership to the Operator Pod instead
-			var owner metav1.Object
-			owner = build
-			if build.Namespace != pod.Namespace {
-				operatorPod := platform.GetOperatorPod(ctx, action.client, pod.Namespace)
-				if operatorPod != nil {
-					owner = operatorPod
-				}
-			}
-			if err = controllerutil.SetControllerReference(owner, pod, action.client.GetScheme()); err != nil {
+			if err = controllerutil.SetControllerReference(build, pod, action.client.GetScheme()); err != nil {
 				return nil, err
 			}
-
 			if err = action.client.Create(ctx, pod); err != nil {
 				return nil, fmt.Errorf("cannot create build pod: %w", err)
 			}

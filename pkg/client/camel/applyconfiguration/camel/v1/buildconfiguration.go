@@ -26,17 +26,30 @@ import (
 // BuildConfigurationApplyConfiguration represents a declarative configuration of the BuildConfiguration type for use
 // with apply.
 type BuildConfigurationApplyConfiguration struct {
-	ToolImage           *string                     `json:"toolImage,omitempty"`
-	BuilderPodNamespace *string                     `json:"operatorNamespace,omitempty"`
-	Strategy            *camelv1.BuildStrategy      `json:"strategy,omitempty"`
-	OrderStrategy       *camelv1.BuildOrderStrategy `json:"orderStrategy,omitempty"`
-	RequestCPU          *string                     `json:"requestCPU,omitempty"`
-	RequestMemory       *string                     `json:"requestMemory,omitempty"`
-	LimitCPU            *string                     `json:"limitCPU,omitempty"`
-	LimitMemory         *string                     `json:"limitMemory,omitempty"`
-	NodeSelector        map[string]string           `json:"nodeSelector,omitempty"`
-	Annotations         map[string]string           `json:"annotations,omitempty"`
-	ImagePlatforms      []string                    `json:"platforms,omitempty"`
+	// The container image to be used to run the build.
+	ToolImage *string `json:"toolImage,omitempty"`
+	// The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
+	//
+	// Deprecated: no longer in use.
+	DeprecatedBuilderPodNamespace *string `json:"operatorNamespace,omitempty"`
+	// the strategy to adopt
+	Strategy *camelv1.BuildStrategy `json:"strategy,omitempty"`
+	// the build order strategy to adopt
+	OrderStrategy *camelv1.BuildOrderStrategy `json:"orderStrategy,omitempty"`
+	// The minimum amount of CPU required. Only used for `pod` strategy
+	RequestCPU *string `json:"requestCPU,omitempty"`
+	// The minimum amount of memory required. Only used for `pod` strategy
+	RequestMemory *string `json:"requestMemory,omitempty"`
+	// The maximum amount of CPU required. Only used for `pod` strategy
+	LimitCPU *string `json:"limitCPU,omitempty"`
+	// The maximum amount of memory required. Only used for `pod` strategy
+	LimitMemory *string `json:"limitMemory,omitempty"`
+	// The node selector for the builder pod. Only used for `pod` strategy
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+	// Annotation to use for the builder pod. Only used for `pod` strategy
+	Annotations map[string]string `json:"annotations,omitempty"`
+	// The list of platforms used in order to build a container image.
+	ImagePlatforms []string `json:"platforms,omitempty"`
 }
 
 // BuildConfigurationApplyConfiguration constructs a declarative configuration of the BuildConfiguration type for use with
@@ -53,11 +66,11 @@ func (b *BuildConfigurationApplyConfiguration) WithToolImage(value string) *Buil
 	return b
 }
 
-// WithBuilderPodNamespace sets the BuilderPodNamespace field in the declarative configuration to the given value
+// WithDeprecatedBuilderPodNamespace sets the DeprecatedBuilderPodNamespace field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the BuilderPodNamespace field is set to the value of the last call.
-func (b *BuildConfigurationApplyConfiguration) WithBuilderPodNamespace(value string) *BuildConfigurationApplyConfiguration {
-	b.BuilderPodNamespace = &value
+// If called multiple times, the DeprecatedBuilderPodNamespace field is set to the value of the last call.
+func (b *BuildConfigurationApplyConfiguration) WithDeprecatedBuilderPodNamespace(value string) *BuildConfigurationApplyConfiguration {
+	b.DeprecatedBuilderPodNamespace = &value
 	return b
 }
 
