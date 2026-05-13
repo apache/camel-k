@@ -26,17 +26,17 @@ import (
 // BuildConfigurationApplyConfiguration represents a declarative configuration of the BuildConfiguration type for use
 // with apply.
 type BuildConfigurationApplyConfiguration struct {
-	ToolImage           *string                     `json:"toolImage,omitempty"`
-	BuilderPodNamespace *string                     `json:"operatorNamespace,omitempty"`
-	Strategy            *camelv1.BuildStrategy      `json:"strategy,omitempty"`
-	OrderStrategy       *camelv1.BuildOrderStrategy `json:"orderStrategy,omitempty"`
-	RequestCPU          *string                     `json:"requestCPU,omitempty"`
-	RequestMemory       *string                     `json:"requestMemory,omitempty"`
-	LimitCPU            *string                     `json:"limitCPU,omitempty"`
-	LimitMemory         *string                     `json:"limitMemory,omitempty"`
-	NodeSelector        map[string]string           `json:"nodeSelector,omitempty"`
-	Annotations         map[string]string           `json:"annotations,omitempty"`
-	ImagePlatforms      []string                    `json:"platforms,omitempty"`
+	ToolImage                     *string                     `json:"toolImage,omitempty"`
+	DeprecatedBuilderPodNamespace *string                     `json:"operatorNamespace,omitempty"`
+	Strategy                      *camelv1.BuildStrategy      `json:"strategy,omitempty"`
+	OrderStrategy                 *camelv1.BuildOrderStrategy `json:"orderStrategy,omitempty"`
+	RequestCPU                    *string                     `json:"requestCPU,omitempty"`
+	RequestMemory                 *string                     `json:"requestMemory,omitempty"`
+	LimitCPU                      *string                     `json:"limitCPU,omitempty"`
+	LimitMemory                   *string                     `json:"limitMemory,omitempty"`
+	NodeSelector                  map[string]string           `json:"nodeSelector,omitempty"`
+	Annotations                   map[string]string           `json:"annotations,omitempty"`
+	ImagePlatforms                []string                    `json:"platforms,omitempty"`
 }
 
 // BuildConfigurationApplyConfiguration constructs a declarative configuration of the BuildConfiguration type for use with
@@ -53,11 +53,11 @@ func (b *BuildConfigurationApplyConfiguration) WithToolImage(value string) *Buil
 	return b
 }
 
-// WithBuilderPodNamespace sets the BuilderPodNamespace field in the declarative configuration to the given value
+// WithDeprecatedBuilderPodNamespace sets the DeprecatedBuilderPodNamespace field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the BuilderPodNamespace field is set to the value of the last call.
-func (b *BuildConfigurationApplyConfiguration) WithBuilderPodNamespace(value string) *BuildConfigurationApplyConfiguration {
-	b.BuilderPodNamespace = &value
+// If called multiple times, the DeprecatedBuilderPodNamespace field is set to the value of the last call.
+func (b *BuildConfigurationApplyConfiguration) WithDeprecatedBuilderPodNamespace(value string) *BuildConfigurationApplyConfiguration {
+	b.DeprecatedBuilderPodNamespace = &value
 	return b
 }
 
