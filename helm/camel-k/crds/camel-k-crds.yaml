@@ -22518,9 +22518,12 @@ spec:
                         the transition.
                       type: string
                     pods:
-                      description: Pods collect health and conditions information
-                        from the owned PODs
+                      description: |-
+                        DeprecatedPods collect health and conditions information from the owned PODs
+
+                        Deprecated: may be removed in future releases.
                       items:
+                        description: 'Deprecated: may be removed in future releases.'
                         properties:
                           condition:
                             description: PodCondition contains details for the current
@@ -37786,6 +37789,7 @@ spec:
                       description: Pods collect health and conditions information
                         from the owned PODs
                       items:
+                        description: 'Deprecated: may be removed in future releases.'
                         properties:
                           condition:
                             description: PodCondition contains details for the current

@@ -17,6 +17,9 @@ limitations under the License.
 
 package trait
 
+// WARNING: The Prometheus trait is **deprecated** and will removed in future release versions:
+// use Camel Monitor operator (https://camel-tooling.github.io/camel-dashboard/docs/installation-guide/advanced/operator/) instead.
+//
 // The Prometheus trait configures a Prometheus-compatible endpoint. It also creates a `PodMonitor` resource,
 // so that the endpoint can be scraped automatically, when using the Prometheus operator.
 //
@@ -31,6 +34,7 @@ package trait
 // The Prometheus trait is disabled by default.
 //
 // +camel-k:trait=prometheus.
+// +camel-k:deprecated=2.11.0.
 //
 //nolint:godoclint
 type PrometheusTrait struct {

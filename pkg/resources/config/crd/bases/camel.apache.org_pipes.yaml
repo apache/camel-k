@@ -11644,6 +11644,7 @@ spec:
                       description: Pods collect health and conditions information
                         from the owned PODs
                       items:
+                        description: 'Deprecated: may be removed in future releases.'
                         properties:
                           condition:
                             description: PodCondition contains details for the current

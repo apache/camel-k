@@ -18,7 +18,7 @@ limitations under the License.
 package trait
 
 // WARNING: The Pod trait is **deprecated** and will removed in future release versions:
-// use InitContainers trait istead.
+// use InitContainers trait instead.
 //
 // The pod trait allows the customization of the Integration pods.
 // It applies the `PodSpecTemplate` struct contained in the Integration `.spec.podTemplate` field,

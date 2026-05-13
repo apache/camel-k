@@ -1198,8 +1198,8 @@ func (in *IntegrationCondition) DeepCopyInto(out *IntegrationCondition) {
 		in, out := &in.FirstTruthyTime, &out.FirstTruthyTime
 		*out = (*in).DeepCopy()
 	}
-	if in.Pods != nil {
-		in, out := &in.Pods, &out.Pods
+	if in.DeprecatedPods != nil {
+		in, out := &in.DeprecatedPods, &out.DeprecatedPods
 		*out = make([]PodCondition, len(*in))
 		for i := range *in {
 			(*in)[i].DeepCopyInto(&(*out)[i])

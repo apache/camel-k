@@ -107,13 +107,13 @@ func TestHealthTrait(t *testing.T) {
 					if c.Status != corev1.ConditionFalse {
 						return false
 					}
-					if len(c.Pods) != 3 {
+					if len(c.DeprecatedPods) != 3 {
 						return false
 					}
 
 					var r *v1.HealthCheckResponse
 
-					for _, pod := range c.Pods {
+					for _, pod := range c.DeprecatedPods {
 						for h := range pod.Health {
 							if pod.Health[h].Name == "camel-routes" {
 								r = &pod.Health[h]
@@ -201,15 +201,15 @@ func TestHealthTrait(t *testing.T) {
 					if c.Status != corev1.ConditionFalse {
 						return false
 					}
-					if len(c.Pods) != 1 {
+					if len(c.DeprecatedPods) != 1 {
 						return false
 					}
 
 					var r *v1.HealthCheckResponse
 
-					for h := range c.Pods[0].Health {
-						if c.Pods[0].Health[h].Name == "camel-routes" {
-							r = &c.Pods[0].Health[h]
+					for h := range c.DeprecatedPods[0].Health {
+						if c.DeprecatedPods[0].Health[h].Name == "camel-routes" {
+							r = &c.DeprecatedPods[0].Health[h]
 						}
 					}
 
@@ -288,15 +288,15 @@ func TestHealthTrait(t *testing.T) {
 					if c.Status != corev1.ConditionFalse {
 						return false
 					}
-					if len(c.Pods) != 1 {
+					if len(c.DeprecatedPods) != 1 {
 						return false
 					}
 
 					var r *v1.HealthCheckResponse
 
-					for h := range c.Pods[0].Health {
-						if c.Pods[0].Health[h].Name == "camel-routes" {
-							r = &c.Pods[0].Health[h]
+					for h := range c.DeprecatedPods[0].Health {
+						if c.DeprecatedPods[0].Health[h].Name == "camel-routes" {
+							r = &c.DeprecatedPods[0].Health[h]
 						}
 					}
 
@@ -374,15 +374,15 @@ func TestHealthTrait(t *testing.T) {
 					if c.Status != corev1.ConditionFalse {
 						return false
 					}
-					if len(c.Pods) != 1 {
+					if len(c.DeprecatedPods) != 1 {
 						return false
 					}
 
 					var r *v1.HealthCheckResponse
 
-					for h := range c.Pods[0].Health {
-						if c.Pods[0].Health[h].Name == "never-ready" {
-							r = &c.Pods[0].Health[h]
+					for h := range c.DeprecatedPods[0].Health {
+						if c.DeprecatedPods[0].Health[h].Name == "never-ready" {
+							r = &c.DeprecatedPods[0].Health[h]
 						}
 					}
 
@@ -426,15 +426,15 @@ func TestHealthTrait(t *testing.T) {
 					if c.Status != corev1.ConditionFalse {
 						return false
 					}
-					if len(c.Pods) != 1 {
+					if len(c.DeprecatedPods) != 1 {
 						return false
 					}
 
 					var r *v1.HealthCheckResponse
 
-					for h := range c.Pods[0].Health {
-						if c.Pods[0].Health[h].Name == "never-ready" && c.Pods[0].Health[h].Status == "DOWN" {
-							r = &c.Pods[0].Health[h]
+					for h := range c.DeprecatedPods[0].Health {
+						if c.DeprecatedPods[0].Health[h].Name == "never-ready" && c.DeprecatedPods[0].Health[h].Status == "DOWN" {
+							r = &c.DeprecatedPods[0].Health[h]
 						}
 					}
 

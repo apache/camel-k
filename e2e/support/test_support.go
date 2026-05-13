@@ -748,14 +748,14 @@ func HealthCheckResponse(podRegexp string, healthName string) func(*v1.Integrati
 			return nil
 		}
 
-		for p := range c.Pods {
-			if re.MatchString(c.Pods[p].Name) {
+		for p := range c.DeprecatedPods {
+			if re.MatchString(c.DeprecatedPods[p].Name) {
 				continue
 			}
 
-			for h := range c.Pods[p].Health {
-				if c.Pods[p].Health[h].Name == healthName {
-					return &c.Pods[p].Health[h]
+			for h := range c.DeprecatedPods[p].Health {
+				if c.DeprecatedPods[p].Health[h].Name == healthName {
+					return &c.DeprecatedPods[p].Health[h]
 				}
 			}
 

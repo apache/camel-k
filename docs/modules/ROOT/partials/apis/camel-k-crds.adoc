@@ -2498,7 +2498,9 @@ A human-readable message indicating details about the transition.
 |
 
 
-Pods collect health and conditions information from the owned PODs
+DeprecatedPods collect health and conditions information from the owned PODs
+
+Deprecated: may be removed in future releases.
 
 
 |===
@@ -5107,7 +5109,7 @@ PluginProperties -- .
 * <<#_camel_apache_org_v1_IntegrationCondition, IntegrationCondition>>
 * <<#_camel_apache_org_v1_PipeCondition, PipeCondition>>
 
-
+Deprecated: may be removed in future releases.
 
 [cols="2,2a",options="header"]
 |===
@@ -9057,7 +9059,7 @@ Deprecated: no longer in use.
 * <<#_camel_apache_org_v1_Traits, Traits>>
 
 WARNING: The Pod trait is **deprecated** and will removed in future release versions:
-use InitContainers trait istead.
+use InitContainers trait instead.
 
 The pod trait allows the customization of the Integration pods.
 It applies the `PodSpecTemplate` struct contained in the Integration `.spec.podTemplate` field,
@@ -9088,6 +9090,9 @@ by using the `integration` container name.
 *Appears on:*
 
 * <<#_camel_apache_org_v1_Traits, Traits>>
+
+WARNING: The Prometheus trait is **deprecated** and will removed in future release versions:
+use Camel Monitor operator (https://camel-tooling.github.io/camel-dashboard/docs/installation-guide/advanced/operator/) instead.
 
 The Prometheus trait configures a Prometheus-compatible endpoint. It also creates a `PodMonitor` resource,
 so that the endpoint can be scraped automatically, when using the Prometheus operator.

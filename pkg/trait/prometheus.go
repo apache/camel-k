@@ -52,7 +52,15 @@ func (t *prometheusTrait) Configure(e *Environment) (bool, *TraitCondition, erro
 		return false, nil, nil
 	}
 
-	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization) || e.IntegrationInRunningPhases(), nil, nil
+	condition := NewIntegrationCondition(
+		"Prometheus",
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		TraitConfigurationReason,
+		"Prometheus trait is deprecated in favour of Camel Monitor Operator project",
+	)
+
+	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization) || e.IntegrationInRunningPhases(), condition, nil
 }
 
 func (t *prometheusTrait) Apply(e *Environment) error {

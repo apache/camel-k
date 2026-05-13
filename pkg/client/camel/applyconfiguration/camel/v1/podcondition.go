@@ -25,6 +25,8 @@ import (
 
 // PodConditionApplyConfiguration represents a declarative configuration of the PodCondition type for use
 // with apply.
+//
+// Deprecated: may be removed in future releases.
 type PodConditionApplyConfiguration struct {
 	Name      *string                                 `json:"name,omitempty"`
 	Condition *corev1.PodCondition                    `json:"condition,omitempty"`

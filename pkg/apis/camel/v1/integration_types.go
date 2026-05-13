@@ -307,8 +307,10 @@ type IntegrationCondition struct {
 	Reason string `json:"reason,omitempty"`
 	// A human-readable message indicating details about the transition.
 	Message string `json:"message,omitempty"`
-	// Pods collect health and conditions information from the owned PODs
-	Pods []PodCondition `json:"pods,omitempty"`
+	// DeprecatedPods collect health and conditions information from the owned PODs
+	//
+	// Deprecated: may be removed in future releases.
+	DeprecatedPods []PodCondition `json:"pods,omitempty"`
 }
 
 // PodSpecTemplate represent a template used to deploy an Integration `Pod`.
@@ -349,6 +351,7 @@ type PodSpec struct {
 	SecurityContext corev1.PodSecurityContext `json:"securityContext,omitempty" protobuf:"bytes,34,opt,name=securityContext"`
 }
 
+// Deprecated: may be removed in future releases.
 type PodCondition struct {
 	Name      string                `json:"name,omitempty"   yaml:"name,omitempty"`
 	Condition corev1.PodCondition   `json:"condition"        yaml:"condition"`

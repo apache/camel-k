@@ -514,12 +514,14 @@ func arePodsFailingStatuses(integration *v1.Integration, pendingPods []corev1.Po
 
 // probeReadiness calls the readiness probes of the non-ready Pods directly to retrieve insights from the Camel runtime.
 // The func return the number of readyPods, the success of the probe and any error may have happened during its execution.
+//
+//nolint:staticcheck
 func (action *monitorAction) probeReadiness(ctx context.Context, environment *trait.Environment, integration *v1.Integration, pods []corev1.Pod) (int32, bool, error) {
 	// as a default we assume the Integration is Ready
 	readyCondition := v1.IntegrationCondition{
-		Type:   v1.IntegrationConditionReady,
-		Status: corev1.ConditionTrue,
-		Pods:   make([]v1.PodCondition, len(pods)),
+		Type:           v1.IntegrationConditionReady,
+		Status:         corev1.ConditionTrue,
+		DeprecatedPods: make([]v1.PodCondition, len(pods)),
 	}
 
 	readyPods := int32(0)
@@ -531,10 +533,10 @@ func (action *monitorAction) probeReadiness(ctx context.Context, environment *tr
 
 	for i := range pods {
 		pod := &pods[i]
-		readyCondition.Pods[i].Name = pod.Name
+		readyCondition.DeprecatedPods[i].Name = pod.Name
 		for p := range pod.Status.Conditions {
 			if pod.Status.Conditions[p].Type == corev1.PodReady {
-				readyCondition.Pods[i].Condition = pod.Status.Conditions[p]
+				readyCondition.DeprecatedPods[i].Condition = pod.Status.Conditions[p]
 
 				break
 			}
@@ -599,13 +601,13 @@ func (action *monitorAction) probeReadiness(ctx context.Context, environment *tr
 			}
 
 			if errors.Is(err, context.DeadlineExceeded) {
-				readyCondition.Pods[i].Condition.Message = fmt.Sprintf("readiness probe timed out for Pod %s/%s", pod.Namespace, pod.Name)
+				readyCondition.DeprecatedPods[i].Condition.Message = fmt.Sprintf("readiness probe timed out for Pod %s/%s", pod.Namespace, pod.Name)
 				runtimeReady = false
 
 				continue
 			}
 			if !k8serrors.IsServiceUnavailable(err) {
-				readyCondition.Pods[i].Condition.Message = fmt.Sprintf("readiness probe failed for Pod %s/%s: %s", pod.Namespace, pod.Name, err.Error())
+				readyCondition.DeprecatedPods[i].Condition.Message = fmt.Sprintf("readiness probe failed for Pod %s/%s: %s", pod.Namespace, pod.Name, err.Error())
 				runtimeReady = false
 
 				continue
@@ -623,7 +625,7 @@ func (action *monitorAction) probeReadiness(ctx context.Context, environment *tr
 				runtimeReady = false
 				runtimeFailed = true
 
-				readyCondition.Pods[i].Health = append(readyCondition.Pods[i].Health, check)
+				readyCondition.DeprecatedPods[i].Health = append(readyCondition.DeprecatedPods[i].Health, check)
 			}
 		}
 	}
