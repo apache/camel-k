@@ -35,7 +35,8 @@ func TestNewBuildPodConfiguration(t *testing.T) {
 
 	build := v1.Build{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "theBuildName",
+			Name:      "theBuildName",
+			Namespace: "theNamespace",
 		},
 		Spec: v1.BuildSpec{
 			Tasks: []v1.Task{
@@ -44,9 +45,8 @@ func TestNewBuildPodConfiguration(t *testing.T) {
 						BaseTask: v1.BaseTask{
 							Name: "builder",
 							Configuration: v1.BuildConfiguration{
-								BuilderPodNamespace: "theNamespace",
-								NodeSelector:        map[string]string{"node": "selector"},
-								Annotations:         map[string]string{"annotation": "value"},
+								NodeSelector: map[string]string{"node": "selector"},
+								Annotations:  map[string]string{"annotation": "value"},
 							},
 						},
 					},

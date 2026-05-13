@@ -111,8 +111,10 @@ spec:
                       for `pod` strategy
                     type: object
                   operatorNamespace:
-                    description: The namespace where to run the builder Pod (must
-                      be the same of the operator in charge of this Build reconciliation).
+                    description: |-
+                      The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
+
+                      Deprecated: no longer in use.
                     type: string
                   orderStrategy:
                     description: the build order strategy to adopt
@@ -198,9 +200,10 @@ spec:
                                 Only used for `pod` strategy
                               type: object
                             operatorNamespace:
-                              description: The namespace where to run the builder
-                                Pod (must be the same of the operator in charge of
-                                this Build reconciliation).
+                              description: |-
+                                The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
+
+                                Deprecated: no longer in use.
                               type: string
                             orderStrategy:
                               description: the build order strategy to adopt
@@ -308,9 +311,10 @@ spec:
                                 Only used for `pod` strategy
                               type: object
                             operatorNamespace:
-                              description: The namespace where to run the builder
-                                Pod (must be the same of the operator in charge of
-                                this Build reconciliation).
+                              description: |-
+                                The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
+
+                                Deprecated: no longer in use.
                               type: string
                             orderStrategy:
                               description: the build order strategy to adopt
@@ -938,9 +942,10 @@ spec:
                                 Only used for `pod` strategy
                               type: object
                             operatorNamespace:
-                              description: The namespace where to run the builder
-                                Pod (must be the same of the operator in charge of
-                                this Build reconciliation).
+                              description: |-
+                                The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
+
+                                Deprecated: no longer in use.
                               type: string
                             orderStrategy:
                               description: the build order strategy to adopt
@@ -1019,9 +1024,10 @@ spec:
                                 Only used for `pod` strategy
                               type: object
                             operatorNamespace:
-                              description: The namespace where to run the builder
-                                Pod (must be the same of the operator in charge of
-                                this Build reconciliation).
+                              description: |-
+                                The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
+
+                                Deprecated: no longer in use.
                               type: string
                             orderStrategy:
                               description: the build order strategy to adopt
@@ -1130,9 +1136,10 @@ spec:
                                 Only used for `pod` strategy
                               type: object
                             operatorNamespace:
-                              description: The namespace where to run the builder
-                                Pod (must be the same of the operator in charge of
-                                this Build reconciliation).
+                              description: |-
+                                The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
+
+                                Deprecated: no longer in use.
                               type: string
                             orderStrategy:
                               description: the build order strategy to adopt
@@ -1239,9 +1246,10 @@ spec:
                                 Only used for `pod` strategy
                               type: object
                             operatorNamespace:
-                              description: The namespace where to run the builder
-                                Pod (must be the same of the operator in charge of
-                                this Build reconciliation).
+                              description: |-
+                                The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
+
+                                Deprecated: no longer in use.
                               type: string
                             orderStrategy:
                               description: the build order strategy to adopt
@@ -1863,9 +1871,10 @@ spec:
                                 Only used for `pod` strategy
                               type: object
                             operatorNamespace:
-                              description: The namespace where to run the builder
-                                Pod (must be the same of the operator in charge of
-                                this Build reconciliation).
+                              description: |-
+                                The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
+
+                                Deprecated: no longer in use.
                               type: string
                             orderStrategy:
                               description: the build order strategy to adopt
@@ -1967,9 +1976,10 @@ spec:
                                 Only used for `pod` strategy
                               type: object
                             operatorNamespace:
-                              description: The namespace where to run the builder
-                                Pod (must be the same of the operator in charge of
-                                this Build reconciliation).
+                              description: |-
+                                The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
+
+                                Deprecated: no longer in use.
                               type: string
                             orderStrategy:
                               description: the build order strategy to adopt

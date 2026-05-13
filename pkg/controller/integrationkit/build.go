@@ -131,8 +131,6 @@ func (action *buildAction) createBuild(ctx context.Context, kit *v1.IntegrationK
 		annotations[v1.OperatorIDAnnotation] = operatorID
 	}
 
-	// We may need to change certain builder configuration values
-	operatorNamespace := platform.GetOperatorNamespace()
 	buildConfig := v1.ConfigurationTasksByName(env.Pipeline, "builder")
 	if buildConfig.IsEmpty() {
 		// default to IntegrationPlatform configuration
@@ -152,7 +150,6 @@ func (action *buildAction) createBuild(ctx context.Context, kit *v1.IntegrationK
 	// The build operation, when executed as a Pod, should be executed by a container image containing the
 	// `kamel builder` command. Likely the same image running the operator should be fine.
 	buildConfig.ToolImage = platform.OperatorImage
-	buildConfig.BuilderPodNamespace = operatorNamespace
 	v1.SetBuilderConfigurationTasks(env.Pipeline, buildConfig)
 
 	build := &v1.Build{

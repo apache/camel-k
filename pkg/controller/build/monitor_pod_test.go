@@ -47,11 +47,6 @@ func TestHandle_PodSucceeded(t *testing.T) {
 			Tasks: []v1.Task{
 				{
 					Custom: &v1.UserTask{
-						BaseTask: v1.BaseTask{
-							Configuration: v1.BuildConfiguration{
-								BuilderPodNamespace: "default",
-							},
-						},
 						PublishingImage: "my-camel-k-container-image",
 					},
 				},
@@ -66,7 +61,7 @@ func TestHandle_PodSucceeded(t *testing.T) {
 	pod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        buildPodName(build),
-			Namespace:   build.BuilderPodNamespace(),
+			Namespace:   build.Namespace,
 			Annotations: map[string]string{},
 		},
 		Status: corev1.PodStatus{
@@ -118,11 +113,6 @@ func TestHandle_PodFailed(t *testing.T) {
 			Tasks: []v1.Task{
 				{
 					Custom: &v1.UserTask{
-						BaseTask: v1.BaseTask{
-							Configuration: v1.BuildConfiguration{
-								BuilderPodNamespace: "default",
-							},
-						},
 						PublishingImage: "my-camel-k-container-image",
 					},
 				},
@@ -137,7 +127,7 @@ func TestHandle_PodFailed(t *testing.T) {
 	pod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        buildPodName(build),
-			Namespace:   build.BuilderPodNamespace(),
+			Namespace:   build.Namespace,
 			Annotations: map[string]string{},
 		},
 		Status: corev1.PodStatus{
