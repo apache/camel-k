@@ -52,8 +52,8 @@ func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
 		integrationA := RandomizedSuffixName("java-a")
 		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", integrationA).Execute()).To(Succeed())
 
-		g.Eventually(IntegrationKit(t, ctx, ns, integrationA), TestTimeoutMedium).ShouldNot(BeEmpty())
-		integrationKitNameA := IntegrationKit(t, ctx, ns, integrationA)()
+		g.Eventually(IntegrationKitName(t, ctx, ns, integrationA), TestTimeoutMedium).ShouldNot(BeEmpty())
+		integrationKitNameA := IntegrationKitName(t, ctx, ns, integrationA)()
 		g.Eventually(Build(t, ctx, ns, integrationKitNameA), TestTimeoutMedium).ShouldNot(BeNil())
 
 		integrationB := RandomizedSuffixName("java-b")
@@ -65,13 +65,13 @@ func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
 		integrationZ := RandomizedSuffixName("yaml-z")
 		g.Expect(KamelRun(t, ctx, ns, "files/timer-source.yaml", "--name", integrationZ).Execute()).To(Succeed())
 
-		g.Eventually(IntegrationKit(t, ctx, ns, integrationB), TestTimeoutMedium).ShouldNot(BeEmpty())
-		g.Eventually(IntegrationKit(t, ctx, ns, integrationC), TestTimeoutMedium).ShouldNot(BeEmpty())
-		g.Eventually(IntegrationKit(t, ctx, ns, integrationZ), TestTimeoutMedium).ShouldNot(BeEmpty())
+		g.Eventually(IntegrationKitName(t, ctx, ns, integrationB), TestTimeoutMedium).ShouldNot(BeEmpty())
+		g.Eventually(IntegrationKitName(t, ctx, ns, integrationC), TestTimeoutMedium).ShouldNot(BeEmpty())
+		g.Eventually(IntegrationKitName(t, ctx, ns, integrationZ), TestTimeoutMedium).ShouldNot(BeEmpty())
 
-		integrationKitNameB := IntegrationKit(t, ctx, ns, integrationB)()
-		integrationKitNameC := IntegrationKit(t, ctx, ns, integrationC)()
-		integrationKitNameZ := IntegrationKit(t, ctx, ns, integrationZ)()
+		integrationKitNameB := IntegrationKitName(t, ctx, ns, integrationB)()
+		integrationKitNameC := IntegrationKitName(t, ctx, ns, integrationC)()
+		integrationKitNameZ := IntegrationKitName(t, ctx, ns, integrationZ)()
 
 		g.Eventually(BuildPhase(t, ctx, ns, integrationKitNameA), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, integrationA), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -139,21 +139,21 @@ func TestRunBuildOrderStrategyFIFO(t *testing.T) {
 			"--name", integrationZ,
 		).Execute()).To(Succeed())
 
-		g.Eventually(IntegrationKit(t, ctx, ns, integrationA)).ShouldNot(BeNil())
-		g.Eventually(IntegrationKit(t, ctx, ns, integrationB)).ShouldNot(BeNil())
-		g.Eventually(IntegrationKit(t, ctx, ns, integrationZ)).ShouldNot(BeNil())
+		g.Eventually(IntegrationKitName(t, ctx, ns, integrationA)).ShouldNot(BeEmpty())
+		g.Eventually(IntegrationKitName(t, ctx, ns, integrationB)).ShouldNot(BeEmpty())
+		g.Eventually(IntegrationKitName(t, ctx, ns, integrationZ)).ShouldNot(BeEmpty())
 
-		integrationKitNameA := IntegrationKit(t, ctx, ns, integrationA)()
+		integrationKitNameA := IntegrationKitName(t, ctx, ns, integrationA)()
 		g.Eventually(Build(t, ctx, ns, integrationKitNameA)).ShouldNot(BeNil())
 		g.Eventually(BuildPhase(t, ctx, ns, integrationKitNameA), TestTimeoutShort).Should(Equal(v1.BuildPhaseRunning))
 
 		g.Eventually(IntegrationPhase(t, ctx, ns, integrationB)).Should(Equal(v1.IntegrationPhaseBuildingKit))
-		integrationKitNameB := IntegrationKit(t, ctx, ns, integrationB)()
+		integrationKitNameB := IntegrationKitName(t, ctx, ns, integrationB)()
 		g.Eventually(Build(t, ctx, ns, integrationKitNameB)).ShouldNot(BeNil())
 		g.Eventually(BuildPhase(t, ctx, ns, integrationKitNameB), TestTimeoutShort).Should(Equal(v1.BuildPhaseRunning))
 
 		g.Eventually(IntegrationPhase(t, ctx, ns, integrationZ)).Should(Equal(v1.IntegrationPhaseBuildingKit))
-		integrationKitNameZ := IntegrationKit(t, ctx, ns, integrationZ)()
+		integrationKitNameZ := IntegrationKitName(t, ctx, ns, integrationZ)()
 		g.Eventually(Build(t, ctx, ns, integrationKitNameZ)).ShouldNot(BeNil())
 		g.Eventually(BuildPhase(t, ctx, ns, integrationKitNameZ), TestTimeoutShort).Should(Equal(v1.BuildPhaseRunning))
 

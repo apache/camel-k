@@ -61,7 +61,7 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 				g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 					Should(Equal(corev1.ConditionTrue))
 				g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Java Magicstring!"))
-				g.Eventually(IntegrationKit(t, ctx, ns, javaNativeCloneName)).Should(Equal(IntegrationKit(t, ctx, ns, javaNativeName)()))
+				g.Eventually(IntegrationKitName(t, ctx, ns, javaNativeCloneName)).Should(Equal(IntegrationKitName(t, ctx, ns, javaNativeName)()))
 			})
 
 			t.Run("java native should rebuild", func(t *testing.T) {
@@ -74,7 +74,7 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 				g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 					Should(Equal(corev1.ConditionTrue))
 				g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Java Magic2string!"))
-				g.Eventually(IntegrationKit(t, ctx, ns, javaNative2Name)).ShouldNot(Equal(IntegrationKit(t, ctx, ns, javaNativeName)()))
+				g.Eventually(IntegrationKitName(t, ctx, ns, javaNative2Name)).ShouldNot(Equal(IntegrationKitName(t, ctx, ns, javaNativeName)()))
 			})
 
 		})

@@ -60,8 +60,8 @@ func TestCamelCatalogBuilder(t *testing.T) {
 			g.Eventually(CamelCatalogPhase(t, ctx, ns, nonCompatibleCatalogName)).Should(Equal(v1.CamelCatalogPhaseError))
 			g.Eventually(CamelCatalogCondition(t, ctx, ns, nonCompatibleCatalogName, v1.CamelCatalogConditionReady)().Message).Should(ContainSubstring("Container image tool missing in catalog"))
 
-			g.Eventually(IntegrationKit(t, ctx, ns, name)).ShouldNot(Equal(""))
-			kitName := IntegrationKit(t, ctx, ns, name)()
+			g.Eventually(IntegrationKitName(t, ctx, ns, name)).ShouldNot(Equal(""))
+			kitName := IntegrationKitName(t, ctx, ns, name)()
 			g.Eventually(KitPhase(t, ctx, ns, kitName)).Should(Equal(v1.IntegrationKitPhaseError))
 			g.Eventually(KitCondition(t, ctx, ns, kitName, v1.IntegrationKitConditionCatalogAvailable)().Reason).Should(Equal("Camel Catalog 1.15.0 error"))
 			g.Eventually(IntegrationPhase(t, ctx, ns, name)).Should(Equal(v1.IntegrationPhaseError))
@@ -109,8 +109,8 @@ func TestCamelCatalogBuilder(t *testing.T) {
 				Equal("Container image tool found in catalog"),
 			)
 
-			g.Eventually(IntegrationKit(t, ctx, ns, name)).ShouldNot(Equal(""))
-			kitName := IntegrationKit(t, ctx, ns, name)()
+			g.Eventually(IntegrationKitName(t, ctx, ns, name)).ShouldNot(Equal(""))
+			kitName := IntegrationKitName(t, ctx, ns, name)()
 			g.Eventually(KitPhase(t, ctx, ns, kitName)).Should(Equal(v1.IntegrationKitPhaseReady))
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).

@@ -43,7 +43,7 @@ func TestKamelReset(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			g.Eventually(Kit(t, ctx, ns, IntegrationKit(t, ctx, ns, name)())).Should(Not(BeNil()))
+			g.Eventually(Kit(t, ctx, ns, IntegrationKitName(t, ctx, ns, name)())).Should(Not(BeNil()))
 			g.Eventually(Integration(t, ctx, ns, name)).Should(Not(BeNil()))
 
 			g.Expect(Kamel(t, ctx, "reset", "-n", ns, "--force").Execute()).To(Succeed())
@@ -56,7 +56,7 @@ func TestKamelReset(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			g.Eventually(Kit(t, ctx, ns, IntegrationKit(t, ctx, ns, name)())).Should(Not(BeNil()))
+			g.Eventually(Kit(t, ctx, ns, IntegrationKitName(t, ctx, ns, name)())).Should(Not(BeNil()))
 			g.Eventually(Integration(t, ctx, ns, name)).Should(Not(BeNil()))
 
 			g.Expect(Kamel(t, ctx, "reset", "-n", ns, "--skip-integrations", "--force").Execute()).To(Succeed())
@@ -69,7 +69,7 @@ func TestKamelReset(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			kitName := IntegrationKit(t, ctx, ns, name)()
+			kitName := IntegrationKitName(t, ctx, ns, name)()
 			g.Eventually(Kit(t, ctx, ns, kitName)).Should(Not(BeNil()))
 			g.Eventually(Integration(t, ctx, ns, name)).Should(Not(BeNil()))
 

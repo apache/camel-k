@@ -49,7 +49,7 @@ func TestOperatorRestart(t *testing.T) {
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			g.Eventually(Kit(t, ctx, ns, IntegrationKit(t, ctx, ns, name)())).Should(Not(BeNil()))
+			g.Eventually(Kit(t, ctx, ns, IntegrationKitName(t, ctx, ns, name)())).Should(Not(BeNil()))
 			g.Eventually(Integration(t, ctx, ns, name)).Should(Not(BeNil()))
 		})
 
@@ -61,7 +61,7 @@ func TestOperatorRestart(t *testing.T) {
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			g.Eventually(Kit(t, ctx, ns, IntegrationKit(t, ctx, ns, name)())).Should(Not(BeNil()))
+			g.Eventually(Kit(t, ctx, ns, IntegrationKitName(t, ctx, ns, name)())).Should(Not(BeNil()))
 			g.Eventually(Integration(t, ctx, ns, name)).Should(Not(BeNil()))
 		})
 
@@ -79,7 +79,7 @@ func TestOperatorRestart(t *testing.T) {
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			g.Eventually(Kit(t, ctx, ns, IntegrationKit(t, ctx, ns, name)())).Should(Not(BeNil()))
+			g.Eventually(Kit(t, ctx, ns, IntegrationKitName(t, ctx, ns, name)())).Should(Not(BeNil()))
 			g.Eventually(Integration(t, ctx, ns, name)).Should(Not(BeNil()))
 		})
 	})
