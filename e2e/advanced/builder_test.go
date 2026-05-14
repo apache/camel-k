@@ -64,7 +64,7 @@ func TestBuilderTimeout(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml", "--name", name, "-t", "builder.strategy=pod").Execute()).To(Succeed())
 			// As the build hits timeout, it keeps trying building
 			g.Eventually(IntegrationPhase(t, ctx, ns, name)).Should(Equal(v1.IntegrationPhaseBuildingKit))
-			integrationKitName := IntegrationKit(t, ctx, ns, name)()
+			integrationKitName := IntegrationKitName(t, ctx, ns, name)()
 			builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
 			g.Eventually(BuilderPodPhase(t, ctx, ns, builderKitName)).Should(Equal(corev1.PodPending))
 			g.Eventually(BuildPhase(t, ctx, ns, integrationKitName)).Should(Equal(v1.BuildPhaseRunning))
@@ -98,7 +98,7 @@ func TestMavenProfile(t *testing.T) {
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			integrationKitName := IntegrationKit(t, ctx, ns, name)()
+			integrationKitName := IntegrationKitName(t, ctx, ns, name)()
 			integrationKitNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
 			builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
 			g.Eventually(BuilderPod(t, ctx, integrationKitNamespace, builderKitName), TestTimeoutShort).ShouldNot(BeNil())

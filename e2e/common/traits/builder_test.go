@@ -50,7 +50,7 @@ func TestBuilderTrait(t *testing.T) {
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			integrationKitName := IntegrationKit(t, ctx, ns, name)()
+			integrationKitName := IntegrationKitName(t, ctx, ns, name)()
 			integrationKitNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
 			builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
 			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().Strategy, TestTimeoutShort).Should(Equal(v1.BuildStrategyRoutine))
@@ -77,7 +77,7 @@ func TestBuilderTrait(t *testing.T) {
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			integrationKitName := IntegrationKit(t, ctx, ns, name)()
+			integrationKitName := IntegrationKitName(t, ctx, ns, name)()
 			integrationKitNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
 			builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
 			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().Strategy, TestTimeoutShort).Should(Equal(v1.BuildStrategyRoutine))
@@ -102,7 +102,7 @@ func TestBuilderTrait(t *testing.T) {
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			integrationKitName := IntegrationKit(t, ctx, ns, name)()
+			integrationKitName := IntegrationKitName(t, ctx, ns, name)()
 			integrationKitNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
 			builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
 			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().Strategy, TestTimeoutShort).Should(Equal(v1.BuildStrategyRoutine))
@@ -133,7 +133,7 @@ func TestBuilderTrait(t *testing.T) {
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			integrationKitName := IntegrationKit(t, ctx, ns, name)()
+			integrationKitName := IntegrationKitName(t, ctx, ns, name)()
 			integrationKitNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
 			builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
 
@@ -164,7 +164,7 @@ func TestBuilderTrait(t *testing.T) {
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			integrationKitName := IntegrationKit(t, ctx, ns, name)()
+			integrationKitName := IntegrationKitName(t, ctx, ns, name)()
 			integrationKitNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
 			builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
 			g.Eventually(BuilderPod(t, ctx, integrationKitNamespace, builderKitName), TestTimeoutShort).ShouldNot(BeNil())
@@ -204,7 +204,7 @@ func TestBuilderTrait(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "builder.tasks=custom1;alpine;cat missingfile.txt", "-t", "builder.strategy=pod").Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPhase(t, ctx, ns, name)).Should(Equal(v1.IntegrationPhaseBuildingKit))
-			integrationKitName := IntegrationKit(t, ctx, ns, name)()
+			integrationKitName := IntegrationKitName(t, ctx, ns, name)()
 			integrationKitNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
 			// Check containers conditions
 			g.Eventually(Build(t, ctx, integrationKitNamespace, integrationKitName), TestTimeoutLong).ShouldNot(BeNil())
@@ -225,7 +225,7 @@ func TestBuilderTrait(t *testing.T) {
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			integrationKitName := IntegrationKit(t, ctx, ns, name)()
+			integrationKitName := IntegrationKitName(t, ctx, ns, name)()
 			integrationKitNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
 			g.Eventually(KitRootImage(t, ctx, integrationKitNamespace, integrationKitName), TestTimeoutShort).Should(Equal("gcr.io/distroless/java17-debian12"))
 		})

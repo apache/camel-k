@@ -226,7 +226,7 @@ func TestRunConfigBuildProperties(t *testing.T) {
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "build-property-route-updated", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, "build-property-route-updated"), TestTimeoutShort).Should(ContainSubstring("my-super-application-updated"))
 			// Verify the integration kits are different
-			g.Eventually(IntegrationKit(t, ctx, ns, "build-property-route-updated")).ShouldNot(Equal(IntegrationKit(t, ctx, ns, "build-property-route")()))
+			g.Eventually(IntegrationKitName(t, ctx, ns, "build-property-route-updated")).ShouldNot(Equal(IntegrationKitName(t, ctx, ns, "build-property-route")()))
 		})
 
 		// Build-Properties file

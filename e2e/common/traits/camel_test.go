@@ -45,13 +45,13 @@ func TestCamelTrait(t *testing.T) {
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			integrationKit := IntegrationKit(t, ctx, ns, name)()
+			integrationKit := IntegrationKitName(t, ctx, ns, name)()
 
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-p", "a=1").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			g.Eventually(IntegrationKit(t, ctx, ns, name)).Should(Equal(integrationKit))
+			g.Eventually(IntegrationKitName(t, ctx, ns, name)).Should(Equal(integrationKit))
 		})
 	})
 }

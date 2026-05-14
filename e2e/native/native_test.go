@@ -88,7 +88,7 @@ func TestNativeIntegrations(t *testing.T) {
 				g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 					Should(Equal(corev1.ConditionTrue))
 				g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!2"))
-				g.Eventually(IntegrationKit(t, ctx, ns, "yaml-native-2")).Should(Equal(IntegrationKit(t, ctx, ns, "yaml-native")()))
+				g.Eventually(IntegrationKitName(t, ctx, ns, "yaml-native-2")).Should(Equal(IntegrationKitName(t, ctx, ns, "yaml-native")()))
 			})
 		})
 

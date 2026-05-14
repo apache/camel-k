@@ -55,7 +55,7 @@ func TestKamelPromoteGitOps(t *testing.T) {
 				Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, nsTarget, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			// Make sure that no IntegrationKit was ever built for this Integration
-			g.Eventually(IntegrationKit(t, ctx, nsTarget, "yaml")).Should(Equal(""))
+			g.Eventually(IntegrationKitName(t, ctx, nsTarget, "yaml")).Should(Equal(""))
 		})
 	})
 }

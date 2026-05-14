@@ -80,7 +80,7 @@ func TestOperatorIDFiltering(t *testing.T) {
 				})
 
 				t.Run("Operators can run scoped integrations with fixed image", func(t *testing.T) {
-					kitName := IntegrationKit(t, ctx, ns, "moving")()
+					kitName := IntegrationKitName(t, ctx, ns, "moving")()
 					g.Expect(kitName).NotTo(BeEmpty())
 					kitImage := KitImage(t, ctx, nsop2, kitName)()
 					g.Expect(kitImage).NotTo(BeEmpty())

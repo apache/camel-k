@@ -1072,7 +1072,7 @@ func IntegrationSpecSA(t *testing.T, ctx context.Context, ns string, name string
 	}
 }
 
-func IntegrationKit(t *testing.T, ctx context.Context, ns string, name string) func() string {
+func IntegrationKitName(t *testing.T, ctx context.Context, ns string, name string) func() string {
 	return func() string {
 		it := Integration(t, ctx, ns, name)()
 		if it == nil {
@@ -1879,10 +1879,12 @@ func Build(t *testing.T, ctx context.Context, ns, name string) func() *v1.Build 
 		build := v1.NewBuild(ns, name)
 		if err := TestClient(t).Get(ctx, ctrl.ObjectKeyFromObject(build), build); err != nil && k8serrors.IsNotFound(err) {
 			return nil
-		} else if err != nil {
-			log.Error(err, "Error while retrieving build "+name)
+		} else if err != nil && k8serrors.IsNotFound(err) && k8serrors.IsNotFound(err) {
 			return nil
+		} else {
+			log.Error(err, "Error while retrieving build "+name)
 		}
+
 		return build
 	}
 }

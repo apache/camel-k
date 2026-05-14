@@ -127,7 +127,7 @@ func TestIntegrationProfileInfluencesKit(t *testing.T) {
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, "normal"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationLogs(t, ctx, ns, "normal"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 		// Verify that a new kit has been built based on the default base image
-		integrationKitName := IntegrationKit(t, ctx, ns, "normal")()
+		integrationKitName := IntegrationKitName(t, ctx, ns, "normal")()
 		g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
 		g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.RootImage).Should(Equal(defaults.BaseImage()))
 
@@ -139,7 +139,7 @@ func TestIntegrationProfileInfluencesKit(t *testing.T) {
 		g.Eventually(IntegrationLogs(t, ctx, ns, "simple"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 		// Verify that a new kit has been built based on the previous kit
-		integrationKitNameWithProfile := IntegrationKit(t, ctx, ns, "simple")()
+		integrationKitNameWithProfile := IntegrationKitName(t, ctx, ns, "simple")()
 		g.Eventually(integrationKitNameWithProfile).ShouldNot(Equal(integrationKitName))
 		g.Eventually(Kit(t, ctx, ns, integrationKitNameWithProfile)().Status.BaseImage).Should(ContainSubstring(integrationKitName))
 		g.Eventually(Kit(t, ctx, ns, integrationKitNameWithProfile)().Status.RootImage).Should(Equal(defaults.BaseImage()))

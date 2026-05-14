@@ -147,7 +147,7 @@ func TestUpgrade(t *testing.T) {
 			kit := Kits(t, ctx, ns, KitWithRuntimeVersion(defaults.DefaultRuntimeVersion))()[0]
 
 			// Check the Integration uses the new image
-			g.Eventually(IntegrationKit(t, ctx, nsIntegration, name), TestTimeoutMedium).Should(Equal(kit.Name))
+			g.Eventually(IntegrationKitName(t, ctx, nsIntegration, name), TestTimeoutMedium).Should(Equal(kit.Name))
 			// Check the Integration Pod uses the new kit
 			g.Eventually(IntegrationPodImage(t, ctx, nsIntegration, name)).Should(Equal(kit.Status.Image))
 

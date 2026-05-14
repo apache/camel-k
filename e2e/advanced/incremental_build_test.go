@@ -47,7 +47,7 @@ func TestRunIncrementalBuildRoutine(t *testing.T) {
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-		integrationKitName := IntegrationKit(t, ctx, ns, name)()
+		integrationKitName := IntegrationKitName(t, ctx, ns, name)()
 		g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
 		g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.RootImage).Should(Equal(defaults.BaseImage()))
 
@@ -57,7 +57,7 @@ func TestRunIncrementalBuildRoutine(t *testing.T) {
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, nameClone), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, nameClone, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, nameClone), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			integrationCloneKitName := IntegrationKit(t, ctx, ns, nameClone)()
+			integrationCloneKitName := IntegrationKitName(t, ctx, ns, nameClone)()
 			g.Eventually(integrationCloneKitName).Should(Equal(integrationKitName))
 		})
 
@@ -69,7 +69,7 @@ func TestRunIncrementalBuildRoutine(t *testing.T) {
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, nameIncremental), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, nameIncremental, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, nameIncremental), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			integrationIncrementalKitName := IntegrationKit(t, ctx, ns, nameIncremental)()
+			integrationIncrementalKitName := IntegrationKitName(t, ctx, ns, nameIncremental)()
 			// the container comes in a format like
 			// 10.108.177.66/test-d7cad110-bb1d-4e79-8a0e-ebd44f6fe5d4/camel-k-kit-c8357r4k5tp6fn1idm60@sha256:d49716f0429ad8b23a1b8d20a357d64b1aa42a67c1a2a534ebd4c54cd598a18d
 			// we should be saving just to check the substring is contained
@@ -90,7 +90,7 @@ func TestRunIncrementalBuildPod(t *testing.T) {
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-		integrationKitName := IntegrationKit(t, ctx, ns, name)()
+		integrationKitName := IntegrationKitName(t, ctx, ns, name)()
 		g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
 		g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.RootImage).Should(Equal(defaults.BaseImage()))
 		g.Eventually(BuilderPodsCount(t, ctx, ns)).Should(Equal(1))
@@ -101,7 +101,7 @@ func TestRunIncrementalBuildPod(t *testing.T) {
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, nameClone), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, nameClone, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, nameClone), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			integrationCloneKitName := IntegrationKit(t, ctx, ns, nameClone)()
+			integrationCloneKitName := IntegrationKitName(t, ctx, ns, nameClone)()
 			g.Eventually(integrationCloneKitName).Should(Equal(integrationKitName))
 			g.Eventually(BuilderPodsCount(t, ctx, ns)).Should(Equal(1))
 		})
@@ -114,7 +114,7 @@ func TestRunIncrementalBuildPod(t *testing.T) {
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, nameIncremental), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, nameIncremental, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, nameIncremental), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			integrationIncrementalKitName := IntegrationKit(t, ctx, ns, nameIncremental)()
+			integrationIncrementalKitName := IntegrationKitName(t, ctx, ns, nameIncremental)()
 			// the container comes in a format like
 			// 10.108.177.66/test-d7cad110-bb1d-4e79-8a0e-ebd44f6fe5d4/camel-k-kit-c8357r4k5tp6fn1idm60@sha256:d49716f0429ad8b23a1b8d20a357d64b1aa42a67c1a2a534ebd4c54cd598a18d
 			// we should be saving just to check the substring is contained
@@ -136,7 +136,7 @@ func TestRunIncrementalBuildOff(t *testing.T) {
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-		integrationKitName := IntegrationKit(t, ctx, ns, name)()
+		integrationKitName := IntegrationKitName(t, ctx, ns, name)()
 		g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
 
 		t.Run("Don't reuse previous kit", func(t *testing.T) {
@@ -145,7 +145,7 @@ func TestRunIncrementalBuildOff(t *testing.T) {
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, nameClone), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, nameClone, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, nameClone), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			integrationCloneKitName := IntegrationKit(t, ctx, ns, nameClone)()
+			integrationCloneKitName := IntegrationKitName(t, ctx, ns, nameClone)()
 			g.Eventually(Kit(t, ctx, ns, integrationCloneKitName)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
 		})
 
@@ -157,7 +157,7 @@ func TestRunIncrementalBuildOff(t *testing.T) {
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, nameIncremental), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, nameIncremental, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, nameIncremental), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			integrationIncrementalKitName := IntegrationKit(t, ctx, ns, nameIncremental)()
+			integrationIncrementalKitName := IntegrationKitName(t, ctx, ns, nameIncremental)()
 			g.Eventually(Kit(t, ctx, ns, integrationIncrementalKitName)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
 		})
 	})
@@ -174,7 +174,7 @@ func TestRunIncrementalBuildWithDifferentBaseImages(t *testing.T) {
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-		integrationKitName := IntegrationKit(t, ctx, ns, name)()
+		integrationKitName := IntegrationKitName(t, ctx, ns, name)()
 		g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
 		g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.RootImage).Should(Equal(defaults.BaseImage()))
 
@@ -186,7 +186,7 @@ func TestRunIncrementalBuildWithDifferentBaseImages(t *testing.T) {
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, nameIncremental), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, nameIncremental, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, nameIncremental), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			integrationIncrementalKitName := IntegrationKit(t, ctx, ns, nameIncremental)()
+			integrationIncrementalKitName := IntegrationKitName(t, ctx, ns, nameIncremental)()
 			// the container comes in a format like
 			// 10.108.177.66/test-d7cad110-bb1d-4e79-8a0e-ebd44f6fe5d4/camel-k-kit-c8357r4k5tp6fn1idm60@sha256:d49716f0429ad8b23a1b8d20a357d64b1aa42a67c1a2a534ebd4c54cd598a18d
 			// we should be save just to check the substring is contained
@@ -202,7 +202,7 @@ func TestRunIncrementalBuildWithDifferentBaseImages(t *testing.T) {
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			integrationKitName = IntegrationKit(t, ctx, ns, name)()
+			integrationKitName = IntegrationKitName(t, ctx, ns, name)()
 			g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.BaseImage).Should(Equal(newBaseImage))
 			g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.RootImage).Should(Equal(newBaseImage))
 		})
