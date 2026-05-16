@@ -32,7 +32,7 @@ github:
       branches:
         includes:
           - "~DEFAULT_BRANCH"
-          - "release/*"
+          - "release-*"
           - "rel/*"
         excludes: []
       bypass_teams:
