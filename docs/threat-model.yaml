@@ -1,0 +1,96 @@
+# Apache Camel K — threat-model sidecar (derived; prose docs/threat-model.md is canonical)
+# Regenerate whenever docs/threat-model.md changes.
+meta:
+  project: apache-camel-k
+  version: 2.11.0-SNAPSHOT
+  commit: 31286c9cf
+  date: 2026-05-18
+  status: accepted-2026-05-18 (ratified; only non-blocking Q-meta open)
+  reporting: "ASF process security@apache.org (no Camel-K SECURITY.md; under Apache Camel umbrella)"
+
+component_families:
+  - name: operator-controllers
+    in_scope: true
+    note: "high-privilege control plane; reconciles camel.apache.org CRs"
+  - name: build-subsystem
+    in_scope: true
+    note: "Maven/Jib/S2I; routine=in operator pod, pod=builder pod"
+  - name: kamel-cli
+    in_scope: true
+    note: "thin client over Kube API; runs with invoking user's privileges"
+  - name: integration-runtime-pod
+    in_scope: false
+    routes_to: apache-camel-core-threat-model
+  - name: samples-tests-proposals-deprecated
+    in_scope: false
+    note: "examples/, e2e/, proposals/, samples, Buildah/Kaniko/Spectrum, pod trait, synthetic, multi-operator (Q6)"
+
+trust_boundary:
+  primary: "RBAC to create/patch any camel.apache.org CR == arbitrary code/container exec in target namespace"
+  gate: kubernetes-rbac-only
+  admission_webhook: none   # absent by design (Q7)
+
+entry_points:                  # field -> attacker-controllable? (see §4.6)
+  Integration.spec.sources/flows: { attacker_controllable: true, trusted_role: cr-author }
+  Integration.spec.dependencies/repositories: { attacker_controllable: true, trusted_role: cr-author }
+  Integration.spec.git: { attacker_controllable: true, trusted_role: cr-author }
+  builder.trait.tasks: { attacker_controllable: true, requires: build-strategy-pod }
+  container.trait.image/runAsUser/capabilitiesAdd: { attacker_controllable: true }
+  Integration.spec.template (pod trait): { attacker_controllable: true }
+  IntegrationKit.spec.image: { attacker_controllable: true }
+  Kamelet.spec.template/dependencies: { attacker_controllable: true }
+  Pipe.spec.source/sink: { attacker_controllable: true }
+  IntegrationPlatform/IntegrationProfile.spec.build.*: { attacker_controllable: false, trusted_role: platform-admin }
+  kamel.run.remote-source-url: { attacker_controllable: true, boundary: user-workstation-not-operator }
+
+config_knobs:                  # §4.5a (all rulings ratified 2026-05-18)
+  BUILD_STRATEGY: { default: routine, security_relevant: true, ruling: "Q9: routine supported only for trusted CR authors; untrusted/multi-tenant requires pod (else OUT-OF-MODEL:non-default-build)" }
+  install_scope: { default: install-method, values: [namespaced, descoped], security_relevant: true, ruling: "Q4: CR author trusted only at own-namespace level; cross-ns/cluster escalation in scope & VALID" }
+  registry.insecure / maven.InsecureSkipVerify: { default: false, security_relevant: true, ruling: "Q5: non-default, unsupported in production -> OUT-OF-MODEL:non-default-build" }
+  CAMEL_K_SYNTHETIC_INTEGRATIONS: { default: false, deprecated: true, in_scope: false, ruling: "Q6: deprecated, out of model" }
+  security-context.runAsNonRoot: { default: false, security_relevant: true, ruling: "Q11: deliberate compat default; non-root enforcement is deployer's job (PSA) -> BY-DESIGN" }
+
+properties_provided:           # §4.8 (ratified 2026-05-18)
+  - id: rbac-sole-gate            { severity: critical,  symptom: "action on CR the API would deny",       provenance: maintainer, q: Q8 }
+  - id: no-cross-ns-escalation    { severity: critical,  symptom: "CR author gains rights in other ns/cluster", provenance: maintainer, q: Q4, disposition: VALID }
+  - id: multi-operator-noncontend { severity: correctness, symptom: "two operators fight one CR",          provenance: documented }
+  - id: base-image-digest-pinned  { severity: critical,  symptom: "different image at pinned ref",          provenance: documented }
+  - id: namespaced-confines-rbac  { severity: critical,  symptom: "namespaced operator affects other ns",   provenance: maintainer, q: Q4 }
+  - id: default-pod-hardening     { severity: hardening, symptom: "no seccomp/cap-drop",                     provenance: documented, caveat: "runAsNonRoot defaults false (Q11: by design)" }
+  resource_line: "only MAX_RUNNING_BUILDS + BUILD_TIMEOUT_SECONDS; no CPU/mem guarantee (maintainer 2026-05-18, Q13)"
+
+properties_not_provided:       # §4.9
+  - no-integration-code-sandbox
+  - no-build-isolation-under-routine-default
+  - no-supply-chain-verification
+  - builder.tasks/container.image/pod-trait-are-by-design-code-exec
+  - no-multi-tenant-isolation-by-itself
+  - no-route-hardening (apache-camel-core's job)
+
+false_friends:                 # §4.9
+  - "Camel K secured my integration (it deploys what you give it)"
+  - "operator validates Integration (shape only, no admission webhook)"
+  - "pinned base image == supply chain verified (only the default image)"
+
+known_non_findings:            # §4.11a -> suppression list
+  - operator-broad-rbac-by-design   # unless it escalates a CR author beyond own-ns trust -> then VALID (Q4)
+  - cr-runs-arbitrary-code-image-host-maven-by-design
+  - insecure-tls-knob-non-default
+  - integration-pods-can-run-as-root-default
+  - scanner-hits-in-unsupported-code
+  - kamel-resolves-remote-sources-on-user-machine
+
+dispositions:                  # §4.13 (closed set)
+  - VALID
+  - VALID-HARDENING
+  - OUT-OF-MODEL:trusted-input
+  - OUT-OF-MODEL:adversary-not-in-scope
+  - OUT-OF-MODEL:unsupported-component
+  - OUT-OF-MODEL:non-default-build
+  - BY-DESIGN:property-disclaimed
+  - KNOWN-NON-FINDING
+  - MODEL-GAP
+
+ratified_2026-05-18: [Q1, Q2, Q3, Q4, Q5, Q6, Q7, Q8, Q9, Q10, Q11, Q12, Q13]
+open_questions_blocking_close: []        # none — model closes reports across all sections
+meta_open: [Q-meta]                      # publication venue; non-blocking, backs no claim
