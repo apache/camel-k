@@ -9,10 +9,11 @@ Go **operator** plus the `kamel` **CLI** that turn user-supplied Camel route Cus
 (`Integration`, `Pipe`, `Kamelet`, …) into built container images and running workloads on
 Kubernetes/OpenShift.
 
-- Version: 2.11.0-SNAPSHOT
-- Go: 1.26+
+- Version: not hardcoded — read it from `pkg/util/defaults/defaults.go`
+  (`Version = "…"`), or run `make get-version`.
+- Go: not hardcoded — read the `go` directive in `go.mod`.
 - Build: `make` (Go toolchain, not Maven)
-- Module: `github.com/apache/camel-k/v2`
+- Module: `github.com/apache/camel-k/v2` (see `go.mod`)
 - Issue tracker: **GitHub Issues** (not JIRA)
 
 ## AI Agent Rules of Engagement
