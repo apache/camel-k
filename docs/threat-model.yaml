@@ -7,6 +7,8 @@ meta:
   date: 2026-05-18
   status: accepted-2026-05-18 (ratified; only non-blocking Q-meta open)
   reporting: "ASF process security@apache.org (no Camel-K SECURITY.md; under Apache Camel umbrella)"
+  umbrella_security_model: "https://camel.apache.org/manual/security-model.html"
+  relationship: "strict superset / additive Camel-K sub-project expansion; umbrella self-scopes to embedded framework, NOT a multi-tenant managed service — Camel K is that excluded cluster/operator/CR layer; no contradiction"
 
 component_families:
   - name: operator-controllers
@@ -93,4 +95,4 @@ dispositions:                  # §4.13 (closed set)
 
 ratified_2026-05-18: [Q1, Q2, Q3, Q4, Q5, Q6, Q7, Q8, Q9, Q10, Q11, Q12, Q13]
 open_questions_blocking_close: []        # none — model closes reports across all sections
-meta_open: [Q-meta]                      # publication venue; non-blocking, backs no claim
+meta_open: [Q-meta]                      # ONLY publication venue/linking (docs/PMC); substance settled: umbrella self-scopes out the cluster layer -> this is the additive sub-project expansion; non-blocking, backs no claim

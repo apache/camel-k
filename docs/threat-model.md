@@ -24,9 +24,18 @@ not at HEAD. The model is meaningfully tied to the *operator* version and the
 **Reporting cross-reference.** Camel K has no separate `SECURITY.md` and no
 Camel-K-specific security page; the ASF cross-foundation security index lists
 only "Apache Camel", governed by the ASF process (security@apache.org)
-*(documented — `security.apache.org/projects/`)*. Findings that violate a
-§4.8 property should be reported through that channel. Findings that fall
-under §4.3, §4.7, or §4.9 will be closed citing this document.
+*(documented — `security.apache.org/projects/`)*. The Apache Camel
+**Security Model** (`camel.apache.org/manual/security-model.html`) is the
+Camel PMC's umbrella triage reference; it explicitly scopes itself to
+"Camel … embedded in someone else's application, **not a multi-tenant
+managed service**" *(documented — Camel Security Model, "Trust model")*.
+Camel K is precisely the layer that operates Camel applications on a
+cluster, so **this document is the Camel-K sub-project expansion of that
+umbrella model for the cluster/operator/CR boundary the umbrella excludes**;
+it is a strict superset and does not contradict the umbrella model.
+Findings that violate a §4.8 property should be reported through the ASF
+channel. Findings that fall under §4.3, §4.7, or §4.9 will be closed citing
+this document.
 
 **Provenance legend.** *(documented)* = stated in Camel K or Apache Camel
 docs (cite source). *(maintainer)* = stated by a maintainer in response to
@@ -100,9 +109,12 @@ inside a cluster.
   vulnerabilities — e.g. the Camel-core header-injection class,
   CVE-2025-27636) is **Apache Camel core's** threat model and the route
   author's responsibility, not Camel K's. Camel K's model ends at "image
-  built and workload created." *(maintainer, 2026-05-18 — Q3; Camel
-  `security.html` defers route-trust questions to the Camel "Security
-  Model")*
+  built and workload created." *(documented — Camel Security Model: route
+  authors and deployment operators are "fully trusted" and "Code execution
+  by a route author is by design and is not a vulnerability in the
+  framework"; external message senders are the untrusted attacker;
+  `camel.apache.org/manual/security-model.html`. Camel-K boundary
+  application: maintainer, 2026-05-18 — Q3)*
 - **An adversary who already holds RBAC to create/patch Camel K CRs.** By
   design that principal can run code in the target namespace; they are not
   a meaningful adversary at that namespace's trust level (§4.7).
@@ -392,9 +404,13 @@ This is the most important section for an integrator.
   2026-05-18 — Q12)*
 - **No defense for the deployed route.** Camel K does not add
   authentication, TLS, header filtering, or rate limiting to the
-  integration it deploys; the route's exposure is the route author's
-  problem under Apache Camel core's model. *(maintainer, 2026-05-18 — Q3;
-  documented — Camel `security.html`)*
+  integration it deploys; the route's exposure — including DoS via
+  resource exhaustion — is the route author's / operator's problem under
+  Apache Camel core's model. *(documented — Camel Security Model: untrusted
+  external message senders are Camel's "primary attacker model", and "DoS
+  via resource exhaustion" is operator responsibility (Out of scope);
+  `camel.apache.org/manual/security-model.html`. Camel-K boundary
+  application: maintainer, 2026-05-18 — Q3)*
 
 **False friends** (features that look like a security property but are not):
 
@@ -457,7 +473,8 @@ CR author):
    security-context.adoc; stance maintainer, 2026-05-18 — Q11)*
 8. **(CR author / route author)** Apply Apache Camel core's endpoint
    hardening (header filtering, auth, TLS) to any route exposed to
-   untrusted networks. *(documented — Camel `security.html`)*
+   untrusted networks. *(documented — Camel security features catalog,
+   `camel.apache.org/manual/security.html`)*
 
 ---
 
@@ -612,15 +629,20 @@ matching `Qn` tag. All questions below were confirmed as proposed.
 
 ### Non-blocking meta (open — not a security-model claim)
 
-- **Q-meta — Document coexistence & venue.** Apache Camel's
-  `security.html` defers trust-boundary statements to a Camel "Security
-  Model" page that is **not yet reachable**, and Camel K has no
-  `SECURITY.md`. Decision still owned by the docs/PMC: should this
-  document (a) become the canonical Camel K threat model linked from the
-  Camel security pages, (b) be folded into the umbrella Camel Security
-  Model, or (c) sit alongside as a Camel-K expansion — and where should it
-  live (`docs/threat-model.md` is not published by the Antora site)? This
-  does not gate triage and backs no claim; left open by design. → §4.1
+- **Q-meta — Document coexistence & venue.** The Apache Camel **Security
+  Model** is now published and reachable at
+  `camel.apache.org/manual/security-model.html`. Its substance settles
+  the *coexistence* question: it explicitly scopes itself to "Camel …
+  embedded in someone else's application, **not a multi-tenant managed
+  service**" and never addresses the Kubernetes operator / CR / cluster
+  layer. Camel K is exactly that excluded layer, so this document is the
+  **additive Camel-K sub-project expansion (option c)** — not a
+  replacement of, nor folded into, the umbrella model, and not
+  contradicting it (§4.1). What remains a **docs/PMC decision** is purely
+  the *publication venue and linking*: where this lives
+  (`docs/threat-model.md` is not published by the Antora site) and whether
+  the Camel security pages should link to it. This does not gate triage
+  and backs no claim. → §4.1
 
 ---
 
@@ -642,7 +664,11 @@ sidecar is regenerated whenever this file changes.
 | `installation/advanced/multi.adoc` | §4.3, §4.8 (prop 3) |
 | `pkg/resources/config/rbac/*` | §4.5, §4.7, §4.8, §4.10 |
 | `pkg/util/defaults/defaults.go`, `pkg/platform/defaults.go` | §4.1, §4.5a, §4.8 (prop 4) |
-| Apache Camel `security.html`; `security.apache.org/projects/` | §4.1, §4.3, §4.9 |
+| `security.apache.org/projects/` (ASF index lists only "Apache Camel") | §4.1 |
+| Camel Security Model — "Camel … embedded in someone else's application, **not a multi-tenant managed service**" | §4.1 (this doc = the Camel-K expansion for the excluded layer), §4.14 Q-meta |
+| Camel Security Model — route authors & deployment operators are "fully trusted"; "Code execution by a route author is by design and is not a vulnerability" | §4.2, §4.3, §4.9 (central trust statement / route-runtime division) |
+| Camel Security Model — external message senders are the "primary attacker model" | §4.3, §4.9 (deployed-route attack surface is Camel core's) |
+| Camel Security Model — "Out of scope": DoS via resource exhaustion is operator responsibility; documented opt-in insecure options | §4.9, §4.10, §4.5a (`insecure`/`InsecureSkipVerify`) |
 | Maintainer ratification, 2026-05-18 | §4.14 and all *(maintainer)* tags |
 
 > **Self-check status:** every section is substantive; no audit/code-review
