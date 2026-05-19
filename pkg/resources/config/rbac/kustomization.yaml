@@ -25,8 +25,10 @@ resources:
 - builder-role.yaml
 - builder-role-openshift.yaml
 - kamelets-viewer-role.yaml
+- operator-role-leases.yaml
 - registry-clusterrole.yaml
 - builder-role-binding.yaml
 - builder-role-binding-openshift.yaml
 - kamelets-viewer-role-binding.yaml
+- operator-role-binding-leases.yaml
 - registry-clusterrole-binding.yaml

@@ -53,7 +53,6 @@ import (
 	"github.com/spf13/cobra"
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
-	coordination "k8s.io/api/coordination/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -807,23 +806,6 @@ func Annotations(object metav1.Object) map[string]string {
 
 func IntegrationSpec(it *v1.Integration) *v1.IntegrationSpec {
 	return &it.Spec
-}
-
-func Lease(t *testing.T, ctx context.Context, ns string, name string) func() *coordination.Lease {
-	return func() *coordination.Lease {
-		lease := coordination.Lease{}
-		key := ctrl.ObjectKey{
-			Namespace: ns,
-			Name:      name,
-		}
-		err := TestClient(t).Get(ctx, key, &lease)
-		if err != nil && k8serrors.IsNotFound(err) {
-			return nil
-		} else if err != nil {
-			failTest(t, err)
-		}
-		return &lease
-	}
 }
 
 func Nodes(t *testing.T, ctx context.Context) func() []corev1.Node {

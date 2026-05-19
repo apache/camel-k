@@ -22,15 +22,13 @@ metadata:
   labels:
     app: "camel-k"
 rules:
+# We read leases in other namespaces to confirm no other operator is expected to reconcile that resource
 - apiGroups:
   - "coordination.k8s.io"
   resources:
   - leases
   verbs:
-  - create
-  - delete
   - get
   - list
-  - patch
-  - update
-  - watch
+  # Required by master trait: it can be removed, when the master trait (deprecated in 2.9) is no longer supported
+  - create
