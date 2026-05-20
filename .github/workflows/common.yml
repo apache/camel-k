@@ -75,6 +75,7 @@ jobs:
       run: |
         kubectl create ns camel-k
         make install-k8s-global
+        make install-registry
         kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=60s
 
     - name: Run test

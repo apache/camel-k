@@ -43,6 +43,11 @@ You can edit the `Subscription` custom resource, setting the channel you want to
 
 NOTE: Some Kubernetes clusters such as Openshift may let you to perform the same operation from a GUI as well. Refer to the cluster instruction to learn how to perform such action from user interface.
 
+[[bootstrap-configuration]]
+== Setup the operator configuration
+
+Each installation method have its proper way to setup configuration. A common one is the creation of a `Configmap` named `camel-k-operator-configmap-configuration` and a `Secret` named `camel-k-operator-secret-configuration` in the same namespace where the operator is installed. If available, the operator will read the environment variable from these resources.
+
 [[container-registry]]
 == Setup the container registry
 

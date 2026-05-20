@@ -25,8 +25,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 
-	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
-
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -72,12 +70,8 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, *TraitCondition, erro
 }
 func (t *pullSecretTrait) autoConfigure(e *Environment) error {
 	if t.SecretName == "" {
-		s, err := t.resolveSecret(e)
-		if err != nil {
-			return err
-		}
-
-		t.SecretName = s
+		// By default, it uses the registry secret configuration
+		t.SecretName = e.Platform.Registry.Secret
 	}
 
 	//nolint:staticcheck
@@ -157,23 +151,4 @@ func (t *pullSecretTrait) newImagePullerRoleBinding(e *Environment) *rbacv1.Role
 			},
 		},
 	}
-}
-
-func (t *pullSecretTrait) resolveSecret(e *Environment) (string, error) {
-	secret := e.Platform.Registry.Secret
-	if secret == "" {
-		return "", nil
-	}
-
-	key := ctrl.ObjectKey{Namespace: e.Platform.Registry.Organization, Name: secret}
-	obj := corev1.Secret{}
-	if err := t.Client.Get(e.Ctx, key, &obj); err != nil {
-		return "", err
-	}
-
-	if obj.Type != corev1.SecretTypeDockerConfigJson {
-		return "", nil
-	}
-
-	return secret, nil
 }

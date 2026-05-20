@@ -24,7 +24,6 @@ package advanced
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"testing"
 
@@ -33,7 +32,6 @@ import (
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/util/defaults"
 )
 
 func TestCamelCatalogBuilder(t *testing.T) {
@@ -41,11 +39,6 @@ func TestCamelCatalogBuilder(t *testing.T) {
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		InstallOperator(t, ctx, g, ns)
-		g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
-		g.Eventually(PlatformPhase(t, ctx, ns)).Should(Equal(v1.IntegrationPlatformPhaseReady))
-		catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
-		g.Eventually(CamelCatalog(t, ctx, ns, catalogName)).ShouldNot(BeNil())
-		g.Eventually(CamelCatalogPhase(t, ctx, ns, catalogName), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
 
 		// Run an integration with a catalog not compatible
 		// The operator should create the catalog, but fail on reconciliation as it is not compatible

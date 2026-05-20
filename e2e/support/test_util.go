@@ -31,13 +31,13 @@ import (
 	"sync"
 	"testing"
 
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
 	. "github.com/onsi/gomega/gstruct"
 	"github.com/onsi/gomega/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	corev1 "k8s.io/api/core/v1"
 )
 
 var (
@@ -107,7 +107,7 @@ func InstallOperatorWithConf(t *testing.T, ctx context.Context, g *WithT, ns, op
 	)
 	// Let's make sure the operator has been deployed and the platform ready
 	g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
-	g.Eventually(PlatformPhase(t, ctx, ns)).Should(Equal(v1.IntegrationPlatformPhaseReady))
+	g.Eventually(OperatorPodPhase(t, ctx, ns)).Should(Equal(corev1.PodRunning))
 }
 
 // UninstallOperator will delete operator resources from namespace (keeps CRDs).

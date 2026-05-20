@@ -42,7 +42,6 @@ import (
 	. "github.com/apache/camel-k/v2/e2e/support"
 	. "github.com/apache/camel-k/v2/e2e/support/util"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/prometheus/common/model"
 )
 
@@ -197,68 +196,6 @@ func TestMetrics(t *testing.T) {
 			)))
 
 			counter := NewLogCounter(&logs)
-
-			// Count the number of IntegrationPlatform reconciliations
-			platformReconciliations, err := counter.Count(MatchFields(IgnoreExtras, Fields{
-				"LoggerName":       Equal("camel-k.controller.integrationplatform"),
-				"Message":          Equal("Reconciling IntegrationPlatform"),
-				"RequestNamespace": Equal(ns),
-				"RequestName":      Equal(platform.DefaultPlatformName),
-			}))
-			g.Expect(err).To(BeNil())
-
-			// Check it matches the observation in the corresponding metric
-			platformReconciled := getMetric(metrics["camel_k_reconciliation_duration_seconds"],
-				MatchFieldsP(IgnoreExtras, Fields{
-					"Label": ConsistOf(
-						label("group", v1.SchemeGroupVersion.Group),
-						label("version", v1.SchemeGroupVersion.Version),
-						label("kind", "IntegrationPlatform"),
-						label("namespace", ns),
-						label("result", "Reconciled"),
-						label("tag", ""),
-					),
-				}))
-			g.Expect(platformReconciled).NotTo(BeNil())
-			platformReconciledCount := *platformReconciled.Histogram.SampleCount
-			g.Expect(platformReconciledCount).To(BeNumerically(">", 0))
-
-			platformRequeued := getMetric(metrics["camel_k_reconciliation_duration_seconds"],
-				MatchFieldsP(IgnoreExtras, Fields{
-					"Label": ConsistOf(
-						label("group", v1.SchemeGroupVersion.Group),
-						label("version", v1.SchemeGroupVersion.Version),
-						label("kind", "IntegrationPlatform"),
-						label("namespace", ns),
-						label("result", "Requeued"),
-						label("tag", ""),
-					),
-				}))
-			platformRequeuedCount := uint64(0)
-			if platformRequeued != nil {
-				platformRequeuedCount = *platformRequeued.Histogram.SampleCount
-			}
-
-			platformErrored := getMetric(metrics["camel_k_reconciliation_duration_seconds"],
-				MatchFieldsP(IgnoreExtras, Fields{
-					"Label": ConsistOf(
-						label("group", v1.SchemeGroupVersion.Group),
-						label("version", v1.SchemeGroupVersion.Version),
-						label("kind", "IntegrationPlatform"),
-						label("namespace", ns),
-						label("result", "Errored"),
-						label("tag", "PlatformError"),
-					),
-				}))
-			platformErroredCount := uint64(0)
-			if platformErrored != nil {
-				platformErroredCount = *platformErrored.Histogram.SampleCount
-			}
-
-			t.Logf("duration metric (integration platform) platformReconciliations=%d, platformReconciledCount=%d, platformRequeuedCount=%d platformErroredCount=%d",
-				platformReconciliations, platformReconciledCount, platformRequeuedCount, platformErroredCount)
-
-			g.Expect(platformReconciliations).To(BeNumerically("==", platformReconciledCount+platformRequeuedCount+platformErroredCount))
 
 			// Count the number of Integration reconciliations
 			integrationReconciliations, err := counter.Count(MatchFields(IgnoreExtras, Fields{

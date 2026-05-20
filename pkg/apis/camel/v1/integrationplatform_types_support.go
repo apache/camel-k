@@ -57,6 +57,11 @@ func (in *IntegrationPlatformSpec) Configurations() []ConfigurationSpec {
 	return in.Configuration
 }
 
+// GetOperatorID returns the operator id as an annotation.
+func (in *IntegrationPlatform) GetOperatorID() string {
+	return GetAnnotation(OperatorIDAnnotation, in)
+}
+
 // SetOperatorID sets the given operator id as an annotation.
 func (in *IntegrationPlatform) SetOperatorID(operatorID string) {
 	SetAnnotation(&in.ObjectMeta, OperatorIDAnnotation, operatorID)

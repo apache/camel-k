@@ -39,6 +39,7 @@ func TestKamelCLIDebug(t *testing.T) {
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		InstallOperator(t, ctx, g, ns)
+		g.Eventually(OperatorPodPhase(t, ctx, ns)).Should(Equal(corev1.PodRunning))
 
 		t.Run("debug local default port check", func(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml").Execute()).To(Succeed())

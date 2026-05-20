@@ -804,7 +804,16 @@ endif
 	cd $(KUST_TMP)/install/overlays/platform && kustomize edit set namespace $(NAMESPACE)
 	kubectl apply -k $(KUST_TMP)/$(KUSTOMIZE_DIR) --server-side --force-conflicts
 
-install-registry:
+install-k8s-global: DEFAULT_NS="camel-k"
+install-k8s-global: KUSTOMIZE_DIR="install/overlays/kubernetes/descoped"
+install-k8s-global: clone-kustomize-dir set-operator-id set-operator-env install-operator
+
+install-k8s-ns: DEFAULT_NS="default"
+install-k8s-ns: KUSTOMIZE_DIR="install/overlays/kubernetes/namespaced"
+install-k8s-ns: clone-kustomize-dir set-operator-id set-operator-env install-operator
+
+install-registry: NAMESPACE="camel-k"
+install-registry: clone-kustomize-dir
 	@echo "####### Installing container registry..."
 ifdef REGISTRY
 	@echo "INFO: Setting IntegrationPlatform container registry to $(REGISTRY)"
@@ -818,14 +827,6 @@ ifneq ($(MINIKUBE_REGISTRY),"")
 	kubectl apply -k $(KUST_TMP)/install/overlays/platform --server-side -n $(NAMESPACE) --force-conflicts
 endif
 endif
-
-install-k8s-global: DEFAULT_NS="camel-k"
-install-k8s-global: KUSTOMIZE_DIR="install/overlays/kubernetes/descoped"
-install-k8s-global: clone-kustomize-dir set-operator-id set-operator-env install-operator install-registry
-
-install-k8s-ns: DEFAULT_NS="default"
-install-k8s-ns: KUSTOMIZE_DIR="install/overlays/kubernetes/namespaced"
-install-k8s-ns: clone-kustomize-dir set-operator-id set-operator-env install-operator install-registry
 
 uninstall:
 ifdef NAMESPACE

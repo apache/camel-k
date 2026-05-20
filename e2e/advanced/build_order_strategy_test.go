@@ -37,18 +37,10 @@ import (
 
 func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		InstallOperator(t, ctx, g, ns)
-
-		// Update platform with parameters required by this test
-		pl := Platform(t, ctx, ns)()
-		pl.Spec.Build.MaxRunningBuilds = 4
-		pl.Spec.Build.BuildConfiguration.OrderStrategy = v1.BuildOrderStrategyDependencies
-		if err := TestClient(t).Update(ctx, pl); err != nil {
-			t.Error(err)
-			t.FailNow()
-		}
-		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutShort).Should(Equal(v1.IntegrationPlatformPhaseReady))
-
+		InstallOperatorWithConf(t, ctx, g, ns, "", false, map[string]string{
+			"MAX_RUNNING_BUILDS":   "4",
+			"BUILD_ORDER_STRATEGY": string(v1.BuildOrderStrategyDependencies),
+		})
 		integrationA := RandomizedSuffixName("java-a")
 		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", integrationA).Execute()).To(Succeed())
 
@@ -63,7 +55,7 @@ func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
 		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", integrationC, "-d", "camel:cron", "-d", "camel:zipfile").Execute()).To(Succeed())
 
 		integrationZ := RandomizedSuffixName("yaml-z")
-		g.Expect(KamelRun(t, ctx, ns, "files/timer-source.yaml", "--name", integrationZ).Execute()).To(Succeed())
+		g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml", "--name", integrationZ).Execute()).To(Succeed())
 
 		g.Eventually(IntegrationKitName(t, ctx, ns, integrationB), TestTimeoutMedium).ShouldNot(BeEmpty())
 		g.Eventually(IntegrationKitName(t, ctx, ns, integrationC), TestTimeoutMedium).ShouldNot(BeEmpty())
@@ -112,16 +104,9 @@ func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
 
 func TestRunBuildOrderStrategyFIFO(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		InstallOperator(t, ctx, g, ns)
-		// Update platform with parameters required by this test
-		pl := Platform(t, ctx, ns)()
-		pl.Spec.Build.BuildConfiguration.OrderStrategy = v1.BuildOrderStrategyFIFO
-		if err := TestClient(t).Update(ctx, pl); err != nil {
-			t.Error(err)
-			t.FailNow()
-		}
-		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutShort).Should(Equal(v1.IntegrationPlatformPhaseReady))
-
+		InstallOperatorWithConf(t, ctx, g, ns, "", false, map[string]string{
+			"BUILD_ORDER_STRATEGY": string(v1.BuildOrderStrategyFIFO),
+		})
 		integrationA := RandomizedSuffixName("java-a")
 		g.Expect(KamelRun(t, ctx, ns, "files/Java.java",
 			"--name", integrationA,
@@ -135,7 +120,7 @@ func TestRunBuildOrderStrategyFIFO(t *testing.T) {
 		).Execute()).To(Succeed())
 
 		integrationZ := RandomizedSuffixName("yaml-z")
-		g.Expect(KamelRun(t, ctx, ns, "files/timer-source.yaml",
+		g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml",
 			"--name", integrationZ,
 		).Execute()).To(Succeed())
 

@@ -63,14 +63,13 @@ func (action *platformSetupAction) Handle(ctx context.Context, integration *v1.I
 	pl, err := platform.GetForResource(ctx, action.client, integration)
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return nil, err
-	} else if pl != nil {
-		profile, err := determineBestTraitProfile(action.client, integration, pl)
-		if err != nil {
-			return nil, err
-		}
-		//nolint:staticcheck
-		integration.Status.Profile = profile
 	}
+	profile, err := determineBestTraitProfile(action.client, integration, pl)
+	if err != nil {
+		return nil, err
+	}
+	//nolint:staticcheck
+	integration.Status.Profile = profile
 
 	// Change the integration phase to Initialization after traits have been applied
 	// so that traits targeting Initialization phase don't get applied unintentionally
@@ -93,11 +92,11 @@ func determineBestTraitProfile(c client.Client, integration *v1.Integration, p *
 		// Integration already has a profile
 		return integration.Status.Profile, nil
 	}
-	if p.Status.Profile != "" {
+	if p != nil && p.Status.Profile != "" {
 		// Use platform profile if set
 		return p.Status.Profile, nil
 	}
-	if p.Spec.Profile != "" {
+	if p != nil && p.Spec.Profile != "" {
 		// Use platform spec profile if set
 		return p.Spec.Profile, nil
 	}
@@ -107,5 +106,9 @@ func determineBestTraitProfile(c client.Client, integration *v1.Integration, p *
 		return v1.TraitProfileKnative, nil
 	}
 
-	return platform.GetTraitProfile(p), nil
+	if p != nil {
+		return platform.GetTraitProfile(p), nil
+	}
+
+	return v1.TraitProfileKubernetes, nil
 }

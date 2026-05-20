@@ -42,8 +42,7 @@ func TestOperatorRestart(t *testing.T) {
 
 		t.Run("Operator started", func(t *testing.T) {
 			InstallOperator(t, ctx, g, ns)
-			g.Eventually(OperatorPod(t, ctx, ns)).Should(Not(BeNil()))
-			g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutShort).Should(Equal(v1.IntegrationPlatformPhaseReady))
+
 			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
@@ -55,8 +54,8 @@ func TestOperatorRestart(t *testing.T) {
 
 		t.Run("Operator uninstalled", func(t *testing.T) {
 			UninstallOperator(t, ctx, g, ns, "../../")
+
 			g.Eventually(OperatorPod(t, ctx, ns)).Should(BeNil())
-			g.Eventually(Platform(t, ctx, ns)).Should(BeNil())
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
@@ -72,8 +71,7 @@ func TestOperatorRestart(t *testing.T) {
 					"KAMEL_INSTALL_DEFAULT_KAMELETS": "false",
 				},
 			)
-			g.Eventually(OperatorPod(t, ctx, ns)).Should(Not(BeNil()))
-			g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutShort).Should(Equal(v1.IntegrationPlatformPhaseReady))
+
 			g.Consistently(OperatorLogs(t, ctx, ns), 1*time.Minute, 3*time.Second).Should(Not(ContainSubstring("error")))
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))

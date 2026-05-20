@@ -63,6 +63,16 @@ func NewCamelCatalogList() CamelCatalogList {
 	}
 }
 
+// GetOperatorID returns the operator id as an annotation.
+func (c *CamelCatalog) GetOperatorID() string {
+	return GetAnnotation(OperatorIDAnnotation, c)
+}
+
+// SetOperatorID sets the given operator id as an annotation.
+func (c *CamelCatalog) SetOperatorID(operatorID string) {
+	SetAnnotation(&c.ObjectMeta, OperatorIDAnnotation, operatorID)
+}
+
 // GetType --.
 func (c *CamelCatalogCondition) GetType() string {
 	return string(c.Type)

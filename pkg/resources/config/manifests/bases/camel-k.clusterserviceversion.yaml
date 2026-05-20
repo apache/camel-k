@@ -86,22 +86,8 @@ spec:
 
     ## Installation
 
-    You may need to specify the container registry where to store the container images created for the Camel applications.
-    To start using Camel K, install the operator and then create the following `IntegrationPlatform`:
-    ```
-    apiVersion: camel.apache.org/v1
-    kind: IntegrationPlatform
-    metadata:
-      name: camel-k
-      labels:
-        app: "camel-k"
-    spec:
-      build:
-        registry:
-          address: docker.io/my-org
-    ```
-
-    An `IntegrationPlatform` resource is automatically created by default on OpenShift, so you can skip this step when using Openshift cluster.
+    Proceed to the Camel K operator installation via `Subscription` or via GUI.
+    See official Apache Camel K documentation to learn how to configure all the available parameters.
 
     ## Running an Integration
 
@@ -110,8 +96,6 @@ spec:
     apiVersion: camel.apache.org/v1
     kind: Integration
     metadata:
-      annotations:
-        camel.apache.org/operator.id: camel-k
       name: test
     spec:
       flows:

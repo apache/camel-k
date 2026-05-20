@@ -6646,6 +6646,8 @@ This configmap/secret is a resource of the IntegrationKit created, therefore it 
 The content of the maven profile is expected to be a text containing a valid maven profile starting with `<profile>` and ending with `</profile>` that will be integrated as an inline profile in the POM.
 Syntax: [configmap{vbar}secret]:name[/key], where name represents the resource name, key optionally represents the resource key to be filtered (default key value = profile.xml).
 
+Deprecated: will be removed in future versions.
+
 |`tasks` +
 []string
 |

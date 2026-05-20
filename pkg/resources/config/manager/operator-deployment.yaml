@@ -77,6 +77,14 @@ spec:
             # Note: remove the variable to disable the feature.
             - name: CAMEL_MONITOR_OPERATOR_LABEL
               value: "camel.apache.org/monitor"
+          # Attempt to read bootstrap configuration from configmap or secret
+          envFrom:
+            - configMapRef:
+                name: camel-k-operator-configmap-configuration
+                optional: true
+            - secretRef:
+                name: camel-k-operator-secret-configuration
+                optional: true
           livenessProbe:
             httpGet:
               path: /healthz
