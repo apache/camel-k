@@ -47,6 +47,9 @@ func TestUpgrade(t *testing.T) {
 		// We start the test by installing previous version operator
 		lastVersion, ok := os.LookupEnv("LAST_RELEASED_VERSION")
 		g.Expect(ok).To(BeTrue(), "Missing last released version: you need to set it into LAST_RELEASED_VERSION env var")
+
+		// Install previous version
+
 		lastVersionDir := fmt.Sprintf("/tmp/camel-k-v-%s", lastVersion)
 		// We clone and install the previous installed operator
 		// from source with tag
@@ -78,16 +81,37 @@ func TestUpgrade(t *testing.T) {
 		installPrevCmd.Dir = lastVersionDir
 		ExpectExecSucceed(t, g, installPrevCmd)
 
+		// TODO: In 2.11 we should move to this one instead
+		//
+		// kustomizeCmd := exec.Command(
+		// 	"kubectl",
+		// 	"kustomize",
+		// 	"github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v"+lastVersion,
+		// )
+		// output, err := kustomizeCmd.Output()
+		// g.Expect(err).To(BeNil())
+		// modified := strings.ReplaceAll(
+		// 	string(output),
+		// 	"namespace: camel-k",
+		// 	"namespace: "+ns,
+		// )
+		// applyCmd := exec.Command(
+		// 	"kubectl",
+		// 	"apply",
+		// 	"-f",
+		// 	"-",
+		// 	"--server-side",
+		// 	"--force-conflicts",
+		// )
+		// applyCmd.Stdin = strings.NewReader(modified)
+		// ExpectExecSucceed(t, g, applyCmd)
+
 		// Refresh the test client to account for the newly installed CRDs
 		RefreshClient(t)
 		// Check the operator image is the previous one
 		g.Eventually(OperatorImage(t, ctx, ns)).Should(ContainSubstring(lastVersion))
 		// Check the operator pod is running
 		g.Eventually(OperatorPodPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-		// Check the IntegrationPlatform has been reconciled
-		g.Eventually(PlatformPhase(t, ctx, ns)).Should(Equal(v1.IntegrationPlatformPhaseReady))
-		g.Eventually(PlatformVersion(t, ctx, ns)).Should(Equal(lastVersion))
-		lastRuntimeVersion := PlatformRuntimeVersion(t, ctx, ns)()
 
 		// We need a different namespace from the global operator
 		WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsIntegration string) {
@@ -99,6 +123,8 @@ func TestUpgrade(t *testing.T) {
 				Should(Equal(corev1.ConditionTrue))
 			// Check the Integration version
 			g.Eventually(IntegrationVersion(t, ctx, nsIntegration, name)).Should(Equal(lastVersion))
+			// Get the info of the runtime, as we need for further check later
+			lastRuntimeVersion := Integration(t, ctx, nsIntegration, name)().Status.RuntimeVersion
 
 			// Let's upgrade the operator with the newer installation
 			installNextCmd := exec.Command(
@@ -115,10 +141,6 @@ func TestUpgrade(t *testing.T) {
 			g.Eventually(OperatorImage(t, ctx, ns)).Should(ContainSubstring(defaults.Version))
 			// Check the operator pod is running
 			g.Eventually(OperatorPodPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			// Check the IntegrationPlatform has been reconciled
-			g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-			g.Eventually(PlatformVersion(t, ctx, ns), TestTimeoutMedium).Should(Equal(defaults.Version))
-			g.Eventually(PlatformRuntimeVersion(t, ctx, ns), TestTimeoutMedium).Should(Equal(defaults.DefaultRuntimeVersion))
 
 			// Check the Integration hasn't been upgraded
 			g.Consistently(IntegrationVersion(t, ctx, nsIntegration, name), 15*time.Second, 3*time.Second).

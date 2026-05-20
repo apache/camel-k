@@ -213,8 +213,6 @@ func TestMavenProxyNotPresent(t *testing.T) {
 
 		// Should not be able to build
 		g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseError))
-		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionKitAvailable), TestTimeoutShort).
-			Should(Equal(corev1.ConditionFalse))
 	})
 }
 

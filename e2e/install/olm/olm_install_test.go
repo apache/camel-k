@@ -49,8 +49,6 @@ func TestOLMInstallation(t *testing.T) {
 		g.Eventually(CRDs(t)).Should(BeNil(), "No Camel K CRDs should be previously installed for this test")
 		bundleImageName, ok := os.LookupEnv("BUNDLE_IMAGE_NAME")
 		g.Expect(ok).To(BeTrue(), "Missing bundle image: you need to build and push to a container registry and set BUNDLE_IMAGE_NAME env var")
-		containerRegistry, ok := os.LookupEnv("KAMEL_INSTALL_REGISTRY")
-		g.Expect(ok).To(BeTrue(), "Missing local container registry: you need to set it into KAMEL_INSTALL_REGISTRY env var")
 		os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../")
 		// Install staged bundle (it must be available by building it before running the test)
 		// You can build it locally via `make bundle-push` action
@@ -73,15 +71,6 @@ func TestOLMInstallation(t *testing.T) {
 		// Check the operator pod is running
 		g.Eventually(OperatorPodPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		g.Eventually(OperatorImage(t, ctx, ns), TestTimeoutShort).Should(Equal(operatorImage()))
-
-		integrationPlatform := v1.NewIntegrationPlatform(ns, "camel-k")
-		integrationPlatform.Spec.Build.Registry = v1.RegistrySpec{
-			Address:  containerRegistry,
-			Insecure: true,
-		}
-		g.Expect(CreateIntegrationPlatform(t, ctx, &integrationPlatform)).To(Succeed())
-		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-		g.Eventually(PlatformVersion(t, ctx, ns), TestTimeoutMedium).Should(Equal(defaults.Version))
 
 		// Check if restricted security context has been applyed
 		operatorPod := OperatorPod(t, ctx, ns)()

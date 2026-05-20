@@ -25,7 +25,6 @@ package kustomize
 import (
 	"context"
 	"fmt"
-	"os"
 	"os/exec"
 	"testing"
 
@@ -39,13 +38,11 @@ import (
 )
 
 func TestKustomizeNamespaced(t *testing.T) {
-	KAMEL_INSTALL_REGISTRY := os.Getenv("KAMEL_INSTALL_REGISTRY")
 	kustomizeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		// Let's make sure no CRD is yet available in the cluster
 		// as we must make the procedure to install them accordingly
 		g.Eventually(CRDs(t)).Should(BeNil(), "No Camel K CRDs should be previously installed for this test")
-		g.Expect(KAMEL_INSTALL_REGISTRY).NotTo(Equal(""))
 		// We must change a few values in the Kustomize config
 		ExpectExecSucceed(t, g,
 			exec.Command(
@@ -60,21 +57,7 @@ func TestKustomizeNamespaced(t *testing.T) {
 			fmt.Sprintf("%s/overlays/kubernetes/namespaced", kustomizeDir),
 			"--server-side",
 		))
-		ExpectExecSucceed(t, g,
-			exec.Command(
-				"sed",
-				"-i",
-				fmt.Sprintf("s/address: .*/address: %s/", KAMEL_INSTALL_REGISTRY),
-				fmt.Sprintf("%s/overlays/platform/integration-platform.yaml", kustomizeDir),
-			))
-		ExpectExecSucceed(t, g, Kubectl(
-			"apply",
-			"-k",
-			fmt.Sprintf("%s/overlays/platform", kustomizeDir),
-			"--server-side",
-			"-n",
-			ns,
-		))
+
 		// Refresh the test client to account for the newly installed CRDs
 		RefreshClient(t)
 		g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
@@ -93,11 +76,6 @@ func TestKustomizeNamespaced(t *testing.T) {
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation).To(
 			Equal(DefaultOperatorSecurityContext().AllowPrivilegeEscalation),
 		)
-		g.Eventually(Platform(t, ctx, ns)).ShouldNot(BeNil())
-		g.Eventually(PlatformHas(t, ctx, ns, func(pl *v1.IntegrationPlatform) bool {
-			return pl.Status.Build.Registry.Address == KAMEL_INSTALL_REGISTRY
-		}), TestTimeoutShort).Should(BeTrue())
-		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutShort).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		// Test a simple integration is running
 		g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml").Execute()).To(Succeed())
@@ -109,7 +87,6 @@ func TestKustomizeNamespaced(t *testing.T) {
 		UninstallOperator(t, ctx, g, ns, "../../../")
 
 		g.Eventually(OperatorPod(t, ctx, ns)).Should(BeNil())
-		g.Eventually(Platform(t, ctx, ns)).Should(BeNil())
 		g.Eventually(Integration(t, ctx, ns, "yaml"), TestTimeoutShort).ShouldNot(BeNil())
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
@@ -122,13 +99,11 @@ func TestKustomizeNamespaced(t *testing.T) {
 }
 
 func TestKustomizeDescoped(t *testing.T) {
-	KAMEL_INSTALL_REGISTRY := os.Getenv("KAMEL_INSTALL_REGISTRY")
 	kustomizeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		// Let's make sure no CRD is yet available in the cluster
 		// as we must make the procedure to install them accordingly
 		g.Eventually(CRDs(t)).Should(BeNil(), "No Camel K CRDs should be previously installed for this test")
-		g.Expect(KAMEL_INSTALL_REGISTRY).NotTo(Equal(""))
 		// We must change a few values in the Kustomize config
 		ExpectExecSucceed(t, g,
 			exec.Command(
@@ -142,21 +117,6 @@ func TestKustomizeDescoped(t *testing.T) {
 			"-k",
 			fmt.Sprintf("%s/overlays/kubernetes/descoped", kustomizeDir),
 			"--server-side",
-		))
-		ExpectExecSucceed(t, g,
-			exec.Command(
-				"sed",
-				"-i",
-				fmt.Sprintf("s/address: .*/address: %s/", KAMEL_INSTALL_REGISTRY),
-				fmt.Sprintf("%s/overlays/platform/integration-platform.yaml", kustomizeDir),
-			))
-		ExpectExecSucceed(t, g, Kubectl(
-			"apply",
-			"-k",
-			fmt.Sprintf("%s/overlays/platform", kustomizeDir),
-			"--server-side",
-			"-n",
-			ns,
 		))
 
 		// Refresh the test client to account for the newly installed CRDs
@@ -196,8 +156,6 @@ func TestKustomizeDescoped(t *testing.T) {
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation).To(
 			Equal(DefaultOperatorSecurityContext().AllowPrivilegeEscalation),
 		)
-		g.Eventually(Platform(t, ctx, ns)).ShouldNot(BeNil())
-		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutShort).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		// We need a different namespace from the global operator
 		WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsIntegration string) {
@@ -211,7 +169,6 @@ func TestKustomizeDescoped(t *testing.T) {
 			UninstallOperator(t, ctx, g, ns, "../../../")
 
 			g.Eventually(OperatorPod(t, ctx, ns)).Should(BeNil())
-			g.Eventually(Platform(t, ctx, ns)).Should(BeNil())
 			g.Eventually(Integration(t, ctx, nsIntegration, "yaml"), TestTimeoutShort).ShouldNot(BeNil())
 			g.Eventually(IntegrationConditionStatus(t, ctx, nsIntegration, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 

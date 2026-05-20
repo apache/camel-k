@@ -278,6 +278,11 @@ func NewSourceSpec(name string, content string, language Language) SourceSpec {
 	}
 }
 
+// GetOperatorID returns the operator id as an annotation.
+func (in *Integration) GetOperatorID() string {
+	return GetAnnotation(OperatorIDAnnotation, in)
+}
+
 // SetOperatorID sets the given operator id as an annotation.
 func (in *Integration) SetOperatorID(operatorID string) {
 	SetAnnotation(&in.ObjectMeta, OperatorIDAnnotation, operatorID)

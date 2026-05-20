@@ -40,15 +40,6 @@ rules:
   - update
 - apiGroups:
   - ""
-  resources:
-  - configmaps
-  - secrets
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
   - events.k8s.io
   resources:
   - events

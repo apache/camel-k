@@ -26,7 +26,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
@@ -34,6 +33,7 @@ import (
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 )
 
 func TestIntegrationProfile(t *testing.T) {
@@ -61,7 +61,8 @@ func TestIntegrationProfile(t *testing.T) {
 			g.Expect(CreateIntegrationProfile(t, ctx, &integrationProfile)).To(Succeed())
 
 			t.Run("Run integration with global integration profile", func(t *testing.T) {
-				g.Expect(KamelRunWithID(t, ctx, operatorID, ns1, "--name", "limited", "--integration-profile", "ipr-global", "files/yaml.yaml").Execute()).To(Succeed())
+				g.Expect(KamelRunWithID(t, ctx, operatorID, ns1,
+					"--name", "limited", "--integration-profile", "ipr-global", "files/yaml.yaml").Execute()).To(Succeed())
 
 				g.Eventually(IntegrationPod(t, ctx, ns1, "limited"), TestTimeoutMedium).Should(Not(BeNil()))
 				g.Eventually(IntegrationPodHas(t, ctx, ns1, "limited", func(pod *corev1.Pod) bool {

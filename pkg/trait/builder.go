@@ -441,6 +441,7 @@ func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfigurati
 	}
 
 	// User provides a maven profile
+	//nolint:staticcheck
 	if t.MavenProfiles != nil {
 		mavenProfiles := make([]v1.ValueSource, 0)
 		for _, v := range t.MavenProfiles {

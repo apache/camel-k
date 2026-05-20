@@ -35,7 +35,7 @@ import (
 // CreateCatalog --.
 func CreateCatalog(
 	ctx context.Context, client client.Client, namespace string,
-	mavenSpec v1.MavenSpec, timeout time.Duration, runtime v1.RuntimeSpec, extraRepositories []string) (*RuntimeCatalog, error) {
+	mavenSpec v1.MavenSpec, timeout time.Duration, runtime v1.RuntimeSpec, extraRepositories []string, operatorId string) (*RuntimeCatalog, error) {
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	catalog, err := GenerateCatalog(ctx, client, namespace, mavenSpec, runtime, extraRepositories)
@@ -52,6 +52,10 @@ func CreateCatalog(
 	cx.Labels[kubernetes.CamelLabelRuntimeVersion] = runtime.Version
 	cx.Labels[kubernetes.CamelLabelRuntimeProvider] = string(runtime.Provider)
 	cx.Labels["camel.apache.org/catalog.generated"] = "true"
+
+	if operatorId != "" {
+		cx.SetOperatorID(operatorId)
+	}
 
 	if err := client.Create(ctx, &cx); err != nil {
 		if k8serrors.IsAlreadyExists(err) {

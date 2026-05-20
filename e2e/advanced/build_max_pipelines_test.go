@@ -24,6 +24,7 @@ package advanced
 
 import (
 	"context"
+	"strconv"
 	"testing"
 	"time"
 
@@ -41,21 +42,10 @@ type kitOptions struct {
 
 func kitMaxBuildLimit(t *testing.T, maxRunningBuilds int32, condition func(runningBuilds int) bool, buildOrderStrategy v1.BuildOrderStrategy) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		InstallOperator(t, ctx, g, ns)
-
-		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutShort).Should(Equal(v1.IntegrationPlatformPhaseReady))
-		pl := Platform(t, ctx, ns)()
-		// set maximum number of running builds and order strategy
-		pl.Spec.Build.MaxRunningBuilds = maxRunningBuilds
-		pl.Spec.Build.BuildConfiguration.OrderStrategy = buildOrderStrategy
-		if err := TestClient(t).Update(ctx, pl); err != nil {
-			t.Error(err)
-			t.FailNow()
-		}
-		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutShort).Should(Equal(v1.IntegrationPlatformPhaseReady))
-		g.Eventually(PlatformHas(t, ctx, ns, func(pl *v1.IntegrationPlatform) bool {
-			return pl.Status.Build.MaxRunningBuilds == maxRunningBuilds
-		}), TestTimeoutShort).Should(BeTrue())
+		InstallOperatorWithConf(t, ctx, g, ns, "", false, map[string]string{
+			"MAX_RUNNING_BUILDS":   strconv.FormatInt(int64(maxRunningBuilds), 10),
+			"BUILD_ORDER_STRATEGY": string(buildOrderStrategy),
+		})
 
 		buildA := "integration-a"
 		buildB := "integration-b"
@@ -134,16 +124,10 @@ func TestKitMaxBuildLimitDependencies(t *testing.T) {
 func TestMaxBuildLimitWaitingBuilds(t *testing.T) {
 	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		InstallOperator(t, ctx, g, ns)
-
-		pl := Platform(t, ctx, ns)()
-		// set maximum number of running builds and order strategy
-		pl.Spec.Build.MaxRunningBuilds = 1
-		pl.Spec.Build.BuildConfiguration.OrderStrategy = v1.BuildOrderStrategyFIFO
-		if err := TestClient(t).Update(ctx, pl); err != nil {
-			t.Error(err)
-			t.FailNow()
-		}
+		InstallOperatorWithConf(t, ctx, g, ns, "", false, map[string]string{
+			"MAX_RUNNING_BUILDS":   "1",
+			"BUILD_ORDER_STRATEGY": string(v1.BuildOrderStrategyFIFO),
+		})
 
 		buildA := "integration-a"
 		buildB := "integration-b"

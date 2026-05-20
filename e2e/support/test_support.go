@@ -1881,8 +1881,6 @@ func Build(t *testing.T, ctx context.Context, ns, name string) func() *v1.Build 
 			return nil
 		} else if err != nil && k8serrors.IsNotFound(err) && k8serrors.IsNotFound(err) {
 			return nil
-		} else {
-			log.Error(err, "Error while retrieving build "+name)
 		}
 
 		return build
@@ -1948,47 +1946,6 @@ func BuildsRunning(predicates ...func() v1.BuildPhase) func() int {
 			}
 		}
 		return runningBuilds
-	}
-}
-
-func HasPlatform(t *testing.T, ctx context.Context, ns string) func() bool {
-	return func() bool {
-		lst := v1.NewIntegrationPlatformList()
-		if err := TestClient(t).List(ctx, &lst, ctrl.InNamespace(ns)); err != nil {
-			return false
-		}
-		return len(lst.Items) > 0
-	}
-}
-
-func Platform(t *testing.T, ctx context.Context, ns string) func() *v1.IntegrationPlatform {
-	return func() *v1.IntegrationPlatform {
-		lst := v1.NewIntegrationPlatformList()
-		if err := TestClient(t).List(ctx, &lst, ctrl.InNamespace(ns)); err != nil {
-			return nil
-		}
-		if len(lst.Items) == 0 {
-			return nil
-		}
-		if len(lst.Items) > 1 {
-			failTest(t, fmt.Errorf("multiple integration platforms found in namespace %q", ns))
-		}
-		return &lst.Items[0]
-	}
-}
-
-func PlatformByName(t *testing.T, ctx context.Context, ns string, name string) func() *v1.IntegrationPlatform {
-	return func() *v1.IntegrationPlatform {
-		lst := v1.NewIntegrationPlatformList()
-		if err := TestClient(t).List(ctx, &lst, ctrl.InNamespace(ns)); err != nil {
-			failTest(t, err)
-		}
-		for _, p := range lst.Items {
-			if p.Name == name {
-				return &p
-			}
-		}
-		return nil
 	}
 }
 
@@ -2137,141 +2094,6 @@ func CamelCatalogList(t *testing.T, ctx context.Context, ns string) func() []v1.
 		}
 		return lst.Items
 	}
-}
-
-func DeletePlatform(t *testing.T, ctx context.Context, ns string) func() bool {
-	return func() bool {
-		pl := Platform(t, ctx, ns)()
-		if pl == nil {
-			return true
-		}
-		if err := TestClient(t).Delete(ctx, pl); err != nil {
-			log.Error(err, "Got error while deleting the platform")
-			return false
-		}
-		return true
-	}
-}
-
-func UpdatePlatform(t *testing.T, ctx context.Context, ns string, upd func(ip *v1.IntegrationPlatform)) error {
-	ip := PlatformByName(t, ctx, ns, platform.DefaultPlatformName)()
-	if ip == nil {
-		return fmt.Errorf("unable to locate Integration Platform %s in %s", platform.DefaultPlatformName, ns)
-	}
-	target := ip.DeepCopy()
-	upd(target)
-	// For some reason, full patch fails on some clusters
-	p, err := patch.MergePatch(ip, target)
-	if err != nil {
-		return err
-	} else if len(p) == 0 {
-		return nil
-	}
-	return TestClient(t).Patch(ctx, target, ctrl.RawPatch(types.MergePatchType, p))
-}
-
-func CreateIntegrationPlatform(t *testing.T, ctx context.Context, ip *v1.IntegrationPlatform) error {
-	return TestClient(t).Create(ctx, ip)
-}
-
-func PlatformVersion(t *testing.T, ctx context.Context, ns string) func() string {
-	return func() string {
-		p := Platform(t, ctx, ns)()
-		if p == nil {
-			return ""
-		}
-		return p.Status.Version
-	}
-}
-
-func PlatformRuntimeVersion(t *testing.T, ctx context.Context, ns string) func() string {
-	return func() string {
-		p := Platform(t, ctx, ns)()
-		if p == nil {
-			return ""
-		}
-		return p.Status.Build.RuntimeVersion
-	}
-}
-
-func PlatformPhase(t *testing.T, ctx context.Context, ns string) func() v1.IntegrationPlatformPhase {
-	return func() v1.IntegrationPlatformPhase {
-		p := Platform(t, ctx, ns)()
-		if p == nil {
-			return ""
-		}
-		return p.Status.Phase
-	}
-}
-
-func SelectedPlatformPhase(t *testing.T, ctx context.Context, ns string, name string) func() v1.IntegrationPlatformPhase {
-	return func() v1.IntegrationPlatformPhase {
-		p := PlatformByName(t, ctx, ns, name)()
-		if p == nil {
-			return ""
-		}
-		return p.Status.Phase
-	}
-}
-
-func PlatformHas(t *testing.T, ctx context.Context, ns string, predicate func(pl *v1.IntegrationPlatform) bool) func() bool {
-	return func() bool {
-		pl := Platform(t, ctx, ns)()
-		if pl == nil {
-			return false
-		}
-		return predicate(pl)
-	}
-}
-
-func PlatformCondition(t *testing.T, ctx context.Context, ns string, conditionType v1.IntegrationPlatformConditionType) func() *v1.IntegrationPlatformCondition {
-	return func() *v1.IntegrationPlatformCondition {
-		p := Platform(t, ctx, ns)()
-		if p == nil {
-			return nil
-		}
-		return p.Status.GetCondition(conditionType)
-	}
-}
-
-func PlatformConditionStatus(t *testing.T, ctx context.Context, ns string, conditionType v1.IntegrationPlatformConditionType) func() corev1.ConditionStatus {
-	return func() corev1.ConditionStatus {
-		c := PlatformCondition(t, ctx, ns, conditionType)()
-		if c == nil {
-			return "Unknown"
-		}
-		return c.Status
-	}
-}
-
-func PlatformProfile(t *testing.T, ctx context.Context, ns string) func() v1.TraitProfile {
-	return func() v1.TraitProfile {
-		p := Platform(t, ctx, ns)()
-		if p == nil {
-			return ""
-		}
-		return p.Status.Profile
-	}
-}
-
-func PlatformTimeout(t *testing.T, ctx context.Context, ns string) func() *metav1.Duration {
-	return func() *metav1.Duration {
-		p := Platform(t, ctx, ns)()
-		if p == nil {
-			return &metav1.Duration{}
-		}
-		return p.Status.Build.Timeout
-	}
-}
-
-func AssignPlatformToOperator(t *testing.T, ctx context.Context, ns, operator string) error {
-	pl := Platform(t, ctx, ns)()
-	if pl == nil {
-		return errors.New("cannot assign platform to operator: no platform found")
-	}
-
-	pl.SetOperatorID(operator)
-	return TestClient(t).Update(ctx, pl)
 }
 
 func CRDs(t *testing.T) func() []metav1.APIResource {
@@ -2560,78 +2382,9 @@ func ClusterDomainName(t *testing.T, ctx context.Context) (string, error) {
 	return dns.Spec.BaseDomain, nil
 }
 
-// CreateKamelPodWithIntegrationSource generates and deploy a Pod from current Camel K controller image that will run a `kamel xxxx` command.
-// The integration parameter represent an Integration source file contained in a ConfigMap or Secret defined and mounted on the as a Volume.
-func CreateKamelPodWithIntegrationSource(t *testing.T, ctx context.Context, ns string, name string, integration v1.ValueSource, command ...string) error {
-
-	var volumes []corev1.Volume
-	if integration.SecretKeyRef != nil {
-		volumes = []corev1.Volume{
-			{
-				Name: "integration-source-volume",
-				VolumeSource: corev1.VolumeSource{
-					Secret: &corev1.SecretVolumeSource{
-						SecretName: integration.SecretKeyRef.Name,
-					},
-				},
-			},
-		}
-	} else {
-		volumes = []corev1.Volume{
-			{
-				Name: "integration-source-volume",
-				VolumeSource: corev1.VolumeSource{
-					ConfigMap: &corev1.ConfigMapVolumeSource{
-						LocalObjectReference: integration.ConfigMapKeyRef.LocalObjectReference,
-					},
-				},
-			},
-		}
-	}
-
-	var volumeMounts []corev1.VolumeMount
-	volumeMounts = []corev1.VolumeMount{
-		{
-			Name:      "integration-source-volume",
-			MountPath: "/tmp/",
-			ReadOnly:  true,
-		},
-	}
-
-	args := command
-	for _, hook := range KamelHooks {
-		args = hook(args)
-	}
-	pod := corev1.Pod{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Pod",
-			APIVersion: corev1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: ns,
-			Name:      name,
-		},
-		Spec: corev1.PodSpec{
-			ServiceAccountName: "camel-k-operator",
-			RestartPolicy:      corev1.RestartPolicyNever,
-			Containers: []corev1.Container{
-				{
-					Name:         "kamel-runner",
-					Image:        TestImageName + ":" + TestImageVersion,
-					Command:      append([]string{"kamel"}, args...),
-					VolumeMounts: volumeMounts,
-				},
-			},
-			Volumes: volumes,
-		},
-	}
-	return TestClient(t).Create(ctx, &pod)
-}
-
 /*
-	Knative
+Knative
 */
-
 func CreateKnativeChannel(t *testing.T, ctx context.Context, ns string, name string) func() error {
 	return func() error {
 		channel := messaging.InMemoryChannel{

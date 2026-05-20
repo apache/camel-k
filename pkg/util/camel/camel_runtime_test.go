@@ -53,6 +53,7 @@ func TestCreateCatalog(t *testing.T) {
 		platform.SingletonPlatform.BuildTimeout,
 		v1.RuntimeSpec{Provider: v1.RuntimeProviderQuarkus, Version: defaults.DefaultRuntimeVersion},
 		nil,
+		"",
 	)
 	require.NoError(t, err)
 	assert.NotNil(t, catalog)

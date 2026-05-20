@@ -146,7 +146,7 @@ func (action *createAction) handleNewCatalog(ctx context.Context, platform *v1.I
 	if catalog == nil {
 		cat, err := camel.CreateCatalog(
 			ctx, action.client, platform.Namespace, platform.Status.Build.Maven,
-			platform.Status.Build.GetTimeout().Duration, runtimeSpec, nil)
+			platform.Status.Build.GetTimeout().Duration, runtimeSpec, nil, platform.GetOperatorID())
 		if err != nil {
 			action.L.Error(err, "IntegrationPlatform unable to create Camel catalog",
 				"runtime-version", runtimeSpec.Version, "runtime-provider", runtimeSpec.Provider)

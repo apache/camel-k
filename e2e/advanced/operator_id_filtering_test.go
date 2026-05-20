@@ -42,12 +42,10 @@ func TestOperatorIDFiltering(t *testing.T) {
 		WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsop1 string) {
 			operator1 := "operator-1"
 			InstallOperatorWithConf(t, ctx, g, nsop1, operator1, true, nil)
-			g.Eventually(PlatformPhase(t, ctx, nsop1), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 			WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsop2 string) {
 				operator2 := "operator-2"
 				InstallOperatorWithConf(t, ctx, g, nsop2, operator2, true, nil)
-				g.Eventually(PlatformPhase(t, ctx, nsop2), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 				t.Run("Operators ignore non-scoped integrations", func(t *testing.T) {
 					g.Expect(KamelRunWithID(t, ctx, "operator-x", ns, "files/yaml.yaml", "--name", "untouched").Execute()).To(Succeed())

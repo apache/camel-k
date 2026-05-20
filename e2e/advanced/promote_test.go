@@ -43,7 +43,6 @@ func TestKamelCLIPromote(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsDev string) {
 		operatorDevID := "camel-k-cli-promote-dev"
 		InstallOperatorWithConf(t, ctx, g, nsDev, operatorDevID, false, nil)
-		g.Eventually(SelectedPlatformPhase(t, ctx, nsDev, operatorDevID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		// Dev content configmap
 		var cmData = make(map[string]string)
@@ -89,7 +88,6 @@ func TestKamelCLIPromote(t *testing.T) {
 		WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsProd string) {
 			operatorProdID := "camel-k-cli-promote-prod"
 			InstallOperatorWithConf(t, ctx, g, nsProd, operatorProdID, false, nil)
-			g.Eventually(PlatformPhase(t, ctx, nsProd), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 			// Prod content configmap
 			var cmData = make(map[string]string)

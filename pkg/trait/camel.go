@@ -29,6 +29,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -181,14 +182,27 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment) error {
 		if exactVersionRegexp.MatchString(t.runtimeVersion) {
 			mavenSpec := e.Platform.Maven.MavenSpec
 			var extraRepositories []string
-			if e.Integration != nil && e.Integration.Spec.Repositories != nil {
-				extraRepositories = append(extraRepositories, e.Integration.Spec.Repositories...)
+			// If the resource is targeting a specific operator, then, we must
+			// provide the same setting to the catalog
+			operatorId := ""
+			if e.Integration != nil {
+				if e.Integration.GetOperatorID() != "" {
+					operatorId = e.Integration.GetOperatorID()
+				}
+				if e.Integration.Spec.Repositories != nil {
+					extraRepositories = append(extraRepositories, e.Integration.Spec.Repositories...)
+				}
 			}
-			if e.IntegrationKit != nil && e.IntegrationKit.Spec.Repositories != nil {
-				extraRepositories = append(extraRepositories, e.IntegrationKit.Spec.Repositories...)
+			if e.IntegrationKit != nil {
+				if e.IntegrationKit.GetOperatorID() != "" {
+					operatorId = e.IntegrationKit.GetOperatorID()
+				}
+				if e.IntegrationKit.Spec.Repositories != nil {
+					extraRepositories = append(extraRepositories, e.IntegrationKit.Spec.Repositories...)
+				}
 			}
 			catalog, err = camel.CreateCatalog(e.Ctx, e.Client, catalogNamespace,
-				mavenSpec, e.Platform.BuildTimeout, runtime, extraRepositories)
+				mavenSpec, platform.DefaultBuildTimeout, runtime, extraRepositories, operatorId)
 			if err != nil {
 				return err
 			}
