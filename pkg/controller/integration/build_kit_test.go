@@ -130,12 +130,19 @@ func TestCamelBuildKitKitSetOnIntegration(t *testing.T) {
 	// Move IntegrationKit phase to ready status
 	it.Status.Phase = v1.IntegrationPhaseBuildingKit
 	ik.Status.Phase = v1.IntegrationKitPhaseError
+	ik.Status.Failure = &v1.Failure{
+		Reason: "Pipeline tasks unavailable when using `routine` platform build strategy: use `pod` instead.",
+		Time:   metav1.Now(),
+	}
 	c, err = internal.NewFakeClient(it, ik)
 	require.NoError(t, err)
 	a.InjectClient(c)
 	handledIt, err = a.Handle(context.TODO(), it)
 	require.NoError(t, err)
 	assert.Equal(t, v1.IntegrationPhaseError, handledIt.Status.Phase)
+	kitAvailable := handledIt.Status.GetCondition(v1.IntegrationConditionKitAvailable)
+	require.NotNil(t, kitAvailable)
+	assert.Contains(t, kitAvailable.Message, "Pipeline tasks unavailable when using `routine` platform build strategy: use `pod` instead.")
 
 	// Remove IntegrationKit
 	it.Status.Phase = v1.IntegrationPhaseBuildingKit
