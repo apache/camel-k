@@ -36,6 +36,12 @@ fi
 # Refresh catalog sets. We can clean any leftover as well.
 rm -f ${rootdir}/pkg/resources/resources/camel-catalog-*
 
+if ! command -v mvn &> /dev/null
+then
+    echo "Maven (mvn) is required but not installed."
+    exit 1
+fi
+
 mvn -q dependency:copy -Dartifact="org.apache.camel.k:camel-k-catalog:$runtime_version:yaml:catalog" \
   -Dmdep.useBaseVersion=true \
   -DoutputDirectory=${rootdir}/resources/ \
