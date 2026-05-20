@@ -198,6 +198,8 @@ func TestCustomTaskBuilderTraitInvalidStrategy(t *testing.T) {
 	assert.Equal(t, v1.IntegrationKitPhaseError, env.IntegrationKit.Status.Phase)
 	assert.Equal(t, corev1.ConditionFalse, env.IntegrationKit.Status.Conditions[0].Status)
 	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Type, v1.IntegrationKitConditionType("IntegrationKitTasksValid"))
+	require.NotNil(t, env.IntegrationKit.Status.Failure)
+	assert.Equal(t, "Pipeline tasks unavailable when using `routine` platform build strategy: use `pod` instead.", env.IntegrationKit.Status.Failure.Reason)
 }
 
 func TestCustomTaskBuilderTraitInvalidStrategyOverride(t *testing.T) {
@@ -213,6 +215,8 @@ func TestCustomTaskBuilderTraitInvalidStrategyOverride(t *testing.T) {
 	assert.Equal(t, v1.IntegrationKitPhaseError, env.IntegrationKit.Status.Phase)
 	assert.Equal(t, corev1.ConditionFalse, env.IntegrationKit.Status.Conditions[0].Status)
 	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Type, v1.IntegrationKitConditionType("IntegrationKitTasksValid"))
+	require.NotNil(t, env.IntegrationKit.Status.Failure)
+	assert.Equal(t, "Pipeline tasks unavailable when using `routine` platform build strategy: use `pod` instead.", env.IntegrationKit.Status.Failure.Reason)
 }
 
 func TestMavenProfilesBuilderTrait(t *testing.T) {

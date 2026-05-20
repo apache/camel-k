@@ -29,6 +29,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -336,6 +337,10 @@ func failIntegrationKit(e *Environment, conditionType v1.IntegrationKitCondition
 	if e.IntegrationKit != nil {
 		e.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseError
 		e.IntegrationKit.Status.SetCondition(conditionType, status, reason, message)
+		e.IntegrationKit.Status.Failure = &v1.Failure{
+			Reason: message,
+			Time:   metav1.Now(),
+		}
 		if err := e.Client.Status().Update(e.Ctx, e.IntegrationKit); err != nil {
 			return err
 		}
