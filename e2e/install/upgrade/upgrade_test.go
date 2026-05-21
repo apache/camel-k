@@ -47,36 +47,25 @@ func TestUpgrade(t *testing.T) {
 		// We start the test by installing previous version operator
 		lastVersion, ok := os.LookupEnv("LAST_RELEASED_VERSION")
 		g.Expect(ok).To(BeTrue(), "Missing last released version: you need to set it into LAST_RELEASED_VERSION env var")
-		lastVersionDir := fmt.Sprintf("/tmp/camel-k-v-%s", lastVersion)
-		// We clone and install the previous installed operator
-		// from source with tag
-		ExpectExecSucceed(t, g,
-			exec.Command(
-				"rm",
-				"-rf",
-				lastVersionDir,
-			))
-		ExpectExecSucceed(t, g,
-			exec.Command(
-				"git",
-				"clone",
-				"https://github.com/apache/camel-k.git",
-				lastVersionDir,
-			))
-		checkoutCmd := exec.Command(
-			"git",
-			"checkout",
-			fmt.Sprintf("v%s", lastVersion),
-		)
-		checkoutCmd.Dir = lastVersionDir
-		ExpectExecSucceed(t, g, checkoutCmd)
-		installPrevCmd := exec.Command(
-			"make",
-			"install-k8s-global",
-			fmt.Sprintf("NAMESPACE=%s", ns),
-		)
-		installPrevCmd.Dir = lastVersionDir
-		ExpectExecSucceed(t, g, installPrevCmd)
+		// We install the previous operator directly from the git tag using Kustomize
+		kustomizeDir, err := os.MkdirTemp("", "camel-k-upgrade-*")
+		g.Expect(err).To(BeNil())
+		defer os.RemoveAll(kustomizeDir)
+
+		kustomization := fmt.Sprintf(`namespace: %s
+resources:
+- github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v%s
+`, ns, lastVersion)
+
+		err = os.WriteFile(fmt.Sprintf("%s/kustomization.yaml", kustomizeDir), []byte(kustomization), 0o644)
+		g.Expect(err).To(BeNil())
+
+		ExpectExecSucceed(t, g, Kubectl(
+			"apply",
+			"-k",
+			kustomizeDir,
+			"--server-side",
+		))
 
 		// Refresh the test client to account for the newly installed CRDs
 		RefreshClient(t)
