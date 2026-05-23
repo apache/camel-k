@@ -25,8 +25,14 @@ const (
 	// Version --
 	Version = "2.11.0-SNAPSHOT"
 
+	// DefaultRuntimeProvider --
+	DefaultRuntimeProvider = "plain-quarkus"
+
 	// DefaultRuntimeVersion --
-	DefaultRuntimeVersion = "3.15.3"
+	DefaultRuntimeVersion = "3.35.1"
+
+	// CamelKRuntimeCatalogVersion --
+	CamelKRuntimeCatalogVersion = "3.15.3"
 
 	// baseImage --
 	baseImage = "eclipse-temurin:17-jdk@sha256:b04a8c5d46e210873ffd1af6ad5f4d62c69ed3a6736993556eae60bba1373a23"

@@ -63,7 +63,7 @@ func (action *createAction) Handle(ctx context.Context, platform *v1.Integration
 	}
 
 	// if bundled version, load catalog spec from resources
-	if platform.Status.Build.RuntimeVersion == defaults.DefaultRuntimeVersion {
+	if platform.Status.Build.RuntimeVersion == defaults.CamelKRuntimeCatalogVersion {
 		if platform, err = action.handleBundledCatalog(ctx, platform, catalog); err != nil {
 			return platform, err
 		}

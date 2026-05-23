@@ -2042,7 +2042,7 @@ func DeleteCamelCatalog(t *testing.T, ctx context.Context, ns, name string) func
 
 func DefaultCamelCatalogPhase(t *testing.T, ctx context.Context, ns string) func() v1.CamelCatalogPhase {
 	return func() v1.CamelCatalogPhase {
-		catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
+		catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.CamelKRuntimeCatalogVersion))
 		c := CamelCatalog(t, ctx, ns, catalogName)()
 		if c == nil {
 			return ""

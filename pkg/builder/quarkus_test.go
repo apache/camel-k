@@ -231,7 +231,7 @@ func TestBuildQuarkusRunner(t *testing.T) {
 	c, err := internal.NewFakeClient(&v1.CamelCatalog{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "default",
-			Name:      "camel-catalog-" + defaults.DefaultRuntimeVersion,
+			Name:      "camel-catalog-" + defaults.CamelKRuntimeCatalogVersion,
 		},
 		Spec: v1.CamelCatalogSpec{
 			Runtime: defaultCatalog.Runtime,
@@ -256,7 +256,7 @@ func TestBuildQuarkusRunner(t *testing.T) {
 			Dependencies: []string{"mvn:org.apache.camel.k:camel-k-runtime"},
 		},
 	}
-	if strings.Contains(defaults.DefaultRuntimeVersion, "SNAPSHOT") {
+	if strings.Contains(defaults.CamelKRuntimeCatalogVersion, "SNAPSHOT") {
 		builderContext.Build.Maven.Repositories = []v1.Repository{
 			{
 				ID:   "APACHE-SNAPSHOT",
@@ -304,7 +304,7 @@ func TestBuildQuarkusRunner(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotEmpty(t, builderContext.Artifacts)
 	camelRuntimeDepFound := false
-	expectedArtifact := fmt.Sprintf("org.apache.camel.k.camel-k-runtime-%s.jar", defaults.DefaultRuntimeVersion)
+	expectedArtifact := fmt.Sprintf("org.apache.camel.k.camel-k-runtime-%s.jar", defaults.CamelKRuntimeCatalogVersion)
 	for _, artifact := range builderContext.Artifacts {
 		if artifact.ID == expectedArtifact {
 			camelRuntimeDepFound = true

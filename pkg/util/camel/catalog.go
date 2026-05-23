@@ -65,7 +65,7 @@ func catalogForRuntimeProvider(provider v1.RuntimeProvider) (*RuntimeCatalog, er
 	}
 
 	return findBestMatch(catalogs, v1.RuntimeSpec{
-		Version:  defaults.DefaultRuntimeVersion,
+		Version:  defaults.CamelKRuntimeCatalogVersion,
 		Provider: provider,
 		Metadata: make(map[string]string),
 	})
