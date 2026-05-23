@@ -50,7 +50,7 @@ func TestRuntimeContainsEmbeddedArtifacts(t *testing.T) {
 	catalog, err := DefaultCatalog()
 	require.NoError(t, err)
 
-	assert.Equal(t, defaults.DefaultRuntimeVersion, catalog.Runtime.Version)
+	assert.Equal(t, defaults.CamelKRuntimeCatalogVersion, catalog.Runtime.Version)
 
 	artifact := catalog.GetArtifactByScheme("knative")
 	assert.Equal(t, 1, len(artifact.Schemes))
@@ -60,4 +60,10 @@ func TestRuntimeContainsEmbeddedArtifacts(t *testing.T) {
 	scheme, found := catalog.GetScheme("knative")
 	assert.True(t, found)
 	assert.True(t, scheme.HTTP)
+}
+
+func TestDefaultCatalog(t *testing.T) {
+	catalog, err := DefaultCatalog()
+	require.Nil(t, err)
+	assert.NotNil(t, catalog)
 }

@@ -64,7 +64,7 @@ func TestIntegrationBuildSubmitted(t *testing.T) {
 		Spec: v1.CamelCatalogSpec{
 			Runtime: v1.RuntimeSpec{
 				Provider: v1.RuntimeProviderQuarkus,
-				Version:  defaults.DefaultRuntimeVersion,
+				Version:  defaults.CamelKRuntimeCatalogVersion,
 			},
 		},
 	}

@@ -48,7 +48,7 @@ func TestDefaultRuntimeSpec(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, v1.IntegrationPlatformPhaseCreating, answer.Status.Phase)
 	assert.Equal(t, defaults.DefaultRuntimeVersion, answer.Status.Build.RuntimeVersion)
-	assert.Equal(t, v1.RuntimeProviderQuarkus, answer.Status.Build.RuntimeProvider)
+	assert.Equal(t, v1.RuntimeProviderPlainQuarkus, answer.Status.Build.RuntimeProvider)
 }
 
 func TestUserRuntimeSpec(t *testing.T) {

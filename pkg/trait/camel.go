@@ -77,6 +77,11 @@ func (t *camelTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	}
 
 	if t.RuntimeVersion == "" {
+		t.runtimeProvider = determineRuntimeProvider(e)
+	} else {
+		t.runtimeProvider = t.RuntimeProvider
+	}
+	if t.RuntimeVersion == "" {
 		if runtimeVersion, err := determineRuntimeVersion(e); err != nil {
 			return false, nil, err
 		} else {
@@ -84,12 +89,6 @@ func (t *camelTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		}
 	} else {
 		t.runtimeVersion = t.RuntimeVersion
-	}
-
-	if t.RuntimeProvider == "" {
-		t.runtimeProvider = "quarkus"
-	} else {
-		t.runtimeProvider = t.RuntimeProvider
 	}
 
 	var cond *TraitCondition
@@ -167,7 +166,7 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment) error {
 	if runtime.Provider == v1.RuntimeProviderPlainQuarkus {
 		// We need this workaround to load the last existing catalog
 		// TODO: this part will be subject to future refactoring
-		runtime.Version = defaults.DefaultRuntimeVersion
+		runtime.Version = defaults.CamelKRuntimeCatalogVersion
 	}
 
 	catalog, err := camel.LoadCatalog(e.Ctx, e.Client, catalogNamespace, runtime)
@@ -240,6 +239,20 @@ func determineRuntimeVersion(e *Environment) (string, error) {
 	}
 
 	return "", errors.New("unable to determine runtime version")
+}
+
+func determineRuntimeProvider(e *Environment) string {
+	if e.Integration != nil && e.Integration.Status.RuntimeProvider != "" {
+		return string(e.Integration.Status.RuntimeProvider)
+	}
+	if e.IntegrationKit != nil && e.IntegrationKit.Status.RuntimeProvider != "" {
+		return string(e.IntegrationKit.Status.RuntimeProvider)
+	}
+	if e.IntegrationProfile != nil && e.IntegrationProfile.Spec.Build.RuntimeProvider != "" {
+		return string(e.IntegrationProfile.Spec.Build.RuntimeProvider)
+	}
+
+	return defaults.DefaultRuntimeProvider
 }
 
 func (t *camelTrait) computeUserProperties(e *Environment) []ctrl.Object {

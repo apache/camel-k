@@ -301,7 +301,7 @@ func testDefaultIntegrationPhaseTraitsSetting(t *testing.T, phase v1.Integration
 		},
 	}
 	// Load the default catalog
-	camelCatalogData, err := resources.Resource(fmt.Sprintf("/resources/camel-catalog-%s.yaml", defaults.DefaultRuntimeVersion))
+	camelCatalogData, err := resources.Resource(fmt.Sprintf("/resources/camel-catalog-%s.yaml", defaults.CamelKRuntimeCatalogVersion))
 	require.NoError(t, err)
 	var cat v1.CamelCatalog
 	err = yaml.Unmarshal(camelCatalogData, &cat)
@@ -388,7 +388,7 @@ func TestIntegrationTraitsSetting(t *testing.T) {
 		},
 	}
 	// Load the default catalog
-	camelCatalogData, err := resources.Resource(fmt.Sprintf("/resources/camel-catalog-%s.yaml", defaults.DefaultRuntimeVersion))
+	camelCatalogData, err := resources.Resource(fmt.Sprintf("/resources/camel-catalog-%s.yaml", defaults.CamelKRuntimeCatalogVersion))
 	require.NoError(t, err)
 	var cat v1.CamelCatalog
 	err = yaml.Unmarshal(camelCatalogData, &cat)

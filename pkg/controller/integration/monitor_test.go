@@ -122,6 +122,7 @@ func TestMonitorFailureIntegration(t *testing.T) {
 	require.NoError(t, err)
 
 	// simulate a trait execution failure
+	it.Status.RuntimeProvider = v1.RuntimeProviderQuarkus
 	it.Status.RuntimeVersion = "0.0.0"
 
 	a := monitorAction{}
@@ -150,7 +151,7 @@ func nominalEnvironment() (client.Client, *v1.Integration, error) {
 		Spec: v1.CamelCatalogSpec{
 			Runtime: v1.RuntimeSpec{
 				Provider: v1.RuntimeProviderQuarkus,
-				Version:  defaults.DefaultRuntimeVersion,
+				Version:  defaults.CamelKRuntimeCatalogVersion,
 			},
 		},
 	}

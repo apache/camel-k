@@ -27,7 +27,11 @@ VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION ?= 2.11.0-SNAPSHOT
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
 LAST_RELEASED_VERSION ?= 2.10.0
-DEFAULT_RUNTIME_VERSION := 3.15.3
+DEFAULT_RUNTIME_PROVIDER := plain-quarkus
+DEFAULT_RUNTIME_VERSION := 3.35.1
+# The last camel-k-runtime catalog
+# we keep using it until we support the CamelCatalog CR
+CK_RUNTIME_CATALOG_VERSION := 3.15.3
 # Kubernetes tooling
 CONTROLLER_GEN_VERSION := v0.20.0
 CONTROLLER_GEN=$(GOBIN)/controller-gen
@@ -113,15 +117,6 @@ TEST_PREBUILD = build
 TEST_COMMON_PARALLEL_COUNT ?= 2
 TEST_ADVANCED_PARALLEL_COUNT ?= 2
 
-# OLM (Operator Lifecycle Manager and Operator Hub): uncomment to override operator settings at build time
-#GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/olm.DefaultOperatorName=camel-k-operator
-#GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/olm.DefaultPackage=camel-k
-#GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/olm.DefaultChannel=alpha
-#GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/olm.DefaultSource=community-operators
-#GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/olm.DefaultSourceNamespace=openshift-marketplace
-#GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/olm.DefaultStartingCSV=
-#GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/olm.DefaultGlobalNamespace=openshift-operators
-
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
 GOBIN=$(shell go env GOPATH)/bin
@@ -192,8 +187,14 @@ codegen:
 	@echo "  // Version -- " >> $(VERSIONFILE)
 	@echo "  Version = \"$(CUSTOM_VERSION)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
+	@echo "  // DefaultRuntimeProvider -- " >> $(VERSIONFILE)
+	@echo "  DefaultRuntimeProvider = \"$(DEFAULT_RUNTIME_PROVIDER)\"" >> $(VERSIONFILE)
+	@echo "" >> $(VERSIONFILE)
 	@echo "  // DefaultRuntimeVersion -- " >> $(VERSIONFILE)
 	@echo "  DefaultRuntimeVersion = \"$(DEFAULT_RUNTIME_VERSION)\"" >> $(VERSIONFILE)
+	@echo "" >> $(VERSIONFILE)
+	@echo "  // CamelKRuntimeCatalogVersion -- " >> $(VERSIONFILE)
+	@echo "  CamelKRuntimeCatalogVersion = \"$(CK_RUNTIME_CATALOG_VERSION)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // baseImage -- " >> $(VERSIONFILE)
 	@echo "  baseImage = \"$(BASE_IMAGE)\"" >> $(VERSIONFILE)
@@ -363,7 +364,7 @@ ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
 endif
 
 build-resources:
-	./script/get_catalog.sh $(DEFAULT_RUNTIME_VERSION)
+	./script/get_catalog.sh $(CK_RUNTIME_CATALOG_VERSION)
 
 build-compile-integration-tests:
 ifndef NOTEST
@@ -448,9 +449,6 @@ DOCKER_TAG := $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-$(BASE_IMAGE_VERSION)-$(IMAGE_AR
 images: build image-build build-kamel-platform
 
 image-build:
-ifneq (,$(findstring SNAPSHOT,$(DEFAULT_RUNTIME_VERSION)))
-	./script/package_maven_artifacts.sh -d "$(CAMEL_K_RUNTIME_DIR)" $(DEFAULT_RUNTIME_VERSION)
-endif
 	@echo "####### Building Camel K operator jdk $(BASE_IMAGE_VERSION) arch $(IMAGE_ARCH) container image..."
 	mkdir -p build/_maven_output
 	docker buildx build --target $(TARGET_STAGE) \

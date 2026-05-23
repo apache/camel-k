@@ -50,7 +50,7 @@ func TestCreate(t *testing.T) {
 		IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
 			Build: v1.IntegrationPlatformBuildSpec{
 				RuntimeProvider: v1.RuntimeProviderQuarkus,
-				RuntimeVersion:  defaults.DefaultRuntimeVersion,
+				RuntimeVersion:  defaults.CamelKRuntimeCatalogVersion,
 			},
 		},
 	}
@@ -67,7 +67,7 @@ func TestCreate(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotNil(t, answer)
 	assert.Equal(t, v1.IntegrationPlatformPhaseReady, answer.Status.Phase)
-	assert.Equal(t, defaults.DefaultRuntimeVersion, answer.Status.Build.RuntimeVersion)
+	assert.Equal(t, defaults.CamelKRuntimeCatalogVersion, answer.Status.Build.RuntimeVersion)
 	assert.Equal(t, v1.RuntimeProviderQuarkus, answer.Status.Build.RuntimeProvider)
 	assert.NotEqual(t, "", answer.Status.Build.RuntimeCoreVersion)
 	assert.Equal(t, corev1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionCamelCatalogAvailable).Status)
@@ -86,13 +86,13 @@ func TestCatalogAlreadyPresent(t *testing.T) {
 		IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
 			Build: v1.IntegrationPlatformBuildSpec{
 				RuntimeProvider: v1.RuntimeProviderQuarkus,
-				RuntimeVersion:  defaults.DefaultRuntimeVersion,
+				RuntimeVersion:  defaults.CamelKRuntimeCatalogVersion,
 			},
 		},
 	}
 
-	catalog := v1.NewCamelCatalog("ns", fmt.Sprintf("camel-catalog-%s", defaults.DefaultRuntimeVersion))
-	catalog.Spec.Runtime.Version = defaults.DefaultRuntimeVersion
+	catalog := v1.NewCamelCatalog("ns", fmt.Sprintf("camel-catalog-%s", defaults.CamelKRuntimeCatalogVersion))
+	catalog.Spec.Runtime.Version = defaults.CamelKRuntimeCatalogVersion
 	catalog.Spec.Runtime.Provider = v1.RuntimeProviderQuarkus
 	catalog.Spec.Runtime.Metadata = map[string]string{
 		"camel.version": "4.4.0",
@@ -127,12 +127,13 @@ func TestCreateNewCatalog(t *testing.T) {
 		Maven: v1.MavenSpec{
 			LocalRepository: m2RepoTmpDir,
 		},
+		RuntimeVersion: defaults.CamelKRuntimeCatalogVersion,
 	}
 	ip.Status = v1.IntegrationPlatformStatus{
 		IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
 			Build: v1.IntegrationPlatformBuildSpec{
 				RuntimeProvider: v1.RuntimeProviderQuarkus,
-				RuntimeVersion:  defaults.DefaultRuntimeVersion,
+				RuntimeVersion:  defaults.CamelKRuntimeCatalogVersion,
 				Timeout: &metav1.Duration{
 					Duration: 1 * time.Minute,
 				},
@@ -200,7 +201,7 @@ func TestCreateNewCatalog(t *testing.T) {
 		IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
 			Build: v1.IntegrationPlatformBuildSpec{
 				RuntimeProvider: v1.RuntimeProviderQuarkus,
-				RuntimeVersion:  defaults.DefaultRuntimeVersion,
+				RuntimeVersion:  defaults.CamelKRuntimeCatalogVersion,
 				Timeout: &metav1.Duration{
 					Duration: 1 * time.Minute,
 				},

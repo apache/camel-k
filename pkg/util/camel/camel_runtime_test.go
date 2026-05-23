@@ -42,7 +42,7 @@ func TestCreateCatalog(t *testing.T) {
 	if !ok {
 		t.Setenv("MAVEN_CMD", "mvn")
 	}
-	if strings.Contains(defaults.DefaultRuntimeVersion, "SNAPSHOT") {
+	if strings.Contains(defaults.CamelKRuntimeCatalogVersion, "SNAPSHOT") {
 		maven.DefaultMavenRepositories += ",https://repository.apache.org/content/repositories/snapshots-group@snapshots@id=apache-snapshots"
 	}
 	catalog, err := CreateCatalog(
@@ -51,13 +51,13 @@ func TestCreateCatalog(t *testing.T) {
 		"",
 		platform.SingletonPlatform.Maven.MavenSpec,
 		platform.SingletonPlatform.BuildTimeout,
-		v1.RuntimeSpec{Provider: v1.RuntimeProviderQuarkus, Version: defaults.DefaultRuntimeVersion},
+		v1.RuntimeSpec{Provider: v1.RuntimeProviderQuarkus, Version: defaults.CamelKRuntimeCatalogVersion},
 		nil,
 		"",
 	)
 	require.NoError(t, err)
 	assert.NotNil(t, catalog)
-	assert.Equal(t, defaults.DefaultRuntimeVersion, catalog.Runtime.Version)
+	assert.Equal(t, defaults.CamelKRuntimeCatalogVersion, catalog.Runtime.Version)
 	assert.Equal(t, v1.RuntimeProviderQuarkus, catalog.Runtime.Provider)
 	assert.NotEmpty(t, catalog.Runtime.Capabilities)
 

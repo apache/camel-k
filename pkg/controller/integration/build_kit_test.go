@@ -167,7 +167,7 @@ func TestCamelBuildKitKitLookupExistingKit(t *testing.T) {
 		Spec: v1.CamelCatalogSpec{
 			Runtime: v1.RuntimeSpec{
 				Provider: v1.RuntimeProviderQuarkus,
-				Version:  defaults.DefaultRuntimeVersion,
+				Version:  defaults.CamelKRuntimeCatalogVersion,
 			},
 		},
 	}
@@ -181,13 +181,13 @@ func TestCamelBuildKitKitLookupExistingKit(t *testing.T) {
 			Name:      "my-ik",
 			Labels: map[string]string{
 				v1.IntegrationKitTypeLabel:           v1.IntegrationKitTypePlatform,
-				kubernetes.CamelLabelRuntimeVersion:  defaults.DefaultRuntimeVersion,
+				kubernetes.CamelLabelRuntimeVersion:  defaults.CamelKRuntimeCatalogVersion,
 				kubernetes.CamelLabelRuntimeProvider: string(v1.RuntimeProviderQuarkus),
 			},
 		},
 		Status: v1.IntegrationKitStatus{
 			Phase:           v1.IntegrationKitPhaseBuildRunning,
-			RuntimeVersion:  defaults.DefaultRuntimeVersion,
+			RuntimeVersion:  defaults.CamelKRuntimeCatalogVersion,
 			RuntimeProvider: v1.RuntimeProviderQuarkus,
 		},
 	}
@@ -202,7 +202,7 @@ func TestCamelBuildKitKitLookupExistingKit(t *testing.T) {
 		},
 		Status: v1.IntegrationStatus{
 			Phase:           v1.IntegrationPhaseBuildingKit,
-			RuntimeVersion:  defaults.DefaultRuntimeVersion,
+			RuntimeVersion:  defaults.CamelKRuntimeCatalogVersion,
 			RuntimeProvider: v1.RuntimeProviderQuarkus,
 		},
 	}
@@ -262,7 +262,7 @@ func TestCamelBuildKitKitLookupNoMatchingKits(t *testing.T) {
 		Spec: v1.CamelCatalogSpec{
 			Runtime: v1.RuntimeSpec{
 				Provider: v1.RuntimeProviderQuarkus,
-				Version:  defaults.DefaultRuntimeVersion,
+				Version:  defaults.CamelKRuntimeCatalogVersion,
 			},
 		},
 	}
@@ -276,7 +276,7 @@ func TestCamelBuildKitKitLookupNoMatchingKits(t *testing.T) {
 			Name:      "my-ik",
 			Labels: map[string]string{
 				v1.IntegrationKitTypeLabel:           v1.IntegrationKitTypePlatform,
-				kubernetes.CamelLabelRuntimeVersion:  defaults.DefaultRuntimeVersion,
+				kubernetes.CamelLabelRuntimeVersion:  defaults.CamelKRuntimeCatalogVersion,
 				kubernetes.CamelLabelRuntimeProvider: string(v1.RuntimeProviderQuarkus),
 			},
 		},
@@ -297,7 +297,7 @@ func TestCamelBuildKitKitLookupNoMatchingKits(t *testing.T) {
 		},
 		Status: v1.IntegrationStatus{
 			Phase:           v1.IntegrationPhaseBuildingKit,
-			RuntimeVersion:  defaults.DefaultRuntimeVersion,
+			RuntimeVersion:  defaults.CamelKRuntimeCatalogVersion,
 			RuntimeProvider: v1.RuntimeProviderQuarkus,
 		},
 	}

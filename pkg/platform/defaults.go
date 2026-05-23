@@ -64,7 +64,7 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 	}
 
 	if p.Status.Build.RuntimeProvider == "" {
-		p.Status.Build.RuntimeProvider = v1.RuntimeProviderQuarkus
+		p.Status.Build.RuntimeProvider = defaults.DefaultRuntimeProvider
 		log.Debugf("Integration Platform %s [%s]: setting default runtime provider %s", p.Name, p.Namespace, v1.RuntimeProviderQuarkus)
 	}
 	if p.Status.Build.RuntimeVersion == "" {
