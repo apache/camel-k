@@ -278,6 +278,35 @@ func (s *SourceSpec) InferLanguage() Language {
 
 	return ""
 }
+func (s *SourceSpec) NativeImageSourceType() NativeImageSourceType {
+	if s.NativeImage == "" {
+		return NativeImageSourceTypeAuto
+	}
+
+	return s.NativeImage
+}
+
+func (s *SourceSpec) NativeImageAsResource() bool {
+	switch s.NativeImageSourceType() {
+	case NativeImageSourceTypeResource:
+		return true
+	case NativeImageSourceTypeRoute:
+		return false
+	default:
+		return s.InferLanguage() == ""
+	}
+}
+
+func (s *SourceSpec) NativeImageAsRoute() bool {
+	switch s.NativeImageSourceType() {
+	case NativeImageSourceTypeRoute:
+		return true
+	case NativeImageSourceTypeResource:
+		return false
+	default:
+		return s.InferLanguage() != ""
+	}
+}
 
 // Validate checks if the strategy is supported.
 func (b BuildStrategy) Validate() error {

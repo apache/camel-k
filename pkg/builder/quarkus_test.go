@@ -224,6 +224,46 @@ func TestGenerateQuarkusProjectWithNativeSources(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func TestGenerateQuarkusProjectWithNativeResources(t *testing.T) {
+	tmpDir := t.TempDir()
+	defaultCatalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	builderContext := builderContext{
+		C:         context.TODO(),
+		Path:      tmpDir,
+		Namespace: "test",
+		Build: v1.BuilderTask{
+			Runtime: defaultCatalog.Runtime,
+			Maven: v1.MavenBuildSpec{
+				MavenSpec: v1.MavenSpec{},
+			},
+			Sources: []v1.SourceSpec{
+				v1.NewSourceSpec("Test.java", "bogus, irrelevant for test", v1.LanguageJavaSource),
+				{
+					DataSpec: v1.DataSpec{
+						Name:    "resources/my-resource.yaml",
+						Content: "hello: from-resource",
+					},
+					NativeImage: v1.NativeImageSourceTypeResource,
+				},
+			},
+		},
+	}
+
+	err = prepareProjectWithSources(&builderContext)
+	require.NoError(t, err)
+
+	assert.Equal(t, "resources/my-resource.yaml", builderContext.Build.Maven.Properties["quarkus.native.resources.includes"])
+
+	materializedResource, err := os.ReadFile(filepath.Join(tmpDir, "maven", "src", "main", "resources", "resources", "my-resource.yaml"))
+	require.NoError(t, err)
+	assert.Equal(t, "hello: from-resource", string(materializedResource))
+
+	_, err = os.Stat(filepath.Join(tmpDir, "maven", "src", "main", "resources", "routes", "resources", "my-resource.yaml"))
+	assert.Error(t, err)
+}
+
 func TestBuildQuarkusRunner(t *testing.T) {
 	tmpDir := t.TempDir()
 	defaultCatalog, err := camel.DefaultCatalog()

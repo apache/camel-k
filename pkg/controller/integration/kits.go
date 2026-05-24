@@ -209,13 +209,15 @@ func kitMatches(c client.Client, kit *v1.IntegrationKit, target *v1.IntegrationK
 }
 
 func hasMatchingSourcesForNative(it *v1.Integration, kit *v1.IntegrationKit) bool {
-	if len(it.OriginalSources()) != len(kit.Spec.Sources) {
+	if len(kit.Spec.Sources) == 0 {
 		return false
 	}
-	for _, itSource := range it.OriginalSources() {
+	for _, ikSource := range kit.Spec.Sources {
 		found := false
-		for _, ikSource := range kit.Spec.Sources {
-			if itSource.Content == ikSource.Content {
+		for _, itSource := range it.OriginalSources() {
+			if itSource.Name == ikSource.Name &&
+				itSource.Content == ikSource.Content &&
+				itSource.NativeImageSourceType() == ikSource.NativeImageSourceType() {
 				found = true
 
 				break

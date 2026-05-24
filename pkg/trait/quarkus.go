@@ -203,6 +203,9 @@ func (t *quarkusTrait) languageSettingDeprecated(e *Environment) bool {
 		return false
 	}
 	for _, source := range e.Integration.AllSources() {
+		if source.NativeImageAsResource() {
+			continue
+		}
 		if language := source.InferLanguage(); getLanguageSettings(e, language).deprecated {
 			return true
 		}
@@ -213,6 +216,9 @@ func (t *quarkusTrait) languageSettingDeprecated(e *Environment) bool {
 
 func (t *quarkusTrait) validateNativeSupport(e *Environment) error {
 	for _, source := range e.Integration.AllSources() {
+		if source.NativeImageAsResource() {
+			continue
+		}
 		if language := source.InferLanguage(); !getLanguageSettings(e, language).native {
 			return fmt.Errorf("invalid native support: Integration %s/%s contains a %s source that cannot be compiled to native executable",
 				e.Integration.Namespace, e.Integration.Name, language)
@@ -505,11 +511,15 @@ func sourcesRequiredAtBuildTime(e *Environment, source v1.SourceSpec) bool {
 	return settings.native && settings.sourcesRequiredAtBuildTime
 }
 
+func sourceMustBeEmbeddedAsResource(source v1.SourceSpec) bool {
+	return source.NativeImageAsResource()
+}
+
 // Propagates the user defined sources that are required at build time for native compilation.
 func propagateSourcesRequiredAtBuildTime(e *Environment) []v1.SourceSpec {
 	array := make([]v1.SourceSpec, 0)
 	for _, source := range e.Integration.OriginalSources() {
-		if sourcesRequiredAtBuildTime(e, source) {
+		if sourcesRequiredAtBuildTime(e, source) || sourceMustBeEmbeddedAsResource(source) {
 			array = append(array, source)
 		}
 	}

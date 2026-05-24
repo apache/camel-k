@@ -279,6 +279,9 @@ func ComputeForSource(s v1.SourceSpec) (string, error) {
 	if _, err := hash.Write([]byte(s.Language)); err != nil {
 		return "", err
 	}
+	if _, err := hash.Write([]byte(s.NativeImageSourceType())); err != nil {
+		return "", err
+	}
 	if _, err := hash.Write([]byte(s.ContentKey)); err != nil {
 		return "", err
 	}

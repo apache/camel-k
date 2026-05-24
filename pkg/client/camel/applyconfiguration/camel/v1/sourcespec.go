@@ -32,6 +32,8 @@ type SourceSpecApplyConfiguration struct {
 	DataSpecApplyConfiguration `json:",inline"`
 	// specify which is the language (Camel DSL) used to interpret this source code
 	Language *camelv1.Language `json:"language,omitempty"`
+	// Controls how the source is included when building a native executable.
+	NativeImage *camelv1.NativeImageSourceType `json:"nativeImage,omitempty"`
 	// Loader is an optional id of the org.apache.camel.k.RoutesLoader that will
 	// interpret this source at runtime
 	Loader *string `json:"loader,omitempty"`
@@ -125,6 +127,14 @@ func (b *SourceSpecApplyConfiguration) WithCompression(value bool) *SourceSpecAp
 // If called multiple times, the Language field is set to the value of the last call.
 func (b *SourceSpecApplyConfiguration) WithLanguage(value camelv1.Language) *SourceSpecApplyConfiguration {
 	b.Language = &value
+	return b
+}
+
+// WithNativeImage sets the NativeImage field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the NativeImage field is set to the value of the last call.
+func (b *SourceSpecApplyConfiguration) WithNativeImage(value camelv1.NativeImageSourceType) *SourceSpecApplyConfiguration {
+	b.NativeImage = &value
 	return b
 }
 
