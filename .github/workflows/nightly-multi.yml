@@ -56,7 +56,6 @@ jobs:
         sed -i "s#apache/camel-k:$THIS_VERSION#testcamelk/camel-k:$VERSION#g" install/base/config/manager/operator-deployment.yaml
         kubectl create ns camel-k
         make install-k8s-global
-        kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=120s
 
     - name: Run test
       shell: bash
@@ -90,7 +89,6 @@ jobs:
         CUSTOM_IMAGE=testcamelk/camel-k CUSTOM_VERSION=$VERSION make bundle
         kubectl create ns camel-k
         make install-k8s-global
-        kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=120s
 
     - name: Run test
       shell: bash
