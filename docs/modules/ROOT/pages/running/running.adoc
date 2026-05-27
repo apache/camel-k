@@ -92,6 +92,58 @@ spec:
 
 You can see the specification is a lot neater, so, try choosing Yaml DSL whenever it's possible.
 
+== Native builds and classpath resources
+
+When you build a native executable, Camel K has to decide whether each entry in `spec.sources` is:
+
+- a Camel route that must be loaded by Camel
+- a classpath resource that must be embedded into the native executable
+
+By default Camel K infers this from the source language or file extension. You can override that behavior explicitly with `spec.sources[].nativeImage`.
+
+This is useful when a file has a known Camel DSL extension, such as `.yaml`, but it is actually application data and not a route.
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: native-resource-example
+spec:
+  sources:
+  - name: Hello.java
+    content: |
+      import org.apache.camel.builder.RouteBuilder;
+
+      public class Hello extends RouteBuilder {
+          @Override
+          public void configure() throws Exception {
+              from("timer:tick?period=3000")
+                  .setBody().constant("Hello from Camel K")
+                  .log("${body}");
+          }
+      }
+  - name: files/app-config.yaml
+    nativeImage: resource
+    content: |
+      greeting: hello
+      audience: native
+  traits:
+    quarkus:
+      buildMode:
+      - native
+----
+
+The `nativeImage` field accepts:
+
+- `auto`: Camel K infers the behavior. This is the default.
+- `route`: force the source to be treated as a Camel route.
+- `resource`: force the source to be packaged as a classpath resource.
+
+For example, if you really want a YAML file to stay a route in a native build, omit the field or set `nativeImage: route`. If you want the same kind of file to be embedded as application data, set `nativeImage: resource`.
+
+NOTE: `spec.sources[].nativeImage` is about files stored in the Integration itself. It does not replace runtime-mounted ConfigMaps or Secrets configured with xref:traits:mount.adoc[mount trait].
+
 == Runtime provider
 
 Camel K was originally equipped with a dedicated runtime known as Camel K Runtime. This is a lightweight layer on top of Camel Quarkus. However, you can directly run plain regular Camel Quarkus runtime applications as well. You will learn the concept of traits later on. For now, just be aware that you can run any Integration setting the plain Quarkus runtime using `camel` trait configuration. Here an example of how that would be:

@@ -87,6 +87,38 @@ status: {}
 ```
 This can be saved for future processing (ie, stored to a GIT repository and later deployed to a cluster via some GitOps deployment strategy). Consider that any **modeline** option will be translated accordingly.
 
+Dry run is also the easiest way to customize per-source native build behavior. For example, if you are building a native executable and one of the source files should be embedded as a classpath resource instead of being interpreted as a Camel route, you can:
+
+1. Generate the Integration manifest with `kamel run ... -o yaml`
+2. Edit the relevant `spec.sources[]` entry
+3. Set `nativeImage: resource`
+4. Apply the resulting manifest with `kubectl apply -f`
+
+For example:
+
+[source,console]
+----
+kamel run Hello.java app-config.yaml -t quarkus.build-mode=native -o yaml
+----
+
+Then edit the generated Integration so the resource entry looks like:
+
+[source,yaml]
+----
+spec:
+  sources:
+  - name: Hello.java
+    content: |
+      ...
+  - name: app-config.yaml
+    nativeImage: resource
+    content: |
+      greeting: hello
+      audience: native
+----
+
+This is particularly useful for files such as `.yaml` that may otherwise be inferred as Camel DSL routes.
+
 [[modeline]]
 == Camel K Modeline
 

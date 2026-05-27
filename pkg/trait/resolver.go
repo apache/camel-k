@@ -99,8 +99,15 @@ func resolveIntegrationSources(
 	} else {
 		sources = integration.AllSources()
 	}
+	filtered := make([]v1.SourceSpec, 0, len(sources))
+	for _, source := range sources {
+		if source.NativeImageAsResource() {
+			continue
+		}
+		filtered = append(filtered, source)
+	}
 
-	return resolveSources(sources, func(name string) (*corev1.ConfigMap, error) {
+	return resolveSources(filtered, func(name string) (*corev1.ConfigMap, error) {
 		// the config map could be part of the resources created
 		// by traits
 		cm := resources.GetConfigMap(func(m *corev1.ConfigMap) bool {

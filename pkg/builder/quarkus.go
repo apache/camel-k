@@ -78,7 +78,24 @@ func prepareProjectWithSources(ctx *builderContext) error {
 	}
 
 	sourceList := ""
+	resourceList := make([]string, 0)
 	for _, source := range ctx.Build.Sources {
+		if source.NativeImageAsResource() {
+			resourcePath := filepath.Join(ctx.Path, "maven", "src", "main", "resources", source.Name)
+			if err := os.MkdirAll(filepath.Dir(resourcePath), os.ModePerm); err != nil {
+				return fmt.Errorf("failure while creating resource folder: %w", err)
+			}
+			if err := os.WriteFile(
+				resourcePath,
+				[]byte(source.Content),
+				projectModePerm,
+			); err != nil {
+				return fmt.Errorf("failure while writing %s: %w", source.Name, err)
+			}
+			resourceList = append(resourceList, filepath.ToSlash(source.Name))
+			continue
+		}
+
 		if sourceList != "" {
 			sourceList += ","
 		}
@@ -102,7 +119,16 @@ func prepareProjectWithSources(ctx *builderContext) error {
 			return fmt.Errorf("failure while writing the configuration application.properties: %w", err)
 		}
 	}
-
+	if len(resourceList) > 0 {
+		if ctx.Build.Maven.Properties == nil {
+			ctx.Build.Maven.Properties = make(map[string]string)
+		}
+		resourceIncludes := strings.Join(resourceList, ",")
+		if existing := ctx.Build.Maven.Properties["quarkus.native.resources.includes"]; existing != "" {
+			resourceIncludes = existing + "," + resourceIncludes
+		}
+		ctx.Build.Maven.Properties["quarkus.native.resources.includes"] = resourceIncludes
+	}
 	return nil
 }
 

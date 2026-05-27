@@ -483,6 +483,9 @@ type SourceSpec struct {
 
 	// specify which is the language (Camel DSL) used to interpret this source code
 	Language Language `json:"language,omitempty"`
+	// Controls how the source is included when building a native executable.
+	// `auto` uses Camel K inference, `route` forces route inclusion, `resource` forces classpath resource inclusion.
+	NativeImage NativeImageSourceType `json:"nativeImage,omitempty"`
 	// Loader is an optional id of the org.apache.camel.k.RoutesLoader that will
 	// interpret this source at runtime
 	Loader string `json:"loader,omitempty"`
@@ -509,6 +512,19 @@ const (
 	SourceTypeTemplate SourceType = "template"
 	// SourceTypeErrorHandler is used to represent an error handler.
 	SourceTypeErrorHandler SourceType = "errorHandler"
+)
+
+// NativeImageSourceType determines how a source should be materialized in a native build.
+// +kubebuilder:validation:Enum=auto;route;resource
+type NativeImageSourceType string
+
+const (
+	// NativeImageSourceTypeAuto lets Camel K infer whether the source is a route or a resource.
+	NativeImageSourceTypeAuto NativeImageSourceType = "auto"
+	// NativeImageSourceTypeRoute forces the source to be treated as a Camel route during native build.
+	NativeImageSourceTypeRoute NativeImageSourceType = "route"
+	// NativeImageSourceTypeResource forces the source to be treated as a classpath resource during native build.
+	NativeImageSourceTypeResource NativeImageSourceType = "resource"
 )
 
 // DataSpec represents the way the source is materialized in the running `Pod`.

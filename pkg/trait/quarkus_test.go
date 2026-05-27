@@ -72,6 +72,25 @@ func TestConfigureQuarkusTraitNativeNotSupported(t *testing.T) {
 	assert.Nil(t, condition)
 }
 
+func TestConfigureQuarkusTraitNativeResourceSkipsValidation(t *testing.T) {
+	quarkusTrait, environment := createNominalQuarkusTest()
+	environment.Integration.Spec.Sources[0] = v1.SourceSpec{
+		DataSpec: v1.DataSpec{
+			Name:    "not-a-route.js",
+			Content: "plain text resource",
+		},
+		NativeImage: v1.NativeImageSourceTypeResource,
+	}
+	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
+	quarkusTrait.Modes = []traitv1.QuarkusMode{traitv1.NativeQuarkusMode}
+
+	configured, condition, err := quarkusTrait.Configure(environment)
+
+	assert.True(t, configured)
+	require.NoError(t, err)
+	assert.Nil(t, condition)
+}
+
 func TestApplyQuarkusTraitDefaultKitLayout(t *testing.T) {
 	quarkusTrait, environment := createNominalQuarkusTest()
 	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit

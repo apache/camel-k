@@ -384,6 +384,78 @@ func TestHasMatchingMultipleSources(t *testing.T) {
 	assert.False(t, hms2)
 }
 
+func TestHasMatchingSourcesAllowsNonBuildTimeIntegrationSources(t *testing.T) {
+	integration := &v1.Integration{
+		Spec: v1.IntegrationSpec{
+			Sources: []v1.SourceSpec{
+				v1.NewSourceSpec("Test.java", "some java content", v1.LanguageJavaSource),
+				{
+					DataSpec: v1.DataSpec{
+						Name:    "routes.yaml",
+						Content: "some yaml route content",
+					},
+				},
+				{
+					DataSpec: v1.DataSpec{
+						Name:    "resources/my-resource.txt",
+						Content: "some resource content",
+					},
+					NativeImage: v1.NativeImageSourceTypeResource,
+				},
+			},
+		},
+	}
+
+	kit := &v1.IntegrationKit{
+		Spec: v1.IntegrationKitSpec{
+			Sources: []v1.SourceSpec{
+				v1.NewSourceSpec("Test.java", "some java content", v1.LanguageJavaSource),
+				{
+					DataSpec: v1.DataSpec{
+						Name:    "resources/my-resource.txt",
+						Content: "some resource content",
+					},
+					NativeImage: v1.NativeImageSourceTypeResource,
+				},
+			},
+		},
+	}
+
+	assert.True(t, hasMatchingSourcesForNative(integration, kit))
+}
+
+func TestHasNotMatchingSourcesWhenNativeImageTypeDiffers(t *testing.T) {
+	integration := &v1.Integration{
+		Spec: v1.IntegrationSpec{
+			Sources: []v1.SourceSpec{
+				{
+					DataSpec: v1.DataSpec{
+						Name:    "resource.yaml",
+						Content: "content",
+					},
+					NativeImage: v1.NativeImageSourceTypeResource,
+				},
+			},
+		},
+	}
+
+	kit := &v1.IntegrationKit{
+		Spec: v1.IntegrationKitSpec{
+			Sources: []v1.SourceSpec{
+				{
+					DataSpec: v1.DataSpec{
+						Name:    "resource.yaml",
+						Content: "content",
+					},
+					NativeImage: v1.NativeImageSourceTypeRoute,
+				},
+			},
+		},
+	}
+
+	assert.False(t, hasMatchingSourcesForNative(integration, kit))
+}
+
 func TestHasNotMatchingSources(t *testing.T) {
 	integration := &v1.Integration{
 		Spec: v1.IntegrationSpec{

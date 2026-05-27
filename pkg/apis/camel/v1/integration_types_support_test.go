@@ -61,6 +61,62 @@ func TestLanguageAlreadySet(t *testing.T) {
 	assert.Equal(t, LanguageJavaSource, code.InferLanguage())
 }
 
+func TestNativeImageSourceTypeDefaultsToAuto(t *testing.T) {
+	code := SourceSpec{
+		DataSpec: DataSpec{
+			Name: "request.yaml",
+		},
+	}
+
+	assert.Equal(t, NativeImageSourceTypeAuto, code.NativeImageSourceType())
+	assert.True(t, code.NativeImageAsRoute())
+	assert.False(t, code.NativeImageAsResource())
+}
+
+func TestNativeImageSourceTypeCanForceResource(t *testing.T) {
+	code := SourceSpec{
+		DataSpec: DataSpec{
+			Name: "request.yaml",
+		},
+		NativeImage: NativeImageSourceTypeResource,
+	}
+
+	assert.Equal(t, NativeImageSourceTypeResource, code.NativeImageSourceType())
+	assert.False(t, code.NativeImageAsRoute())
+	assert.True(t, code.NativeImageAsResource())
+}
+
+func TestNativeImageSourceTypeCanForceRoute(t *testing.T) {
+	code := SourceSpec{
+		DataSpec: DataSpec{
+			Name: "notes.txt",
+		},
+		NativeImage: NativeImageSourceTypeRoute,
+	}
+
+	assert.Equal(t, NativeImageSourceTypeRoute, code.NativeImageSourceType())
+	assert.True(t, code.NativeImageAsRoute())
+	assert.False(t, code.NativeImageAsResource())
+}
+
+func TestNativeImageSourceTypeAutoAndEmptyAreEquivalent(t *testing.T) {
+	implicit := SourceSpec{
+		DataSpec: DataSpec{
+			Name: "request.yaml",
+		},
+	}
+	explicit := SourceSpec{
+		DataSpec: DataSpec{
+			Name: "request.yaml",
+		},
+		NativeImage: NativeImageSourceTypeAuto,
+	}
+
+	assert.Equal(t, implicit.NativeImageSourceType(), explicit.NativeImageSourceType())
+	assert.Equal(t, implicit.NativeImageAsRoute(), explicit.NativeImageAsRoute())
+	assert.Equal(t, implicit.NativeImageAsResource(), explicit.NativeImageAsResource())
+}
+
 func TestAddDependency(t *testing.T) {
 	integration := IntegrationSpec{}
 	integration.AddDependency("camel:file")
