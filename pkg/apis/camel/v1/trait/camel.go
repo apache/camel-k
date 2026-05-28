@@ -17,7 +17,7 @@ limitations under the License.
 
 package trait
 
-// The Camel trait can be used to configure versions of Apache Camel K runtime and related libraries, it cannot be disabled.
+// The Camel trait can be used to configure versions of Camel runtime and related libraries, it cannot be disabled.
 //
 // +camel-k:trait=camel.
 //
@@ -25,7 +25,7 @@ package trait
 type CamelTrait struct {
 	PlatformBaseTrait `json:",inline" property:",squash"`
 
-	// The runtime provider to use for the integration. (Default, Camel K Runtime).
+	// The runtime provider to use for the integration. (Default, plain Quarkus).
 	// +kubebuilder:validation:Enum=quarkus;plain-quarkus
 	RuntimeProvider string `json:"runtimeProvider,omitempty" property:"runtime-provider"`
 	// The runtime version to use for the integration. It overrides the default version set in the Integration Platform.

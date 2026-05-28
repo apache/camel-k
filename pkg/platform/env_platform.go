@@ -40,15 +40,16 @@ var SingletonPlatform = getEnvPlatform()
 
 // Platform contains a series of configuration required during build and packaging.
 type Platform struct {
-	CatalogNamespace    string
-	BuildRuntimeVersion string
-	BuildTimeout        time.Duration
-	BuildConfiguration  v1.BuildConfiguration
-	BuildBaseImage      string
-	PublishStrategy     v1.IntegrationPlatformBuildPublishStrategy
-	Registry            v1.RegistrySpec
-	Maven               v1.MavenBuildSpec
-	MaxRunningBuilds    int32
+	CatalogNamespace     string
+	BuildRuntimeVersion  string
+	BuildRuntimeProvider v1.RuntimeProvider
+	BuildTimeout         time.Duration
+	BuildConfiguration   v1.BuildConfiguration
+	BuildBaseImage       string
+	PublishStrategy      v1.IntegrationPlatformBuildPublishStrategy
+	Registry             v1.RegistrySpec
+	Maven                v1.MavenBuildSpec
+	MaxRunningBuilds     int32
 }
 
 // getEnvPlatform is in charge to parse the environment variables of the operator and return the Platform object.
@@ -63,9 +64,10 @@ func getEnvPlatform() Platform {
 	}
 
 	return Platform{
-		CatalogNamespace:    GetOperatorNamespace(),
-		BuildRuntimeVersion: GetEnvOrDefault("BUILD_RUNTIME_VERSION", defaults.DefaultRuntimeVersion),
-		BuildTimeout:        buildTimeout(),
+		CatalogNamespace:     GetOperatorNamespace(),
+		BuildRuntimeVersion:  GetEnvOrDefault("BUILD_RUNTIME_VERSION", defaults.DefaultRuntimeVersion),
+		BuildRuntimeProvider: v1.RuntimeProvider(GetEnvOrDefault("BUILD_RUNTIME_PROVIDER", defaults.DefaultRuntimeProvider)),
+		BuildTimeout:         buildTimeout(),
 		BuildConfiguration: v1.BuildConfiguration{
 			Strategy:       buildStrategy(),
 			OrderStrategy:  orderStrategy(),

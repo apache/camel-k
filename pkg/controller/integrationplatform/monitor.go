@@ -66,6 +66,9 @@ func (action *monitorAction) Handle(ctx context.Context, platform *v1.Integratio
 		Version:  platform.Status.Build.RuntimeVersion,
 		Provider: platform.Status.Build.RuntimeProvider,
 	}
+	if runtimeSpec.Provider == v1.RuntimeProviderPlainQuarkus {
+		runtimeSpec.Version = defaults.CamelKRuntimeCatalogVersion
+	}
 	catalog, err := loadCatalog(ctx, action.client, platform.Namespace, runtimeSpec)
 	if catalog == nil || err != nil {
 		// error, a catalog must be available

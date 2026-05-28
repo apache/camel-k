@@ -37,6 +37,7 @@ import (
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestUpgrade(t *testing.T) {
@@ -81,7 +82,7 @@ func TestUpgrade(t *testing.T) {
 		installPrevCmd.Dir = lastVersionDir
 		ExpectExecSucceed(t, g, installPrevCmd)
 
-		// TODO: In 2.11 we should move to this one instead
+		// TODO: In 2.12 we should move to this one instead
 		//
 		// kustomizeCmd := exec.Command(
 		// 	"kubectl",
@@ -142,6 +143,11 @@ func TestUpgrade(t *testing.T) {
 			// Check the operator pod is running
 			g.Eventually(OperatorPodPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 
+			// TODO: In 2.12 we should remove the IntegrationPlatform removal
+			// which was still default in 2.10 and installed and it is required
+			// for this test to complete. Also remove the DeleteIntegrationPlatform func
+			g.Expect(DeleteIntegrationPlatform(t, ctx, ns, "camel-k")).To(Succeed())
+
 			// Check the Integration hasn't been upgraded
 			g.Consistently(IntegrationVersion(t, ctx, nsIntegration, name), 15*time.Second, 3*time.Second).
 				Should(Equal(lastVersion))
@@ -181,4 +187,18 @@ func TestUpgrade(t *testing.T) {
 		})
 		// TODO: we should verify new CRDs installed are the same as the one defined in the source core here
 	})
+}
+
+func DeleteIntegrationPlatform(t *testing.T, ctx context.Context, ns string, name string) error {
+	itp := v1.IntegrationPlatform{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "IntegrationPlatform",
+			APIVersion: v1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      name,
+		},
+	}
+	return TestClient(t).Delete(ctx, &itp)
 }

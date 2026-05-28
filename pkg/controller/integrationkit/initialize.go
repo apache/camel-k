@@ -83,7 +83,7 @@ func (action *initializeAction) image(ctx context.Context, env *trait.Environmen
 	if env.CamelCatalog.GetRuntimeProvider() == v1.RuntimeProviderPlainQuarkus {
 		// We need this workaround to load the last existing catalog
 		// TODO: this part will be subject to future refactoring
-		catalogName = "camel-catalog-quarkus-" + strings.ToLower(defaults.DefaultRuntimeVersion)
+		catalogName = "camel-catalog-quarkus-" + strings.ToLower(defaults.CamelKRuntimeCatalogVersion)
 	}
 	// Wait for CamelCatalog to be ready
 	catalog, err := kubernetes.GetCamelCatalog(

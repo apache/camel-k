@@ -597,7 +597,7 @@ spec:
                         type: array
                       runtimeProvider:
                         description: The runtime provider to use for the integration.
-                          (Default, Camel K Runtime).
+                          (Default, plain Quarkus).
                         enum:
                         - quarkus
                         - plain-quarkus
@@ -3007,7 +3007,7 @@ spec:
                         type: array
                       runtimeProvider:
                         description: The runtime provider to use for the integration.
-                          (Default, Camel K Runtime).
+                          (Default, plain Quarkus).
                         enum:
                         - quarkus
                         - plain-quarkus

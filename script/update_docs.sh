@@ -17,56 +17,6 @@
 
 location=$(dirname $0)
 
-echo "Scraping information from Makefile"
-LAST_RELEASED_VERSION=$(grep '^LAST_RELEASED_VERSION ?= ' Makefile | sed 's/^.* \?= //')
-RUNTIME_VERSION=$(grep '^DEFAULT_RUNTIME_VERSION := ' Makefile | sed 's/^.* \?= //')
-
-CATALOG="$location/../pkg/resources/resources/camel-catalog-$RUNTIME_VERSION.yaml"
-# This script requires the catalog to be available (via make build-resources for instance)
-if [ ! -f $CATALOG ]; then
-    echo "❗ catalog not available. Make sure to download it before calling this script."
-    exit 1
-fi
-
-KUSTOMIZE_VERSION=$(grep '^KUSTOMIZE_VERSION := ' Makefile | sed 's/^.* \?= //' | sed 's/^.//')
-
-echo "Camel K Runtime version: $RUNTIME_VERSION"
-echo "Kustomize version: $KUSTOMIZE_VERSION"
-
-yq -i ".asciidoc.attributes.kustomize-version = \"$KUSTOMIZE_VERSION\"" $location/../docs/antora.yml
-
-echo "Scraping information from catalog available at: $CATALOG"
-RUNTIME_VERSION=$(yq '.spec.runtime.version' $CATALOG)
-CAMEL_VERSION=$(yq '.spec.runtime.metadata."camel.version"' $CATALOG)
-re="^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)$"
-if ! [[ $CAMEL_VERSION =~ $re ]]; then
-    echo "❗ argument must match semantic version: $CAMEL_VERSION"
-    exit 1
-fi
-CAMEL_DOCS_VERSION="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.x"
-CAMEL_QUARKUS_VERSION=$(yq '.spec.runtime.metadata."camel-quarkus.version"' $CATALOG)
-re="^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)$"
-if ! [[ $CAMEL_QUARKUS_VERSION =~ $re ]]; then
-    echo "❗ argument must match semantic version: $CAMEL_QUARKUS_VERSION"
-    exit 1
-fi
-CAMEL_QUARKUS_DOCS_VERSION="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.x"
-QUARKUS_VERSION=$(yq '.spec.runtime.metadata."quarkus.version"' $CATALOG)
-
-echo "Camel K latest version: $LAST_RELEASED_VERSION"
-echo "Camel K Runtime version: $RUNTIME_VERSION"
-echo "Camel version: $CAMEL_VERSION"
-echo "Camel Quarkus version: $CAMEL_QUARKUS_VERSION"
-echo "Quarkus version: $QUARKUS_VERSION"
-
-yq -i ".asciidoc.attributes.last-released-version = \"$LAST_RELEASED_VERSION\"" $location/../docs/antora.yml
-yq -i ".asciidoc.attributes.camel-k-runtime-version = \"$RUNTIME_VERSION\"" $location/../docs/antora.yml
-yq -i ".asciidoc.attributes.camel-version = \"$CAMEL_VERSION\"" $location/../docs/antora.yml
-yq -i ".asciidoc.attributes.camel-docs-version = \"$CAMEL_DOCS_VERSION\"" $location/../docs/antora.yml
-yq -i ".asciidoc.attributes.camel-quarkus-version = \"$CAMEL_QUARKUS_VERSION\"" $location/../docs/antora.yml
-yq -i ".asciidoc.attributes.camel-quarkus-docs-version = \"$CAMEL_QUARKUS_DOCS_VERSION\"" $location/../docs/antora.yml
-yq -i ".asciidoc.attributes.quarkus-version = \"$QUARKUS_VERSION\"" $location/../docs/antora.yml
-
 echo "Scraping information from go.mod"
 KNATIVE_API_VERSION=$(grep '^.*knative.dev/eventing ' $location/../go.mod | sed 's/^.* //' | sed 's/^.//')
 KUBE_API_VERSION=$(grep '^.*k8s.io/api ' $location/../go.mod | sed 's/^.* //' | sed 's/^.//')
