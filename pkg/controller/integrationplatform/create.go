@@ -62,9 +62,10 @@ func (action *createAction) Handle(ctx context.Context, platform *v1.Integration
 		return nil, err
 	}
 
-	// if bundled version, load catalog spec from resources
-	if platform.Status.Build.RuntimeVersion == defaults.CamelKRuntimeCatalogVersion {
-		if platform, err = action.handleBundledCatalog(ctx, platform, catalog); err != nil {
+	// if Plain Quarkus or last bundled version, load catalog spec from resources
+	if platform.Status.Build.RuntimeProvider == v1.RuntimeProviderPlainQuarkus ||
+		platform.Status.Build.RuntimeVersion == defaults.CamelKRuntimeCatalogVersion {
+		if platform, err = action.handleBundledCatalog(ctx, platform, catalog, defaults.CamelKRuntimeCatalogVersion); err != nil {
 			return platform, err
 		}
 	} else {
@@ -111,11 +112,11 @@ func loadCatalog(ctx context.Context, c client.Client, namespace string, runtime
 }
 
 //nolint:staticcheck
-func (action *createAction) handleBundledCatalog(ctx context.Context, platform *v1.IntegrationPlatform, catalog *v1.CamelCatalog) (*v1.IntegrationPlatform, error) {
+func (action *createAction) handleBundledCatalog(ctx context.Context, platform *v1.IntegrationPlatform, catalog *v1.CamelCatalog, version string) (*v1.IntegrationPlatform, error) {
 	var camelVersion string
 	// Create the catalog only if it was not yet created
 	if catalog == nil {
-		camelCatalogData, err := resources.Resource(fmt.Sprintf("/resources/camel-catalog-%s.yaml", platform.Status.Build.RuntimeVersion))
+		camelCatalogData, err := resources.Resource(fmt.Sprintf("/resources/camel-catalog-%s.yaml", version))
 		if err != nil {
 			return nil, err
 		}
@@ -126,7 +127,7 @@ func (action *createAction) handleBundledCatalog(ctx context.Context, platform *
 		// Copy platform annotations to the catalog
 		cat.SetAnnotations(platform.Annotations)
 		cat.SetNamespace(platform.Namespace)
-		action.L.Infof("Installing bundled camel catalog: %s", platform.Status.Build.RuntimeVersion)
+		action.L.Infof("Installing bundled camel catalog: %s", version)
 		if err = action.client.Create(ctx, &cat); err != nil {
 			return nil, err
 		}

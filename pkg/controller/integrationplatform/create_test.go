@@ -228,6 +228,7 @@ func TestCreateCatalogError(t *testing.T) {
 	ip := v1.IntegrationPlatform{}
 	ip.Namespace = "ns"
 	ip.Name = "ck"
+	ip.Spec.Build.RuntimeProvider = v1.RuntimeProviderQuarkus
 	ip.Spec.Build.RuntimeVersion = "0.0.0"
 	c, err := internal.NewFakeClient(&ip)
 	require.NoError(t, err)

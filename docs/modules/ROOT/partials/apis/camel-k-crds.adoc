@@ -6748,7 +6748,7 @@ Path to the PEM-encoded CA certificate file to import.
 * <<#_camel_apache_org_v1_IntegrationKitTraits, IntegrationKitTraits>>
 * <<#_camel_apache_org_v1_Traits, Traits>>
 
-The Camel trait can be used to configure versions of Apache Camel K runtime and related libraries, it cannot be disabled.
+The Camel trait can be used to configure versions of Camel runtime and related libraries, it cannot be disabled.
 
 
 [cols="2,2a",options="header"]
@@ -6768,7 +6768,7 @@ string
 |
 
 
-The runtime provider to use for the integration. (Default, Camel K Runtime).
+The runtime provider to use for the integration. (Default, plain Quarkus).
 
 |`runtimeVersion` +
 string

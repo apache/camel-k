@@ -111,7 +111,7 @@ func loadCamelQuarkusCatalog(ctx *builderContext) error {
 	if runtime.Provider == v1.RuntimeProviderPlainQuarkus {
 		// We need this workaround to load the last existing catalog
 		// TODO: this part will be subject to future refactoring
-		runtime.Version = defaults.DefaultRuntimeVersion
+		runtime.Version = defaults.CamelKRuntimeCatalogVersion
 	}
 
 	catalog, err := camel.LoadCatalog(ctx.C, ctx.Client, ctx.Namespace, *runtime)

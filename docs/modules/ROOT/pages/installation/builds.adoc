@@ -11,9 +11,13 @@ Here a quick resume of the parameters you can configure as environment variables
 |===
 | Name | Description | Default
 
+| BUILD_RUNTIME_PROVIDER
+| Provider of the Apache Camel runtime used for builds.
+| `plain-quarkus`
+
 | BUILD_RUNTIME_VERSION
-| Version of the runtime used for builds.
-| The Camel K runtime specified by the Camel K operator version released
+| Version of the Apache Camel runtime used for builds.
+| The default version specified by the Camel K operator version released
 
 | BUILD_TIMEOUT_SECONDS
 | Timeout (in seconds) for a build before it is terminated.

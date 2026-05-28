@@ -28,7 +28,7 @@ VERSION ?= 2.11.0-SNAPSHOT
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
 LAST_RELEASED_VERSION ?= 2.10.0
 DEFAULT_RUNTIME_PROVIDER := plain-quarkus
-DEFAULT_RUNTIME_VERSION := 3.35.1
+DEFAULT_RUNTIME_VERSION := 3.33.2
 # The last camel-k-runtime catalog
 # we keep using it until we support the CamelCatalog CR
 CK_RUNTIME_CATALOG_VERSION := 3.15.3
