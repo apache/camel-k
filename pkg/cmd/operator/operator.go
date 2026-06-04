@@ -74,6 +74,7 @@ func printVersion() {
 	log.Info(fmt.Sprintf("Go OS/Arch: %s/%s", runtime.GOOS, runtime.GOARCH))
 	log.Info(fmt.Sprintf("Camel K Operator Version: %v", defaults.Version))
 	log.Info(fmt.Sprintf("Camel K Default Runtime Version: %v", defaults.DefaultRuntimeVersion))
+	log.Info(fmt.Sprintf("Camel K Default Runtime Provider: %v", defaults.DefaultRuntimeProvider))
 	log.Info(fmt.Sprintf("Camel K Git Commit: %v", defaults.GitCommit))
 	log.Info(fmt.Sprintf("Camel K Operator ID: %v", defaults.OperatorID()))
 
