@@ -33,8 +33,7 @@ rules:
   - get
   - list
   - patch
-  # - update
-  # - watch
+  - watch
 - apiGroups:
   - eventing.knative.dev
   resources:
@@ -46,7 +45,6 @@ rules:
   - get
   - list
   - patch
-  # - update
 - apiGroups:
   - messaging.knative.dev
   resources:

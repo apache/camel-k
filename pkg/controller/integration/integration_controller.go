@@ -435,9 +435,9 @@ func watchKnativeResources(ctx context.Context, c client.Client, b *builder.Buil
 		return err
 	}
 	if !ok {
-		log.Info(`KnativeService resources are not installed in the cluster. You can't use Knative features. If you install Knative Serving resources after the
-			Camel K operator, make sure to apply the required RBAC privileges and restart the Camel K Operator Pod to be able to watch for
-			Camel K managed Knative Services.`)
+		log.Info("KnativeService resources are not installed in the cluster. You can't use Knative serving features. " +
+			"If you install Knative Serving resources after the Camel K operator, make sure to apply the required RBAC privileges " +
+			"and restart the Camel K Operator Pod to be able to watch for Camel K managed Knative Services.")
 
 		return nil
 	}
@@ -448,11 +448,12 @@ func watchKnativeResources(ctx context.Context, c client.Client, b *builder.Buil
 	if ok, err = kubernetes.CheckSelfPermission(checkCtx, c, serving.GroupName, "services", platform.GetOperatorWatchNamespace(), "", "watch"); err != nil {
 		return err
 	} else if ok {
-		log.Info("KnativeService resources installed in the cluster. RBAC privileges assigned correctly, you can use Knative features.")
+		log.Info("KnativeService resources installed in the cluster. RBAC privileges assigned correctly, you can use Knative serving features.")
 		b.Owns(&servingv1.Service{}, builder.WithPredicates(StatusChangedPredicate{}))
 	} else {
-		log.Info(` KnativeService resources installed in the cluster. However Camel K operator has not the required RBAC privileges. You can't use Knative features.
-				Make sure to apply the required RBAC privileges and restart the Camel K Operator Pod to be able to watch for Camel K managed Knative Services.`)
+		log.Info("KnativeService resources installed in the cluster. However Camel K operator has not the required RBAC privileges. " +
+			"You can't use Knative features.Make sure to apply the required RBAC privileges and restart the Camel K Operator Pod to be able " +
+			"to watch for Camel K managed Knative Services.")
 	}
 
 	return nil
