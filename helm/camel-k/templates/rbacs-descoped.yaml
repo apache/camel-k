@@ -271,6 +271,7 @@ rules:
   - get
   - list
   - patch
+  - watch
 - apiGroups:
   - eventing.knative.dev
   resources:
