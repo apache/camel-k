@@ -44,6 +44,7 @@ linters:
     - wrapcheck
     - wsl
     - wsl_v5
+    - gomodguard
   settings:
     goconst:
       min-len: 4
