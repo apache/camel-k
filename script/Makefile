@@ -26,7 +26,7 @@ LOCALBIN := $(PROJECT_PATH)/bin
 VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION ?= 2.11.0-SNAPSHOT
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
-LAST_RELEASED_VERSION ?= 2.10.0
+LAST_RELEASED_VERSION ?= 2.10.1
 DEFAULT_RUNTIME_PROVIDER := plain-quarkus
 DEFAULT_RUNTIME_VERSION := 3.33.2
 # The last camel-k-runtime catalog
