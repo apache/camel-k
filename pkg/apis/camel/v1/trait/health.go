@@ -17,9 +17,16 @@ limitations under the License.
 
 package trait
 
-// The health trait is responsible for configuring the health probes on the integration container.
+// The health trait is responsible for configuring the container probes on the Integration container.
 //
-// NOTE: this trait is disabled by default.
+// NOTE: this trait is enabled by default in `plain-quarkus` runtime, leveraging the `camel-observability-services` component.
+// You can disable turning it off.
+//
+// The trait uses Camel health component in order to provide a readiness probe. You can also configure liveness and startup
+// probes which are disabled by default. The default values (delay, timeout, etc...),
+// whereas not specified are the default ones provided by Kubernetes.
+//
+// You can also configure manually the trait parameters in order to provide a customized probes configuration.
 //
 // +camel-k:trait=health.
 //
@@ -41,7 +48,7 @@ type HealthTrait struct {
 	LivenessSuccessThreshold int32 `json:"livenessSuccessThreshold,omitempty" property:"liveness-success-threshold"`
 	// Minimum consecutive failures for the liveness probe to be considered failed after having succeeded.
 	LivenessFailureThreshold int32 `json:"livenessFailureThreshold,omitempty" property:"liveness-failure-threshold"`
-	// The liveness probe path to use (default provided by the Catalog runtime used).
+	// The liveness probe path to use (default provided by the dependency used).
 	LivenessProbe string `json:"livenessProbe,omitempty" property:"liveness-probe"`
 	// The liveness port to use (default 8080).
 	LivenessPort int32 `json:"livenessPort,omitempty" property:"liveness-port"`
@@ -60,7 +67,7 @@ type HealthTrait struct {
 	ReadinessSuccessThreshold int32 `json:"readinessSuccessThreshold,omitempty" property:"readiness-success-threshold"`
 	// Minimum consecutive failures for the readiness probe to be considered failed after having succeeded.
 	ReadinessFailureThreshold int32 `json:"readinessFailureThreshold,omitempty" property:"readiness-failure-threshold"`
-	// The readiness probe path to use (default provided by the Catalog runtime used).
+	// The readiness probe path to use (default provided by the dependency used).
 	ReadinessProbe string `json:"readinessProbe,omitempty" property:"readiness-probe"`
 	// The readiness port to use (default 8080).
 	ReadinessPort int32 `json:"readinessPort,omitempty" property:"readiness-port"`
@@ -77,9 +84,9 @@ type HealthTrait struct {
 	StartupPeriod int32 `json:"startupPeriod,omitempty" property:"startup-period"`
 	// Minimum consecutive successes for the startup probe to be considered successful after having failed.
 	StartupSuccessThreshold int32 `json:"startupSuccessThreshold,omitempty" property:"startup-success-threshold"`
-	// Minimum consecutive failures for the startup probe to be considered failed after having succeeded.
+	// Minimum consecutive failures for the startup probe to be considered failed after having succeeded (default 6 if not specified).
 	StartupFailureThreshold int32 `json:"startupFailureThreshold,omitempty" property:"startup-failure-threshold"`
-	// The startup probe path to use (default provided by the Catalog runtime used).
+	// The startup probe path to use (default provided by the dependency used).
 	StartupProbe string `json:"startupProbe,omitempty" property:"startup-probe"`
 	// The startup port to use (default 8080).
 	StartupPort int32 `json:"startupPort,omitempty" property:"startup-port"`
