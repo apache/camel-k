@@ -46,7 +46,7 @@ You can explicitly add dependency using the `-d` flag (short name of the flag `-
 kamel run -d mvn:com.google.guava:guava:26.0-jre -d camel:http Integration.java
 ```
 
-With that command you will add a dependency of Guava and the Camel HTTP component. This feature can also be disabled if needed (although we discourage you from doing it) by disabling the _dependencies_ trait (`-t dependencies.enabled=false`).
+With that command you will add a dependency of Guava and the Camel HTTP component.
 
 [[dependencies-kind]]
 == Kind of dependencies
@@ -94,6 +94,46 @@ azure:user/repo/version
 ```
 
 The `version` can be omitted when you are willing to use the `main` branch. Otherwise it will represent the branch or tag used in the project repo.
+
+[[custom-components]]
+== Custom components
+
+When you are running advanced Integrations you may find useful the possibility to create a Camel custom component. A custom component is like any other embedded component, but, it is not available out of the box in the catalog, hence, you will need to provide the dependency explicitly. For example, given the following route configured to run an `echo:test` endpoint:
+
+```yaml
+- route:
+    from:
+      uri: timer:yaml
+      parameters:
+        period: "1000"
+      steps:
+        - setBody:
+            simple: Hello Camel from ${routeId}
+        - to:
+            uri: echo:test
+        - log: ${body}
+```
+you will need to include the custom component dependency (which, must be developed as expected by Camel framework) and a few more build time properties (only for Quarkus runtime). You can see the example we've provided in the https://github.com/squakez/camel-echo[`camel-echo` component Github repository]. What's important is that the dependency is published and your Maven repository can reach it. In the example below we're using the Jitpack dependency:
+
+```bash
+kamel run custom-echo-component-route.yaml \
+    -d github:squakez/camel-echo \
+	-t builder.properties=quarkus.index-dependency.camel-echo.group-id=com.github.squakez \
+	-t builder.properties=quarkus.index-dependency.camel-echo.artifact-id=camel-echo \
+	-t builder.properties=quarkus.camel.service.discovery.include-patterns=META-INF/services/org/apache/camel/echo
+```
+
+This is required to instruct the compiler about the Jandex index. You can replace the `custom-echo` with the name of your dependency and you will need to provide the same SPI also provided in your custom component dependency.
+
+NOTE: if you're running Camel Main or Spring Boot runtimes (for example, via Git repository build) you won't need to provide any build time property because those runtimes leverage the existing SPI provided in the dependency.
+
+The above approach is the simplest one you can use and it will work if your custom component has not any particular Quarkus requirement or you don't need to run in Quarkus native mode. If that is the case or you want to avoid proving the builder properties, then, you will have to write a Quarkus extension and provide just the runtime extension dependency to your application. Take as example the https://github.com/squakez/camel-echo-quarkus-extension[`camel-echo-quarkus-extenstion` Github repository]. You will need to publish it to a Maven repository reachable by your operator and later you can just run something like:
+
+```bash
+kamel run custom-echo-component-route.yaml -d mvn:com.example.camel:camel-quarkus-echo:1.0.0
+```
+
+During the compilation, the runtime dependency will instruct the compiler how to properly use the Camel custom component it refers.
 
 [[dependencies-dynamic]]
 == Dynamic URIs
