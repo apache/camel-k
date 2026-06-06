@@ -367,8 +367,9 @@ func (i *baseInspector) addDependencies(uri string, meta *Metadata, consumer boo
 	candidateComp, scheme := i.catalog.DecodeComponent(uri)
 
 	if candidateComp == nil || scheme == nil {
-		return fmt.Errorf("component not found for uri %q in camel catalog runtime version %s",
-			uri, i.catalog.GetRuntimeVersion())
+		// just ignore as it could be a custom component which has to be
+		// provided by the final user
+		return nil
 	}
 
 	meta.AddDependency(candidateComp.GetDependencyID())

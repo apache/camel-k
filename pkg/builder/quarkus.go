@@ -263,7 +263,13 @@ func computeApplicationProperties(appPropertiesPath string, applicationPropertie
 	applicationProperties["quarkus.camel.routes-discovery.enabled"] = boolean.FalseString
 	// required for to resolve data type transformers at runtime with service discovery
 	// the different Camel runtimes use different resource paths for the service lookup
-	applicationProperties["quarkus.camel.service.discovery.include-patterns"] = "META-INF/services/org/apache/camel/datatype/converter/*,META-INF/services/org/apache/camel/datatype/transformer/*,META-INF/services/org/apache/camel/transformer/*"
+	serviceDiscoveryVar := "quarkus.camel.service.discovery.include-patterns"
+	serviceDiscoveryProp := "META-INF/services/org/apache/camel/datatype/converter/*,META-INF/services/org/apache/camel/datatype/transformer/*,META-INF/services/org/apache/camel/transformer/*"
+	if applicationProperties[serviceDiscoveryVar] == "" {
+		applicationProperties[serviceDiscoveryVar] = serviceDiscoveryProp
+	} else {
+		applicationProperties[serviceDiscoveryVar] = applicationProperties[serviceDiscoveryVar] + "," + serviceDiscoveryProp
+	}
 	// Workaround to prevent JS runtime errors, see https://github.com/apache/camel-quarkus/issues/5678
 	applicationProperties["quarkus.class-loading.parent-first-artifacts"] = "org.graalvm.regex:regex"
 	defer f.Close()

@@ -1,0 +1,11 @@
+- route:
+    from:
+      uri: timer:yaml
+      parameters:
+        period: "1000"
+      steps:
+        - setBody:
+            simple: Hello Camel from ${routeId}
+        - to:
+            uri: echo:test
+        - log: ${body}
