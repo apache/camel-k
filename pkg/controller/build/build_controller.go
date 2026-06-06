@@ -196,6 +196,11 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 
 		newTarget, err := a.Handle(ctx, target)
 		if err != nil {
+			// NotFound means the Build was deleted mid-reconcile (stale cache); benign, not an error.
+			if k8serrors.IsNotFound(err) {
+				return reconcile.Result{}, nil
+			}
+
 			camelevent.NotifyError(r.recorder, &instance, target, instance.Name, instance.Kind, err)
 
 			return reconcile.Result{}, err
@@ -204,6 +209,10 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 		if newTarget != nil {
 			err := r.update(ctx, targetLog, &instance, newTarget)
 			if err != nil {
+				if k8serrors.IsNotFound(err) {
+					return reconcile.Result{}, nil
+				}
+
 				return reconcile.Result{}, err
 			}
 
