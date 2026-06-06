@@ -9162,11 +9162,11 @@ spec:
                             type: boolean
                           runAsNonRoot:
                             description: Security Context RunAsNonRoot configuration
-                              (default false).
+                              (default true).
                             type: boolean
                           runAsUser:
                             description: 'Security Context RunAsUser configuration
-                              (default none): this value is automatically retrieved
+                              (default user 1000): this value is automatically retrieved
                               in Openshift clusters when not explicitly set.'
                             format: int64
                             type: integer
@@ -11450,11 +11450,11 @@ spec:
                         type: boolean
                       runAsNonRoot:
                         description: Security Context RunAsNonRoot configuration (default
-                          false).
+                          true).
                         type: boolean
                       runAsUser:
                         description: 'Security Context RunAsUser configuration (default
-                          none): this value is automatically retrieved in Openshift
+                          user 1000): this value is automatically retrieved in Openshift
                           clusters when not explicitly set.'
                         format: int64
                         type: integer

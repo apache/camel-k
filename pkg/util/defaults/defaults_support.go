@@ -24,6 +24,8 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
+const DefaultPodRunAsUser = int64(1000)
+
 func BaseImage() string {
 	return envOrDefault(baseImage, "KAMEL_BASE_IMAGE", "RELATED_IMAGE_BASE")
 }

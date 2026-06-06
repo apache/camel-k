@@ -32,6 +32,7 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
@@ -66,7 +67,7 @@ func TestDefaultPodKubernetesSecurityContext(t *testing.T) {
 
 	assert.NotNil(t, d)
 	assert.Equal(t, ptr.To(defaultPodRunAsNonRoot), d.Spec.Template.Spec.SecurityContext.RunAsNonRoot)
-	assert.Nil(t, d.Spec.Template.Spec.SecurityContext.RunAsUser)
+	assert.Equal(t, defaults.DefaultPodRunAsUser, *d.Spec.Template.Spec.SecurityContext.RunAsUser)
 	assert.Equal(t, corev1.SeccompProfileTypeRuntimeDefault, d.Spec.Template.Spec.SecurityContext.SeccompProfile.Type)
 }
 
@@ -123,7 +124,7 @@ func TestUserPodSecurityContext(t *testing.T) {
 	environment.Integration.Spec.Traits = v1.Traits{
 		SecurityContext: &traitv1.SecurityContextTrait{
 			RunAsNonRoot:       ptr.To(false),
-			RunAsUser:          ptr.To(int64(1000)),
+			RunAsUser:          ptr.To(int64(1001)),
 			SeccompProfileType: "Unconfined",
 		},
 	}
@@ -142,7 +143,7 @@ func TestUserPodSecurityContext(t *testing.T) {
 
 	assert.NotNil(t, d)
 	assert.Equal(t, ptr.To(false), d.Spec.Template.Spec.SecurityContext.RunAsNonRoot)
-	assert.Equal(t, ptr.To(int64(1000)), d.Spec.Template.Spec.SecurityContext.RunAsUser)
+	assert.Equal(t, ptr.To(int64(1001)), d.Spec.Template.Spec.SecurityContext.RunAsUser)
 	assert.Equal(t, corev1.SeccompProfileTypeUnconfined, d.Spec.Template.Spec.SecurityContext.SeccompProfile.Type)
 }
 

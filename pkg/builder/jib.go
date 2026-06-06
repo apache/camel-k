@@ -23,11 +23,13 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/jib"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 	"github.com/apache/camel-k/v2/pkg/util/maven"
@@ -149,7 +151,7 @@ func buildJibMavenArgs(mavenDir, image, baseImage string, insecureRegistry bool,
 	mavenArgs = append(mavenArgs, jib.JibMavenToImageParam+image)
 	mavenArgs = append(mavenArgs, jib.JibMavenFromImageParam+baseImage)
 	mavenArgs = append(mavenArgs, jib.JibMavenBaseImageCache+mavenDir+"/jib")
-	mavenArgs = append(mavenArgs, "-Djib.container.user=1000")
+	mavenArgs = append(mavenArgs, jib.JibMavenContainerUser+strconv.FormatInt(defaults.DefaultPodRunAsUser, 10))
 
 	if imagePlatforms != nil {
 		platforms := strings.Join(imagePlatforms, ",")

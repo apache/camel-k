@@ -26,6 +26,7 @@ import (
 const JibMavenGoal = "jib:build"
 const JibMavenToImageParam = "-Djib.to.image="
 const JibMavenFromImageParam = "-Djib.from.image="
+const JibMavenContainerUser = "-Djib.container.user="
 const JibMavenFromPlatforms = "-Djib.from.platforms="
 const JibMavenBaseImageCache = "-Djib.baseImageCache="
 const JibMavenInsecureRegistries = "-Djib.allowInsecureRegistries="
