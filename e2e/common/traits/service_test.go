@@ -39,10 +39,12 @@ import (
 func TestServiceTrait(t *testing.T) {
 	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		name := "platform-http-server"
 		t.Run("NodePort service", func(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "files/PlatformHttpServer.java", "-t", "service.enabled=true",
 				"-t", "service.node-port=true").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
+				Should(Equal(corev1.ConditionTrue))
 
 			//
 			// Service names can vary with the ExternalName Service
@@ -54,7 +56,8 @@ func TestServiceTrait(t *testing.T) {
 		t.Run("Default service (ClusterIP)", func(t *testing.T) {
 			// Service trait is enabled by default
 			g.Expect(KamelRun(t, ctx, ns, "files/PlatformHttpServer.java").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady)).
+				Should(Equal(corev1.ConditionTrue))
 
 			//
 			// Service names can vary with the ExternalName Service
@@ -66,7 +69,8 @@ func TestServiceTrait(t *testing.T) {
 		t.Run("NodePort service from Type", func(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "files/PlatformHttpServer.java", "-t", "service.enabled=true",
 				"-t", "service.type=NodePort").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady)).
+				Should(Equal(corev1.ConditionTrue))
 
 			//
 			// Service names can vary with the ExternalName Service
@@ -78,7 +82,8 @@ func TestServiceTrait(t *testing.T) {
 		t.Run("ClusterIP service from Type", func(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "files/PlatformHttpServer.java",
 				"-t", "service.enabled=true", "-t", "service.type=ClusterIP").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady)).
+				Should(Equal(corev1.ConditionTrue))
 
 			//
 			// Service names can vary with the ExternalName Service
@@ -90,7 +95,8 @@ func TestServiceTrait(t *testing.T) {
 		t.Run("LoadBalancer service from Type", func(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "files/PlatformHttpServer.java", "-t", "service.enabled=true",
 				"-t", "service.type=LoadBalancer").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady)).
+				Should(Equal(corev1.ConditionTrue))
 
 			//
 			// Service names can vary with the ExternalName Service

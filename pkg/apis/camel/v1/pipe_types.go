@@ -126,8 +126,10 @@ type PipeCondition struct {
 	Reason string `json:"reason,omitempty"`
 	// A human readable message indicating details about the transition.
 	Message string `json:"message,omitempty"`
-	// Pods collect health and conditions information from the owned PODs
-	Pods []PodCondition `json:"pods,omitempty"`
+	// DeprecatedPods collect health and conditions information from the owned PODs
+	//
+	// Deprecated: may be removed in future releases.
+	DeprecatedPods []PodCondition `json:"pods,omitempty"`
 }
 
 // PipeConditionType --.

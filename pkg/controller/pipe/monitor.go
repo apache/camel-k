@@ -153,8 +153,8 @@ func (action *monitorAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.Pip
 		//nolint:staticcheck
 		if condition := it.Status.GetCondition(v1.IntegrationConditionReady); condition != nil {
 			if condition.DeprecatedPods != nil {
-				c.Pods = make([]v1.PodCondition, 0, len(condition.DeprecatedPods))
-				c.Pods = append(c.Pods, condition.DeprecatedPods...)
+				c.DeprecatedPods = make([]v1.PodCondition, 0, len(condition.DeprecatedPods))
+				c.DeprecatedPods = append(c.DeprecatedPods, condition.DeprecatedPods...)
 			}
 		}
 
@@ -186,8 +186,8 @@ func setPipeReadyCondition(kb *v1.Pipe, it *v1.Integration) {
 
 		//nolint:staticcheck
 		if condition.DeprecatedPods != nil {
-			c.Pods = make([]v1.PodCondition, 0, len(condition.DeprecatedPods))
-			c.Pods = append(c.Pods, condition.DeprecatedPods...)
+			c.DeprecatedPods = make([]v1.PodCondition, 0, len(condition.DeprecatedPods))
+			c.DeprecatedPods = append(c.DeprecatedPods, condition.DeprecatedPods...)
 		}
 
 		kb.Status.SetConditions(c)

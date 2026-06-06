@@ -7524,9 +7524,16 @@ The email used to commit the GitOps changes (default `camel-k-operator@apache.or
 
 * <<#_camel_apache_org_v1_Traits, Traits>>
 
-The health trait is responsible for configuring the health probes on the integration container.
+The health trait is responsible for configuring the container probes on the Integration container.
 
-NOTE: this trait is disabled by default.
+NOTE: this trait is enabled by default in `plain-quarkus` runtime, leveraging the `camel-observability-services` component.
+You can disable turning it off.
+
+The trait uses Camel health component in order to provide a readiness probe. You can also configure liveness and startup
+probes which are disabled by default. The default values (delay, timeout, etc...),
+whereas not specified are the default ones provided by Kubernetes.
+
+You can also configure manually the trait parameters in order to provide a customized probes configuration.
 
 
 [cols="2,2a",options="header"]
@@ -7595,7 +7602,7 @@ string
 |
 
 
-The liveness probe path to use (default provided by the Catalog runtime used).
+The liveness probe path to use (default provided by the dependency used).
 
 |`livenessPort` +
 int32
@@ -7658,7 +7665,7 @@ string
 |
 
 
-The readiness probe path to use (default provided by the Catalog runtime used).
+The readiness probe path to use (default provided by the dependency used).
 
 |`readinessPort` +
 int32
@@ -7714,14 +7721,14 @@ int32
 |
 
 
-Minimum consecutive failures for the startup probe to be considered failed after having succeeded.
+Minimum consecutive failures for the startup probe to be considered failed after having succeeded (default 6 if not specified).
 
 |`startupProbe` +
 string
 |
 
 
-The startup probe path to use (default provided by the Catalog runtime used).
+The startup probe path to use (default provided by the dependency used).
 
 |`startupPort` +
 int32

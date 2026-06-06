@@ -44,9 +44,10 @@ func TestRunIncrementalBuildRoutine(t *testing.T) {
 
 		name := RandomizedSuffixName("java")
 		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
-		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
+			Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("Magicstring!"))
 		integrationKitName := IntegrationKitName(t, ctx, ns, name)()
 		g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
 		g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.RootImage).Should(Equal(defaults.BaseImage()))
@@ -54,9 +55,10 @@ func TestRunIncrementalBuildRoutine(t *testing.T) {
 		t.Run("Reuse previous kit", func(t *testing.T) {
 			nameClone := "java-clone"
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", nameClone).Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, nameClone), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, nameClone, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ctx, ns, nameClone), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, nameClone, v1.IntegrationConditionReady), TestTimeoutMedium).
+				Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, nameClone)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, nameClone)).Should(ContainSubstring("Magicstring!"))
 			integrationCloneKitName := IntegrationKitName(t, ctx, ns, nameClone)()
 			g.Eventually(integrationCloneKitName).Should(Equal(integrationKitName))
 		})
@@ -66,9 +68,10 @@ func TestRunIncrementalBuildRoutine(t *testing.T) {
 			// just add a new random dependency
 			nameIncremental := RandomizedSuffixName("java-incremental")
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", nameIncremental, "-d", "camel:zipfile").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, nameIncremental), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, nameIncremental, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ctx, ns, nameIncremental), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, nameIncremental, v1.IntegrationConditionReady), TestTimeoutMedium).
+				Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, nameIncremental)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, nameIncremental)).Should(ContainSubstring("Magicstring!"))
 			integrationIncrementalKitName := IntegrationKitName(t, ctx, ns, nameIncremental)()
 			// the container comes in a format like
 			// 10.108.177.66/test-d7cad110-bb1d-4e79-8a0e-ebd44f6fe5d4/camel-k-kit-c8357r4k5tp6fn1idm60@sha256:d49716f0429ad8b23a1b8d20a357d64b1aa42a67c1a2a534ebd4c54cd598a18d
@@ -87,9 +90,10 @@ func TestRunIncrementalBuildPod(t *testing.T) {
 
 		name := RandomizedSuffixName("java")
 		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "builder.strategy=pod").Execute()).To(Succeed())
-		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
+			Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("Magicstring!"))
 		integrationKitName := IntegrationKitName(t, ctx, ns, name)()
 		g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
 		g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.RootImage).Should(Equal(defaults.BaseImage()))
@@ -98,9 +102,10 @@ func TestRunIncrementalBuildPod(t *testing.T) {
 		t.Run("Reuse previous kit", func(t *testing.T) {
 			nameClone := RandomizedSuffixName("java-clone")
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", nameClone, "-t", "builder.strategy=pod").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, nameClone), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, nameClone, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ctx, ns, nameClone), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, nameClone, v1.IntegrationConditionReady), TestTimeoutMedium).
+				Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, nameClone)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, nameClone)).Should(ContainSubstring("Magicstring!"))
 			integrationCloneKitName := IntegrationKitName(t, ctx, ns, nameClone)()
 			g.Eventually(integrationCloneKitName).Should(Equal(integrationKitName))
 			g.Eventually(BuilderPodsCount(t, ctx, ns)).Should(Equal(1))
@@ -110,10 +115,12 @@ func TestRunIncrementalBuildPod(t *testing.T) {
 			// Another integration that should be built on top of the previous IntegrationKit
 			// just add a new random dependency
 			nameIncremental := RandomizedSuffixName("java-incremental")
-			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", nameIncremental, "-d", "camel:zipfile", "-t", "builder.strategy=pod").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, nameIncremental), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, nameIncremental, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ctx, ns, nameIncremental), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", nameIncremental,
+				"-d", "camel:zipfile", "-t", "builder.strategy=pod").Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, nameIncremental, v1.IntegrationConditionReady), TestTimeoutMedium).
+				Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, nameIncremental)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, nameIncremental)).Should(ContainSubstring("Magicstring!"))
 			integrationIncrementalKitName := IntegrationKitName(t, ctx, ns, nameIncremental)()
 			// the container comes in a format like
 			// 10.108.177.66/test-d7cad110-bb1d-4e79-8a0e-ebd44f6fe5d4/camel-k-kit-c8357r4k5tp6fn1idm60@sha256:d49716f0429ad8b23a1b8d20a357d64b1aa42a67c1a2a534ebd4c54cd598a18d
@@ -133,18 +140,20 @@ func TestRunIncrementalBuildOff(t *testing.T) {
 
 		name := RandomizedSuffixName("java")
 		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
-		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
+			Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("Magicstring!"))
 		integrationKitName := IntegrationKitName(t, ctx, ns, name)()
 		g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
 
 		t.Run("Don't reuse previous kit", func(t *testing.T) {
 			nameClone := RandomizedSuffixName("java-clone")
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", nameClone, "-t", "builder.incremental-image-build=false").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, nameClone), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, nameClone, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ctx, ns, nameClone), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, nameClone, v1.IntegrationConditionReady), TestTimeoutMedium).
+				Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, nameClone)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, nameClone)).Should(ContainSubstring("Magicstring!"))
 			integrationCloneKitName := IntegrationKitName(t, ctx, ns, nameClone)()
 			g.Eventually(Kit(t, ctx, ns, integrationCloneKitName)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
 		})
@@ -154,9 +163,10 @@ func TestRunIncrementalBuildOff(t *testing.T) {
 			// just add a new random dependency
 			nameIncremental := RandomizedSuffixName("java-incremental")
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", nameIncremental, "-d", "camel:zipfile", "-t", "builder.incremental-image-build=false").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, nameIncremental), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, nameIncremental, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ctx, ns, nameIncremental), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, nameIncremental, v1.IntegrationConditionReady), TestTimeoutMedium).
+				Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, nameIncremental)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, nameIncremental)).Should(ContainSubstring("Magicstring!"))
 			integrationIncrementalKitName := IntegrationKitName(t, ctx, ns, nameIncremental)()
 			g.Eventually(Kit(t, ctx, ns, integrationIncrementalKitName)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
 		})
@@ -171,9 +181,10 @@ func TestRunIncrementalBuildWithDifferentBaseImages(t *testing.T) {
 
 		name := RandomizedSuffixName("java")
 		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
-		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
+			Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("Magicstring!"))
 		integrationKitName := IntegrationKitName(t, ctx, ns, name)()
 		g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
 		g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.RootImage).Should(Equal(defaults.BaseImage()))
@@ -183,9 +194,10 @@ func TestRunIncrementalBuildWithDifferentBaseImages(t *testing.T) {
 			// just add a new random dependency
 			nameIncremental := RandomizedSuffixName("java-incremental")
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", nameIncremental, "-d", "camel:zipfile").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, nameIncremental), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, nameIncremental, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ctx, ns, nameIncremental), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, nameIncremental, v1.IntegrationConditionReady), TestTimeoutMedium).
+				Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, nameIncremental)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, nameIncremental)).Should(ContainSubstring("Magicstring!"))
 			integrationIncrementalKitName := IntegrationKitName(t, ctx, ns, nameIncremental)()
 			// the container comes in a format like
 			// 10.108.177.66/test-d7cad110-bb1d-4e79-8a0e-ebd44f6fe5d4/camel-k-kit-c8357r4k5tp6fn1idm60@sha256:d49716f0429ad8b23a1b8d20a357d64b1aa42a67c1a2a534ebd4c54cd598a18d
@@ -198,10 +210,14 @@ func TestRunIncrementalBuildWithDifferentBaseImages(t *testing.T) {
 			// We should spin off a new hierarchy of builds
 			newBaseImage := "eclipse-temurin:17.0.8.1_1-jdk-ubi9-minimal"
 			name = RandomizedSuffixName("java-new")
-			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-d", "camel:mongodb", "-t", fmt.Sprintf("builder.base-image=%s", newBaseImage)).Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java",
+				"--name", name, "-d", "camel:zipfile",
+				"-t", fmt.Sprintf("builder.base-image=%s", newBaseImage),
+			).Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
+				Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("Magicstring!"))
 			integrationKitName = IntegrationKitName(t, ctx, ns, name)()
 			g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.BaseImage).Should(Equal(newBaseImage))
 			g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.RootImage).Should(Equal(newBaseImage))

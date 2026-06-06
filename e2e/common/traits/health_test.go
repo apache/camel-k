@@ -47,10 +47,8 @@ func TestHealthTrait(t *testing.T) {
 		t.Run("Readiness condition with stopped route scaled", func(t *testing.T) {
 			name := RandomizedSuffixName("java")
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java",
-				"-t", "health.enabled=true",
 				"-t", "jvm.agents=jolokia;https://repo1.maven.org/maven2/org/jolokia/jolokia-agent-jvm/2.3.0/jolokia-agent-jvm-2.3.0-javaagent.jar;host=*",
 				"-t", "container.ports=jolokia;8778",
-				"-d", "camel:management",
 				"--name", name).Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -145,10 +143,8 @@ func TestHealthTrait(t *testing.T) {
 		t.Run("Readiness condition with stopped route", func(t *testing.T) {
 			name := RandomizedSuffixName("java")
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java",
-				"-t", "health.enabled=true",
 				"-t", "jvm.agents=jolokia;https://repo1.maven.org/maven2/org/jolokia/jolokia-agent-jvm/2.3.0/jolokia-agent-jvm-2.3.0-javaagent.jar;host=*",
 				"-t", "container.ports=jolokia;8778",
-				"-d", "camel:management",
 				"--name", name).Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -243,10 +239,8 @@ func TestHealthTrait(t *testing.T) {
 			g.Expect(KamelBind(t, ctx, ns, source, sink,
 				"-p", "source.message=Magicstring!",
 				"-p", "sink.loggerName=binding",
-				"-t", "health.enabled=true",
 				"-t", "jvm.agents=jolokia;https://repo1.maven.org/maven2/org/jolokia/jolokia-agent-jvm/2.3.0/jolokia-agent-jvm-2.3.0-javaagent.jar;host=*",
 				"-t", "container.ports=jolokia;8778",
-				"-d", "camel:management",
 				"--name", name).Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -321,15 +315,15 @@ func TestHealthTrait(t *testing.T) {
 					if c.Status != corev1.ConditionFalse {
 						return false
 					}
-					if len(c.Pods) != 1 {
+					if len(c.DeprecatedPods) != 1 {
 						return false
 					}
 
 					var r *v1.HealthCheckResponse
 
-					for h := range c.Pods[0].Health {
-						if c.Pods[0].Health[h].Name == "camel-routes" {
-							r = &c.Pods[0].Health[h]
+					for h := range c.DeprecatedPods[0].Health {
+						if c.DeprecatedPods[0].Health[h].Name == "camel-routes" {
+							r = &c.DeprecatedPods[0].Health[h]
 						}
 					}
 
@@ -354,7 +348,6 @@ func TestHealthTrait(t *testing.T) {
 			name := RandomizedSuffixName("never-ready")
 
 			g.Expect(KamelRun(t, ctx, ns, "files/NeverReady.java", "--name", name,
-				"-t", "health.enabled=true",
 				"-p", "camel.health.routesEnabled=false",
 			).Execute()).To(Succeed())
 
@@ -407,9 +400,7 @@ func TestHealthTrait(t *testing.T) {
 			name := RandomizedSuffixName("startup-probe-never-ready-route")
 
 			g.Expect(KamelRun(t, ctx, ns, "files/NeverReady.java", "--name", name,
-				"-t", "health.enabled=true",
 				"-t", "health.startup-probe-enabled=true",
-				"-t", "health.startup-timeout=60",
 			).Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
@@ -459,9 +450,7 @@ func TestHealthTrait(t *testing.T) {
 			name := RandomizedSuffixName("startup-probe-ready-route")
 
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name,
-				"-t", "health.enabled=true",
 				"-t", "health.startup-probe-enabled=true",
-				"-t", "health.startup-timeout=60",
 			).Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))

@@ -6,6 +6,7 @@ package v1
 
 import (
 	"encoding/json"
+
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -2500,8 +2501,8 @@ func (in *PipeCondition) DeepCopyInto(out *PipeCondition) {
 	*out = *in
 	in.LastUpdateTime.DeepCopyInto(&out.LastUpdateTime)
 	in.LastTransitionTime.DeepCopyInto(&out.LastTransitionTime)
-	if in.Pods != nil {
-		in, out := &in.Pods, &out.Pods
+	if in.DeprecatedPods != nil {
+		in, out := &in.DeprecatedPods, &out.DeprecatedPods
 		*out = make([]PodCondition, len(*in))
 		for i := range *in {
 			(*in)[i].DeepCopyInto(&(*out)[i])
