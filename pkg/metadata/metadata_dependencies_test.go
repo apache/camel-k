@@ -109,7 +109,9 @@ func TestDependencyInexistent(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = extract(catalog, code)
-	require.Error(t, err)
+	// No error because it may be a custom component and the user
+	// has to provide the dependency explicitly
+	require.NoError(t, err)
 }
 
 func TestDependenciesQuarkus(t *testing.T) {

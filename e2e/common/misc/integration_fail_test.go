@@ -122,34 +122,6 @@ func TestBadRouteIntegration(t *testing.T) {
 			g.Eventually(BuildPhase(t, ctx, integrationKitRecoveryNamespace, kitRecoveryName), TestTimeoutShort).Should(Equal(v1.BuildPhaseSucceeded))
 		})
 
-		t.Run("run unresolvable component java route", func(t *testing.T) {
-			name := RandomizedSuffixName("unresolvable-route")
-			g.Expect(KamelRun(t, ctx, ns, "files/Unresolvable.java", "--name", name, "-t", "health.enabled=false").Execute()).To(Succeed())
-			// Integration in error with Initialization Failed condition
-			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
-				Should(Equal(corev1.ConditionFalse))
-			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(And(
-				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionInitializationFailedReason)),
-				WithTransform(IntegrationConditionMessage, HavePrefix("error during trait customization")),
-			))
-			// Kit shouldn't be created
-			g.Consistently(IntegrationKitName(t, ctx, ns, name), 10*time.Second).Should(BeEmpty())
-
-			// Fixing the route should reconcile the Integration in Initialization Failed condition to Running
-			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "health.enabled=false").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
-				Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			// New Kit success
-			kitRecoveryName := IntegrationKitName(t, ctx, ns, name)()
-			integrationKitRecoveryNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
-			g.Eventually(KitPhase(t, ctx, integrationKitRecoveryNamespace, kitRecoveryName), TestTimeoutShort).Should(Equal(v1.IntegrationKitPhaseReady))
-			// New Build success
-			g.Eventually(BuildPhase(t, ctx, integrationKitRecoveryNamespace, kitRecoveryName), TestTimeoutShort).Should(Equal(v1.BuildPhaseSucceeded))
-		})
-
 		t.Run("run invalid java route", func(t *testing.T) {
 			name := RandomizedSuffixName("invalid-java-route")
 			// Skip the health check so we can quickly read from log
