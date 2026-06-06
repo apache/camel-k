@@ -38,6 +38,81 @@ import (
 
 func TestHealthTrait(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
+	catalog.Runtime.Provider = v1.RuntimeProviderPlainQuarkus
+	require.NoError(t, err)
+
+	client, _ := internal.NewFakeClient()
+	traitCatalog := NewCatalog(nil)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Client:       client,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      ServiceTestName,
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Traits: v1.Traits{
+					Health: &trait.HealthTrait{
+						LivenessProbeEnabled:  ptr.To(true),
+						ReadinessProbeEnabled: ptr.To(true),
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: platform.Platform{
+			PublishStrategy:     v1.IntegrationPlatformBuildPublishStrategyJib,
+			Registry:            v1.RegistrySpec{Address: "registry"},
+			BuildRuntimeVersion: catalog.Runtime.Version,
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      kubernetes.NewCollection(),
+	}
+	_, _, err = traitCatalog.apply(&environment)
+	require.NoError(t, err)
+
+	d := environment.Resources.GetDeploymentForIntegration(environment.Integration)
+	assert.NotNil(t, d)
+	assert.Len(t, d.Spec.Template.Spec.Containers, 1)
+	assert.NotNil(t, d.Spec.Template.Spec.Containers[0].LivenessProbe)
+	assert.Equal(t, defaultObsSvcLivenessProbePath, d.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Path)
+	assert.Equal(t, defaultObsSvcHealthPort, d.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Port.IntVal)
+	assert.NotNil(t, d.Spec.Template.Spec.Containers[0].ReadinessProbe)
+	assert.Equal(t, defaultObsSvcReadinessProbePath, d.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Path)
+	assert.Equal(t, defaultObsSvcHealthPort, d.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Port.IntVal)
+	assert.Nil(t, d.Spec.Template.Spec.Containers[0].StartupProbe)
+
+	// Change traits configuration
+	environment.Integration.Spec.Traits.Health.LivenessProbeEnabled = ptr.To(false)
+	environment.Integration.Spec.Traits.Health.ReadinessProbeEnabled = ptr.To(false)
+	environment.Integration.Spec.Traits.Health.StartupProbeEnabled = ptr.To(true)
+
+	_, _, err = traitCatalog.apply(&environment)
+	require.NoError(t, err)
+	d = environment.Resources.GetDeploymentForIntegration(environment.Integration)
+	assert.NotNil(t, d)
+	assert.Len(t, d.Spec.Template.Spec.Containers, 1)
+	assert.Nil(t, d.Spec.Template.Spec.Containers[0].LivenessProbe)
+	assert.Nil(t, d.Spec.Template.Spec.Containers[0].ReadinessProbe)
+	assert.NotNil(t, d.Spec.Template.Spec.Containers[0].StartupProbe)
+	assert.Equal(t, defaultObsSvcStartupProbePath, d.Spec.Template.Spec.Containers[0].StartupProbe.HTTPGet.Path)
+	assert.Equal(t, defaultObsSvcHealthPort, d.Spec.Template.Spec.Containers[0].StartupProbe.HTTPGet.Port.IntVal)
+}
+
+func TestHealthTraitOlderRuntime(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	catalog.Runtime.Provider = v1.RuntimeProviderQuarkus
 	require.NoError(t, err)
 
 	client, _ := internal.NewFakeClient()
@@ -88,9 +163,11 @@ func TestHealthTrait(t *testing.T) {
 	assert.NotNil(t, d)
 	assert.Len(t, d.Spec.Template.Spec.Containers, 1)
 	assert.NotNil(t, d.Spec.Template.Spec.Containers[0].LivenessProbe)
-	assert.Equal(t, "/q/health/live", d.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Path)
+	assert.Equal(t, defaultQuarkusLivenessProbePath, d.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Path)
+	assert.Equal(t, defaultQuarkusHealthPort, d.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Port.IntVal)
 	assert.NotNil(t, d.Spec.Template.Spec.Containers[0].ReadinessProbe)
-	assert.Equal(t, "/q/health/ready", d.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Path)
+	assert.Equal(t, defaultQuarkusReadinessProbePath, d.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Path)
+	assert.Equal(t, defaultQuarkusHealthPort, d.Spec.Template.Spec.Containers[0].ReadinessProbe.HTTPGet.Port.IntVal)
 	assert.Nil(t, d.Spec.Template.Spec.Containers[0].StartupProbe)
 
 	// Change traits configuration
@@ -106,11 +183,22 @@ func TestHealthTrait(t *testing.T) {
 	assert.Nil(t, d.Spec.Template.Spec.Containers[0].LivenessProbe)
 	assert.Nil(t, d.Spec.Template.Spec.Containers[0].ReadinessProbe)
 	assert.NotNil(t, d.Spec.Template.Spec.Containers[0].StartupProbe)
-	assert.Equal(t, "/q/health/started", d.Spec.Template.Spec.Containers[0].StartupProbe.HTTPGet.Path)
+	assert.Equal(t, defaultQuarkusStartupProbePath, d.Spec.Template.Spec.Containers[0].StartupProbe.HTTPGet.Path)
+	assert.Equal(t, defaultQuarkusHealthPort, d.Spec.Template.Spec.Containers[0].StartupProbe.HTTPGet.Port.IntVal)
 }
 
 func TestConfigureHealthTraitDefault(t *testing.T) {
 	ht, environment := createNominalHealthTrait(t)
+	configured, condition, err := ht.Configure(environment)
+
+	assert.True(t, configured)
+	assert.Nil(t, err)
+	assert.Nil(t, condition)
+}
+
+func TestConfigureHealthTraitDefaultOlderRuntime(t *testing.T) {
+	ht, environment := createNominalHealthTrait(t)
+	environment.CamelCatalog.Runtime.Provider = v1.RuntimeProviderQuarkus
 	configured, condition, err := ht.Configure(environment)
 
 	assert.False(t, configured)
@@ -118,10 +206,10 @@ func TestConfigureHealthTraitDefault(t *testing.T) {
 	assert.Nil(t, condition)
 }
 
-func TestConfigureHealthTraitEnabled(t *testing.T) {
-	enabled := true
+func TestConfigureHealthTraitEnableOlderRuntime(t *testing.T) {
 	ht, environment := createNominalHealthTrait(t)
-	ht.Enabled = &enabled
+	environment.CamelCatalog.Runtime.Provider = v1.RuntimeProviderQuarkus
+	ht.Enabled = ptr.To(true)
 	configured, condition, err := ht.Configure(environment)
 
 	assert.True(t, configured)
@@ -129,58 +217,21 @@ func TestConfigureHealthTraitEnabled(t *testing.T) {
 	assert.Nil(t, condition)
 }
 
-func TestApplyHealthTraitDefault(t *testing.T) {
-	enabled := true
+func TestConfigureHealthTraitDisabled(t *testing.T) {
+	enabled := false
 	ht, environment := createNominalHealthTrait(t)
 	ht.Enabled = &enabled
 	configured, condition, err := ht.Configure(environment)
-	assert.True(t, configured)
+
+	assert.False(t, configured)
 	assert.Nil(t, err)
 	assert.Nil(t, condition)
-
-	err = ht.Apply(environment)
-	assert.Nil(t, err)
-	assert.Equal(t, "/q/health/ready", environment.GetIntegrationContainer().ReadinessProbe.HTTPGet.Path)
-	assert.Equal(t, corev1.URISchemeHTTP, environment.GetIntegrationContainer().ReadinessProbe.HTTPGet.Scheme)
-	assert.Equal(t, "8080", environment.GetIntegrationContainer().ReadinessProbe.HTTPGet.Port.String())
-}
-func TestApplyHealthTraitLivenessDefault(t *testing.T) {
-	enabled := true
-	ht, environment := createNominalHealthTrait(t)
-	ht.Enabled = &enabled
-	ht.LivenessProbeEnabled = &enabled
-	configured, condition, err := ht.Configure(environment)
-	assert.True(t, configured)
-	assert.Nil(t, err)
-	assert.Nil(t, condition)
-
-	err = ht.Apply(environment)
-	assert.Nil(t, err)
-	assert.Equal(t, "/q/health/live", environment.GetIntegrationContainer().LivenessProbe.HTTPGet.Path)
-	assert.Equal(t, corev1.URISchemeHTTP, environment.GetIntegrationContainer().LivenessProbe.HTTPGet.Scheme)
-	assert.Equal(t, "8080", environment.GetIntegrationContainer().LivenessProbe.HTTPGet.Port.String())
-}
-
-func TestApplyHealthTraitStartupDefault(t *testing.T) {
-	enabled := true
-	ht, environment := createNominalHealthTrait(t)
-	ht.Enabled = &enabled
-	ht.StartupProbeEnabled = &enabled
-	configured, condition, err := ht.Configure(environment)
-	assert.True(t, configured)
-	assert.Nil(t, err)
-	assert.Nil(t, condition)
-
-	err = ht.Apply(environment)
-	assert.Nil(t, err)
-	assert.Equal(t, "/q/health/started", environment.GetIntegrationContainer().StartupProbe.HTTPGet.Path)
-	assert.Equal(t, corev1.URISchemeHTTP, environment.GetIntegrationContainer().StartupProbe.HTTPGet.Scheme)
-	assert.Equal(t, "8080", environment.GetIntegrationContainer().StartupProbe.HTTPGet.Port.String())
 }
 
 func createNominalHealthTrait(t *testing.T) (*healthTrait, *Environment) {
 	t.Helper()
 	catalog, err := camel.DefaultCatalog()
+	catalog.Runtime.Provider = v1.RuntimeProviderPlainQuarkus
 	assert.Nil(t, err)
 	trait, _ := newHealthTrait().(*healthTrait)
 
@@ -224,7 +275,7 @@ func TestApplyHealthTraitSyntheticKit(t *testing.T) {
 	ht, environment := createNominalHealthTrait(t)
 	// Simulate a synthetic Kit which has not catalog attached
 	environment.CamelCatalog = nil
-	ht.Enabled = &enabled
+	ht.Enabled = ptr.To(true)
 	ht.LivenessProbeEnabled = &enabled
 	ht.ReadinessProbeEnabled = &enabled
 	ht.StartupProbeEnabled = &enabled

@@ -542,29 +542,6 @@ func (e *Environment) getIntegrationContainerPort() *corev1.ContainerPort {
 	return nil
 }
 
-// createContainerPort creates a new container port with values taken from Container trait or default.
-func (e *Environment) createContainerPort() *corev1.ContainerPort {
-	var name string
-	var port int32
-
-	if t := e.Catalog.GetTrait(containerTraitID); t != nil {
-		if ct, ok := t.(*containerTrait); ok {
-			name = ct.PortName
-			port = ct.getPort()
-		}
-	}
-
-	if name == "" {
-		name = e.determineDefaultContainerPortName()
-	}
-
-	return &corev1.ContainerPort{
-		Name:          name,
-		ContainerPort: port,
-		Protocol:      corev1.ProtocolTCP,
-	}
-}
-
 // CapabilityPropertyKey returns the key or expand any variable provided in it. vars variable contain the
 // possible dynamic values to use.
 func CapabilityPropertyKey(camelPropertyKey string, vars map[string]string) string {

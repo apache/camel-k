@@ -56,6 +56,7 @@ func TestConfigurePrometheusTraitInWrongPhaseDoesNotSucceed(t *testing.T) {
 func TestApplyNominalPrometheusTraitDoesSucceed(t *testing.T) {
 	trait, environment := createNominalPrometheusTest()
 
+	trait.Configure(environment)
 	err := trait.Apply(environment)
 
 	require.NoError(t, err)
@@ -85,6 +86,7 @@ func TestApplyPrometheusTraitWithoutContainerDoesNotSucceed(t *testing.T) {
 	trait, environment := createNominalPrometheusTest()
 	environment.Resources = kubernetes.NewCollection()
 
+	trait.Configure(environment)
 	err := trait.Apply(environment)
 
 	require.NoError(t, err)

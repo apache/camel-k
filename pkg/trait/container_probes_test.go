@@ -109,11 +109,11 @@ func TestProbesOnDeployment(t *testing.T) {
 
 	assert.Equal(t, "", container.LivenessProbe.HTTPGet.Host)
 	assert.Equal(t, int32(defaultContainerPort), container.LivenessProbe.HTTPGet.Port.IntVal)
-	assert.Equal(t, defaultLivenessProbePath, container.LivenessProbe.HTTPGet.Path)
+	assert.Equal(t, defaultQuarkusLivenessProbePath, container.LivenessProbe.HTTPGet.Path)
 	assert.Equal(t, corev1.URISchemeHTTP, container.ReadinessProbe.HTTPGet.Scheme)
 	assert.Equal(t, "", container.ReadinessProbe.HTTPGet.Host)
 	assert.Equal(t, int32(defaultContainerPort), container.ReadinessProbe.HTTPGet.Port.IntVal)
-	assert.Equal(t, defaultReadinessProbePath, container.ReadinessProbe.HTTPGet.Path)
+	assert.Equal(t, defaultQuarkusReadinessProbePath, container.ReadinessProbe.HTTPGet.Path)
 	assert.Equal(t, corev1.URISchemeHTTP, container.LivenessProbe.HTTPGet.Scheme)
 	assert.Equal(t, int32(1234), container.LivenessProbe.TimeoutSeconds)
 }
@@ -148,11 +148,11 @@ func TestProbesOnDeploymentWithCustomScheme(t *testing.T) {
 
 	assert.Equal(t, "", container.LivenessProbe.HTTPGet.Host)
 	assert.Equal(t, int32(defaultContainerPort), container.LivenessProbe.HTTPGet.Port.IntVal)
-	assert.Equal(t, defaultLivenessProbePath, container.LivenessProbe.HTTPGet.Path)
+	assert.Equal(t, defaultQuarkusLivenessProbePath, container.LivenessProbe.HTTPGet.Path)
 	assert.Equal(t, corev1.URISchemeHTTPS, container.ReadinessProbe.HTTPGet.Scheme)
 	assert.Equal(t, "", container.ReadinessProbe.HTTPGet.Host)
 	assert.Equal(t, int32(defaultContainerPort), container.ReadinessProbe.HTTPGet.Port.IntVal)
-	assert.Equal(t, defaultReadinessProbePath, container.ReadinessProbe.HTTPGet.Path)
+	assert.Equal(t, defaultQuarkusReadinessProbePath, container.ReadinessProbe.HTTPGet.Path)
 	assert.Equal(t, corev1.URISchemeHTTPS, container.LivenessProbe.HTTPGet.Scheme)
 	assert.Equal(t, int32(1234), container.LivenessProbe.TimeoutSeconds)
 }
@@ -207,9 +207,9 @@ func TestProbesOnKnativeService(t *testing.T) {
 
 	assert.Equal(t, "", container.LivenessProbe.HTTPGet.Host)
 	assert.Equal(t, int32(defaultContainerPort), container.LivenessProbe.HTTPGet.Port.IntVal)
-	assert.Equal(t, defaultLivenessProbePath, container.LivenessProbe.HTTPGet.Path)
+	assert.Equal(t, defaultQuarkusLivenessProbePath, container.LivenessProbe.HTTPGet.Path)
 	assert.Equal(t, "", container.ReadinessProbe.HTTPGet.Host)
 	assert.Equal(t, int32(defaultContainerPort), container.ReadinessProbe.HTTPGet.Port.IntVal)
-	assert.Equal(t, defaultReadinessProbePath, container.ReadinessProbe.HTTPGet.Path)
+	assert.Equal(t, defaultQuarkusReadinessProbePath, container.ReadinessProbe.HTTPGet.Path)
 	assert.Equal(t, int32(1234), container.LivenessProbe.TimeoutSeconds)
 }

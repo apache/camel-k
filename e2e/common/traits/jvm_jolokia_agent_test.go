@@ -44,7 +44,6 @@ func TestJvmAgentJolokiaTrait(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name,
 				"-t", "jvm.agents=jolokia;https://repo1.maven.org/maven2/org/jolokia/jolokia-agent-jvm/2.3.0/jolokia-agent-jvm-2.3.0-javaagent.jar;host=*",
 				"-t", "container.ports=jolokia;8778",
-				"-d", "camel:management",
 			).Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))

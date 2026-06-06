@@ -51,16 +51,19 @@ func TestPrometheusTrait(t *testing.T) {
 		require.NoError(t, err)
 		// Do not create PodMonitor for the time being as CI test runs on OCP 3.11
 		createPodMonitor := false
-		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "-t", "prometheus.enabled=true", "-t", fmt.Sprintf("prometheus.pod-monitor=%v", createPodMonitor)).Execute()).To(Succeed())
-		g.Eventually(IntegrationPodPhase(t, ctx, ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Expect(KamelRun(t, ctx, ns, "files/Java.java",
+			"-t", "prometheus.enabled=true",
+			"-t", fmt.Sprintf("prometheus.pod-monitor=%v", createPodMonitor),
+		).Execute()).To(Succeed())
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "java", v1.IntegrationConditionReady), TestTimeoutMedium).
+			Should(Equal(corev1.ConditionTrue))
 		g.Eventually(IntegrationLogs(t, ctx, ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 		t.Run("Metrics endpoint works", func(t *testing.T) {
 			pod := IntegrationPod(t, ctx, ns, "java")
 			response, err := TestClient(t).CoreV1().RESTClient().Get().
 				Timeout(30 * time.Second).
-				AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/q/metrics", ns, pod().Name)).DoRaw(ctx)
+				AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/observe/metrics", ns, pod().Name)).DoRaw(ctx)
 			if err != nil {
 				assert.Fail(t, err.Error())
 			}

@@ -7983,7 +7983,7 @@ spec:
                             type: integer
                           livenessProbe:
                             description: The liveness probe path to use (default provided
-                              by the Catalog runtime used).
+                              by the dependency used).
                             type: string
                           livenessProbeEnabled:
                             description: Configures the liveness probe for the integration
@@ -8023,7 +8023,7 @@ spec:
                             type: integer
                           readinessProbe:
                             description: The readiness probe path to use (default
-                              provided by the Catalog runtime used).
+                              provided by the dependency used).
                             type: string
                           readinessProbeEnabled:
                             description: Configures the readiness probe for the integration
@@ -8045,7 +8045,8 @@ spec:
                             type: integer
                           startupFailureThreshold:
                             description: Minimum consecutive failures for the startup
-                              probe to be considered failed after having succeeded.
+                              probe to be considered failed after having succeeded
+                              (default 6 if not specified).
                             format: int32
                             type: integer
                           startupInitialDelay:
@@ -8063,7 +8064,7 @@ spec:
                             type: integer
                           startupProbe:
                             description: The startup probe path to use (default provided
-                              by the Catalog runtime used).
+                              by the dependency used).
                             type: string
                           startupProbeEnabled:
                             description: Configures the startup probe for the integration
@@ -10276,7 +10277,7 @@ spec:
                         type: integer
                       livenessProbe:
                         description: The liveness probe path to use (default provided
-                          by the Catalog runtime used).
+                          by the dependency used).
                         type: string
                       livenessProbeEnabled:
                         description: Configures the liveness probe for the integration
@@ -10316,7 +10317,7 @@ spec:
                         type: integer
                       readinessProbe:
                         description: The readiness probe path to use (default provided
-                          by the Catalog runtime used).
+                          by the dependency used).
                         type: string
                       readinessProbeEnabled:
                         description: Configures the readiness probe for the integration
@@ -10338,7 +10339,8 @@ spec:
                         type: integer
                       startupFailureThreshold:
                         description: Minimum consecutive failures for the startup
-                          probe to be considered failed after having succeeded.
+                          probe to be considered failed after having succeeded (default
+                          6 if not specified).
                         format: int32
                         type: integer
                       startupInitialDelay:
@@ -10356,7 +10358,7 @@ spec:
                         type: integer
                       startupProbe:
                         description: The startup probe path to use (default provided
-                          by the Catalog runtime used).
+                          by the dependency used).
                         type: string
                       startupProbeEnabled:
                         description: Configures the startup probe for the integration

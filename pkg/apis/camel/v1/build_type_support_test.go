@@ -107,7 +107,7 @@ func TestMatchingBuildsPending(t *testing.T) {
 				{
 					Builder: &BuilderTask{
 						Dependencies: []string{
-							"camel:mongodb",
+							"camel:zipfile",
 							"camel:component-a",
 							"camel:component-b",
 						},
