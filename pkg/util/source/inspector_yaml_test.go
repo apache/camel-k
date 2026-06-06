@@ -19,7 +19,6 @@ package source
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -624,7 +623,7 @@ const yamlFromDSLWithUnknownFromScheme = `
       - to: "log:info"
 `
 
-const yamlFromDSLWithUnknownToScheme = `
+const yamlFromDSLWithCustomComponentScheme = `
 - route:
     id: route2
     from:
@@ -633,12 +632,12 @@ const yamlFromDSLWithUnknownToScheme = `
       - to: "unknown:foo"
 `
 
-func TestYAMLRouteWithUnknownScheme(t *testing.T) {
+func TestYAMLRouteWithCustomComponentScheme(t *testing.T) {
 	inspector := newTestYAMLInspector(t)
-	for i, source := range []string{yamlFromDSLWithUnknownFromScheme, yamlFromDSLWithUnknownToScheme} {
-		t.Run(fmt.Sprintf("TestYAMLRouteWithUnknownScheme-%d", i), func(t *testing.T) {
-			assertExtractYAMLError(t, inspector, source, func(err error) {
-				assert.True(t, strings.HasPrefix(err.Error(), fmt.Sprintf("component not found for uri %q", "unknown:foo")))
+	for i, source := range []string{yamlFromDSLWithUnknownFromScheme, yamlFromDSLWithCustomComponentScheme} {
+		t.Run(fmt.Sprintf("TestYAMLRouteWithCustomComponent-%d", i), func(t *testing.T) {
+			assertExtractYAML(t, inspector, source, func(meta *Metadata) {
+				// all good
 			})
 		})
 	}
