@@ -27,9 +27,9 @@ import corev1 "k8s.io/api/core/v1"
 type SecurityContextTrait struct {
 	PlatformBaseTrait `json:",inline" property:",squash"`
 
-	// Security Context RunAsUser configuration (default none): this value is automatically retrieved in Openshift clusters when not explicitly set.
+	// Security Context RunAsUser configuration (default user 1000): this value is automatically retrieved in Openshift clusters when not explicitly set.
 	RunAsUser *int64 `json:"runAsUser,omitempty" property:"run-as-user"`
-	// Security Context RunAsNonRoot configuration (default false).
+	// Security Context RunAsNonRoot configuration (default true).
 	RunAsNonRoot *bool `json:"runAsNonRoot,omitempty" property:"run-as-non-root"`
 	// Security Context SeccompProfileType configuration (default RuntimeDefault).
 	// +kubebuilder:validation:Enum=Unconfined;RuntimeDefault

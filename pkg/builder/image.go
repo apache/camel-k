@@ -21,6 +21,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/apache/camel-k/v2/pkg/util/io"
@@ -115,7 +116,7 @@ func jvmDockerfile(ctx *builderContext) error {
 	dockerfile := []byte(`
 		FROM ` + ctx.BaseImage + `
 		ADD . ` + DeploymentDir + `
-		USER 1000
+		USER ` + strconv.FormatInt(defaults.DefaultPodRunAsUser, 10) + `
 	`)
 
 	err := os.WriteFile(filepath.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, io.FilePerm400)

@@ -520,7 +520,7 @@ func TestUserSecurityContext(t *testing.T) {
 	environment.Integration.Spec.Traits = v1.Traits{
 		Container: &traitv1.ContainerTrait{
 			RunAsNonRoot:             ptr.To(false),
-			RunAsUser:                ptr.To(int64(1000)),
+			RunAsUser:                ptr.To(int64(1001)),
 			SeccompProfileType:       "Unconfined",
 			AllowPrivilegeEscalation: ptr.To(true),
 			CapabilitiesDrop:         []corev1.Capability{"DROP"},
@@ -543,7 +543,7 @@ func TestUserSecurityContext(t *testing.T) {
 	assert.NotNil(t, d)
 	assert.Len(t, d.Spec.Template.Spec.Containers, 1)
 	assert.Equal(t, ptr.To(false), d.Spec.Template.Spec.Containers[0].SecurityContext.RunAsNonRoot)
-	assert.Equal(t, ptr.To(int64(1000)), d.Spec.Template.Spec.Containers[0].SecurityContext.RunAsUser)
+	assert.Equal(t, ptr.To(int64(1001)), d.Spec.Template.Spec.Containers[0].SecurityContext.RunAsUser)
 	assert.Equal(t, corev1.SeccompProfileTypeUnconfined, d.Spec.Template.Spec.Containers[0].SecurityContext.SeccompProfile.Type)
 	assert.Equal(t, ptr.To(true), d.Spec.Template.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
 	assert.Equal(t, []corev1.Capability{"DROP"}, d.Spec.Template.Spec.Containers[0].SecurityContext.Capabilities.Drop)
