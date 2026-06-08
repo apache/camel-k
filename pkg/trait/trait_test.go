@@ -345,6 +345,50 @@ func TestDefaultIntegrationErrorTraitsSetting(t *testing.T) {
 	testDefaultIntegrationPhaseTraitsSetting(t, v1.IntegrationPhaseError)
 }
 
+func TestAutoInferredServiceTraitsDoNotLeakIntoStatus(t *testing.T) {
+	it := &v1.Integration{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "my-it",
+			Namespace: "ns",
+		},
+		Spec: v1.IntegrationSpec{
+			Sources: []v1.SourceSpec{
+				{
+					DataSpec: v1.DataSpec{
+						Name:    "file.java",
+						Content: `from("servlet:http").to("log:info")`,
+					},
+					Language: v1.LanguageJavaSource,
+				},
+			},
+		},
+		Status: v1.IntegrationStatus{
+			Phase: v1.IntegrationPhaseRunning,
+			Conditions: []v1.IntegrationCondition{
+				{
+					Type:   v1.IntegrationConditionDeploymentAvailable,
+					Status: corev1.ConditionTrue,
+				},
+			},
+		},
+	}
+	// Load the default catalog
+	camelCatalogData, err := resources.Resource(fmt.Sprintf("/resources/camel-catalog-%s.yaml", defaults.CamelKRuntimeCatalogVersion))
+	require.NoError(t, err)
+	var cat v1.CamelCatalog
+	err = yaml.Unmarshal(camelCatalogData, &cat)
+	require.NoError(t, err)
+	cat.Namespace = "default"
+	platform.SingletonPlatform.CatalogNamespace = cat.Namespace
+
+	client, err := internal.NewFakeClient(&cat)
+	require.NoError(t, err)
+	env, err := Apply(context.Background(), client, it, nil)
+	require.NoError(t, err)
+	require.NotNil(t, env.Resources.GetServiceForIntegration(it))
+	assert.Equal(t, &v1.Traits{}, env.Integration.Status.Traits)
+}
+
 func TestIntegrationTraitsSetting(t *testing.T) {
 	it := &v1.Integration{
 		ObjectMeta: metav1.ObjectMeta{
