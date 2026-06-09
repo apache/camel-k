@@ -66,6 +66,7 @@ type containerTrait struct {
 	traitv1.ContainerTrait `property:",squash"`
 
 	containerPorts []containerPort
+	expose         *bool
 }
 
 // containerPort is supporting port parsing.
@@ -93,7 +94,7 @@ func (t *containerTrait) Configure(e *Environment) (bool, *TraitCondition, error
 	if ptr.Deref(t.Auto, true) {
 		if t.Expose == nil {
 			if e.Resources.GetServiceForIntegration(e.Integration) != nil {
-				t.Expose = new(true)
+				t.expose = new(true)
 			}
 		}
 	}
@@ -214,7 +215,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 		// Knative does not like anybody touching the container ports
 		t.configurePorts(&container)
 	}
-	if knative || ptr.Deref(t.Expose, false) {
+	if knative || t.isExpose() {
 		t.configureService(e, &container, knative)
 	}
 	t.configureCapabilities(e)
@@ -356,9 +357,7 @@ func (t *containerTrait) setSecurityContext(e *Environment, container *corev1.Co
 		return err
 	}
 
-	t.RunAsUser = runAsUser
-
-	sc.RunAsUser = t.RunAsUser
+	sc.RunAsUser = runAsUser
 	container.SecurityContext = &sc
 
 	return nil
@@ -384,6 +383,14 @@ func (t *containerTrait) getUser(e *Environment) (*int64, error) {
 	}
 
 	return runAsUser, nil
+}
+
+func (t *containerTrait) isExpose() bool {
+	if t.Expose != nil {
+		return *t.Expose
+	}
+
+	return ptr.Deref(t.expose, false)
 }
 
 func (t *containerTrait) getPort() int32 {

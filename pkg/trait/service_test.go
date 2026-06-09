@@ -575,10 +575,9 @@ func TestServiceWithKnativeServiceDisabledInIntegrationPlatform(t *testing.T) {
 		"KnativeServiceNotAvailable",
 		"explicitly disabled",
 	)
-	conditions, traits, err := traitCatalog.apply(&environment)
+	conditions, _, err := traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
-	assert.NotEmpty(t, traits)
 	assert.Contains(t, conditions, expectedCondition)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait(serviceTraitID))
@@ -633,7 +632,10 @@ func TestServiceAutoConfiguration(t *testing.T) {
 	}
 	_, traits, err := traitCatalog.apply(&environment)
 	require.NoError(t, err)
-	assert.Equal(t, ptr.To(true), traits.Service.Enabled)
+	assert.NotNil(t, environment.GetTrait(serviceTraitID))
+	if traits.Service != nil {
+		assert.Nil(t, traits.Service.Enabled)
+	}
 }
 
 func TestServiceAnnotationsAndLables(t *testing.T) {

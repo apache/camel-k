@@ -60,7 +60,7 @@ func Apply(ctx context.Context, c client.Client, integration *v1.Integration, ki
 	environment.Catalog = catalog
 
 	// invoke the trait framework to determine the needed resources
-	conditions, _, err := catalog.apply(environment)
+	conditions, traits, err := catalog.apply(environment)
 	// WARNING: Conditions contains informative message coming from the trait execution and useful to be reported into it or ik CR
 	// they must be applied before returning after an error
 	for _, tc := range conditions {
@@ -74,12 +74,13 @@ func Apply(ctx context.Context, c client.Client, integration *v1.Integration, ki
 	if err != nil {
 		return nil, fmt.Errorf("error during trait customization: %w", err)
 	}
-	// Only reflect user-specified trait values in the status.
-	// Auto-inferred defaults (e.g. container.expose, service.enabled) must not
-	// leak into .status.traits because they cause unnecessary pod restarts and
-	// clutter the status with values the user never configured.
+	// Set the executed traits taking care to merge in order to avoid the distinct execution
+	// phase to clean up any previous executed trait
 	if integration != nil {
 		integration.Status.Traits = integration.Spec.Traits.DeepCopy()
+		if err := integration.Status.Traits.Merge(*traits); err != nil {
+			return nil, fmt.Errorf("error setting status traits: %w", err)
+		}
 	}
 
 	postActionErrors := make([]error, 0)
