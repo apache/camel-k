@@ -256,7 +256,7 @@ func (action *buildAction) createBuilderServiceAccount(ctx context.Context, ns s
 			},
 		},
 	}
-	action.L.Info("Creating %s ServiceAccount in namespace %s", sa.Name, sa.Namespace)
+	action.L.Infof("Creating %s ServiceAccount in namespace %s", sa.Name, sa.Namespace)
 
 	return action.client.Create(ctx, sa)
 }
@@ -298,7 +298,7 @@ func (action *buildAction) createBuilderRole(ctx context.Context, ns string) err
 			},
 		},
 	}
-	action.L.Info("Creating %s Role in namespace %s", r.Name, r.Namespace)
+	action.L.Infof("Creating %s Role in namespace %s", r.Name, r.Namespace)
 
 	return action.client.Create(ctx, r)
 }
@@ -331,7 +331,7 @@ func (action *buildAction) createBuilderRoleBinding(ctx context.Context, ns stri
 			Name:     platform.BuilderServiceAccount,
 		},
 	}
-	action.L.Info("Creating %s RoleBinding in namespace %s", rb.Name, rb.Namespace)
+	action.L.Infof("Creating %s RoleBinding in namespace %s", rb.Name, rb.Namespace)
 
 	return action.client.Create(ctx, rb)
 }
