@@ -198,7 +198,7 @@ func TestRoute_Default(t *testing.T) {
 
 	conditions, traits, err := traitsCatalog.apply(environment)
 	require.NoError(t, err)
-	assert.NotEmpty(t, traits)
+	assert.Empty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("container"))
@@ -235,7 +235,7 @@ func TestRoute_Disabled(t *testing.T) {
 	traitsCatalog := environment.Catalog
 	conditions, traits, err := traitsCatalog.apply(environment)
 	require.NoError(t, err)
-	assert.NotEmpty(t, traits)
+	assert.Empty(t, traits)
 	assert.Contains(t, conditions, expectedCondition)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.Nil(t, environment.GetTrait("route"))

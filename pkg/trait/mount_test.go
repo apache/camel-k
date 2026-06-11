@@ -47,7 +47,7 @@ func TestMountVolumesEmpty(t *testing.T) {
 	conditions, traits, err := traitCatalog.apply(environment)
 
 	require.NoError(t, err)
-	assert.NotEmpty(t, traits)
+	assert.Empty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("mount"))

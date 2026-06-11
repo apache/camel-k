@@ -86,6 +86,7 @@ func (t *serviceTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 		return false, nil, nil
 	}
 
+	enabled := ptr.Deref(t.Enabled, false)
 	if ptr.Deref(t.Auto, true) {
 		exposeHTTPServices, err := e.ConsumeMeta(false, func(meta metadata.IntegrationMetadata) bool {
 			return meta.ExposesHTTPServices
@@ -103,7 +104,7 @@ func (t *serviceTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 			return false, condition, err
 		}
 
-		t.Enabled = new(exposeHTTPServices)
+		enabled = exposeHTTPServices
 	}
 
 	servicePorts, err := t.parseServicePorts()
@@ -112,7 +113,7 @@ func (t *serviceTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	}
 	t.servicePorts = servicePorts
 
-	return ptr.Deref(t.Enabled, false) || len(t.servicePorts) > 0, nil, nil
+	return enabled || len(t.servicePorts) > 0, nil, nil
 }
 
 func (t *serviceTrait) Apply(e *Environment) error {
