@@ -47,6 +47,10 @@ Here a quick resume of the parameters you can configure as environment variables
 | Maximum number of builds that can run concurrently.
 | `3` if build strategy is `routine`, `10` if `pod`
 
+| BUILDER_NODE_SELECTOR_ALLOWED_LABELS
+| Comma-separated list of node-selector label keys that CR authors are permitted to set via the `builder.nodeSelector` trait. When unset or empty all keys are accepted. Unlisted keys are dropped and an info message is logged. Example: `kubernetes.io/hostname,topology.kubernetes.io/zone`.
+|
+
 |===
 
 Certain configuration can be also specified via trait configuration on xref:traits:builder.adoc[`builder`] and xref:traits:builder.adoc[`camel`] trait. Those values have precedence over global configuration.

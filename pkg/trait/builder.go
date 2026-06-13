@@ -34,6 +34,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/builder"
+	"github.com/apache/camel-k/v2/pkg/platform"
 	mvn "github.com/apache/camel-k/v2/pkg/util/maven"
 	"github.com/apache/camel-k/v2/pkg/util/property"
 )
@@ -239,7 +240,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 
 		return nil
 	}
-	builderTask.Configuration.NodeSelector = t.NodeSelector
+	builderTask.Configuration.NodeSelector = t.filterNodeSelector()
 	builderTask.Configuration.Annotations = t.Annotations
 	pipelineTasks = append(pipelineTasks, v1.Task{Builder: builderTask})
 
@@ -710,3 +711,31 @@ func (t *builderTrait) setPlatform(e *Environment) {
 		}
 	}
 }
+
+// filterNodeSelector returns the node selector map after applying the operator-level allow list.
+// If BUILDER_NODE_SELECTOR_ALLOWED_LABELS is empty/unset all keys are accepted (backward compatible).
+// Otherwise only keys present in the allow list are retained; every dropped key is logged at info level.
+func (t *builderTrait) filterNodeSelector() map[string]string {
+	if len(t.NodeSelector) == 0 {
+		return t.NodeSelector
+	}
+
+	allowList := platform.BuilderNodeSelectorAllowList()
+	if len(allowList) == 0 {
+		// no restriction configured – accept everything
+		return t.NodeSelector
+	}
+
+	filtered := make(map[string]string, len(t.NodeSelector))
+	for k, v := range t.NodeSelector {
+		if slices.Contains(allowList, k) {
+			filtered[k] = v
+		} else {
+			t.L.Info("builder.nodeSelector key is not in the allowed list and will be ignored",
+				"key", k, "allowedKeys", allowList)
+		}
+	}
+
+	return filtered
+}
+
