@@ -88,7 +88,7 @@ func (t *prometheusTrait) Apply(e *Environment) error {
 
 	containerPort := e.getIntegrationContainerPort()
 	if containerPort == nil {
-		containerPort = e.createContainerPort()
+		containerPort = e.createContainerPort(nil)
 		container.Ports = append(container.Ports, *containerPort)
 	}
 

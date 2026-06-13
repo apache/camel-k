@@ -106,6 +106,12 @@ func (action *initializeAction) addPlainQuarkusCatalog(ctx context.Context, cata
 				GroupID:    v1.MavenQuarkusGroupID,
 				ArtifactID: "camel-quarkus-core",
 			},
+			// We enforce the presence of this component to provide an
+			// opinionated set of observability services
+			{
+				GroupID:    v1.MavenQuarkusGroupID,
+				ArtifactID: "camel-quarkus-observability-services",
+			},
 		}
 		if clonedCatalog.Spec.Runtime.Capabilities != nil {
 			clonedCatalog.Spec.Runtime.Capabilities["cron"] = v1.Capability{

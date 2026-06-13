@@ -25,6 +25,7 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/ptr"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -52,6 +53,15 @@ func TestMonitorSyntheticIntegrationImportingKindUnavailable(t *testing.T) {
 				v1.IntegrationImportedNameLabel: "my-deploy",
 				v1.IntegrationSyntheticLabel:    "true",
 				v1.IntegrationImportedKindLabel: "SomeKind",
+			},
+		},
+		Spec: v1.IntegrationSpec{
+			Traits: v1.Traits{
+				Health: &trait.HealthTrait{
+					Trait: trait.Trait{
+						Enabled: ptr.To(false),
+					},
+				},
 			},
 		},
 		Status: v1.IntegrationStatus{
@@ -87,6 +97,15 @@ func TestMonitorSyntheticIntegrationCannotMonitorPods(t *testing.T) {
 				v1.IntegrationImportedNameLabel: "my-deploy",
 				v1.IntegrationSyntheticLabel:    "true",
 				v1.IntegrationImportedKindLabel: "Deployment",
+			},
+		},
+		Spec: v1.IntegrationSpec{
+			Traits: v1.Traits{
+				Health: &trait.HealthTrait{
+					Trait: trait.Trait{
+						Enabled: ptr.To(false),
+					},
+				},
 			},
 		},
 		Status: v1.IntegrationStatus{
@@ -151,6 +170,11 @@ func TestMonitorSyntheticIntegrationDeployment(t *testing.T) {
 			Traits: v1.Traits{
 				Container: &trait.ContainerTrait{
 					Name: "my-cnt",
+				},
+				Health: &trait.HealthTrait{
+					Trait: trait.Trait{
+						Enabled: ptr.To(false),
+					},
 				},
 			},
 		},
@@ -270,6 +294,15 @@ func TestMonitorSyntheticIntegrationCronJob(t *testing.T) {
 				v1.IntegrationImportedKindLabel: "CronJob",
 			},
 		},
+		Spec: v1.IntegrationSpec{
+			Traits: v1.Traits{
+				Health: &trait.HealthTrait{
+					Trait: trait.Trait{
+						Enabled: ptr.To(false),
+					},
+				},
+			},
+		},
 		Status: v1.IntegrationStatus{
 			Phase: v1.IntegrationPhaseRunning,
 			Conditions: []v1.IntegrationCondition{
@@ -379,6 +412,15 @@ func TestMonitorSyntheticIntegrationKnativeService(t *testing.T) {
 				v1.IntegrationImportedNameLabel: "my-ksvc",
 				v1.IntegrationSyntheticLabel:    "true",
 				v1.IntegrationImportedKindLabel: "KnativeService",
+			},
+		},
+		Spec: v1.IntegrationSpec{
+			Traits: v1.Traits{
+				Health: &trait.HealthTrait{
+					Trait: trait.Trait{
+						Enabled: ptr.To(false),
+					},
+				},
 			},
 		},
 		Status: v1.IntegrationStatus{

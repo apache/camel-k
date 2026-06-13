@@ -35,14 +35,33 @@ const (
 	healthTraitID    = "health"
 	healthTraitOrder = 1700
 
-	defaultLivenessProbePath  = "/q/health/live"
-	defaultReadinessProbePath = "/q/health/ready"
-	defaultStartupProbePath   = "/q/health/started"
+	defaultQuarkusBasePath           = "/q/health"
+	defaultQuarkusLivenessProbePath  = defaultQuarkusBasePath + "/live"
+	defaultQuarkusReadinessProbePath = defaultQuarkusBasePath + "/ready"
+	defaultQuarkusStartupProbePath   = defaultQuarkusBasePath + "/started"
+	defaultQuarkusHealthPort         = int32(8080)
+
+	defaultObsSvcBasePath           = "/observe/health"
+	defaultObsSvcLivenessProbePath  = defaultObsSvcBasePath + "/live"
+	defaultObsSvcReadinessProbePath = defaultObsSvcBasePath + "/ready"
+	defaultObsSvcStartupProbePath   = defaultObsSvcBasePath + ""
+	defaultObsSvcHealthPort         = int32(9876)
+
+	// We need to be a bit more generous with startup
+	// failure. A jvm mode app can take more than 30 secs
+	// to be started up.
+	defaultStartupFailureThreshold = 6
 )
 
 type healthTrait struct {
 	BaseTrait
 	traitv1.HealthTrait `property:",squash"`
+
+	// Probes port and base path can be also configured via user properties
+	probesPort          int32
+	probesLivenessPath  string
+	probesReadinessPath string
+	probesStartupPath   string
 }
 
 func newHealthTrait() Trait {
@@ -54,57 +73,89 @@ func newHealthTrait() Trait {
 func (t *healthTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil ||
 		(!e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases()) ||
-		!ptr.Deref(t.Enabled, false) {
+		!ptr.Deref(t.Enabled, true) {
 		return false, nil, nil
+	}
+
+	// The trait used to be disabled by default in older Camel K runtime
+	if e.CamelCatalog != nil && e.CamelCatalog.Runtime.Provider == v1.RuntimeProviderQuarkus && !ptr.Deref(t.Enabled, false) {
+		return false, nil, nil
+	}
+
+	// Skip if self managed build, unless enabled on purpose
+	if !e.Integration.IsManagedBuild() && !ptr.Deref(t.Enabled, false) {
+		return false, NewIntegrationConditionPlatformDisabledWithMessage("Health",
+			"self managed build: container probes disabled, you can turn explicitly on"), nil
+	}
+
+	// Skip if built from git, unless enabled on purpose
+	if e.Integration.IsGitBuild() && !ptr.Deref(t.Enabled, false) {
+		return false, NewIntegrationConditionPlatformDisabledWithMessage("Health",
+			"build from Git: container probes disabled, you can turn explicitly on"), nil
 	}
 
 	// The trait must be disabled if a debug operation is ongoing
 	if jt := e.Catalog.GetTrait(jvmTraitID); jt != nil {
 		if jvm, ok := jt.(*jvmTrait); ok && ptr.Deref(jvm.Debug, false) {
-			return false, NewIntegrationConditionPlatformDisabledWithMessage("Health", "debug operation ongoing: incompatible with health checks"), nil
+			return false, NewIntegrationConditionPlatformDisabledWithMessage("Health",
+				"debug operation ongoing: incompatible with health checks"), nil
 		}
 	}
 
 	t.setProbesValues(e)
 
-	return true, nil, nil
+	return ptr.Deref(t.Enabled, true), nil, nil
 }
 
 func (t *healthTrait) setProbesValues(e *Environment) {
-	if t.LivenessProbe == "" {
-		if e.CamelCatalog.Runtime.Capabilities["health"].Metadata != nil {
-			t.LivenessProbe = e.CamelCatalog.Runtime.Capabilities["health"].Metadata["defaultLivenessProbePath"]
+	// values are taken by trait configuration as priority
+	t.probesLivenessPath = t.LivenessProbe
+	t.probesReadinessPath = t.ReadinessProbe
+	t.probesStartupPath = t.StartupProbe
+	// Default is 8080 anyway
+	t.probesPort = defaultQuarkusHealthPort
+
+	if e.CamelCatalog == nil {
+		// Likely it is a self managed build integration
+		return
+	}
+	isOlderCamelKRuntime := e.CamelCatalog.Runtime.Provider == v1.RuntimeProviderQuarkus
+	t.probesPort = defaultObsSvcHealthPort
+	if isOlderCamelKRuntime {
+		t.probesPort = defaultQuarkusHealthPort
+	}
+
+	if t.probesLivenessPath == "" {
+		if isOlderCamelKRuntime {
+			t.probesLivenessPath = defaultQuarkusLivenessProbePath
 		} else {
-			// Deprecated: to be removed
-			t.LivenessProbe = defaultLivenessProbePath
+			t.probesLivenessPath = defaultObsSvcLivenessProbePath
 		}
 	}
-	if t.ReadinessProbe == "" {
-		if e.CamelCatalog.Runtime.Capabilities["health"].Metadata != nil {
-			t.ReadinessProbe = e.CamelCatalog.Runtime.Capabilities["health"].Metadata["defaultReadinessProbePath"]
+
+	if t.probesReadinessPath == "" {
+		if isOlderCamelKRuntime {
+			t.probesReadinessPath = defaultQuarkusReadinessProbePath
 		} else {
-			// Deprecated: to be removed
-			t.ReadinessProbe = defaultReadinessProbePath
+			t.probesReadinessPath = defaultObsSvcReadinessProbePath
 		}
 	}
-	if t.StartupProbe == "" {
-		if e.CamelCatalog.Runtime.Capabilities["health"].Metadata != nil {
-			t.StartupProbe = e.CamelCatalog.Runtime.Capabilities["health"].Metadata["defaultStartupProbePath"]
+
+	if t.probesStartupPath == "" {
+		if isOlderCamelKRuntime {
+			t.probesStartupPath = defaultQuarkusStartupProbePath
 		} else {
-			// Deprecated: to be removed
-			t.StartupProbe = defaultStartupProbePath
+			t.probesStartupPath = defaultObsSvcStartupProbePath
 		}
 	}
 }
 
 func (t *healthTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		if capability, ok := e.CamelCatalog.Runtime.Capabilities[v1.CapabilityHealth]; ok {
-			for _, dependency := range capability.Dependencies {
-				util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, dependency.GetDependencyID())
-			}
-			// sort the dependencies to get always the same list if they don't change
-			sort.Strings(e.Integration.Status.Dependencies)
+		// Execute this only for the old deprecated provider in order to
+		// maintain backward compatibility
+		if e.CamelCatalog != nil && e.CamelCatalog.Runtime.Provider == v1.RuntimeProviderQuarkus {
+			addCamelHealthCapabilityDependency(e)
 		}
 
 		return nil
@@ -119,35 +170,39 @@ func (t *healthTrait) Apply(e *Environment) error {
 		return fmt.Errorf("unable to find integration container: %s", e.Integration.Name)
 	}
 
-	var port *intstr.IntOrString
-	containerPort := e.getIntegrationContainerPort()
-	if containerPort == nil {
-		containerPort = e.createContainerPort()
-	}
-	p := intstr.FromInt32(containerPort.ContainerPort)
-	port = &p
+	p := intstr.FromInt32(t.probesPort)
 
-	return t.setProbes(container, port)
+	return t.setProbes(container, &p)
+}
+
+func addCamelHealthCapabilityDependency(e *Environment) {
+	if capability, ok := e.CamelCatalog.Runtime.Capabilities[v1.CapabilityHealth]; ok {
+		for _, dependency := range capability.Dependencies {
+			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, dependency.GetDependencyID())
+		}
+		// sort the dependencies to get always the same list if they don't change
+		sort.Strings(e.Integration.Status.Dependencies)
+	}
 }
 
 func (t *healthTrait) setProbes(container *corev1.Container, port *intstr.IntOrString) error {
 	if ptr.Deref(t.LivenessProbeEnabled, false) {
-		if t.LivenessProbe == "" {
+		if t.probesLivenessPath == "" {
 			return errors.New("you need to configure a liveness probe explicitly or in your catalog")
 		}
-		container.LivenessProbe = t.newLivenessProbe(port, t.LivenessProbe)
+		container.LivenessProbe = t.newLivenessProbe(port, t.probesLivenessPath)
 	}
 	if ptr.Deref(t.ReadinessProbeEnabled, true) {
-		if t.ReadinessProbe == "" {
+		if t.probesReadinessPath == "" {
 			return errors.New("you need to configure a readiness probe explicitly or in your catalog")
 		}
-		container.ReadinessProbe = t.newReadinessProbe(port, t.ReadinessProbe)
+		container.ReadinessProbe = t.newReadinessProbe(port, t.probesReadinessPath)
 	}
 	if ptr.Deref(t.StartupProbeEnabled, false) {
-		if t.StartupProbe == "" {
+		if t.probesStartupPath == "" {
 			return errors.New("you need to configure a startup probe explicitly or in your catalog")
 		}
-		container.StartupProbe = t.newStartupProbe(port, t.StartupProbe)
+		container.StartupProbe = t.newStartupProbe(port, t.probesStartupPath)
 	}
 
 	return nil
@@ -178,60 +233,69 @@ func (t *healthTrait) getStartupScheme() corev1.URIScheme {
 }
 
 func (t *healthTrait) newLivenessProbe(port *intstr.IntOrString, path string) *corev1.Probe {
-	p := corev1.Probe{
-		ProbeHandler: corev1.ProbeHandler{
-			HTTPGet: &corev1.HTTPGetAction{
-				Path:   path,
-				Scheme: t.getLivenessScheme(),
-				Port:   *t.getLivenessPort(port),
-			},
-		},
-		InitialDelaySeconds: t.LivenessInitialDelay,
-		TimeoutSeconds:      t.LivenessTimeout,
-		PeriodSeconds:       t.LivenessPeriod,
-		SuccessThreshold:    t.LivenessSuccessThreshold,
-		FailureThreshold:    t.LivenessFailureThreshold,
-	}
-
-	return &p
+	return newProbe(
+		path,
+		t.getLivenessScheme(),
+		t.getLivenessPort(port),
+		t.LivenessInitialDelay,
+		t.LivenessTimeout,
+		t.LivenessPeriod,
+		t.LivenessSuccessThreshold,
+		t.LivenessFailureThreshold,
+	)
 }
 
 func (t *healthTrait) newReadinessProbe(port *intstr.IntOrString, path string) *corev1.Probe {
-	p := corev1.Probe{
-		ProbeHandler: corev1.ProbeHandler{
-			HTTPGet: &corev1.HTTPGetAction{
-				Path:   path,
-				Scheme: t.getReadinessScheme(),
-				Port:   *t.getReadinessPort(port),
-			},
-		},
-		InitialDelaySeconds: t.ReadinessInitialDelay,
-		TimeoutSeconds:      t.ReadinessTimeout,
-		PeriodSeconds:       t.ReadinessPeriod,
-		SuccessThreshold:    t.ReadinessSuccessThreshold,
-		FailureThreshold:    t.ReadinessFailureThreshold,
-	}
-
-	return &p
+	return newProbe(
+		path,
+		t.getReadinessScheme(),
+		t.getReadinessPort(port),
+		t.ReadinessInitialDelay,
+		t.ReadinessTimeout,
+		t.ReadinessPeriod,
+		t.ReadinessSuccessThreshold,
+		t.ReadinessFailureThreshold,
+	)
 }
 
 func (t *healthTrait) newStartupProbe(port *intstr.IntOrString, path string) *corev1.Probe {
-	p := corev1.Probe{
+	startupFailureThreshold := t.StartupFailureThreshold
+	if startupFailureThreshold == 0 {
+		startupFailureThreshold = defaultStartupFailureThreshold
+	}
+
+	return newProbe(
+		path,
+		t.getStartupScheme(),
+		t.getStartupPort(port),
+		t.StartupInitialDelay,
+		t.StartupTimeout,
+		t.StartupPeriod,
+		t.StartupSuccessThreshold,
+		startupFailureThreshold,
+	)
+}
+
+func newProbe(
+	path string,
+	scheme corev1.URIScheme,
+	resolverPort *intstr.IntOrString,
+	initialDelay, timeout, period, success, failure int32,
+) *corev1.Probe {
+	return &corev1.Probe{
 		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
 				Path:   path,
-				Scheme: t.getStartupScheme(),
-				Port:   *t.getStartupPort(port),
+				Scheme: scheme,
+				Port:   *resolverPort,
 			},
 		},
-		InitialDelaySeconds: t.StartupInitialDelay,
-		TimeoutSeconds:      t.StartupTimeout,
-		PeriodSeconds:       t.StartupPeriod,
-		SuccessThreshold:    t.StartupSuccessThreshold,
-		FailureThreshold:    t.StartupFailureThreshold,
+		InitialDelaySeconds: initialDelay,
+		TimeoutSeconds:      timeout,
+		PeriodSeconds:       period,
+		SuccessThreshold:    success,
+		FailureThreshold:    failure,
 	}
-
-	return &p
 }
 
 func (t *healthTrait) getLivenessPort(port *intstr.IntOrString) *intstr.IntOrString {

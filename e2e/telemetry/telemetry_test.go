@@ -42,8 +42,11 @@ func TestTelemetryTrait(t *testing.T) {
 		// Create integration and activate traces using OpenTelemetry properties and dependency
 		g.Expect(KamelRun(t, ctx, ns,
 			"files/rest-consumer.yaml", "--name", "rest-consumer",
-			"--dependency", "camel:opentelemetry",
-			"-p", "quarkus.otel.exporter.otlp.traces.endpoint=http://opentelemetrycollector.otlp:4317").Execute()).To(Succeed())
+			// we must enable the collector endpoint and enable the collection explicitly
+			// as required by camel-observability-services quarkus extension
+			"-p", "quarkus.otel.exporter.otlp.traces.endpoint=http://opentelemetrycollector.otlp:4317",
+			"-p", "quarkus.otel.sdk.disabled=false",
+		).Execute()).To(Succeed())
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, "rest-consumer"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
 		name := "Bob"

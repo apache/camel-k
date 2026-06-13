@@ -214,6 +214,7 @@ func createTestEnv(t *testing.T, script string) *Environment {
 
 	client, _ := internal.NewFakeClient()
 	catalog, err := camel.DefaultCatalog()
+	catalog.Runtime.Provider = v1.RuntimeProviderPlainQuarkus
 	require.NoError(t, err)
 
 	res := &Environment{
@@ -268,7 +269,7 @@ func TestExecutedTraitsCondition(t *testing.T) {
 		v1.IntegrationConditionTraitInfo,
 		corev1.ConditionTrue,
 		"TraitConfiguration",
-		"Applied traits: camel,environment,logging,deployer,deployment,gc,container,security-context,mount,quarkus,jvm,owner",
+		"Applied traits: camel,environment,logging,deployer,deployment,gc,container,security-context,mount,health,quarkus,jvm,owner",
 	)
 	assert.Contains(t, conditions, expectedCondition)
 }
