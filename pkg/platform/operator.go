@@ -150,20 +150,7 @@ func IsOperatorHandler(object ctrl.Object) bool {
 		return true
 	}
 
-	// check if we are dealing with resource that is missing a proper operator id annotation
-	if resourceID == "" {
-		// allow default global operator to handle legacy resources (missing proper operator id annotations)
-		if operatorID == DefaultPlatformName {
-			return true
-		}
-
-		// allow local operators to handle legacy resources (missing proper operator id annotations)
-		if !IsCurrentOperatorGlobal() {
-			return true
-		}
-	}
-
-	return false
+	return resourceID == ""
 }
 
 // IsOperatorHandlerConsideringLock uses normal IsOperatorHandler checks and adds additional check for legacy resources

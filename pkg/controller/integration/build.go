@@ -100,6 +100,7 @@ func (action *buildAction) createBuild(ctx context.Context, it *v1.Integration) 
 
 	operatorID := defaults.OperatorID()
 	if operatorID != "" {
+		//nolint:staticcheck
 		annotations[v1.OperatorIDAnnotation] = operatorID
 	}
 

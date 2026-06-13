@@ -578,8 +578,6 @@ func TestOutputYaml(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf(`apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:
-  annotations:
-    camel.apache.org/operator.id: camel-k
   name: %s
 spec:
   sources:
@@ -612,8 +610,6 @@ func TestTrait(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf(`apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:
-  annotations:
-    camel.apache.org/operator.id: camel-k
   name: %s
 spec:
   sources:
@@ -919,8 +915,6 @@ func TestSelfManagedBuildIntegration(t *testing.T) {
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:
-  annotations:
-    camel.apache.org/operator.id: camel-k
   name: my-app-v1
 spec:
   traits:
@@ -942,8 +936,6 @@ func TestGitRepoIntegration(t *testing.T) {
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:
-  annotations:
-    camel.apache.org/operator.id: camel-k
   name: my-it
 spec:
   git:
@@ -962,8 +954,6 @@ func TestGitTagIntegration(t *testing.T) {
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:
-  annotations:
-    camel.apache.org/operator.id: camel-k
   name: my-it
 spec:
   git:
@@ -983,8 +973,6 @@ func TestGitBranchIntegration(t *testing.T) {
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:
-  annotations:
-    camel.apache.org/operator.id: camel-k
   name: my-it
 spec:
   git:
@@ -1004,8 +992,6 @@ func TestGitCommitIntegration(t *testing.T) {
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:
-  annotations:
-    camel.apache.org/operator.id: camel-k
   name: my-it
 spec:
   git:

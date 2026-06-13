@@ -123,6 +123,7 @@ func cloneAnnotations(ann map[string]string, operatorID string) map[string]strin
 		if k == "kubectl.kubernetes.io/last-applied-configuration" {
 			continue
 		}
+		//nolint:staticcheck
 		if k == v1.OperatorIDAnnotation {
 			if operatorID != "" {
 				newMap[v1.OperatorIDAnnotation] = operatorID
@@ -132,6 +133,7 @@ func cloneAnnotations(ann map[string]string, operatorID string) map[string]strin
 			newMap[k] = v
 		}
 	}
+	//nolint:staticcheck
 	if !operatorIDAnnotationSet && operatorID != "" {
 		newMap[v1.OperatorIDAnnotation] = operatorID
 	}
@@ -213,6 +215,7 @@ func AppendKustomizeIntegration(dstIt *v1.Integration, destinationDir string, ov
 	baseIt := dstIt.DeepCopy()
 	baseIt.Namespace = ""
 	if baseIt.Annotations != nil {
+		//nolint:staticcheck
 		delete(baseIt.Annotations, v1.OperatorIDAnnotation)
 	}
 	appFolderName := strings.ToLower(baseIt.Name)
@@ -417,6 +420,7 @@ func AppendKustomizePipe(dstPipe *v1.Pipe, destinationDir string, overwrite bool
 	basePipe := dstPipe.DeepCopy()
 	basePipe.Namespace = ""
 	if basePipe.Annotations != nil {
+		//nolint:staticcheck
 		delete(basePipe.Annotations, v1.OperatorIDAnnotation)
 	}
 	appFolderName := strings.ToLower(basePipe.Name)

@@ -804,7 +804,7 @@ install-k8s-global: KUSTOMIZE_DIR="install/overlays/kubernetes/descoped"
 install-k8s-global: clone-kustomize-dir set-operator-id set-operator-env install-operator
 
 install-k8s-ns: DEFAULT_NS="default"
-install-k8s-ns: KUSTOMIZE_DIR="install/overlays/kubernetes/namespaced"
+install-k8s-ns: KUSTOMIZE_DIR="install/overlays/kubernetes/own-namespace"
 install-k8s-ns: clone-kustomize-dir set-operator-id set-operator-env install-operator
 
 install-registry: NAMESPACE="camel-k"

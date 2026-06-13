@@ -145,8 +145,7 @@ func createTestCamelCatalog(ns string, runtimeProvider v1.RuntimeProvider, versi
 func TestIntegrationWithMetadataDryRun(t *testing.T) {
 	defaultIntegration, defaultKit := nominalIntegration("my-it-test")
 	defaultIntegration.Annotations = map[string]string{
-		"camel.apache.org/operator.id": "camel-k",
-		"my-annotation":                "my-value",
+		"my-annotation": "my-value",
 	}
 	defaultIntegration.Labels = map[string]string{
 		"my-label": "my-value",
@@ -182,8 +181,7 @@ status: {}
 func TestPipeWithMetadataDryRun(t *testing.T) {
 	defaultKB := nominalPipe("my-pipe-test")
 	defaultKB.Annotations = map[string]string{
-		"camel.apache.org/operator.id": "camel-k",
-		"my-annotation":                "my-value",
+		"my-annotation": "my-value",
 	}
 	defaultKB.Labels = map[string]string{
 		"my-label": "my-value",
@@ -334,8 +332,7 @@ status: {}
 func TestPipeWithSavedTraitsDryRun(t *testing.T) {
 	defaultKB := nominalPipe("my-pipe-test")
 	defaultKB.Annotations = map[string]string{
-		"camel.apache.org/operator.id": "camel-k",
-		"my-annotation":                "my-value",
+		"my-annotation": "my-value",
 	}
 	defaultKB.Labels = map[string]string{
 		"my-label": "my-value",
@@ -614,8 +611,7 @@ resources:
 func TestPipeGitOps(t *testing.T) {
 	defaultPipe := nominalPipe("my-pipe-test")
 	defaultPipe.Annotations = map[string]string{
-		"camel.apache.org/operator.id": "camel-k",
-		"my-annotation":                "my-value",
+		"my-annotation": "my-value",
 	}
 	defaultPipe.Labels = map[string]string{
 		"my-label": "my-value",

@@ -149,12 +149,7 @@ func integrationKitEnqueueRequestsFromMapFunc(ctx context.Context, c client.Clie
 	}
 
 	list := &v1.IntegrationList{}
-	// Do global search in case of global operator (it may be using a global platform)
-	var opts []ctrl.ListOption
-	if !platform.IsCurrentOperatorGlobal() {
-		opts = append(opts, ctrl.InNamespace(kit.Namespace))
-	}
-	if err := c.List(ctx, list, opts...); err != nil {
+	if err := c.List(ctx, list); err != nil {
 		log.Error(err, "Failed to retrieve integration list")
 
 		return requests
@@ -452,7 +447,7 @@ func watchKnativeResources(ctx context.Context, c client.Client, b *builder.Buil
 		b.Owns(&servingv1.Service{}, builder.WithPredicates(StatusChangedPredicate{}))
 	} else {
 		log.Info("KnativeService resources installed in the cluster. However Camel K operator has not the required RBAC privileges. " +
-			"You can't use Knative features.Make sure to apply the required RBAC privileges and restart the Camel K Operator Pod to be able " +
+			"You can't use Knative features. Make sure to apply the required RBAC privileges and restart the Camel K Operator Pod to be able " +
 			"to watch for Camel K managed Knative Services.")
 	}
 
