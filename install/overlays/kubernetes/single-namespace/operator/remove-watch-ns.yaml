@@ -15,26 +15,5 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-resources:
-- operator-deployment.yaml
-- operator-service-account.yaml
-- builder-service-account.yaml
-
-patches:
-  - path: add-registry-envvars.yaml
-    target:
-      kind: Deployment
-      name: camel-k-operator
-
-replacements:
-  - source:
-      kind: Deployment
-      fieldPath: spec.template.spec.containers.[name=camel-k-operator].image
-    targets:
-      - select:
-          kind: Deployment
-        fieldPaths:
-          - spec.template.spec.containers.[name=camel-k-operator].env.[name=CONTAINER_IMAGE].value
+- op: remove
+  path: /spec/template/spec/containers/0/env/0

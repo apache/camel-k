@@ -91,7 +91,7 @@ func TestOperatorIDFiltering(t *testing.T) {
 								v1.IntegrationKitTypeLabel: v1.IntegrationKitTypeExternal,
 							},
 							Annotations: map[string]string{
-								"camel.apache.org/operator.id": operator2,
+								v1.OperatorIDAnnotation: operator2,
 							},
 						},
 						Spec: v1.IntegrationKitSpec{

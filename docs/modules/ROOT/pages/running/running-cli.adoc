@@ -67,8 +67,6 @@ As an example, take the option available on the `kamel run test.yaml -t promethe
 apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:
-  annotations:
-    camel.apache.org/operator.id: camel-k
   name: test
 spec:
   flows:

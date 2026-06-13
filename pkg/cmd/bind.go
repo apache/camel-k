@@ -62,7 +62,7 @@ func newCmdBind(rootCmdOptions *RootCmdOptions) (*cobra.Command, *bindCmdOptions
 	cmd.Flags().Bool("skip-checks", false, "Do not verify the binding for compliance with Kamelets and other Kubernetes resources")
 	cmd.Flags().StringArray("step", nil, `Add binding steps as Kubernetes resources. Endpoints are expected in the format "[[apigroup/]version:]kind:[namespace/]name", plain Camel URIs or Kamelet name.`)
 	cmd.Flags().StringArrayP("trait", "t", nil, `Add a trait to the corresponding Integration.`)
-	cmd.Flags().StringP("operator-id", "x", "camel-k", "Operator id selected to manage this Pipe.")
+	cmd.Flags().StringP("operator-id", "x", "", "Deprecated. Operator id selected to manage this Pipe.")
 	cmd.Flags().StringArray("annotation", nil, "Add an annotation to the Pipe. E.g. \"--annotation my.company=hello\"")
 	cmd.Flags().String("service-account", "", "The SA to use to run this binding")
 	cmd.Flags().StringArrayP("dependency", "d", nil, `A dependency that should be included, e.g., "camel:mail" for a Camel component, "mvn:org.my:app:1.0" for a Maven dependency`)
@@ -118,10 +118,6 @@ func (o *bindCmdOptions) validate(cmd *cobra.Command, args []string) error {
 		return errors.New("too many arguments: expected source and sink")
 	} else if len(args) < 2 {
 		return errors.New("source or sink arguments are missing")
-	}
-
-	if o.OperatorID == "" {
-		return errors.New("cannot use empty operator id")
 	}
 
 	for _, annotation := range o.Annotations {
@@ -245,7 +241,9 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	// --operator-id={id} is a syntax sugar for '--annotation camel.apache.org/operator.id={id}'
-	pipe.SetOperatorID(strings.TrimSpace(o.OperatorID))
+	if o.OperatorID != "" {
+		pipe.SetOperatorID(strings.TrimSpace(o.OperatorID))
+	}
 
 	for _, annotation := range o.Annotations {
 		parts := strings.SplitN(annotation, "=", 2)

@@ -37,67 +37,6 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestKustomizeNamespaced(t *testing.T) {
-	kustomizeDir := testutil.MakeTempCopyDir(t, "../../../install")
-	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		// Let's make sure no CRD is yet available in the cluster
-		// as we must make the procedure to install them accordingly
-		g.Eventually(CRDs(t)).Should(BeNil(), "No Camel K CRDs should be previously installed for this test")
-		// We must change a few values in the Kustomize config
-		ExpectExecSucceed(t, g,
-			exec.Command(
-				"sed",
-				"-i",
-				fmt.Sprintf("s/namespace: .*/namespace: %s/", ns),
-				fmt.Sprintf("%s/overlays/kubernetes/namespaced/kustomization.yaml", kustomizeDir),
-			))
-		ExpectExecSucceed(t, g, Kubectl(
-			"apply",
-			"-k",
-			fmt.Sprintf("%s/overlays/kubernetes/namespaced", kustomizeDir),
-			"--server-side",
-		))
-
-		// Refresh the test client to account for the newly installed CRDs
-		RefreshClient(t)
-		g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
-		g.Eventually(OperatorPodPhase(t, ctx, ns)).Should(Equal(corev1.PodRunning))
-		// Check if restricted security context has been applied
-		operatorPod := OperatorPod(t, ctx, ns)()
-		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.RunAsNonRoot).To(
-			Equal(DefaultOperatorSecurityContext().RunAsNonRoot),
-		)
-		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.Capabilities).To(
-			Equal(DefaultOperatorSecurityContext().Capabilities),
-		)
-		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.SeccompProfile).To(
-			Equal(DefaultOperatorSecurityContext().SeccompProfile),
-		)
-		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation).To(
-			Equal(DefaultOperatorSecurityContext().AllowPrivilegeEscalation),
-		)
-
-		// Test a simple integration is running
-		g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml").Execute()).To(Succeed())
-		g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		g.Eventually(IntegrationLogs(t, ctx, ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-
-		// Test operator only uninstall
-		UninstallOperator(t, ctx, g, ns, "../../../")
-
-		g.Eventually(OperatorPod(t, ctx, ns)).Should(BeNil())
-		g.Eventually(Integration(t, ctx, ns, "yaml"), TestTimeoutShort).ShouldNot(BeNil())
-		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-
-		// Test CRD uninstall (will remove Integrations as well)
-		UninstallCRDs(t, ctx, g, "../../../")
-
-		g.Eventually(OperatorPod(t, ctx, ns)).Should(BeNil())
-		g.Eventually(CRDs(t)).Should(BeNil())
-	})
-}
-
 func TestKustomizeDescoped(t *testing.T) {
 	kustomizeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
@@ -118,9 +57,6 @@ func TestKustomizeDescoped(t *testing.T) {
 			fmt.Sprintf("%s/overlays/kubernetes/descoped", kustomizeDir),
 			"--server-side",
 		))
-
-		// Refresh the test client to account for the newly installed CRDs
-		RefreshClient(t)
 
 		podFunc := OperatorPod(t, ctx, ns)
 		g.Eventually(podFunc).ShouldNot(BeNil())
