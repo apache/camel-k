@@ -29,6 +29,8 @@ const (
 	// Deprecated: use .spec.traits instead.
 	TraitAnnotationPrefix = "trait.camel.apache.org/"
 	// OperatorIDAnnotation operator id annotation label.
+	//
+	// Deprecated: will be removed in the future.
 	OperatorIDAnnotation = "camel.apache.org/operator.id"
 	// PlatformSelectorAnnotation platform id annotation label.
 	PlatformSelectorAnnotation = "camel.apache.org/platform.id"

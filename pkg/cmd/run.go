@@ -97,7 +97,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().Bool("sync", false, "[Deprecated] Synchronize the local source file with the cluster, republishing at each change")
 	cmd.Flags().Bool("dev", false, "[Deprecated] Enable Dev mode (equivalent to \"-w --logs --sync\")")
 	cmd.Flags().Bool("use-flows", true, "Write yaml sources as Flow objects in the integration custom resource")
-	cmd.Flags().StringP("operator-id", "x", "camel-k", "Operator id selected to manage this integration.")
+	cmd.Flags().StringP("operator-id", "x", "", "Operator id selected to manage this integration.")
 	cmd.Flags().String("profile", "", "Trait profile used for deployment")
 	cmd.Flags().String("integration-profile", "", "Integration profile used for deployment")
 	cmd.Flags().StringArrayP("trait", "t", nil, "Configure a trait. E.g. \"-t service.enabled=false\"")
@@ -246,10 +246,6 @@ func (o *runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
 }
 
 func (o *runCmdOptions) validate(cmd *cobra.Command) error {
-	if o.OperatorID == "" {
-		return errors.New("cannot use empty operator id")
-	}
-
 	for _, volume := range o.Volumes {
 		volumeConfig := strings.Split(volume, ":")
 		if len(volumeConfig) != 2 || len(strings.TrimSpace(volumeConfig[0])) == 0 || len(strings.TrimSpace(volumeConfig[1])) == 0 {
@@ -719,7 +715,9 @@ func (o *runCmdOptions) applyAnnotations(it *v1.Integration) {
 	}
 
 	// --operator-id={id} is a syntax sugar for '--annotation camel.apache.org/operator.id={id}'
-	it.SetOperatorID(strings.TrimSpace(o.OperatorID))
+	if o.OperatorID != "" {
+		it.SetOperatorID(strings.TrimSpace(o.OperatorID))
+	}
 
 	// --integration-profile={id} is a syntax sugar for '--annotation camel.apache.org/integration-profile.id={id}'
 	if o.IntegrationProfile != "" {

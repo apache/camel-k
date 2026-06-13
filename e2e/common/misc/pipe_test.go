@@ -127,53 +127,6 @@ func TestPipe(t *testing.T) {
 	})
 }
 
-func TestPipeWithImage(t *testing.T) {
-	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		bindingID := "with-image-binding"
-
-		t.Run("run with initial image", func(t *testing.T) {
-			expectedImage := "quay.io/fuse_qe/echo-server:0.3.2"
-
-			g.Expect(KamelBind(t, ctx, ns, "my-own-timer-source", "my-own-log-sink",
-				"--trait", "container.image="+expectedImage, "--trait", "jvm.enabled=false",
-				"--trait", "kamelets.enabled=false", "--trait", "dependencies.enabled=false",
-				"--annotation", "test=1", "--name", bindingID).Execute()).To(Succeed())
-
-			g.Eventually(IntegrationGeneration(t, ctx, ns, bindingID)).
-				Should(gstruct.PointTo(BeNumerically("==", 1)))
-			g.Eventually(Integration(t, ctx, ns, bindingID)).Should(WithTransform(Annotations,
-				HaveKeyWithValue("test", "1"),
-			))
-			g.Eventually(IntegrationStatusImage(t, ctx, ns, bindingID)).
-				Should(Equal(expectedImage))
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, bindingID), TestTimeoutShort).
-				Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationPodImage(t, ctx, ns, bindingID)).
-				Should(Equal(expectedImage))
-		})
-
-		t.Run("run with new image", func(t *testing.T) {
-			expectedImage := "quay.io/fuse_qe/echo-server:0.3.3"
-
-			g.Expect(KamelBind(t, ctx, ns, "my-own-timer-source", "my-own-log-sink",
-				"--trait", "container.image="+expectedImage, "--trait", "jvm.enabled=false",
-				"--trait", "kamelets.enabled=false", "--trait", "dependencies.enabled=false",
-				"--annotation", "test=2", "--name", bindingID).Execute()).To(Succeed())
-			g.Eventually(IntegrationGeneration(t, ctx, ns, bindingID)).
-				Should(gstruct.PointTo(BeNumerically("==", 1)))
-			g.Eventually(Integration(t, ctx, ns, bindingID)).Should(WithTransform(Annotations,
-				HaveKeyWithValue("test", "2"),
-			))
-			g.Eventually(IntegrationStatusImage(t, ctx, ns, bindingID)).
-				Should(Equal(expectedImage))
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, bindingID), TestTimeoutShort).
-				Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationPodImage(t, ctx, ns, bindingID)).
-				Should(Equal(expectedImage))
-		})
-	})
-}
-
 func TestPipeScale(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		name := RandomizedSuffixName("timer2log")

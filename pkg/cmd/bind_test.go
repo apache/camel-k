@@ -55,7 +55,7 @@ func TestBindOutputJSON(t *testing.T) {
 	assert.Equal(t, "json", buildCmdOptions.OutputFormat)
 
 	require.NoError(t, err)
-	assert.Equal(t, `{"kind":"Pipe","apiVersion":"camel.apache.org/v1","metadata":{"name":"my-to-my","annotations":{"camel.apache.org/operator.id":"camel-k"}},"spec":{"source":{"uri":"my:src"},"sink":{"uri":"my:dst"}},"status":{}}`, output)
+	assert.Equal(t, `{"kind":"Pipe","apiVersion":"camel.apache.org/v1","metadata":{"name":"my-to-my"},"spec":{"source":{"uri":"my:src"},"sink":{"uri":"my:dst"}},"status":{}}`, output)
 }
 
 func TestBindOutputYAML(t *testing.T) {
@@ -67,8 +67,6 @@ func TestBindOutputYAML(t *testing.T) {
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
-  annotations:
-    camel.apache.org/operator.id: camel-k
   name: my-to-my
 spec:
   sink:
@@ -97,8 +95,6 @@ func TestBindErrorHandlerDLCKamelet(t *testing.T) {
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
-  annotations:
-    camel.apache.org/operator.id: camel-k
   name: my-to-my
 spec:
   errorHandler:
@@ -128,8 +124,6 @@ func TestBindErrorHandlerNone(t *testing.T) {
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
-  annotations:
-    camel.apache.org/operator.id: camel-k
   name: my-to-my
 spec:
   errorHandler:
@@ -152,8 +146,6 @@ func TestBindErrorHandlerLog(t *testing.T) {
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
-  annotations:
-    camel.apache.org/operator.id: camel-k
   name: my-to-my
 spec:
   errorHandler:
@@ -176,8 +168,6 @@ func TestBindTraits(t *testing.T) {
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
-  annotations:
-    camel.apache.org/operator.id: camel-k
   name: my-to-my
 spec:
   sink:
@@ -202,8 +192,6 @@ func TestBindTraitsArray(t *testing.T) {
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
-  annotations:
-    camel.apache.org/operator.id: camel-k
   name: my-to-my
 spec:
   sink:
@@ -231,8 +219,6 @@ func TestBindSteps(t *testing.T) {
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
-  annotations:
-    camel.apache.org/operator.id: camel-k
   name: my-to-my
 spec:
   sink:
@@ -283,8 +269,6 @@ func TestBindOutputWithDependencies(t *testing.T) {
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
-  annotations:
-    camel.apache.org/operator.id: camel-k
   name: my-to-my
 spec:
   dependencies:
