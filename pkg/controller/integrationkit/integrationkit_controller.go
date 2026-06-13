@@ -153,6 +153,7 @@ func add(_ context.Context, mgr manager.Manager, r reconcile.Reconciler) error {
 
 							continue
 						}
+						//nolint:staticcheck
 						if v, ok := kit.Annotations[v1.OperatorIDAnnotation]; ok && v != itp.Name {
 							// kit waiting for another platform to become ready - skip here
 							log.Debugf("Integration kit %s is waiting for another integration platform '%s' - skip it now", kit.Name, v)

@@ -77,6 +77,12 @@ spec:
             # Note: remove the variable to disable the feature.
             - name: CAMEL_MONITOR_OPERATOR_LABEL
               value: "camel.apache.org/monitor"
+            # Used to query which is the image this operator is running
+            - name: CONTAINER_IMAGE
+              value: ""
+            # You can provide a different SA for builder Pods
+            - name: BUILDER_SA
+              value: "camel-k-builder"
           # Attempt to read bootstrap configuration from configmap or secret
           envFrom:
             - configMapRef:

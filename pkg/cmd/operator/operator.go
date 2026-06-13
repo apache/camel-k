@@ -19,7 +19,6 @@ package operator
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -38,7 +37,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
@@ -158,8 +156,7 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	}
 
 	// Set the operator container image if it runs in-container
-	platform.OperatorImage, err = getOperatorImage(ctx, bootstrapClient)
-	exitOnError(err, "cannot get operator container image")
+	platform.OperatorImage = getOperatorImage()
 
 	if !leaderElection {
 		log.Info("Leader election is disabled!")
@@ -173,11 +170,15 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 		Label: labelsSelector,
 	}
 
+	cacheConfigs := getNamespacesSelector(operatorNamespace, watchNamespace)
 	if !platform.IsCurrentOperatorGlobal() {
+		log.Infof("This operator is configured to watch only %s namespace(s)", watchNamespace)
 		selector = cache.ByObject{
 			Label:      labelsSelector,
-			Namespaces: getNamespacesSelector(operatorNamespace, watchNamespace),
+			Namespaces: cacheConfigs,
 		}
+	} else {
+		log.Info("This operator is global and will watch all namespaces!")
 	}
 
 	selectors := map[ctrl.Object]cache.ByObject{
@@ -186,11 +187,13 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 		&batchv1.Job{}:       selector,
 	}
 
-	if ok, err := kubernetes.IsAPIResourceInstalled(bootstrapClient, servingv1.SchemeGroupVersion.String(), reflect.TypeFor[servingv1.Service]().Name()); ok && err == nil {
+	if ok, err := kubernetes.IsAPIResourceInstalled(bootstrapClient, servingv1.SchemeGroupVersion.String(),
+		reflect.TypeFor[servingv1.Service]().Name()); ok && err == nil {
 		selectors[&servingv1.Service{}] = selector
 	}
 
-	if ok, err := kubernetes.IsAPIResourceInstalled(bootstrapClient, batchv1.SchemeGroupVersion.String(), reflect.TypeFor[batchv1.CronJob]().Name()); ok && err == nil {
+	if ok, err := kubernetes.IsAPIResourceInstalled(bootstrapClient, batchv1.SchemeGroupVersion.String(),
+		reflect.TypeFor[batchv1.CronJob]().Name()); ok && err == nil {
 		selectors[&batchv1.CronJob{}] = selector
 	}
 
@@ -199,7 +202,7 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	}
 
 	if !platform.IsCurrentOperatorGlobal() {
-		options.DefaultNamespaces = getNamespacesSelector(operatorNamespace, watchNamespace)
+		options.DefaultNamespaces = cacheConfigs
 	}
 
 	mgr, err := manager.New(cfg, manager.Options{
@@ -224,7 +227,7 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	log.Info("Installing operator resources")
 	installCtx, installCancel := context.WithTimeout(ctx, 1*time.Minute)
 	defer installCancel()
-	install.OperatorStartupOptionalTools(installCtx, bootstrapClient, watchNamespace, operatorNamespace, log)
+	install.OperatorStartupOptionalTools(installCtx, bootstrapClient, log)
 
 	synthEnvVal, synth := os.LookupEnv("CAMEL_K_SYNTHETIC_INTEGRATIONS")
 	if synth && synthEnvVal == "true" {
@@ -238,10 +241,19 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 
 func getNamespacesSelector(operatorNamespace string, watchNamespace string) map[string]cache.Config {
 	namespacesSelector := map[string]cache.Config{
+		// The same operator namespace is needed while the operator stores
+		// Builds and IntegrationKits and CamelCatalogs in its namespace
+		// TODO: remove this when we either remove those CR or we move them in the tenant namespace only
 		operatorNamespace: {},
 	}
-	if operatorNamespace != watchNamespace {
-		namespacesSelector[watchNamespace] = cache.Config{}
+
+	for ns := range strings.SplitSeq(watchNamespace, ",") {
+		ns = strings.TrimSpace(ns)
+		if ns == "" || ns == operatorNamespace {
+			continue
+		}
+
+		namespacesSelector[ns] = cache.Config{}
 	}
 
 	return namespacesSelector
@@ -258,24 +270,8 @@ func getWatchNamespace() (string, error) {
 }
 
 // getOperatorImage returns the image currently used by the running operator if present (when running out of cluster, it may be absent).
-func getOperatorImage(ctx context.Context, c ctrl.Reader) (string, error) {
-	ns := platform.GetOperatorNamespace()
-	name := platform.GetOperatorPodName()
-	if ns == "" || name == "" {
-		return "", nil
-	}
-
-	pod := corev1.Pod{}
-	if err := c.Get(ctx, ctrl.ObjectKey{Namespace: ns, Name: name}, &pod); err != nil && k8serrors.IsNotFound(err) {
-		return "", nil
-	} else if err != nil {
-		return "", err
-	}
-	if len(pod.Spec.Containers) == 0 {
-		return "", errors.New("no containers found in operator pod")
-	}
-
-	return pod.Spec.Containers[0].Image, nil
+func getOperatorImage() string {
+	return os.Getenv("CONTAINER_IMAGE")
 }
 
 func exitOnError(err error, msg string) {

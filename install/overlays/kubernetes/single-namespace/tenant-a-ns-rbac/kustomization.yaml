@@ -14,9 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ---------------------------------------------------------------------------
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
 
-- op: add
-  path: /spec/template/spec/containers/0/env/-
-  value:
-    name: KAMEL_INSTALL_DEFAULT_KAMELETS
-    value: "false"
+namespace: tenant-a
+nameSuffix: -tenant-a
+
+resources:
+- ../../../../base/config/rbac/namespaced
+
+patches:
+ - target:
+      kind: RoleBinding
+   path: patch-rolebinding-subjects.yaml

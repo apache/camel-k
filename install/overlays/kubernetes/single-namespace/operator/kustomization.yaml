@@ -14,27 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ---------------------------------------------------------------------------
-
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+namespace: operators
+nameSuffix: -tenant-a
+
 resources:
-- operator-deployment.yaml
-- operator-service-account.yaml
-- builder-service-account.yaml
+- ../../own-namespace
 
 patches:
-  - path: add-registry-envvars.yaml
-    target:
+ - target:
       kind: Deployment
-      name: camel-k-operator
-
-replacements:
-  - source:
-      kind: Deployment
-      fieldPath: spec.template.spec.containers.[name=camel-k-operator].image
-    targets:
-      - select:
-          kind: Deployment
-        fieldPaths:
-          - spec.template.spec.containers.[name=camel-k-operator].env.[name=CONTAINER_IMAGE].value
+   path: remove-watch-ns.yaml
+ - path: patch-envvars.yaml

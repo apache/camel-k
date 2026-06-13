@@ -19,6 +19,7 @@ package platform
 
 import (
 	"context"
+	"os"
 	"runtime"
 	"strings"
 	"time"
@@ -39,7 +40,6 @@ import (
 
 const (
 	DefaultPlatformName                    = "camel-k"
-	BuilderServiceAccount                  = "camel-k-builder"
 	DefaultBuildTimeout                    = 5 * time.Minute
 	DefaultBuildStrategy                   = v1.BuildStrategyRoutine
 	DefaultBuildOrderStrategy              = v1.BuildOrderStrategyDependencies
@@ -48,6 +48,17 @@ const (
 	DefaultMaxRunningBuildsPodStrategy     = 10
 	DefaultMaxRunningBuildsRoutineStrategy = 3
 )
+
+var BuilderServiceAccount = getBuilderServiceAccount()
+
+func getBuilderServiceAccount() string {
+	bsa := os.Getenv("BUILDER_SA")
+	if bsa == "" {
+		bsa = "camel-k-builder"
+	}
+
+	return bsa
+}
 
 // ConfigureDefaults fills with default values all missing details about the integration platform.
 // Defaults are set in the status fields, not in the spec.

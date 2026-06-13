@@ -292,7 +292,10 @@ func kamelCommandWithContext(t *testing.T, ctx context.Context, command string, 
 	cmdMutex.Lock()
 	defer cmdMutex.Unlock()
 
-	cmdArgs := []string{command, "-n", namespace, "--operator-id", operatorID}
+	cmdArgs := []string{command, "-n", namespace}
+	if operatorID != platform.DefaultPlatformName {
+		cmdArgs = append(cmdArgs, "--operator-id", operatorID)
+	}
 	cmdArgs = append(cmdArgs, args...)
 	return KamelWithContext(t, ctx, cmdArgs...)
 }
@@ -2533,6 +2536,14 @@ func Pods(t *testing.T, ctx context.Context, ns string) func() []corev1.Pod {
 
 func WithNewTestNamespace(t *testing.T, doRun func(context.Context, *gomega.WithT, string)) {
 	ns := NewTestNamespace(t, testContext, false)
+	defer deleteTestNamespace(t, testContext, ns)
+	defer userCleanup(t)
+
+	invokeUserTestCode(t, testContext, ns.GetName(), doRun)
+}
+
+func WithNamedTestNamespace(t *testing.T, doRun func(context.Context, *gomega.WithT, string), namespace string) {
+	ns := NewNamedTestNamespace(t, testContext, namespace, false)
 	defer deleteTestNamespace(t, testContext, ns)
 	defer userCleanup(t)
 
