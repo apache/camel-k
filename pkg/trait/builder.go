@@ -738,4 +738,3 @@ func (t *builderTrait) filterNodeSelector() map[string]string {
 
 	return filtered
 }
-
