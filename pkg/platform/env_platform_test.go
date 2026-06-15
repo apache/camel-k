@@ -140,3 +140,31 @@ func TestImagePlatforms_OtherArch(t *testing.T) {
 	ips := imagePlatforms()
 	assert.Nil(t, ips)
 }
+
+func TestBuilderNodeSelectorAllowList_NotSet(t *testing.T) {
+	// env var not set – should return nil (allow everything)
+	allowList := BuilderNodeSelectorAllowList()
+	assert.Nil(t, allowList)
+}
+
+func TestBuilderNodeSelectorAllowList_Empty(t *testing.T) {
+	t.Setenv("BUILDER_NODE_SELECTOR_ALLOWED_LABELS", "")
+
+	allowList := BuilderNodeSelectorAllowList()
+	assert.Empty(t, allowList)
+}
+
+func TestBuilderNodeSelectorAllowList_SingleKey(t *testing.T) {
+	t.Setenv("BUILDER_NODE_SELECTOR_ALLOWED_LABELS", "kubernetes.io/hostname")
+
+	allowList := BuilderNodeSelectorAllowList()
+	assert.Equal(t, []string{"kubernetes.io/hostname"}, allowList)
+}
+
+func TestBuilderNodeSelectorAllowList_MultipleKeys(t *testing.T) {
+	t.Setenv("BUILDER_NODE_SELECTOR_ALLOWED_LABELS", "kubernetes.io/hostname,node-role.kubernetes.io/worker, topology.kubernetes.io/zone ")
+
+	allowList := BuilderNodeSelectorAllowList()
+	assert.Equal(t, []string{"kubernetes.io/hostname", "node-role.kubernetes.io/worker", "topology.kubernetes.io/zone"}, allowList)
+}
+

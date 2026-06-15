@@ -646,3 +646,110 @@ func TestBuilderTraitOrderStrategy(t *testing.T) {
 
 	assert.Equal(t, v1.BuildOrderStrategyFIFO, env.Pipeline[0].Builder.Configuration.OrderStrategy)
 }
+
+// TestFilterNodeSelector_NoAllowList verifies that when BUILDER_NODE_SELECTOR_ALLOWED_LABELS is
+// not set, all node-selector keys pass through unchanged.
+func TestFilterNodeSelector_NoAllowList(t *testing.T) {
+	bt := createNominalBuilderTraitTest()
+	bt.NodeSelector = map[string]string{
+		"kubernetes.io/hostname":          "node-1",
+		"node-role.kubernetes.io/worker":  "true",
+	}
+
+	// env var not set – nil allow list means everything is allowed
+	result := bt.filterNodeSelector()
+	assert.Equal(t, bt.NodeSelector, result)
+}
+
+// TestFilterNodeSelector_AllowListFiltersKeys verifies that only keys present in the allow list
+// survive when BUILDER_NODE_SELECTOR_ALLOWED_LABELS is set.
+func TestFilterNodeSelector_AllowListFiltersKeys(t *testing.T) {
+	t.Setenv("BUILDER_NODE_SELECTOR_ALLOWED_LABELS", "kubernetes.io/hostname")
+
+	bt := createNominalBuilderTraitTest()
+	bt.NodeSelector = map[string]string{
+		"kubernetes.io/hostname":         "node-1",
+		"node-role.kubernetes.io/worker": "true", // not in allow list – must be dropped
+	}
+
+	result := bt.filterNodeSelector()
+	assert.Len(t, result, 1)
+	assert.Equal(t, "node-1", result["kubernetes.io/hostname"])
+	assert.NotContains(t, result, "node-role.kubernetes.io/worker")
+}
+
+// TestFilterNodeSelector_AllowListAllKeysAllowed verifies that when every key is in the allow list
+// the map is returned intact.
+func TestFilterNodeSelector_AllowListAllKeysAllowed(t *testing.T) {
+	t.Setenv("BUILDER_NODE_SELECTOR_ALLOWED_LABELS", "kubernetes.io/hostname,node-role.kubernetes.io/worker")
+
+	bt := createNominalBuilderTraitTest()
+	bt.NodeSelector = map[string]string{
+		"kubernetes.io/hostname":         "node-1",
+		"node-role.kubernetes.io/worker": "true",
+	}
+
+	result := bt.filterNodeSelector()
+	assert.Equal(t, bt.NodeSelector, result)
+}
+
+// TestFilterNodeSelector_NilNodeSelector verifies that a nil NodeSelector is returned as-is.
+func TestFilterNodeSelector_NilNodeSelector(t *testing.T) {
+	t.Setenv("BUILDER_NODE_SELECTOR_ALLOWED_LABELS", "kubernetes.io/hostname")
+
+	bt := createNominalBuilderTraitTest()
+	bt.NodeSelector = nil
+
+	result := bt.filterNodeSelector()
+	assert.Nil(t, result)
+}
+
+// TestFilterNodeSelector_EmptyNodeSelector verifies that an empty NodeSelector is returned as-is.
+func TestFilterNodeSelector_EmptyNodeSelector(t *testing.T) {
+	t.Setenv("BUILDER_NODE_SELECTOR_ALLOWED_LABELS", "kubernetes.io/hostname")
+
+	bt := createNominalBuilderTraitTest()
+	bt.NodeSelector = map[string]string{}
+
+	result := bt.filterNodeSelector()
+	assert.Empty(t, result)
+}
+
+// TestFilterNodeSelector_AllKeysDropped verifies that when no key matches the allow list the
+// result is an empty map (not nil).
+func TestFilterNodeSelector_AllKeysDropped(t *testing.T) {
+	t.Setenv("BUILDER_NODE_SELECTOR_ALLOWED_LABELS", "kubernetes.io/hostname")
+
+	bt := createNominalBuilderTraitTest()
+	bt.NodeSelector = map[string]string{
+		"node-role.kubernetes.io/worker": "true",
+		"topology.kubernetes.io/zone":    "us-east-1a",
+	}
+
+	result := bt.filterNodeSelector()
+	assert.NotNil(t, result)
+	assert.Empty(t, result)
+}
+
+// TestBuilderTraitNodeSelectorAppliedWithAllowList is an end-to-end test that verifies the
+// pipeline builder task only contains allowed node-selector keys after Apply().
+func TestBuilderTraitNodeSelectorAppliedWithAllowList(t *testing.T) {
+	t.Setenv("BUILDER_NODE_SELECTOR_ALLOWED_LABELS", "kubernetes.io/hostname")
+
+	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
+	bt := createNominalBuilderTraitTest()
+	bt.NodeSelector = map[string]string{
+		"kubernetes.io/hostname":         "node-42",
+		"node-role.kubernetes.io/worker": "true",
+	}
+
+	err := bt.Apply(env)
+	require.NoError(t, err)
+	require.NotNil(t, env.Pipeline[0].Builder)
+
+	ns := env.Pipeline[0].Builder.Configuration.NodeSelector
+	assert.Len(t, ns, 1)
+	assert.Equal(t, "node-42", ns["kubernetes.io/hostname"])
+	assert.NotContains(t, ns, "node-role.kubernetes.io/worker")
+}
+

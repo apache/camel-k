@@ -173,6 +173,27 @@ func publishStrategy() v1.IntegrationPlatformBuildPublishStrategy {
 	return DefaultPublishStrategy
 }
 
+// BuilderNodeSelectorAllowList returns the list of node-selector keys that are allowed to be set
+// by the builder trait. When the list is empty (BUILDER_NODE_SELECTOR_ALLOWED_LABELS is unset or blank),
+// any key is permitted. When the list is non-empty only the listed keys are accepted; unlisted keys
+// are dropped; an info message is logged by the trait.
+func BuilderNodeSelectorAllowList() []string {
+	raw := GetEnvOrDefault("BUILDER_NODE_SELECTOR_ALLOWED_LABELS", "")
+	if raw == "" {
+		return nil
+	}
+	parts := strings.Split(raw, ",")
+	result := make([]string, 0, len(parts))
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p != "" {
+			result = append(result, p)
+		}
+	}
+
+	return result
+}
+
 func imagePlatforms() []string {
 	buildImagePlatforms := GetEnvOrDefault("BUILD_IMAGE_PLATFORMS", "")
 	if buildImagePlatforms != "" {
