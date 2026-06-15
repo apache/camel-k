@@ -158,4 +158,4 @@ Node selectors can be specified when running an integration with the CLI:
 $ kamel run --trait builder.node-selector.'size'=large integration.yaml
 ----
 
-NOTE: Operators can restrict which node-selector label keys CR authors are permitted to use by setting the `BUILDER_NODE_SELECTOR_ALLOWED_LABELS` environment variable on the operator deployment to a comma-separated list of allowed keys (e.g. `kubernetes.io/hostname,topology.kubernetes.io/zone`). Any key not in the list is dropped and an info message is logged. When the variable is unset or empty, all keys are accepted (default behavior). See xref:installation:builds.adoc#env-var-config[build environment variables] for details.
+NOTE: Operators can restrict which node-selector label keys CR authors are permitted to use by setting the `BUILDER_NODE_SELECTOR_ALLOWED_LABELS` environment variable on the operator deployment to a comma-separated list of allowed keys (e.g. `kubernetes.io/hostname,topology.kubernetes.io/zone`). Any key not in the list is dropped and an info message is logged. When the variable is unset or empty, all keys are accepted (default behavior). See ooperator tuning documentation for details.
