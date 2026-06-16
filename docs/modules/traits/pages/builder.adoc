@@ -158,4 +158,10 @@ Node selectors can be specified when running an integration with the CLI:
 $ kamel run --trait builder.node-selector.'size'=large integration.yaml
 ----
 
-NOTE: Operators can restrict which node-selector label keys CR authors are permitted to use by setting the `BUILDER_NODE_SELECTOR_ALLOWED_LABELS` environment variable on the operator deployment to a comma-separated list of allowed keys (e.g. `kubernetes.io/hostname,topology.kubernetes.io/zone`). Any key not in the list is dropped and an info message is logged. When the variable is unset or empty, all keys are accepted (default behavior). See Camel K operator tuning documentation for details.
+NOTE: Operators can restrict which node-selector label keys CR authors are permitted to use by setting the `BUILDER_NODE_SELECTOR_ALLOWED_LABELS` environment variable on the operator deployment to a comma-separated list of allowed keys (e.g. `kubernetes.io/hostname,topology.kubernetes.io/zone`). Any key not in the list is dropped and an info message is logged. When the variable is unset or empty, all keys are accepted (default behavior). See xref:installation:builds.adoc#env-var-config[build environment variables] for details.
+
+== Custom Pipeline Tasks
+
+The `builder.tasks` trait option lets CR authors inject arbitrary containers into the build pipeline (only when using the `pod` build strategy). Each task entry has the format `<name>;<image>;<command>[;<userID>]`.
+
+NOTE: Operators can disable custom task injection entirely by setting `BUILDER_TASKS_ENABLED=false` on the operator deployment. When disabled, any `builder.tasks` values provided by CR authors are silently ignored and an info message is logged. The default is `true` (tasks are allowed). See xref:installation:builds.adoc#env-var-config[build environment variables] for details.

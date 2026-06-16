@@ -173,6 +173,14 @@ func publishStrategy() v1.IntegrationPlatformBuildPublishStrategy {
 	return DefaultPublishStrategy
 }
 
+// BuilderTasksEnabled reports whether CR authors are permitted to inject custom pipeline tasks
+// via the builder.tasks trait. Controlled by the BUILDER_TASKS_ENABLED operator environment
+// variable (default true for backward compatibility). Set to "false" to prevent custom task
+// injection across all integrations managed by this operator.
+func BuilderTasksEnabled() bool {
+	return strings.ToLower(strings.TrimSpace(GetEnvOrDefault("BUILDER_TASKS_ENABLED", "true"))) != "false"
+}
+
 // BuilderNodeSelectorAllowList returns the list of node-selector keys that are allowed to be set
 // by the builder trait. When the list is empty (BUILDER_NODE_SELECTOR_ALLOWED_LABELS is unset or blank),
 // any key is permitted. When the list is non-empty only the listed keys are accepted; unlisted keys
