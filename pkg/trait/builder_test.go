@@ -652,8 +652,8 @@ func TestBuilderTraitOrderStrategy(t *testing.T) {
 func TestFilterNodeSelector_NoAllowList(t *testing.T) {
 	bt := createNominalBuilderTraitTest()
 	bt.NodeSelector = map[string]string{
-		"kubernetes.io/hostname":          "node-1",
-		"node-role.kubernetes.io/worker":  "true",
+		"kubernetes.io/hostname":         "node-1",
+		"node-role.kubernetes.io/worker": "true",
 	}
 
 	// env var not set – nil allow list means everything is allowed
@@ -753,3 +753,40 @@ func TestBuilderTraitNodeSelectorAppliedWithAllowList(t *testing.T) {
 	assert.NotContains(t, ns, "node-role.kubernetes.io/worker")
 }
 
+// TestBuilderTraitTasksDisabledByOperator verifies that when BUILDER_TASKS_ENABLED=false the
+// custom tasks are not added to the pipeline even when the CR author sets builder.tasks.
+func TestBuilderTraitTasksDisabledByOperator(t *testing.T) {
+	t.Setenv("BUILDER_TASKS_ENABLED", "false")
+
+	env := createBuilderTestEnv(v1.BuildStrategyPod)
+	bt := createNominalBuilderTraitTest()
+	bt.Tasks = []string{"custom;alpine;echo hello"}
+
+	err := bt.Apply(env)
+	require.NoError(t, err)
+
+	// pipeline must contain only the builder task, no custom task appended
+	for _, task := range env.Pipeline {
+		assert.Nil(t, task.Custom, "custom task must not be present when builder.tasks is disabled")
+	}
+}
+
+// TestBuilderTraitTasksEnabledByDefault verifies that when BUILDER_TASKS_ENABLED is unset
+// custom tasks flow through normally.
+func TestBuilderTraitTasksEnabledByDefault(t *testing.T) {
+	env := createBuilderTestEnv(v1.BuildStrategyPod)
+	bt := createNominalBuilderTraitTest()
+	bt.Tasks = []string{"custom;alpine;echo hello"}
+
+	err := bt.Apply(env)
+	require.NoError(t, err)
+
+	found := false
+	for _, task := range env.Pipeline {
+		if task.Custom != nil && task.Custom.Name == "custom" {
+			found = true
+			break
+		}
+	}
+	assert.True(t, found, "custom task must be present when builder.tasks is enabled")
+}

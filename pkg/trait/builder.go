@@ -246,15 +246,18 @@ func (t *builderTrait) Apply(e *Environment) error {
 
 	// Custom tasks
 	if t.Tasks != nil {
-		ct, err := t.determineCustomTasks(e, builderTask, tasksConf)
-		if err != nil {
-			return err
+		if !platform.BuilderTasksEnabled() {
+			t.L.Info("builder.tasks is disabled by operator configuration and will be ignored")
+		} else {
+			ct, err := t.determineCustomTasks(e, builderTask, tasksConf)
+			if err != nil {
+				return err
+			}
+			if ct == nil {
+				return nil
+			}
+			pipelineTasks = append(pipelineTasks, ct...)
 		}
-		if ct == nil {
-			return nil
-		}
-
-		pipelineTasks = append(pipelineTasks, ct...)
 	}
 
 	// Packaging task
