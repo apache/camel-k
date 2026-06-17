@@ -771,6 +771,31 @@ func TestBuilderTraitTasksDisabledByOperator(t *testing.T) {
 	}
 }
 
+// TestBuilderTraitTasksDisabledKeepsQuarkusNative verifies that when BUILDER_TASKS_ENABLED=false
+// the operator-injected quarkus-native task is preserved while user tasks are dropped.
+func TestBuilderTraitTasksDisabledKeepsQuarkusNative(t *testing.T) {
+	t.Setenv("BUILDER_TASKS_ENABLED", "false")
+
+	env := createBuilderTestEnv(v1.BuildStrategyPod)
+	bt := createNominalBuilderTraitTest()
+	bt.Tasks = []string{
+		"quarkus-native;quarkus-image;/bin/bash -c \"build native\"",
+		"user-task;alpine;echo hello",
+	}
+
+	err := bt.Apply(env)
+	require.NoError(t, err)
+
+	var customNames []string
+	for _, task := range env.Pipeline {
+		if task.Custom != nil {
+			customNames = append(customNames, task.Custom.Name)
+		}
+	}
+	assert.Contains(t, customNames, "quarkus-native", "quarkus-native task must be preserved when builder.tasks is disabled")
+	assert.NotContains(t, customNames, "user-task", "user task must be dropped when builder.tasks is disabled")
+}
+
 // TestBuilderTraitTasksEnabledByDefault verifies that when BUILDER_TASKS_ENABLED is unset
 // custom tasks flow through normally.
 func TestBuilderTraitTasksEnabledByDefault(t *testing.T) {
