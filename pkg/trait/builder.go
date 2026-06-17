@@ -245,19 +245,16 @@ func (t *builderTrait) Apply(e *Environment) error {
 	pipelineTasks = append(pipelineTasks, v1.Task{Builder: builderTask})
 
 	// Custom tasks
-	if t.Tasks != nil {
-		if !platform.BuilderTasksEnabled() {
-			t.L.Info("builder.tasks is disabled by operator configuration and will be ignored")
-		} else {
-			ct, err := t.determineCustomTasks(e, builderTask, tasksConf)
-			if err != nil {
-				return err
-			}
-			if ct == nil {
-				return nil
-			}
-			pipelineTasks = append(pipelineTasks, ct...)
+	t.applyTasksFilter()
+	if len(t.Tasks) > 0 {
+		ct, err := t.determineCustomTasks(e, builderTask, tasksConf)
+		if err != nil {
+			return err
 		}
+		if ct == nil {
+			return nil
+		}
+		pipelineTasks = append(pipelineTasks, ct...)
 	}
 
 	// Packaging task
@@ -718,6 +715,24 @@ func (t *builderTrait) setPlatform(e *Environment) {
 // filterNodeSelector returns the node selector map after applying the operator-level allow list.
 // If BUILDER_NODE_SELECTOR_ALLOWED_LABELS is empty/unset all keys are accepted (backward compatible).
 // Otherwise only keys present in the allow list are retained; every dropped key is logged at info level.
+// applyTasksFilter removes user-provided tasks when BUILDER_TASKS_ENABLED=false.
+// The quarkus-native task is operator-injected and is always retained.
+func (t *builderTrait) applyTasksFilter() {
+	if len(t.Tasks) == 0 || platform.BuilderTasksEnabled() {
+		return
+	}
+	kept := make([]string, 0, len(t.Tasks))
+	for _, task := range t.Tasks {
+		name, _, _ := strings.Cut(task, ";")
+		if name == "quarkus-native" {
+			kept = append(kept, task)
+		} else {
+			t.L.Info("builder.tasks is disabled by operator configuration and will be ignored", "task", name)
+		}
+	}
+	t.Tasks = kept
+}
+
 func (t *builderTrait) filterNodeSelector() map[string]string {
 	if len(t.NodeSelector) == 0 {
 		return t.NodeSelector
