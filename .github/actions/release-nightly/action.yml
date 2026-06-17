@@ -58,7 +58,7 @@ runs:
         sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
     - name: Set up QEMU (required by multi platform build)
-      uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392
+      uses: docker/setup-qemu-action@06116385d9baf250c9f4dcb4858b16962ea869c3
 
     # 
     # IMPORTANT:
@@ -95,7 +95,7 @@ runs:
         echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
 
     - name: Login to staging container registry
-      uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
+      uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee
       with:
         username: ${{ inputs.secretDockerHubUser }}
         password: ${{ inputs.secretDockerHubPassword }}
