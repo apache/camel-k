@@ -47,6 +47,10 @@ Here a quick resume of the parameters you can configure as environment variables
 | Maximum number of builds that can run concurrently.
 | `3` if build strategy is `routine`, `10` if `pod`
 
+| AFFINITY_NODE_LABELS_ALLOWED_KEYS
+| Comma-separated list of label keys that CR authors are permitted to use in `affinity.nodeAffinityLabels`. When unset or empty all keys are accepted. Expressions whose key is not in the list are dropped and an info message is logged. Example: `kubernetes.io/hostname,topology.kubernetes.io/zone`.
+|
+
 | BUILDER_TASKS_ENABLED
 | Controls whether CR authors are permitted to inject custom pipeline tasks via the `builder.tasks` trait. Set to `false` to disable custom task injection for all integrations managed by this operator. When unset or set to any value other than `false`, custom tasks are allowed (default behavior).
 | `true`
