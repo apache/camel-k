@@ -4589,7 +4589,7 @@ spec:
                       startupFailureThreshold:
                         description: Minimum consecutive failures for the startup
                           probe to be considered failed after having succeeded (default
-                          6 if not specified).
+                          10 if not specified).
                         format: int32
                         type: integer
                       startupInitialDelay:
@@ -7120,7 +7120,7 @@ spec:
                       startupFailureThreshold:
                         description: Minimum consecutive failures for the startup
                           probe to be considered failed after having succeeded (default
-                          6 if not specified).
+                          10 if not specified).
                         format: int32
                         type: integer
                       startupInitialDelay:
@@ -9545,7 +9545,7 @@ spec:
                       startupFailureThreshold:
                         description: Minimum consecutive failures for the startup
                           probe to be considered failed after having succeeded (default
-                          6 if not specified).
+                          10 if not specified).
                         format: int32
                         type: integer
                       startupInitialDelay:
@@ -11956,7 +11956,7 @@ spec:
                       startupFailureThreshold:
                         description: Minimum consecutive failures for the startup
                           probe to be considered failed after having succeeded (default
-                          6 if not specified).
+                          10 if not specified).
                         format: int32
                         type: integer
                       startupInitialDelay:
@@ -21223,7 +21223,7 @@ spec:
                       startupFailureThreshold:
                         description: Minimum consecutive failures for the startup
                           probe to be considered failed after having succeeded (default
-                          6 if not specified).
+                          10 if not specified).
                         format: int32
                         type: integer
                       startupInitialDelay:
@@ -23595,7 +23595,7 @@ spec:
                       startupFailureThreshold:
                         description: Minimum consecutive failures for the startup
                           probe to be considered failed after having succeeded (default
-                          6 if not specified).
+                          10 if not specified).
                         format: int32
                         type: integer
                       startupInitialDelay:
@@ -34225,7 +34225,7 @@ spec:
                           startupFailureThreshold:
                             description: Minimum consecutive failures for the startup
                               probe to be considered failed after having succeeded
-                              (default 6 if not specified).
+                              (default 10 if not specified).
                             format: int32
                             type: integer
                           startupInitialDelay:
@@ -36519,7 +36519,7 @@ spec:
                       startupFailureThreshold:
                         description: Minimum consecutive failures for the startup
                           probe to be considered failed after having succeeded (default
-                          6 if not specified).
+                          10 if not specified).
                         format: int32
                         type: integer
                       startupInitialDelay:
@@ -37826,8 +37826,10 @@ spec:
                         the transition.
                       type: string
                     pods:
-                      description: Pods collect health and conditions information
-                        from the owned PODs
+                      description: |-
+                        DeprecatedPods collect health and conditions information from the owned PODs
+
+                        Deprecated: may be removed in future releases.
                       items:
                         description: 'Deprecated: may be removed in future releases.'
                         properties:

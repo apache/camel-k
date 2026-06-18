@@ -4812,7 +4812,9 @@ A human readable message indicating details about the transition.
 |
 
 
-Pods collect health and conditions information from the owned PODs
+DeprecatedPods collect health and conditions information from the owned PODs
+
+Deprecated: may be removed in future releases.
 
 
 |===
@@ -7721,7 +7723,7 @@ int32
 |
 
 
-Minimum consecutive failures for the startup probe to be considered failed after having succeeded (default 6 if not specified).
+Minimum consecutive failures for the startup probe to be considered failed after having succeeded (default 10 if not specified).
 
 |`startupProbe` +
 string

@@ -1288,7 +1288,7 @@ spec:
                       startupFailureThreshold:
                         description: Minimum consecutive failures for the startup
                           probe to be considered failed after having succeeded (default
-                          6 if not specified).
+                          10 if not specified).
                         format: int32
                         type: integer
                       startupInitialDelay:
@@ -3819,7 +3819,7 @@ spec:
                       startupFailureThreshold:
                         description: Minimum consecutive failures for the startup
                           probe to be considered failed after having succeeded (default
-                          6 if not specified).
+                          10 if not specified).
                         format: int32
                         type: integer
                       startupInitialDelay:

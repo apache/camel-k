@@ -134,7 +134,7 @@ The following configuration options are available:
 
 | health.startupFailureThreshold
 | int32
-| Minimum consecutive failures for the startup probe to be considered failed after having succeeded (default 6 if not specified).
+| Minimum consecutive failures for the startup probe to be considered failed after having succeeded (default 10 if not specified).
 
 | health.startupProbe
 | string

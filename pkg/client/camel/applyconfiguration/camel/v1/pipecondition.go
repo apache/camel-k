@@ -42,8 +42,10 @@ type PipeConditionApplyConfiguration struct {
 	Reason *string `json:"reason,omitempty"`
 	// A human readable message indicating details about the transition.
 	Message *string `json:"message,omitempty"`
-	// Pods collect health and conditions information from the owned PODs
-	Pods []PodConditionApplyConfiguration `json:"pods,omitempty"`
+	// DeprecatedPods collect health and conditions information from the owned PODs
+	//
+	// Deprecated: may be removed in future releases.
+	DeprecatedPods []PodConditionApplyConfiguration `json:"pods,omitempty"`
 }
 
 // PipeConditionApplyConfiguration constructs a declarative configuration of the PipeCondition type for use with
@@ -100,15 +102,15 @@ func (b *PipeConditionApplyConfiguration) WithMessage(value string) *PipeConditi
 	return b
 }
 
-// WithPods adds the given value to the Pods field in the declarative configuration
+// WithDeprecatedPods adds the given value to the DeprecatedPods field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
-// If called multiple times, values provided by each call will be appended to the Pods field.
-func (b *PipeConditionApplyConfiguration) WithPods(values ...*PodConditionApplyConfiguration) *PipeConditionApplyConfiguration {
+// If called multiple times, values provided by each call will be appended to the DeprecatedPods field.
+func (b *PipeConditionApplyConfiguration) WithDeprecatedPods(values ...*PodConditionApplyConfiguration) *PipeConditionApplyConfiguration {
 	for i := range values {
 		if values[i] == nil {
-			panic("nil value passed to WithPods")
+			panic("nil value passed to WithDeprecatedPods")
 		}
-		b.Pods = append(b.Pods, *values[i])
+		b.DeprecatedPods = append(b.DeprecatedPods, *values[i])
 	}
 	return b
 }
