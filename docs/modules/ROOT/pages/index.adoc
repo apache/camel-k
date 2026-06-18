@@ -18,11 +18,11 @@ metadata:
 spec:
   flows:
   - from:
+      uri: timer:yaml
       steps:
       - setBody:
           simple: Hello Camel from ${routeId}
       - log: ${body}
-      uri: timer:yaml
 ----
 
 You can then execute the following command:
