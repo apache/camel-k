@@ -168,6 +168,32 @@ func TestBuilderNodeSelectorAllowList_MultipleKeys(t *testing.T) {
 	assert.Equal(t, []string{"kubernetes.io/hostname", "node-role.kubernetes.io/worker", "topology.kubernetes.io/zone"}, allowList)
 }
 
+func TestAffinityNodeLabelsAllowList_NotSet(t *testing.T) {
+	allowList := AffinityNodeLabelsAllowList()
+	assert.Nil(t, allowList)
+}
+
+func TestAffinityNodeLabelsAllowList_Empty(t *testing.T) {
+	t.Setenv("AFFINITY_NODE_LABELS_ALLOWED_KEYS", "")
+
+	allowList := AffinityNodeLabelsAllowList()
+	assert.Empty(t, allowList)
+}
+
+func TestAffinityNodeLabelsAllowList_SingleKey(t *testing.T) {
+	t.Setenv("AFFINITY_NODE_LABELS_ALLOWED_KEYS", "kubernetes.io/hostname")
+
+	allowList := AffinityNodeLabelsAllowList()
+	assert.Equal(t, []string{"kubernetes.io/hostname"}, allowList)
+}
+
+func TestAffinityNodeLabelsAllowList_MultipleKeys(t *testing.T) {
+	t.Setenv("AFFINITY_NODE_LABELS_ALLOWED_KEYS", "kubernetes.io/hostname, topology.kubernetes.io/zone ")
+
+	allowList := AffinityNodeLabelsAllowList()
+	assert.Equal(t, []string{"kubernetes.io/hostname", "topology.kubernetes.io/zone"}, allowList)
+}
+
 func TestBuilderTasksEnabled_NotSet(t *testing.T) {
 	// env var not set – default is enabled
 	assert.True(t, BuilderTasksEnabled())

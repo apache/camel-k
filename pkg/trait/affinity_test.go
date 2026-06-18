@@ -198,3 +198,62 @@ func createNominalAffinityTest() *affinityTrait {
 
 	return trait
 }
+
+func TestFilterNodeAffinityLabels_NoAllowList(t *testing.T) {
+	trait := createNominalAffinityTest()
+	trait.NodeAffinityLabels = []string{"kubernetes.io/hostname = node-1", "topology.kubernetes.io/zone = us-east-1a"}
+
+	trait.filterNodeAffinityLabels()
+	assert.Equal(t, []string{"kubernetes.io/hostname = node-1", "topology.kubernetes.io/zone = us-east-1a"}, trait.NodeAffinityLabels)
+}
+
+func TestFilterNodeAffinityLabels_AllowListFilters(t *testing.T) {
+	t.Setenv("AFFINITY_NODE_LABELS_ALLOWED_KEYS", "kubernetes.io/hostname")
+
+	trait := createNominalAffinityTest()
+	trait.NodeAffinityLabels = []string{"kubernetes.io/hostname = node-1", "topology.kubernetes.io/zone = us-east-1a"}
+
+	trait.filterNodeAffinityLabels()
+	assert.Equal(t, []string{"kubernetes.io/hostname = node-1"}, trait.NodeAffinityLabels)
+	assert.NotContains(t, trait.NodeAffinityLabels, "topology.kubernetes.io/zone = us-east-1a")
+}
+
+func TestFilterNodeAffinityLabels_AllAllowed(t *testing.T) {
+	t.Setenv("AFFINITY_NODE_LABELS_ALLOWED_KEYS", "kubernetes.io/hostname,topology.kubernetes.io/zone")
+
+	trait := createNominalAffinityTest()
+	trait.NodeAffinityLabels = []string{"kubernetes.io/hostname = node-1", "topology.kubernetes.io/zone = us-east-1a"}
+
+	trait.filterNodeAffinityLabels()
+	assert.Len(t, trait.NodeAffinityLabels, 2)
+}
+
+func TestFilterNodeAffinityLabels_AllDropped(t *testing.T) {
+	t.Setenv("AFFINITY_NODE_LABELS_ALLOWED_KEYS", "kubernetes.io/hostname")
+
+	trait := createNominalAffinityTest()
+	trait.NodeAffinityLabels = []string{"topology.kubernetes.io/zone = us-east-1a"}
+
+	trait.filterNodeAffinityLabels()
+	assert.Empty(t, trait.NodeAffinityLabels)
+}
+
+func TestApplyNodeAffinityLabelsWithAllowList(t *testing.T) {
+	t.Setenv("AFFINITY_NODE_LABELS_ALLOWED_KEYS", "kubernetes.io/hostname")
+
+	affinityTrait := createNominalAffinityTest()
+	affinityTrait.NodeAffinityLabels = []string{
+		"kubernetes.io/hostname = node-1",
+		"topology.kubernetes.io/zone = us-east-1a",
+	}
+
+	environment, deployment := createNominalDeploymentTraitTest()
+	err := affinityTrait.Apply(environment)
+
+	require.NoError(t, err)
+	nodeAffinity := deployment.Spec.Template.Spec.Affinity.NodeAffinity
+	require.NotNil(t, nodeAffinity)
+	terms := nodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms[0].MatchExpressions
+	assert.Len(t, terms, 1)
+	assert.Equal(t, "kubernetes.io/hostname", terms[0].Key)
+}

@@ -173,6 +173,27 @@ func publishStrategy() v1.IntegrationPlatformBuildPublishStrategy {
 	return DefaultPublishStrategy
 }
 
+// AffinityNodeLabelsAllowList returns the list of label keys that are allowed to be used in
+// affinity.nodeAffinityLabels. When the list is empty (AFFINITY_NODE_LABELS_ALLOWED_KEYS is
+// unset or blank), any key is permitted. When the list is non-empty only expressions whose
+// keys are in the list are accepted; others are dropped and an info message is logged by the trait.
+func AffinityNodeLabelsAllowList() []string {
+	raw := GetEnvOrDefault("AFFINITY_NODE_LABELS_ALLOWED_KEYS", "")
+	if raw == "" {
+		return nil
+	}
+	parts := strings.Split(raw, ",")
+	result := make([]string, 0, len(parts))
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p != "" {
+			result = append(result, p)
+		}
+	}
+
+	return result
+}
+
 // BuilderTasksEnabled reports whether CR authors are permitted to inject custom pipeline tasks
 // via the builder.tasks trait. Controlled by the BUILDER_TASKS_ENABLED operator environment
 // variable (default true for backward compatibility). Set to "false" to prevent custom task

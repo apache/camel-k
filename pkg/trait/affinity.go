@@ -20,6 +20,7 @@ package trait
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
@@ -30,6 +31,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/platform"
 )
 
 const (
@@ -83,6 +85,7 @@ func (t *affinityTrait) Apply(e *Environment) error {
 }
 
 func (t *affinityTrait) addNodeAffinity(_ *Environment, podSpec *corev1.PodSpec) error {
+	t.filterNodeAffinityLabels()
 	if len(t.NodeAffinityLabels) == 0 {
 		return nil
 	}
@@ -259,4 +262,40 @@ func operatorToLabelSelectorOperator(operator selection.Operator) (metav1.LabelS
 	}
 
 	return "", fmt.Errorf("unsupported label selector operator: %s", operator)
+}
+
+// filterNodeAffinityLabels removes expressions whose label key is not in the operator-configured
+// allow list. When AFFINITY_NODE_LABELS_ALLOWED_KEYS is unset or empty all expressions are kept.
+func (t *affinityTrait) filterNodeAffinityLabels() {
+	allowList := platform.AffinityNodeLabelsAllowList()
+	if len(allowList) == 0 || len(t.NodeAffinityLabels) == 0 {
+		return
+	}
+	kept := make([]string, 0, len(t.NodeAffinityLabels))
+	for _, expr := range t.NodeAffinityLabels {
+		if t.nodeAffinityLabelAllowed(expr, allowList) {
+			kept = append(kept, expr)
+		}
+	}
+	t.NodeAffinityLabels = kept
+}
+
+// nodeAffinityLabelAllowed returns true when every label key in the expression is in allowList.
+// Malformed expressions are kept so existing error handling in addNodeAffinity fires as before.
+func (t *affinityTrait) nodeAffinityLabelAllowed(expr string, allowList []string) bool {
+	sel, err := labels.Parse(expr)
+	if err != nil {
+		return true
+	}
+	reqs, _ := sel.Requirements()
+	for _, r := range reqs {
+		if !slices.Contains(allowList, r.Key()) {
+			t.L.Info("affinity.nodeAffinityLabels key is not in the allowed list and will be ignored",
+				"key", r.Key(), "allowedKeys", allowList)
+
+			return false
+		}
+	}
+
+	return true
 }
