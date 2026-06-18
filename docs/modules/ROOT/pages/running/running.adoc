@@ -81,13 +81,13 @@ metadata:
 spec:
   flows:
   - from:
+      uri: timer:yaml
       parameters:
         period: "1000"
       steps:
       - setBody:
           simple: Hello Camel from ${routeId}
       - log: ${body}
-      uri: timer:yaml
 ```
 
 You can see the specification is a lot neater, so, try choosing Yaml DSL whenever it's possible.
