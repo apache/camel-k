@@ -160,11 +160,13 @@ func TestBuilderTrait(t *testing.T) {
 			).Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			integrationKitName := IntegrationKitName(t, ctx, ns, name)()
 			integrationKitNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
-			g.Eventually(KitRootImage(t, ctx, integrationKitNamespace, integrationKitName), TestTimeoutShort).Should(Equal("gcr.io/distroless/java17-debian12"))
+			g.Eventually(KitRootImage(t, ctx, integrationKitNamespace, integrationKitName), TestTimeoutShort).
+				Should(Equal("gcr.io/distroless/java17-debian12"))
 		})
 	})
 }
