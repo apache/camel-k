@@ -49,12 +49,12 @@ func TestKustomizeOwnNamespace(t *testing.T) {
 				"sed",
 				"-i",
 				fmt.Sprintf("s/namespace: .*/namespace: %s/", ns),
-				fmt.Sprintf("%s/overlays/kubernetes/own-namespace/kustomization.yaml", kustomizeDir),
+				fmt.Sprintf("%s/overlays/own-namespace/kustomization.yaml", kustomizeDir),
 			))
 		ExpectExecSucceed(t, g, Kubectl(
 			"apply",
 			"-k",
-			fmt.Sprintf("%s/overlays/kubernetes/own-namespace", kustomizeDir),
+			fmt.Sprintf("%s/overlays/own-namespace", kustomizeDir),
 			"--server-side",
 		))
 

@@ -49,12 +49,12 @@ func TestKustomizeDescoped(t *testing.T) {
 				"sed",
 				"-i",
 				fmt.Sprintf("s/namespace: .*/namespace: %s/", ns),
-				fmt.Sprintf("%s/overlays/kubernetes/descoped/kustomization.yaml", kustomizeDir),
+				fmt.Sprintf("%s/overlays/all-namespaces/kustomization.yaml", kustomizeDir),
 			))
 		ExpectExecSucceed(t, g, Kubectl(
 			"apply",
 			"-k",
-			fmt.Sprintf("%s/overlays/kubernetes/descoped", kustomizeDir),
+			fmt.Sprintf("%s/overlays/all-namespaces", kustomizeDir),
 			"--server-side",
 		))
 
