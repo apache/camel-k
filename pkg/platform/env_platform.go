@@ -199,7 +199,7 @@ func AffinityNodeLabelsAllowList() []string {
 // variable (default true for backward compatibility). Set to "false" to prevent custom task
 // injection across all integrations managed by this operator.
 func BuilderTasksEnabled() bool {
-	return strings.ToLower(strings.TrimSpace(GetEnvOrDefault("BUILDER_TASKS_ENABLED", "true"))) != "false"
+	return strings.ToLower(strings.TrimSpace(GetEnvOrDefault("BUILDER_TASKS_ENABLED", "false"))) == "true"
 }
 
 // BuilderNodeSelectorAllowList returns the list of node-selector keys that are allowed to be set

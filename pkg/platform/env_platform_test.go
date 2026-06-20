@@ -195,8 +195,8 @@ func TestAffinityNodeLabelsAllowList_MultipleKeys(t *testing.T) {
 }
 
 func TestBuilderTasksEnabled_NotSet(t *testing.T) {
-	// env var not set – default is enabled
-	assert.True(t, BuilderTasksEnabled())
+	// env var not set – default is disabled
+	assert.False(t, BuilderTasksEnabled())
 }
 
 func TestBuilderTasksEnabled_True(t *testing.T) {
@@ -217,5 +217,5 @@ func TestBuilderTasksEnabled_FalseUpperCase(t *testing.T) {
 func TestBuilderTasksEnabled_Empty(t *testing.T) {
 	t.Setenv("BUILDER_TASKS_ENABLED", "")
 	// empty string is not "false" – treat as enabled
-	assert.True(t, BuilderTasksEnabled())
+	assert.False(t, BuilderTasksEnabled())
 }

@@ -67,10 +67,15 @@ type BuilderTrait struct {
 	// Deprecated: will be removed in future versions.
 	MavenProfiles []string `json:"mavenProfiles,omitempty" property:"maven-profiles"`
 	// A list of tasks to be executed (available only when using `pod` strategy) with format `<name>;<container-image>;<container-command>`.
+	//
+	// Deprecated: may be removed in future versions.
 	Tasks []string `json:"tasks,omitempty" property:"tasks"`
 	// A list of tasks sorted by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.
 	// Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`, `s2i`)
-	// if you need to execute them. Useful only with `pod` strategy.
+	// if you need to execute them. Useful only with `pod` strategy. Disabled by default, you need to enable via
+	// BUILDER_TASKS_ENABLED=true environment variable on operator Deployment.
+	//
+	// Deprecated: may be removed in future versions.
 	TasksFilter string `json:"tasksFilter,omitempty" property:"tasks-filter"`
 	// A list of request cpu configuration for the specific task with format `<task-name>:<request-cpu-conf>`.
 	TasksRequestCPU []string `json:"tasksRequestCPU,omitempty" property:"tasks-request-cpu"`
