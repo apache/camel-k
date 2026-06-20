@@ -152,75 +152,12 @@ func TestBuilderTrait(t *testing.T) {
 			g.Eventually(BuilderPod(t, ctx, integrationKitNamespace, builderKitName)().Spec.InitContainers[0].Resources.Limits.Memory().String(), TestTimeoutShort).Should(Equal("3Gi"))
 		})
 
-		t.Run("Run custom pipeline task", func(t *testing.T) {
-			name := RandomizedSuffixName("java-pipeline")
-			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name,
-				"-t", "builder.tasks=custom1;alpine;tree",
-				"-t", "builder.tasks=custom2;alpine;cat maven/pom.xml",
-				"-t", "builder.strategy=pod",
-			).Execute()).To(Succeed())
-
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-
-			integrationKitName := IntegrationKitName(t, ctx, ns, name)()
-			integrationKitNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
-			builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
-			g.Eventually(BuilderPod(t, ctx, integrationKitNamespace, builderKitName), TestTimeoutShort).ShouldNot(BeNil())
-			g.Eventually(len(BuilderPod(t, ctx, integrationKitNamespace, builderKitName)().Spec.InitContainers), TestTimeoutShort).Should(Equal(4))
-			g.Eventually(BuilderPod(t, ctx, integrationKitNamespace, builderKitName)().Spec.InitContainers[0].Name, TestTimeoutShort).Should(Equal("builder"))
-			g.Eventually(BuilderPod(t, ctx, integrationKitNamespace, builderKitName)().Spec.InitContainers[1].Name, TestTimeoutShort).Should(Equal("custom1"))
-			g.Eventually(BuilderPod(t, ctx, integrationKitNamespace, builderKitName)().Spec.InitContainers[2].Name, TestTimeoutShort).Should(Equal("custom2"))
-
-			// Check containers conditions
-			g.Eventually(Build(t, ctx, integrationKitNamespace, integrationKitName), TestTimeoutShort).ShouldNot(BeNil())
-			g.Eventually(
-				Build(t, ctx, integrationKitNamespace, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Containercustom1Succeeded")).Status,
-				TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(
-				Build(t, ctx, integrationKitNamespace, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Containercustom1Succeeded")).Message,
-				TestTimeoutShort).Should(ContainSubstring("generated-bytecode.jar"))
-			g.Eventually(Build(t, ctx, integrationKitNamespace, integrationKitName), TestTimeoutShort).ShouldNot(BeNil())
-			g.Eventually(
-				Build(t, ctx, integrationKitNamespace, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Containercustom2Succeeded")).Status,
-				TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(
-				Build(t, ctx, integrationKitNamespace, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Containercustom2Succeeded")).Message,
-				TestTimeoutShort).Should(ContainSubstring("</project>"))
-
-			// Check logs
-			g.Eventually(Logs(t, ctx, integrationKitNamespace, builderKitName, corev1.PodLogOptions{Container: "custom1"})).Should(ContainSubstring(`generated-bytecode.jar`))
-			g.Eventually(Logs(t, ctx, integrationKitNamespace, builderKitName, corev1.PodLogOptions{Container: "custom2"})).Should(ContainSubstring(`<artifactId>camel-k-integration</artifactId>`))
-
-			// Verify base image uses a digest for reproducible builds (see #5986)
-			jibLogs := Logs(t, ctx, integrationKitNamespace, builderKitName, corev1.PodLogOptions{Container: "jib"})()
-			g.Expect(jibLogs).ToNot(BeEmpty())
-			g.Expect(jibLogs).ToNot(ContainSubstring("does not use a specific image digest"))
-		})
-
-		t.Run("Run custom pipeline task error", func(t *testing.T) {
-			name := RandomizedSuffixName("java-error")
-			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "builder.tasks=custom1;alpine;cat missingfile.txt", "-t", "builder.strategy=pod").Execute()).To(Succeed())
-
-			g.Eventually(IntegrationPhase(t, ctx, ns, name)).Should(Equal(v1.IntegrationPhaseBuildingKit))
-			integrationKitName := IntegrationKitName(t, ctx, ns, name)()
-			integrationKitNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
-			// Check containers conditions
-			g.Eventually(Build(t, ctx, integrationKitNamespace, integrationKitName), TestTimeoutLong).ShouldNot(BeNil())
-			g.Eventually(BuildConditions(t, ctx, integrationKitNamespace, integrationKitName), TestTimeoutLong).ShouldNot(BeNil())
-			g.Eventually(BuildCondition(t, ctx, integrationKitNamespace, integrationKitName, v1.BuildConditionType("Containercustom1Succeeded")), TestTimeoutMedium).ShouldNot(BeNil())
-			g.Eventually(
-				BuildCondition(t, ctx, integrationKitNamespace, integrationKitName, v1.BuildConditionType("Containercustom1Succeeded"))().Status,
-				TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
-			g.Eventually(
-				BuildCondition(t, ctx, integrationKitNamespace, integrationKitName, v1.BuildConditionType("Containercustom1Succeeded"))().Message,
-				TestTimeoutShort).Should(ContainSubstring("No such file or directory"))
-		})
-
 		t.Run("Run distroless container image", func(t *testing.T) {
 			name := RandomizedSuffixName("java")
-			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "builder.base-image=gcr.io/distroless/java17-debian12").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java",
+				"--name", name,
+				"-t", "builder.base-image=gcr.io/distroless/java17-debian12",
+			).Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
@@ -228,26 +165,6 @@ func TestBuilderTrait(t *testing.T) {
 			integrationKitName := IntegrationKitName(t, ctx, ns, name)()
 			integrationKitNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
 			g.Eventually(KitRootImage(t, ctx, integrationKitNamespace, integrationKitName), TestTimeoutShort).Should(Equal("gcr.io/distroless/java17-debian12"))
-		})
-	})
-}
-
-func TestCustomPipelineBuildah(t *testing.T) {
-	t.Parallel()
-	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		t.Run("Run Buildah custom publish task", func(t *testing.T) {
-			name := RandomizedSuffixName("java")
-			g.Expect(KamelRun(t, ctx, ns, "files/Java.java",
-				"--name", name,
-				"-t", "builder.strategy=pod",
-				"-t", "builder.base-image=docker.io/library/eclipse-temurin:17",
-				"-t", `builder.tasks=my-buildah;quay.io/buildah/stable;/bin/bash -c \"cd context && buildah bud --storage-driver=vfs --tls-verify=false -t $(INTEGRATION_KIT_IMAGE) . && buildah push --storage-driver=vfs --digestfile=/dev/termination-log --tls-verify=false $(INTEGRATION_KIT_IMAGE) docker://$(INTEGRATION_KIT_IMAGE)";0`,
-				"-t", "builder.tasks-filter=builder,package,my-buildah",
-			).Execute()).To(Succeed())
-
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("Magicstring!"))
 		})
 	})
 }

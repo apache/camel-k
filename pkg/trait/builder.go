@@ -42,6 +42,8 @@ import (
 const (
 	builderTraitID    = "builder"
 	builderTraitOrder = 600
+
+	quarkusNativeTaskName = "quarkus-native"
 )
 
 var commandsRegexp = regexp.MustCompile(`"[^"]+"|[\w/-]+`)
@@ -49,6 +51,9 @@ var commandsRegexp = regexp.MustCompile(`"[^"]+"|[\w/-]+`)
 type builderTrait struct {
 	BasePlatformTrait
 	traitv1.BuilderTrait `property:",squash"`
+
+	// no task when empty
+	quarkusNativeTask string
 }
 
 func newBuilderTrait() Trait {
@@ -62,6 +67,7 @@ func (t *builderTrait) InfluencesKit() bool {
 	return true
 }
 
+//nolint:staticcheck
 func (t *builderTrait) Matches(trait Trait) bool {
 	otherTrait, ok := trait.(*builderTrait)
 	if !ok {
@@ -135,22 +141,22 @@ func (t *builderTrait) configureForQuarkus(trait Trait, e *Environment, conditio
 			nativeBuilderImage = strings.ReplaceAll(nativeBuilderImage, "jdk-21", "jdk-25")
 		}
 
-		// it should be performed as the last custom task
-		t.Tasks = append(t.Tasks, fmt.Sprintf(`quarkus-native;%s;/bin/bash -c "%s"`, nativeBuilderImage, command))
 		// Force the build to run in a separate Pod and strictly sequential
-		m := "This is a Quarkus native build: setting build configuration with build Pod strategy and native container sensible resources (if not specified by the user). Make sure your cluster can handle it."
+		m := "This is a Quarkus native build: setting build configuration with build Pod strategy and native container sensible resources " +
+			"(if not specified by the user). Make sure your cluster can handle it."
 		t.L.Info(m)
-
 		condition = newOrAppend(condition, m)
 		t.Strategy = string(v1.BuildStrategyPod)
 		t.OrderStrategy = string(v1.BuildOrderStrategySequential)
 
-		if !existsTaskRequest(t.TasksRequestCPU, "quarkus-native") {
-			t.TasksRequestCPU = append(t.TasksRequestCPU, "quarkus-native:1000m")
+		if !existsTaskRequest(t.TasksRequestCPU, quarkusNativeTaskName) {
+			t.TasksRequestCPU = append(t.TasksRequestCPU, quarkusNativeTaskName+":1000m")
 		}
-		if !existsTaskRequest(t.TasksRequestMemory, "quarkus-native") {
-			t.TasksRequestMemory = append(t.TasksRequestMemory, "quarkus-native:4Gi")
+		if !existsTaskRequest(t.TasksRequestMemory, quarkusNativeTaskName) {
+			t.TasksRequestMemory = append(t.TasksRequestMemory, quarkusNativeTaskName+":4Gi")
 		}
+
+		t.quarkusNativeTask = fmt.Sprintf(`%s;%s;/bin/bash -c "%s"`, quarkusNativeTaskName, nativeBuilderImage, command)
 	}
 
 	return condition, nil
@@ -245,16 +251,29 @@ func (t *builderTrait) Apply(e *Environment) error {
 	pipelineTasks = append(pipelineTasks, v1.Task{Builder: builderTask})
 
 	// Custom tasks
-	t.applyTasksFilter()
-	if len(t.Tasks) > 0 {
-		ct, err := t.determineCustomTasks(e, builderTask, tasksConf)
+	//nolint:staticcheck,nestif
+	if platform.BuilderTasksEnabled() {
+		if len(t.Tasks) > 0 {
+			ct, err := t.determineCustomTasks(e, builderTask, tasksConf)
+			if err != nil {
+				return err
+			}
+			if ct == nil {
+				return nil
+			}
+			pipelineTasks = append(pipelineTasks, ct...)
+		}
+	} else {
+		t.L.Info("Custom tasks are disabled by operator configuration: the tasks will be ignored")
+		// Useful to report in status no custom task was executed
+		t.Tasks = []string{}
+	}
+	if t.quarkusNativeTask != "" {
+		quarkusNativeTask, err := parseTask(t.quarkusNativeTask, tasksConf, imageName)
 		if err != nil {
 			return err
 		}
-		if ct == nil {
-			return nil
-		}
-		pipelineTasks = append(pipelineTasks, ct...)
+		pipelineTasks = append(pipelineTasks, *quarkusNativeTask)
 	}
 
 	// Packaging task
@@ -300,6 +319,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 	}
 
 	// filter only those tasks required by the user
+	//nolint:staticcheck
 	if t.TasksFilter != "" {
 		flt := strings.Split(t.TasksFilter, ",")
 		if pipelineTasks, err = filter(pipelineTasks, flt); err != nil {
@@ -516,6 +536,7 @@ func (t *builderTrait) determineCustomTasks(e *Environment, builderTask *v1.Buil
 		realBuildStrategy = e.Platform.BuildConfiguration.Strategy
 	}
 
+	//nolint:staticcheck
 	if len(t.Tasks) > 0 && realBuildStrategy != v1.BuildStrategyPod {
 		err := failIntegrationKit(
 			e,
@@ -538,35 +559,48 @@ func (t *builderTrait) determineCustomTasks(e *Environment, builderTask *v1.Buil
 }
 
 // the format expected is "<task-name>;<task-image>;<task-container-command>[;<task-container-user-id>]".
+//
+// Deprecated: will be removed in future versions.
 func (t *builderTrait) customTasks(tasksConf map[string]*v1.BuildConfiguration, imageName string) ([]v1.Task, error) {
 	customTasks := make([]v1.Task, len(t.Tasks))
 
 	for i, t := range t.Tasks {
-		splitted := strings.Split(t, ";")
-		if len(splitted) < 3 {
-			return nil, fmt.Errorf(`provide a custom task with at least 3 arguments, ie "my-task-name;my-image;echo 'hello'", was %v`, t)
+		parsedTask, err := parseTask(t, tasksConf, imageName)
+		if err != nil {
+			return nil, err
 		}
-		customTasks[i] = v1.Task{
-			Custom: &v1.UserTask{
-				BaseTask: v1.BaseTask{
-					Name:          splitted[0],
-					Configuration: *taskConfOrDefault(tasksConf, splitted[0]),
-				},
-				PublishingImage:   imageName,
-				ContainerImage:    splitted[1],
-				ContainerCommands: splitContainerCommand(splitted[2]),
-			},
-		}
-		if len(splitted) > 3 {
-			uid, err := strconv.ParseInt(splitted[3], 10, 64)
-			if err != nil {
-				return nil, fmt.Errorf(`provide a custom task with a correct numeric user id, was %v`, splitted[3])
-			}
-			customTasks[i].Custom.ContainerUserID = &uid
-		}
+
+		customTasks[i] = *parsedTask
 	}
 
 	return customTasks, nil
+}
+
+func parseTask(task string, tasksConf map[string]*v1.BuildConfiguration, imageName string) (*v1.Task, error) {
+	splitted := strings.Split(task, ";")
+	if len(splitted) < 3 {
+		return nil, fmt.Errorf(`provide a custom task with at least 3 arguments, ie "my-task-name;my-image;echo 'hello'", was %v`, task)
+	}
+	parsedTask := v1.Task{
+		Custom: &v1.UserTask{
+			BaseTask: v1.BaseTask{
+				Name:          splitted[0],
+				Configuration: *taskConfOrDefault(tasksConf, splitted[0]),
+			},
+			PublishingImage:   imageName,
+			ContainerImage:    splitted[1],
+			ContainerCommands: splitContainerCommand(splitted[2]),
+		},
+	}
+	if len(splitted) > 3 {
+		uid, err := strconv.ParseInt(splitted[3], 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf(`provide a custom task with a correct numeric user id, was %v`, splitted[3])
+		}
+		parsedTask.Custom.ContainerUserID = &uid
+	}
+
+	return &parsedTask, nil
 }
 
 func taskConfOrDefault(tasksConf map[string]*v1.BuildConfiguration, taskName string) *v1.BuildConfiguration {
@@ -715,24 +749,6 @@ func (t *builderTrait) setPlatform(e *Environment) {
 // filterNodeSelector returns the node selector map after applying the operator-level allow list.
 // If BUILDER_NODE_SELECTOR_ALLOWED_LABELS is empty/unset all keys are accepted (backward compatible).
 // Otherwise only keys present in the allow list are retained; every dropped key is logged at info level.
-// applyTasksFilter removes user-provided tasks when BUILDER_TASKS_ENABLED=false.
-// The quarkus-native task is operator-injected and is always retained.
-func (t *builderTrait) applyTasksFilter() {
-	if len(t.Tasks) == 0 || platform.BuilderTasksEnabled() {
-		return
-	}
-	kept := make([]string, 0, len(t.Tasks))
-	for _, task := range t.Tasks {
-		name, _, _ := strings.Cut(task, ";")
-		if name == "quarkus-native" {
-			kept = append(kept, task)
-		} else {
-			t.L.Info("builder.tasks is disabled by operator configuration and will be ignored", "task", name)
-		}
-	}
-	t.Tasks = kept
-}
-
 func (t *builderTrait) filterNodeSelector() map[string]string {
 	if len(t.NodeSelector) == 0 {
 		return t.NodeSelector

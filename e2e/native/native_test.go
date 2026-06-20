@@ -37,7 +37,11 @@ func TestNativeIntegrations(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		t.Run("xml native support", func(t *testing.T) {
 			name := RandomizedSuffixName("xml-native")
-			g.Expect(KamelRun(t, ctx, ns, "files/Xml.xml", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/Xml.xml",
+				"--name", name,
+				"-t", "quarkus.build-mode=native",
+				"-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi",
+			).Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationPod(t, ctx, ns, name), TestTimeoutShort).
@@ -51,7 +55,11 @@ func TestNativeIntegrations(t *testing.T) {
 
 		t.Run("automatic rollout deployment from jvm to native kit", func(t *testing.T) {
 			name := RandomizedSuffixName("yaml-native")
-			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml", "--name", name, "-t", "quarkus.build-mode=jvm", "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml",
+				"--name", name,
+				"-t", "quarkus.build-mode=jvm",
+				"-t", "quarkus.build-mode=native",
+				"-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi").Execute()).To(Succeed())
 
 			// Check the fast-jar Kit is ready
 			g.Eventually(IntegrationKitLayout(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationKitLayoutFastJar))
@@ -79,7 +87,11 @@ func TestNativeIntegrations(t *testing.T) {
 
 			t.Run("yaml native should not rebuild", func(t *testing.T) {
 				name := RandomizedSuffixName("yaml-native-2")
-				g.Expect(KamelRun(t, ctx, ns, "files/yaml2.yaml", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi").Execute()).To(Succeed())
+				g.Expect(KamelRun(t, ctx, ns, "files/yaml2.yaml",
+					"--name", name,
+					"-t", "quarkus.build-mode=native",
+					"-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi",
+				).Execute()).To(Succeed())
 
 				// This one should run quickly as it suppose to reuse an IntegrationKit
 				g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))

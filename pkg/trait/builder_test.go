@@ -146,6 +146,7 @@ func createNominalBuilderTraitTest() *builderTrait {
 }
 
 func TestCustomTaskBuilderTrait(t *testing.T) {
+	t.Setenv("BUILDER_TASKS_ENABLED", "true")
 	env := createBuilderTestEnv(v1.BuildStrategyPod)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
@@ -169,6 +170,7 @@ func TestCustomTaskBuilderTrait(t *testing.T) {
 }
 
 func TestCustomTaskBuilderTraitValidStrategyOverride(t *testing.T) {
+	t.Setenv("BUILDER_TASKS_ENABLED", "true")
 	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
@@ -187,6 +189,7 @@ func TestCustomTaskBuilderTraitValidStrategyOverride(t *testing.T) {
 }
 
 func TestCustomTaskBuilderTraitInvalidStrategy(t *testing.T) {
+	t.Setenv("BUILDER_TASKS_ENABLED", "true")
 	env := createBuilderTestEnv(v1.BuildStrategyRoutine)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
@@ -203,6 +206,7 @@ func TestCustomTaskBuilderTraitInvalidStrategy(t *testing.T) {
 }
 
 func TestCustomTaskBuilderTraitInvalidStrategyOverride(t *testing.T) {
+	t.Setenv("BUILDER_TASKS_ENABLED", "true")
 	env := createBuilderTestEnv(v1.BuildStrategyPod)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
@@ -520,6 +524,7 @@ func TestBuilderTasksFilterAndReorderOperatorTasks(t *testing.T) {
 }
 
 func TestBuilderTasksFilterAndReorderCustomTasks(t *testing.T) {
+	t.Setenv("BUILDER_TASKS_ENABLED", "true")
 	env := createBuilderTestEnv(v1.BuildStrategyPod)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Tasks = append(builderTrait.Tasks, `my-custom-publish;alpine;mvn test`)
@@ -778,8 +783,8 @@ func TestBuilderTraitTasksDisabledKeepsQuarkusNative(t *testing.T) {
 
 	env := createBuilderTestEnv(v1.BuildStrategyPod)
 	bt := createNominalBuilderTraitTest()
+	bt.quarkusNativeTask = "quarkus-native;quarkus-image;/bin/bash -c \"build native\""
 	bt.Tasks = []string{
-		"quarkus-native;quarkus-image;/bin/bash -c \"build native\"",
 		"user-task;alpine;echo hello",
 	}
 
@@ -796,8 +801,7 @@ func TestBuilderTraitTasksDisabledKeepsQuarkusNative(t *testing.T) {
 	assert.NotContains(t, customNames, "user-task", "user task must be dropped when builder.tasks is disabled")
 }
 
-// TestBuilderTraitTasksEnabledByDefault verifies that when BUILDER_TASKS_ENABLED is unset
-// custom tasks flow through normally.
+// TestBuilderTraitTasksEnabledByDefault verifies that when BUILDER_TASKS_ENABLED is unset.
 func TestBuilderTraitTasksEnabledByDefault(t *testing.T) {
 	env := createBuilderTestEnv(v1.BuildStrategyPod)
 	bt := createNominalBuilderTraitTest()
@@ -813,5 +817,5 @@ func TestBuilderTraitTasksEnabledByDefault(t *testing.T) {
 			break
 		}
 	}
-	assert.True(t, found, "custom task must be present when builder.tasks is enabled")
+	assert.False(t, found, "custom task must not be present when builder.tasks is disabled (default)")
 }

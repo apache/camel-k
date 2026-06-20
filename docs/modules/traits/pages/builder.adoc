@@ -94,11 +94,16 @@ Deprecated: will be removed in future versions.
 | []string
 | A list of tasks to be executed (available only when using `pod` strategy) with format `<name>;<container-image>;<container-command>`.
 
+Deprecated: may be removed in future versions.
+
 | builder.tasksFilter
 | string
 | A list of tasks sorted by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.
 Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`, `s2i`)
-if you need to execute them. Useful only with `pod` strategy.
+if you need to execute them. Useful only with `pod` strategy. Disabled by default, you need to enable via
+BUILDER_TASKS_ENABLED=true environment variable on operator Deployment.
+
+Deprecated: may be removed in future versions.
 
 | builder.tasksRequestCPU
 | []string
@@ -164,4 +169,4 @@ NOTE: Operators can restrict which node-selector label keys CR authors are permi
 
 The `builder.tasks` trait option lets CR authors inject arbitrary containers into the build pipeline (only when using the `pod` build strategy). Each task entry has the format `<name>;<image>;<command>[;<userID>]`.
 
-NOTE: Operators can disable custom task injection entirely by setting `BUILDER_TASKS_ENABLED=false` on the operator deployment. When disabled, any `builder.tasks` values provided by CR authors are silently ignored and an info message is logged. The default is `true` (tasks are allowed). See build environment variables documentation for details.
+NOTE: Operators can enable custom task injection by setting `BUILDER_TASKS_ENABLED=true` on the operator deployment. When disabled, any `builder.tasks` values provided by CR authors are silently ignored and an info message is logged. The default is `false` (custom tasks are not allowed). See build environment variables documentation for details.
