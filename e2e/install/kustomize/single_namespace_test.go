@@ -51,7 +51,7 @@ func TestKustomizeSingleNamespace(t *testing.T) {
 			ExpectExecSucceed(t, g, Kubectl(
 				"apply",
 				"-k",
-				fmt.Sprintf("%s/overlays/kubernetes/single-namespace", kustomizeDir),
+				fmt.Sprintf("%s/overlays/single-namespace", kustomizeDir),
 				"--server-side",
 			))
 			g.Eventually(OperatorPod(t, ctx, operatorNs)).ShouldNot(BeNil())
@@ -60,7 +60,7 @@ func TestKustomizeSingleNamespace(t *testing.T) {
 			WithNamedTestNamespace(t, func(ctx context.Context, g *WithT, tenantNs string) {
 				// Test a simple integration in "tenant-b" is not reconciled
 				g.Expect(KamelRun(t, ctx, tenantNs, "files/yaml.yaml").Execute()).To(Succeed())
-				g.Consistently(IntegrationPhase(t, ctx, tenantNs, "yaml"), 10*time.Second).Should(BeEmpty())
+				g.Consistently(IntegrationPhase(t, ctx, tenantNs, "yaml"), 30*time.Second).Should(BeEmpty())
 			}, "tenant-b")
 
 			// Test a simple integration in "tenant-a" is reconciled and runs correctly

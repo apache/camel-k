@@ -60,13 +60,13 @@ runs:
     - name: Set up QEMU (required by multi platform build)
       uses: docker/setup-qemu-action@06116385d9baf250c9f4dcb4858b16962ea869c3
 
-    # 
+    #
     # IMPORTANT:
     # Do we really want to run smoke test?
     # We can skip unless we see the usage of the nightly is widespread and it makes sense to run some smoke
     # test before releasing
     #
-    
+
     # - name: Infra setting
     #   uses: ./.github/actions/infra-setting
 
@@ -178,7 +178,7 @@ runs:
         Apache Camel K ${{ env.VERSION }} build for testing purposes only (unstable). This nightly release is using an **unsupported** operator image published as `${{ env.IMAGE_NAME }}:${{ env.VERSION }}`. The available platforms are AMD64 and ARM64.
         ## Kubectl
         ```
-        kubectl apply -k github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=${{ env.TAG }}
+        kubectl apply -k github.com/apache/camel-k/install/overlays/all-namespaces?ref=${{ env.TAG }}
         ```
         ## Helm
         ```

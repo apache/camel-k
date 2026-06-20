@@ -754,7 +754,7 @@ goimport:
 # START Local installation procedure. Handy for development purpose
 #####
 
-KUSTOMIZE_DIR = "install/overlays/kubernetes/descoped"
+KUSTOMIZE_DIR = "install/overlays/all-namespaces"
 DEFAULT_NS = "camel-k"
 
 .PHONY: install install-k8s-global install-k8s-ns install-openshift-global install-openshift-ns
@@ -800,11 +800,11 @@ endif
 	kubectl apply -k $(KUST_TMP)/$(KUSTOMIZE_DIR) --server-side --force-conflicts
 
 install-k8s-global: DEFAULT_NS="camel-k"
-install-k8s-global: KUSTOMIZE_DIR="install/overlays/kubernetes/descoped"
+install-k8s-global: KUSTOMIZE_DIR="install/overlays/all-namespaces"
 install-k8s-global: clone-kustomize-dir set-operator-id set-operator-env install-operator
 
 install-k8s-ns: DEFAULT_NS="default"
-install-k8s-ns: KUSTOMIZE_DIR="install/overlays/kubernetes/own-namespace"
+install-k8s-ns: KUSTOMIZE_DIR="install/overlays/own-namespace"
 install-k8s-ns: clone-kustomize-dir set-operator-id set-operator-env install-operator
 
 install-registry: NAMESPACE="camel-k"

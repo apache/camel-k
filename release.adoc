@@ -85,7 +85,7 @@ Camel K Client 2.0.0
 If the version retrieved is the one expected you can run an installation procedure:
 
 ```
-kustomize build github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v<version> | sed 's#apache/camel-k#camelk/camel-k#g' | kubectl apply -f - --server-side
+kustomize build github.com/apache/camel-k/install/overlays/all-namespaces?ref=v<version> | sed 's#apache/camel-k#camelk/camel-k#g' | kubectl apply -f - --server-side
 ```
 
 Make some test and if all is in order, you can upload the sources and CLIs to the dist/dev repository in ASF the staged artifacts, in order to link them in the release vote communication.
@@ -105,7 +105,7 @@ You should also manually add some text to explain how to test the staging artifa
 This release is on vote. It is using a **staging** operator image published as `docker.io/camelk/camel-k:<version>`. The available platforms are AMD64 and ARM64. You can test it following these instructions:
 ### Kubectl
 ```
-kustomize build github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v<version> | sed 's#apache/camel-k#camelk/camel-k#g' | kubectl apply -f - --server-side
+kustomize build github.com/apache/camel-k/install/overlays/all-namespaces?ref=v<version> | sed 's#apache/camel-k#camelk/camel-k#g' | kubectl apply -f - --server-side
 ```
 ### Helm
 ```
@@ -223,7 +223,7 @@ You can edit the draft release and set it to final, marking as last release. You
 Install the operator looking at the official https://camel.apache.org/camel-k/<2.5.x>/installation/installation.html[Camel K operator <version> installation procedure].
 ```
 
-Perform a simple test to verify that everything is in place (running a "Hello World" integration after an installation done with, as an example `kubectl apply -k github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v<version> --server-side`). Do a simple final test.
+Perform a simple test to verify that everything is in place (running a "Hello World" integration after an installation done with, as an example `kubectl apply -k github.com/apache/camel-k/install/overlays/all-namespaces?ref=v<version> --server-side`). Do a simple final test.
 
 === Announce the release
 

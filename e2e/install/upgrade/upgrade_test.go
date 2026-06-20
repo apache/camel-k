@@ -87,7 +87,7 @@ func TestUpgrade(t *testing.T) {
 		// kustomizeCmd := exec.Command(
 		// 	"kubectl",
 		// 	"kustomize",
-		// 	"github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v"+lastVersion,
+		// 	"github.com/apache/camel-k/install/overlays/all-namespaces?ref=v"+lastVersion,
 		// )
 		// output, err := kustomizeCmd.Output()
 		// g.Expect(err).To(BeNil())
