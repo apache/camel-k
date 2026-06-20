@@ -220,14 +220,19 @@ func TestBuilderTrait(t *testing.T) {
 
 		t.Run("Run distroless container image", func(t *testing.T) {
 			name := RandomizedSuffixName("java")
-			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "builder.base-image=gcr.io/distroless/java17-debian12").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java",
+				"--name", name,
+				"-t", "builder.base-image=gcr.io/distroless/java17-debian12",
+			).Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			integrationKitName := IntegrationKitName(t, ctx, ns, name)()
 			integrationKitNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
-			g.Eventually(KitRootImage(t, ctx, integrationKitNamespace, integrationKitName), TestTimeoutShort).Should(Equal("gcr.io/distroless/java17-debian12"))
+			g.Eventually(KitRootImage(t, ctx, integrationKitNamespace, integrationKitName), TestTimeoutShort).
+				Should(Equal("gcr.io/distroless/java17-debian12"))
 		})
 	})
 }

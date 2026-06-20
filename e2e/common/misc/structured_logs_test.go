@@ -41,7 +41,8 @@ func TestStructuredLogs(t *testing.T) {
 		name := RandomizedSuffixName("java")
 		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+			Should(Equal(corev1.ConditionTrue))
 
 		pod := OperatorPodGlobal(t, ctx)()
 		g.Expect(pod).NotTo(BeNil())
