@@ -173,6 +173,27 @@ func publishStrategy() v1.IntegrationPlatformBuildPublishStrategy {
 	return DefaultPublishStrategy
 }
 
+// TolerationTaintsAllowList returns the list of taint keys that are allowed to be used in
+// toleration.taints. When the list is empty (TOLERATION_TAINTS_ALLOWED_KEYS is unset or blank),
+// any key is permitted. When the list is non-empty only taints whose key is in the list are
+// accepted; others are dropped and an info message is logged by the trait.
+func TolerationTaintsAllowList() []string {
+	raw := GetEnvOrDefault("TOLERATION_TAINTS_ALLOWED_KEYS", "")
+	if raw == "" {
+		return nil
+	}
+	parts := strings.Split(raw, ",")
+	result := make([]string, 0, len(parts))
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p != "" {
+			result = append(result, p)
+		}
+	}
+
+	return result
+}
+
 // AffinityNodeLabelsAllowList returns the list of label keys that are allowed to be used in
 // affinity.nodeAffinityLabels. When the list is empty (AFFINITY_NODE_LABELS_ALLOWED_KEYS is
 // unset or blank), any key is permitted. When the list is non-empty only expressions whose
