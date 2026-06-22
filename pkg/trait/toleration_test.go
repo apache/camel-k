@@ -186,7 +186,9 @@ func TestApplyTolerationWithAllowList(t *testing.T) {
 	tolerationTrait.Taints = []string{"disktype:NoSchedule", "node-role.kubernetes.io/master:NoExecute"}
 
 	environment, deployment := createNominalDeploymentTraitTest()
-	err := tolerationTrait.Apply(environment)
+	_, _, err := tolerationTrait.Configure(environment)
+	require.NoError(t, err)
+	err = tolerationTrait.Apply(environment)
 
 	require.NoError(t, err)
 	tolerations := deployment.Spec.Template.Spec.Tolerations

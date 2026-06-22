@@ -56,11 +56,12 @@ func (t *tolerationTrait) Configure(e *Environment) (bool, *TraitCondition, erro
 		return false, nil, errors.New("no taint was provided")
 	}
 
+	t.filterTaints()
+
 	return e.IntegrationInRunningPhases(), nil, nil
 }
 
 func (t *tolerationTrait) Apply(e *Environment) error {
-	t.filterTaints()
 	tolerations, err := kubernetes.NewTolerations(t.Taints)
 	if err != nil {
 		return err
@@ -100,10 +101,9 @@ func (t *tolerationTrait) filterTaints() {
 
 // taintKey extracts the key from a taint string of the form Key[=Value]:Effect[:Seconds].
 func taintKey(taint string) string {
-	if k, _, found := strings.Cut(taint, "="); found {
-		return k
+	if parts := strings.SplitN(taint, "=", 2); len(parts) > 1 {
+		return parts[0]
 	}
-	k, _, _ := strings.Cut(taint, ":")
 
-	return k
+	return strings.SplitN(taint, ":", 2)[0]
 }
