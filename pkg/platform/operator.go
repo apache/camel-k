@@ -35,9 +35,14 @@ import (
 
 const (
 	OperatorWatchNamespaceEnvVariable = "WATCH_NAMESPACE"
-	operatorNamespaceEnvVariable      = "NAMESPACE"
-	operatorPodNameEnvVariable        = "POD_NAME"
-	OperatorBuildStrategyEnvVar       = "BUILD_STRATEGY"
+	// OperatorWatchNamespaceSelectorEnvVariable holds a Kubernetes label selector. When set, the
+	// operator dynamically discovers and watches every namespace whose labels match the selector,
+	// in addition to any namespaces listed in WATCH_NAMESPACE. It is the gate for the dynamic
+	// multi-namespace mode.
+	OperatorWatchNamespaceSelectorEnvVariable = "WATCH_NAMESPACE_SELECTOR"
+	operatorNamespaceEnvVariable              = "NAMESPACE"
+	operatorPodNameEnvVariable                = "POD_NAME"
+	OperatorBuildStrategyEnvVar               = "BUILD_STRATEGY"
 )
 
 const OperatorLockName = "camel-k-lock"
@@ -45,7 +50,17 @@ const OperatorLockName = "camel-k-lock"
 var OperatorImage string
 
 // IsCurrentOperatorGlobal returns true if the operator is configured to watch all namespaces.
+//
+// The operator is global only when it has no explicit scope at all: WATCH_NAMESPACE is empty/unset
+// AND no WATCH_NAMESPACE_SELECTOR is set. A non-empty WATCH_NAMESPACE (single or comma-separated
+// list) or a non-empty selector both put the operator in a (multi-)namespace-scoped, i.e. local, mode.
 func IsCurrentOperatorGlobal() bool {
+	if selector, envSet := os.LookupEnv(OperatorWatchNamespaceSelectorEnvVariable); envSet && strings.TrimSpace(selector) != "" {
+		log.Debug("Operator is local to namespaces matching a label selector")
+
+		return false
+	}
+
 	if watchNamespace, envSet := os.LookupEnv(OperatorWatchNamespaceEnvVariable); !envSet || strings.TrimSpace(watchNamespace) == "" {
 		log.Debug("Operator is global to all namespaces")
 
@@ -57,10 +72,46 @@ func IsCurrentOperatorGlobal() bool {
 	return false
 }
 
-// GetOperatorWatchNamespace returns the namespace the operator watches.
+// GetOperatorWatchNamespace returns the raw value of the WATCH_NAMESPACE environment variable.
+// It may be empty (global), a single namespace, or a comma-separated list of namespaces.
 func GetOperatorWatchNamespace() string {
 	if namespace, envSet := os.LookupEnv(OperatorWatchNamespaceEnvVariable); envSet {
 		return namespace
+	}
+
+	return ""
+}
+
+// GetWatchNamespaces returns the explicit, de-duplicated list of namespaces the operator is
+// statically configured to watch via WATCH_NAMESPACE. WATCH_NAMESPACE may contain a single
+// namespace or a comma-separated list; surrounding whitespace and empty entries are ignored.
+// An empty result means no namespace was statically configured (global mode, or selector-only
+// dynamic mode).
+func GetWatchNamespaces() []string {
+	raw := GetOperatorWatchNamespace()
+	if strings.TrimSpace(raw) == "" {
+		return nil
+	}
+
+	seen := make(map[string]bool)
+	namespaces := make([]string, 0)
+	for _, ns := range strings.Split(raw, ",") {
+		ns = strings.TrimSpace(ns)
+		if ns == "" || seen[ns] {
+			continue
+		}
+		seen[ns] = true
+		namespaces = append(namespaces, ns)
+	}
+
+	return namespaces
+}
+
+// GetWatchNamespaceSelector returns the trimmed WATCH_NAMESPACE_SELECTOR label selector used to
+// dynamically discover namespaces to watch. An empty result means dynamic discovery is disabled.
+func GetWatchNamespaceSelector() string {
+	if selector, envSet := os.LookupEnv(OperatorWatchNamespaceSelectorEnvVariable); envSet {
+		return strings.TrimSpace(selector)
 	}
 
 	return ""

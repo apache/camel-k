@@ -39,3 +39,12 @@ printf "{{- end }}\n" >> ./helm/camel-k/templates/rbacs-descoped.yaml
 sed -i -E "s/^([[:space:]]*)name: camel-k-(.*)$/\1name: {{ include \"camel-k.fullname\" . }}-\2/" ./helm/camel-k/templates/rbacs-common.yaml
 sed -i -E "s/^([[:space:]]*)name: camel-k-(.*)$/\1name: {{ include \"camel-k.fullname\" . }}-\2/" ./helm/camel-k/templates/rbacs-namespaced.yaml
 sed -i -E "s/^([[:space:]]*)name: camel-k-(.*)$/\1name: {{ include \"camel-k.fullname\" . }}-\2/" ./helm/camel-k/templates/rbacs-descoped.yaml
+
+# [Helm] Camel-K Operator sharding for the cluster-scoped registry-reader ClusterRole/ClusterRoleBinding.
+# Their kustomize source names (registry-reader, registry-reader-binding) are not prefixed "camel-k-", so
+# the generic rule above skips them and they would collide between operator shards. Prefix them with the
+# release fullname too. The $-anchors keep "registry-reader" from also matching "registry-reader-binding",
+# and rewriting "name: registry-reader" updates both the ClusterRole metadata.name and the binding's
+# roleRef.name consistently, so the binding keeps pointing at the renamed ClusterRole.
+sed -i -E "s/^([[:space:]]*)name: registry-reader-binding$/\1name: {{ include \"camel-k.fullname\" . }}-registry-reader-binding/" ./helm/camel-k/templates/rbacs-common.yaml
+sed -i -E "s/^([[:space:]]*)name: registry-reader$/\1name: {{ include \"camel-k.fullname\" . }}-registry-reader/" ./helm/camel-k/templates/rbacs-common.yaml

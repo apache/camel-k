@@ -1,0 +1,117 @@
+[[advanced-installation-multi-namespace]]
+= Watching multiple namespaces
+
+The Camel K operator traditionally runs in one of two modes: **global** (it watches every namespace
+through cluster-wide RBAC) or **single-namespace** (it watches only its own namespace). On a large
+multi-tenant cluster neither is ideal: global mode gives the operator cluster-wide access to every
+namespace's secrets and workloads, while single-namespace mode cannot cover many teams.
+
+The operator can instead watch an explicit, opt-in **set** of namespaces — either listed statically
+or discovered dynamically by a namespace label — while keeping its RBAC scoped to only those
+namespaces. This page describes both modes.
+
+NOTE: Multi-namespace mode is a form of the namespaced (non-global) operator: keep `global` set to
+`false`. It is fully backward compatible — leaving the new settings empty preserves the default
+single-namespace behavior.
+
+[[multi-namespace-static]]
+== Static list of namespaces
+
+Set `WATCH_NAMESPACE` to a comma-separated list of namespaces. The operator watches exactly those
+namespaces, plus its own (where the `IntegrationPlatform` and leader-election lease live).
+
+With Helm:
+
+[source,shell]
+----
+helm install camel-k ./helm/camel-k -n camel-k-system \
+  --set operator.global=false \
+  --set "operator.watchNamespaces={team-a,team-b}"
+----
+
+This mode needs **no** cluster-scoped RBAC. Install the namespaced operator RBAC into each watched
+namespace (see <<multi-namespace-rbac>>). Adding or removing a namespace from the list requires a
+`helm upgrade` (the operator restarts to pick up the new list).
+
+[[multi-namespace-dynamic]]
+== Dynamic discovery by label
+
+Set `WATCH_NAMESPACE_SELECTOR` to a Kubernetes label selector. The operator discovers every
+namespace whose labels match, watches them (in addition to anything listed in `WATCH_NAMESPACE`),
+and **restarts itself automatically** whenever that set changes — for example when a namespace gains
+or loses the label, or is deleted.
+
+[source,shell]
+----
+helm install camel-k ./helm/camel-k -n camel-k-system \
+  --set operator.global=false \
+  --set operator.watchNamespaceSelector="camel-k-enabled=true"
+----
+
+To onboard a team namespace, **install the RBAC first, then label it** (the label is the signal that
+the namespace is ready):
+
+[source,shell]
+----
+# 1. Install the namespaced operator RBAC, bound to the operator's ServiceAccount.
+./script/install_namespace_rbac.sh team-a camel-k-system
+
+# 2. Label the namespace so the operator starts watching it.
+kubectl label namespace team-a camel-k-enabled=true
+----
+
+Removing the label (or deleting the namespace) makes the operator stop watching it. Integrations
+already running in a namespace whose label was removed keep running; the operator simply stops
+managing them until the label is restored.
+
+=== How dynamic discovery works (and its limits)
+
+controller-runtime does not allow adding or removing namespaces from a running cache. To get a
+dynamic set, the operator watches `Namespace` objects matching the selector and, when the effective
+set changes, **gracefully restarts** (it releases the leader lease, exits, and Kubernetes restarts
+it), recomputing the watched set at startup. Reconciliation is level-based, so the brief restart
+loses no work.
+
+* The restart is automatic; you do not need to do anything beyond labelling the namespace.
+* A short re-evaluation runs periodically as a safety net, so installing the RBAC *after* labelling
+  still self-heals without re-labelling.
+* If a namespace is labelled but lacks the operator RBAC, it is skipped with a warning instead of
+  blocking the operator.
+
+[[multi-namespace-security]]
+== Security model
+
+Dynamic discovery requires the operator to read namespace metadata cluster-wide. This is the **only**
+cluster-scoped permission it gets: a `ClusterRole` granting `get`, `list`, `watch` on `namespaces`
+and nothing else. Namespace objects contain no secrets, so this does not expose any tenant data.
+
+All access to Integrations, Pods, Deployments, secrets, etc. remains **namespaced**: it is granted
+only by the `Role`/`RoleBinding` you install in each watched namespace. A secret read in any
+namespace where you have not installed that RBAC is denied. Removing a namespace's RBaC (or never
+adding it) means the operator simply cannot act there.
+
+The static-list mode needs no cluster-scoped permission at all.
+
+[[multi-namespace-rbac]]
+== Installing the per-namespace RBAC
+
+The operator needs the namespaced operator `Role` and a `RoleBinding` (bound to the operator's
+ServiceAccount in the operator namespace) in every watched namespace. The helper script renders the
+canonical namespaced RBAC and applies it to a target namespace:
+
+[source,shell]
+----
+./script/install_namespace_rbac.sh <watched-namespace> [operator-namespace] [operator-sa]
+# e.g.
+./script/install_namespace_rbac.sh team-a camel-k-system camel-k-operator
+----
+
+For the dynamic-discovery cluster role (granting read-only access to namespace metadata), the Helm
+chart renders it automatically when `operator.watchNamespaceSelector` is set. For a Kustomize-based
+install, apply `pkg/resources/config/rbac/namespace-watcher` and bind it to your operator
+ServiceAccount.
+
+NOTE: The operator never creates RBAC in other namespaces itself — doing so would require it to hold
+cluster-wide rights to manage roles and bindings, which is exactly the cross-namespace escalation the
+project threat model guards against. Installing the per-namespace RBAC is a deliberate, opt-in
+administrative action.

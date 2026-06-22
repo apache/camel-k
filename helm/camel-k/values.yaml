@@ -25,6 +25,23 @@ fullnameOverride: ""
 operator:
   image: docker.io/apache/camel-k:2.11.0-SNAPSHOT
   global: "false"
+  # watchNamespaces lets a non-global ("global: false") operator watch an explicit set of
+  # namespaces instead of just its own. List the namespaces here, e.g.:
+  #   watchNamespaces:
+  #     - team-a
+  #     - team-b
+  # The operator always also watches its own (release) namespace. Each listed namespace must have
+  # the namespaced operator RBAC installed in it (see the multi-namespace installation docs).
+  # Leave empty for the default single-namespace behavior. Ignored when global is "true".
+  watchNamespaces: []
+  # watchNamespaceSelector enables dynamic, label-based namespace discovery for a non-global
+  # operator. When set (e.g. "camel-k-enabled=true"), the operator watches every namespace whose
+  # labels match the selector and restarts itself whenever that set changes. This renders a
+  # minimal cluster-scoped ClusterRole granting read-only access to namespace metadata only
+  # (get/list/watch on namespaces) bound to the operator ServiceAccount — no cluster-wide access
+  # to secrets or workloads. Each matched namespace must have the namespaced operator RBAC
+  # installed in it. Leave empty to disable dynamic discovery. Ignored when global is "true".
+  watchNamespaceSelector: ""
   resources: {}
   securityContext: {}
   tolerations: []

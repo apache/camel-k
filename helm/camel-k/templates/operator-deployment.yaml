@@ -52,13 +52,21 @@ spec:
             - operator
           env:
             - name: WATCH_NAMESPACE
-              {{- if eq .Values.operator.global "false" }}
+              {{- if eq .Values.operator.global "true" }}
+              value: ""
+              {{- else if .Values.operator.watchNamespaces }}
+              value: {{ join "," .Values.operator.watchNamespaces | quote }}
+              {{- else if .Values.operator.watchNamespaceSelector }}
+              value: ""
+              {{- else }}
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-              {{- else }}
-              value: ""
               {{- end }}
+            {{- if and (eq .Values.operator.global "false") .Values.operator.watchNamespaceSelector }}
+            - name: WATCH_NAMESPACE_SELECTOR
+              value: {{ .Values.operator.watchNamespaceSelector | quote }}
+            {{- end }}
             - name: LOG_LEVEL
               value: {{ .Values.operator.logLevel }}
             - name: OPERATOR_NAME

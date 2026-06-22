@@ -120,7 +120,7 @@ kind: ClusterRole
 metadata:
   labels:
     app: camel-k
-  name: registry-reader
+  name: {{ include "camel-k.fullname" . }}-registry-reader
 rules:
 - apiGroups:
   - ""
@@ -179,11 +179,11 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     app: camel-k
-  name: registry-reader-binding
+  name: {{ include "camel-k.fullname" . }}-registry-reader-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: registry-reader
+  name: {{ include "camel-k.fullname" . }}-registry-reader
 subjects:
 - kind: ServiceAccount
   name: {{ include "camel-k.fullname" . }}-operator

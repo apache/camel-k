@@ -15,6 +15,8 @@ You can install one or more Camel K operators (which must share CRDs). In such c
 
 Camel K operator can work in **global** (descoped) mode by watching all namespaces or **namespaced** (scoped). This behavior is controlled by the WATCH_NAMESPACE environment variable. If set to an empty value, then the operator will watch for resources in all namespaces. If it set to a given namespace, then it will only watch for resources in such a namespace.
 
+`WATCH_NAMESPACE` also accepts a **comma-separated list** of namespaces (e.g. `team-a,team-b`), in which case the operator watches exactly those namespaces (plus its own). For a multi-tenant cluster where the set of namespaces changes over time, the operator can instead **discover namespaces dynamically by label** through the `WATCH_NAMESPACE_SELECTOR` environment variable. Both modes keep the operator's RBAC scoped to the watched namespaces instead of granting cluster-wide access. See xref:installation/advanced/multi-namespace.adoc[Watching multiple namespaces] for the full setup.
+
 == Resource management
 
 We provide certain configuration to better "operationalize" the Camel K Operator. More detailed information on the xref:installation/advanced/resources.adoc[resource management] page.
@@ -43,7 +45,11 @@ The following environment variables can be configured on the operator Deployment
 
 |`WATCH_NAMESPACE`
 |_empty_
-|The namespace(s) the operator watches for Integration resources. When not set or empty, the operator watches all namespaces.
+|The namespace(s) the operator watches for Integration resources. When not set or empty, the operator watches all namespaces (global mode). A single namespace or a comma-separated list (e.g. `team-a,team-b`) scopes the operator to those namespaces (plus its own). See xref:installation/advanced/multi-namespace.adoc[Watching multiple namespaces].
+
+|`WATCH_NAMESPACE_SELECTOR`
+|_empty_
+|A Kubernetes label selector (e.g. `camel-k-enabled=true`). When set, the operator dynamically discovers and watches every namespace whose labels match, in addition to those listed in `WATCH_NAMESPACE`, and restarts itself when that set changes. Requires read-only access to namespace metadata. See xref:installation/advanced/multi-namespace.adoc[Watching multiple namespaces].
 
 |`NAMESPACE`
 |_auto-detected_

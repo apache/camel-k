@@ -14,6 +14,7 @@
 *** xref:installation/advanced/jdk-version.adoc[JDK version]
 *** xref:installation/advanced/platform-architecture.adoc[Platform architecture]
 *** xref:installation/advanced/resources.adoc[Resource management]
+*** xref:installation/advanced/multi-namespace.adoc[Watching multiple namespaces]
 *** xref:installation/advanced/multi.adoc[Multiple Operators]
 *** xref:installation/advanced/http-proxy.adoc[HTTP Proxy]
 *** xref:installation/advanced/offline.adoc[Offline]

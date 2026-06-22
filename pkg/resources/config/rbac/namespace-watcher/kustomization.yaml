@@ -1,0 +1,5 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- operator-cluster-role-namespace-watcher.yaml
+- operator-cluster-role-binding-namespace-watcher.yaml

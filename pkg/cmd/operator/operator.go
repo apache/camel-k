@@ -129,10 +129,28 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 
 	printVersion()
 
-	watchNamespace, err := getWatchNamespace()
-	exitOnError(err, "failed to get watch namespace")
+	// WATCH_NAMESPACE must be present (it may be empty, which selects global mode).
+	if _, err := getWatchNamespace(); err != nil {
+		exitOnError(err, "failed to get watch namespace")
+	}
+	// watchNamespaces is the explicit list configured via WATCH_NAMESPACE (single or comma-separated).
+	watchNamespaces := platform.GetWatchNamespaces()
+
+	// watchSelector, when set, enables dynamic discovery of namespaces to watch by label.
+	var watchSelector labels.Selector
+	if selectorStr := platform.GetWatchNamespaceSelector(); selectorStr != "" {
+		parsed, err := labels.Parse(selectorStr)
+		exitOnError(err, "invalid "+platform.OperatorWatchNamespaceSelectorEnvVariable)
+		watchSelector = parsed
+	}
 
 	ctx := signals.SetupSignalHandler()
+	// managerCtx lets the operator gracefully restart itself (recomputing its watched namespaces
+	// at startup) when the set of dynamically discovered namespaces changes. Cancelling it stops
+	// the manager cleanly without terminating the process abnormally; the process then exits 0 and
+	// is restarted by Kubernetes.
+	managerCtx, restartOperator := context.WithCancel(ctx)
+	defer restartOperator()
 
 	cfg, err := config.GetConfig()
 	exitOnError(err, "cannot get client config")
@@ -146,10 +164,12 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 
 	operatorNamespace := platform.GetOperatorNamespace()
 	if operatorNamespace == "" {
-		// Fallback to using the watch namespace when the operator is not in-cluster.
+		// Fallback to using a watched namespace when the operator is not in-cluster.
 		// It does not support local (off-cluster) operator watching resources globally,
 		// in which case it's not possible to determine a namespace.
-		operatorNamespace = watchNamespace
+		if len(watchNamespaces) > 0 {
+			operatorNamespace = watchNamespaces[0]
+		}
 		if operatorNamespace == "" {
 			leaderElection = false
 			log.Info("unable to determine namespace for leader election")
@@ -164,6 +184,17 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 		log.Info("Leader election is disabled!")
 	}
 
+	// Determine the set of namespaces to watch. In global mode this stays nil (watch everything);
+	// otherwise it is the operator namespace plus any statically configured (WATCH_NAMESPACE)
+	// and/or dynamically discovered (WATCH_NAMESPACE_SELECTOR) namespaces the operator can access.
+	var watchedNamespaces map[string]bool
+	if !platform.IsCurrentOperatorGlobal() {
+		watchedNamespaces, err = computeWatchedNamespaces(ctx, bootstrapClient, cfg, bootstrapClient.GetScheme(),
+			operatorNamespace, watchNamespaces, watchSelector)
+		exitOnError(err, "cannot determine the namespaces to watch")
+		log.Info("Operator is watching a defined set of namespaces", "namespaces", sortedKeys(watchedNamespaces))
+	}
+
 	hasIntegrationLabel, err := labels.NewRequirement(v1.IntegrationLabel, selection.Exists, []string{})
 	exitOnError(err, "cannot create Integration label selector")
 	labelsSelector := labels.NewSelector().Add(*hasIntegrationLabel)
@@ -173,10 +204,7 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	}
 
 	if !platform.IsCurrentOperatorGlobal() {
-		selector = cache.ByObject{
-			Label:      labelsSelector,
-			Namespaces: getNamespacesSelector(operatorNamespace, watchNamespace),
-		}
+		selector.Namespaces = toCacheNamespaces(watchedNamespaces)
 	}
 
 	selectors := map[ctrl.Object]cache.ByObject{
@@ -198,7 +226,7 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	}
 
 	if !platform.IsCurrentOperatorGlobal() {
-		options.DefaultNamespaces = getNamespacesSelector(operatorNamespace, watchNamespace)
+		options.DefaultNamespaces = toCacheNamespaces(watchedNamespaces)
 	}
 
 	mgr, err := manager.New(cfg, manager.Options{
@@ -220,10 +248,26 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	exitOnError(err, "")
 	exitOnError(controller.AddToManager(ctx, mgr, ctrlClient), "")
 
+	// When dynamic namespace discovery is enabled, watch Namespace objects matching the selector
+	// and gracefully restart the operator whenever the watchable namespace set changes.
+	if watchSelector != nil {
+		exitOnError(mgr.Add(&namespaceWatcher{
+			config:            cfg,
+			scheme:            mgr.GetScheme(),
+			reviewer:          bootstrapClient,
+			selector:          watchSelector,
+			operatorNamespace: operatorNamespace,
+			staticNamespaces:  watchNamespaces,
+			current:           watchedNamespaces,
+			requestRestart:    restartOperator,
+		}), "cannot add the dynamic namespace watcher")
+		log.Info("Dynamic namespace discovery is enabled", "selector", watchSelector.String())
+	}
+
 	log.Info("Installing operator resources")
 	installCtx, installCancel := context.WithTimeout(ctx, 1*time.Minute)
 	defer installCancel()
-	install.OperatorStartupOptionalTools(installCtx, bootstrapClient, watchNamespace, operatorNamespace, log)
+	install.OperatorStartupOptionalTools(installCtx, bootstrapClient, platform.GetOperatorWatchNamespace(), operatorNamespace, log)
 
 	synthEnvVal, synth := os.LookupEnv("CAMEL_K_SYNTHETIC_INTEGRATIONS")
 	if synth && synthEnvVal == "true" {
@@ -232,15 +276,18 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 		exitOnError(synthetic.ManageSyntheticIntegrations(ctx, ctrlClient, mgr.GetCache()), "synthetic Integration manager error")
 	}
 	log.Info("Starting the manager")
-	exitOnError(mgr.Start(ctx), "manager exited non-zero")
+	// managerCtx is cancelled either by a process signal (graceful shutdown) or by the namespace
+	// watcher requesting a restart. In both cases Start returns nil and the process exits 0; on a
+	// restart request Kubernetes brings the operator back up and it recomputes its watched set.
+	exitOnError(mgr.Start(managerCtx), "manager exited non-zero")
 }
 
-func getNamespacesSelector(operatorNamespace string, watchNamespace string) map[string]cache.Config {
-	namespacesSelector := map[string]cache.Config{
-		operatorNamespace: {},
-	}
-	if operatorNamespace != watchNamespace {
-		namespacesSelector[watchNamespace] = cache.Config{}
+// toCacheNamespaces converts a set of namespace names into the per-namespace cache configuration
+// expected by controller-runtime. An empty/nil input yields an empty map.
+func toCacheNamespaces(namespaces map[string]bool) map[string]cache.Config {
+	namespacesSelector := make(map[string]cache.Config, len(namespaces))
+	for ns := range namespaces {
+		namespacesSelector[ns] = cache.Config{}
 	}
 
 	return namespacesSelector
