@@ -1960,7 +1960,6 @@ func WithNewTestNamespace(t *testing.T, doRun func(context.Context, *gomega.With
 func WithNamedTestNamespace(t *testing.T, doRun func(context.Context, *gomega.WithT, string), namespace string) {
 	ns := NewNamedTestNamespace(t, testContext, namespace, false)
 	defer deleteTestNamespace(t, testContext, ns)
-	defer userCleanup(t)
 
 	invokeUserTestCode(t, testContext, ns.GetName(), doRun)
 }
