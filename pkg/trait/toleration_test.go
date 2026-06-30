@@ -131,6 +131,71 @@ func TestTolerationValidTaints(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func TestFilterTaints_NoAllowList(t *testing.T) {
+	trait := createNominalTolerationTrait()
+	trait.Taints = []string{"disktype:NoSchedule", "node-role.kubernetes.io/master:NoExecute"}
+
+	trait.filterTaints()
+	assert.Len(t, trait.Taints, 2)
+}
+
+func TestFilterTaints_AllowListFilters(t *testing.T) {
+	t.Setenv("TOLERATION_TAINTS_ALLOWED_KEYS", "disktype")
+
+	trait := createNominalTolerationTrait()
+	trait.Taints = []string{"disktype:NoSchedule", "node-role.kubernetes.io/master:NoExecute"}
+
+	trait.filterTaints()
+	assert.Equal(t, []string{"disktype:NoSchedule"}, trait.Taints)
+}
+
+func TestFilterTaints_AllAllowed(t *testing.T) {
+	t.Setenv("TOLERATION_TAINTS_ALLOWED_KEYS", "disktype,node-role.kubernetes.io/master")
+
+	trait := createNominalTolerationTrait()
+	trait.Taints = []string{"disktype:NoSchedule", "node-role.kubernetes.io/master:NoExecute"}
+
+	trait.filterTaints()
+	assert.Len(t, trait.Taints, 2)
+}
+
+func TestFilterTaints_AllDropped(t *testing.T) {
+	t.Setenv("TOLERATION_TAINTS_ALLOWED_KEYS", "disktype")
+
+	trait := createNominalTolerationTrait()
+	trait.Taints = []string{"node-role.kubernetes.io/master:NoExecute"}
+
+	trait.filterTaints()
+	assert.Empty(t, trait.Taints)
+}
+
+func TestFilterTaints_KeyWithValue(t *testing.T) {
+	t.Setenv("TOLERATION_TAINTS_ALLOWED_KEYS", "my-toleration")
+
+	trait := createNominalTolerationTrait()
+	trait.Taints = []string{"my-toleration=my-value:NoExecute", "other=val:NoSchedule"}
+
+	trait.filterTaints()
+	assert.Equal(t, []string{"my-toleration=my-value:NoExecute"}, trait.Taints)
+}
+
+func TestApplyTolerationWithAllowList(t *testing.T) {
+	t.Setenv("TOLERATION_TAINTS_ALLOWED_KEYS", "disktype")
+
+	tolerationTrait := createNominalTolerationTrait()
+	tolerationTrait.Taints = []string{"disktype:NoSchedule", "node-role.kubernetes.io/master:NoExecute"}
+
+	environment, deployment := createNominalDeploymentTraitTest()
+	_, _, err := tolerationTrait.Configure(environment)
+	require.NoError(t, err)
+	err = tolerationTrait.Apply(environment)
+
+	require.NoError(t, err)
+	tolerations := deployment.Spec.Template.Spec.Tolerations
+	assert.Len(t, tolerations, 1)
+	assert.Equal(t, "disktype", tolerations[0].Key)
+}
+
 func createNominalTolerationTrait() *tolerationTrait {
 	tolerationTrait, _ := newTolerationTrait().(*tolerationTrait)
 	tolerationTrait.Enabled = ptr.To(true)

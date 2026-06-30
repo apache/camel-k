@@ -47,6 +47,10 @@ Here a quick resume of the parameters you can configure as environment variables
 | Maximum number of builds that can run concurrently.
 | `3` if build strategy is `routine`, `10` if `pod`
 
+| TOLERATION_TAINTS_ALLOWED_KEYS
+| Comma-separated list of taint keys that CR authors are permitted to use in `toleration.taints`. When unset or empty all keys are accepted. Taints whose key is not in the list are dropped and an info message is logged. Example: `node-role.kubernetes.io/master,disktype`.
+|
+
 | AFFINITY_NODE_LABELS_ALLOWED_KEYS
 | Comma-separated list of label keys that CR authors are permitted to use in `affinity.nodeAffinityLabels`. When unset or empty all keys are accepted. Expressions whose key is not in the list are dropped and an info message is logged. Example: `kubernetes.io/hostname,topology.kubernetes.io/zone`.
 |

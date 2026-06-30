@@ -168,6 +168,32 @@ func TestBuilderNodeSelectorAllowList_MultipleKeys(t *testing.T) {
 	assert.Equal(t, []string{"kubernetes.io/hostname", "node-role.kubernetes.io/worker", "topology.kubernetes.io/zone"}, allowList)
 }
 
+func TestTolerationTaintsAllowList_NotSet(t *testing.T) {
+	allowList := TolerationTaintsAllowList()
+	assert.Nil(t, allowList)
+}
+
+func TestTolerationTaintsAllowList_Empty(t *testing.T) {
+	t.Setenv("TOLERATION_TAINTS_ALLOWED_KEYS", "")
+
+	allowList := TolerationTaintsAllowList()
+	assert.Empty(t, allowList)
+}
+
+func TestTolerationTaintsAllowList_SingleKey(t *testing.T) {
+	t.Setenv("TOLERATION_TAINTS_ALLOWED_KEYS", "node-role.kubernetes.io/master")
+
+	allowList := TolerationTaintsAllowList()
+	assert.Equal(t, []string{"node-role.kubernetes.io/master"}, allowList)
+}
+
+func TestTolerationTaintsAllowList_MultipleKeys(t *testing.T) {
+	t.Setenv("TOLERATION_TAINTS_ALLOWED_KEYS", "node-role.kubernetes.io/master, disktype ")
+
+	allowList := TolerationTaintsAllowList()
+	assert.Equal(t, []string{"node-role.kubernetes.io/master", "disktype"}, allowList)
+}
+
 func TestAffinityNodeLabelsAllowList_NotSet(t *testing.T) {
 	allowList := AffinityNodeLabelsAllowList()
 	assert.Nil(t, allowList)

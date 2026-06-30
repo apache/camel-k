@@ -20,11 +20,14 @@ package trait
 import (
 	"errors"
 	"fmt"
+	"slices"
+	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/ptr"
 
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
@@ -53,6 +56,8 @@ func (t *tolerationTrait) Configure(e *Environment) (bool, *TraitCondition, erro
 		return false, nil, errors.New("no taint was provided")
 	}
 
+	t.filterTaints()
+
 	return e.IntegrationInRunningPhases(), nil, nil
 }
 
@@ -72,4 +77,33 @@ func (t *tolerationTrait) Apply(e *Environment) error {
 	podSpec.Tolerations = append(podSpec.Tolerations, tolerations...)
 
 	return nil
+}
+
+// filterTaints removes taint entries whose key is not in the operator-configured allow list.
+// When TOLERATION_TAINTS_ALLOWED_KEYS is unset or empty all taints are kept.
+func (t *tolerationTrait) filterTaints() {
+	allowList := platform.TolerationTaintsAllowList()
+	if len(allowList) == 0 || len(t.Taints) == 0 {
+		return
+	}
+	kept := make([]string, 0, len(t.Taints))
+	for _, taint := range t.Taints {
+		key := taintKey(taint)
+		if slices.Contains(allowList, key) {
+			kept = append(kept, taint)
+		} else {
+			t.L.Info("toleration.taints key is not in the allowed list and will be ignored",
+				"key", key, "allowedKeys", allowList)
+		}
+	}
+	t.Taints = kept
+}
+
+// taintKey extracts the key from a taint string of the form Key[=Value]:Effect[:Seconds].
+func taintKey(taint string) string {
+	if parts := strings.SplitN(taint, "=", 2); len(parts) > 1 {
+		return parts[0]
+	}
+
+	return strings.SplitN(taint, ":", 2)[0]
 }
