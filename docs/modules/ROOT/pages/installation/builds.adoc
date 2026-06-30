@@ -74,11 +74,11 @@ Beside the values above, you can also configure specifically Maven using the fol
 | Name | Description | Default
 
 | MAVEN_SETTINGS
-| Configmap or Secret Maven `settings.xml` configuration used to define repositories, mirrors, and credentials. Format expected `configmap|secret:my-resource`.
+| Configmap or Secret Maven `settings.xml` configuration used to define repositories, mirrors, and credentials. Format expected `configmap\|secret:my-resource`.
 |
 
 | MAVEN_SETTINGS_SECURITY
-| Configmap or Secret Maven `settings-security.xml` configuration used for decrypting encrypted credentials in `settings.xml`. Format expected `configmap|secret:my-resource`.
+| Configmap or Secret Maven `settings-security.xml` configuration used for decrypting encrypted credentials in `settings.xml`. Format expected `configmap\|secret:my-resource`.
 |
 
 | MAVEN_CA_SECRETS
