@@ -21,6 +21,8 @@ import (
 	"github.com/apache/camel-k/v2/cmd/util/doc-gen/generators"
 	"github.com/spf13/pflag"
 	"k8s.io/gengo/args"
+	"os"
+
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
@@ -44,6 +46,7 @@ func main() {
 		generators.DefaultNameSystem(),
 		generators.Packages,
 	); err != nil {
-		panic(err)
+		log.Log.Error(err, "failed to execute doc generator")
+		os.Exit(1)
 	}
 }
