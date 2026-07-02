@@ -2,11 +2,11 @@ apiVersion: v1
 entries:
   camel-k:
   - apiVersion: v2
-    appVersion: 2.8.1
-    created: "2026-05-14T11:38:20.408251825+02:00"
+    appVersion: 2.11.0-nightly
+    created: "2026-07-02T01:19:30.380754571Z"
     description: A lightweight integration platform, born on Kubernetes, with serverless
       superpowers
-    digest: 57453733a82f6128be9aeb4c57ebb76d70d9b76613a513b8b00be8453e7c81f2
+    digest: dd5ca6717adc3079653562828cce855962cedc34131b2e58c046f59803a1d7f6
     home: https://camel.apache.org/camel-k/latest/
     icon: https://github.com/apache/camel/raw/main/docs/img/logo64-d.png
     keywords:
@@ -28,37 +28,8 @@ entries:
     - https://github.com/apache/camel
     type: application
     urls:
-    - https://apache.github.io/camel-k/charts/camel-k-2.8.1.tgz
-    version: 2.8.1
-  - apiVersion: v2
-    appVersion: 2.9.2
-    created: "2026-05-14T12:33:35.541144395+02:00"
-    description: A lightweight integration platform, born on Kubernetes, with serverless
-      superpowers
-    digest: ae61a31a9edf7048ba170a45cb679449f9d94d9ba01a015a5364c94a6111a00d
-    home: https://camel.apache.org/camel-k/latest/
-    icon: https://github.com/apache/camel/raw/main/docs/img/logo64-d.png
-    keywords:
-    - serverless
-    - integration
-    - patterns
-    maintainers:
-    - email: pcongiusti@apache.org
-      name: pcongiusti
-    - email: acosentino@apache.org
-      name: acosentino
-    - email: gaelle.fournier.work@gmail.com
-      name: gansheer
-    name: camel-k
-    sources:
-    - https://github.com/apache/camel-k
-    - https://github.com/apache/camel-k-runtime
-    - https://github.com/apache/camel-quarkus
-    - https://github.com/apache/camel
-    type: application
-    urls:
-    - https://apache.github.io/camel-k/charts/camel-k-2.9.2.tgz
-    version: 2.9.2
+    - https://apache.github.io/camel-k/charts/camel-k-2.11.0-nightly.tgz
+    version: 2.11.0-nightly
   - apiVersion: v2
     appVersion: 2.10.1
     created: "2026-05-14T11:08:43.885115158+02:00"
@@ -118,6 +89,35 @@ entries:
     - https://apache.github.io/camel-k/charts/camel-k-2.10.0.tgz
     version: 2.10.0
   - apiVersion: v2
+    appVersion: 2.9.2
+    created: "2026-05-14T12:33:35.541144395+02:00"
+    description: A lightweight integration platform, born on Kubernetes, with serverless
+      superpowers
+    digest: ae61a31a9edf7048ba170a45cb679449f9d94d9ba01a015a5364c94a6111a00d
+    home: https://camel.apache.org/camel-k/latest/
+    icon: https://github.com/apache/camel/raw/main/docs/img/logo64-d.png
+    keywords:
+    - serverless
+    - integration
+    - patterns
+    maintainers:
+    - email: pcongiusti@apache.org
+      name: pcongiusti
+    - email: acosentino@apache.org
+      name: acosentino
+    - email: gaelle.fournier.work@gmail.com
+      name: gansheer
+    name: camel-k
+    sources:
+    - https://github.com/apache/camel-k
+    - https://github.com/apache/camel-k-runtime
+    - https://github.com/apache/camel-quarkus
+    - https://github.com/apache/camel
+    type: application
+    urls:
+    - https://apache.github.io/camel-k/charts/camel-k-2.9.2.tgz
+    version: 2.9.2
+  - apiVersion: v2
     appVersion: 2.9.1
     created: "2026-02-10T15:47:25.313755334+01:00"
     description: A lightweight integration platform, born on Kubernetes, with serverless
@@ -171,6 +171,35 @@ entries:
     urls:
     - https://apache.github.io/camel-k/charts/camel-k-2.9.0.tgz
     version: 2.9.0
+  - apiVersion: v2
+    appVersion: 2.8.1
+    created: "2026-05-14T11:38:20.408251825+02:00"
+    description: A lightweight integration platform, born on Kubernetes, with serverless
+      superpowers
+    digest: 57453733a82f6128be9aeb4c57ebb76d70d9b76613a513b8b00be8453e7c81f2
+    home: https://camel.apache.org/camel-k/latest/
+    icon: https://github.com/apache/camel/raw/main/docs/img/logo64-d.png
+    keywords:
+    - serverless
+    - integration
+    - patterns
+    maintainers:
+    - email: pcongiusti@apache.org
+      name: pcongiusti
+    - email: acosentino@apache.org
+      name: acosentino
+    - email: gaelle.fournier.work@gmail.com
+      name: gansheer
+    name: camel-k
+    sources:
+    - https://github.com/apache/camel-k
+    - https://github.com/apache/camel-k-runtime
+    - https://github.com/apache/camel-quarkus
+    - https://github.com/apache/camel
+    type: application
+    urls:
+    - https://apache.github.io/camel-k/charts/camel-k-2.8.1.tgz
+    version: 2.8.1
   - apiVersion: v2
     appVersion: 2.8.0
     created: "2025-09-16T16:50:36.273070322+02:00"
@@ -1342,4 +1371,4 @@ entries:
     urls:
     - https://apache.github.io/camel-k/charts/camel-k-0.1.0.tgz
     version: 0.1.0
-generated: "2026-05-14T11:08:43.872465432+02:00"
+generated: "2026-07-02T01:19:30.372602791Z"
