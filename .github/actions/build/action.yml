@@ -63,7 +63,7 @@ runs:
 
   - name: Checkout target branch code
     if: github.event_name == 'pull_request'
-    uses: actions/checkout@v4
+    uses: actions/checkout@v7
     with:
       persist-credentials: false
       submodules: recursive
