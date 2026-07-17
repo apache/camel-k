@@ -29,11 +29,17 @@ The following configuration options are available:
 
 | init-containers.initTasks
 | []string
-| A list of init tasks to be executed with format `<name>;<container-image>;<container-command>`.
+| A list of init tasks to be executed.
+Each task accepts the format `<name>;<container-image>;<container-command>` or key=value format
+`name=<name>;image=<image>;command=<command>;request-cpu=<quantity>;limit-cpu=<quantity>;request-memory=<quantity>;limit-memory=<quantity>`.
+Resource keys (request-cpu, limit-cpu, request-memory, limit-memory) are optional and accept Kubernetes resource quantities.
 
 | init-containers.sideCarTasks
 | []string
-| A list of sidecar tasks to be executed with format `<name>;<container-image>;<container-command>`.
+| A list of sidecar tasks to be executed.
+Each task accepts the format `<name>;<container-image>;<container-command>` or key=value format
+`name=<name>;image=<image>;command=<command>;request-cpu=<quantity>;limit-cpu=<quantity>;request-memory=<quantity>;limit-memory=<quantity>`.
+Resource keys (request-cpu, limit-cpu, request-memory, limit-memory) are optional and accept Kubernetes resource quantities.
 
 |===
 

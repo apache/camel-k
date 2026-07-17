@@ -29,6 +29,7 @@ import (
 
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/utils/ptr"
 )
 
@@ -38,11 +39,15 @@ const (
 )
 
 type containerTask struct {
-	name      string
-	image     string
-	command   string
-	isSidecar bool
-	env       []corev1.EnvVar
+	name          string
+	image         string
+	command       string
+	isSidecar     bool
+	requestCPU    string
+	requestMemory string
+	limitCPU      string
+	limitMemory   string
+	env           []corev1.EnvVar
 }
 
 type initContainersTrait struct {
@@ -183,6 +188,24 @@ func (t *initContainersTrait) configureContainers(containers *[]corev1.Container
 		if task.isSidecar {
 			initCont.RestartPolicy = ptr.To(corev1.ContainerRestartPolicyAlways)
 		}
+		if task.requestCPU != "" || task.requestMemory != "" || task.limitCPU != "" || task.limitMemory != "" {
+			initCont.Resources = corev1.ResourceRequirements{
+				Requests: corev1.ResourceList{},
+				Limits:   corev1.ResourceList{},
+			}
+			if task.requestCPU != "" {
+				initCont.Resources.Requests[corev1.ResourceCPU] = resource.MustParse(task.requestCPU)
+			}
+			if task.requestMemory != "" {
+				initCont.Resources.Requests[corev1.ResourceMemory] = resource.MustParse(task.requestMemory)
+			}
+			if task.limitCPU != "" {
+				initCont.Resources.Limits[corev1.ResourceCPU] = resource.MustParse(task.limitCPU)
+			}
+			if task.limitMemory != "" {
+				initCont.Resources.Limits[corev1.ResourceMemory] = resource.MustParse(task.limitMemory)
+			}
+		}
 		*containers = append(*containers, initCont)
 	}
 }
@@ -194,31 +217,90 @@ func (t *initContainersTrait) parseTasks() (bool, error) {
 	t.tasks = make([]containerTask, len(t.InitTasks)+len(t.SidecarTasks))
 	i := 0
 	for _, task := range t.InitTasks {
-		split := strings.SplitN(task, ";", 3)
-		if len(split) != 3 {
-			return false, fmt.Errorf(`could not parse init container task "%s": format expected "name;container-image;command"`, task)
+		parsed, err := parseSingleTask(task, false)
+		if err != nil {
+			return false, fmt.Errorf("could not parse init container task %q: %w", task, err)
 		}
-		t.tasks[i] = containerTask{
-			name:      split[0],
-			image:     split[1],
-			command:   split[2],
-			isSidecar: false,
-		}
+		t.tasks[i] = parsed
 		i++
 	}
 	for _, task := range t.SidecarTasks {
-		split := strings.SplitN(task, ";", 3)
-		if len(split) != 3 {
-			return false, fmt.Errorf(`could not parse sidecar container task "%s": format expected "name;container-image;command"`, task)
+		parsed, err := parseSingleTask(task, true)
+		if err != nil {
+			return false, fmt.Errorf("could not parse sidecar container task %q: %w", task, err)
 		}
-		t.tasks[i] = containerTask{
-			name:      split[0],
-			image:     split[1],
-			command:   split[2],
-			isSidecar: true,
-		}
+		t.tasks[i] = parsed
 		i++
 	}
 
 	return true, nil
+}
+
+func parseSingleTask(task string, isSidecar bool) (containerTask, error) {
+	segments := strings.Split(task, ";")
+
+	var result containerTask
+	result.isSidecar = isSidecar
+
+	var commandParts []string
+
+	for _, seg := range segments {
+		if len(strings.TrimSpace(seg)) == 0 {
+			continue
+		}
+		if strings.Contains(seg, "=") {
+			kv := strings.SplitN(seg, "=", 2)
+			key, value := strings.TrimSpace(kv[0]), strings.TrimSpace(kv[1])
+			switch key {
+			case "name":
+				result.name = value
+			case "image":
+				result.image = value
+			case "command":
+				commandParts = append(commandParts, value)
+			case "request-cpu":
+				if _, err := resource.ParseQuantity(value); err != nil {
+					return containerTask{}, fmt.Errorf("invalid request-cpu value %q: %w", value, err)
+				}
+				result.requestCPU = value
+			case "request-memory":
+				if _, err := resource.ParseQuantity(value); err != nil {
+					return containerTask{}, fmt.Errorf("invalid request-memory value %q: %w", value, err)
+				}
+				result.requestMemory = value
+			case "limit-cpu":
+				if _, err := resource.ParseQuantity(value); err != nil {
+					return containerTask{}, fmt.Errorf("invalid limit-cpu value %q: %w", value, err)
+				}
+				result.limitCPU = value
+			case "limit-memory":
+				if _, err := resource.ParseQuantity(value); err != nil {
+					return containerTask{}, fmt.Errorf("invalid limit-memory value %q: %w", value, err)
+				}
+				result.limitMemory = value
+			default:
+				// Forward compatibility: unknown keys are appended to command
+				commandParts = append(commandParts, seg)
+			}
+		} else {
+			// Positional segment: fill first unset field
+			if result.name == "" {
+				result.name = seg
+			} else if result.image == "" {
+				result.image = seg
+			} else {
+				commandParts = append(commandParts, seg)
+			}
+		}
+	}
+
+	if len(commandParts) > 0 {
+		result.command = strings.Join(commandParts, ";")
+	}
+
+	if result.name == "" || result.image == "" {
+		return containerTask{}, fmt.Errorf("name and image are required (format: %q)", "name;image;command or name=...;image=...")
+	}
+
+	return result, nil
 }
