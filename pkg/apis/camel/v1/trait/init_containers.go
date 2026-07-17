@@ -25,8 +25,14 @@ package trait
 type InitContainersTrait struct {
 	Trait `json:",inline" property:",squash"`
 
-	// A list of init tasks to be executed with format `<name>;<container-image>;<container-command>`.
+	// A list of init tasks to be executed.
+	// Each task accepts the format `<name>;<container-image>;<container-command>` or key=value format
+	// `name=<name>;image=<image>;command=<command>;request-cpu=<quantity>;limit-cpu=<quantity>;request-memory=<quantity>;limit-memory=<quantity>`.
+	// Resource keys (request-cpu, limit-cpu, request-memory, limit-memory) are optional and accept Kubernetes resource quantities.
 	InitTasks []string `json:"initTasks,omitempty" property:"init-tasks"`
-	// A list of sidecar tasks to be executed with format `<name>;<container-image>;<container-command>`.
+	// A list of sidecar tasks to be executed.
+	// Each task accepts the format `<name>;<container-image>;<container-command>` or key=value format
+	// `name=<name>;image=<image>;command=<command>;request-cpu=<quantity>;limit-cpu=<quantity>;request-memory=<quantity>;limit-memory=<quantity>`.
+	// Resource keys (request-cpu, limit-cpu, request-memory, limit-memory) are optional and accept Kubernetes resource quantities.
 	SidecarTasks []string `json:"sideCarTasks,omitempty" property:"sidecar-tasks"`
 }
