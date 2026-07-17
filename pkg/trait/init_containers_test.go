@@ -31,6 +31,7 @@ import (
 	"github.com/stretchr/testify/require"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 )
@@ -66,7 +67,7 @@ func TestParseInitContainerShouldFail(t *testing.T) {
 	assert.False(t, configured, "Should not be configured, there's an error")
 	assert.Nil(t, condition)
 	assert.NotNil(t, err)
-	assert.Equal(t, `could not parse init container task "not a valid format": format expected "name;container-image;command"`, err.Error())
+	assert.Contains(t, err.Error(), `could not parse init container task "not a valid format"`)
 }
 
 func TestParseInitContainerOK(t *testing.T) {
@@ -608,4 +609,200 @@ func TestApplyInitContainerWithBaseTruststore(t *testing.T) {
 	assert.Contains(t, commandStr, "-storepass:file /etc/camel/conf.d/_secrets/base-truststore-pass/password")
 	assert.Contains(t, commandStr, "/etc/camel/conf.d/_secrets/my-ca/ca.crt")
 	assert.Contains(t, commandStr, "&&")
+}
+
+func TestParseInitContainerWithResources(t *testing.T) {
+	trait := &initContainersTrait{
+		InitContainersTrait: trait.InitContainersTrait{
+			InitTasks: []string{
+				"name=myinit;image=myimg;command=mycmd;request-cpu=100m;limit-cpu=200m;request-memory=128Mi;limit-memory=256Mi",
+			},
+		},
+	}
+
+	configured, err := trait.parseTasks()
+	assert.True(t, configured)
+	require.Nil(t, err)
+	require.Len(t, trait.tasks, 1)
+
+	task := trait.tasks[0]
+	assert.Equal(t, "myinit", task.name)
+	assert.Equal(t, "myimg", task.image)
+	assert.Equal(t, "mycmd", task.command)
+	assert.False(t, task.isSidecar)
+	assert.Equal(t, "100m", task.requestCPU)
+	assert.Equal(t, "200m", task.limitCPU)
+	assert.Equal(t, "128Mi", task.requestMemory)
+	assert.Equal(t, "256Mi", task.limitMemory)
+}
+
+func TestParseSidecarContainerWithResources(t *testing.T) {
+	trait := &initContainersTrait{
+		InitContainersTrait: trait.InitContainersTrait{
+			SidecarTasks: []string{
+				"name=logger;image=fluentd;command=start;request-cpu=250m;limit-cpu=500m;request-memory=64Mi;limit-memory=128Mi",
+			},
+		},
+	}
+
+	configured, err := trait.parseTasks()
+	assert.True(t, configured)
+	require.Nil(t, err)
+	require.Len(t, trait.tasks, 1)
+
+	task := trait.tasks[0]
+	assert.Equal(t, "logger", task.name)
+	assert.Equal(t, "fluentd", task.image)
+	assert.Equal(t, "start", task.command)
+	assert.True(t, task.isSidecar)
+	assert.Equal(t, "250m", task.requestCPU)
+	assert.Equal(t, "500m", task.limitCPU)
+	assert.Equal(t, "64Mi", task.requestMemory)
+	assert.Equal(t, "128Mi", task.limitMemory)
+}
+
+func TestParseInitContainerPartialResources(t *testing.T) {
+	trait := &initContainersTrait{
+		InitContainersTrait: trait.InitContainersTrait{
+			InitTasks: []string{
+				"name=myinit;image=myimg;command=mycmd;request-cpu=100m;limit-memory=256Mi",
+			},
+		},
+	}
+
+	configured, err := trait.parseTasks()
+	assert.True(t, configured)
+	require.Nil(t, err)
+	require.Len(t, trait.tasks, 1)
+
+	task := trait.tasks[0]
+	assert.Equal(t, "100m", task.requestCPU)
+	assert.Equal(t, "", task.limitCPU)
+	assert.Equal(t, "", task.requestMemory)
+	assert.Equal(t, "256Mi", task.limitMemory)
+}
+
+func TestParseInitContainerInvalidResource(t *testing.T) {
+	trait := &initContainersTrait{
+		InitContainersTrait: trait.InitContainersTrait{
+			InitTasks: []string{
+				"name=myinit;image=myimg;command=mycmd;request-cpu=abc",
+			},
+		},
+	}
+
+	configured, err := trait.parseTasks()
+	assert.False(t, configured)
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "invalid request-cpu value")
+	assert.Contains(t, err.Error(), `"abc"`)
+}
+
+func TestApplyInitContainerWithResources(t *testing.T) {
+	environment := Environment{
+		Catalog:   NewCatalog(nil),
+		Resources: kubernetes.NewCollection(),
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "my-it",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseRunning,
+			},
+		},
+	}
+	environment.Resources.Add(&appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Labels: map[string]string{
+				v1.IntegrationLabel: "my-it",
+			},
+		},
+		Spec: appsv1.DeploymentSpec{
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{},
+			},
+		},
+	})
+	initCont := initContainersTrait{
+		InitContainersTrait: trait.InitContainersTrait{
+			InitTasks: []string{
+				"name=myinit;image=myimg;command=mycmd;request-cpu=100m;limit-cpu=200m;request-memory=128Mi;limit-memory=256Mi",
+			},
+		},
+	}
+	configured, condition, err := initCont.Configure(&environment)
+	assert.True(t, configured)
+	assert.Nil(t, condition)
+	require.Nil(t, err)
+	err = initCont.Apply(&environment)
+	require.Nil(t, err)
+
+	deploy := environment.Resources.GetDeploymentForIntegration(environment.Integration)
+	require.NotNil(t, deploy)
+	require.Len(t, deploy.Spec.Template.Spec.InitContainers, 1)
+
+	container := deploy.Spec.Template.Spec.InitContainers[0]
+	assert.Equal(t, "myinit", container.Name)
+
+	expectedResources := corev1.ResourceRequirements{
+		Requests: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse("100m"),
+			corev1.ResourceMemory: resource.MustParse("128Mi"),
+		},
+		Limits: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse("200m"),
+			corev1.ResourceMemory: resource.MustParse("256Mi"),
+		},
+	}
+	assert.Equal(t, expectedResources, container.Resources)
+}
+
+func TestApplyInitContainerWithoutResources(t *testing.T) {
+	environment := Environment{
+		Catalog:   NewCatalog(nil),
+		Resources: kubernetes.NewCollection(),
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "my-it",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseRunning,
+			},
+		},
+	}
+	environment.Resources.Add(&appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Labels: map[string]string{
+				v1.IntegrationLabel: "my-it",
+			},
+		},
+		Spec: appsv1.DeploymentSpec{
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{},
+			},
+		},
+	})
+	initCont := initContainersTrait{
+		InitContainersTrait: trait.InitContainersTrait{
+			InitTasks: []string{
+				"myinit;myimg;mycmd",
+			},
+		},
+	}
+	configured, condition, err := initCont.Configure(&environment)
+	assert.True(t, configured)
+	assert.Nil(t, condition)
+	require.Nil(t, err)
+	err = initCont.Apply(&environment)
+	require.Nil(t, err)
+
+	deploy := environment.Resources.GetDeploymentForIntegration(environment.Integration)
+	require.NotNil(t, deploy)
+	require.Len(t, deploy.Spec.Template.Spec.InitContainers, 1)
+
+	container := deploy.Spec.Template.Spec.InitContainers[0]
+	assert.Equal(t, "myinit", container.Name)
+	// Old format without resources should result in nil/empty Resources
+	assert.Nil(t, container.Resources.Requests)
+	assert.Nil(t, container.Resources.Limits)
 }
