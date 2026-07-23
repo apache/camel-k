@@ -327,6 +327,8 @@ type PodSpecTemplate struct {
 type PodSpec struct {
 	// AutomountServiceAccountToken
 	AutomountServiceAccountToken *bool `json:"automountServiceAccountToken,omitempty" protobuf:"varint,21,opt,name=automountServiceAccountToken"`
+	// EnableServiceLinks indicates whether information about services should be injected into the Pod's environment variables, matching the syntax of Docker links. Defaults to true.
+	EnableServiceLinks *bool `json:"enableServiceLinks,omitempty" protobuf:"varint,30,opt,name=enableServiceLinks"`
 	// Volumes
 	Volumes []corev1.Volume `json:"volumes,omitempty" patchMergeKey:"name" patchStrategy:"merge,retainKeys" protobuf:"bytes,1,rep,name=volumes"`
 	// InitContainers

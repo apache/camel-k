@@ -2749,6 +2749,11 @@ func (in *PodSpec) DeepCopyInto(out *PodSpec) {
 		*out = new(bool)
 		**out = **in
 	}
+	if in.EnableServiceLinks != nil {
+		in, out := &in.EnableServiceLinks, &out.EnableServiceLinks
+		*out = new(bool)
+		**out = **in
+	}
 	if in.Volumes != nil {
 		in, out := &in.Volumes, &out.Volumes
 		*out = make([]corev1.Volume, len(*in))
