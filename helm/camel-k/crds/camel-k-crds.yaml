@@ -15093,6 +15093,12 @@ spec:
                       dnsPolicy:
                         description: DNSPolicy
                         type: string
+                      enableServiceLinks:
+                        description: EnableServiceLinks indicates whether information
+                          about services should be injected into the Pod's environment
+                          variables, matching the syntax of Docker links. Defaults
+                          to true.
+                        type: boolean
                       ephemeralContainers:
                         description: EphemeralContainers
                         items:
@@ -28057,6 +28063,12 @@ spec:
                           dnsPolicy:
                             description: DNSPolicy
                             type: string
+                          enableServiceLinks:
+                            description: EnableServiceLinks indicates whether information
+                              about services should be injected into the Pod's environment
+                              variables, matching the syntax of Docker links. Defaults
+                              to true.
+                            type: boolean
                           ephemeralContainers:
                             description: EphemeralContainers
                             items:

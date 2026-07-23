@@ -32,6 +32,8 @@ import (
 type PodSpecApplyConfiguration struct {
 	// AutomountServiceAccountToken
 	AutomountServiceAccountToken *bool `json:"automountServiceAccountToken,omitempty"`
+	// EnableServiceLinks indicates whether information about services should be injected into the Pod's environment variables, matching the syntax of Docker links. Defaults to true.
+	EnableServiceLinks *bool `json:"enableServiceLinks,omitempty"`
 	// Volumes
 	Volumes []corev1.Volume `json:"volumes,omitempty"`
 	// InitContainers
@@ -67,6 +69,14 @@ func PodSpec() *PodSpecApplyConfiguration {
 // If called multiple times, the AutomountServiceAccountToken field is set to the value of the last call.
 func (b *PodSpecApplyConfiguration) WithAutomountServiceAccountToken(value bool) *PodSpecApplyConfiguration {
 	b.AutomountServiceAccountToken = &value
+	return b
+}
+
+// WithEnableServiceLinks sets the EnableServiceLinks field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the EnableServiceLinks field is set to the value of the last call.
+func (b *PodSpecApplyConfiguration) WithEnableServiceLinks(value bool) *PodSpecApplyConfiguration {
+	b.EnableServiceLinks = &value
 	return b
 }
 
