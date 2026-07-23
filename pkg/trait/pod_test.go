@@ -112,6 +112,14 @@ func TestAutomountServiceAccountToken(t *testing.T) {
 	assert.False(t, *templateSpec.Spec.AutomountServiceAccountToken)
 }
 
+func TestEnableServiceLinks(t *testing.T) {
+	templateString := `enableServiceLinks: false`
+	templateSpec := testPodTemplateSpec(t, templateString)
+
+	assert.NotNil(t, templateSpec.Spec.EnableServiceLinks)
+	assert.False(t, *templateSpec.Spec.EnableServiceLinks)
+}
+
 // nolint: unparam
 func createPodTest(podSpecTemplate string) (*podTrait, *Environment, *appsv1.Deployment) {
 	trait, _ := newPodTrait().(*podTrait)
