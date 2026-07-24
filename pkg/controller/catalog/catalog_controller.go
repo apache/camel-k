@@ -19,7 +19,6 @@ package catalog
 
 import (
 	"context"
-	goruntime "runtime"
 	"time"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -29,7 +28,6 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -96,9 +94,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 					return !e.DeleteStateUnknown
 				},
 			})).
-		WithOptions(controller.Options{
-			MaxConcurrentReconciles: goruntime.GOMAXPROCS(0),
-		}).
 		Complete(r)
 }
 
