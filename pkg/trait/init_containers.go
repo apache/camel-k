@@ -248,6 +248,7 @@ func parseSingleTask(task string, isSidecar bool) (containerTask, error) {
 		if len(strings.TrimSpace(seg)) == 0 {
 			continue
 		}
+		//nolint:nestif
 		if strings.Contains(seg, "=") {
 			kv := strings.SplitN(seg, "=", 2)
 			key, value := strings.TrimSpace(kv[0]), strings.TrimSpace(kv[1])
@@ -284,11 +285,12 @@ func parseSingleTask(task string, isSidecar bool) (containerTask, error) {
 			}
 		} else {
 			// Positional segment: fill first unset field
-			if result.name == "" {
+			switch {
+			case result.name == "":
 				result.name = seg
-			} else if result.image == "" {
+			case result.image == "":
 				result.image = seg
-			} else {
+			default:
 				commandParts = append(commandParts, seg)
 			}
 		}

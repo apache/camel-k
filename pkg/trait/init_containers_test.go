@@ -698,6 +698,89 @@ func TestParseInitContainerInvalidResource(t *testing.T) {
 	assert.Contains(t, err.Error(), `"abc"`)
 }
 
+func TestParseInitContainerMixedFormat(t *testing.T) {
+	trait := &initContainersTrait{
+		InitContainersTrait: trait.InitContainersTrait{
+			InitTasks: []string{
+				"my-task;my-image;my-command;request-cpu=123m;limit-memory=256Mi",
+			},
+		},
+	}
+
+	configured, err := trait.parseTasks()
+	assert.True(t, configured)
+	require.Nil(t, err)
+	require.Len(t, trait.tasks, 1)
+
+	task := trait.tasks[0]
+	assert.Equal(t, "my-task", task.name)
+	assert.Equal(t, "my-image", task.image)
+	assert.Equal(t, "my-command", task.command)
+	assert.False(t, task.isSidecar)
+	assert.Equal(t, "123m", task.requestCPU)
+	assert.Equal(t, "", task.requestMemory)
+	assert.Equal(t, "", task.limitCPU)
+	assert.Equal(t, "256Mi", task.limitMemory)
+}
+
+func TestApplyInitContainerMixedFormat(t *testing.T) {
+	environment := Environment{
+		Catalog:   NewCatalog(nil),
+		Resources: kubernetes.NewCollection(),
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "my-it",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseRunning,
+			},
+		},
+	}
+	environment.Resources.Add(&appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Labels: map[string]string{
+				v1.IntegrationLabel: "my-it",
+			},
+		},
+		Spec: appsv1.DeploymentSpec{
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{},
+			},
+		},
+	})
+	initCont := initContainersTrait{
+		InitContainersTrait: trait.InitContainersTrait{
+			InitTasks: []string{
+				"my-task;my-image;my-command;request-cpu=123m;limit-memory=256Mi",
+			},
+		},
+	}
+	configured, condition, err := initCont.Configure(&environment)
+	assert.True(t, configured)
+	assert.Nil(t, condition)
+	require.Nil(t, err)
+	err = initCont.Apply(&environment)
+	require.Nil(t, err)
+
+	deploy := environment.Resources.GetDeploymentForIntegration(environment.Integration)
+	require.NotNil(t, deploy)
+	require.Len(t, deploy.Spec.Template.Spec.InitContainers, 1)
+
+	container := deploy.Spec.Template.Spec.InitContainers[0]
+	assert.Equal(t, "my-task", container.Name)
+	assert.Equal(t, "my-image", container.Image)
+
+	expectedResources := corev1.ResourceRequirements{
+		Requests: corev1.ResourceList{
+			corev1.ResourceCPU: resource.MustParse("123m"),
+		},
+		Limits: corev1.ResourceList{
+			corev1.ResourceMemory: resource.MustParse("256Mi"),
+		},
+	}
+	assert.Equal(t, expectedResources, container.Resources)
+}
+
 func TestApplyInitContainerWithResources(t *testing.T) {
 	environment := Environment{
 		Catalog:   NewCatalog(nil),
