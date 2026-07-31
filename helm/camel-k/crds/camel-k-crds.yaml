@@ -4717,14 +4717,20 @@ spec:
                           traits share this common property.
                         type: boolean
                       initTasks:
-                        description: A list of init tasks to be executed with format
-                          `<name>;<container-image>;<container-command>`.
+                        description: |-
+                          A list of init tasks to be executed.
+                          Each task accepts the format `<name>;<container-image>;<container-command>` or key=value format
+                          `name=<name>;image=<image>;command=<command>;request-cpu=<quantity>;limit-cpu=<quantity>;request-memory=<quantity>;limit-memory=<quantity>`.
+                          Resource keys (request-cpu, limit-cpu, request-memory, limit-memory) are optional and accept Kubernetes resource quantities.
                         items:
                           type: string
                         type: array
                       sideCarTasks:
-                        description: A list of sidecar tasks to be executed with format
-                          `<name>;<container-image>;<container-command>`.
+                        description: |-
+                          A list of sidecar tasks to be executed.
+                          Each task accepts the format `<name>;<container-image>;<container-command>` or key=value format
+                          `name=<name>;image=<image>;command=<command>;request-cpu=<quantity>;limit-cpu=<quantity>;request-memory=<quantity>;limit-memory=<quantity>`.
+                          Resource keys (request-cpu, limit-cpu, request-memory, limit-memory) are optional and accept Kubernetes resource quantities.
                         items:
                           type: string
                         type: array
@@ -5387,12 +5393,14 @@ spec:
                           traits share this common property.
                         type: boolean
                       targetAnnotations:
-                        description: The set of annotations to be transferred. Use "*" to transfer all annotations.
+                        description: The set of annotations to be transferred. Use
+                          "*" to transfer all annotations.
                         items:
                           type: string
                         type: array
                       targetLabels:
-                        description: The set of labels to be transferred. Use "*" to transfer all labels.
+                        description: The set of labels to be transferred. Use "*"
+                          to transfer all labels.
                         items:
                           type: string
                         type: array
@@ -7253,14 +7261,20 @@ spec:
                           traits share this common property.
                         type: boolean
                       initTasks:
-                        description: A list of init tasks to be executed with format
-                          `<name>;<container-image>;<container-command>`.
+                        description: |-
+                          A list of init tasks to be executed.
+                          Each task accepts the format `<name>;<container-image>;<container-command>` or key=value format
+                          `name=<name>;image=<image>;command=<command>;request-cpu=<quantity>;limit-cpu=<quantity>;request-memory=<quantity>;limit-memory=<quantity>`.
+                          Resource keys (request-cpu, limit-cpu, request-memory, limit-memory) are optional and accept Kubernetes resource quantities.
                         items:
                           type: string
                         type: array
                       sideCarTasks:
-                        description: A list of sidecar tasks to be executed with format
-                          `<name>;<container-image>;<container-command>`.
+                        description: |-
+                          A list of sidecar tasks to be executed.
+                          Each task accepts the format `<name>;<container-image>;<container-command>` or key=value format
+                          `name=<name>;image=<image>;command=<command>;request-cpu=<quantity>;limit-cpu=<quantity>;request-memory=<quantity>;limit-memory=<quantity>`.
+                          Resource keys (request-cpu, limit-cpu, request-memory, limit-memory) are optional and accept Kubernetes resource quantities.
                         items:
                           type: string
                         type: array
@@ -7923,12 +7937,14 @@ spec:
                           traits share this common property.
                         type: boolean
                       targetAnnotations:
-                        description: The set of annotations to be transferred. Use "*" to transfer all annotations.
+                        description: The set of annotations to be transferred. Use
+                          "*" to transfer all annotations.
                         items:
                           type: string
                         type: array
                       targetLabels:
-                        description: The set of labels to be transferred. Use "*" to transfer all labels.
+                        description: The set of labels to be transferred. Use "*"
+                          to transfer all labels.
                         items:
                           type: string
                         type: array
@@ -9683,14 +9699,20 @@ spec:
                           traits share this common property.
                         type: boolean
                       initTasks:
-                        description: A list of init tasks to be executed with format
-                          `<name>;<container-image>;<container-command>`.
+                        description: |-
+                          A list of init tasks to be executed.
+                          Each task accepts the format `<name>;<container-image>;<container-command>` or key=value format
+                          `name=<name>;image=<image>;command=<command>;request-cpu=<quantity>;limit-cpu=<quantity>;request-memory=<quantity>;limit-memory=<quantity>`.
+                          Resource keys (request-cpu, limit-cpu, request-memory, limit-memory) are optional and accept Kubernetes resource quantities.
                         items:
                           type: string
                         type: array
                       sideCarTasks:
-                        description: A list of sidecar tasks to be executed with format
-                          `<name>;<container-image>;<container-command>`.
+                        description: |-
+                          A list of sidecar tasks to be executed.
+                          Each task accepts the format `<name>;<container-image>;<container-command>` or key=value format
+                          `name=<name>;image=<image>;command=<command>;request-cpu=<quantity>;limit-cpu=<quantity>;request-memory=<quantity>;limit-memory=<quantity>`.
+                          Resource keys (request-cpu, limit-cpu, request-memory, limit-memory) are optional and accept Kubernetes resource quantities.
                         items:
                           type: string
                         type: array
@@ -10353,12 +10375,14 @@ spec:
                           traits share this common property.
                         type: boolean
                       targetAnnotations:
-                        description: The set of annotations to be transferred. Use "*" to transfer all annotations.
+                        description: The set of annotations to be transferred. Use
+                          "*" to transfer all annotations.
                         items:
                           type: string
                         type: array
                       targetLabels:
-                        description: The set of labels to be transferred. Use "*" to transfer all labels.
+                        description: The set of labels to be transferred. Use "*"
+                          to transfer all labels.
                         items:
                           type: string
                         type: array
@@ -12099,14 +12123,20 @@ spec:
                           traits share this common property.
                         type: boolean
                       initTasks:
-                        description: A list of init tasks to be executed with format
-                          `<name>;<container-image>;<container-command>`.
+                        description: |-
+                          A list of init tasks to be executed.
+                          Each task accepts the format `<name>;<container-image>;<container-command>` or key=value format
+                          `name=<name>;image=<image>;command=<command>;request-cpu=<quantity>;limit-cpu=<quantity>;request-memory=<quantity>;limit-memory=<quantity>`.
+                          Resource keys (request-cpu, limit-cpu, request-memory, limit-memory) are optional and accept Kubernetes resource quantities.
                         items:
                           type: string
                         type: array
                       sideCarTasks:
-                        description: A list of sidecar tasks to be executed with format
-                          `<name>;<container-image>;<container-command>`.
+                        description: |-
+                          A list of sidecar tasks to be executed.
+                          Each task accepts the format `<name>;<container-image>;<container-command>` or key=value format
+                          `name=<name>;image=<image>;command=<command>;request-cpu=<quantity>;limit-cpu=<quantity>;request-memory=<quantity>;limit-memory=<quantity>`.
+                          Resource keys (request-cpu, limit-cpu, request-memory, limit-memory) are optional and accept Kubernetes resource quantities.
                         items:
                           type: string
                         type: array
@@ -12769,12 +12799,14 @@ spec:
                           traits share this common property.
                         type: boolean
                       targetAnnotations:
-                        description: The set of annotations to be transferred. Use "*" to transfer all annotations.
+                        description: The set of annotations to be transferred. Use
+                          "*" to transfer all annotations.
                         items:
                           type: string
                         type: array
                       targetLabels:
-                        description: The set of labels to be transferred. Use "*" to transfer all labels.
+                        description: The set of labels to be transferred. Use "*"
+                          to transfer all labels.
                         items:
                           type: string
                         type: array
@@ -21371,14 +21403,20 @@ spec:
                           traits share this common property.
                         type: boolean
                       initTasks:
-                        description: A list of init tasks to be executed with format
-                          `<name>;<container-image>;<container-command>`.
+                        description: |-
+                          A list of init tasks to be executed.
+                          Each task accepts the format `<name>;<container-image>;<container-command>` or key=value format
+                          `name=<name>;image=<image>;command=<command>;request-cpu=<quantity>;limit-cpu=<quantity>;request-memory=<quantity>;limit-memory=<quantity>`.
+                          Resource keys (request-cpu, limit-cpu, request-memory, limit-memory) are optional and accept Kubernetes resource quantities.
                         items:
                           type: string
                         type: array
                       sideCarTasks:
-                        description: A list of sidecar tasks to be executed with format
-                          `<name>;<container-image>;<container-command>`.
+                        description: |-
+                          A list of sidecar tasks to be executed.
+                          Each task accepts the format `<name>;<container-image>;<container-command>` or key=value format
+                          `name=<name>;image=<image>;command=<command>;request-cpu=<quantity>;limit-cpu=<quantity>;request-memory=<quantity>;limit-memory=<quantity>`.
+                          Resource keys (request-cpu, limit-cpu, request-memory, limit-memory) are optional and accept Kubernetes resource quantities.
                         items:
                           type: string
                         type: array
@@ -22041,12 +22079,14 @@ spec:
                           traits share this common property.
                         type: boolean
                       targetAnnotations:
-                        description: The set of annotations to be transferred. Use "*" to transfer all annotations.
+                        description: The set of annotations to be transferred. Use
+                          "*" to transfer all annotations.
                         items:
                           type: string
                         type: array
                       targetLabels:
-                        description: The set of labels to be transferred. Use "*" to transfer all labels.
+                        description: The set of labels to be transferred. Use "*"
+                          to transfer all labels.
                         items:
                           type: string
                         type: array
@@ -23748,14 +23788,20 @@ spec:
                           traits share this common property.
                         type: boolean
                       initTasks:
-                        description: A list of init tasks to be executed with format
-                          `<name>;<container-image>;<container-command>`.
+                        description: |-
+                          A list of init tasks to be executed.
+                          Each task accepts the format `<name>;<container-image>;<container-command>` or key=value format
+                          `name=<name>;image=<image>;command=<command>;request-cpu=<quantity>;limit-cpu=<quantity>;request-memory=<quantity>;limit-memory=<quantity>`.
+                          Resource keys (request-cpu, limit-cpu, request-memory, limit-memory) are optional and accept Kubernetes resource quantities.
                         items:
                           type: string
                         type: array
                       sideCarTasks:
-                        description: A list of sidecar tasks to be executed with format
-                          `<name>;<container-image>;<container-command>`.
+                        description: |-
+                          A list of sidecar tasks to be executed.
+                          Each task accepts the format `<name>;<container-image>;<container-command>` or key=value format
+                          `name=<name>;image=<image>;command=<command>;request-cpu=<quantity>;limit-cpu=<quantity>;request-memory=<quantity>;limit-memory=<quantity>`.
+                          Resource keys (request-cpu, limit-cpu, request-memory, limit-memory) are optional and accept Kubernetes resource quantities.
                         items:
                           type: string
                         type: array
@@ -24418,12 +24464,14 @@ spec:
                           traits share this common property.
                         type: boolean
                       targetAnnotations:
-                        description: The set of annotations to be transferred. Use "*" to transfer all annotations.
+                        description: The set of annotations to be transferred. Use
+                          "*" to transfer all annotations.
                         items:
                           type: string
                         type: array
                       targetLabels:
-                        description: The set of labels to be transferred. Use "*" to transfer all labels.
+                        description: The set of labels to be transferred. Use "*"
+                          to transfer all labels.
                         items:
                           type: string
                         type: array
@@ -34383,14 +34431,20 @@ spec:
                               All traits share this common property.
                             type: boolean
                           initTasks:
-                            description: A list of init tasks to be executed with
-                              format `<name>;<container-image>;<container-command>`.
+                            description: |-
+                              A list of init tasks to be executed.
+                              Each task accepts the format `<name>;<container-image>;<container-command>` or key=value format
+                              `name=<name>;image=<image>;command=<command>;request-cpu=<quantity>;limit-cpu=<quantity>;request-memory=<quantity>;limit-memory=<quantity>`.
+                              Resource keys (request-cpu, limit-cpu, request-memory, limit-memory) are optional and accept Kubernetes resource quantities.
                             items:
                               type: string
                             type: array
                           sideCarTasks:
-                            description: A list of sidecar tasks to be executed with
-                              format `<name>;<container-image>;<container-command>`.
+                            description: |-
+                              A list of sidecar tasks to be executed.
+                              Each task accepts the format `<name>;<container-image>;<container-command>` or key=value format
+                              `name=<name>;image=<image>;command=<command>;request-cpu=<quantity>;limit-cpu=<quantity>;request-memory=<quantity>;limit-memory=<quantity>`.
+                              Resource keys (request-cpu, limit-cpu, request-memory, limit-memory) are optional and accept Kubernetes resource quantities.
                             items:
                               type: string
                             type: array
@@ -35057,12 +35111,14 @@ spec:
                               All traits share this common property.
                             type: boolean
                           targetAnnotations:
-                            description: The set of annotations to be transferred. Use "*" to transfer all annotations.
+                            description: The set of annotations to be transferred.
+                              Use "*" to transfer all annotations.
                             items:
                               type: string
                             type: array
                           targetLabels:
-                            description: The set of labels to be transferred. Use "*" to transfer all labels.
+                            description: The set of labels to be transferred. Use
+                              "*" to transfer all labels.
                             items:
                               type: string
                             type: array
@@ -36682,14 +36738,20 @@ spec:
                           traits share this common property.
                         type: boolean
                       initTasks:
-                        description: A list of init tasks to be executed with format
-                          `<name>;<container-image>;<container-command>`.
+                        description: |-
+                          A list of init tasks to be executed.
+                          Each task accepts the format `<name>;<container-image>;<container-command>` or key=value format
+                          `name=<name>;image=<image>;command=<command>;request-cpu=<quantity>;limit-cpu=<quantity>;request-memory=<quantity>;limit-memory=<quantity>`.
+                          Resource keys (request-cpu, limit-cpu, request-memory, limit-memory) are optional and accept Kubernetes resource quantities.
                         items:
                           type: string
                         type: array
                       sideCarTasks:
-                        description: A list of sidecar tasks to be executed with format
-                          `<name>;<container-image>;<container-command>`.
+                        description: |-
+                          A list of sidecar tasks to be executed.
+                          Each task accepts the format `<name>;<container-image>;<container-command>` or key=value format
+                          `name=<name>;image=<image>;command=<command>;request-cpu=<quantity>;limit-cpu=<quantity>;request-memory=<quantity>;limit-memory=<quantity>`.
+                          Resource keys (request-cpu, limit-cpu, request-memory, limit-memory) are optional and accept Kubernetes resource quantities.
                         items:
                           type: string
                         type: array
@@ -37352,12 +37414,14 @@ spec:
                           traits share this common property.
                         type: boolean
                       targetAnnotations:
-                        description: The set of annotations to be transferred. Use "*" to transfer all annotations.
+                        description: The set of annotations to be transferred. Use
+                          "*" to transfer all annotations.
                         items:
                           type: string
                         type: array
                       targetLabels:
-                        description: The set of labels to be transferred. Use "*" to transfer all labels.
+                        description: The set of labels to be transferred. Use "*"
+                          to transfer all labels.
                         items:
                           type: string
                         type: array
