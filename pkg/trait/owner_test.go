@@ -89,6 +89,33 @@ func ValidateOwnerResources(t *testing.T, env *Environment, withOwnerRef bool) {
 	ValidateLabelsAndAnnotations(t, &deployments[0].Spec.Template)
 }
 
+func TestOwnerWildcard(t *testing.T) {
+	env := createTestEnv(t, "camel:core")
+	env.Integration.Spec.Traits = v1.Traits{
+		Owner: &traitv1.OwnerTrait{
+			TargetLabels:      []string{"*"},
+			TargetAnnotations: []string{"*"},
+		},
+	}
+	env.Integration.SetLabels(map[string]string{
+		"com.mycompany/mylabel1": "myvalue1",
+		"com.mycompany/mylabel2": "myvalue2",
+	})
+	env.Integration.SetAnnotations(map[string]string{
+		"com.mycompany/myannotation1": "myannotation1",
+		"com.mycompany/myannotation2": "myannotation2",
+	})
+
+	processTestEnv(t, env)
+
+	env.Resources.VisitMetaObject(func(res metav1.Object) {
+		assert.Contains(t, res.GetLabels(), "com.mycompany/mylabel1")
+		assert.Contains(t, res.GetLabels(), "com.mycompany/mylabel2")
+		assert.Contains(t, res.GetAnnotations(), "com.mycompany/myannotation1")
+		assert.Contains(t, res.GetAnnotations(), "com.mycompany/myannotation2")
+	})
+}
+
 func ValidateLabelsAndAnnotations(t *testing.T, res metav1.Object) {
 	t.Helper()
 

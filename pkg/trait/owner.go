@@ -61,18 +61,30 @@ func (t *ownerTrait) Apply(e *Environment) error {
 
 	targetLabels := make(map[string]string)
 	if e.Integration.Labels != nil {
-		for _, k := range t.TargetLabels {
-			if v, ok := e.Integration.Labels[k]; ok {
+		if containsWildcard(t.TargetLabels) {
+			for k, v := range e.Integration.Labels {
 				targetLabels[k] = v
+			}
+		} else {
+			for _, k := range t.TargetLabels {
+				if v, ok := e.Integration.Labels[k]; ok {
+					targetLabels[k] = v
+				}
 			}
 		}
 	}
 
 	targetAnnotations := make(map[string]string)
 	if e.Integration.Annotations != nil {
-		for _, k := range t.TargetAnnotations {
-			if v, ok := e.Integration.Annotations[k]; ok {
+		if containsWildcard(t.TargetAnnotations) {
+			for k, v := range e.Integration.Annotations {
 				targetAnnotations[k] = v
+			}
+		} else {
+			for _, k := range t.TargetAnnotations {
+				if v, ok := e.Integration.Annotations[k]; ok {
+					targetAnnotations[k] = v
+				}
 			}
 		}
 	}
@@ -141,4 +153,14 @@ func (t *ownerTrait) propagateLabelAndAnnotations(res metav1.Object, targetLabel
 		}
 	}
 	res.SetLabels(labels)
+}
+
+func containsWildcard(values []string) bool {
+	for _, value := range values {
+		if value == "*" {
+			return true
+		}
+	}
+
+	return false
 }
