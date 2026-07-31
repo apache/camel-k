@@ -2081,12 +2081,12 @@ spec:
                           traits share this common property.
                         type: boolean
                       targetAnnotations:
-                        description: The set of annotations to be transferred
+                        description: The set of annotations to be transferred. Use "*" to transfer all annotations.
                         items:
                           type: string
                         type: array
                       targetLabels:
-                        description: The set of labels to be transferred
+                        description: The set of labels to be transferred. Use "*" to transfer all labels.
                         items:
                           type: string
                         type: array
@@ -4617,12 +4617,12 @@ spec:
                           traits share this common property.
                         type: boolean
                       targetAnnotations:
-                        description: The set of annotations to be transferred
+                        description: The set of annotations to be transferred. Use "*" to transfer all annotations.
                         items:
                           type: string
                         type: array
                       targetLabels:
-                        description: The set of labels to be transferred
+                        description: The set of labels to be transferred. Use "*" to transfer all labels.
                         items:
                           type: string
                         type: array
