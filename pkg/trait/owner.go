@@ -18,6 +18,9 @@ limitations under the License.
 package trait
 
 import (
+	"maps"
+	"slices"
+
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
@@ -62,9 +65,7 @@ func (t *ownerTrait) Apply(e *Environment) error {
 	targetLabels := make(map[string]string)
 	if e.Integration.Labels != nil {
 		if containsWildcard(t.TargetLabels) {
-			for k, v := range e.Integration.Labels {
-				targetLabels[k] = v
-			}
+			maps.Copy(targetLabels, e.Integration.Labels)
 		} else {
 			for _, k := range t.TargetLabels {
 				if v, ok := e.Integration.Labels[k]; ok {
@@ -77,9 +78,7 @@ func (t *ownerTrait) Apply(e *Environment) error {
 	targetAnnotations := make(map[string]string)
 	if e.Integration.Annotations != nil {
 		if containsWildcard(t.TargetAnnotations) {
-			for k, v := range e.Integration.Annotations {
-				targetAnnotations[k] = v
-			}
+			maps.Copy(targetAnnotations, e.Integration.Annotations)
 		} else {
 			for _, k := range t.TargetAnnotations {
 				if v, ok := e.Integration.Annotations[k]; ok {
@@ -156,11 +155,5 @@ func (t *ownerTrait) propagateLabelAndAnnotations(res metav1.Object, targetLabel
 }
 
 func containsWildcard(values []string) bool {
-	for _, value := range values {
-		if value == "*" {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(values, "*")
 }
