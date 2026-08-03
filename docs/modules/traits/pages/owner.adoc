@@ -32,11 +32,11 @@ The following configuration options are available:
 
 | owner.targetAnnotations
 | []string
-| The set of annotations to be transferred
+| The set of annotations to be transferred. Use "*" to transfer all annotations.
 
 | owner.targetLabels
 | []string
-| The set of labels to be transferred
+| The set of labels to be transferred. Use "*" to transfer all labels.
 
 |===
 

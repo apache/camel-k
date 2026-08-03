@@ -26,8 +26,8 @@ package trait
 type OwnerTrait struct {
 	Trait `json:",inline" property:",squash"`
 
-	// The set of annotations to be transferred
+	// The set of annotations to be transferred. Use "*" to transfer all annotations.
 	TargetAnnotations []string `json:"targetAnnotations,omitempty" property:"target-annotations"`
-	// The set of labels to be transferred
+	// The set of labels to be transferred. Use "*" to transfer all labels.
 	TargetLabels []string `json:"targetLabels,omitempty" property:"target-labels"`
 }

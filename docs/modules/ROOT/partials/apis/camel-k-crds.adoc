@@ -8929,14 +8929,14 @@ and transfers annotations and labels on the integration onto these owned resourc
 |
 
 
-The set of annotations to be transferred
+The set of annotations to be transferred. Use "*" to transfer all annotations.
 
 |`targetLabels` +
 []string
 |
 
 
-The set of labels to be transferred
+The set of labels to be transferred. Use "*" to transfer all labels.
 
 
 |===
