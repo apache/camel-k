@@ -5167,6 +5167,13 @@ bool
 
 AutomountServiceAccountToken
 
+|`enableServiceLinks` +
+bool
+|
+
+
+EnableServiceLinks indicates whether information about services should be injected into the Pod's environment variables, matching the syntax of Docker links. Defaults to true.
+
 |`volumes` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#volume-v1-core[[\]Kubernetes core/v1.Volume]*
 |
