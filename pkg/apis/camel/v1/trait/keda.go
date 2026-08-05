@@ -51,6 +51,11 @@ type KedaTrait struct {
 type KedaTrigger struct {
 	// The autoscaler type.
 	Type string `json:"type,omitempty" property:"type"`
+	// The metric type for this trigger, mapping to KEDA's trigger-level `metricType`
+	// (`Utilization`, `AverageValue` or `Value`).
+	// +kubebuilder:validation:Enum=Utilization;AverageValue;Value
+	// +optional
+	MetricType string `json:"metricType,omitempty" property:"metric-type"`
 	// The trigger metadata (see Keda documentation to learn how to fill for each type).
 	Metadata map[string]string `json:"metadata,omitempty" property:"metadata"`
 	// The secrets mapping to use. Keda allows the possibility to use values coming from different secrets.

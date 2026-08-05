@@ -5015,6 +5015,15 @@ spec:
                               description: The trigger metadata (see Keda documentation
                                 to learn how to fill for each type).
                               type: object
+                            metricType:
+                              description: |-
+                                The metric type for this trigger, mapping to KEDA's trigger-level `metricType`
+                                (`Utilization`, `AverageValue` or `Value`).
+                              enum:
+                              - Utilization
+                              - AverageValue
+                              - Value
+                              type: string
                             secrets:
                               description: The secrets mapping to use. Keda allows
                                 the possibility to use values coming from different
@@ -7559,6 +7568,15 @@ spec:
                               description: The trigger metadata (see Keda documentation
                                 to learn how to fill for each type).
                               type: object
+                            metricType:
+                              description: |-
+                                The metric type for this trigger, mapping to KEDA's trigger-level `metricType`
+                                (`Utilization`, `AverageValue` or `Value`).
+                              enum:
+                              - Utilization
+                              - AverageValue
+                              - Value
+                              type: string
                             secrets:
                               description: The secrets mapping to use. Keda allows
                                 the possibility to use values coming from different
@@ -9997,6 +10015,15 @@ spec:
                               description: The trigger metadata (see Keda documentation
                                 to learn how to fill for each type).
                               type: object
+                            metricType:
+                              description: |-
+                                The metric type for this trigger, mapping to KEDA's trigger-level `metricType`
+                                (`Utilization`, `AverageValue` or `Value`).
+                              enum:
+                              - Utilization
+                              - AverageValue
+                              - Value
+                              type: string
                             secrets:
                               description: The secrets mapping to use. Keda allows
                                 the possibility to use values coming from different
@@ -12421,6 +12448,15 @@ spec:
                               description: The trigger metadata (see Keda documentation
                                 to learn how to fill for each type).
                               type: object
+                            metricType:
+                              description: |-
+                                The metric type for this trigger, mapping to KEDA's trigger-level `metricType`
+                                (`Utilization`, `AverageValue` or `Value`).
+                              enum:
+                              - Utilization
+                              - AverageValue
+                              - Value
+                              type: string
                             secrets:
                               description: The secrets mapping to use. Keda allows
                                 the possibility to use values coming from different
@@ -21707,6 +21743,15 @@ spec:
                               description: The trigger metadata (see Keda documentation
                                 to learn how to fill for each type).
                               type: object
+                            metricType:
+                              description: |-
+                                The metric type for this trigger, mapping to KEDA's trigger-level `metricType`
+                                (`Utilization`, `AverageValue` or `Value`).
+                              enum:
+                              - Utilization
+                              - AverageValue
+                              - Value
+                              type: string
                             secrets:
                               description: The secrets mapping to use. Keda allows
                                 the possibility to use values coming from different
@@ -24092,6 +24137,15 @@ spec:
                               description: The trigger metadata (see Keda documentation
                                 to learn how to fill for each type).
                               type: object
+                            metricType:
+                              description: |-
+                                The metric type for this trigger, mapping to KEDA's trigger-level `metricType`
+                                (`Utilization`, `AverageValue` or `Value`).
+                              enum:
+                              - Utilization
+                              - AverageValue
+                              - Value
+                              type: string
                             secrets:
                               description: The secrets mapping to use. Keda allows
                                 the possibility to use values coming from different
@@ -34744,6 +34798,15 @@ spec:
                                   description: The trigger metadata (see Keda documentation
                                     to learn how to fill for each type).
                                   type: object
+                                metricType:
+                                  description: |-
+                                    The metric type for this trigger, mapping to KEDA's trigger-level `metricType`
+                                    (`Utilization`, `AverageValue` or `Value`).
+                                  enum:
+                                  - Utilization
+                                  - AverageValue
+                                  - Value
+                                  type: string
                                 secrets:
                                   description: The secrets mapping to use. Keda allows
                                     the possibility to use values coming from different
@@ -37048,6 +37111,15 @@ spec:
                               description: The trigger metadata (see Keda documentation
                                 to learn how to fill for each type).
                               type: object
+                            metricType:
+                              description: |-
+                                The metric type for this trigger, mapping to KEDA's trigger-level `metricType`
+                                (`Utilization`, `AverageValue` or `Value`).
+                              enum:
+                              - Utilization
+                              - AverageValue
+                              - Value
+                              type: string
                             secrets:
                               description: The secrets mapping to use. Keda allows
                                 the possibility to use values coming from different

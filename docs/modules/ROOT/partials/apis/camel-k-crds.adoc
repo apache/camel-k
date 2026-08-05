@@ -8362,6 +8362,14 @@ string
 
 The autoscaler type.
 
+|`metricType` +
+string
+|
+*(Optional)*
+
+The metric type for this trigger, mapping to KEDA's trigger-level `metricType`
+(`Utilization`, `AverageValue` or `Value`).
+
 |`metadata` +
 map[string]string
 |
