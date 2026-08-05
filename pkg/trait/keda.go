@@ -97,8 +97,9 @@ func (t *kedaTrait) populateTriggers(itName, itNamespace string) ([]v1alpha1.Sca
 	triggers := make([]v1alpha1.ScaleTriggers, 0, len(t.Triggers))
 	for _, trigger := range t.Triggers {
 		scaleTrigger := v1alpha1.ScaleTriggers{
-			Type:     trigger.Type,
-			Metadata: trigger.Metadata,
+			Type:       trigger.Type,
+			MetricType: trigger.MetricType,
+			Metadata:   trigger.Metadata,
 		}
 		if trigger.Secrets != nil {
 			triggerAuth := populateTriggerAuth(trigger.Secrets, itName, itNamespace, trigger.Type)

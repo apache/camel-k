@@ -57,6 +57,35 @@ func TestKeda(t *testing.T) {
 	assert.Equal(t, "10", scaledObject.Spec.Triggers[0].Metadata["lagThreshold"])
 }
 
+func TestKedaMetricType(t *testing.T) {
+	environment := nominalEnv(t)
+	// A cpu trigger with a trigger-level metricType: KEDA v2.18+ requires this for
+	// the cpu/memory scalers (the deprecated metadata.type was removed).
+	environment.Integration.Spec.Traits.Keda.Triggers = []traitv1.KedaTrigger{
+		{
+			Type:       "cpu",
+			MetricType: "Utilization",
+			Metadata: map[string]string{
+				"value": "70",
+			},
+		},
+	}
+	traitCatalog := environment.Catalog
+
+	_, _, err := traitCatalog.apply(&environment)
+
+	require.NoError(t, err)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("keda"))
+
+	scaledObject := getKedaScaledObject(environment.Resources)
+	require.NotNil(t, scaledObject)
+	require.Len(t, scaledObject.Spec.Triggers, 1)
+	assert.Equal(t, "cpu", scaledObject.Spec.Triggers[0].Type)
+	assert.Equal(t, "Utilization", scaledObject.Spec.Triggers[0].MetricType)
+	assert.Equal(t, "70", scaledObject.Spec.Triggers[0].Metadata["value"])
+}
+
 func TestKedaAutoDiscovery(t *testing.T) {
 	tests := []struct {
 		name           string
