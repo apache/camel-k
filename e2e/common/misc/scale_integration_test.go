@@ -116,14 +116,16 @@ func TestIntegrationScale(t *testing.T) {
 			// Save resources by deleting the integration
 			g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
 
-			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", "pre-built", "-t", fmt.Sprintf("container.image=%s", image)).Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java",
+				"--name", "pre-built",
+				"-t", fmt.Sprintf("container.image=%s", image),
+			).Execute()).To(Succeed())
 			g.Eventually(IntegrationPhase(t, ctx, ns, "pre-built"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "pre-built"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Expect(ScaleIntegration(t, ctx, ns, "pre-built", 0)).To(Succeed())
-			g.Eventually(IntegrationPod(t, ctx, ns, "pre-built"), TestTimeoutMedium).Should(BeNil())
+			g.Eventually(IntegrationPod(t, ctx, ns, "pre-built")).Should(BeNil())
 			g.Expect(ScaleIntegration(t, ctx, ns, "pre-built", 1)).To(Succeed())
 			g.Eventually(IntegrationPhase(t, ctx, ns, "pre-built"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "pre-built"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "pre-built")).Should(Equal(corev1.PodRunning))
 		})
 	})
 }

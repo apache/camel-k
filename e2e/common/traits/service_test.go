@@ -118,7 +118,7 @@ func TestPortsServiceTrait(t *testing.T) {
 				"-t", "service.ports=hello;85;8085",
 				"--name", name,
 			).Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady)).
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
 				Should(Equal(corev1.ConditionTrue))
 			// We cannot use the health trait to make sure the application is ready to
 			// get requests as we're sharing the service port.

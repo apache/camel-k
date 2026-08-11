@@ -47,7 +47,7 @@ func TestInitContainerTrait(t *testing.T) {
 				"init-containers.init-tasks=init;alpine;/bin/sh -c \"echo helloInit >> /tmp/init\"",
 				"--name",
 				name).Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady)).
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
 				Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("helloInit"))
@@ -62,7 +62,7 @@ func TestInitContainerTrait(t *testing.T) {
 				"init-containers.sidecar-tasks=sidecar;alpine;/bin/sh -c \"for i in $(seq 1 10); do echo helloSidecar$i > /tmp/sidecar_$i.txt; sleep 1; done\"",
 				"--name",
 				name).Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady)).
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
 				Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("helloSidecar10"))

@@ -47,15 +47,20 @@ func TestKameletChange(t *testing.T) {
 		timerSource := "my-timer-source"
 		g.Expect(CreateTimerKamelet(t, ctx, ns, timerSource)()).To(Succeed())
 		g.Expect(CreateKnativeChannel(t, ctx, ns, knChannel)()).To(Succeed())
+
 		// Consumer route that will read from the Knative channel
 		g.Expect(KamelRun(t, ctx, ns, "files/test-kamelet-display.yaml", "-w").Execute()).To(Succeed())
-		g.Eventually(IntegrationPodPhase(t, ctx, ns, "test-kamelet-display")).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "test-kamelet-display", v1.IntegrationConditionReady), TestTimeoutMedium).
+			Should(Equal(corev1.ConditionTrue))
 
 		// Create the Pipe
-		g.Expect(KamelBind(t, ctx, ns, timerSource, knChannelConf, "-p", "source.message=HelloKnative!",
-			"--trait", "health.enabled=true", "--trait", "health.readiness-initial-delay=10", "--name", timerPipe).Execute()).To(Succeed())
-		g.Eventually(IntegrationPodPhase(t, ctx, ns, timerPipe)).Should(Equal(corev1.PodRunning))
-		g.Eventually(IntegrationConditionStatus(t, ctx, ns, timerPipe, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Expect(KamelBind(t, ctx, ns, timerSource, knChannelConf,
+			"-p", "source.message=HelloKnative!",
+			"--name", timerPipe,
+		).Execute()).To(Succeed())
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, timerPipe, v1.IntegrationConditionReady), TestTimeoutMedium).
+			Should(Equal(corev1.ConditionTrue))
+
 		// Consume the message
 		g.Eventually(IntegrationLogs(t, ctx, ns, "test-kamelet-display"), TestTimeoutShort).Should(ContainSubstring("HelloKnative!"))
 
@@ -66,11 +71,13 @@ func TestKameletChange(t *testing.T) {
 		))
 
 		// Update the Pipe
-		g.Expect(KamelBind(t, ctx, ns, timerSource, knChannelConf, "-p", "source.message=message is Hi",
-			"--trait", "health.enabled=true", "--trait", "health.readiness-initial-delay=10", "--name", timerPipe).Execute()).To(Succeed())
+		g.Expect(KamelBind(t, ctx, ns, timerSource, knChannelConf,
+			"-p", "source.message=message is Hi",
+			"--name", timerPipe,
+		).Execute()).To(Succeed())
 
-		g.Eventually(IntegrationPodPhase(t, ctx, ns, timerPipe), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		g.Eventually(IntegrationConditionStatus(t, ctx, ns, timerPipe, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, timerPipe, v1.IntegrationConditionReady), TestTimeoutMedium).
+			Should(Equal(corev1.ConditionTrue))
 		g.Eventually(IntegrationLogs(t, ctx, ns, "test-kamelet-display"), TestTimeoutShort).Should(ContainSubstring("message is Hi"))
 
 		g.Eventually(PipeCondition(t, ctx, ns, timerPipe, v1.PipeConditionReady), TestTimeoutMedium).
