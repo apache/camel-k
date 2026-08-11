@@ -24,7 +24,6 @@ package common
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -40,20 +39,17 @@ func TestStructuredLogs(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		name := RandomizedSuffixName("java")
 		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
-		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
 			Should(Equal(corev1.ConditionTrue))
 
 		pod := OperatorPodGlobal(t, ctx)()
 		g.Expect(pod).NotTo(BeNil())
 
-		// pod.Namespace could be different from ns if using global operator
-		fmt.Printf("Fetching logs for operator pod %s in namespace %s", pod.Name, pod.Namespace)
 		logOptions := &corev1.PodLogOptions{
 			Container: "camel-k-operator",
 		}
 		logs, err := StructuredLogs(t, ctx, pod.Namespace, pod.Name, logOptions, false)
-		g.Expect(err).To(BeNil())
+		g.Expect(err).NotTo(HaveOccurred())
 		g.Expect(logs).NotTo(BeEmpty())
 	})
 }
