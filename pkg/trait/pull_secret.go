@@ -39,6 +39,9 @@ const (
 type pullSecretTrait struct {
 	BaseTrait
 	traitv1.PullSecretTrait `property:",squash"`
+
+	deprecatedImagePullerDelegation *bool
+	secretName                      string
 }
 
 func newPullSecretTrait() Trait {
@@ -65,17 +68,14 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, *TraitCondition, erro
 		}
 	}
 
+	t.secretName = t.SecretName
 	//nolint:staticcheck
-	return t.SecretName != "" || ptr.Deref(t.ImagePullerDelegation, false), nil, nil
+	t.deprecatedImagePullerDelegation = t.ImagePullerDelegation
+
+	return t.secretName != "" || ptr.Deref(t.deprecatedImagePullerDelegation, false), nil, nil
 }
 func (t *pullSecretTrait) autoConfigure(e *Environment) error {
-	if t.SecretName == "" {
-		// By default, it uses the registry secret configuration
-		t.SecretName = e.Platform.Registry.Secret
-	}
-
-	//nolint:staticcheck
-	if t.ImagePullerDelegation == nil {
+	if t.deprecatedImagePullerDelegation == nil {
 		var isOpenShift bool
 		if t.Client != nil {
 			var err error
@@ -87,7 +87,7 @@ func (t *pullSecretTrait) autoConfigure(e *Environment) error {
 		isOperatorGlobal := platform.IsCurrentOperatorGlobal()
 		isKitExternal := e.Integration.GetIntegrationKitNamespace(e.Platform.CatalogNamespace) != e.Integration.Namespace
 		needsDelegation := isOpenShift && isOperatorGlobal && isKitExternal
-		t.ImagePullerDelegation = &needsDelegation
+		t.deprecatedImagePullerDelegation = &needsDelegation
 	}
 
 	return nil
@@ -101,8 +101,8 @@ func (t *pullSecretTrait) Apply(e *Environment) error {
 			})
 		})
 	}
-	//nolint:staticcheck
-	if ptr.Deref(t.ImagePullerDelegation, false) {
+
+	if ptr.Deref(t.deprecatedImagePullerDelegation, false) {
 		if err := t.delegateImagePuller(e); err != nil {
 			return err
 		}
