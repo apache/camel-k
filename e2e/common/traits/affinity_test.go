@@ -56,9 +56,9 @@ func TestAffinityTrait(t *testing.T) {
 				"-t", "affinity.enabled=true",
 				"-t", fmt.Sprintf("affinity.node-affinity-labels=kubernetes.io/hostname in(%s)", hostname)).Execute()).To(Succeed())
 			g.Eventually(
-				IntegrationConditionStatus(t, ctx, ns, "java2", v1.IntegrationConditionReady), TestTimeoutMedium).Should(
+				IntegrationConditionStatus(t, ctx, ns, name1, v1.IntegrationConditionReady), TestTimeoutMedium).Should(
 				Equal(corev1.ConditionTrue),
-			)			
+			)
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name1)).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name1), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
@@ -71,17 +71,18 @@ func TestAffinityTrait(t *testing.T) {
 		})
 
 		t.Run("Run Java with pod affinity", func(t *testing.T) {
-			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", "java2",
+			name2 := RandomizedSuffixName("java2")
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name2,
 				"-t", "affinity.enabled=true",
 				"-t", "affinity.pod-affinity-labels=camel.apache.org/integration").Execute()).To(Succeed())
 			g.Eventually(
-				IntegrationConditionStatus(t, ctx, ns, "java2", v1.IntegrationConditionReady), TestTimeoutMedium).Should(
+				IntegrationConditionStatus(t, ctx, ns, name2, v1.IntegrationConditionReady), TestTimeoutMedium).Should(
 				Equal(corev1.ConditionTrue),
-			)			
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "java2")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "java2"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			)
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name2)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name2), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			pod := IntegrationPod(t, ctx, ns, "java2")()
+			pod := IntegrationPod(t, ctx, ns, name2)()
 			g.Expect(pod.Spec.Affinity).NotTo(BeNil())
 			g.Expect(pod.Spec.Affinity.PodAffinity).To(Equal(&corev1.PodAffinity{
 				RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
@@ -91,18 +92,19 @@ func TestAffinityTrait(t *testing.T) {
 		})
 
 		t.Run("Run Java with pod anti affinity", func(t *testing.T) {
-			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", "java3",
+			name3 := RandomizedSuffixName("java3")
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name3,
 				"-t", "affinity.enabled=true",
 				"-t", "affinity.pod-anti-affinity-labels=camel.apache.org/integration").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "java3")).Should(Equal(corev1.PodPending))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name3)).Should(Equal(corev1.PodPending))
 			g.Eventually(
-				IntegrationConditionStatus(t, ctx, ns, "java3", v1.IntegrationConditionReady), TestTimeoutShort).Should(
+				IntegrationConditionStatus(t, ctx, ns, name3, v1.IntegrationConditionReady), TestTimeoutShort).Should(
 				Equal(corev1.ConditionFalse),
 			)
-			g.Eventually(IntegrationCondition(t, ctx, ns, "java3", v1.IntegrationConditionReady)().Message, TestTimeoutMedium).
+			g.Eventually(IntegrationCondition(t, ctx, ns, name3, v1.IntegrationConditionReady)().Message, TestTimeoutMedium).
 				Should(ContainSubstring("didn't match pod anti-affinity rules"))
 
-			pod := IntegrationPod(t, ctx, ns, "java3")()
+			pod := IntegrationPod(t, ctx, ns, name3)()
 			g.Expect(pod.Spec.Affinity).NotTo(BeNil())
 			g.Expect(pod.Spec.Affinity.PodAntiAffinity).To(Equal(&corev1.PodAntiAffinity{
 				RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
