@@ -19,6 +19,7 @@ package operator
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -39,6 +40,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -156,7 +158,10 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	}
 
 	// Set the operator container image if it runs in-container
-	platform.OperatorImage = getOperatorImage()
+	platform.OperatorImage, err = getOperatorImage(ctx, bootstrapClient)
+	if err != nil {
+		log.Info("WARN: Camel K operator is running outside a container. Some features (eg, running build in pod mode) may be disabled!")
+	}
 
 	if !leaderElection {
 		log.Info("Leader election is disabled!")
@@ -270,8 +275,37 @@ func getWatchNamespace() (string, error) {
 }
 
 // getOperatorImage returns the image currently used by the running operator if present (when running out of cluster, it may be absent).
-func getOperatorImage() string {
-	return os.Getenv("CONTAINER_IMAGE")
+func getOperatorImage(ctx context.Context, kubeClient client.Client) (string, error) {
+	podName := os.Getenv("POD_NAME")
+	podNamespace := os.Getenv("NAMESPACE")
+
+	if podName == "" {
+		return "", errors.New("POD_NAME environment variable is not set")
+	}
+	if podNamespace == "" {
+		return "", errors.New("NAMESPACE environment variable is not set")
+	}
+
+	pod := &corev1.Pod{}
+	if err := kubeClient.Get(ctx, types.NamespacedName{
+		Name:      podName,
+		Namespace: podNamespace,
+	}, pod); err != nil {
+		return "", fmt.Errorf("failed to get operator pod %s/%s: %w",
+			podNamespace, podName, err)
+	}
+
+	for _, container := range pod.Spec.Containers {
+		if container.Name == "camel-k-operator" {
+			return container.Image, nil
+		}
+	}
+
+	return "", fmt.Errorf(
+		"camel-k-operator container not found in pod %s/%s",
+		podNamespace,
+		podName,
+	)
 }
 
 func exitOnError(err error, msg string) {
