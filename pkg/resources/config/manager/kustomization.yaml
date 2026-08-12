@@ -28,13 +28,3 @@ patches:
     target:
       kind: Deployment
       name: camel-k-operator
-
-replacements:
-  - source:
-      kind: Deployment
-      fieldPath: spec.template.spec.containers.[name=camel-k-operator].image
-    targets:
-      - select:
-          kind: Deployment
-        fieldPaths:
-          - spec.template.spec.containers.[name=camel-k-operator].env.[name=CONTAINER_IMAGE].value

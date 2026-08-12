@@ -18,11 +18,16 @@ limitations under the License.
 package operator
 
 import (
+	"context"
 	"testing"
 
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 )
 
@@ -132,19 +137,87 @@ func TestGetWatchNamespace(t *testing.T) {
 }
 
 func TestGetOperatorImage(t *testing.T) {
-	t.Run("env variable set", func(t *testing.T) {
-		t.Setenv("CONTAINER_IMAGE", "quay.io/example/operator:latest")
+	scheme := runtime.NewScheme()
+	require.NoError(t, corev1.AddToScheme(scheme))
 
-		image := getOperatorImage()
+	t.Run("returns operator image", func(t *testing.T) {
+		t.Setenv("POD_NAME", "operator-123")
+		t.Setenv("NAMESPACE", "default")
 
-		assert.Equal(t, "quay.io/example/operator:latest", image)
+		pod := &corev1.Pod{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "operator-123",
+				Namespace: "default",
+			},
+			Spec: corev1.PodSpec{
+				Containers: []corev1.Container{
+					{
+						Name:  "camel-k-operator",
+						Image: "my-operator:v1.2.3",
+					},
+				},
+			},
+		}
+
+		kubeClient, err := internal.NewFakeClient(pod)
+		require.NoError(t, err)
+
+		image, err := getOperatorImage(context.Background(), kubeClient)
+
+		require.NoError(t, err)
+		assert.Equal(t, "my-operator:v1.2.3", image)
 	})
 
-	t.Run("env variable not set", func(t *testing.T) {
-		t.Setenv("CONTAINER_IMAGE", "")
+	t.Run("returns error when pod does not exist", func(t *testing.T) {
+		t.Setenv("POD_NAME", "operator-123")
+		t.Setenv("NAMESPACE", "default")
 
-		image := getOperatorImage()
+		kubeClient, err := internal.NewFakeClient()
+		require.NoError(t, err)
 
+		image, err := getOperatorImage(context.Background(), kubeClient)
+
+		require.Error(t, err)
+		assert.Empty(t, image)
+	})
+
+	t.Run("returns error when environment is missing", func(t *testing.T) {
+		t.Setenv("POD_NAME", "")
+		t.Setenv("NAMESPACE", "default")
+
+		kubeClient, err := internal.NewFakeClient()
+		require.NoError(t, err)
+
+		image, err := getOperatorImage(context.Background(), kubeClient)
+
+		require.Error(t, err)
+		assert.Empty(t, image)
+	})
+
+	t.Run("returns error when operator container is missing", func(t *testing.T) {
+		t.Setenv("POD_NAME", "operator-123")
+		t.Setenv("NAMESPACE", "default")
+
+		pod := &corev1.Pod{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "operator-123",
+				Namespace: "default",
+			},
+			Spec: corev1.PodSpec{
+				Containers: []corev1.Container{
+					{
+						Name:  "some-other-container",
+						Image: "other:v1",
+					},
+				},
+			},
+		}
+		kubeClient, err := internal.NewFakeClient(pod)
+		require.NoError(t, err)
+
+		image, err := getOperatorImage(context.Background(), kubeClient)
+
+		require.Error(t, err)
 		assert.Empty(t, image)
 	})
 }
