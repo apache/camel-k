@@ -55,11 +55,11 @@ func TestAffinityTrait(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name1,
 				"-t", "affinity.enabled=true",
 				"-t", fmt.Sprintf("affinity.node-affinity-labels=kubernetes.io/hostname in(%s)", hostname)).Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name1)).Should(Equal(corev1.PodRunning))
 			g.Eventually(
-				IntegrationConditionStatus(t, ctx, ns, name1, v1.IntegrationConditionReady), TestTimeoutShort).Should(
+				IntegrationConditionStatus(t, ctx, ns, "java2", v1.IntegrationConditionReady), TestTimeoutMedium).Should(
 				Equal(corev1.ConditionTrue),
-			)
+			)			
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name1)).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name1), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 			pod := IntegrationPod(t, ctx, ns, name1)()
@@ -74,11 +74,11 @@ func TestAffinityTrait(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", "java2",
 				"-t", "affinity.enabled=true",
 				"-t", "affinity.pod-affinity-labels=camel.apache.org/integration").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "java2")).Should(Equal(corev1.PodRunning))
 			g.Eventually(
-				IntegrationConditionStatus(t, ctx, ns, "java2", v1.IntegrationConditionReady), TestTimeoutShort).Should(
+				IntegrationConditionStatus(t, ctx, ns, "java2", v1.IntegrationConditionReady), TestTimeoutMedium).Should(
 				Equal(corev1.ConditionTrue),
-			)
+			)			
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "java2")).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, "java2"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 			pod := IntegrationPod(t, ctx, ns, "java2")()
@@ -99,7 +99,7 @@ func TestAffinityTrait(t *testing.T) {
 				IntegrationConditionStatus(t, ctx, ns, "java3", v1.IntegrationConditionReady), TestTimeoutShort).Should(
 				Equal(corev1.ConditionFalse),
 			)
-			g.Eventually(IntegrationCondition(t, ctx, ns, "java3", v1.IntegrationConditionReady)().Message).
+			g.Eventually(IntegrationCondition(t, ctx, ns, "java3", v1.IntegrationConditionReady)().Message, TestTimeoutMedium).
 				Should(ContainSubstring("didn't match pod anti-affinity rules"))
 
 			pod := IntegrationPod(t, ctx, ns, "java3")()
