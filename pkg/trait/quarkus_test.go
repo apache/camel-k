@@ -22,6 +22,7 @@ import (
 
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -274,4 +275,17 @@ func TestConfigureQuarkusTraitDeprecatedLanguages(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotNil(t, condition)
 	assert.Equal(t, "The sources contains some language marked as deprecated. This Integration may not be supported in future release.", condition.message)
+}
+
+func TestFailNewIntegrationKit(t *testing.T) {
+	quarkusTrait, environment := createNominalQuarkusTest()
+	environment.Integration.Namespace = "it-ns"
+	environment.Integration.Spec.IntegrationKit = &corev1.ObjectReference{
+		Namespace: "rogue-ns",
+	}
+	environment.Platform.CatalogNamespace = "op-ns"
+
+	_, err := quarkusTrait.newIntegrationKit(environment, fastJarPackageType)
+	require.Error(t, err)
+	assert.Equal(t, "cannot create a Kit outside Integration or Catalog namespaces", err.Error())
 }
