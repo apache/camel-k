@@ -1,3 +1,0 @@
-[submodule ".github/actions/gh-go-mod-generate-sbom"]
-	path = .github/actions/gh-go-mod-generate-sbom
-	url = https://github.com/CycloneDX/gh-gomod-generate-sbom/
