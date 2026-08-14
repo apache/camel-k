@@ -162,7 +162,9 @@ func TestPipeScale(t *testing.T) {
 			g.Expect(err).To(BeNil())
 
 			// Check the readiness condition is still truthy as down-scaling
-			g.Expect(PipeConditionStatus(t, ctx, ns, name, v1.PipeConditionReady)()).To(Equal(corev1.ConditionTrue))
+			g.Eventually(
+				PipeConditionStatus(t, ctx, ns, name, v1.PipeConditionReady),
+			).Should(Equal(corev1.ConditionTrue))
 			// Check the Integration scale subresource Spec field
 			g.Eventually(IntegrationSpecReplicas(t, ctx, ns, name), TestTimeoutShort).
 				Should(gstruct.PointTo(BeNumerically("==", 2)))
@@ -192,12 +194,16 @@ func TestPipeScale(t *testing.T) {
 			g.Expect(err).To(BeNil())
 
 			// Check the readiness condition is still truthy as down-scaling inPipe
-			g.Expect(PipeConditionStatus(t, ctx, ns, name, v1.PipeConditionReady)()).To(Equal(corev1.ConditionTrue))
+			g.Eventually(
+				PipeConditionStatus(t, ctx, ns, name, v1.PipeConditionReady),
+			).Should(Equal(corev1.ConditionTrue))
 			// Check the Pipe scale subresource Spec field
 			g.Eventually(PipeSpecReplicas(t, ctx, ns, name), TestTimeoutShort).
 				Should(gstruct.PointTo(BeNumerically("==", 1)))
 			// Check the readiness condition is still truthy as down-scaling
-			g.Expect(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady)()).To(Equal(corev1.ConditionTrue))
+			g.Eventually(
+				IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
+			).To(Equal(corev1.ConditionTrue))
 			// Check the Integration scale subresource Spec field
 			g.Eventually(IntegrationSpecReplicas(t, ctx, ns, name), TestTimeoutShort).
 				Should(gstruct.PointTo(BeNumerically("==", 1)))
