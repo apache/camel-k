@@ -110,11 +110,13 @@ runs:
       run: |
         NOTEST=1 make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} BUNDLE_IMAGE_NAME=docker.io/testcamelk/camel-k-bundle bundle-push
 
+    - name: Install SBOM generator
+      shell: bash
+      run: go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@latest
+
     - name: Generate SBOM
-      uses: ./.github/actions/gh-go-mod-generate-sbom
-      with:
-        version: v1
-        args: mod -licenses -json -output sbom.json
+      shell: bash
+      run: cyclonedx-gomod mod -licenses -json -output sbom.json
 
     - name: Commit and push nightly branch
       shell: bash
