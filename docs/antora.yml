@@ -26,7 +26,7 @@ asciidoc:
   attributes:
     requires: "'util=camel-website-util,ck=xref:js/ck.js'"
     prerelease: true
-    last-released-version: 2.10.0
+    last-released-version: 2.10.1
     camel-k-runtime-version: 3.15.3
     camel-api-versions: camel.apache.org/v1 # from Makefile BUNDLE_CAMEL_APIS
     camel-version: 4.18.0
@@ -40,4 +40,4 @@ asciidoc:
     operator-fwk-api-version: 0.45.0
     knative-api-version: 0.50.0
     service-binding-op-version: ""
-    prometheus-op-version: 0.93.0
+    prometheus-op-version: 0.93.1

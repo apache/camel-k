@@ -17,6 +17,16 @@
 
 location=$(dirname $0)
 
+echo "Scraping information from Makefile"
+LAST_RELEASED_VERSION=$(grep '^LAST_RELEASED_VERSION ?= ' $location/../Makefile | sed 's/^.* \?= //')
+KUSTOMIZE_VERSION=$(grep '^KUSTOMIZE_VERSION := ' $location/../Makefile | sed 's/^.* \?= //' | sed 's/^.//')
+
+echo "Camel K latest version: $LAST_RELEASED_VERSION"
+echo "Kustomize version: $KUSTOMIZE_VERSION"
+
+yq -i ".asciidoc.attributes.last-released-version = \"$LAST_RELEASED_VERSION\"" $location/../docs/antora.yml
+yq -i ".asciidoc.attributes.kustomize-version = \"$KUSTOMIZE_VERSION\"" $location/../docs/antora.yml
+
 echo "Scraping information from go.mod"
 KNATIVE_API_VERSION=$(grep '^.*knative.dev/eventing ' $location/../go.mod | sed 's/^.* //' | sed 's/^.//')
 KUBE_API_VERSION=$(grep '^.*k8s.io/api ' $location/../go.mod | sed 's/^.* //' | sed 's/^.//')
