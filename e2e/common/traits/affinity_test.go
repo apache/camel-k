@@ -96,13 +96,16 @@ func TestAffinityTrait(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name3,
 				"-t", "affinity.enabled=true",
 				"-t", "affinity.pod-anti-affinity-labels=camel.apache.org/integration").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name3)).Should(Equal(corev1.PodPending))
 			g.Eventually(
-				IntegrationConditionStatus(t, ctx, ns, name3, v1.IntegrationConditionReady), TestTimeoutShort).Should(
+				IntegrationConditionStatus(t, ctx, ns, name3, v1.IntegrationConditionReady), TestTimeoutMedium).Should(
 				Equal(corev1.ConditionFalse),
 			)
-			g.Eventually(IntegrationCondition(t, ctx, ns, name3, v1.IntegrationConditionReady)().Message, TestTimeoutMedium).
-				Should(ContainSubstring("didn't match pod anti-affinity rules"))
+			g.Eventually(func() string {
+				return IntegrationCondition(t, ctx, ns, name3, v1.IntegrationConditionReady)().Message
+			}, TestTimeoutMedium).Should(
+				ContainSubstring("didn't match pod anti-affinity rules"),
+			)
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name3)).Should(Equal(corev1.PodPending))
 
 			pod := IntegrationPod(t, ctx, ns, name3)()
 			g.Expect(pod.Spec.Affinity).NotTo(BeNil())
