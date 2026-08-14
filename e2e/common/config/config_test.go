@@ -39,48 +39,72 @@ func TestRunConfigProperties(t *testing.T) {
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		t.Run("Simple property", func(t *testing.T) {
-			g.Expect(KamelRun(t, ctx, ns, "./files/property-route.yaml", "-p", "my.message=test-property").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "property-route", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))			
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "property-route")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "property-route")).Should(ContainSubstring("test-property"))
+			name := RandomizedSuffixName("property-route")
+			g.Expect(KamelRun(t, ctx, ns, "./files/property-route.yaml",
+				"--name", name,
+				"-p", "my.message=test-property",
+			).Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
+				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("test-property"))
 		})
 
 		t.Run("Property file", func(t *testing.T) {
-			g.Expect(KamelRun(t, ctx, ns, "./files/property-file-route.yaml", "--property", "file:./files/my.properties").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "property-file-route", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))			
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "property-file-route")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "property-file-route")).Should(ContainSubstring("hello world"))
+			name := RandomizedSuffixName("property-file-route")
+			g.Expect(KamelRun(t, ctx, ns, "./files/property-file-route.yaml",
+				"--name", name,
+				"--property", "file:./files/my.properties").Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
+				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("hello world"))
 		})
 
 		t.Run("Property precedence", func(t *testing.T) {
-			g.Expect(KamelRun(t, ctx, ns, "./files/property-file-route.yaml", "-p", "my.key.2=universe", "-p", "file:./files/my.properties").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "property-file-route", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))			
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "property-file-route")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "property-file-route")).Should(ContainSubstring("hello universe"))
+			name := RandomizedSuffixName("property-file-route")
+			g.Expect(KamelRun(t, ctx, ns, "./files/property-file-route.yaml",
+				"--name", name,
+				"-p", "my.key.2=universe",
+				"-p", "file:./files/my.properties",
+			).Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
+				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("hello universe"))
 		})
 
 		t.Run("Property from ConfigMap", func(t *testing.T) {
+			name := RandomizedSuffixName("property-route")
 			var cmData = make(map[string]string)
 			cmData["my.message"] = "my-configmap-property-value"
 			err := CreatePlainTextConfigmap(t, ctx, ns, "my-cm-test-property", cmData)
 			g.Expect(err).To(BeNil())
 
-			g.Expect(KamelRun(t, ctx, ns, "./files/property-route.yaml", "-p", "configmap:my-cm-test-property").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "property-route", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))			
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "property-route")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "property-route")).Should(ContainSubstring("my-configmap-property-value"))
+			g.Expect(KamelRun(t, ctx, ns, "./files/property-route.yaml",
+				"--name", name,
+				"-p", "configmap:my-cm-test-property",
+			).Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
+				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("my-configmap-property-value"))
 		})
 
 		t.Run("Property from Secret", func(t *testing.T) {
+			name := RandomizedSuffixName("property-route")
 			var secData = make(map[string]string)
 			secData["my.message"] = "my-secret-property-value"
 			err := CreatePlainTextSecret(t, ctx, ns, "my-sec-test-property", secData)
 			g.Expect(err).To(BeNil())
 
-			g.Expect(KamelRun(t, ctx, ns, "./files/property-route.yaml", "-p", "secret:my-sec-test-property").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "property-route", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))			
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "property-route")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "property-route")).Should(ContainSubstring("my-secret-property-value"))
+			g.Expect(KamelRun(t, ctx, ns, "./files/property-route.yaml",
+				"--name", name,
+				"-p", "secret:my-sec-test-property").Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
+				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("my-secret-property-value"))
 		})
 
 	})
@@ -113,48 +137,76 @@ func TestRunConfigConfigmaps(t *testing.T) {
 		g.Expect(err).To(BeNil())
 
 		t.Run("Config configmap", func(t *testing.T) {
-			g.Expect(KamelRun(t, ctx, ns, "./files/config-configmap-route.yaml", "--config", "configmap:my-cm").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "config-configmap-route", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))			
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "config-configmap-route")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "config-configmap-route")).Should(ContainSubstring(cmData["my-configmap-key"]))
+			name := RandomizedSuffixName("config-configmap-route")
+			g.Expect(KamelRun(t, ctx, ns, "./files/config-configmap-route.yaml",
+				"--name", name,
+				"--config", "configmap:my-cm",
+			).Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
+				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring(cmData["my-configmap-key"]))
 		})
 
 		t.Run("Config configmap from properties file", func(t *testing.T) {
-			g.Expect(KamelRun(t, ctx, ns, "./files/config-configmap-properties-route.yaml", "--config", "configmap:my-cm-properties-file").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "config-configmap-properties-route", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))			
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "config-configmap-properties-route")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "config-configmap-properties-route")).Should(ContainSubstring("hello world"))
+			name := RandomizedSuffixName("config-configmap-properties-route")
+			g.Expect(KamelRun(t, ctx, ns, "./files/config-configmap-properties-route.yaml",
+				"--name", name,
+				"--config", "configmap:my-cm-properties-file",
+			).Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
+				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("hello world"))
 		})
 
 		t.Run("Config configmap from properties file (interpolated)", func(t *testing.T) {
-			g.Expect(KamelRun(t, ctx, ns, "./files/config-configmap-properties-interpolation-route.yaml", "--config", "configmap:my-cm-properties-file").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "config-configmap-properties-interpolation-route", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))			
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "config-configmap-properties-interpolation-route")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "config-configmap-properties-interpolation-route")).Should(ContainSubstring("hello world"))
+			name := RandomizedSuffixName("config-configmap-properties-interpolation-route")
+			g.Expect(KamelRun(t, ctx, ns, "./files/config-configmap-properties-interpolation-route.yaml",
+				"--name", name,
+				"--config", "configmap:my-cm-properties-file").Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
+				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("hello world"))
 		})
 
 		t.Run("Resource configmap", func(t *testing.T) {
+			name := RandomizedSuffixName("resource-configmap-route")
 			// We can reuse the configmap created previously
-			g.Expect(KamelRun(t, ctx, ns, "./files/resource-configmap-route.yaml", "--resource", "configmap:my-cm").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "resource-configmap-route", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))			
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "resource-configmap-route")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "resource-configmap-route")).Should(ContainSubstring(cmData["my-configmap-key"]))
+			g.Expect(KamelRun(t, ctx, ns, "./files/resource-configmap-route.yaml",
+				"--name", name,
+				"--resource", "configmap:my-cm").Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
+				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring(cmData["my-configmap-key"]))
 		})
 
 		t.Run("Resource configmap with destination", func(t *testing.T) {
-			g.Expect(KamelRun(t, ctx, ns, "./files/resource-configmap-location-route.yaml", "--resource", "configmap:my-cm@/tmp/app").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "resource-configmap-location-route", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))			
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "resource-configmap-location-route")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "resource-configmap-location-route")).Should(ContainSubstring(cmData["my-configmap-key"]))
+			name := RandomizedSuffixName("resource-configmap-location-route")
+			g.Expect(KamelRun(t, ctx, ns, "./files/resource-configmap-location-route.yaml",
+				"--name", name,
+				"--resource", "configmap:my-cm@/tmp/app",
+			).Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
+				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring(cmData["my-configmap-key"]))
 		})
 
 		t.Run("Resource configmap with filtered key and destination", func(t *testing.T) {
+			name := RandomizedSuffixName("resource-configmap-key-location-route")
 			// We'll use the configmap containing 2 values filtering only 1 key
-			g.Expect(KamelRun(t, ctx, ns, "./files/resource-configmap-key-location-route.yaml", "--resource", "configmap:my-cm-multi/my-configmap-key-2@/tmp/app/test.txt").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "resource-configmap-key-location-route", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))			
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "resource-configmap-key-location-route")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "resource-configmap-key-location-route")).ShouldNot(ContainSubstring(cmDataMulti["my-configmap-key"]))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "resource-configmap-key-location-route")).Should(ContainSubstring(cmDataMulti["my-configmap-key-2"]))
+			g.Expect(KamelRun(t, ctx, ns, "./files/resource-configmap-key-location-route.yaml",
+				"--name", name,
+				"--resource", "configmap:my-cm-multi/my-configmap-key-2@/tmp/app/test.txt",
+			).Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
+				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).ShouldNot(ContainSubstring(cmDataMulti["my-configmap-key"]))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring(cmDataMulti["my-configmap-key-2"]))
 		})
 	})
 }
@@ -171,7 +223,8 @@ func TestRunConfigSecrets(t *testing.T) {
 		g.Expect(err).To(BeNil())
 
 		// Store a secret with multi values
-		// kubectl create secret generic my-sec-multi --from-literal=my-secret-key="very top secret" --from-literal=my-secret-key-2="even more secret"
+		// kubectl create secret generic my-sec-multi --from-literal=my-secret-key="very top secret"
+		// --from-literal=my-secret-key-2="even more secret"
 
 		var secDataMulti = make(map[string]string)
 		secDataMulti["my-secret-key"] = "very top secret"
@@ -180,17 +233,27 @@ func TestRunConfigSecrets(t *testing.T) {
 		g.Expect(err).To(BeNil())
 
 		t.Run("Config secret", func(t *testing.T) {
-			g.Expect(KamelRun(t, ctx, ns, "./files/config-secret-route.yaml", "--config", "secret:my-sec").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "config-secret-route", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))			
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "config-secret-route")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "config-secret-route")).Should(ContainSubstring(secData["my-secret-key"]))
+			name := RandomizedSuffixName("config-secret-route")
+			g.Expect(KamelRun(t, ctx, ns, "./files/config-secret-route.yaml",
+				"--name", name,
+				"--config", "secret:my-sec",
+			).Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
+				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring(secData["my-secret-key"]))
 		})
 
 		t.Run("Resource secret", func(t *testing.T) {
-			g.Expect(KamelRun(t, ctx, ns, "./files/resource-secret-route.yaml", "--resource", "secret:my-sec").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "resource-secret-route", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))			
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "resource-secret-route")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "resource-secret-route")).Should(ContainSubstring(secData["my-secret-key"]))
+			name := RandomizedSuffixName("resource-secret-route")
+			g.Expect(KamelRun(t, ctx, ns, "./files/resource-secret-route.yaml",
+				"--name", name,
+				"--resource", "secret:my-sec",
+			).Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
+				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring(secData["my-secret-key"]))
 		})
 
 		/*
@@ -198,11 +261,16 @@ func TestRunConfigSecrets(t *testing.T) {
 		*/
 
 		t.Run("Secret with filtered key", func(t *testing.T) {
-			g.Expect(KamelRun(t, ctx, ns, "./files/config-secret-key-route.yaml", "--config", "secret:my-sec-multi/my-secret-key-2").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "config-secret-key-route", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))			
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "config-secret-key-route")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "config-secret-key-route")).ShouldNot(ContainSubstring(secDataMulti["my-secret-key"]))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "config-secret-key-route")).Should(ContainSubstring(secDataMulti["my-secret-key-2"]))
+			name := RandomizedSuffixName("config-secret-key-route")
+			g.Expect(KamelRun(t, ctx, ns, "./files/config-secret-key-route.yaml",
+				"--name", name,
+				"--config", "secret:my-sec-multi/my-secret-key-2",
+			).Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
+				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).ShouldNot(ContainSubstring(secDataMulti["my-secret-key"]))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring(secDataMulti["my-secret-key-2"]))
 		})
 
 	})
@@ -211,85 +279,126 @@ func TestRunConfigSecrets(t *testing.T) {
 func TestRunConfigBuildProperties(t *testing.T) {
 	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		// will be used by a second test
+		var nameBuildTimeProperty string
 		t.Run("Build time property", func(t *testing.T) {
-			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-route.yaml", "--build-property", "quarkus.application.name=my-super-application").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "build-property-route", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))			
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "build-property-route")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "build-property-route")).Should(ContainSubstring("my-super-application"))
+			name := RandomizedSuffixName("build-property-route")
+			nameBuildTimeProperty = name
+			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-route.yaml",
+				"--name", name,
+				"--build-property", "quarkus.application.name=my-super-application",
+			).Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
+				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("my-super-application"))
 			// Don't delete - we need it for next test execution
 		})
 
 		// We need to check also that the property (which is available in the IntegrationKit) is correctly replaced and that we don't reuse the same kit
 		t.Run("Build time property updated", func(t *testing.T) {
-			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-route.yaml", "--name", "build-property-route-updated", "--build-property", "quarkus.application.name=my-super-application-updated").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "build-property-route-updated", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "build-property-route-updated")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "build-property-route-updated")).Should(ContainSubstring("my-super-application-updated"))
+			name := RandomizedSuffixName("build-property-route-updated")
+			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-route.yaml",
+				"--name", name,
+				"--build-property", "quarkus.application.name=my-super-application-updated",
+			).Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("my-super-application-updated"))
 			// Verify the integration kits are different
-			g.Eventually(IntegrationKitName(t, ctx, ns, "build-property-route-updated")).ShouldNot(Equal(IntegrationKitName(t, ctx, ns, "build-property-route")()))
+			g.Eventually(IntegrationKitName(t, ctx, ns, name)).ShouldNot(Equal(IntegrationKitName(t, ctx, ns, nameBuildTimeProperty)()))
 		})
 
 		// Build-Properties file
 		t.Run("Build time property file", func(t *testing.T) {
-			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-file-route.yaml", "--build-property", "file:./files/quarkus.properties").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "build-property-file-route", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))			
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "build-property-file-route")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "build-property-file-route")).Should(ContainSubstring("my-super-application"))
+			name := RandomizedSuffixName("build-property-file-route")
+			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-file-route.yaml",
+				"--name", name,
+				"--build-property", "file:./files/quarkus.properties",
+			).Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
+				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("my-super-application"))
 		})
 
 		t.Run("Build time property file with precedence", func(t *testing.T) {
-			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-file-route.yaml", "--name", "build-property-file-route-precedence", "--build-property", "quarkus.application.name=my-overridden-application", "--build-property", "file:./files/quarkus.properties").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "build-property-file-route-precedence", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "build-property-file-route-precedence")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "build-property-file-route-precedence")).Should(ContainSubstring("my-overridden-application"))
+			name := RandomizedSuffixName("build-property-file-route-precedence")
+			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-file-route.yaml",
+				"--name", name,
+				"--build-property", "quarkus.application.name=my-overridden-application",
+				"--build-property", "file:./files/quarkus.properties",
+			).Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
+				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("my-overridden-application"))
 		})
 
 		t.Run("Build time property from ConfigMap", func(t *testing.T) {
+			name := RandomizedSuffixName("build-property-file-route-cm")
 			var cmData = make(map[string]string)
 			cmData["quarkus.application.name"] = "my-cool-application"
 			err := CreatePlainTextConfigmap(t, ctx, ns, "my-cm-test-build-property", cmData)
 			g.Expect(err).To(BeNil())
 
-			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-file-route.yaml", "--build-property", "configmap:my-cm-test-build-property").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "build-property-file-route", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))			
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "build-property-file-route")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "build-property-file-route")).Should(ContainSubstring("my-cool-application"))
+			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-file-route.yaml",
+				"--name", name,
+				"--build-property", "configmap:my-cm-test-build-property",
+			).Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("my-cool-application"))
 		})
 
 		t.Run("Build time property from ConfigMap as property file", func(t *testing.T) {
+			name := RandomizedSuffixName("build-property-file-route-cm-prop")
 			var cmData = make(map[string]string)
 			cmData["my.properties"] = "quarkus.application.name=my-super-cool-application"
 			err := CreatePlainTextConfigmap(t, ctx, ns, "my-cm-test-build-properties", cmData)
 			g.Expect(err).To(BeNil())
 
-			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-file-route.yaml", "--name", "build-property-file-route-cm", "--build-property", "configmap:my-cm-test-build-properties").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "build-property-file-route-cm", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "build-property-file-route-cm")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "build-property-file-route-cm")).Should(ContainSubstring("my-super-cool-application"))
+			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-file-route.yaml",
+				"--name", name,
+				"--build-property", "configmap:my-cm-test-build-properties",
+			).Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
+				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("my-super-cool-application"))
 		})
 
 		t.Run("Build time property from Secret", func(t *testing.T) {
+			name := RandomizedSuffixName("build-property-file-route-sec")
 			var secData = make(map[string]string)
 			secData["quarkus.application.name"] = "my-great-application"
 			err := CreatePlainTextSecret(t, ctx, ns, "my-sec-test-build-property", secData)
 			g.Expect(err).To(BeNil())
 
-			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-file-route.yaml", "--build-property", "secret:my-sec-test-build-property").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "build-property-file-route", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))			
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "build-property-file-route")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "build-property-file-route")).Should(ContainSubstring("my-great-application"))
+			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-file-route.yaml",
+				"--name", name,
+				"--build-property", "secret:my-sec-test-build-property",
+			).Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
+				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("my-great-application"))
 		})
 
 		t.Run("Build time property from Secret as property file", func(t *testing.T) {
+			name := RandomizedSuffixName("build-property-file-route-sec-prop")
 			var secData = make(map[string]string)
 			secData["my.properties"] = "quarkus.application.name=my-awesome-application"
 			err := CreatePlainTextSecret(t, ctx, ns, "my-sec-test-build-properties", secData)
 			g.Expect(err).To(BeNil())
 
-			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-file-route.yaml", "--name", "build-property-file-route-secret", "--build-property", "secret:my-sec-test-build-properties").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "build-property-file-route-secret", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "build-property-file-route-secret")).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "build-property-file-route-secret")).Should(ContainSubstring("my-awesome-application"))
+			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-file-route.yaml",
+				"--name", name,
+				"--build-property", "secret:my-sec-test-build-properties").Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
+				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("my-awesome-application"))
 		})
 
 	})
