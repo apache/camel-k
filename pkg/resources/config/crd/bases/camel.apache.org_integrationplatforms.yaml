@@ -2227,9 +2227,7 @@ spec:
                           Deprecated: may be removed in future releases.
                         type: boolean
                       secretName:
-                        description: The pull secret name to set on the Pod. If left
-                          empty this is automatically taken from the platform registry
-                          configuration.
+                        description: The pull secret name to set on the Pod.
                         type: string
                     type: object
                   quarkus:
@@ -4780,9 +4778,7 @@ spec:
                           Deprecated: may be removed in future releases.
                         type: boolean
                       secretName:
-                        description: The pull secret name to set on the Pod. If left
-                          empty this is automatically taken from the platform registry
-                          configuration.
+                        description: The pull secret name to set on the Pod.
                         type: string
                     type: object
                   quarkus:

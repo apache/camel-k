@@ -20,14 +20,6 @@ You will need to add or edit any existing registry environment variable configur
 | Address (URL, hostname or IP address) of the container registry.
 |
 
-| REGISTRY_SVC_NAMESPACE
-| Kubernetes namespace where the container registry service is deployed.
-|
-
-| REGISTRY_SVC_NAME
-| Name of the Kubernetes service exposing the container registry.
-|
-
 | REGISTRY_INSECURE
 | Whether to allow insecure (non-TLS) connections to the registry.
 | false
@@ -46,9 +38,7 @@ You will need to add or edit any existing registry environment variable configur
 
 |===
 
-You need to provide at least the `REGISTRY_ADDRESS` parameter or `REGISTRY_SVC_NAME` (and additionally `REGISTRY_SVC_NAMESPACE` if the registry is in a namespace different from the operator namespace).
-
-NOTE: if you configure `REGISTRY_SVC_NAME` you need to make sure the the Service with the given name can be read by the operator, assigning the proper RBAC privileges.
+You need to provide at least the `REGISTRY_ADDRESS` parameter with a domain or an IP reachable by your cluster.
 
 [[how-to-configure]]
 == How to configure Camel K container registry

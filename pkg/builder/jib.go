@@ -84,10 +84,10 @@ func (t *jibTask) Do(ctx context.Context) v1.BuildStatus {
 	registryConfigDir := ""
 	if t.task.Registry.Secret != "" {
 		registryConfigDir, err = registry.MountSecretRegistryConfig(ctx, t.c, t.build.Namespace, "jib-secret-", t.task.Registry.Secret)
-		os.Setenv(jib.JibRegistryConfigEnvVar, registryConfigDir)
 		if err != nil {
 			return status.Failed(err)
 		}
+		os.Setenv(jib.JibRegistryConfigEnvVar, registryConfigDir)
 	}
 
 	mavenArgs := buildJibMavenArgs(mavenDir, t.task.Image, status.BaseImage, t.task.Registry.Insecure, t.task.Configuration.ImagePlatforms)
@@ -160,6 +160,7 @@ func buildJibMavenArgs(mavenDir, image, baseImage string, insecureRegistry bool,
 
 	if insecureRegistry {
 		mavenArgs = append(mavenArgs, jib.JibMavenInsecureRegistries+"true")
+		mavenArgs = append(mavenArgs, jib.JibMavenSendCredentialsOverHTTP+"true")
 	}
 
 	return mavenArgs

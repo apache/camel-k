@@ -75,11 +75,8 @@ func InstallOperator(t *testing.T, ctx context.Context, g *WithT, ns string) {
 func InstallOperatorWithConf(t *testing.T, ctx context.Context, g *WithT, ns, operatorID string, global bool, envs map[string]string) {
 	lock.Lock()
 	defer lock.Unlock()
-	KAMEL_INSTALL_REGISTRY := os.Getenv("KAMEL_INSTALL_REGISTRY")
 	args := []string{fmt.Sprintf("NAMESPACE=%s", ns)}
-	if KAMEL_INSTALL_REGISTRY != "" {
-		args = append(args, fmt.Sprintf("REGISTRY=%s", KAMEL_INSTALL_REGISTRY))
-	}
+
 	if operatorID != "" {
 		fmt.Printf("Setting operator ID property as %s\n", operatorID)
 		args = append(args, fmt.Sprintf("OPERATOR_ID=%s", operatorID))

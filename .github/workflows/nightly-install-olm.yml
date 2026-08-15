@@ -73,6 +73,17 @@ jobs:
         echo "Setting bundle image name as as $BUNDLE_IMAGE_NAME which is required by OLM tests"
         BUNDLE_IMAGE_NAME=docker.io/testcamelk/camel-k-bundle make bundle-push
 
+    - name: Create registry secret namespace
+      shell: bash
+      run: |
+        kubectl create ns camel-k
+        E2E_TEST_REGISTRY_CONFIG_COPY=true
+        echo "E2E_TEST_REGISTRY_CONFIG_COPY=$E2E_TEST_REGISTRY_CONFIG_COPY" >> $GITHUB_ENV
+        echo "Setting E2E_TEST_REGISTRY_CONFIG_COPY=true in order to automate the copy of the registry config for operator install"
+
+    - name: Registry setting
+      uses: ./.github/actions/registry-setting
+
     - name: Run tests
       shell: bash
       run: |

@@ -73,10 +73,17 @@ jobs:
     - name: Infra setting
       uses: ./.github/actions/infra-setting
 
-    - name: Install operator
+    - name: Create operator namespace
       shell: bash
       run: |
         kubectl create ns camel-k
+
+    - name: Registry setting
+      uses: ./.github/actions/registry-setting
+
+    - name: Install operator
+      shell: bash
+      run: |
         make install-k8s-global
         # Install Apache Kamelets catalog
         mvn -q dependency:copy -Dartifact=org.apache.camel.kamelets:camel-kamelets:4.18.1:jar -Dmdep.useBaseVersion=true -DoutputDirectory=/tmp

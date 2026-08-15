@@ -30,6 +30,10 @@ const JibMavenContainerUser = "-Djib.container.user="
 const JibMavenFromPlatforms = "-Djib.from.platforms="
 const JibMavenBaseImageCache = "-Djib.baseImageCache="
 const JibMavenInsecureRegistries = "-Djib.allowInsecureRegistries="
+
+// JibMavenSendCredentialsOverHTTP
+// #nosec G101 -- This is a Jib configuration property, not a credential.
+const JibMavenSendCredentialsOverHTTP = "-DsendCredentialsOverHttp="
 const JibDigestFile = "target/jib-image.digest"
 const JibMavenPluginVersionDefault = "3.4.1"
 const JibLayerFilterExtensionMavenVersionDefault = "0.3.0"

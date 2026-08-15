@@ -15,20 +15,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package install
+package registry
 
 import (
-	"context"
+	"os"
+	"path/filepath"
+	"testing"
 
-	"github.com/apache/camel-k/v2/pkg/client"
-	logutil "github.com/apache/camel-k/v2/pkg/util/log"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-// OperatorStartupOptionalTools tries to install optional tools at operator startup and warns if something goes wrong.
-func OperatorStartupOptionalTools(ctx context.Context, c client.Client, log logutil.Logger) {
-	// Try to register the OpenShift CLI Download link if possible
-	if err := OpenShiftConsoleDownloadLink(ctx, c); err != nil {
-		log.Info("Cannot install OpenShift CLI download link: skipping.")
-		log.Debug("Error while installing OpenShift CLI download link", "error", err)
-	}
+func TestReadSecretConfFromEnvVar(t *testing.T) {
+	t.Setenv(RegistrySecretConfEnvVar, "some s3cr3t")
+	dir, err := MountSecretRegistryConfig(t.Context(), nil, "ns", "test", "secret")
+	require.NoError(t, err)
+	assert.NotEmpty(t, dir)
+
+	data, err := os.ReadFile(filepath.Join(dir, jibConfigExtension))
+	require.NoError(t, err)
+	assert.Equal(t, []byte("some s3cr3t"), data)
 }

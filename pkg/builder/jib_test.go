@@ -35,7 +35,8 @@ func TestJibBuildMavenArgs(t *testing.T) {
 	args := buildJibMavenArgs(tmpMvnCtxDir, "my-image", "my-base-image", true, nil)
 	expectedParams := strings.Split(
 		fmt.Sprintf("jib:build -Djib.disableUpdateChecks=true -P jib -Djib.to.image=my-image "+
-			"-Djib.from.image=my-base-image -Djib.baseImageCache=%s -Djib.container.user=1000 -Djib.allowInsecureRegistries=true", tmpMvnCtxDir+"/jib"),
+			"-Djib.from.image=my-base-image -Djib.baseImageCache=%s -Djib.container.user=1000 "+
+			"-Djib.allowInsecureRegistries=true -DsendCredentialsOverHttp=true", tmpMvnCtxDir+"/jib"),
 		" ")
 	assert.Equal(t, expectedParams, args)
 }
@@ -45,7 +46,8 @@ func TestJibBuildMavenArgsWithPlatforms(t *testing.T) {
 	args := buildJibMavenArgs(tmpMvnCtxDir, "my-image", "my-base-image", true, []string{"amd64", "arm64"})
 	expectedParams := strings.Split(
 		fmt.Sprintf("jib:build -Djib.disableUpdateChecks=true -P jib -Djib.to.image=my-image "+
-			"-Djib.from.image=my-base-image -Djib.baseImageCache=%s -Djib.container.user=1000 -Djib.from.platforms=amd64,arm64 -Djib.allowInsecureRegistries=true",
+			"-Djib.from.image=my-base-image -Djib.baseImageCache=%s -Djib.container.user=1000 -Djib.from.platforms=amd64,arm64 "+
+			"-Djib.allowInsecureRegistries=true -DsendCredentialsOverHttp=true",
 			tmpMvnCtxDir+"/jib"),
 		" ")
 	assert.Equal(t, expectedParams, args)

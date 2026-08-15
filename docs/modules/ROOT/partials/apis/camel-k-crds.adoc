@@ -9183,13 +9183,11 @@ The `PodMonitor` resource labels, applicable when `pod-monitor` is `true`.
 
 * <<#_camel_apache_org_v1_Traits, Traits>>
 
-The Pull Secret trait sets a pull secret on the pod,
-to allow Kubernetes to retrieve the container image from an external registry.
+The Pull Secret trait sets a pull secret on the pod to allow Kubernetes to retrieve
+the container image from an external registry.
 
-It's enabled by default whenever you configure authentication for an external container registry,
-so it assumes that external registries are private.
-
-If your registry does not need authentication for pulling images, you can disable this trait.
+In a production environment it is highly advisable to provide such authentication
+and ensure the secret exists in the Integration namespace.
 
 
 [cols="2,2a",options="header"]
@@ -9209,7 +9207,7 @@ string
 |
 
 
-The pull secret name to set on the Pod. If left empty this is automatically taken from the platform registry configuration.
+The pull secret name to set on the Pod.
 
 |`imagePullerDelegation` +
 bool

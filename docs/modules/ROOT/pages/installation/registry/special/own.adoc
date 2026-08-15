@@ -67,8 +67,7 @@ Now you can use such value into your environment variable configuration:
 
 ```
 REGISTRY_INSECURE: true
-REGISTRY_SVC_NAMESPACE: <the namespace where the pod is running>
-REGISTRY_SVC_NAME: registry
+REGISTRY_ADDRESS: 10.96.112.40
 ```
 
 The above installation should be able to push and pull Integration images correctly.

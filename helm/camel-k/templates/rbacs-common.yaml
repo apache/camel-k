@@ -116,22 +116,6 @@ rules:
   - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  labels:
-    app: camel-k
-  name: registry-reader
-rules:
-- apiGroups:
-  - ""
-  resourceNames:
-  - registry
-  resources:
-  - services
-  verbs:
-  - get
----
-apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   labels:
@@ -173,18 +157,3 @@ subjects:
 - apiGroup: rbac.authorization.k8s.io
   kind: Group
   name: system:authenticated
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  labels:
-    app: camel-k
-  name: registry-reader-binding
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: registry-reader
-subjects:
-- kind: ServiceAccount
-  name: {{ include "camel-k.fullname" . }}-operator
-  namespace: '{{ .Release.Namespace }}'

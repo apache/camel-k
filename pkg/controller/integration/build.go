@@ -287,16 +287,6 @@ func (action *buildAction) createBuilderRole(ctx context.Context, ns string) err
 				Resources: []string{"builds/status"},
 				Verbs:     []string{"get", "patch", "update"},
 			},
-			{
-				APIGroups: []string{""},
-				Resources: []string{"secrets"},
-				Verbs:     []string{"get"},
-			},
-			{
-				APIGroups: []string{""},
-				Resources: []string{"configmaps"},
-				Verbs:     []string{"get", "list"},
-			},
 		},
 	}
 	action.L.Infof("Creating %s Role in namespace %s", r.Name, r.Namespace)
