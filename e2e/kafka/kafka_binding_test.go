@@ -34,34 +34,33 @@ import (
 )
 
 func TestKafka(t *testing.T) {
-	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		// NOTE: all resources are local to kafka namespace
+	WithExistingNamedTestNamespace(t, func(ctx context.Context, g *WithT, kafkaNs string) {
 		t.Run("Strimzi Kafka resource", func(t *testing.T) {
 			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/timer-to-kafka.yaml"))
 			// Wait for the readiness of the Integration
-			g.Eventually(IntegrationConditionStatus(t, ctx, "kafka", "timer-to-kafka", v1.IntegrationConditionReady), TestTimeoutMedium).
+			g.Eventually(IntegrationConditionStatus(t, ctx, kafkaNs, "timer-to-kafka", v1.IntegrationConditionReady), TestTimeoutMedium).
 				Should(Equal(corev1.ConditionTrue))
 			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/kafka-to-log.yaml"))
-			g.Eventually(IntegrationConditionStatus(t, ctx, "kafka", "kafka-to-log", v1.IntegrationConditionReady), TestTimeoutMedium).
+			g.Eventually(IntegrationConditionStatus(t, ctx, kafkaNs, "kafka-to-log", v1.IntegrationConditionReady), TestTimeoutMedium).
 				Should(Equal(corev1.ConditionTrue))
 			// Verify we are consuming some record (the body is null as the timer is pushing nothing)
-			g.Eventually(IntegrationLogs(t, ctx, "kafka", "kafka-to-log")).Should(ContainSubstring("Body is null"))
+			g.Eventually(IntegrationLogs(t, ctx, kafkaNs, "kafka-to-log")).Should(ContainSubstring("Body is null"))
 
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", "kafka").Execute()).To(Succeed())
+			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", kafkaNs).Execute()).To(Succeed())
 		})
 
 		t.Run("Strimzi KafkaTopic resource", func(t *testing.T) {
 			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/timer-to-kafkatopic.yaml"))
 			// Wait for the readiness of the Integration
-			g.Eventually(IntegrationConditionStatus(t, ctx, "kafka", "timer-to-kafkatopic", v1.IntegrationConditionReady), TestTimeoutMedium).
+			g.Eventually(IntegrationConditionStatus(t, ctx, kafkaNs, "timer-to-kafkatopic", v1.IntegrationConditionReady), TestTimeoutMedium).
 				Should(Equal(corev1.ConditionTrue))
 			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/kafkatopic-to-log.yaml"))
-			g.Eventually(IntegrationConditionStatus(t, ctx, "kafka", "kafkatopic-to-log", v1.IntegrationConditionReady), TestTimeoutMedium).
+			g.Eventually(IntegrationConditionStatus(t, ctx, kafkaNs, "kafkatopic-to-log", v1.IntegrationConditionReady), TestTimeoutMedium).
 				Should(Equal(corev1.ConditionTrue))
 			// Verify we are consuming some record (the body is null as the timer is pushing nothing)
-			g.Eventually(IntegrationLogs(t, ctx, "kafka", "kafkatopic-to-log")).Should(ContainSubstring("Body is null"))
+			g.Eventually(IntegrationLogs(t, ctx, kafkaNs, "kafkatopic-to-log")).Should(ContainSubstring("Body is null"))
 
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", "kafka").Execute()).To(Succeed())
+			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", kafkaNs).Execute()).To(Succeed())
 		})
-	})
+	}, "kafka")
 }

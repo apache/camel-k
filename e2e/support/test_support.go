@@ -215,6 +215,9 @@ func KamelRunWithID(t *testing.T, ctx context.Context, operatorID string, namesp
 }
 
 func kamelRunWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string, args ...string) *cobra.Command {
+	if os.Getenv("E2E_TEST_REGISTRY_SECRET_COPY") == "true" {
+		args = append(args, "-t", "pull-secret.secret-name=my-registry")
+	}
 	return kamelCommandWithContext(t, ctx, "run", operatorID, namespace, args...)
 }
 
@@ -1957,11 +1960,27 @@ func WithNewTestNamespace(t *testing.T, doRun func(context.Context, *gomega.With
 	invokeUserTestCode(t, testContext, ns.GetName(), doRun)
 }
 
-func WithNamedTestNamespace(t *testing.T, doRun func(context.Context, *gomega.WithT, string), namespace string) {
+func WithNamedTestNamespace(t *testing.T, doRun func(context.Context, *gomega.WithT, string), namespace string, deleteOnCompletion bool) {
 	ns := NewNamedTestNamespace(t, testContext, namespace, false)
-	defer deleteTestNamespace(t, testContext, ns)
+	if deleteOnCompletion {
+		defer deleteTestNamespace(t, testContext, ns)
+	}
 
 	invokeUserTestCode(t, testContext, ns.GetName(), doRun)
+}
+
+func WithExistingNamedTestNamespace(t *testing.T, doRun func(context.Context, *gomega.WithT, string), namespace string) {
+	// Required to copy the registry secret previously set on the camel-k namespace
+	if os.Getenv("E2E_TEST_REGISTRY_SECRET_COPY") == "true" {
+		copySecret(t, testContext, TestClient(t), "my-registry", "camel-k", namespace)
+	}
+	// Required to copy the registry config previously set on the camel-k namespace
+	// This is used by "advanced" tests which are installing the operator on their own
+	if os.Getenv("E2E_TEST_REGISTRY_CONFIG_COPY") == "true" {
+		copyConfigMap(t, testContext, TestClient(t), "camel-k-operator-configmap-configuration", "camel-k", namespace)
+	}
+
+	invokeUserTestCode(t, testContext, namespace, doRun)
 }
 
 func WithNewTestNamespaceWithKnativeBroker(t *testing.T, doRun func(context.Context, *gomega.WithT, string)) {
@@ -2098,6 +2117,8 @@ func NewNamedTestNamespace(t *testing.T, ctx context.Context, name string, injec
 	brokerLabel := "eventing.knative.dev/injection"
 	c := TestClient(t)
 
+	var namespaceOrProject ctrl.Object
+
 	if oc, err := openshift.IsOpenShift(TestClient(t)); err != nil {
 		failTest(t, err)
 	} else if oc {
@@ -2150,7 +2171,7 @@ func NewNamedTestNamespace(t *testing.T, ctx context.Context, name string, injec
 				}
 			}
 		}
-		return project
+		namespaceOrProject = project
 	} else {
 		namespace := &corev1.Namespace{
 			TypeMeta: metav1.TypeMeta{
@@ -2169,10 +2190,87 @@ func NewNamedTestNamespace(t *testing.T, ctx context.Context, name string, injec
 		if err := TestClient(t).Create(ctx, namespace); err != nil {
 			failTest(t, err)
 		}
-		return namespace
+		namespaceOrProject = namespace
 	}
 
-	return nil
+	// Required to copy the registry secret previously set on the camel-k namespace
+	if os.Getenv("E2E_TEST_REGISTRY_SECRET_COPY") == "true" {
+		copySecret(t, ctx, c, "my-registry", "camel-k", name)
+	}
+	// Required to copy the registry config previously set on the camel-k namespace
+	// This is used by "advanced" tests which are installing the operator on their own
+	if os.Getenv("E2E_TEST_REGISTRY_CONFIG_COPY") == "true" {
+		copyConfigMap(t, ctx, c, "camel-k-operator-configmap-configuration", "camel-k", name)
+	}
+
+	return namespaceOrProject
+}
+
+func copySecret(
+	t *testing.T,
+	ctx context.Context,
+	c client.Client,
+	secretName string,
+	sourceNamespace string,
+	targetNamespace string,
+) {
+	source := &corev1.Secret{}
+	if err := c.Get(
+		ctx,
+		types.NamespacedName{
+			Name:      secretName,
+			Namespace: sourceNamespace,
+		},
+		source,
+	); err != nil {
+		failTest(t, err)
+	}
+
+	target := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      source.Name,
+			Namespace: targetNamespace,
+		},
+		Type: source.Type,
+		Data: source.Data,
+	}
+
+	if err := c.Create(ctx, target); err != nil {
+		fmt.Println("Warning, the secret creation failed: ", err.Error())
+	}
+}
+
+func copyConfigMap(
+	t *testing.T,
+	ctx context.Context,
+	c client.Client,
+	cmName string,
+	sourceNamespace string,
+	targetNamespace string,
+) {
+	source := &corev1.ConfigMap{}
+	if err := c.Get(
+		ctx,
+		types.NamespacedName{
+			Name:      cmName,
+			Namespace: sourceNamespace,
+		},
+		source,
+	); err != nil {
+		failTest(t, err)
+	}
+
+	target := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      source.Name,
+			Namespace: targetNamespace,
+		},
+		Data: source.Data,
+	}
+
+	if err := c.Create(ctx, target); err != nil {
+		failTest(t, err)
+	}
 }
 
 func GetOutputString(command *cobra.Command) string {

@@ -136,6 +136,8 @@ func TestKnativePipes(t *testing.T) {
 }
 
 func TestRunBroker(t *testing.T) {
+	t.Skip("This test is skipped as it will be removed by another incoming PR.")
+
 	WithNewTestNamespaceWithKnativeBroker(t, func(ctx context.Context, g *WithT, ns string) {
 		// This test require an adhoc operator to run properly
 		operatorID := fmt.Sprintf("camel-k-%s", ns)

@@ -55,13 +55,6 @@ type Platform struct {
 // getEnvPlatform is in charge to parse the environment variables of the operator and return the Platform object.
 func getEnvPlatform() Platform {
 	registry := registry()
-	// The operator will eventually try to get the registry address from a service, if provided
-	if registry.Address == "" && GetEnvOrDefault("REGISTRY_SVC_NAME", "") == "" {
-		// TODO: fail fast exiting the program when we don't support IntegrationPlatform.
-		log.Info("failed to initialize singleton platform from environment variables: missing mandatory env var REGISTRY_ADDRESS or " +
-			"REGISTRY_SVC_NAME (and REGISTRY_SVC_NAMESPACE). " +
-			"Mind that this will be required when we stop supporting IntegrationPlatform in future releases.")
-	}
 
 	return Platform{
 		CatalogNamespace:     GetOperatorNamespace(),
@@ -264,7 +257,7 @@ func registry() v1.RegistrySpec {
 	insecure, err := strconv.ParseBool(GetEnvOrDefault("REGISTRY_INSECURE", "false"))
 	if err != nil {
 		insecure = false
-		log.Error(err, "could not parse REGISTRY_INSECURE environment variable, fallback to true")
+		log.Error(err, "could not parse REGISTRY_INSECURE environment variable, fallback to false")
 	}
 	registry := v1.RegistrySpec{
 		Insecure:     insecure,

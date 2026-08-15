@@ -35,7 +35,7 @@ import (
 )
 
 func TestKafkaKedaAutoscale(t *testing.T) {
-	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+	WithExistingNamedTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		// NOTE: all resources are local to kafka namespace
 
 		// The scenario is the following:
@@ -44,7 +44,6 @@ func TestKafkaKedaAutoscale(t *testing.T) {
 		// 3. Stop the Kafka producer and verify the consumer scales to 0 accordingly
 		t.Run("Serverless Kafka", func(t *testing.T) {
 			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/keda-kafkatopic-to-log.yaml"))
-			ns := "kafka"
 			consumerName := "keda-kafkatopic-to-log"
 			// Start consumer
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, consumerName, v1.IntegrationConditionReady), TestTimeoutMedium).
@@ -71,14 +70,13 @@ func TestKafkaKedaAutoscale(t *testing.T) {
 				Should(gstruct.PointTo(BeNumerically("==", 0)))
 			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
-	})
+	}, "kafka")
 }
 
 func TestKafkaKedaAutoDiscovery(t *testing.T) {
-	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+	WithExistingNamedTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		t.Run("Auto-discovery Kafka", func(t *testing.T) {
 			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/keda-it-kafkatopic-to-log-auto.yaml"))
-			ns := "kafka"
 			integrationName := "keda-kafka-auto-discovery"
 
 			// Wait for ScaledObject
@@ -96,14 +94,13 @@ func TestKafkaKedaAutoDiscovery(t *testing.T) {
 
 			g.Expect(Kamel(t, ctx, "delete", integrationName, "-n", ns).Execute()).To(Succeed())
 		})
-	})
+	}, "kafka")
 }
 
 func TestKafkaKedaAutoDiscoveryWithManualTrigger(t *testing.T) {
-	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+	WithExistingNamedTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		t.Run("Auto-discovery with manual trigger (Case 2)", func(t *testing.T) {
 			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/keda-kafka-auto-discovery-with-manual.yaml"))
-			ns := "kafka"
 			integrationName := "keda-kafka-auto-discovery-with-manual"
 
 			g.Eventually(ScaledObject(t, ctx, ns, integrationName), TestTimeoutMedium).
@@ -127,14 +124,13 @@ func TestKafkaKedaAutoDiscoveryWithManualTrigger(t *testing.T) {
 
 			g.Expect(Kamel(t, ctx, "delete", integrationName, "-n", ns).Execute()).To(Succeed())
 		})
-	})
+	}, "kafka")
 }
 
 func TestKafkaKedaAutoMetadata(t *testing.T) {
-	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+	WithExistingNamedTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		t.Run("Auto-discovery with autoMetadata merge (Case 3)", func(t *testing.T) {
 			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/keda-kafka-auto-metadata.yaml"))
-			ns := "kafka"
 			integrationName := "keda-kafka-auto-metadata"
 
 			g.Eventually(ScaledObject(t, ctx, ns, integrationName), TestTimeoutMedium).
@@ -155,5 +151,5 @@ func TestKafkaKedaAutoMetadata(t *testing.T) {
 
 			g.Expect(Kamel(t, ctx, "delete", integrationName, "-n", ns).Execute()).To(Succeed())
 		})
-	})
+	}, "kafka")
 }

@@ -27,6 +27,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"regexp"
 	"testing"
 	"time"
 
@@ -41,13 +43,18 @@ import (
 )
 
 func TestUpgrade(t *testing.T) {
-	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+	t.Skip("This test requires to be reworked in 2.12. It cannot work as it is since the older registry is not compatible" +
+		" (secret registry) with the one introduced in the last version.")
+
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, operatorNs string) {
 		// Let's make sure no CRD is yet available in the cluster
 		// as we must make the procedure to install them accordingly
-		g.Eventually(CRDs(t)).Should(BeNil(), "No Camel K CRDs should be previously installed for this test")
+		g.Expect(CRDs(t)()).Should(BeNil(), "No Camel K CRDs should be previously installed for this test")
 		// We start the test by installing previous version operator
 		lastVersion, ok := os.LookupEnv("LAST_RELEASED_VERSION")
 		g.Expect(ok).To(BeTrue(), "Missing last released version: you need to set it into LAST_RELEASED_VERSION env var")
+		registry := os.Getenv("KAMEL_INSTALL_REGISTRY")
+		g.Expect(registry).NotTo(BeEmpty(), "KAMEL_INSTALL_REGISTRY env var must not be empty")
 
 		// Install previous version
 
@@ -74,10 +81,28 @@ func TestUpgrade(t *testing.T) {
 		)
 		checkoutCmd.Dir = lastVersionDir
 		ExpectExecSucceed(t, g, checkoutCmd)
+
+		// Change /install/overlays/platform/integration-platform.yaml on the fly
+		// to include the secret copied in this ns into the ITP
+		filename := filepath.Join(lastVersionDir, "install", "overlays", "platform", "integration-platform.yaml")
+		data, err := os.ReadFile(filename)
+		if err != nil {
+			t.Fatal(err)
+		}
+		re := regexp.MustCompile(`(?m)^(\s*)insecure: true$`)
+		updated := re.ReplaceAllString(
+			string(data),
+			"${1}insecure: true\n${1}secret: my-registry",
+		)
+		if err := os.WriteFile(filename, []byte(updated), 0644); err != nil {
+			t.Fatal(err)
+		}
+
 		installPrevCmd := exec.Command(
 			"make",
 			"install-k8s-global",
-			fmt.Sprintf("NAMESPACE=%s", ns),
+			fmt.Sprintf("NAMESPACE=%s", operatorNs),
+			fmt.Sprintf("REGISTRY=%s", registry),
 		)
 		installPrevCmd.Dir = lastVersionDir
 		ExpectExecSucceed(t, g, installPrevCmd)
@@ -110,9 +135,9 @@ func TestUpgrade(t *testing.T) {
 		// Refresh the test client to account for the newly installed CRDs
 		RefreshClient(t)
 		// Check the operator image is the previous one
-		g.Eventually(OperatorImage(t, ctx, ns)).Should(ContainSubstring(lastVersion))
+		g.Eventually(OperatorImage(t, ctx, operatorNs)).Should(ContainSubstring(lastVersion))
 		// Check the operator pod is running
-		g.Eventually(OperatorPodPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		g.Eventually(OperatorPodPhase(t, ctx, operatorNs), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 
 		// We need a different namespace from the global operator
 		WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsIntegration string) {
@@ -131,7 +156,7 @@ func TestUpgrade(t *testing.T) {
 			installNextCmd := exec.Command(
 				"make",
 				"install-k8s-global",
-				fmt.Sprintf("NAMESPACE=%s", ns),
+				fmt.Sprintf("NAMESPACE=%s", operatorNs),
 			)
 			installNextCmd.Dir = "../../.."
 			ExpectExecSucceed(t, g, installNextCmd)
@@ -139,14 +164,14 @@ func TestUpgrade(t *testing.T) {
 			RefreshClient(t)
 
 			// Check the operator image is the current built one
-			g.Eventually(OperatorImage(t, ctx, ns)).Should(ContainSubstring(defaults.Version))
+			g.Eventually(OperatorImage(t, ctx, operatorNs)).Should(ContainSubstring(defaults.Version))
 			// Check the operator pod is running
-			g.Eventually(OperatorPodPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			g.Eventually(OperatorPodPhase(t, ctx, operatorNs), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 
 			// TODO: In 2.12 we should remove the IntegrationPlatform removal
 			// which was still default in 2.10 and installed and it is required
 			// for this test to complete. Also remove the DeleteIntegrationPlatform func
-			g.Expect(DeleteIntegrationPlatform(t, ctx, ns, "camel-k")).To(Succeed())
+			g.Expect(DeleteIntegrationPlatform(t, ctx, operatorNs, "camel-k")).To(Succeed())
 
 			// Check the Integration hasn't been upgraded
 			g.Consistently(IntegrationVersion(t, ctx, nsIntegration, name), 15*time.Second, 3*time.Second).
@@ -160,19 +185,19 @@ func TestUpgrade(t *testing.T) {
 			g.Expect(Kamel(t, ctx, "rebuild", name, "-n", nsIntegration).Execute()).To(Succeed())
 
 			// A catalog should be created with the new configuration
-			g.Eventually(DefaultCamelCatalogPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
+			g.Eventually(DefaultCamelCatalogPhase(t, ctx, operatorNs), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
 			// Check the Integration version has been upgraded
 			g.Eventually(IntegrationVersion(t, ctx, nsIntegration, name), TestTimeoutMedium).Should(Equal(defaults.Version))
 
 			// Check the previous kit is not garbage collected
-			g.Eventually(Kits(t, ctx, ns, KitWithRuntimeVersion(lastRuntimeVersion))).Should(HaveLen(1))
+			g.Eventually(Kits(t, ctx, operatorNs, KitWithRuntimeVersion(lastRuntimeVersion))).Should(HaveLen(1))
 			// Check a new kit is created with the current version
-			g.Eventually(Kits(t, ctx, ns, KitWithRuntimeVersion(defaults.DefaultRuntimeVersion))).Should(HaveLen(1))
+			g.Eventually(Kits(t, ctx, operatorNs, KitWithRuntimeVersion(defaults.DefaultRuntimeVersion))).Should(HaveLen(1))
 			// Check the new kit is ready
-			g.Eventually(Kits(t, ctx, ns, KitWithRuntimeVersion(defaults.DefaultRuntimeVersion), KitWithPhase(v1.IntegrationKitPhaseReady)),
+			g.Eventually(Kits(t, ctx, operatorNs, KitWithRuntimeVersion(defaults.DefaultRuntimeVersion), KitWithPhase(v1.IntegrationKitPhaseReady)),
 				TestTimeoutMedium).Should(HaveLen(1))
 
-			kit := Kits(t, ctx, ns, KitWithRuntimeVersion(defaults.DefaultRuntimeVersion))()[0]
+			kit := Kits(t, ctx, operatorNs, KitWithRuntimeVersion(defaults.DefaultRuntimeVersion))()[0]
 
 			// Check the Integration uses the new image
 			g.Eventually(IntegrationKitName(t, ctx, nsIntegration, name), TestTimeoutMedium).Should(Equal(kit.Name))

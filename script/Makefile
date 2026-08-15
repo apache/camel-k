@@ -807,22 +807,6 @@ install-k8s-ns: DEFAULT_NS="default"
 install-k8s-ns: KUSTOMIZE_DIR="install/overlays/own-namespace"
 install-k8s-ns: clone-kustomize-dir set-operator-id set-operator-env install-operator
 
-install-registry: NAMESPACE="camel-k"
-install-registry: clone-kustomize-dir
-	@echo "####### Installing container registry..."
-ifdef REGISTRY
-	@echo "INFO: Setting IntegrationPlatform container registry to $(REGISTRY)"
-	@sed -i 's/address: .*/address: $(REGISTRY)/' $(KUST_TMP)/install/overlays/platform/integration-platform.yaml
-	kubectl apply -k $(KUST_TMP)/install/overlays/platform --server-side -n $(NAMESPACE) --force-conflicts
-else
-	$(eval MINIKUBE_REGISTRY=$(shell kubectl -n kube-system get service registry -o jsonpath='{.spec.clusterIP}' 2> /dev/null))
-ifneq ($(MINIKUBE_REGISTRY),"")
-	@echo "INFO: Looks like you're on Minikube. Setting IntegrationPlatform container registry to $(MINIKUBE_REGISTRY)"
-	@sed -i 's/address: .*/address: $(MINIKUBE_REGISTRY)/' $(KUST_TMP)/install/overlays/platform/integration-platform.yaml
-	kubectl apply -k $(KUST_TMP)/install/overlays/platform --server-side -n $(NAMESPACE) --force-conflicts
-endif
-endif
-
 uninstall:
 ifdef NAMESPACE
 	kubectl delete deploy -l app=camel-k -n $(NAMESPACE)

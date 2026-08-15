@@ -67,10 +67,17 @@ jobs:
     - name: Infra setting
       uses: ./.github/actions/infra-setting
 
-    - name: Install operator
+    - name: Create operator namespace
       shell: bash
       run: |
         kubectl create ns camel-k
+
+    - name: Registry setting
+      uses: ./.github/actions/registry-setting
+
+    - name: Install operator
+      shell: bash
+      run: |
         make install-k8s-global
 
     - name: Install OTLP Collector

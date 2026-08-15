@@ -19,10 +19,25 @@ Alternatively, you can also start an instance with the `registry` addon in one c
 minikube start --addons registry
 ```
 
-Once the registry is available, you can reference the namespace and service registry as:
+Once the registry is available, you can get the internal IP:
+
+```
+$ kubectl -n kube-system get service registry -o jsonpath='{.spec.clusterIP}'
+10.102.190.238
+```
+
+And populate properly the environment variables:
 
 ```
 REGISTRY_INSECURE: true
-REGISTRY_SVC_NAMESPACE: kube-system
-REGISTRY_SVC_NAME: registry
+REGISTRY_ADDRESS: 10.102.190.238
+```
+
+You can also provide those configuration in the Camel K configmap:
+
+```
+kubectl create configmap camel-k-operator-configmap-configuration \
+  --from-literal=REGISTRY_ADDRESS="10.102.190.238" \
+  --from-literal=REGISTRY_INSECURE="true" \
+  -n camel-k
 ```

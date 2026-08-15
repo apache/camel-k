@@ -27,12 +27,8 @@ import (
 )
 
 // Log --.
-var Log Logger
-
-func init() {
-	Log = Logger{
-		delegate: logf.Log.WithName("camel-k"),
-	}
+var Log = Logger{
+	delegate: logf.Log.WithName("camel-k"),
 }
 
 // InitForCmd is required to avoid nil pointer exceptions from command line.

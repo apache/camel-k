@@ -70,12 +70,35 @@ jobs:
     - name: Infra setting
       uses: ./.github/actions/infra-setting
 
-    - name: Install operator
+    - name: Create operator namespace
       shell: bash
       run: |
         kubectl create ns camel-k
+
+    - name: Registry setting
+      uses: ./.github/actions/registry-setting
+
+    - name: Install operator
+      shell: bash
+      run: |
         make install-k8s-global
-        make install-registry
+
+        cat <<EOF | kubectl apply -f -
+        apiVersion: camel.apache.org/v1
+        kind: IntegrationPlatform
+        metadata:
+          name: camel-k
+          namespace: camel-k
+          labels:
+            app: "camel-k"
+        spec:
+          build:
+            registry:
+              address: $KAMEL_INSTALL_REGISTRY
+              secret: my-registry
+              insecure: true
+        EOF
+
         kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=60s
 
     - name: Run test
@@ -97,10 +120,17 @@ jobs:
     - name: Infra setting
       uses: ./.github/actions/infra-setting
 
-    - name: Install operator
+    - name: Create operator namespace
       shell: bash
       run: |
         kubectl create ns camel-k
+
+    - name: Registry setting
+      uses: ./.github/actions/registry-setting
+
+    - name: Install operator
+      shell: bash
+      run: |
         kubectl apply -k install/overlays/all-namespaces/ --server-side --force-conflicts
         kubectl wait --for=condition=available deployment/camel-k-operator -n camel-k --timeout=60s
         # Install Apache Kamelets catalog
@@ -123,6 +153,17 @@ jobs:
 
     - name: Infra setting
       uses: ./.github/actions/infra-setting
+
+    - name: Create registry secret namespace
+      shell: bash
+      run: |
+        kubectl create ns camel-k
+        E2E_TEST_REGISTRY_CONFIG_COPY=true
+        echo "E2E_TEST_REGISTRY_CONFIG_COPY=$E2E_TEST_REGISTRY_CONFIG_COPY" >> $GITHUB_ENV
+        echo "Setting E2E_TEST_REGISTRY_CONFIG_COPY=true in order to automate the copy of the registry config for operator install"
+
+    - name: Registry setting
+      uses: ./.github/actions/registry-setting
 
     - name: Install CRDs
       shell: bash

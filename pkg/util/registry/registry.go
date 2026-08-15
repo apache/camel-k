@@ -29,13 +29,24 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const RegistrySecretConfEnvVar = "REGISTRY_SECRET_CONF"
+const RegistryDockerConfFilename = ".dockerconfigjson"
+const jibConfigExtension = "config.json"
+
 // MountSecretRegistryConfig write a file containing the secret registry config in a temporary folder.
+// The procedure tries to read the secret from "REGISTRY_SECRET_CONF" environment variable, as, such a value
+// could have been provided by operator in "Pod" build strategy.
 func MountSecretRegistryConfig(ctx context.Context, c client.Client, namespace, prefix, name string) (string, error) {
 	dir, err := os.MkdirTemp("", prefix)
 	if err != nil {
 		return "", err
 	}
 
+	if os.Getenv(RegistrySecretConfEnvVar) != "" {
+		return mountSecretRegistryConfigFromEnvVar(dir)
+	}
+
+	// TODO: this part is likely to be removed when dropping the support of "routine" build strategy.
 	secret, err := c.CoreV1().Secrets(namespace).Get(ctx, name, metav1.GetOptions{})
 	if err != nil {
 		if removeErr := os.RemoveAll(dir); removeErr != nil {
@@ -58,9 +69,24 @@ func MountSecretRegistryConfig(ctx context.Context, c client.Client, namespace, 
 	return dir, nil
 }
 
+// Use any secret mounted as an env var.
+func mountSecretRegistryConfigFromEnvVar(dir string) (string, error) {
+	registrySecretValue := os.Getenv(RegistrySecretConfEnvVar)
+	// #nosec G703 -- jibConfigExtension is a fixed filename; dir is a trusted directory.
+	if err := os.WriteFile(filepath.Join(dir, jibConfigExtension), []byte(registrySecretValue), io.FilePerm600); err != nil {
+		if removeErr := os.RemoveAll(dir); removeErr != nil {
+			err = multierr.Append(err, removeErr)
+		}
+
+		return "", err
+	}
+
+	return dir, nil
+}
+
 func remap(name string) string {
-	if name == ".dockerconfigjson" {
-		return "config.json"
+	if name == RegistryDockerConfFilename {
+		return jibConfigExtension
 	}
 
 	return name

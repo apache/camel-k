@@ -32,6 +32,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
+	"github.com/apache/camel-k/v2/pkg/util/registry"
 )
 
 const (
@@ -84,19 +85,19 @@ func newBuildPod(ctx context.Context, client client.Client, build *v1.Build) *co
 		switch {
 		// Builder task
 		case task.Builder != nil:
-			addBuildTaskToPod(ctx, client, build, task.Builder.Name, pod)
+			addBuildTaskToPod(ctx, client, build, task.Builder.Name, "", pod)
 		// Custom task
 		case task.Custom != nil:
 			addCustomTaskToPod(build, task.Custom, pod)
 		// Package task
 		// It's a type of builder task, we can reuse the same type
 		case task.Package != nil:
-			addBuildTaskToPod(ctx, client, build, task.Package.Name, pod)
+			addBuildTaskToPod(ctx, client, build, task.Package.Name, "", pod)
 		//nolint:staticcheck
 		case task.S2i != nil:
-			addBuildTaskToPod(ctx, client, build, task.S2i.Name, pod)
+			addBuildTaskToPod(ctx, client, build, task.S2i.Name, "", pod)
 		case task.Jib != nil:
-			addBuildTaskToPod(ctx, client, build, task.Jib.Name, pod)
+			addBuildTaskToPod(ctx, client, build, task.Jib.Name, task.Jib.Registry.Secret, pod)
 		}
 	}
 
@@ -181,7 +182,7 @@ func buildPodName(build *v1.Build) string {
 	return "camel-k-" + build.Name + "-builder"
 }
 
-func addBuildTaskToPod(ctx context.Context, client client.Client, build *v1.Build, taskName string, pod *corev1.Pod) {
+func addBuildTaskToPod(ctx context.Context, client client.Client, build *v1.Build, taskName, registrySecretName string, pod *corev1.Pod) {
 	if !hasVolume(pod, builderVolume) {
 		pod.Spec.Volumes = append(pod.Spec.Volumes,
 			// EmptyDir volume used to share the build state across tasks
@@ -201,6 +202,23 @@ func addBuildTaskToPod(ctx context.Context, client client.Client, build *v1.Buil
 			Value: filepath.Join(builderDir, build.Name),
 		},
 	)
+
+	// If there is a registry secret configured, we need to include the related env var
+	if registrySecretName != "" {
+		envVars = append(envVars,
+			corev1.EnvVar{
+				Name: registry.RegistrySecretConfEnvVar,
+				ValueFrom: &corev1.EnvVarSource{
+					SecretKeyRef: &corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: registrySecretName,
+						},
+						Key: registry.RegistryDockerConfFilename,
+					},
+				},
+			},
+		)
+	}
 
 	container := corev1.Container{
 		Name:            taskName,

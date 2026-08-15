@@ -13,9 +13,12 @@ Minikube offers a container registry addon, which it makes very well suited for 
 
 ```bash
 $ minikube addons enable registry
+...
+$ kubectl -n kube-system get service registry -o jsonpath='{.spec.clusterIP}'
+a.b.c.d
 ```
 
-You can use the container registry Service `registry` in namespace `kube-system` to configure in Camel K.
+You can use the container registry ClusterIP result `a.b.c.d` as `REGISTRY_ADDRESS` configuration.
 
 ## Installation procedure
 
@@ -37,19 +40,7 @@ $ helm install camel-k camel-k/camel-k --set global=true \
   --set operator.env[1].value=<my-registry-secret>
 ```
 
-In the case of a local registry available (for example, in Minikube):
-
-```bash
-$ helm install camel-k camel-k/camel-k --set global=true \
-  --set operator.env[0].name=REGISTRY_SVC_NAMESPACE \
-  --set operator.env[0].value=kube-system \
-  --set operator.env[1].name=REGISTRY_SVC_NAME \
-  --set operator.env[1].value=registry \
-  --set operator.env[2].name=REGISTRY_INSECURE \
-  --set-string operator.env[2].value=true
-```
-
-> **Note**: the installation RBAC provide the setting to access the Service in the namespace, you need to provide the specific RBAC if using another Service.
+**Note**: if you're running a local Minikube installation, you can use the registry ClusterIP as `REGISTRY_ADDRESS`, skip the `REGISTRY_SECRET` and add `REGISTRY_INSECURE=true` environment variables.
 
 ## Test your installation
 

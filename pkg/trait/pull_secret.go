@@ -28,6 +28,7 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
@@ -68,7 +69,10 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, *TraitCondition, erro
 		}
 	}
 
-	t.secretName = t.SecretName
+	if t.SecretName != "" {
+		t.secretName = t.SecretName
+	}
+
 	//nolint:staticcheck
 	t.deprecatedImagePullerDelegation = t.ImagePullerDelegation
 
@@ -90,14 +94,21 @@ func (t *pullSecretTrait) autoConfigure(e *Environment) error {
 		t.deprecatedImagePullerDelegation = &needsDelegation
 	}
 
+	if t.SecretName == "" && e.Platform.Registry.Secret != "" {
+		// This is deprecated and will be removed in future versions
+		log.Info("Setting the configured operator pull secret. This feature is deprecated and will be removed in the future. " +
+			"Use pull-secret trait explicitly instead.")
+		t.secretName = e.Platform.Registry.Secret
+	}
+
 	return nil
 }
 
 func (t *pullSecretTrait) Apply(e *Environment) error {
-	if t.SecretName != "" {
+	if t.secretName != "" {
 		e.Resources.VisitPodSpec(func(p *corev1.PodSpec) {
 			p.ImagePullSecrets = append(p.ImagePullSecrets, corev1.LocalObjectReference{
-				Name: t.SecretName,
+				Name: t.secretName,
 			})
 		})
 	}

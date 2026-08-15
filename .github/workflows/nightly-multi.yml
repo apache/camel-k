@@ -48,13 +48,20 @@ jobs:
     - name: Infra setting
       uses: ./.github/actions/infra-setting
 
+    - name: Create operator namespace
+      shell: bash
+      run: |
+        kubectl create ns camel-k
+
+    - name: Registry setting
+      uses: ./.github/actions/registry-setting
+
     - name: Install operator
       shell: bash
       run: |
         THIS_VERSION="$(make get-version)"
         VERSION="$(make get-version | sed s/-SNAPSHOT//)-nightly"
         sed -i "s#apache/camel-k:$THIS_VERSION#testcamelk/camel-k:$VERSION#g" install/base/config/manager/operator-deployment.yaml
-        kubectl create ns camel-k
         kubectl apply -k install/overlays/all-namespaces/ --server-side --force-conflicts
         kubectl wait --for=condition=available deployment/camel-k-operator -n camel-k --timeout=60s
         # Install Apache Kamelets catalog
@@ -86,12 +93,19 @@ jobs:
     - name: Infra setting
       uses: ./.github/actions/infra-setting
 
+    - name: Create operator namespace
+      shell: bash
+      run: |
+        kubectl create ns camel-k
+
+    - name: Registry setting
+      uses: ./.github/actions/registry-setting
+
     - name: Install operator
       shell: bash
       run: |
         VERSION="$(make get-version | sed s/-SNAPSHOT//)-nightly-21-jdk"
         CUSTOM_IMAGE=testcamelk/camel-k CUSTOM_VERSION=$VERSION make bundle
-        kubectl create ns camel-k
         kubectl apply -k install/overlays/all-namespaces/ --server-side --force-conflicts
         kubectl wait --for=condition=available deployment/camel-k-operator -n camel-k --timeout=60s
         # Install Apache Kamelets catalog

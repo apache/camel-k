@@ -61,7 +61,7 @@ func TestKustomizeSingleNamespace(t *testing.T) {
 				// Test a simple integration in "tenant-b" is not reconciled
 				g.Expect(KamelRun(t, ctx, tenantNs, "files/yaml.yaml").Execute()).To(Succeed())
 				g.Consistently(IntegrationPhase(t, ctx, tenantNs, "yaml"), 30*time.Second).Should(BeEmpty())
-			}, "tenant-b")
+			}, "tenant-b", true)
 
 			// Test a simple integration in "tenant-a" is reconciled and runs correctly
 			g.Expect(KamelRun(t, ctx, tenantNs, "files/yaml.yaml").Execute()).To(Succeed())
@@ -82,6 +82,6 @@ func TestKustomizeSingleNamespace(t *testing.T) {
 
 			g.Eventually(OperatorPod(t, ctx, operatorNs)).Should(BeNil())
 			g.Eventually(CRDs(t)).Should(BeNil())
-		}, "tenant-a")
-	}, "operators")
+		}, "tenant-a", true)
+	}, "operators", true)
 }
