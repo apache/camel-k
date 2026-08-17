@@ -66,8 +66,8 @@ func TestBadRouteIntegration(t *testing.T) {
 			name := RandomizedSuffixName("java-route")
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name,
 				"-d", "mvn:com.example:nonexistent:1.0", "-t", "health.enabled=false").Execute()).To(Succeed())
-			// Integration in error
-			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseError))
+			// NOTE: we need a very long timeout as there may be up to 5 attempts to build the Integration
+			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutVeryLong).Should(Equal(v1.IntegrationPhaseError))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionKitAvailable), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
 			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionKitAvailable), TestTimeoutShort).Should(
 				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionKitAvailableReason)))
