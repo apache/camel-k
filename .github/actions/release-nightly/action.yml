@@ -112,7 +112,9 @@ runs:
 
     - name: Install SBOM generator
       shell: bash
-      run: go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@latest
+      run: |
+        go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@latest
+        echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
 
     - name: Generate SBOM
       shell: bash
