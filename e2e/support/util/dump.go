@@ -24,7 +24,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
@@ -32,16 +31,13 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	routev1 "github.com/openshift/api/route/v1"
 	olm "github.com/operator-framework/api/pkg/operators/v1alpha1"
-	eventingv1 "knative.dev/eventing/pkg/apis/eventing/v1"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
 	"github.com/apache/camel-k/v2/pkg/util/knative"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
 // DumpClusterState prints informations about the cluster state
@@ -82,291 +78,130 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 
 	// Integrations
 	its, err := camelClient.CamelV1().Integrations(ns).List(ctx, metav1.ListOptions{})
-	if err != nil {
-		return err
-	}
-	t.Logf("Found %d integrations:\n", len(its.Items))
-	for _, integration := range its.Items {
-		ref := integration
-		pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
-		if err != nil {
-			return err
+	if err == nil {
+		t.Logf("Found %d integrations:\n", len(its.Items))
+		for _, integration := range its.Items {
+			ref := integration
+			pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
+			if err != nil {
+				return err
+			}
+			t.Logf("---\n%s\n---\n", string(pdata))
 		}
-		t.Logf("---\n%s\n---\n", string(pdata))
+	} else {
+		t.Logf("could not read Integrations: %v\n", err.Error())
 	}
 
 	// IntegrationKits
 	iks, err := camelClient.CamelV1().IntegrationKits(ns).List(ctx, metav1.ListOptions{})
-	if err != nil {
-		return err
-	}
-	t.Logf("Found %d integration kits:\n", len(iks.Items))
-	for _, ik := range iks.Items {
-		ref := ik
-		pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
-		if err != nil {
-			return err
+	if err == nil {
+		t.Logf("Found %d integration kits:\n", len(iks.Items))
+		for _, ik := range iks.Items {
+			ref := ik
+			pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
+			if err != nil {
+				return err
+			}
+			t.Logf("---\n%s\n---\n", string(pdata))
 		}
-		t.Logf("---\n%s\n---\n", string(pdata))
+	} else {
+		t.Logf("could not read IntegrationKits: %v\n", err.Error())
 	}
 
 	// Builds
 	builds, err := camelClient.CamelV1().Builds(ns).List(ctx, metav1.ListOptions{})
-	if err != nil {
-		return err
-	}
-	t.Logf("Found %d builds:\n", len(builds.Items))
-	for _, build := range builds.Items {
-		data, err := kubernetes.ToYAMLNoManagedFields(&build)
-		if err != nil {
-			return err
+	if err == nil {
+		t.Logf("Found %d builds:\n", len(builds.Items))
+		for _, build := range builds.Items {
+			data, err := kubernetes.ToYAMLNoManagedFields(&build)
+			if err != nil {
+				return err
+			}
+			t.Logf("---\n%s\n---\n", string(data))
 		}
-		t.Logf("---\n%s\n---\n", string(data))
+	} else {
+		t.Logf("could not read Builds: %v\n", err.Error())
 	}
 
 	// Configmaps
 	cms, err := c.CoreV1().ConfigMaps(ns).List(ctx, metav1.ListOptions{})
-	if err != nil {
-		return err
-	}
-	t.Logf("Found %d config maps:\n", len(cms.Items))
-	for _, cm := range cms.Items {
-		ref := cm
-		pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
-		if err != nil {
-			return err
+	if err == nil {
+		t.Logf("Found %d config maps:\n", len(cms.Items))
+		for _, cm := range cms.Items {
+			ref := cm
+			pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
+			if err != nil {
+				return err
+			}
+			t.Logf("---\n%s\n---\n", string(pdata))
 		}
-		t.Logf("---\n%s\n---\n", string(pdata))
+	} else {
+		t.Logf("could not read Configmaps: %v\n", err.Error())
 	}
 
 	// Deployments
 	deployments, err := c.AppsV1().Deployments(ns).List(ctx, metav1.ListOptions{})
-	if err != nil {
-		return err
-	}
-	t.Logf("Found %d deployments:\n", len(deployments.Items))
-	for _, deployment := range deployments.Items {
-		ref := deployment
-		data, err := kubernetes.ToYAMLNoManagedFields(&ref)
-		if err != nil {
-			return err
-		}
-		t.Logf("---\n%s\n---\n", string(data))
-	}
-
-	// PVCs
-	pvcs, err := c.CoreV1().PersistentVolumeClaims(ns).List(ctx, metav1.ListOptions{})
-	if err != nil {
-		return err
-	}
-	t.Logf("Found %d persistent volume claims:\n", len(pvcs.Items))
-	for _, pvc := range pvcs.Items {
-		ref := pvc
-		pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
-		if err != nil {
-			return err
-		}
-		t.Logf("---\n%s\n---\n", string(pdata))
-	}
-
-	// Pods
-	lst, err := c.CoreV1().Pods(ns).List(ctx, metav1.ListOptions{})
-	if err != nil {
-		return err
-	}
-
-	t.Logf("\nFound %d pods in %q:\n", len(lst.Items), ns)
-	for _, pod := range lst.Items {
-		t.Logf("name=%s\n", pod.Name)
-
-		ref := pod
-		data, err := kubernetes.ToYAMLNoManagedFields(&ref)
-		if err != nil {
-			return err
-		}
-		t.Logf("---\n%s\n---\n", string(data))
-
-		dumpConditions("  ", pod.Status.Conditions, t)
-		t.Logf("  logs:\n")
-		var allContainers []corev1.Container
-		allContainers = append(allContainers, pod.Spec.InitContainers...)
-		allContainers = append(allContainers, pod.Spec.Containers...)
-		for _, container := range allContainers {
-			pad := "    "
-			t.Logf("%s%s\n", pad, container.Name)
-			err := dumpLogs(ctx, c, fmt.Sprintf("%s> ", pad), ns, pod.Name, container.Name, t)
-			if err != nil {
-				t.Logf("%sERROR while reading the logs: %v\n", pad, err)
-			}
-		}
-	}
-
-	// IntegrationPlatforms
-	pls, err := camelClient.CamelV1().IntegrationPlatforms(ns).List(ctx, metav1.ListOptions{})
-	if err != nil {
-		return err
-	}
-	t.Logf("Found %d platforms:\n", len(pls.Items))
-	for _, p := range pls.Items {
-		ref := p
-		pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
-		if err != nil {
-			return err
-		}
-		t.Logf("---\n%s\n---\n", string(pdata))
-	}
-
-	// IntegrationProfiles
-	iprs, err := camelClient.CamelV1().IntegrationProfiles(ns).List(ctx, metav1.ListOptions{})
-	if err != nil {
-		return err
-	}
-	t.Logf("Found %d integration profiles:\n", len(iprs.Items))
-	for _, p := range iprs.Items {
-		ref := p
-		pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
-		if err != nil {
-			return err
-		}
-		t.Logf("---\n%s\n---\n", string(pdata))
-	}
-
-	// Knative resources
-	if installed, _ := knative.IsEventingInstalled(c); installed {
-		var trgs eventingv1.TriggerList
-		err = c.List(ctx, &trgs)
-		if err != nil {
-			return err
-		}
-		t.Logf("Found %d Knative trigger:\n", len(trgs.Items))
-		for _, p := range trgs.Items {
-			ref := p
-			pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
-			if err != nil {
-				return err
-			}
-			t.Logf("---\n%s\n---\n", string(pdata))
-		}
-	}
-
-	if installed, _ := knative.IsServingInstalled(c); installed {
-		var ksrvs servingv1.ServiceList
-		err = c.List(ctx, &ksrvs)
-		if err != nil {
-			return err
-		}
-		t.Logf("Found %d Knative services:\n", len(ksrvs.Items))
-		for _, p := range ksrvs.Items {
-			ref := p
-			pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
-			if err != nil {
-				return err
-			}
-			t.Logf("---\n%s\n---\n", string(pdata))
-		}
-	}
-
-	// CamelCatalogs
-	cats, err := camelClient.CamelV1().CamelCatalogs(ns).List(ctx, metav1.ListOptions{})
-	if err != nil {
-		return err
-	}
-	t.Logf("Found %d catalogs:\n", len(cats.Items))
-	for _, c := range cats.Items {
-		ref := c
-		cdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
-		if err != nil {
-			return err
-		}
-		t.Logf("---\n%s\n---\n", string(cdata))
-	}
-
-	// Services
-	svcs, err := c.CoreV1().Services(ns).List(ctx, metav1.ListOptions{})
-	if err != nil {
-		return err
-	}
-	t.Logf("\nFound %d services:\n", len(svcs.Items))
-	for _, svc := range svcs.Items {
-		ref := svc
-		data, err := kubernetes.ToYAMLNoManagedFields(&ref)
-		if err != nil {
-			return err
-		}
-		t.Logf("---\n%s\n---\n", string(data))
-	}
-
-	// Routes
-	if ocp, err := openshift.IsOpenShift(c); err == nil && ocp {
-		routes := routev1.RouteList{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Route",
-				APIVersion: routev1.SchemeGroupVersion.String(),
-			},
-		}
-		err := c.List(ctx, &routes, ctrl.InNamespace(ns))
-		if err != nil {
-			return err
-		}
-		t.Logf("\nFound %d routes:\n", len(routes.Items))
-		for _, route := range routes.Items {
-			ref := route
+	if err == nil {
+		t.Logf("Found %d deployments:\n", len(deployments.Items))
+		for _, deployment := range deployments.Items {
+			ref := deployment
 			data, err := kubernetes.ToYAMLNoManagedFields(&ref)
 			if err != nil {
 				return err
 			}
 			t.Logf("---\n%s\n---\n", string(data))
 		}
+	} else {
+		t.Logf("could not read Deployments: %v\n", err.Error())
 	}
 
-	// Cronjobs
-	cronjobs, err := c.BatchV1().CronJobs(ns).List(ctx, metav1.ListOptions{})
-	if err != nil {
-		return err
-	}
-	t.Logf("\nFound %d cronjobs:\n", len(cronjobs.Items))
-	for _, cronjobs := range cronjobs.Items {
-		ref := cronjobs
-		data, err := kubernetes.ToYAMLNoManagedFields(&ref)
-		if err != nil {
-			return err
-		}
-		t.Logf("---\n%s\n---\n", string(data))
-	}
-
-	// OLM CSV
-	csvs := olm.ClusterServiceVersionList{}
-	err = c.List(ctx, &csvs, ctrl.InNamespace(ns))
-	if err != nil && !kubernetes.IsUnknownAPIError(err) {
-		return err
-	}
-	t.Logf("\nFound %d OLM CSVs:\n", len(csvs.Items))
-	for _, csv := range csvs.Items {
-		ref := csv
-		data, err := kubernetes.ToYAMLNoManagedFields(&ref)
-		if err != nil {
-			return err
-		}
-		t.Logf("---\n%s\n---\n", string(data))
-	}
-
-	// Some log from running pods
-	opns := os.Getenv("CAMEL_K_GLOBAL_OPERATOR_NS")
-	if opns != "" {
-		lst, err := c.CoreV1().Pods(opns).List(ctx, metav1.ListOptions{})
-		if err != nil {
-			return err
-		}
-
-		t.Logf("\nFound %d pods in global namespace %q:\n", len(lst.Items), opns)
-		for _, pod := range lst.Items {
-			if !strings.Contains(pod.Name, "camel-k") {
-				// ignore other global operators
-				t.Logf("Ignoring pod %s", pod.Name)
-				continue
+	if installed, _ := knative.IsServingInstalled(c); installed {
+		var ksrvs servingv1.ServiceList
+		err = c.List(ctx, &ksrvs)
+		if err == nil {
+			t.Logf("Found %d Knative services:\n", len(ksrvs.Items))
+			for _, p := range ksrvs.Items {
+				ref := p
+				pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
+				if err != nil {
+					return err
+				}
+				t.Logf("---\n%s\n---\n", string(pdata))
 			}
+		} else {
+			t.Logf("could not read Knative Services: %v\n", err.Error())
+		}
+	}
 
+	cronjobs, err := c.BatchV1().CronJobs(ns).List(ctx, metav1.ListOptions{})
+	if err == nil {
+		t.Logf("\nFound %d cronjobs:\n", len(cronjobs.Items))
+		for _, cronjobs := range cronjobs.Items {
+			ref := cronjobs
+			data, err := kubernetes.ToYAMLNoManagedFields(&ref)
+			if err != nil {
+				return err
+			}
+			t.Logf("---\n%s\n---\n", string(data))
+		}
+	} else {
+		t.Logf("could not read Cronjobs: %v\n", err.Error())
+	}
+
+	// Pods
+	lst, err := c.CoreV1().Pods(ns).List(ctx, metav1.ListOptions{})
+	if err == nil {
+		t.Logf("\nFound %d pods in %q:\n", len(lst.Items), ns)
+		for _, pod := range lst.Items {
 			t.Logf("name=%s\n", pod.Name)
+
+			ref := pod
+			data, err := kubernetes.ToYAMLNoManagedFields(&ref)
+			if err != nil {
+				return err
+			}
+			t.Logf("---\n%s\n---\n", string(data))
+
 			dumpConditions("  ", pod.Status.Conditions, t)
 			t.Logf("  logs:\n")
 			var allContainers []corev1.Container
@@ -375,12 +210,96 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 			for _, container := range allContainers {
 				pad := "    "
 				t.Logf("%s%s\n", pad, container.Name)
-				err := dumpLogs(ctx, c, fmt.Sprintf("%s> ", pad), pod.Namespace, pod.Name, container.Name, t)
+				err := dumpLogs(ctx, c, fmt.Sprintf("%s> ", pad), ns, pod.Name, container.Name, t)
 				if err != nil {
 					t.Logf("%sERROR while reading the logs: %v\n", pad, err)
 				}
 			}
 		}
+	} else {
+		t.Logf("could not read Pods: %v\n", err.Error())
+	}
+
+	// IntegrationPlatforms
+	pls, err := camelClient.CamelV1().IntegrationPlatforms(ns).List(ctx, metav1.ListOptions{})
+	if err == nil {
+		t.Logf("Found %d platforms:\n", len(pls.Items))
+		for _, p := range pls.Items {
+			ref := p
+			pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
+			if err != nil {
+				return err
+			}
+			t.Logf("---\n%s\n---\n", string(pdata))
+		}
+	} else {
+		t.Logf("could not read IntegrationPlatforms: %v\n", err.Error())
+	}
+
+	// IntegrationProfiles
+	iprs, err := camelClient.CamelV1().IntegrationProfiles(ns).List(ctx, metav1.ListOptions{})
+	if err == nil {
+		t.Logf("Found %d integration profiles:\n", len(iprs.Items))
+		for _, p := range iprs.Items {
+			ref := p
+			pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
+			if err != nil {
+				return err
+			}
+			t.Logf("---\n%s\n---\n", string(pdata))
+		}
+	} else {
+		t.Logf("could not read IntegrationProfiles: %v\n", err.Error())
+	}
+
+	// CamelCatalogs
+	// We may enable if debugging some particular issue, otherwise this is adding too much info
+	// cats, err := camelClient.CamelV1().CamelCatalogs(ns).List(ctx, metav1.ListOptions{})
+	// if err == nil {
+	// 	t.Logf("Found %d catalogs:\n", len(cats.Items))
+	// 	for _, c := range cats.Items {
+	// 		ref := c
+	// 		cdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
+	// 		if err != nil {
+	// 			return err
+	// 		}
+	// 		t.Logf("---\n%s\n---\n", string(cdata))
+	// 	}
+	// } else {
+	// 	t.Logf("could not read CamelCatalogs: %v\n", err.Error())
+	// }
+
+	// Services
+	svcs, err := c.CoreV1().Services(ns).List(ctx, metav1.ListOptions{})
+	if err == nil {
+		t.Logf("\nFound %d services:\n", len(svcs.Items))
+		for _, svc := range svcs.Items {
+			ref := svc
+			data, err := kubernetes.ToYAMLNoManagedFields(&ref)
+			if err != nil {
+				return err
+			}
+			t.Logf("---\n%s\n---\n", string(data))
+		}
+	} else {
+		t.Logf("could not read Services: %v\n", err.Error())
+	}
+
+	// OLM CSV
+	csvs := olm.ClusterServiceVersionList{}
+	err = c.List(ctx, &csvs, ctrl.InNamespace(ns))
+	if err == nil && !kubernetes.IsUnknownAPIError(err) {
+		t.Logf("\nFound %d OLM CSVs:\n", len(csvs.Items))
+		for _, csv := range csvs.Items {
+			ref := csv
+			data, err := kubernetes.ToYAMLNoManagedFields(&ref)
+			if err != nil {
+				return err
+			}
+			t.Logf("---\n%s\n---\n", string(data))
+		}
+	} else {
+		t.Logf("could not read OLM CVSs: %v\n", err.Error())
 	}
 
 	t.Logf("-------------------- end dumping namespace %s --------------------\n", ns)
