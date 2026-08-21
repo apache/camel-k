@@ -6142,7 +6142,7 @@ The configuration of Istio trait
 
 The configuration of Jolokia trait.
 
-Deprecated: use jvm.agent instead.
+Deprecated: no longer in use.
 
 |`jvm` +
 *xref:#_camel_apache_org_v1_trait_JVMTrait[JVMTrait]*
@@ -6267,7 +6267,7 @@ The configuration of Quarkus trait
 
 The configuration of Registry trait (support removed since version 2.5.0).
 
-Deprecated: use jvm trait or read documentation.
+Deprecated: no longer in use.
 
 |`route` +
 *xref:#_camel_apache_org_v1_trait_RouteTrait[RouteTrait]*
@@ -8069,6 +8069,8 @@ Deprecated: Use CACertificates instead. Path to a file containing the truststore
 *Appears on:*
 
 * <<#_camel_apache_org_v1_Traits, Traits>>
+
+WARNING: This trait is no longer in use.
 
 The Jolokia trait activates and configures the Jolokia Java agent.
 This trait is useful to enable JMX access to Camel application.

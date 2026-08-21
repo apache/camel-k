@@ -49,7 +49,7 @@ type TraitsApplyConfiguration struct {
 	// The configuration of Error Handler trait.
 	//
 	// Deprecated: no longer in use.
-	ErrorHandler *trait.ErrorHandlerTrait `json:"error-handler,omitempty"`
+	DeprecatedErrorHandler *trait.ErrorHandlerTrait `json:"error-handler,omitempty"`
 	// The configuration of Istio trait
 	Gateway *trait.GatewayTrait `json:"gateway,omitempty"`
 	// The configuration of GC trait
@@ -66,8 +66,8 @@ type TraitsApplyConfiguration struct {
 	Istio *trait.IstioTrait `json:"istio,omitempty"`
 	// The configuration of Jolokia trait.
 	//
-	// Deprecated: use jvm.agent instead.
-	Jolokia *trait.JolokiaTrait `json:"jolokia,omitempty"`
+	// Deprecated: no longer in use.
+	DeprecatedJolokia *trait.JolokiaTrait `json:"jolokia,omitempty"`
 	// The configuration of JVM trait
 	JVM *trait.JVMTrait `json:"jvm,omitempty"`
 	// The configuration of Kamelets trait
@@ -87,7 +87,7 @@ type TraitsApplyConfiguration struct {
 	// The configuration of OpenAPI trait.
 	//
 	// Deprecated: no longer in use.
-	OpenAPI *trait.OpenAPITrait `json:"openapi,omitempty"`
+	DeprecatedOpenAPI *trait.OpenAPITrait `json:"openapi,omitempty"`
 	// The configuration of Owner trait
 	Owner *trait.OwnerTrait `json:"owner,omitempty"`
 	// The configuration of PDB trait
@@ -106,8 +106,8 @@ type TraitsApplyConfiguration struct {
 	Quarkus *trait.QuarkusTrait `json:"quarkus,omitempty"`
 	// The configuration of Registry trait (support removed since version 2.5.0).
 	//
-	// Deprecated: use jvm trait or read documentation.
-	Registry *trait.RegistryTrait `json:"registry,omitempty"`
+	// Deprecated: no longer in use.
+	DeprecatedRegistry *trait.RegistryTrait `json:"registry,omitempty"`
 	// The configuration of Route trait.
 	//
 	// Deprecated: use ingress instead.
@@ -119,19 +119,19 @@ type TraitsApplyConfiguration struct {
 	// The configuration of Service Binding trait.
 	//
 	// Deprecated: no longer in use.
-	ServiceBinding *trait.ServiceBindingTrait `json:"service-binding,omitempty"`
+	DeprecatedServiceBinding *trait.ServiceBindingTrait `json:"service-binding,omitempty"`
 	// The configuration of Telemetry trait
 	Telemetry *trait.TelemetryTrait `json:"telemetry,omitempty"`
 	// The configuration of Toleration trait
 	Toleration *trait.TolerationTrait `json:"toleration,omitempty"`
 	// Deprecated: no longer in use.
-	Addons map[string]AddonTraitApplyConfiguration `json:"addons,omitempty"`
+	DeprecatedAddons map[string]AddonTraitApplyConfiguration `json:"addons,omitempty"`
 	// Deprecated: no longer in use.
-	Strimzi *TraitSpecApplyConfiguration `json:"strimzi,omitempty"`
+	DeprecatedStrimzi *TraitSpecApplyConfiguration `json:"strimzi,omitempty"`
 	// Deprecated: no longer in use.
-	ThreeScale *TraitSpecApplyConfiguration `json:"3scale,omitempty"`
+	DeprecatedThreeScale *TraitSpecApplyConfiguration `json:"3scale,omitempty"`
 	// Deprecated: no longer in use.
-	Tracing *TraitSpecApplyConfiguration `json:"tracing,omitempty"`
+	DeprecatedTracing *TraitSpecApplyConfiguration `json:"tracing,omitempty"`
 }
 
 // TraitsApplyConfiguration constructs a declarative configuration of the Traits type for use with
@@ -212,11 +212,11 @@ func (b *TraitsApplyConfiguration) WithEnvironment(value trait.EnvironmentTrait)
 	return b
 }
 
-// WithErrorHandler sets the ErrorHandler field in the declarative configuration to the given value
+// WithDeprecatedErrorHandler sets the DeprecatedErrorHandler field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the ErrorHandler field is set to the value of the last call.
-func (b *TraitsApplyConfiguration) WithErrorHandler(value trait.ErrorHandlerTrait) *TraitsApplyConfiguration {
-	b.ErrorHandler = &value
+// If called multiple times, the DeprecatedErrorHandler field is set to the value of the last call.
+func (b *TraitsApplyConfiguration) WithDeprecatedErrorHandler(value trait.ErrorHandlerTrait) *TraitsApplyConfiguration {
+	b.DeprecatedErrorHandler = &value
 	return b
 }
 
@@ -276,11 +276,11 @@ func (b *TraitsApplyConfiguration) WithIstio(value trait.IstioTrait) *TraitsAppl
 	return b
 }
 
-// WithJolokia sets the Jolokia field in the declarative configuration to the given value
+// WithDeprecatedJolokia sets the DeprecatedJolokia field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Jolokia field is set to the value of the last call.
-func (b *TraitsApplyConfiguration) WithJolokia(value trait.JolokiaTrait) *TraitsApplyConfiguration {
-	b.Jolokia = &value
+// If called multiple times, the DeprecatedJolokia field is set to the value of the last call.
+func (b *TraitsApplyConfiguration) WithDeprecatedJolokia(value trait.JolokiaTrait) *TraitsApplyConfiguration {
+	b.DeprecatedJolokia = &value
 	return b
 }
 
@@ -348,11 +348,11 @@ func (b *TraitsApplyConfiguration) WithMount(value trait.MountTrait) *TraitsAppl
 	return b
 }
 
-// WithOpenAPI sets the OpenAPI field in the declarative configuration to the given value
+// WithDeprecatedOpenAPI sets the DeprecatedOpenAPI field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the OpenAPI field is set to the value of the last call.
-func (b *TraitsApplyConfiguration) WithOpenAPI(value trait.OpenAPITrait) *TraitsApplyConfiguration {
-	b.OpenAPI = &value
+// If called multiple times, the DeprecatedOpenAPI field is set to the value of the last call.
+func (b *TraitsApplyConfiguration) WithDeprecatedOpenAPI(value trait.OpenAPITrait) *TraitsApplyConfiguration {
+	b.DeprecatedOpenAPI = &value
 	return b
 }
 
@@ -412,11 +412,11 @@ func (b *TraitsApplyConfiguration) WithQuarkus(value trait.QuarkusTrait) *Traits
 	return b
 }
 
-// WithRegistry sets the Registry field in the declarative configuration to the given value
+// WithDeprecatedRegistry sets the DeprecatedRegistry field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Registry field is set to the value of the last call.
-func (b *TraitsApplyConfiguration) WithRegistry(value trait.RegistryTrait) *TraitsApplyConfiguration {
-	b.Registry = &value
+// If called multiple times, the DeprecatedRegistry field is set to the value of the last call.
+func (b *TraitsApplyConfiguration) WithDeprecatedRegistry(value trait.RegistryTrait) *TraitsApplyConfiguration {
+	b.DeprecatedRegistry = &value
 	return b
 }
 
@@ -444,11 +444,11 @@ func (b *TraitsApplyConfiguration) WithService(value trait.ServiceTrait) *Traits
 	return b
 }
 
-// WithServiceBinding sets the ServiceBinding field in the declarative configuration to the given value
+// WithDeprecatedServiceBinding sets the DeprecatedServiceBinding field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the ServiceBinding field is set to the value of the last call.
-func (b *TraitsApplyConfiguration) WithServiceBinding(value trait.ServiceBindingTrait) *TraitsApplyConfiguration {
-	b.ServiceBinding = &value
+// If called multiple times, the DeprecatedServiceBinding field is set to the value of the last call.
+func (b *TraitsApplyConfiguration) WithDeprecatedServiceBinding(value trait.ServiceBindingTrait) *TraitsApplyConfiguration {
+	b.DeprecatedServiceBinding = &value
 	return b
 }
 
@@ -468,40 +468,40 @@ func (b *TraitsApplyConfiguration) WithToleration(value trait.TolerationTrait) *
 	return b
 }
 
-// WithAddons puts the entries into the Addons field in the declarative configuration
+// WithDeprecatedAddons puts the entries into the DeprecatedAddons field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
-// If called multiple times, the entries provided by each call will be put on the Addons field,
-// overwriting an existing map entries in Addons field with the same key.
-func (b *TraitsApplyConfiguration) WithAddons(entries map[string]AddonTraitApplyConfiguration) *TraitsApplyConfiguration {
-	if b.Addons == nil && len(entries) > 0 {
-		b.Addons = make(map[string]AddonTraitApplyConfiguration, len(entries))
+// If called multiple times, the entries provided by each call will be put on the DeprecatedAddons field,
+// overwriting an existing map entries in DeprecatedAddons field with the same key.
+func (b *TraitsApplyConfiguration) WithDeprecatedAddons(entries map[string]AddonTraitApplyConfiguration) *TraitsApplyConfiguration {
+	if b.DeprecatedAddons == nil && len(entries) > 0 {
+		b.DeprecatedAddons = make(map[string]AddonTraitApplyConfiguration, len(entries))
 	}
 	for k, v := range entries {
-		b.Addons[k] = v
+		b.DeprecatedAddons[k] = v
 	}
 	return b
 }
 
-// WithStrimzi sets the Strimzi field in the declarative configuration to the given value
+// WithDeprecatedStrimzi sets the DeprecatedStrimzi field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Strimzi field is set to the value of the last call.
-func (b *TraitsApplyConfiguration) WithStrimzi(value *TraitSpecApplyConfiguration) *TraitsApplyConfiguration {
-	b.Strimzi = value
+// If called multiple times, the DeprecatedStrimzi field is set to the value of the last call.
+func (b *TraitsApplyConfiguration) WithDeprecatedStrimzi(value *TraitSpecApplyConfiguration) *TraitsApplyConfiguration {
+	b.DeprecatedStrimzi = value
 	return b
 }
 
-// WithThreeScale sets the ThreeScale field in the declarative configuration to the given value
+// WithDeprecatedThreeScale sets the DeprecatedThreeScale field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the ThreeScale field is set to the value of the last call.
-func (b *TraitsApplyConfiguration) WithThreeScale(value *TraitSpecApplyConfiguration) *TraitsApplyConfiguration {
-	b.ThreeScale = value
+// If called multiple times, the DeprecatedThreeScale field is set to the value of the last call.
+func (b *TraitsApplyConfiguration) WithDeprecatedThreeScale(value *TraitSpecApplyConfiguration) *TraitsApplyConfiguration {
+	b.DeprecatedThreeScale = value
 	return b
 }
 
-// WithTracing sets the Tracing field in the declarative configuration to the given value
+// WithDeprecatedTracing sets the DeprecatedTracing field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Tracing field is set to the value of the last call.
-func (b *TraitsApplyConfiguration) WithTracing(value *TraitSpecApplyConfiguration) *TraitsApplyConfiguration {
-	b.Tracing = value
+// If called multiple times, the DeprecatedTracing field is set to the value of the last call.
+func (b *TraitsApplyConfiguration) WithDeprecatedTracing(value *TraitSpecApplyConfiguration) *TraitsApplyConfiguration {
+	b.DeprecatedTracing = value
 	return b
 }

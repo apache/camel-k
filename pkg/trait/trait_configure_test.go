@@ -129,7 +129,7 @@ func TestTraitListConfigurationFromAnnotations(t *testing.T) {
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
-					v1.TraitAnnotationPrefix + "jolokia.options":       `["opt1", "opt2"]`,
+					v1.TraitAnnotationPrefix + "environment.vars":      `["V1=a", "V2=b"]`,
 					v1.TraitAnnotationPrefix + "camel.runtime-version": "1.2.3",
 				},
 			},
@@ -137,8 +137,8 @@ func TestTraitListConfigurationFromAnnotations(t *testing.T) {
 	}
 	c := NewCatalog(nil)
 	require.NoError(t, c.Configure(&env))
-	jt, _ := c.GetTrait("jolokia").(*jolokiaTrait)
-	assert.Equal(t, []string{"opt1", "opt2"}, jt.Options)
+	et, _ := c.GetTrait("environment").(*environmentTrait)
+	assert.Equal(t, []string{"V1=a", "V2=b"}, et.Vars)
 	cml, _ := c.GetTrait("camel").(*camelTrait)
 	assert.Equal(t, "1.2.3", cml.RuntimeVersion)
 }

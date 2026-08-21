@@ -212,8 +212,6 @@ const (
 	IntegrationConditionExposureAvailable IntegrationConditionType = "ExposureAvailable"
 	// IntegrationConditionPrometheusAvailable --.
 	IntegrationConditionPrometheusAvailable IntegrationConditionType = "PrometheusAvailable"
-	// IntegrationConditionJolokiaAvailable --.
-	IntegrationConditionJolokiaAvailable IntegrationConditionType = "JolokiaAvailable"
 	// IntegrationConditionProbesAvailable --.
 	IntegrationConditionProbesAvailable IntegrationConditionType = "ProbesAvailable"
 	// IntegrationConditionTraitInfo --.
@@ -253,8 +251,6 @@ const (
 	IntegrationConditionCronJobNotAvailableReason string = "CronJobNotAvailableReason"
 	// IntegrationConditionPrometheusAvailableReason --.
 	IntegrationConditionPrometheusAvailableReason string = "PrometheusAvailable"
-	// IntegrationConditionJolokiaAvailableReason --.
-	IntegrationConditionJolokiaAvailableReason string = "JolokiaAvailable"
 	// IntegrationConditionProbesAvailableReason --.
 	IntegrationConditionProbesAvailableReason string = "ProbesAvailable"
 	// IntegrationConditionMonitoringPodsAvailableReason used to specify that the Pods generated are available for monitoring.

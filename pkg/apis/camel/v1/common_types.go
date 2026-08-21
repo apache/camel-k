@@ -215,7 +215,7 @@ type Traits struct {
 	// The configuration of Error Handler trait.
 	//
 	// Deprecated: no longer in use.
-	ErrorHandler *trait.ErrorHandlerTrait `json:"error-handler,omitempty" property:"error-handler"`
+	DeprecatedErrorHandler *trait.ErrorHandlerTrait `json:"error-handler,omitempty" property:"error-handler"`
 	// The configuration of Istio trait
 	Gateway *trait.GatewayTrait `json:"gateway,omitempty" property:"gateway"`
 	// The configuration of GC trait
@@ -232,8 +232,8 @@ type Traits struct {
 	Istio *trait.IstioTrait `json:"istio,omitempty" property:"istio"`
 	// The configuration of Jolokia trait.
 	//
-	// Deprecated: use jvm.agent instead.
-	Jolokia *trait.JolokiaTrait `json:"jolokia,omitempty" property:"jolokia"`
+	// Deprecated: no longer in use.
+	DeprecatedJolokia *trait.JolokiaTrait `json:"jolokia,omitempty" property:"jolokia"`
 	// The configuration of JVM trait
 	JVM *trait.JVMTrait `json:"jvm,omitempty" property:"jvm"`
 	// The configuration of Kamelets trait
@@ -253,7 +253,7 @@ type Traits struct {
 	// The configuration of OpenAPI trait.
 	//
 	// Deprecated: no longer in use.
-	OpenAPI *trait.OpenAPITrait `json:"openapi,omitempty" property:"openapi"`
+	DeprecatedOpenAPI *trait.OpenAPITrait `json:"openapi,omitempty" property:"openapi"`
 	// The configuration of Owner trait
 	Owner *trait.OwnerTrait `json:"owner,omitempty" property:"owner"`
 	// The configuration of PDB trait
@@ -272,8 +272,8 @@ type Traits struct {
 	Quarkus *trait.QuarkusTrait `json:"quarkus,omitempty" property:"quarkus"`
 	// The configuration of Registry trait (support removed since version 2.5.0).
 	//
-	// Deprecated: use jvm trait or read documentation.
-	Registry *trait.RegistryTrait `json:"registry,omitempty" property:"registry"`
+	// Deprecated: no longer in use.
+	DeprecatedRegistry *trait.RegistryTrait `json:"registry,omitempty" property:"registry"`
 	// The configuration of Route trait.
 	//
 	// Deprecated: use ingress instead.
@@ -285,21 +285,21 @@ type Traits struct {
 	// The configuration of Service Binding trait.
 	//
 	// Deprecated: no longer in use.
-	ServiceBinding *trait.ServiceBindingTrait `json:"service-binding,omitempty" property:"service-binding"`
+	DeprecatedServiceBinding *trait.ServiceBindingTrait `json:"service-binding,omitempty" property:"service-binding"`
 	// The configuration of Telemetry trait
 	Telemetry *trait.TelemetryTrait `json:"telemetry,omitempty" property:"telemetry"`
 	// The configuration of Toleration trait
 	Toleration *trait.TolerationTrait `json:"toleration,omitempty" property:"toleration"`
 
 	// Deprecated: no longer in use.
-	Addons map[string]AddonTrait `json:"addons,omitempty"`
+	DeprecatedAddons map[string]AddonTrait `json:"addons,omitempty"`
 
 	// Deprecated: no longer in use.
-	Strimzi *TraitSpec `json:"strimzi,omitempty" property:"strimzi"`
+	DeprecatedStrimzi *TraitSpec `json:"strimzi,omitempty" property:"strimzi"`
 	// Deprecated: no longer in use.
-	ThreeScale *TraitSpec `json:"3scale,omitempty" property:"3scale"`
+	DeprecatedThreeScale *TraitSpec `json:"3scale,omitempty" property:"3scale"`
 	// Deprecated: no longer in use.
-	Tracing *TraitSpec `json:"tracing,omitempty" property:"tracing"`
+	DeprecatedTracing *TraitSpec `json:"tracing,omitempty" property:"tracing"`
 }
 
 // AddonTrait represents the configuration of an addon trait.
@@ -427,8 +427,6 @@ const (
 	CapabilityHashicorpVault = "hashicorp-vault"
 	// CapabilityHealth defines the health monitoring capability.
 	CapabilityHealth = "health"
-	// CapabilityJolokia --.
-	CapabilityJolokia = "jolokia"
 	// CapabilityKnative --.
 	CapabilityKnative = "knative"
 	// CapabilityMaster defines the master capability.
