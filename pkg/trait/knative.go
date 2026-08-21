@@ -140,7 +140,16 @@ func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 		}
 	}
 
-	return ptr.Deref(t.Enabled, false), nil, nil
+	condition := NewIntegrationCondition(
+		"Knative",
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		TraitConfigurationReason,
+		"Knative (eventing) trait is deprecated and may be removed in future versions. "+
+			"Use Camel Knative component instead.",
+	)
+
+	return ptr.Deref(t.Enabled, false), condition, nil
 }
 
 func filterMetaItems(meta metadata.IntegrationMetadata, cst knativeapi.CamelServiceType, uriType string) []string {

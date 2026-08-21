@@ -27,7 +27,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -61,8 +60,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	eventing "knative.dev/eventing/pkg/apis/eventing/v1"
-	messaging "knative.dev/eventing/pkg/apis/messaging/v1"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	"github.com/apache/camel-k/v2/e2e/support/util"
@@ -1852,22 +1849,6 @@ func ClusterDomainName(t *testing.T, ctx context.Context) (string, error) {
 	return dns.Spec.BaseDomain, nil
 }
 
-func CreateKnativeChannel(t *testing.T, ctx context.Context, ns string, name string) func() error {
-	return func() error {
-		channel := messaging.InMemoryChannel{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "InMemoryChannel",
-				APIVersion: messaging.SchemeGroupVersion.String(),
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: ns,
-				Name:      name,
-			},
-		}
-		return TestClient(t).Create(ctx, &channel)
-	}
-}
-
 func CreateKamelet(t *testing.T, ctx context.Context, ns string, name string, template map[string]interface{}, properties map[string]v1.JSONSchemaProp, labels map[string]string) func() error {
 	return CreateKameletWithID(t, platform.DefaultPlatformName, ctx, ns, name, template, properties, labels)
 }
@@ -1954,17 +1935,15 @@ func Pods(t *testing.T, ctx context.Context, ns string) func() []corev1.Pod {
 }
 
 func WithNewTestNamespace(t *testing.T, doRun func(context.Context, *gomega.WithT, string)) {
-	ns := NewTestNamespace(t, testContext, false)
+	ns := NewTestNamespace(t, testContext)
 	defer deleteTestNamespace(t, testContext, ns)
 
 	invokeUserTestCode(t, testContext, ns.GetName(), doRun)
 }
 
-func WithNamedTestNamespace(t *testing.T, doRun func(context.Context, *gomega.WithT, string), namespace string, deleteOnCompletion bool) {
-	ns := NewNamedTestNamespace(t, testContext, namespace, false)
-	if deleteOnCompletion {
-		defer deleteTestNamespace(t, testContext, ns)
-	}
+func WithNamedTestNamespace(t *testing.T, doRun func(context.Context, *gomega.WithT, string), namespace string) {
+	ns := NewNamedTestNamespace(t, testContext, namespace)
+	defer deleteTestNamespace(t, testContext, ns)
 
 	invokeUserTestCode(t, testContext, ns.GetName(), doRun)
 }
@@ -1983,14 +1962,6 @@ func WithExistingNamedTestNamespace(t *testing.T, doRun func(context.Context, *g
 	invokeUserTestCode(t, testContext, namespace, doRun)
 }
 
-func WithNewTestNamespaceWithKnativeBroker(t *testing.T, doRun func(context.Context, *gomega.WithT, string)) {
-	ns := NewTestNamespace(t, testContext, true)
-	defer deleteTestNamespace(t, testContext, ns)
-	defer deleteKnativeBroker(t, testContext, ns)
-
-	invokeUserTestCode(t, testContext, ns.GetName(), doRun)
-}
-
 func invokeUserTestCode(t *testing.T, ctx context.Context, ns string, doRun func(context.Context, *gomega.WithT, string)) {
 	defer func() {
 		DumpNamespace(t, ctx, ns)
@@ -2000,40 +1971,6 @@ func invokeUserTestCode(t *testing.T, ctx context.Context, ns string, doRun func
 
 	g := gomega.NewWithT(t)
 	doRun(ctx, g, ns)
-}
-
-func deleteKnativeBroker(t *testing.T, ctx context.Context, ns metav1.Object) {
-	nsRef := corev1.Namespace{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: v1.SchemeGroupVersion.String(),
-			Kind:       "Namespace",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: ns.GetName(),
-		},
-	}
-	nsKey := ctrl.ObjectKeyFromObject(&nsRef)
-	if err := TestClient(t).Get(ctx, nsKey, &nsRef); err != nil {
-		failTest(t, err)
-	}
-
-	nsRef.SetLabels(make(map[string]string, 0))
-	if err := TestClient(t).Update(ctx, &nsRef); err != nil {
-		failTest(t, err)
-	}
-	broker := eventing.Broker{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: eventing.SchemeGroupVersion.String(),
-			Kind:       "Broker",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: ns.GetName(),
-			Name:      TestDefaultNamespace,
-		},
-	}
-	if err := TestClient(t).Delete(ctx, &broker); err != nil {
-		failTest(t, err)
-	}
 }
 
 func deleteTestNamespace(t *testing.T, ctx context.Context, ns ctrl.Object) {
@@ -2100,7 +2037,7 @@ func DumpNamespace(t *testing.T, ctx context.Context, ns string) {
 	}
 }
 
-func NewTestNamespace(t *testing.T, ctx context.Context, injectKnativeBroker bool) ctrl.Object {
+func NewTestNamespace(t *testing.T, ctx context.Context) ctrl.Object {
 	name := "test-" + uuid.New().String()
 
 	if exists, err := testNamespaceExists(t, ctx, name); err != nil {
@@ -2110,11 +2047,10 @@ func NewTestNamespace(t *testing.T, ctx context.Context, injectKnativeBroker boo
 		name = fmt.Sprintf("%s-%d", name, time.Now().Second())
 	}
 
-	return NewNamedTestNamespace(t, ctx, name, injectKnativeBroker)
+	return NewNamedTestNamespace(t, ctx, name)
 }
 
-func NewNamedTestNamespace(t *testing.T, ctx context.Context, name string, injectKnativeBroker bool) ctrl.Object {
-	brokerLabel := "eventing.knative.dev/injection"
+func NewNamedTestNamespace(t *testing.T, ctx context.Context, name string) ctrl.Object {
 	c := TestClient(t)
 
 	var namespaceOrProject ctrl.Object
@@ -2155,23 +2091,7 @@ func NewNamedTestNamespace(t *testing.T, ctx context.Context, name string, injec
 		if err != nil {
 			failTest(t, err)
 		}
-		// workaround https://github.com/openshift/origin/issues/3819
-		if injectKnativeBroker {
-			// use Kubernetes API - https://access.redhat.com/solutions/2677921
-			if namespace, err := TestClient(t).CoreV1().Namespaces().Get(ctx, name, metav1.GetOptions{}); err != nil {
-				failTest(t, err)
-			} else {
-				if _, ok := namespace.GetLabels()[brokerLabel]; !ok {
-					namespace.SetLabels(map[string]string{
-						brokerLabel: "enabled",
-					})
-					if err = TestClient(t).Update(ctx, namespace); err != nil {
-						failTest(t, errors.New("Unable to label project with knative-eventing-injection. This operation needs update permission on the project."))
-					}
-				}
-			}
-		}
-		namespaceOrProject = project
+		return project
 	} else {
 		namespace := &corev1.Namespace{
 			TypeMeta: metav1.TypeMeta{
@@ -2181,11 +2101,6 @@ func NewNamedTestNamespace(t *testing.T, ctx context.Context, name string, injec
 			ObjectMeta: metav1.ObjectMeta{
 				Name: name,
 			},
-		}
-		if injectKnativeBroker {
-			namespace.SetLabels(map[string]string{
-				brokerLabel: "enabled",
-			})
 		}
 		if err := TestClient(t).Create(ctx, namespace); err != nil {
 			failTest(t, err)
