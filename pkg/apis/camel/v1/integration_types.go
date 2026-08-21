@@ -75,8 +75,6 @@ type IntegrationSpec struct {
 	// the traits needed to run this Integration
 	Traits Traits `json:"traits,omitempty"`
 	// Pod template customization.
-	//
-	// Deprecated: use container, init-containers or owner traits instead
 	PodTemplate *PodSpecTemplate `json:"template,omitempty"`
 	// Deprecated:
 	//
@@ -310,16 +308,12 @@ type IntegrationCondition struct {
 }
 
 // PodSpecTemplate represent a template used to deploy an Integration `Pod`.
-//
-// Deprecated: to be removed in future versions.
 type PodSpecTemplate struct {
 	// the specification
 	Spec PodSpec `json:"spec,omitempty"`
 }
 
 // PodSpec defines a group of Kubernetes resources.
-//
-// Deprecated: to be removed in future versions.
 type PodSpec struct {
 	// AutomountServiceAccountToken
 	AutomountServiceAccountToken *bool `json:"automountServiceAccountToken,omitempty" protobuf:"varint,21,opt,name=automountServiceAccountToken"`

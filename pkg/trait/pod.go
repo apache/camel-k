@@ -25,7 +25,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/apimachinery/pkg/util/strategicpatch"
-	"k8s.io/utils/ptr"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
@@ -47,30 +46,14 @@ func newPodTrait() Trait {
 }
 
 func (t *podTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
-	if e.Integration == nil {
-		return false, nil, nil
-	}
-	if !ptr.Deref(t.Enabled, true) {
-		return false, NewIntegrationConditionUserDisabled("Pod"), nil
-	}
-	//nolint:staticcheck
-	if e.Integration.Spec.PodTemplate == nil {
+	if e.Integration == nil || e.Integration.Spec.PodTemplate == nil {
 		return false, nil, nil
 	}
 
-	condition := NewIntegrationCondition(
-		"Pod",
-		v1.IntegrationConditionTraitInfo,
-		corev1.ConditionTrue,
-		TraitConfigurationReason,
-		"Pod trait is deprecated in favour of InitContainers. It may be removed in future version.",
-	)
-
-	return e.IntegrationInRunningPhases(), condition, nil
+	return e.IntegrationInRunningPhases(), nil, nil
 }
 
 func (t *podTrait) Apply(e *Environment) error {
-	//nolint:staticcheck
 	changes := e.Integration.Spec.PodTemplate.Spec
 	var patchedPodSpec *corev1.PodSpec
 	strategy, err := e.DetermineControllerStrategy()
@@ -112,7 +95,6 @@ func (t *podTrait) Apply(e *Environment) error {
 	return nil
 }
 
-//nolint:staticcheck
 func (t *podTrait) applyChangesTo(podSpec *corev1.PodSpec, changes v1.PodSpec) (*corev1.PodSpec, error) {
 	patch, err := json.Marshal(changes)
 	if err != nil {
