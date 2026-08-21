@@ -261,8 +261,6 @@ type Traits struct {
 	// The configuration of Platform trait
 	Platform *trait.PlatformTrait `json:"platform,omitempty" property:"platform"`
 	// The configuration of Pod trait.
-	//
-	// Deprecated: use init-containers instead.
 	Pod *trait.PodTrait `json:"pod,omitempty" property:"pod"`
 	// The configuration of Prometheus trait
 	Prometheus *trait.PrometheusTrait `json:"prometheus,omitempty" property:"prometheus"`

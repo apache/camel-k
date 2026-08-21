@@ -109,7 +109,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringArray("label", nil, "Add a label to the integration. E.g. \"--label my.company=hello\"")
 	cmd.Flags().StringArray("source", nil, "Add source file to your integration, "+
 		"this is added to the list of files listed as arguments of the command")
-	cmd.Flags().String("pod-template", "", "The path of the YAML file containing a PodSpec template to be used for the Integration pods")
+	cmd.Flags().String("pod-template", "", "[Deprecated] The path of the YAML file containing a PodSpec template to be used for the Integration pods")
 	cmd.Flags().String("service-account", "", "The SA to use to run this Integration")
 	cmd.Flags().String("git", "", "A Git repository containing the project to build.")
 	cmd.Flags().String("git-branch", "", "Git branch to checkout when using --git option")

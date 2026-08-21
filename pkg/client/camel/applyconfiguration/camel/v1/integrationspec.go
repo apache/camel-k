@@ -49,8 +49,6 @@ type IntegrationSpecApplyConfiguration struct {
 	// the traits needed to run this Integration
 	Traits *TraitsApplyConfiguration `json:"traits,omitempty"`
 	// Pod template customization.
-	//
-	// Deprecated: use container, init-containers or owner traits instead
 	PodTemplate *PodSpecTemplateApplyConfiguration `json:"template,omitempty"`
 	// Deprecated:
 	//

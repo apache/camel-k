@@ -15,7 +15,7 @@ We suggest to edit the Deployment to configure the https://kubernetes.io/docs/co
 
 === Builder Pods and Integrations
 
-Builder Pods and Integration Pods can be also scheduled and assigned in the cluster. For this reason you need to use xref:traits:builder.adoc[builder trait] configuration (for builder Pod when using `pod` building strategy) and xref:traits:affinity.adoc[affinity], xref:traits:pod.adoc[pod], xref:traits:toleration.adoc[toleration] traits for Integration Pods.
+Builder Pods and Integration Pods can be also scheduled and assigned in the cluster. For this reason you need to use xref:traits:builder.adoc[builder trait] configuration (for builder Pod when using `pod` building strategy) and xref:traits:affinity.adoc[affinity], xref:traits:toleration.adoc[toleration] traits for Integration Pods. In advanced cases you can also use `.spec.template` Integration to specify a Pod template to use.
 
 [[scheduling-infra-pod-resources]]
 == Resources

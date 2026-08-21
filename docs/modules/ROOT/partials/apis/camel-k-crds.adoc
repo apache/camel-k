@@ -3559,8 +3559,6 @@ the traits needed to run this Integration
 
 Pod template customization.
 
-Deprecated: use container, init-containers or owner traits instead
-
 |`configuration` +
 *xref:#_camel_apache_org_v1_ConfigurationSpec[[\]ConfigurationSpec]*
 |
@@ -5153,8 +5151,6 @@ string
 
 PodSpec defines a group of Kubernetes resources.
 
-Deprecated: to be removed in future versions.
-
 [cols="2,2a",options="header"]
 |===
 |Field
@@ -5262,8 +5258,6 @@ PodSecurityContext
 * <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
 
 PodSpecTemplate represent a template used to deploy an Integration `Pod`.
-
-Deprecated: to be removed in future versions.
 
 [cols="2,2a",options="header"]
 |===
@@ -6236,8 +6230,6 @@ The configuration of Platform trait
 
 
 The configuration of Pod trait.
-
-Deprecated: use init-containers instead.
 
 |`prometheus` +
 *xref:#_camel_apache_org_v1_trait_PrometheusTrait[PrometheusTrait]*
@@ -9015,6 +9007,7 @@ Only one of `max-unavailable` and `min-available` can be specified.
 * <<#_camel_apache_org_v1_trait_MountTrait, MountTrait>>
 * <<#_camel_apache_org_v1_trait_OpenAPITrait, OpenAPITrait>>
 * <<#_camel_apache_org_v1_trait_PlatformTrait, PlatformTrait>>
+* <<#_camel_apache_org_v1_trait_PodTrait, PodTrait>>
 * <<#_camel_apache_org_v1_trait_QuarkusTrait, QuarkusTrait>>
 * <<#_camel_apache_org_v1_trait_SecurityContextTrait, SecurityContextTrait>>
 
@@ -9097,15 +9090,9 @@ Deprecated: no longer in use.
 
 * <<#_camel_apache_org_v1_Traits, Traits>>
 
-WARNING: The Pod trait is **deprecated** and will removed in future release versions:
-use InitContainers trait instead.
-
 The pod trait allows the customization of the Integration pods.
 It applies the `PodSpecTemplate` struct contained in the Integration `.spec.podTemplate` field,
 into the Integration deployment Pods template, using strategic merge patch.
-
-This can be used to customize the container where Camel routes execute,
-by using the `integration` container name.
 
 
 [cols="2,2a",options="header"]
@@ -9113,9 +9100,9 @@ by using the `integration` container name.
 |Field
 |Description
 
-|`Trait` +
-*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
-|(Members of `Trait` are embedded into this type.)
+|`PlatformBaseTrait` +
+*xref:#_camel_apache_org_v1_trait_PlatformBaseTrait[PlatformBaseTrait]*
+|(Members of `PlatformBaseTrait` are embedded into this type.)
 
 
 
@@ -9825,7 +9812,6 @@ The list of taints to tolerate, in the form `Key[=Value]:Effect[:Seconds]`
 * <<#_camel_apache_org_v1_trait_MasterTrait, MasterTrait>>
 * <<#_camel_apache_org_v1_trait_OwnerTrait, OwnerTrait>>
 * <<#_camel_apache_org_v1_trait_PDBTrait, PDBTrait>>
-* <<#_camel_apache_org_v1_trait_PodTrait, PodTrait>>
 * <<#_camel_apache_org_v1_trait_PrometheusTrait, PrometheusTrait>>
 * <<#_camel_apache_org_v1_trait_PullSecretTrait, PullSecretTrait>>
 * <<#_camel_apache_org_v1_trait_RegistryTrait, RegistryTrait>>

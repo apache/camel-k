@@ -27,8 +27,6 @@ import (
 // with apply.
 //
 // PodSpec defines a group of Kubernetes resources.
-//
-// Deprecated: to be removed in future versions.
 type PodSpecApplyConfiguration struct {
 	// AutomountServiceAccountToken
 	AutomountServiceAccountToken *bool `json:"automountServiceAccountToken,omitempty"`
