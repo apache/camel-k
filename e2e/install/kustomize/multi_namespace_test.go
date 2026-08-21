@@ -62,7 +62,7 @@ func TestKustomizeMultiNamespace(t *testing.T) {
 					// Test a simple integration in "tenant-z" is not reconciled
 					g.Expect(KamelRun(t, ctx, tenantNs, "files/yaml.yaml").Execute()).To(Succeed())
 					g.Consistently(IntegrationPhase(t, ctx, tenantNs, "yaml"), 30*time.Second).Should(BeEmpty())
-				}, "tenant-z", true)
+				}, "tenant-z")
 
 				// Test a simple integration in "tenant-a" is reconciled and runs correctly
 				g.Expect(KamelRun(t, ctx, tenantANs, "files/yaml.yaml").Execute()).To(Succeed())
@@ -92,7 +92,7 @@ func TestKustomizeMultiNamespace(t *testing.T) {
 
 				g.Eventually(OperatorPod(t, ctx, operatorNs)).Should(BeNil())
 				g.Eventually(CRDs(t)).Should(BeNil())
-			}, "tenant-b", true)
-		}, "tenant-a", true)
-	}, "operators", true)
+			}, "tenant-b")
+		}, "tenant-a")
+	}, "operators")
 }

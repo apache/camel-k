@@ -22,9 +22,15 @@ package trait
 //
 // The Camel Knative component will then use the full configuration to configure the routes.
 //
+// WARNING: The Knative trait is **deprecated** and will be removed in future release versions:
+// use Camel (Quarkus) Knative component instead.
+//
 // The trait is enabled by default when the Knative profile is active.
 //
 // +camel-k:trait=knative.
+//
+// +camel-k:trait=logging.
+// +camel-k:deprecated=2.11.0.
 //
 //nolint:godoclint
 type KnativeTrait struct {

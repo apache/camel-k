@@ -108,10 +108,9 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 	require.NoError(t, err)
 
 	tr, _ := tc.GetTrait("knative").(*knativeTrait)
-	ok, condition, err := tr.Configure(&environment)
+	ok, _, err := tr.Configure(&environment)
 	require.NoError(t, err)
 	assert.True(t, ok)
-	assert.Nil(t, condition)
 
 	err = tr.Apply(&environment)
 	require.NoError(t, err)
@@ -226,10 +225,9 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 
 	tr, _ := tc.GetTrait("knative").(*knativeTrait)
 
-	ok, condition, err := tr.Configure(&environment)
+	ok, _, err := tr.Configure(&environment)
 	require.NoError(t, err)
 	assert.True(t, ok)
-	assert.Nil(t, condition)
 
 	err = tr.Apply(&environment)
 	require.NoError(t, err)
@@ -1154,10 +1152,9 @@ func TestKnativeEnabled(t *testing.T) {
 
 	// configure the knative trait
 	knTrait, _ := newKnativeTrait().(*knativeTrait)
-	ok, condition, err = knTrait.Configure(&environment)
+	ok, _, err = knTrait.Configure(&environment)
 	require.NoError(t, err)
 	assert.True(t, ok)
-	assert.Nil(t, condition)
 
 	// apply the knative trait
 	require.NoError(t, knTrait.Apply(&environment))
@@ -1215,10 +1212,9 @@ func TestKnativeNotEnabled(t *testing.T) {
 
 	// configure the knative trait
 	knTrait, _ := newKnativeTrait().(*knativeTrait)
-	ok, condition, err = knTrait.Configure(&environment)
+	ok, _, err = knTrait.Configure(&environment)
 	require.NoError(t, err)
 	assert.False(t, ok)
-	assert.Nil(t, condition)
 
 	assert.NotContains(t, environment.Integration.Status.Capabilities, v1.CapabilityKnative)
 }
@@ -1520,20 +1516,18 @@ func fromCamelProperties(appProps map[string]string) (*knativeapi.CamelEnvironme
 func TestKnativeSyntheticKitDefault(t *testing.T) {
 	e := NewFakeEnvironmentForSyntheticKit(t)
 	knTrait, _ := newKnativeTrait().(*knativeTrait)
-	ok, condition, err := knTrait.Configure(&e)
+	ok, _, err := knTrait.Configure(&e)
 	require.NoError(t, err)
 	assert.False(t, ok)
-	assert.Nil(t, condition)
 }
 
 func TestKnativeSyntheticKitEnabled(t *testing.T) {
 	e := NewFakeEnvironmentForSyntheticKit(t)
 	knTrait, _ := newKnativeTrait().(*knativeTrait)
 	knTrait.Enabled = ptr.To(true)
-	ok, condition, err := knTrait.Configure(&e)
+	ok, _, err := knTrait.Configure(&e)
 	require.NoError(t, err)
 	assert.True(t, ok)
-	assert.Nil(t, condition)
 }
 
 func TestRunKnativeEndpointWithKnativeNotInstalled(t *testing.T) {
@@ -1578,9 +1572,8 @@ func TestRunNonKnativeEndpointWithKnativeNotInstalled(t *testing.T) {
 		},
 	}
 
-	configured, condition, err := trait.Configure(environment)
+	configured, _, err := trait.Configure(environment)
 	require.NoError(t, err)
-	assert.Nil(t, condition)
 	assert.False(t, configured)
 	conditions := environment.Integration.Status.Conditions
 	assert.Empty(t, conditions)
@@ -1657,9 +1650,8 @@ func TestKnativeAutoConfiguration(t *testing.T) {
 		},
 	}
 
-	configured, condition, err := trait.Configure(environment)
+	configured, _, err := trait.Configure(environment)
 	require.NoError(t, err)
-	assert.Nil(t, condition)
 	assert.True(t, configured)
 	err = trait.Apply(environment)
 	require.NoError(t, err)

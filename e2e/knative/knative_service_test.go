@@ -38,22 +38,22 @@ func TestKnativeServiceURL(t *testing.T) {
 
 		t.Run("Service endpoint url check", func(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "files/knativeurl1.yaml").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "knativeurl1"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "knativeurl1", camelv1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(v1.ConditionTrue))
-			ks := KnativeService(t, ctx, ns, "knativeurl1")
-			g.Eventually(ks, TestTimeoutShort).ShouldNot(BeNil())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "knativeurl1", camelv1.IntegrationConditionReady),
+				TestTimeoutMedium).Should(Equal(v1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "knativeurl1")).Should(Equal(v1.PodRunning))
+			g.Eventually(KnativeService(t, ctx, ns, "knativeurl1")).ShouldNot(BeNil())
 			url := "http://knativeurl1." + ns + ".svc.cluster.local"
-			g.Eventually(ks().Status.RouteStatusFields.URL.String(), TestTimeoutShort).Should(Equal(url))
+			g.Eventually(KnativeService(t, ctx, ns, "knativeurl1")().Status.RouteStatusFields.URL.String()).Should(Equal(url))
 		})
 
 		t.Run("Service multiple endpoint url check", func(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "files/knativeurl2.yaml").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "knativeurl2"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "knativeurl2", camelv1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(v1.ConditionTrue))
-			ks := KnativeService(t, ctx, ns, "knativeurl2")
-			g.Eventually(ks, TestTimeoutShort).ShouldNot(BeNil())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "knativeurl2", camelv1.IntegrationConditionReady),
+				TestTimeoutMedium).Should(Equal(v1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "knativeurl2")).Should(Equal(v1.PodRunning))
+			g.Eventually(KnativeService(t, ctx, ns, "knativeurl2")).ShouldNot(BeNil())
 			url := "http://knativeurl2." + ns + ".svc.cluster.local"
-			g.Eventually(ks().Status.RouteStatusFields.URL.String(), TestTimeoutShort).Should(Equal(url))
+			g.Eventually(KnativeService(t, ctx, ns, "knativeurl2")().Status.RouteStatusFields.URL.String()).Should(Equal(url))
 		})
 		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
