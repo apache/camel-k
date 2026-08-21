@@ -4764,7 +4764,7 @@ spec:
                     description: |-
                       The configuration of Jolokia trait.
 
-                      Deprecated: use jvm.agent instead.
+                      Deprecated: no longer in use.
                     properties:
                       CACert:
                         description: |-
@@ -5597,7 +5597,7 @@ spec:
                     description: |-
                       The configuration of Registry trait (support removed since version 2.5.0).
 
-                      Deprecated: use jvm trait or read documentation.
+                      Deprecated: no longer in use.
                     properties:
                       configuration:
                         description: |-
@@ -7317,7 +7317,7 @@ spec:
                     description: |-
                       The configuration of Jolokia trait.
 
-                      Deprecated: use jvm.agent instead.
+                      Deprecated: no longer in use.
                     properties:
                       CACert:
                         description: |-
@@ -8150,7 +8150,7 @@ spec:
                     description: |-
                       The configuration of Registry trait (support removed since version 2.5.0).
 
-                      Deprecated: use jvm trait or read documentation.
+                      Deprecated: no longer in use.
                     properties:
                       configuration:
                         description: |-
@@ -9764,7 +9764,7 @@ spec:
                     description: |-
                       The configuration of Jolokia trait.
 
-                      Deprecated: use jvm.agent instead.
+                      Deprecated: no longer in use.
                     properties:
                       CACert:
                         description: |-
@@ -10597,7 +10597,7 @@ spec:
                     description: |-
                       The configuration of Registry trait (support removed since version 2.5.0).
 
-                      Deprecated: use jvm trait or read documentation.
+                      Deprecated: no longer in use.
                     properties:
                       configuration:
                         description: |-
@@ -12197,7 +12197,7 @@ spec:
                     description: |-
                       The configuration of Jolokia trait.
 
-                      Deprecated: use jvm.agent instead.
+                      Deprecated: no longer in use.
                     properties:
                       CACert:
                         description: |-
@@ -13030,7 +13030,7 @@ spec:
                     description: |-
                       The configuration of Registry trait (support removed since version 2.5.0).
 
-                      Deprecated: use jvm trait or read documentation.
+                      Deprecated: no longer in use.
                     properties:
                       configuration:
                         description: |-
@@ -21492,7 +21492,7 @@ spec:
                     description: |-
                       The configuration of Jolokia trait.
 
-                      Deprecated: use jvm.agent instead.
+                      Deprecated: no longer in use.
                     properties:
                       CACert:
                         description: |-
@@ -22325,7 +22325,7 @@ spec:
                     description: |-
                       The configuration of Registry trait (support removed since version 2.5.0).
 
-                      Deprecated: use jvm trait or read documentation.
+                      Deprecated: no longer in use.
                     properties:
                       configuration:
                         description: |-
@@ -23886,7 +23886,7 @@ spec:
                     description: |-
                       The configuration of Jolokia trait.
 
-                      Deprecated: use jvm.agent instead.
+                      Deprecated: no longer in use.
                     properties:
                       CACert:
                         description: |-
@@ -24719,7 +24719,7 @@ spec:
                     description: |-
                       The configuration of Registry trait (support removed since version 2.5.0).
 
-                      Deprecated: use jvm trait or read documentation.
+                      Deprecated: no longer in use.
                     properties:
                       configuration:
                         description: |-
@@ -34545,7 +34545,7 @@ spec:
                         description: |-
                           The configuration of Jolokia trait.
 
-                          Deprecated: use jvm.agent instead.
+                          Deprecated: no longer in use.
                         properties:
                           CACert:
                             description: |-
@@ -35382,7 +35382,7 @@ spec:
                         description: |-
                           The configuration of Registry trait (support removed since version 2.5.0).
 
-                          Deprecated: use jvm trait or read documentation.
+                          Deprecated: no longer in use.
                         properties:
                           configuration:
                             description: |-
@@ -36860,7 +36860,7 @@ spec:
                     description: |-
                       The configuration of Jolokia trait.
 
-                      Deprecated: use jvm.agent instead.
+                      Deprecated: no longer in use.
                     properties:
                       CACert:
                         description: |-
@@ -37693,7 +37693,7 @@ spec:
                     description: |-
                       The configuration of Registry trait (support removed since version 2.5.0).
 
-                      Deprecated: use jvm trait or read documentation.
+                      Deprecated: no longer in use.
                     properties:
                       configuration:
                         description: |-

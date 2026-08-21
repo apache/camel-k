@@ -60,7 +60,6 @@
 ** xref:traits:ingress.adoc[Ingress]
 ** xref:traits:init-containers.adoc[Init Containers]
 ** xref:traits:istio.adoc[Istio]
-** xref:traits:jolokia.adoc[Jolokia]
 ** xref:traits:jvm.adoc[Jvm]
 ** xref:traits:kamelets.adoc[Kamelets]
 ** xref:traits:keda.adoc[Keda]

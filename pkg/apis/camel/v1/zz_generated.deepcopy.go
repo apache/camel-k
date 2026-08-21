@@ -3236,8 +3236,8 @@ func (in *Traits) DeepCopyInto(out *Traits) {
 		*out = new(trait.EnvironmentTrait)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.ErrorHandler != nil {
-		in, out := &in.ErrorHandler, &out.ErrorHandler
+	if in.DeprecatedErrorHandler != nil {
+		in, out := &in.DeprecatedErrorHandler, &out.DeprecatedErrorHandler
 		*out = new(trait.ErrorHandlerTrait)
 		(*in).DeepCopyInto(*out)
 	}
@@ -3276,8 +3276,8 @@ func (in *Traits) DeepCopyInto(out *Traits) {
 		*out = new(trait.IstioTrait)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.Jolokia != nil {
-		in, out := &in.Jolokia, &out.Jolokia
+	if in.DeprecatedJolokia != nil {
+		in, out := &in.DeprecatedJolokia, &out.DeprecatedJolokia
 		*out = new(trait.JolokiaTrait)
 		(*in).DeepCopyInto(*out)
 	}
@@ -3321,8 +3321,8 @@ func (in *Traits) DeepCopyInto(out *Traits) {
 		*out = new(trait.MountTrait)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.OpenAPI != nil {
-		in, out := &in.OpenAPI, &out.OpenAPI
+	if in.DeprecatedOpenAPI != nil {
+		in, out := &in.DeprecatedOpenAPI, &out.DeprecatedOpenAPI
 		*out = new(trait.OpenAPITrait)
 		(*in).DeepCopyInto(*out)
 	}
@@ -3361,8 +3361,8 @@ func (in *Traits) DeepCopyInto(out *Traits) {
 		*out = new(trait.QuarkusTrait)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.Registry != nil {
-		in, out := &in.Registry, &out.Registry
+	if in.DeprecatedRegistry != nil {
+		in, out := &in.DeprecatedRegistry, &out.DeprecatedRegistry
 		*out = new(trait.RegistryTrait)
 		(*in).DeepCopyInto(*out)
 	}
@@ -3381,8 +3381,8 @@ func (in *Traits) DeepCopyInto(out *Traits) {
 		*out = new(trait.ServiceTrait)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.ServiceBinding != nil {
-		in, out := &in.ServiceBinding, &out.ServiceBinding
+	if in.DeprecatedServiceBinding != nil {
+		in, out := &in.DeprecatedServiceBinding, &out.DeprecatedServiceBinding
 		*out = new(trait.ServiceBindingTrait)
 		(*in).DeepCopyInto(*out)
 	}
@@ -3396,25 +3396,25 @@ func (in *Traits) DeepCopyInto(out *Traits) {
 		*out = new(trait.TolerationTrait)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.Addons != nil {
-		in, out := &in.Addons, &out.Addons
+	if in.DeprecatedAddons != nil {
+		in, out := &in.DeprecatedAddons, &out.DeprecatedAddons
 		*out = make(map[string]AddonTrait, len(*in))
 		for key, val := range *in {
 			(*out)[key] = *val.DeepCopy()
 		}
 	}
-	if in.Strimzi != nil {
-		in, out := &in.Strimzi, &out.Strimzi
+	if in.DeprecatedStrimzi != nil {
+		in, out := &in.DeprecatedStrimzi, &out.DeprecatedStrimzi
 		*out = new(TraitSpec)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.ThreeScale != nil {
-		in, out := &in.ThreeScale, &out.ThreeScale
+	if in.DeprecatedThreeScale != nil {
+		in, out := &in.DeprecatedThreeScale, &out.DeprecatedThreeScale
 		*out = new(TraitSpec)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.Tracing != nil {
-		in, out := &in.Tracing, &out.Tracing
+	if in.DeprecatedTracing != nil {
+		in, out := &in.DeprecatedTracing, &out.DeprecatedTracing
 		*out = new(TraitSpec)
 		(*in).DeepCopyInto(*out)
 	}

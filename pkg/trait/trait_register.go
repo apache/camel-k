@@ -38,7 +38,6 @@ func init() {
 	AddToTraits(NewInitTrait)
 	AddToTraits(newIngressTrait)
 	AddToTraits(newIstioTrait)
-	AddToTraits(newJolokiaTrait)
 	AddToTraits(newJvmTrait)
 	AddToTraits(newKameletsTrait)
 	AddToTraits(newKedaTrait)
