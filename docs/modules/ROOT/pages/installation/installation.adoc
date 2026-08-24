@@ -72,6 +72,44 @@ It's important to notice that when running the single or multiple namespace oper
 
 NOTE: RBAC custom configuration may vary depending on the installation methodology.
 
+[[multi-namespace-kustomize]]
+== Install a multi namespace operator with Kustomize
+
+The repository includes a complete Kustomize example for an operator installed in one namespace and watching two tenant namespaces. The `multi-namespace` overlay installs the operator in `operators`, configures `WATCH_NAMESPACE` to `tenant-a,tenant-b`, and grants the operator's ServiceAccount the required namespaced permissions in both tenant namespaces. The operator also watches its own `operators` namespace for the resources it manages there.
+
+The overlay does not create namespaces. Create the operator and tenant namespaces before applying it:
+
+[source,shell script]
+----
+$ kubectl create namespace operators
+$ kubectl create namespace tenant-a
+$ kubectl create namespace tenant-b
+----
+
+Apply the overlay for the Camel K version you want to install:
+
+[subs=attributes+]
+----
+$ kubectl apply -k github.com/apache/camel-k/install/overlays/multi-namespace?ref=v{last-released-version} --server-side
+----
+
+The example creates the `camel-k-operator-tenant-ab` ServiceAccount in `operators`. Each tenant RoleBinding points to that ServiceAccount across namespaces, so the binding must be installed in every namespace listed in `WATCH_NAMESPACE`. Granting the operator access to only one tenant namespace will leave it unable to reconcile resources in the other namespaces.
+
+Verify the deployment, watched namespaces, and cross-namespace RoleBinding:
+
+[source,shell script]
+----
+$ kubectl -n operators get deployment camel-k-operator-tenant-ab
+$ kubectl -n operators get deployment camel-k-operator-tenant-ab \
+    -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="WATCH_NAMESPACE")].value}{"\n"}'
+tenant-a,tenant-b
+$ kubectl -n tenant-a get rolebinding camel-k-operator-tenant-a \
+    -o jsonpath='{.subjects[0].namespace}/{.subjects[0].name}{"\n"}'
+operators/camel-k-operator-tenant-ab
+----
+
+The overlay is a two-tenant example. To use different namespaces, copy the `tenant-a-ns-rbac` and `tenant-b-ns-rbac` overlay directories, change each `namespace` and `nameSuffix`, update the `WATCH_NAMESPACE` value in `operator/patch-envvars.yaml`, and add the new directories to the top-level `kustomization.yaml`. Keep the RoleBinding subject namespace set to `operators` (or change it together with the operator namespace) and keep its ServiceAccount name aligned with the operator Deployment.
+
 [[bootstrap-configuration]]
 == Setup the operator configuration
 
