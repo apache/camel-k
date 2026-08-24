@@ -722,7 +722,7 @@ ifndef NAMESPACE
 	@echo "WARN: no namespace specified, using default namespace $(DEFAULT_NS)"
 	$(eval NAMESPACE=$(DEFAULT_NS))
 endif
-	$(OPERATOR_SDK) run bundle $(BUNDLE_IMAGE_NAME):$(CUSTOM_VERSION) -n $(NAMESPACE)
+	$(OPERATOR_SDK) run bundle $(BUNDLE_IMAGE_NAME):$(CUSTOM_VERSION) --install-mode $(OLM_INSTALL_MODE) -n $(NAMESPACE)
 
 #
 # Builds a test catalog index for installing the operator via an OLM
