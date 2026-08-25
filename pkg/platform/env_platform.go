@@ -210,7 +210,7 @@ func AffinityNodeLabelsAllowList() []string {
 
 // BuilderTasksEnabled reports whether CR authors are permitted to inject custom pipeline tasks
 // via the builder.tasks trait. Controlled by the BUILDER_TASKS_ENABLED operator environment
-// variable (default true for backward compatibility). Set to "false" to prevent custom task
+// variable (default false). Set to "false" to prevent custom task
 // injection across all integrations managed by this operator.
 func BuilderTasksEnabled() bool {
 	return strings.ToLower(strings.TrimSpace(GetEnvOrDefault("BUILDER_TASKS_ENABLED", "false"))) == "true"
