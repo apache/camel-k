@@ -58,4 +58,4 @@ resources:
 
 === Builder Pod configuration
 
-You can set the resources requests and limits for the builder Pod using xref:traits:builder.adoc[container] trait.
+You can set the resources requests and limits for the builder Pod using xref:traits:container.adoc[container] trait.
