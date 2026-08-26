@@ -113,14 +113,11 @@ runs:
 
     - name: Install assurance tools
       shell: bash
-      env:
-        CYCLONEDX_GOMOD_VERSION: v1.12.0
-        SYFT_VERSION: v1.51.0
-        COSIGN_VERSION: v3.1.3
       run: |
-        go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@${CYCLONEDX_GOMOD_VERSION}
-        go install github.com/anchore/syft/cmd/syft@${SYFT_VERSION}
-        go install github.com/sigstore/cosign/v3/cmd/cosign@${COSIGN_VERSION}
+        source script/release-assurance-tools.env
+        go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@${CYCLONEDX_GOMOD_REF}
+        go install github.com/anchore/syft/cmd/syft@${SYFT_REF}
+        go install github.com/sigstore/cosign/v3/cmd/cosign@${COSIGN_REF}
         echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
         go version -m "$(go env GOPATH)/bin/cyclonedx-gomod" | grep -F "github.com/CycloneDX/cyclonedx-gomod ${CYCLONEDX_GOMOD_VERSION}"
         "$(go env GOPATH)/bin/syft" --version | grep -E '1\.51\.0$'
@@ -145,12 +142,10 @@ runs:
     - name: Generate release assurance
       shell: bash
       env:
-        CYCLONEDX_GOMOD_VERSION: v1.12.0
-        SYFT_VERSION: v1.51.0
         SYFT_CHECK_FOR_APP_UPDATE: "false"
-        SYFT_REGISTRY_AUTH_USERNAME: ${{ inputs.secretDockerHubUser }}
-        SYFT_REGISTRY_AUTH_PASSWORD: ${{ inputs.secretDockerHubPassword }}
       run: |
+        source script/release-assurance-tools.env
+        export SYFT_VERSION
         bash script/generate_release_assurance.sh \
           "${{ env.VERSION }}" \
           "${{ env.TAG }}" \
