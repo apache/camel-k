@@ -120,7 +120,8 @@ runs:
         go install github.com/sigstore/cosign/v3/cmd/cosign@${COSIGN_REF}
         echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
         go version -m "$(go env GOPATH)/bin/cyclonedx-gomod" | grep -F "github.com/CycloneDX/cyclonedx-gomod ${CYCLONEDX_GOMOD_VERSION}"
-        "$(go env GOPATH)/bin/syft" --version | grep -E '1\.51\.0$'
+        reported_syft_version=$("$(go env GOPATH)/bin/syft" --version | awk '{print $NF}')
+        test "$reported_syft_version" = "${SYFT_VERSION#v}"
         go version -m "$(go env GOPATH)/bin/cosign" | grep -F "github.com/sigstore/cosign/v3 ${COSIGN_VERSION}"
 
     - name: Generate module SBOM
