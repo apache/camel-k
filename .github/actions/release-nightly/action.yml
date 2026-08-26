@@ -90,6 +90,7 @@ runs:
         echo "VERSION=$V" >> $GITHUB_ENV
         echo "TAG=v$V" >> $GITHUB_ENV
         echo "UPD_DATE=$D" >> $GITHUB_ENV
+        echo "BUILD_SOURCE_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
         IMAGE_NAME=docker.io/${TEST_DOCKER_HUB_USERNAME:-testcamelk}/camel-k
         echo "Using IMAGE_NAME=$IMAGE_NAME"
         echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
@@ -110,30 +111,70 @@ runs:
       run: |
         NOTEST=1 make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} BUNDLE_IMAGE_NAME=docker.io/testcamelk/camel-k-bundle bundle-push
 
-    - name: Install SBOM generator
+    - name: Install assurance tools
       shell: bash
+      env:
+        CYCLONEDX_GOMOD_VERSION: v1.12.0
+        SYFT_VERSION: v1.51.0
+        COSIGN_VERSION: v3.1.3
       run: |
-        go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@latest
-        echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+        go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@${CYCLONEDX_GOMOD_VERSION}
+        go install github.com/anchore/syft/cmd/syft@${SYFT_VERSION}
+        go install github.com/sigstore/cosign/v3/cmd/cosign@${COSIGN_VERSION}
+        echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+        go version -m "$(go env GOPATH)/bin/cyclonedx-gomod" | grep -F "github.com/CycloneDX/cyclonedx-gomod ${CYCLONEDX_GOMOD_VERSION}"
+        "$(go env GOPATH)/bin/syft" --version | grep -E '1\.51\.0$'
+        go version -m "$(go env GOPATH)/bin/cosign" | grep -F "github.com/sigstore/cosign/v3 ${COSIGN_VERSION}"
 
-    - name: Generate SBOM
+    - name: Generate module SBOM
       shell: bash
-      run: cyclonedx-gomod mod -licenses -json -output sbom.json
+      run: cyclonedx-gomod mod -licenses -json -noserial -notimestamp -output sbom.json
 
-    - name: Commit and push nightly branch
+    - name: Prepare nightly release commit
       shell: bash
       env:
         CI_USER: "github-actions[bot]"
         CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
-        CI_TOKEN: ${{ inputs.secretGithubToken }}
       run: |
         git config --local user.email "$CI_EMAIL"
         git config --local user.name "$CI_USER"
         git add docs/charts/
         git commit -am 'chore(ci): ${{ env.TAG }} release updates' || echo "No nightly release updates changes to commit"
         echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_ENV
-        git tag ${{ env.TAG }} $(git rev-parse HEAD)
-        git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" tag ${{ env.TAG }} -f || echo "No nightly release updates changes to push"
+
+    - name: Generate release assurance
+      shell: bash
+      env:
+        CYCLONEDX_GOMOD_VERSION: v1.12.0
+        SYFT_VERSION: v1.51.0
+        SYFT_CHECK_FOR_APP_UPDATE: "false"
+        SYFT_REGISTRY_AUTH_USERNAME: ${{ inputs.secretDockerHubUser }}
+        SYFT_REGISTRY_AUTH_PASSWORD: ${{ inputs.secretDockerHubPassword }}
+      run: |
+        bash script/generate_release_assurance.sh \
+          "${{ env.VERSION }}" \
+          "${{ env.TAG }}" \
+          "${{ env.BUILD_SOURCE_SHA }}" \
+          "${{ env.COMMIT_ID }}" \
+          "$CYCLONEDX_GOMOD_VERSION"
+
+    - name: Sign and attest release assurance
+      shell: bash
+      env:
+        COSIGN_YES: "true"
+      run: |
+        bash script/attest_release_assurance.sh \
+          release-assurance.json \
+          release-assurance.sigstore.json
+
+    - name: Publish nightly tag
+      shell: bash
+      env:
+        CI_USER: "github-actions[bot]"
+        CI_TOKEN: ${{ inputs.secretGithubToken }}
+      run: |
+        git tag -f "${{ env.TAG }}" "${{ env.COMMIT_ID }}"
+        git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" "refs/tags/${{ env.TAG }}" --force
 
     - name: Create release first time
       shell: bash
@@ -236,7 +277,7 @@ runs:
       shell: bash
       run: |
         RELEASE_ID=${{ env.RELEASE_ID }}
-        FILES="./camel-k-client*.tar.gz sbom.json"
+        FILES="./camel-k-client*.tar.gz sbom.json ./camel-k-client*.sbom.cdx.json ./camel-k-image-*.sbom.cdx.json release-assurance.json release-assurance.json.sha256 release-assurance.sigstore.json"
 
         for FILE in $FILES; do
           if [ -f "$FILE" ]; then
