@@ -337,3 +337,13 @@ func TestMasterTraitDeprecationWarning(t *testing.T) {
 	assert.Contains(t, condition.message, "RoleBinding")
 	assert.Contains(t, condition.message, "Quarkus properties")
 }
+
+func TestPrepareRBACFailures(t *testing.T) {
+	wrongSa := "my-sa\nsomethingelse"
+	mt := &masterTrait{
+		BaseTrait: NewBaseTrait("master", TraitOrderBeforeControllerCreation),
+	}
+	_, err := mt.prepareRBAC(nil, wrongSa, "", "")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "integration service account name is not properly formatted")
+}
