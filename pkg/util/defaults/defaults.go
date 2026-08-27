@@ -29,7 +29,7 @@ const (
 	DefaultRuntimeProvider = "plain-quarkus"
 
 	// DefaultRuntimeVersion --
-	DefaultRuntimeVersion = "3.33.2"
+	DefaultRuntimeVersion = "3.39.1"
 
 	// CamelKRuntimeCatalogVersion --
 	CamelKRuntimeCatalogVersion = "3.15.3"
