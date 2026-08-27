@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -208,6 +209,12 @@ func (t *masterTrait) prepareRBAC(cli client.Client, serviceAccount, itName, itN
 	objs := make([]ctrl.Object, 0, 2)
 	if serviceAccount == "" {
 		serviceAccount = "default"
+	}
+	if errs := validation.IsDNS1123Subdomain(serviceAccount); len(errs) > 0 {
+		return nil, fmt.Errorf(
+			"integration service account name is not properly formatted: %s",
+			strings.Join(errs, "; "),
+		)
 	}
 
 	templateData := struct {
