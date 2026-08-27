@@ -66,15 +66,15 @@ func (b *MavenBuildSpecApplyConfiguration) WithProperties(entries map[string]str
 	return b
 }
 
-// WithProfiles adds the given value to the Profiles field in the declarative configuration
+// WithDeprecatedProfiles adds the given value to the DeprecatedProfiles field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
-// If called multiple times, values provided by each call will be appended to the Profiles field.
-func (b *MavenBuildSpecApplyConfiguration) WithProfiles(values ...*ValueSourceApplyConfiguration) *MavenBuildSpecApplyConfiguration {
+// If called multiple times, values provided by each call will be appended to the DeprecatedProfiles field.
+func (b *MavenBuildSpecApplyConfiguration) WithDeprecatedProfiles(values ...*ValueSourceApplyConfiguration) *MavenBuildSpecApplyConfiguration {
 	for i := range values {
 		if values[i] == nil {
-			panic("nil value passed to WithProfiles")
+			panic("nil value passed to WithDeprecatedProfiles")
 		}
-		b.MavenSpecApplyConfiguration.Profiles = append(b.MavenSpecApplyConfiguration.Profiles, *values[i])
+		b.MavenSpecApplyConfiguration.DeprecatedProfiles = append(b.MavenSpecApplyConfiguration.DeprecatedProfiles, *values[i])
 	}
 	return b
 }

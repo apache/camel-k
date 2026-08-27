@@ -85,8 +85,8 @@ func (in *BuilderTrait) DeepCopyInto(out *BuilderTrait) {
 		*out = new(bool)
 		**out = **in
 	}
-	if in.MavenProfiles != nil {
-		in, out := &in.MavenProfiles, &out.MavenProfiles
+	if in.DeprecatedMavenProfiles != nil {
+		in, out := &in.DeprecatedMavenProfiles, &out.DeprecatedMavenProfiles
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
