@@ -456,9 +456,7 @@ spec:
                               description: The path of the local Maven repository.
                               type: string
                             profiles:
-                              description: |-
-                                A reference to the ConfigMap or Secret key that contains
-                                the Maven profile.
+                              description: 'Deprecated: no longer in use.'
                               items:
                                 description: ValueSource --.
                                 properties:
@@ -1390,9 +1388,7 @@ spec:
                               description: The path of the local Maven repository.
                               type: string
                             profiles:
-                              description: |-
-                                A reference to the ConfigMap or Secret key that contains
-                                the Maven profile.
+                              description: 'Deprecated: no longer in use.'
                               items:
                                 description: ValueSource --.
                                 properties:

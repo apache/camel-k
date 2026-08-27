@@ -245,47 +245,6 @@ func TestCustomTaskBuilderTraitInvalidStrategyOverride(t *testing.T) {
 	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Type, v1.IntegrationKitConditionType("IntegrationKitTasksValid"))
 }
 
-func TestMavenProfilesBuilderTrait(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
-	builderTrait := createNominalBuilderTraitTest()
-	builderTrait.MavenProfiles = []string{"configmap:maven-profile/owasp-profile.xml", "secret:maven-profile-secret"}
-
-	err := builderTrait.Apply(env)
-
-	require.NoError(t, err)
-
-	assert.Equal(t, v1.ValueSource{
-		ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
-			LocalObjectReference: corev1.LocalObjectReference{
-				Name: "maven-profile",
-			},
-			Key: "owasp-profile.xml",
-		},
-	}, env.Pipeline[0].Builder.Maven.MavenSpec.Profiles[0])
-	assert.Equal(t, v1.ValueSource{
-		SecretKeyRef: &corev1.SecretKeySelector{
-			LocalObjectReference: corev1.LocalObjectReference{
-				Name: "maven-profile-secret",
-			},
-			Key: "profile.xml",
-		},
-	}, env.Pipeline[0].Builder.Maven.MavenSpec.Profiles[1])
-}
-
-func TestInvalidMavenProfilesBuilderTrait(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
-	builderTrait := createNominalBuilderTraitTest()
-	builderTrait.MavenProfiles = []string{"fakeprofile"}
-
-	err := builderTrait.Apply(env)
-
-	// The error will be reported to IntegrationKits
-	require.NoError(t, err)
-	assert.Equal(t, v1.IntegrationKitPhaseError, env.IntegrationKit.Status.Phase)
-	assert.Equal(t, corev1.ConditionFalse, env.IntegrationKit.Status.Conditions[0].Status)
-	assert.Contains(t, env.IntegrationKit.Status.Conditions[0].Message, "fakeprofile")
-}
-
 func TestBuilderCustomTasks(t *testing.T) {
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
