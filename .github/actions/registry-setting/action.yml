@@ -41,6 +41,7 @@ runs:
         --from-literal=REGISTRY_ADDRESS="$KAMEL_INSTALL_REGISTRY" \
         --from-literal=REGISTRY_INSECURE="true" \
         --from-literal=REGISTRY_SECRET="my-registry" \
+        --from-literal=MAVEN_REPOSITORIES_ALLOWED="https://maven.repository.redhat.com/ga@id=redhat" \
         -n camel-k
       E2E_TEST_REGISTRY_SECRET_COPY=true
       echo "E2E_TEST_REGISTRY_SECRET_COPY=$E2E_TEST_REGISTRY_SECRET_COPY" >> $GITHUB_ENV

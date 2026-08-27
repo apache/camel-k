@@ -90,7 +90,11 @@ Beside the values above, you can also configure specifically Maven using the fol
 | -V,--no-transfer-progress,-Dstyle.color=never
 
 | MAVEN_REPOSITORIES
-| Comma separated list of Maven repository definitions (Repository format: `<repository-url>[@snapshots][@noreleases][@id=<value>][@name=<value>][@checksumpolicy=<value>]` - appends `@`-separated attributes to configure behavior (e.g. `http://my-nexus:8081/repository/public@id=my-repo@snapshots`)).
+| Comma separated list of default Maven repository definitions (repository format: `<repository-url>[@snapshots][@noreleases][@id=<value>][@name=<value>][@checksumpolicy=<value>]` - appends `@`-separated attributes to configure behavior (e.g. `http://my-nexus:8081/repository/public@id=my-repo@snapshots`)).
+|
+
+| MAVEN_REPOSITORIES_ALLOWED
+| Comma separated list of Maven repository definitions (repository format same as `MAVEN_REPOSITORIES`) which are allowed to be used by final users in Integrations.
 |
 
 |===

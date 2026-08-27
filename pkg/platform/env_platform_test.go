@@ -23,6 +23,7 @@ import (
 	"time"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util/maven"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -244,4 +245,16 @@ func TestBuilderTasksEnabled_Empty(t *testing.T) {
 	t.Setenv("BUILDER_TASKS_ENABLED", "")
 	// empty string is not "false" – treat as enabled
 	assert.False(t, BuilderTasksEnabled())
+}
+
+func TestMavenRepoAllowed(t *testing.T) {
+	t.Setenv("MAVEN_REPOSITORIES_ALLOWED", "repo1,repo2")
+	assert.True(t, IsMavenRepoAllowed("repo1"))
+	assert.True(t, IsMavenRepoAllowed("repo2"))
+	assert.False(t, IsMavenRepoAllowed("repo3"))
+}
+
+func TestMavenRepoAllowedDefault(t *testing.T) {
+	assert.True(t, IsMavenRepoAllowed(maven.DefaultMavenRepositories))
+	assert.False(t, IsMavenRepoAllowed("repo3"))
 }

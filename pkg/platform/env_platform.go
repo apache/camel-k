@@ -21,6 +21,7 @@ import (
 	"errors"
 	"os"
 	"runtime"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -392,4 +393,12 @@ func FromIntegrationPlatform(itp *v1.IntegrationPlatform) Platform {
 		},
 		MaxRunningBuilds: itp.Status.Build.MaxRunningBuilds,
 	}
+}
+
+// IsMavenRepoAllowed is used to verify if a given maven repository can be used or not.
+func IsMavenRepoAllowed(mavenRepo string) bool {
+	csvRepos := GetEnvOrDefault("MAVEN_REPOSITORIES_ALLOWED", maven.DefaultMavenRepositories)
+	allowedRepos := strings.Split(csvRepos, ",")
+
+	return slices.Contains(allowedRepos, mavenRepo)
 }

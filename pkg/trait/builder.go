@@ -376,11 +376,17 @@ func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfigurati
 	// Add Maven repositories defined in the IntegrationKit or Integration
 	if e.IntegrationKit != nil {
 		for _, repo := range e.IntegrationKit.Spec.Repositories {
+			if !platform.IsMavenRepoAllowed(repo) {
+				return nil, fmt.Errorf("maven repository %s is not allowed by the operator", repo)
+			}
 			maven.Repositories = append(maven.Repositories, mvn.NewRepository(repo))
 		}
 	}
 	if e.Integration != nil {
 		for _, repo := range e.Integration.Spec.Repositories {
+			if !platform.IsMavenRepoAllowed(repo) {
+				return nil, fmt.Errorf("maven repository %s is not allowed by the operator", repo)
+			}
 			maven.Repositories = append(maven.Repositories, mvn.NewRepository(repo))
 		}
 	}
