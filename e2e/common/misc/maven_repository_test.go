@@ -38,6 +38,7 @@ func TestRunExtraRepository(t *testing.T) {
 	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		name := RandomizedSuffixName("java")
+		// NOTE: the repo was allow listed during operator installation procedure
 		g.Expect(KamelRun(t, ctx, ns, "files/Java.java",
 			"--maven-repository", "https://maven.repository.redhat.com/ga@id=redhat",
 			"--dependency", "mvn:org.jolokia:jolokia-core:1.7.1.redhat-00001",

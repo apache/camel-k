@@ -200,6 +200,13 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment) error {
 					extraRepositories = append(extraRepositories, e.IntegrationKit.Spec.Repositories...)
 				}
 			}
+			// verify extra repos are allowed
+			for _, repo := range extraRepositories {
+				if !platform.IsMavenRepoAllowed(repo) {
+					return fmt.Errorf("maven repository %s is not allowed by the operator", repo)
+				}
+			}
+
 			catalog, err = camel.CreateCatalog(e.Ctx, e.Client, catalogNamespace,
 				mavenSpec, platform.DefaultBuildTimeout, runtime, extraRepositories, operatorId)
 			if err != nil {
