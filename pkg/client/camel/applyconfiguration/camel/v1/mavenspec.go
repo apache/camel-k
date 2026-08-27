@@ -32,9 +32,8 @@ type MavenSpecApplyConfiguration struct {
 	LocalRepository *string `json:"localRepository,omitempty"`
 	// The Maven properties.
 	Properties map[string]string `json:"properties,omitempty"`
-	// A reference to the ConfigMap or Secret key that contains
-	// the Maven profile.
-	Profiles []ValueSourceApplyConfiguration `json:"profiles,omitempty"`
+	// Deprecated: no longer in use.
+	DeprecatedProfiles []ValueSourceApplyConfiguration `json:"profiles,omitempty"`
 	// A reference to the ConfigMap or Secret key that contains
 	// the Maven settings.
 	Settings *ValueSourceApplyConfiguration `json:"settings,omitempty"`
@@ -84,15 +83,15 @@ func (b *MavenSpecApplyConfiguration) WithProperties(entries map[string]string) 
 	return b
 }
 
-// WithProfiles adds the given value to the Profiles field in the declarative configuration
+// WithDeprecatedProfiles adds the given value to the DeprecatedProfiles field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
-// If called multiple times, values provided by each call will be appended to the Profiles field.
-func (b *MavenSpecApplyConfiguration) WithProfiles(values ...*ValueSourceApplyConfiguration) *MavenSpecApplyConfiguration {
+// If called multiple times, values provided by each call will be appended to the DeprecatedProfiles field.
+func (b *MavenSpecApplyConfiguration) WithDeprecatedProfiles(values ...*ValueSourceApplyConfiguration) *MavenSpecApplyConfiguration {
 	for i := range values {
 		if values[i] == nil {
-			panic("nil value passed to WithProfiles")
+			panic("nil value passed to WithDeprecatedProfiles")
 		}
-		b.Profiles = append(b.Profiles, *values[i])
+		b.DeprecatedProfiles = append(b.DeprecatedProfiles, *values[i])
 	}
 	return b
 }

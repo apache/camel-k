@@ -29,9 +29,8 @@ type MavenSpec struct {
 	LocalRepository string `json:"localRepository,omitempty"`
 	// The Maven properties.
 	Properties map[string]string `json:"properties,omitempty"`
-	// A reference to the ConfigMap or Secret key that contains
-	// the Maven profile.
-	Profiles []ValueSource `json:"profiles,omitempty"`
+	// Deprecated: no longer in use.
+	DeprecatedProfiles []ValueSource `json:"profiles,omitempty"`
 	// A reference to the ConfigMap or Secret key that contains
 	// the Maven settings.
 	Settings ValueSource `json:"settings,omitempty"`

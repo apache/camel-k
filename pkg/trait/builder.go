@@ -466,22 +466,6 @@ func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfigurati
 		}
 	}
 
-	// User provides a maven profile
-	//nolint:staticcheck
-	if t.MavenProfiles != nil {
-		mavenProfiles := make([]v1.ValueSource, 0)
-		for _, v := range t.MavenProfiles {
-			if v != "" {
-				mavenProfile, err := v1.DecodeValueSource(v, "profile.xml")
-				if err != nil {
-					return nil, fmt.Errorf("invalid maven profile: %s: %w. ", v, err)
-				}
-				mavenProfiles = append(mavenProfiles, mavenProfile)
-			}
-		}
-		task.Maven.Profiles = mavenProfiles
-	}
-
 	steps := make([]builder.Step, 0, len(builder.Project.CommonSteps))
 	steps = append(steps, builder.Project.CommonSteps...)
 
