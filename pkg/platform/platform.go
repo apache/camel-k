@@ -19,11 +19,15 @@ package platform
 
 import (
 	"context"
+	"os"
+	"slices"
+	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
+	"github.com/apache/camel-k/v2/pkg/util/maven"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -210,4 +214,21 @@ func GetTraitProfile(p *v1.IntegrationPlatform) v1.TraitProfile {
 	}
 
 	return ""
+}
+
+// IsMavenRepoAllowed is used to verify if a given maven repository can be used or not.
+func IsMavenRepoAllowed(mavenRepo string) bool {
+	csvRepos := getEnvOrDefault("MAVEN_REPOSITORIES_ALLOWED", maven.DefaultMavenRepositories)
+	allowedRepos := strings.Split(csvRepos, ",")
+
+	return slices.Contains(allowedRepos, mavenRepo)
+}
+
+func getEnvOrDefault(key string, deflt string) string {
+	env, exists := os.LookupEnv(key)
+	if exists {
+		return env
+	} else {
+		return deflt
+	}
 }
