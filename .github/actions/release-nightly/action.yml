@@ -170,7 +170,7 @@ runs:
         CI_TOKEN: ${{ inputs.secretGithubToken }}
       run: |
         git tag -f "${{ env.TAG }}" "${{ env.COMMIT_ID }}"
-        git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" "refs/tags/${{ env.TAG }}" --force
+        git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" "refs/tags/${{ env.TAG }}" --force || echo "No nightly release updates changes to push"
 
     - name: Create release first time
       shell: bash
