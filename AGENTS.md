@@ -206,10 +206,11 @@ follow the private process in `SECURITY.md` and stop.
 - **Platform admins / operator-deployers** are **fully trusted**. They install the operator,
   set its RBAC, and edit `IntegrationPlatform` / `IntegrationProfile` (registry, base image,
   Maven settings, build strategy). Compromise here is total and out of model.
-- **CR authors** (whoever can create/patch `Integration`, `Pipe`, `Kamelet`,
-  `IntegrationKit`, `Build`, `IntegrationProfile`) are trusted **only at the target
-  namespace's level**. Submitting such a CR is, by design, arbitrary code and container
-  execution in that namespace; the only gate is Kubernetes RBAC.
+- **CR authors** (whoever can create/patch `Integration`, `Pipe`, `Kamelet`) are trusted **only at the target namespace's level**. Submitting such a CR is, by design, arbitrary code and container execution in that namespace; the only gate is Kubernetes RBAC.
+- **Cross namespaces resource** _may_ be allowed in certain circumstances, for example, in `Pipe` custom resource
+  binding. In any case, the operator has to verify that the Service Account (SA) used by `Pipe` (and inherited) by
+  downstream `Integration` has enough privileges that had to be previously assigned by a trusted author (likely the admins).
+- `IntegrationKit` resources are meant to be shared by more tenants when the operator is running in global mode.
 - **Cluster tenants without Camel K CR RBAC** are **untrusted** and in scope as adversaries.
 - **Network clients of the deployed integration** are **untrusted**; the running route's own
   attack surface is **Apache Camel core's** threat model, not Camel K's.
@@ -244,8 +245,7 @@ follow the private process in `SECURITY.md` and stop.
 
 When reviewing or recommending a deployment, surface the following:
 
-- Treat "create/patch `Integration` / `Pipe` / `Kamelet` / `IntegrationKit` / `Build` /
-  `IntegrationProfile` in namespace N" as equivalent to "run arbitrary code in N" — grant
+- Treat "create/patch `Integration` / `Pipe` / `Kamelet` in namespace N" as equivalent to "run arbitrary code in N" — grant
   that RBAC only to principals trusted at that level.
 - Lock down `IntegrationPlatform` / `IntegrationProfile` and the install namespace.
 - For untrusted or multi-tenant CR authors, use the **`pod` build strategy**, not `routine`
