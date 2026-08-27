@@ -52,11 +52,8 @@ type BuilderTrait struct {
 	// When using `pod` strategy, the maximum amount of memory required by the pod builder.
 	// Deprecated: use TasksRequestCPU instead with task name `builder`.
 	LimitMemory string `json:"limitMemory,omitempty" property:"limit-memory"`
-	// A list of references pointing to configmaps/secrets that contains a maven profile.
-	// This configmap/secret is a resource of the IntegrationKit created, therefore it needs to be present in the namespace where the operator is going to create the IntegrationKit.
-	// The content of the maven profile is expected to be a text containing a valid maven profile starting with `<profile>` and ending with `</profile>` that will be integrated as an inline profile in the POM.
-	// Syntax: [configmap|secret]:name[/key], where name represents the resource name, key optionally represents the resource key to be filtered (default key value = profile.xml).
-	MavenProfiles []string `json:"mavenProfiles,omitempty" property:"maven-profiles"`
+	// Deprecated: no longer in use.
+	DeprecatedMavenProfiles []string `json:"mavenProfiles,omitempty" property:"maven-profiles"`
 	// A list of tasks to be executed (available only when using `pod` strategy) with format `<name>;<container-image>;<container-command>`.
 	Tasks []string `json:"tasks,omitempty" property:"tasks"`
 	// A list of tasks sorted by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.

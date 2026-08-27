@@ -447,9 +447,7 @@ spec:
                               description: The path of the local Maven repository.
                               type: string
                             profiles:
-                              description: |-
-                                A reference to the ConfigMap or Secret key that contains
-                                the Maven profile.
+                              description: 'Deprecated: no longer in use.'
                               items:
                                 description: ValueSource --.
                                 properties:
@@ -1373,9 +1371,7 @@ spec:
                               description: The path of the local Maven repository.
                               type: string
                             profiles:
-                              description: |-
-                                A reference to the ConfigMap or Secret key that contains
-                                the Maven profile.
+                              description: 'Deprecated: no longer in use.'
                               items:
                                 description: ValueSource --.
                                 properties:
@@ -2934,11 +2930,7 @@ spec:
                           Deprecated: use TasksRequestCPU instead with task name `builder`.
                         type: string
                       mavenProfiles:
-                        description: |-
-                          A list of references pointing to configmaps/secrets that contains a maven profile.
-                          This configmap/secret is a resource of the IntegrationKit created, therefore it needs to be present in the namespace where the operator is going to create the IntegrationKit.
-                          The content of the maven profile is expected to be a text containing a valid maven profile starting with `<profile>` and ending with `</profile>` that will be integrated as an inline profile in the POM.
-                          Syntax: [configmap|secret]:name[/key], where name represents the resource name, key optionally represents the resource key to be filtered (default key value = profile.xml).
+                        description: 'Deprecated: no longer in use.'
                         items:
                           type: string
                         type: array
@@ -3505,9 +3497,7 @@ spec:
                         description: The path of the local Maven repository.
                         type: string
                       profiles:
-                        description: |-
-                          A reference to the ConfigMap or Secret key that contains
-                          the Maven profile.
+                        description: 'Deprecated: no longer in use.'
                         items:
                           description: ValueSource --.
                           properties:
@@ -3871,11 +3861,7 @@ spec:
                           Deprecated: use TasksRequestCPU instead with task name `builder`.
                         type: string
                       mavenProfiles:
-                        description: |-
-                          A list of references pointing to configmaps/secrets that contains a maven profile.
-                          This configmap/secret is a resource of the IntegrationKit created, therefore it needs to be present in the namespace where the operator is going to create the IntegrationKit.
-                          The content of the maven profile is expected to be a text containing a valid maven profile starting with `<profile>` and ending with `</profile>` that will be integrated as an inline profile in the POM.
-                          Syntax: [configmap|secret]:name[/key], where name represents the resource name, key optionally represents the resource key to be filtered (default key value = profile.xml).
+                        description: 'Deprecated: no longer in use.'
                         items:
                           type: string
                         type: array
@@ -5872,9 +5858,7 @@ spec:
                         description: The path of the local Maven repository.
                         type: string
                       profiles:
-                        description: |-
-                          A reference to the ConfigMap or Secret key that contains
-                          the Maven profile.
+                        description: 'Deprecated: no longer in use.'
                         items:
                           description: ValueSource --.
                           properties:
@@ -6286,11 +6270,7 @@ spec:
                           Deprecated: use TasksRequestCPU instead with task name `builder`.
                         type: string
                       mavenProfiles:
-                        description: |-
-                          A list of references pointing to configmaps/secrets that contains a maven profile.
-                          This configmap/secret is a resource of the IntegrationKit created, therefore it needs to be present in the namespace where the operator is going to create the IntegrationKit.
-                          The content of the maven profile is expected to be a text containing a valid maven profile starting with `<profile>` and ending with `</profile>` that will be integrated as an inline profile in the POM.
-                          Syntax: [configmap|secret]:name[/key], where name represents the resource name, key optionally represents the resource key to be filtered (default key value = profile.xml).
+                        description: 'Deprecated: no longer in use.'
                         items:
                           type: string
                         type: array
@@ -8281,9 +8261,7 @@ spec:
                         description: The path of the local Maven repository.
                         type: string
                       profiles:
-                        description: |-
-                          A reference to the ConfigMap or Secret key that contains
-                          the Maven profile.
+                        description: 'Deprecated: no longer in use.'
                         items:
                           description: ValueSource --.
                           properties:
@@ -8601,11 +8579,7 @@ spec:
                           Deprecated: use TasksRequestCPU instead with task name `builder`.
                         type: string
                       mavenProfiles:
-                        description: |-
-                          A list of references pointing to configmaps/secrets that contains a maven profile.
-                          This configmap/secret is a resource of the IntegrationKit created, therefore it needs to be present in the namespace where the operator is going to create the IntegrationKit.
-                          The content of the maven profile is expected to be a text containing a valid maven profile starting with `<profile>` and ending with `</profile>` that will be integrated as an inline profile in the POM.
-                          Syntax: [configmap|secret]:name[/key], where name represents the resource name, key optionally represents the resource key to be filtered (default key value = profile.xml).
+                        description: 'Deprecated: no longer in use.'
                         items:
                           type: string
                         type: array
@@ -10531,9 +10505,7 @@ spec:
                         description: The path of the local Maven repository.
                         type: string
                       profiles:
-                        description: |-
-                          A reference to the ConfigMap or Secret key that contains
-                          the Maven profile.
+                        description: 'Deprecated: no longer in use.'
                         items:
                           description: ValueSource --.
                           properties:
@@ -10893,11 +10865,7 @@ spec:
                           Deprecated: use TasksRequestCPU instead with task name `builder`.
                         type: string
                       mavenProfiles:
-                        description: |-
-                          A list of references pointing to configmaps/secrets that contains a maven profile.
-                          This configmap/secret is a resource of the IntegrationKit created, therefore it needs to be present in the namespace where the operator is going to create the IntegrationKit.
-                          The content of the maven profile is expected to be a text containing a valid maven profile starting with `<profile>` and ending with `</profile>` that will be integrated as an inline profile in the POM.
-                          Syntax: [configmap|secret]:name[/key], where name represents the resource name, key optionally represents the resource key to be filtered (default key value = profile.xml).
+                        description: 'Deprecated: no longer in use.'
                         items:
                           type: string
                         type: array
@@ -20019,11 +19987,7 @@ spec:
                           Deprecated: use TasksRequestCPU instead with task name `builder`.
                         type: string
                       mavenProfiles:
-                        description: |-
-                          A list of references pointing to configmaps/secrets that contains a maven profile.
-                          This configmap/secret is a resource of the IntegrationKit created, therefore it needs to be present in the namespace where the operator is going to create the IntegrationKit.
-                          The content of the maven profile is expected to be a text containing a valid maven profile starting with `<profile>` and ending with `</profile>` that will be integrated as an inline profile in the POM.
-                          Syntax: [configmap|secret]:name[/key], where name represents the resource name, key optionally represents the resource key to be filtered (default key value = profile.xml).
+                        description: 'Deprecated: no longer in use.'
                         items:
                           type: string
                         type: array
@@ -22265,11 +22229,7 @@ spec:
                           Deprecated: use TasksRequestCPU instead with task name `builder`.
                         type: string
                       mavenProfiles:
-                        description: |-
-                          A list of references pointing to configmaps/secrets that contains a maven profile.
-                          This configmap/secret is a resource of the IntegrationKit created, therefore it needs to be present in the namespace where the operator is going to create the IntegrationKit.
-                          The content of the maven profile is expected to be a text containing a valid maven profile starting with `<profile>` and ending with `</profile>` that will be integrated as an inline profile in the POM.
-                          Syntax: [configmap|secret]:name[/key], where name represents the resource name, key optionally represents the resource key to be filtered (default key value = profile.xml).
+                        description: 'Deprecated: no longer in use.'
                         items:
                           type: string
                         type: array
@@ -32749,11 +32709,7 @@ spec:
                               Deprecated: use TasksRequestCPU instead with task name `builder`.
                             type: string
                           mavenProfiles:
-                            description: |-
-                              A list of references pointing to configmaps/secrets that contains a maven profile.
-                              This configmap/secret is a resource of the IntegrationKit created, therefore it needs to be present in the namespace where the operator is going to create the IntegrationKit.
-                              The content of the maven profile is expected to be a text containing a valid maven profile starting with `<profile>` and ending with `</profile>` that will be integrated as an inline profile in the POM.
-                              Syntax: [configmap|secret]:name[/key], where name represents the resource name, key optionally represents the resource key to be filtered (default key value = profile.xml).
+                            description: 'Deprecated: no longer in use.'
                             items:
                               type: string
                             type: array
@@ -34931,11 +34887,7 @@ spec:
                           Deprecated: use TasksRequestCPU instead with task name `builder`.
                         type: string
                       mavenProfiles:
-                        description: |-
-                          A list of references pointing to configmaps/secrets that contains a maven profile.
-                          This configmap/secret is a resource of the IntegrationKit created, therefore it needs to be present in the namespace where the operator is going to create the IntegrationKit.
-                          The content of the maven profile is expected to be a text containing a valid maven profile starting with `<profile>` and ending with `</profile>` that will be integrated as an inline profile in the POM.
-                          Syntax: [configmap|secret]:name[/key], where name represents the resource name, key optionally represents the resource key to be filtered (default key value = profile.xml).
+                        description: 'Deprecated: no longer in use.'
                         items:
                           type: string
                         type: array

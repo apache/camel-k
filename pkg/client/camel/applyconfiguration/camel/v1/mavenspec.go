@@ -26,14 +26,32 @@ import (
 // MavenSpecApplyConfiguration represents a declarative configuration of the MavenSpec type for use
 // with apply.
 type MavenSpecApplyConfiguration struct {
-	LocalRepository  *string                           `json:"localRepository,omitempty"`
-	Properties       map[string]string                 `json:"properties,omitempty"`
-	Profiles         []ValueSourceApplyConfiguration   `json:"profiles,omitempty"`
-	Settings         *ValueSourceApplyConfiguration    `json:"settings,omitempty"`
-	SettingsSecurity *ValueSourceApplyConfiguration    `json:"settingsSecurity,omitempty"`
-	CASecrets        []corev1.SecretKeySelector        `json:"caSecrets,omitempty"`
-	Extension        []MavenArtifactApplyConfiguration `json:"extension,omitempty"`
-	CLIOptions       []string                          `json:"cliOptions,omitempty"`
+	// The path of the local Maven repository.
+	LocalRepository *string `json:"localRepository,omitempty"`
+	// The Maven properties.
+	Properties map[string]string `json:"properties,omitempty"`
+	// Deprecated: no longer in use.
+	DeprecatedProfiles []ValueSourceApplyConfiguration `json:"profiles,omitempty"`
+	// A reference to the ConfigMap or Secret key that contains
+	// the Maven settings.
+	Settings *ValueSourceApplyConfiguration `json:"settings,omitempty"`
+	// A reference to the ConfigMap or Secret key that contains
+	// the security of the Maven settings.
+	SettingsSecurity *ValueSourceApplyConfiguration `json:"settingsSecurity,omitempty"`
+	// The Secrets name and key, containing the CA certificate(s) used to connect
+	// to remote Maven repositories.
+	// It can contain X.509 certificates, and PKCS#7 formatted certificate chains.
+	// A JKS formatted keystore is automatically created to store the CA certificate(s),
+	// and configured to be used as a trusted certificate(s) by the Maven commands.
+	// Note that the root CA certificates are also imported into the created keystore.
+	CASecrets []corev1.SecretKeySelector `json:"caSecrets,omitempty"`
+	// The Maven build extensions.
+	// See https://maven.apache.org/guides/mini/guide-using-extensions.html.
+	Extension []MavenArtifactApplyConfiguration `json:"extension,omitempty"`
+	// The CLI options that are appended to the list of arguments for Maven commands,
+	// e.g., `-V,--no-transfer-progress,-Dstyle.color=never`.
+	// See https://maven.apache.org/ref/3.9.14/maven-embedder/cli.html.
+	CLIOptions []string `json:"cliOptions,omitempty"`
 }
 
 // MavenSpecApplyConfiguration constructs a declarative configuration of the MavenSpec type for use with
@@ -64,15 +82,15 @@ func (b *MavenSpecApplyConfiguration) WithProperties(entries map[string]string) 
 	return b
 }
 
-// WithProfiles adds the given value to the Profiles field in the declarative configuration
+// WithDeprecatedProfiles adds the given value to the DeprecatedProfiles field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
-// If called multiple times, values provided by each call will be appended to the Profiles field.
-func (b *MavenSpecApplyConfiguration) WithProfiles(values ...*ValueSourceApplyConfiguration) *MavenSpecApplyConfiguration {
+// If called multiple times, values provided by each call will be appended to the DeprecatedProfiles field.
+func (b *MavenSpecApplyConfiguration) WithDeprecatedProfiles(values ...*ValueSourceApplyConfiguration) *MavenSpecApplyConfiguration {
 	for i := range values {
 		if values[i] == nil {
-			panic("nil value passed to WithProfiles")
+			panic("nil value passed to WithDeprecatedProfiles")
 		}
-		b.Profiles = append(b.Profiles, *values[i])
+		b.DeprecatedProfiles = append(b.DeprecatedProfiles, *values[i])
 	}
 	return b
 }

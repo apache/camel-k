@@ -2386,8 +2386,8 @@ func (in *MavenSpec) DeepCopyInto(out *MavenSpec) {
 			(*out)[key] = val
 		}
 	}
-	if in.Profiles != nil {
-		in, out := &in.Profiles, &out.Profiles
+	if in.DeprecatedProfiles != nil {
+		in, out := &in.DeprecatedProfiles, &out.DeprecatedProfiles
 		*out = make([]ValueSource, len(*in))
 		for i := range *in {
 			(*in)[i].DeepCopyInto(&(*out)[i])
