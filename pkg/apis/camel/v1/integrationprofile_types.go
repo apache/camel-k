@@ -39,8 +39,10 @@ type IntegrationProfileSpec struct {
 	Kamelet IntegrationProfileKameletSpec `json:"kamelet,omitempty"`
 }
 
-// IntegrationProfileStatus defines the observed state of IntegrationProfile.
-type IntegrationProfileStatus struct {
+// DeprecatedIntegrationProfileStatus defines the observed state of IntegrationProfile.
+//
+// Deprecated: no longer in use.
+type DeprecatedIntegrationProfileStatus struct {
 	IntegrationProfileSpec `json:",inline"`
 
 	// ObservedGeneration is the most recent generation observed for this IntegrationProfile.
@@ -48,7 +50,7 @@ type IntegrationProfileStatus struct {
 	// defines in what phase the IntegrationProfile is found
 	Phase IntegrationProfilePhase `json:"phase,omitempty"`
 	// which are the conditions met (particularly useful when in ERROR phase)
-	Conditions []IntegrationProfileCondition `json:"conditions,omitempty"`
+	Conditions []DeprecatedIntegrationProfileCondition `json:"conditions,omitempty"`
 }
 
 // +genclient
@@ -65,7 +67,7 @@ type IntegrationProfile struct {
 
 	Spec IntegrationProfileSpec `json:"spec,omitempty"`
 	// Deprecated: no longer in use.
-	Status IntegrationProfileStatus `json:"status,omitempty"`
+	DeprecatedStatus DeprecatedIntegrationProfileStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -81,19 +83,27 @@ type IntegrationProfileList struct {
 // IntegrationProfileBuildSpec contains profile related build information.
 // This configuration can be used to tune the behavior of the Integration/IntegrationKit image builds.
 type IntegrationProfileBuildSpec struct {
-	// the Camel K Runtime dependency version
-	RuntimeVersion string `json:"runtimeVersion,omitempty"`
-	// the runtime used. Likely Camel Quarkus (we used to have main runtime which has been discontinued since version 1.5)
+	// the runtime provider to use. Likely Camel Quarkus.
 	RuntimeProvider RuntimeProvider `json:"runtimeProvider,omitempty"`
+	// the runtime dependency version to use.
+	RuntimeVersion string `json:"runtimeVersion,omitempty"`
 	// a base image that can be used as base layer for all images.
 	// It can be useful if you want to provide some custom base image with further utility software
 	BaseImage string `json:"baseImage,omitempty"`
 	// the image registry used to push/pull Integration images
-	Registry RegistrySpec `json:"registry,omitempty"`
+	Registry *RegistrySpec `json:"registry,omitempty"`
 	// how much time to wait before time out the pipeline process
 	Timeout *metav1.Duration `json:"timeout,omitempty"`
-	// Maven configuration used to build the Camel/Camel-Quarkus applications
-	Maven MavenSpec `json:"maven,omitempty"`
+	// Maven configuration used to build the Camel applications
+	Maven *MavenSpec `json:"maven,omitempty"`
+	// Maven repositories used to build the Camel applications
+	Repositories []string `json:"repositories,omitempty"`
+	// the configuration required to build an Integration container image
+	BuildConfiguration BuildConfiguration `json:",inline"`
+	// the strategy to adopt for publishing an Integration container image
+	PublishStrategy IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
+	// the maximum amount of parallel running pipelines started by this operator instance
+	MaxRunningBuilds int32 `json:"maxRunningBuilds,omitempty"`
 }
 
 // IntegrationProfileKameletSpec define the behavior for all the Kamelets controller by the IntegrationProfile.
@@ -105,31 +115,24 @@ type IntegrationProfileKameletSpec struct {
 }
 
 // IntegrationProfilePhase is the phase of an IntegrationProfile.
+//
+// Deprecated: no longer in use.
 type IntegrationProfilePhase string
 
 // IntegrationProfileConditionType defines the type of condition.
+//
+// Deprecated: no longer in use.
 type IntegrationProfileConditionType string
 
 const (
 	// IntegrationProfileKind is the Kind name of the IntegrationProfile CR.
 	IntegrationProfileKind string = "IntegrationProfile"
-
-	// IntegrationProfilePhaseNone when the IntegrationProfile does not exist.
-	IntegrationProfilePhaseNone IntegrationProfilePhase = ""
-	// IntegrationProfilePhaseReady when the IntegrationProfile is ready.
-	IntegrationProfilePhaseReady IntegrationProfilePhase = "Ready"
-	// IntegrationProfilePhaseError when the IntegrationProfile had some error (see Conditions).
-	IntegrationProfilePhaseError IntegrationProfilePhase = "Error"
-
-	// IntegrationProfileConditionTypeCreated is the condition if the IntegrationProfile has been created.
-	IntegrationProfileConditionTypeCreated IntegrationProfileConditionType = "Created"
-
-	// IntegrationProfileConditionCreatedReason represents the reason that the IntegrationProfile is created.
-	IntegrationProfileConditionCreatedReason = "IntegrationProfileCreated"
 )
 
-// IntegrationProfileCondition describes the state of a resource at a certain point.
-type IntegrationProfileCondition struct {
+// DeprecatedIntegrationProfileCondition describes the state of a resource at a certain point.
+//
+// Deprecated: no longer in use.
+type DeprecatedIntegrationProfileCondition struct {
 	// Type of integration condition.
 	Type IntegrationProfileConditionType `json:"type"`
 	// Status of the condition, one of True, False, Unknown.

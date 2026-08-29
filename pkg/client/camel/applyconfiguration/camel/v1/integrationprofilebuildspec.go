@@ -30,10 +30,10 @@ import (
 // IntegrationProfileBuildSpec contains profile related build information.
 // This configuration can be used to tune the behavior of the Integration/IntegrationKit image builds.
 type IntegrationProfileBuildSpecApplyConfiguration struct {
-	// the Camel K Runtime dependency version
-	RuntimeVersion *string `json:"runtimeVersion,omitempty"`
-	// the runtime used. Likely Camel Quarkus (we used to have main runtime which has been discontinued since version 1.5)
+	// the runtime provider to use. Likely Camel Quarkus.
 	RuntimeProvider *camelv1.RuntimeProvider `json:"runtimeProvider,omitempty"`
+	// the runtime dependency version to use.
+	RuntimeVersion *string `json:"runtimeVersion,omitempty"`
 	// a base image that can be used as base layer for all images.
 	// It can be useful if you want to provide some custom base image with further utility software
 	BaseImage *string `json:"baseImage,omitempty"`
@@ -41,8 +41,16 @@ type IntegrationProfileBuildSpecApplyConfiguration struct {
 	Registry *RegistrySpecApplyConfiguration `json:"registry,omitempty"`
 	// how much time to wait before time out the pipeline process
 	Timeout *metav1.Duration `json:"timeout,omitempty"`
-	// Maven configuration used to build the Camel/Camel-Quarkus applications
+	// Maven configuration used to build the Camel applications
 	Maven *MavenSpecApplyConfiguration `json:"maven,omitempty"`
+	// Maven repositories used to build the Camel applications
+	Repositories []string `json:"repositories,omitempty"`
+	// the configuration required to build an Integration container image
+	BuildConfiguration *BuildConfigurationApplyConfiguration `json:",inline"`
+	// the strategy to adopt for publishing an Integration container image
+	PublishStrategy *camelv1.IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
+	// the maximum amount of parallel running pipelines started by this operator instance
+	MaxRunningBuilds *int32 `json:"maxRunningBuilds,omitempty"`
 }
 
 // IntegrationProfileBuildSpecApplyConfiguration constructs a declarative configuration of the IntegrationProfileBuildSpec type for use with
@@ -51,19 +59,19 @@ func IntegrationProfileBuildSpec() *IntegrationProfileBuildSpecApplyConfiguratio
 	return &IntegrationProfileBuildSpecApplyConfiguration{}
 }
 
-// WithRuntimeVersion sets the RuntimeVersion field in the declarative configuration to the given value
-// and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the RuntimeVersion field is set to the value of the last call.
-func (b *IntegrationProfileBuildSpecApplyConfiguration) WithRuntimeVersion(value string) *IntegrationProfileBuildSpecApplyConfiguration {
-	b.RuntimeVersion = &value
-	return b
-}
-
 // WithRuntimeProvider sets the RuntimeProvider field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the RuntimeProvider field is set to the value of the last call.
 func (b *IntegrationProfileBuildSpecApplyConfiguration) WithRuntimeProvider(value camelv1.RuntimeProvider) *IntegrationProfileBuildSpecApplyConfiguration {
 	b.RuntimeProvider = &value
+	return b
+}
+
+// WithRuntimeVersion sets the RuntimeVersion field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the RuntimeVersion field is set to the value of the last call.
+func (b *IntegrationProfileBuildSpecApplyConfiguration) WithRuntimeVersion(value string) *IntegrationProfileBuildSpecApplyConfiguration {
+	b.RuntimeVersion = &value
 	return b
 }
 
@@ -96,5 +104,39 @@ func (b *IntegrationProfileBuildSpecApplyConfiguration) WithTimeout(value metav1
 // If called multiple times, the Maven field is set to the value of the last call.
 func (b *IntegrationProfileBuildSpecApplyConfiguration) WithMaven(value *MavenSpecApplyConfiguration) *IntegrationProfileBuildSpecApplyConfiguration {
 	b.Maven = value
+	return b
+}
+
+// WithRepositories adds the given value to the Repositories field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, values provided by each call will be appended to the Repositories field.
+func (b *IntegrationProfileBuildSpecApplyConfiguration) WithRepositories(values ...string) *IntegrationProfileBuildSpecApplyConfiguration {
+	for i := range values {
+		b.Repositories = append(b.Repositories, values[i])
+	}
+	return b
+}
+
+// WithBuildConfiguration sets the BuildConfiguration field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the BuildConfiguration field is set to the value of the last call.
+func (b *IntegrationProfileBuildSpecApplyConfiguration) WithBuildConfiguration(value *BuildConfigurationApplyConfiguration) *IntegrationProfileBuildSpecApplyConfiguration {
+	b.BuildConfiguration = value
+	return b
+}
+
+// WithPublishStrategy sets the PublishStrategy field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the PublishStrategy field is set to the value of the last call.
+func (b *IntegrationProfileBuildSpecApplyConfiguration) WithPublishStrategy(value camelv1.IntegrationPlatformBuildPublishStrategy) *IntegrationProfileBuildSpecApplyConfiguration {
+	b.PublishStrategy = &value
+	return b
+}
+
+// WithMaxRunningBuilds sets the MaxRunningBuilds field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the MaxRunningBuilds field is set to the value of the last call.
+func (b *IntegrationProfileBuildSpecApplyConfiguration) WithMaxRunningBuilds(value int32) *IntegrationProfileBuildSpecApplyConfiguration {
+	b.MaxRunningBuilds = &value
 	return b
 }

@@ -721,14 +721,7 @@ func (o *runCmdOptions) applyAnnotations(it *v1.Integration) {
 
 	// --integration-profile={id} is a syntax sugar for '--annotation camel.apache.org/integration-profile.id={id}'
 	if o.IntegrationProfile != "" {
-		if strings.Contains(o.IntegrationProfile, "/") {
-			namespacedName := strings.SplitN(o.IntegrationProfile, "/", 2)
-			//nolint:staticcheck
-			v1.SetAnnotation(&it.ObjectMeta, v1.IntegrationProfileNamespaceAnnotation, namespacedName[0])
-			v1.SetAnnotation(&it.ObjectMeta, v1.IntegrationProfileAnnotation, namespacedName[1])
-		} else {
-			v1.SetAnnotation(&it.ObjectMeta, v1.IntegrationProfileAnnotation, o.IntegrationProfile)
-		}
+		v1.SetAnnotation(&it.ObjectMeta, v1.IntegrationProfileAnnotation, o.IntegrationProfile)
 	}
 
 	for _, annotation := range o.Annotations {

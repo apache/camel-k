@@ -25,11 +25,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// IntegrationProfileConditionApplyConfiguration represents a declarative configuration of the IntegrationProfileCondition type for use
+// DeprecatedIntegrationProfileConditionApplyConfiguration represents a declarative configuration of the DeprecatedIntegrationProfileCondition type for use
 // with apply.
 //
-// IntegrationProfileCondition describes the state of a resource at a certain point.
-type IntegrationProfileConditionApplyConfiguration struct {
+// DeprecatedIntegrationProfileCondition describes the state of a resource at a certain point.
+//
+// Deprecated: no longer in use.
+type DeprecatedIntegrationProfileConditionApplyConfiguration struct {
 	// Type of integration condition.
 	Type *camelv1.IntegrationProfileConditionType `json:"type,omitempty"`
 	// Status of the condition, one of True, False, Unknown.
@@ -44,16 +46,16 @@ type IntegrationProfileConditionApplyConfiguration struct {
 	Message *string `json:"message,omitempty"`
 }
 
-// IntegrationProfileConditionApplyConfiguration constructs a declarative configuration of the IntegrationProfileCondition type for use with
+// DeprecatedIntegrationProfileConditionApplyConfiguration constructs a declarative configuration of the DeprecatedIntegrationProfileCondition type for use with
 // apply.
-func IntegrationProfileCondition() *IntegrationProfileConditionApplyConfiguration {
-	return &IntegrationProfileConditionApplyConfiguration{}
+func DeprecatedIntegrationProfileCondition() *DeprecatedIntegrationProfileConditionApplyConfiguration {
+	return &DeprecatedIntegrationProfileConditionApplyConfiguration{}
 }
 
 // WithType sets the Type field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Type field is set to the value of the last call.
-func (b *IntegrationProfileConditionApplyConfiguration) WithType(value camelv1.IntegrationProfileConditionType) *IntegrationProfileConditionApplyConfiguration {
+func (b *DeprecatedIntegrationProfileConditionApplyConfiguration) WithType(value camelv1.IntegrationProfileConditionType) *DeprecatedIntegrationProfileConditionApplyConfiguration {
 	b.Type = &value
 	return b
 }
@@ -61,7 +63,7 @@ func (b *IntegrationProfileConditionApplyConfiguration) WithType(value camelv1.I
 // WithStatus sets the Status field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Status field is set to the value of the last call.
-func (b *IntegrationProfileConditionApplyConfiguration) WithStatus(value corev1.ConditionStatus) *IntegrationProfileConditionApplyConfiguration {
+func (b *DeprecatedIntegrationProfileConditionApplyConfiguration) WithStatus(value corev1.ConditionStatus) *DeprecatedIntegrationProfileConditionApplyConfiguration {
 	b.Status = &value
 	return b
 }
@@ -69,7 +71,7 @@ func (b *IntegrationProfileConditionApplyConfiguration) WithStatus(value corev1.
 // WithLastUpdateTime sets the LastUpdateTime field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the LastUpdateTime field is set to the value of the last call.
-func (b *IntegrationProfileConditionApplyConfiguration) WithLastUpdateTime(value metav1.Time) *IntegrationProfileConditionApplyConfiguration {
+func (b *DeprecatedIntegrationProfileConditionApplyConfiguration) WithLastUpdateTime(value metav1.Time) *DeprecatedIntegrationProfileConditionApplyConfiguration {
 	b.LastUpdateTime = &value
 	return b
 }
@@ -77,7 +79,7 @@ func (b *IntegrationProfileConditionApplyConfiguration) WithLastUpdateTime(value
 // WithLastTransitionTime sets the LastTransitionTime field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the LastTransitionTime field is set to the value of the last call.
-func (b *IntegrationProfileConditionApplyConfiguration) WithLastTransitionTime(value metav1.Time) *IntegrationProfileConditionApplyConfiguration {
+func (b *DeprecatedIntegrationProfileConditionApplyConfiguration) WithLastTransitionTime(value metav1.Time) *DeprecatedIntegrationProfileConditionApplyConfiguration {
 	b.LastTransitionTime = &value
 	return b
 }
@@ -85,7 +87,7 @@ func (b *IntegrationProfileConditionApplyConfiguration) WithLastTransitionTime(v
 // WithReason sets the Reason field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Reason field is set to the value of the last call.
-func (b *IntegrationProfileConditionApplyConfiguration) WithReason(value string) *IntegrationProfileConditionApplyConfiguration {
+func (b *DeprecatedIntegrationProfileConditionApplyConfiguration) WithReason(value string) *DeprecatedIntegrationProfileConditionApplyConfiguration {
 	b.Reason = &value
 	return b
 }
@@ -93,7 +95,7 @@ func (b *IntegrationProfileConditionApplyConfiguration) WithReason(value string)
 // WithMessage sets the Message field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Message field is set to the value of the last call.
-func (b *IntegrationProfileConditionApplyConfiguration) WithMessage(value string) *IntegrationProfileConditionApplyConfiguration {
+func (b *DeprecatedIntegrationProfileConditionApplyConfiguration) WithMessage(value string) *DeprecatedIntegrationProfileConditionApplyConfiguration {
 	b.Message = &value
 	return b
 }

@@ -23,30 +23,32 @@ import (
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// IntegrationProfileStatusApplyConfiguration represents a declarative configuration of the IntegrationProfileStatus type for use
+// DeprecatedIntegrationProfileStatusApplyConfiguration represents a declarative configuration of the DeprecatedIntegrationProfileStatus type for use
 // with apply.
 //
-// IntegrationProfileStatus defines the observed state of IntegrationProfile.
-type IntegrationProfileStatusApplyConfiguration struct {
+// DeprecatedIntegrationProfileStatus defines the observed state of IntegrationProfile.
+//
+// Deprecated: no longer in use.
+type DeprecatedIntegrationProfileStatusApplyConfiguration struct {
 	IntegrationProfileSpecApplyConfiguration `json:",inline"`
 	// ObservedGeneration is the most recent generation observed for this IntegrationProfile.
 	ObservedGeneration *int64 `json:"observedGeneration,omitempty"`
 	// defines in what phase the IntegrationProfile is found
 	Phase *camelv1.IntegrationProfilePhase `json:"phase,omitempty"`
 	// which are the conditions met (particularly useful when in ERROR phase)
-	Conditions []IntegrationProfileConditionApplyConfiguration `json:"conditions,omitempty"`
+	Conditions []DeprecatedIntegrationProfileConditionApplyConfiguration `json:"conditions,omitempty"`
 }
 
-// IntegrationProfileStatusApplyConfiguration constructs a declarative configuration of the IntegrationProfileStatus type for use with
+// DeprecatedIntegrationProfileStatusApplyConfiguration constructs a declarative configuration of the DeprecatedIntegrationProfileStatus type for use with
 // apply.
-func IntegrationProfileStatus() *IntegrationProfileStatusApplyConfiguration {
-	return &IntegrationProfileStatusApplyConfiguration{}
+func DeprecatedIntegrationProfileStatus() *DeprecatedIntegrationProfileStatusApplyConfiguration {
+	return &DeprecatedIntegrationProfileStatusApplyConfiguration{}
 }
 
 // WithBuild sets the Build field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Build field is set to the value of the last call.
-func (b *IntegrationProfileStatusApplyConfiguration) WithBuild(value *IntegrationProfileBuildSpecApplyConfiguration) *IntegrationProfileStatusApplyConfiguration {
+func (b *DeprecatedIntegrationProfileStatusApplyConfiguration) WithBuild(value *IntegrationProfileBuildSpecApplyConfiguration) *DeprecatedIntegrationProfileStatusApplyConfiguration {
 	b.IntegrationProfileSpecApplyConfiguration.Build = value
 	return b
 }
@@ -54,7 +56,7 @@ func (b *IntegrationProfileStatusApplyConfiguration) WithBuild(value *Integratio
 // WithTraits sets the Traits field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Traits field is set to the value of the last call.
-func (b *IntegrationProfileStatusApplyConfiguration) WithTraits(value *TraitsApplyConfiguration) *IntegrationProfileStatusApplyConfiguration {
+func (b *DeprecatedIntegrationProfileStatusApplyConfiguration) WithTraits(value *TraitsApplyConfiguration) *DeprecatedIntegrationProfileStatusApplyConfiguration {
 	b.IntegrationProfileSpecApplyConfiguration.Traits = value
 	return b
 }
@@ -62,7 +64,7 @@ func (b *IntegrationProfileStatusApplyConfiguration) WithTraits(value *TraitsApp
 // WithDependencies adds the given value to the Dependencies field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the Dependencies field.
-func (b *IntegrationProfileStatusApplyConfiguration) WithDependencies(values ...string) *IntegrationProfileStatusApplyConfiguration {
+func (b *DeprecatedIntegrationProfileStatusApplyConfiguration) WithDependencies(values ...string) *DeprecatedIntegrationProfileStatusApplyConfiguration {
 	for i := range values {
 		b.IntegrationProfileSpecApplyConfiguration.Dependencies = append(b.IntegrationProfileSpecApplyConfiguration.Dependencies, values[i])
 	}
@@ -72,7 +74,7 @@ func (b *IntegrationProfileStatusApplyConfiguration) WithDependencies(values ...
 // WithKamelet sets the Kamelet field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Kamelet field is set to the value of the last call.
-func (b *IntegrationProfileStatusApplyConfiguration) WithKamelet(value *IntegrationProfileKameletSpecApplyConfiguration) *IntegrationProfileStatusApplyConfiguration {
+func (b *DeprecatedIntegrationProfileStatusApplyConfiguration) WithKamelet(value *IntegrationProfileKameletSpecApplyConfiguration) *DeprecatedIntegrationProfileStatusApplyConfiguration {
 	b.IntegrationProfileSpecApplyConfiguration.Kamelet = value
 	return b
 }
@@ -80,7 +82,7 @@ func (b *IntegrationProfileStatusApplyConfiguration) WithKamelet(value *Integrat
 // WithObservedGeneration sets the ObservedGeneration field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the ObservedGeneration field is set to the value of the last call.
-func (b *IntegrationProfileStatusApplyConfiguration) WithObservedGeneration(value int64) *IntegrationProfileStatusApplyConfiguration {
+func (b *DeprecatedIntegrationProfileStatusApplyConfiguration) WithObservedGeneration(value int64) *DeprecatedIntegrationProfileStatusApplyConfiguration {
 	b.ObservedGeneration = &value
 	return b
 }
@@ -88,7 +90,7 @@ func (b *IntegrationProfileStatusApplyConfiguration) WithObservedGeneration(valu
 // WithPhase sets the Phase field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Phase field is set to the value of the last call.
-func (b *IntegrationProfileStatusApplyConfiguration) WithPhase(value camelv1.IntegrationProfilePhase) *IntegrationProfileStatusApplyConfiguration {
+func (b *DeprecatedIntegrationProfileStatusApplyConfiguration) WithPhase(value camelv1.IntegrationProfilePhase) *DeprecatedIntegrationProfileStatusApplyConfiguration {
 	b.Phase = &value
 	return b
 }
@@ -96,7 +98,7 @@ func (b *IntegrationProfileStatusApplyConfiguration) WithPhase(value camelv1.Int
 // WithConditions adds the given value to the Conditions field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the Conditions field.
-func (b *IntegrationProfileStatusApplyConfiguration) WithConditions(values ...*IntegrationProfileConditionApplyConfiguration) *IntegrationProfileStatusApplyConfiguration {
+func (b *DeprecatedIntegrationProfileStatusApplyConfiguration) WithConditions(values ...*DeprecatedIntegrationProfileConditionApplyConfiguration) *DeprecatedIntegrationProfileStatusApplyConfiguration {
 	for i := range values {
 		if values[i] == nil {
 			panic("nil value passed to WithConditions")

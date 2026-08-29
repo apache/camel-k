@@ -29,7 +29,8 @@ import (
 
 func TestGetEnvPlatform_Defaults(t *testing.T) {
 	// No environment variables set
-	pl := getEnvPlatform() // reinitialize to get the value from env vars
+	InitPlatform()
+	pl := getDefaultPlatform()
 
 	assert.NotNil(t, pl)
 	assert.Equal(t, DefaultBuildStrategy, pl.BuildConfiguration.Strategy)
@@ -53,7 +54,8 @@ func TestGetEnvPlatform_WithEnv(t *testing.T) {
 	t.Setenv("MAVEN_SETTINGS", "configmap:my-settings@settings")
 	t.Setenv("MAVEN_SETTINGS_SECURITY", "secret:my-settings-sec@sec")
 
-	p := getEnvPlatform() // reinitialize to get the value from env vars
+	InitPlatform()
+	p := getDefaultPlatform()
 
 	assert.Equal(t, "1.2.3", p.BuildRuntimeVersion)
 	assert.Equal(t, time.Duration(10)*time.Second, p.BuildTimeout)
@@ -257,4 +259,70 @@ func TestMavenRepoAllowed(t *testing.T) {
 func TestMavenRepoAllowedDefault(t *testing.T) {
 	assert.True(t, IsMavenRepoAllowed(maven.DefaultMavenRepositories))
 	assert.False(t, IsMavenRepoAllowed("repo3"))
+}
+
+func TestFromIntegrationProfile_Overrides(t *testing.T) {
+	original := singletonPlatform
+	t.Cleanup(func() {
+		singletonPlatform = original
+	})
+
+	singletonPlatform = Platform{
+		BuildRuntimeVersion: "1.20",
+		BuildTimeout:        5 * time.Minute,
+		BuildConfiguration: v1.BuildConfiguration{
+			Strategy:      "default-strategy",
+			OrderStrategy: "default-order",
+		},
+		BuildBaseImage:  "default-image",
+		PublishStrategy: "default-publish",
+		Registry: v1.RegistrySpec{
+			Address: "default.registry",
+		},
+		Maven: v1.MavenBuildSpec{
+			MavenSpec:    v1.MavenSpec{},
+			Repositories: []v1.Repository{},
+		},
+		MaxRunningBuilds: 3,
+	}
+
+	itpr := &v1.IntegrationProfile{
+		Spec: v1.IntegrationProfileSpec{
+			Build: v1.IntegrationProfileBuildSpec{
+				RuntimeProvider: v1.RuntimeProviderPlainQuarkus,
+				RuntimeVersion:  "1.21",
+				BaseImage:       "custom-image",
+				PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
+				Registry: &v1.RegistrySpec{
+					Address:      "custom.registry",
+					Secret:       "custom-secret",
+					Organization: "custom-org",
+				},
+				Maven: &v1.MavenSpec{
+					Settings: v1.ValueSource{},
+				},
+				Repositories:     []string{"https://repo1.example.com", "https://repo2.example.com"},
+				MaxRunningBuilds: 10,
+			},
+		},
+	}
+
+	got := fromIntegrationProfile(itpr)
+
+	assert.Equal(t, v1.RuntimeProviderPlainQuarkus, got.BuildRuntimeProvider)
+	assert.Equal(t, "1.21", got.BuildRuntimeVersion)
+	assert.Equal(t, "custom-image", got.BuildBaseImage)
+	assert.Equal(t, v1.IntegrationPlatformBuildPublishStrategyJib, got.PublishStrategy)
+	assert.Equal(t, "custom.registry", got.Registry.Address)
+	assert.Equal(t, "custom-secret", got.Registry.Secret)
+	assert.Equal(t, "custom-org", got.Registry.Organization)
+	assert.Equal(t, int32(10), got.MaxRunningBuilds)
+	assert.Equal(t,
+		itpr.Spec.Build.Maven,
+		&got.Maven.MavenSpec,
+	)
+	assert.Equal(t,
+		splitRepositories(itpr.Spec.Build.Repositories),
+		got.Maven.Repositories,
+	)
 }

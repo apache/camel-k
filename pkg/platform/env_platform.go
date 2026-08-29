@@ -24,6 +24,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -36,8 +37,11 @@ import (
 // Used to check runtime architecture.
 var operatorArch = runtime.GOARCH
 
-// SingletonPlatform is initialized once for performance reasons when the application starts.
-var SingletonPlatform = getEnvPlatform()
+// singletonPlatform is initialized once for performance reasons when the application starts.
+// The operator process should be in charge to initialize.
+var singletonPlatform Platform
+
+var logOnce sync.Map // map[string]*sync.Once
 
 // Platform contains a series of configuration required during build and packaging.
 type Platform struct {
@@ -53,11 +57,25 @@ type Platform struct {
 	MaxRunningBuilds     int32
 }
 
-// getEnvPlatform is in charge to parse the environment variables of the operator and return the Platform object.
-func getEnvPlatform() Platform {
+func (p *Platform) DeepCopy() *Platform {
+	if p == nil {
+		return nil
+	}
+
+	out := *p
+
+	out.BuildConfiguration = *p.BuildConfiguration.DeepCopy()
+	out.Registry = *p.Registry.DeepCopy()
+	out.Maven = *p.Maven.DeepCopy()
+
+	return &out
+}
+
+// InitPlatform is in charge to parse the environment variables of the operator and initialize the environment Platform.
+func InitPlatform() {
 	registry := registry()
 
-	return Platform{
+	singletonPlatform = Platform{
 		CatalogNamespace:     GetOperatorNamespace(),
 		BuildRuntimeVersion:  GetEnvOrDefault("BUILD_RUNTIME_VERSION", defaults.DefaultRuntimeVersion),
 		BuildRuntimeProvider: v1.RuntimeProvider(GetEnvOrDefault("BUILD_RUNTIME_PROVIDER", defaults.DefaultRuntimeProvider)),
@@ -273,22 +291,25 @@ func registry() v1.RegistrySpec {
 
 func repositories() []v1.Repository {
 	csvRepos := GetEnvOrDefault("MAVEN_REPOSITORIES", "")
-	if csvRepos != "" {
-		parts := strings.Split(csvRepos, ",")
+	if csvRepos == "" {
+		return nil
+	}
+	parts := strings.Split(csvRepos, ",")
 
-		repositories := make([]v1.Repository, 0, len(parts))
-		for _, repo := range parts {
-			repo = strings.TrimSpace(repo)
-			if repo == "" {
-				continue
-			}
-			repositories = append(repositories, maven.NewRepository(repo))
+	return splitRepositories(parts)
+}
+
+func splitRepositories(repos []string) []v1.Repository {
+	repositories := make([]v1.Repository, 0, len(repos))
+	for _, repo := range repos {
+		repo = strings.TrimSpace(repo)
+		if repo == "" {
+			continue
 		}
-
-		return repositories
+		repositories = append(repositories, maven.NewRepository(repo))
 	}
 
-	return nil
+	return repositories
 }
 
 func mavenSpec() v1.MavenSpec {
@@ -378,8 +399,36 @@ func caSecrets() []corev1.SecretKeySelector {
 	return caSecrets
 }
 
+// GetPlatform is in charge to return a Platform based on priority:
+// 1. From IntegrationPlatform
+// 2. From IntegrationProfile
+// 3. From default environment variable setting
+//
 //nolint:staticcheck
-func FromIntegrationPlatform(itp *v1.IntegrationPlatform) Platform {
+func GetPlatform(itp *v1.IntegrationPlatform, itpr *v1.IntegrationProfile) Platform {
+	if itp != nil {
+		return fromIntegrationPlatform(itp)
+	}
+
+	if itpr != nil {
+		return fromIntegrationProfile(itpr)
+	}
+
+	return getDefaultPlatform()
+}
+
+//nolint:staticcheck
+func fromIntegrationPlatform(itp *v1.IntegrationPlatform) Platform {
+	key := itp.Namespace + "/" + itp.Name
+	once, _ := logOnce.LoadOrStore(key, &sync.Once{})
+	o, ok := once.(*sync.Once)
+	if ok {
+		o.Do(func() {
+			log.Info("The operator detected the presence of a DEPRECATED IntegrationPlatform resource (" +
+				itp.Namespace + "/" + itp.Name + "). You need to remove it and replace any configuration with environment variables instead")
+		})
+	}
+
 	return Platform{
 		CatalogNamespace:    itp.GetNamespace(),
 		BuildRuntimeVersion: itp.Status.Build.RuntimeVersion,
@@ -401,4 +450,53 @@ func IsMavenRepoAllowed(mavenRepo string) bool {
 	allowedRepos := strings.Split(csvRepos, ",")
 
 	return slices.Contains(allowedRepos, mavenRepo)
+}
+
+func fromIntegrationProfile(itpr *v1.IntegrationProfile) Platform {
+	// It uses as base the configuration coming from default. It adds on top of that
+	// those configuration overridden.
+	basePlatform := singletonPlatform.DeepCopy()
+
+	if itpr.Spec.Build.RuntimeProvider != "" {
+		basePlatform.BuildRuntimeProvider = itpr.Spec.Build.RuntimeProvider
+	}
+	if itpr.Spec.Build.RuntimeVersion != "" {
+		basePlatform.BuildRuntimeVersion = itpr.Spec.Build.RuntimeVersion
+	}
+	if itpr.Spec.Build.Timeout != nil {
+		basePlatform.BuildTimeout = itpr.Spec.Build.GetTimeout().Duration
+	}
+	if itpr.Spec.Build.BuildConfiguration.Strategy != "" {
+		basePlatform.BuildConfiguration.Strategy = itpr.Spec.Build.BuildConfiguration.Strategy
+	}
+	if itpr.Spec.Build.BuildConfiguration.OrderStrategy != "" {
+		basePlatform.BuildConfiguration.OrderStrategy = itpr.Spec.Build.BuildConfiguration.OrderStrategy
+	}
+	if itpr.Spec.Build.BuildConfiguration.ImagePlatforms != nil {
+		basePlatform.BuildConfiguration.ImagePlatforms = itpr.Spec.Build.BuildConfiguration.ImagePlatforms
+	}
+	if itpr.Spec.Build.BaseImage != "" {
+		basePlatform.BuildBaseImage = itpr.Spec.Build.BaseImage
+	}
+	if itpr.Spec.Build.PublishStrategy != "" {
+		basePlatform.PublishStrategy = itpr.Spec.Build.PublishStrategy
+	}
+	if itpr.Spec.Build.Registry != nil {
+		basePlatform.Registry = *itpr.Spec.Build.Registry
+	}
+	if itpr.Spec.Build.Maven != nil {
+		basePlatform.Maven.MavenSpec = *itpr.Spec.Build.Maven
+	}
+	if itpr.Spec.Build.Repositories != nil {
+		basePlatform.Maven.Repositories = splitRepositories(itpr.Spec.Build.Repositories)
+	}
+	if itpr.Spec.Build.MaxRunningBuilds > 0 {
+		basePlatform.MaxRunningBuilds = itpr.Spec.Build.MaxRunningBuilds
+	}
+
+	return *basePlatform
+}
+
+func getDefaultPlatform() Platform {
+	return singletonPlatform
 }

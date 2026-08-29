@@ -41,8 +41,6 @@ type IntegrationProfilesGetter interface {
 type IntegrationProfileInterface interface {
 	Create(ctx context.Context, integrationProfile *camelv1.IntegrationProfile, opts metav1.CreateOptions) (*camelv1.IntegrationProfile, error)
 	Update(ctx context.Context, integrationProfile *camelv1.IntegrationProfile, opts metav1.UpdateOptions) (*camelv1.IntegrationProfile, error)
-	// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-	UpdateStatus(ctx context.Context, integrationProfile *camelv1.IntegrationProfile, opts metav1.UpdateOptions) (*camelv1.IntegrationProfile, error)
 	Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error
 	DeleteCollection(ctx context.Context, opts metav1.DeleteOptions, listOpts metav1.ListOptions) error
 	Get(ctx context.Context, name string, opts metav1.GetOptions) (*camelv1.IntegrationProfile, error)
@@ -50,8 +48,6 @@ type IntegrationProfileInterface interface {
 	Watch(ctx context.Context, opts metav1.ListOptions) (watch.Interface, error)
 	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts metav1.PatchOptions, subresources ...string) (result *camelv1.IntegrationProfile, err error)
 	Apply(ctx context.Context, integrationProfile *applyconfigurationcamelv1.IntegrationProfileApplyConfiguration, opts metav1.ApplyOptions) (result *camelv1.IntegrationProfile, err error)
-	// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
-	ApplyStatus(ctx context.Context, integrationProfile *applyconfigurationcamelv1.IntegrationProfileApplyConfiguration, opts metav1.ApplyOptions) (result *camelv1.IntegrationProfile, err error)
 	IntegrationProfileExpansion
 }
 
