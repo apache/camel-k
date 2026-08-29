@@ -223,8 +223,8 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	exitOnError(err, "")
 
 	log.Info("Configuring manager")
-	// Verify the environment platform configuration
-	checkRegistry()
+	// Initialize environment platform configuration
+	platform.InitPlatform()
 	exitOnError(mgr.AddHealthzCheck("health-probe", healthz.Ping), "Unable add liveness check")
 	exitOnError(apis.AddToScheme(mgr.GetScheme()), "")
 	ctrlClient, err := client.FromManager(mgr)
@@ -244,28 +244,6 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	}
 	log.Info("Starting the manager")
 	exitOnError(mgr.Start(ctx), "manager exited non-zero")
-}
-
-func checkRegistry() {
-	// The operator will eventually try to get the registry address from an IntegrationPlatform, if provided
-	if platform.SingletonPlatform.Registry.Address == "" {
-		// TODO: fail fast exiting the program when we don't support IntegrationPlatform.
-		log.Info("Failed to initialize singleton platform from environment variables: missing mandatory env var REGISTRY_ADDRESS. " +
-			"Mind that this will be required when we stop supporting IntegrationPlatform in future releases.")
-	} else {
-		// TODO: support registry in IntegrationProfile before removing IntegrationPlatform.
-		log.Infof("Registry %s configured for this operator. "+
-			"The operator will use this one unless any other specified in IntegrationPlatform (deprecated)",
-			platform.SingletonPlatform.Registry.Address)
-	}
-	if platform.SingletonPlatform.Registry.Insecure {
-		log.Info("The registry may be accessed insecurely via http (non encrypted) protocol: " +
-			"make sure this is disabled in a production environment for security reasons.")
-	}
-	if platform.SingletonPlatform.Registry.Secret == "" {
-		log.Info("The registry will access publicly (no secret configured): " +
-			"make sure this is disabled in a production environment for security reasons.")
-	}
 }
 
 func getNamespacesSelector(operatorNamespace string, watchNamespace string) map[string]cache.Config {

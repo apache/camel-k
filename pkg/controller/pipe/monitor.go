@@ -72,10 +72,6 @@ func (action *monitorAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.Pip
 	integrationProfileChanged := v1.GetIntegrationProfileAnnotation(pipe) != "" &&
 		(v1.GetIntegrationProfileAnnotation(pipe) != v1.GetIntegrationProfileAnnotation(&it))
 
-	//nolint:staticcheck
-	integrationProfileNamespaceChanged := v1.GetIntegrationProfileNamespaceAnnotation(pipe) != "" &&
-		(v1.GetIntegrationProfileNamespaceAnnotation(pipe) != v1.GetIntegrationProfileNamespaceAnnotation(&it))
-
 	sameTraits, err := trait.IntegrationAndPipeSameTraits(action.client, &it, pipe)
 	if err != nil {
 		return nil, err
@@ -96,12 +92,12 @@ func (action *monitorAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.Pip
 
 	semanticEquality := equality.Semantic.DeepDerivative(expected.Spec, it.Spec)
 
-	if !semanticEquality || operatorIDChanged || integrationProfileChanged || integrationProfileNamespaceChanged || !sameTraits {
+	if !semanticEquality || operatorIDChanged || integrationProfileChanged || !sameTraits {
 		action.L.Info(
 			"Pipe needs a rebuild",
 			"semantic-equality", !semanticEquality,
 			"operatorid-changed", operatorIDChanged,
-			"integration-profile-changed", integrationProfileChanged || integrationProfileNamespaceChanged,
+			"integration-profile-changed", integrationProfileChanged,
 			"traits-changed", !sameTraits)
 
 		// Pipe has changed and needs rebuild

@@ -50,34 +50,34 @@ func (b *IntegrationProfileBuildSpec) GetTimeout() metav1.Duration {
 	return *b.Timeout
 }
 
-var _ ResourceCondition = &IntegrationProfileCondition{}
+var _ ResourceCondition = &DeprecatedIntegrationProfileCondition{}
 
 // GetType --.
-func (c *IntegrationProfileCondition) GetType() string {
+func (c *DeprecatedIntegrationProfileCondition) GetType() string {
 	return string(c.Type)
 }
 
 // GetStatus --.
-func (c *IntegrationProfileCondition) GetStatus() corev1.ConditionStatus {
+func (c *DeprecatedIntegrationProfileCondition) GetStatus() corev1.ConditionStatus {
 	return c.Status
 }
 
 // GetLastUpdateTime --.
-func (c *IntegrationProfileCondition) GetLastUpdateTime() metav1.Time {
+func (c *DeprecatedIntegrationProfileCondition) GetLastUpdateTime() metav1.Time {
 	return c.LastUpdateTime
 }
 
 // GetLastTransitionTime --.
-func (c *IntegrationProfileCondition) GetLastTransitionTime() metav1.Time {
+func (c *DeprecatedIntegrationProfileCondition) GetLastTransitionTime() metav1.Time {
 	return c.LastTransitionTime
 }
 
 // GetReason --.
-func (c *IntegrationProfileCondition) GetReason() string {
+func (c *DeprecatedIntegrationProfileCondition) GetReason() string {
 	return c.Reason
 }
 
 // GetMessage --.
-func (c *IntegrationProfileCondition) GetMessage() string {
+func (c *DeprecatedIntegrationProfileCondition) GetMessage() string {
 	return c.Message
 }

@@ -61,10 +61,6 @@ func ComputeForIntegration(integration *v1.Integration, configmapVersions []stri
 	if _, err := hash.Write([]byte(v1.GetIntegrationProfileAnnotation(integration))); err != nil {
 		return "", err
 	}
-	//nolint:staticcheck
-	if _, err := hash.Write([]byte(v1.GetIntegrationProfileNamespaceAnnotation(integration))); err != nil {
-		return "", err
-	}
 
 	// Integration Kit is relevant
 	if integration.Spec.IntegrationKit != nil {

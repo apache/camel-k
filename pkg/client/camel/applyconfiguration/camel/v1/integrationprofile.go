@@ -35,7 +35,7 @@ type IntegrationProfileApplyConfiguration struct {
 	*metav1.ObjectMetaApplyConfiguration `json:"metadata,omitempty"`
 	Spec                                 *IntegrationProfileSpecApplyConfiguration `json:"spec,omitempty"`
 	// Deprecated: no longer in use.
-	Status *IntegrationProfileStatusApplyConfiguration `json:"status,omitempty"`
+	DeprecatedStatus *DeprecatedIntegrationProfileStatusApplyConfiguration `json:"status,omitempty"`
 }
 
 // IntegrationProfile constructs a declarative configuration of the IntegrationProfile type for use with
@@ -217,11 +217,11 @@ func (b *IntegrationProfileApplyConfiguration) WithSpec(value *IntegrationProfil
 	return b
 }
 
-// WithStatus sets the Status field in the declarative configuration to the given value
+// WithDeprecatedStatus sets the DeprecatedStatus field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Status field is set to the value of the last call.
-func (b *IntegrationProfileApplyConfiguration) WithStatus(value *IntegrationProfileStatusApplyConfiguration) *IntegrationProfileApplyConfiguration {
-	b.Status = value
+// If called multiple times, the DeprecatedStatus field is set to the value of the last call.
+func (b *IntegrationProfileApplyConfiguration) WithDeprecatedStatus(value *DeprecatedIntegrationProfileStatusApplyConfiguration) *IntegrationProfileApplyConfiguration {
+	b.DeprecatedStatus = value
 	return b
 }
 

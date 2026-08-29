@@ -67,14 +67,27 @@ spec:
               build:
                 description: specify how to build the Integration/IntegrationKits
                 properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    description: Annotation to use for the builder pod. Only used
+                      for `pod` strategy
+                    type: object
                   baseImage:
                     description: |-
                       a base image that can be used as base layer for all images.
                       It can be useful if you want to provide some custom base image with further utility software
                     type: string
+                  limitCPU:
+                    description: The maximum amount of CPU required. Only used for
+                      `pod` strategy
+                    type: string
+                  limitMemory:
+                    description: The maximum amount of memory required. Only used
+                      for `pod` strategy
+                    type: string
                   maven:
-                    description: Maven configuration used to build the Camel/Camel-Quarkus
-                      applications
+                    description: Maven configuration used to build the Camel applications
                     properties:
                       caSecrets:
                         description: |-
@@ -312,6 +325,40 @@ spec:
                             x-kubernetes-map-type: atomic
                         type: object
                     type: object
+                  maxRunningBuilds:
+                    description: the maximum amount of parallel running pipelines
+                      started by this operator instance
+                    format: int32
+                    type: integer
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: The node selector for the builder pod. Only used
+                      for `pod` strategy
+                    type: object
+                  operatorNamespace:
+                    description: |-
+                      The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
+
+                      Deprecated: no longer in use.
+                    type: string
+                  orderStrategy:
+                    description: the build order strategy to adopt
+                    enum:
+                    - dependencies
+                    - fifo
+                    - sequential
+                    type: string
+                  platforms:
+                    description: The list of platforms used in order to build a container
+                      image.
+                    items:
+                      type: string
+                    type: array
+                  publishStrategy:
+                    description: the strategy to adopt for publishing an Integration
+                      container image
+                    type: string
                   registry:
                     description: the image registry used to push/pull Integration
                       images
@@ -333,17 +380,37 @@ spec:
                         description: the secret where credentials are stored
                         type: string
                     type: object
+                  repositories:
+                    description: Maven repositories used to build the Camel applications
+                    items:
+                      type: string
+                    type: array
+                  requestCPU:
+                    description: The minimum amount of CPU required. Only used for
+                      `pod` strategy
+                    type: string
+                  requestMemory:
+                    description: The minimum amount of memory required. Only used
+                      for `pod` strategy
+                    type: string
                   runtimeProvider:
-                    description: the runtime used. Likely Camel Quarkus (we used to
-                      have main runtime which has been discontinued since version
-                      1.5)
+                    description: the runtime provider to use. Likely Camel Quarkus.
                     type: string
                   runtimeVersion:
-                    description: the Camel K Runtime dependency version
+                    description: the runtime dependency version to use.
+                    type: string
+                  strategy:
+                    description: the strategy to adopt
+                    enum:
+                    - routine
+                    - pod
                     type: string
                   timeout:
                     description: how much time to wait before time out the pipeline
                       process
+                    type: string
+                  toolImage:
+                    description: The container image to be used to run the build.
                     type: string
                 type: object
               dependencies:
@@ -2444,14 +2511,27 @@ spec:
               build:
                 description: specify how to build the Integration/IntegrationKits
                 properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    description: Annotation to use for the builder pod. Only used
+                      for `pod` strategy
+                    type: object
                   baseImage:
                     description: |-
                       a base image that can be used as base layer for all images.
                       It can be useful if you want to provide some custom base image with further utility software
                     type: string
+                  limitCPU:
+                    description: The maximum amount of CPU required. Only used for
+                      `pod` strategy
+                    type: string
+                  limitMemory:
+                    description: The maximum amount of memory required. Only used
+                      for `pod` strategy
+                    type: string
                   maven:
-                    description: Maven configuration used to build the Camel/Camel-Quarkus
-                      applications
+                    description: Maven configuration used to build the Camel applications
                     properties:
                       caSecrets:
                         description: |-
@@ -2689,6 +2769,40 @@ spec:
                             x-kubernetes-map-type: atomic
                         type: object
                     type: object
+                  maxRunningBuilds:
+                    description: the maximum amount of parallel running pipelines
+                      started by this operator instance
+                    format: int32
+                    type: integer
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: The node selector for the builder pod. Only used
+                      for `pod` strategy
+                    type: object
+                  operatorNamespace:
+                    description: |-
+                      The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
+
+                      Deprecated: no longer in use.
+                    type: string
+                  orderStrategy:
+                    description: the build order strategy to adopt
+                    enum:
+                    - dependencies
+                    - fifo
+                    - sequential
+                    type: string
+                  platforms:
+                    description: The list of platforms used in order to build a container
+                      image.
+                    items:
+                      type: string
+                    type: array
+                  publishStrategy:
+                    description: the strategy to adopt for publishing an Integration
+                      container image
+                    type: string
                   registry:
                     description: the image registry used to push/pull Integration
                       images
@@ -2710,25 +2824,47 @@ spec:
                         description: the secret where credentials are stored
                         type: string
                     type: object
+                  repositories:
+                    description: Maven repositories used to build the Camel applications
+                    items:
+                      type: string
+                    type: array
+                  requestCPU:
+                    description: The minimum amount of CPU required. Only used for
+                      `pod` strategy
+                    type: string
+                  requestMemory:
+                    description: The minimum amount of memory required. Only used
+                      for `pod` strategy
+                    type: string
                   runtimeProvider:
-                    description: the runtime used. Likely Camel Quarkus (we used to
-                      have main runtime which has been discontinued since version
-                      1.5)
+                    description: the runtime provider to use. Likely Camel Quarkus.
                     type: string
                   runtimeVersion:
-                    description: the Camel K Runtime dependency version
+                    description: the runtime dependency version to use.
+                    type: string
+                  strategy:
+                    description: the strategy to adopt
+                    enum:
+                    - routine
+                    - pod
                     type: string
                   timeout:
                     description: how much time to wait before time out the pipeline
                       process
+                    type: string
+                  toolImage:
+                    description: The container image to be used to run the build.
                     type: string
                 type: object
               conditions:
                 description: which are the conditions met (particularly useful when
                   in ERROR phase)
                 items:
-                  description: IntegrationProfileCondition describes the state of
-                    a resource at a certain point.
+                  description: |-
+                    DeprecatedIntegrationProfileCondition describes the state of a resource at a certain point.
+
+                    Deprecated: no longer in use.
                   properties:
                     lastTransitionTime:
                       description: Last time the condition transitioned from one status

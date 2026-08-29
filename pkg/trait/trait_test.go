@@ -308,7 +308,8 @@ func testDefaultIntegrationPhaseTraitsSetting(t *testing.T, phase v1.Integration
 	err = yaml.Unmarshal(camelCatalogData, &cat)
 	require.NoError(t, err)
 	cat.Namespace = "default"
-	platform.SingletonPlatform.CatalogNamespace = cat.Namespace
+	t.Setenv("NAMESPACE", cat.Namespace)
+	platform.InitPlatform()
 
 	client, err := internal.NewFakeClient(&cat)
 	require.NoError(t, err)
@@ -380,7 +381,8 @@ func TestAutoInferredServiceTraitsDoNotLeakIntoStatus(t *testing.T) {
 	err = yaml.Unmarshal(camelCatalogData, &cat)
 	require.NoError(t, err)
 	cat.Namespace = "default"
-	platform.SingletonPlatform.CatalogNamespace = cat.Namespace
+	t.Setenv("NAMESPACE", cat.Namespace)
+	platform.InitPlatform()
 
 	client, err := internal.NewFakeClient(&cat)
 	require.NoError(t, err)
@@ -428,7 +430,8 @@ func TestUserSpecifiedTraitValuesStillAppearInStatus(t *testing.T) {
 	err = yaml.Unmarshal(camelCatalogData, &cat)
 	require.NoError(t, err)
 	cat.Namespace = "default"
-	platform.SingletonPlatform.CatalogNamespace = cat.Namespace
+	t.Setenv("NAMESPACE", cat.Namespace)
+	platform.InitPlatform()
 
 	client, err := internal.NewFakeClient(&cat)
 	require.NoError(t, err)
@@ -491,7 +494,8 @@ func TestIntegrationTraitsSetting(t *testing.T) {
 	err = yaml.Unmarshal(camelCatalogData, &cat)
 	require.NoError(t, err)
 	cat.Namespace = "default"
-	platform.SingletonPlatform.CatalogNamespace = cat.Namespace
+	t.Setenv("NAMESPACE", cat.Namespace)
+	platform.InitPlatform()
 
 	client, err := internal.NewFakeClient(&cat)
 	require.NoError(t, err)
@@ -513,4 +517,96 @@ func TestIntegrationTraitsSetting(t *testing.T) {
 			Name: "my-container-name",
 		},
 	}, env.Integration.Status.Traits)
+}
+
+func TestApplyEnvPlatformFromDefaultEnvVars(t *testing.T) {
+	it := &v1.Integration{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "my-it",
+			Namespace: "ns",
+		},
+		Spec: v1.IntegrationSpec{
+			Sources: []v1.SourceSpec{
+				{
+					DataSpec: v1.DataSpec{
+						Name:    "file.java",
+						Content: `from("timer:test").to("log:info")`,
+					},
+					Language: v1.LanguageJavaSource,
+				},
+			},
+		},
+	}
+	// Load the default catalog
+	camelCatalogData, err := resources.Resource(fmt.Sprintf("/resources/camel-catalog-%s.yaml", defaults.CamelKRuntimeCatalogVersion))
+	require.NoError(t, err)
+	var cat v1.CamelCatalog
+	err = yaml.Unmarshal(camelCatalogData, &cat)
+	require.NoError(t, err)
+	cat.Namespace = "default"
+	t.Setenv("NAMESPACE", cat.Namespace)
+	t.Setenv("REGISTRY_ADDRESS", "my-registry.io")
+	platform.InitPlatform()
+
+	client, err := internal.NewFakeClient(&cat)
+	require.NoError(t, err)
+	env, err := Apply(context.Background(), client, it, nil)
+	require.NoError(t, err)
+	assert.NotEmpty(t, env.Platform)
+
+	assert.Equal(t, "my-registry.io", env.Platform.Registry.Address)
+}
+
+func TestApplyEnvPlatformFromIntegrationProfile(t *testing.T) {
+	it := &v1.Integration{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "my-it",
+			Namespace: "ns",
+			Annotations: map[string]string{
+				"camel.apache.org/integration-profile.id": "my-profile",
+			},
+		},
+		Spec: v1.IntegrationSpec{
+			Sources: []v1.SourceSpec{
+				{
+					DataSpec: v1.DataSpec{
+						Name:    "file.java",
+						Content: `from("timer:test").to("log:info")`,
+					},
+					Language: v1.LanguageJavaSource,
+				},
+			},
+		},
+	}
+	ipr := &v1.IntegrationProfile{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "my-profile",
+			Namespace: "ns",
+		},
+		Spec: v1.IntegrationProfileSpec{
+			Build: v1.IntegrationProfileBuildSpec{
+				Registry: &v1.RegistrySpec{
+					Address: "profile-overridden.io",
+				},
+			},
+		},
+	}
+	// Load the default catalog
+	camelCatalogData, err := resources.Resource(fmt.Sprintf("/resources/camel-catalog-%s.yaml", defaults.CamelKRuntimeCatalogVersion))
+	require.NoError(t, err)
+	var cat v1.CamelCatalog
+	err = yaml.Unmarshal(camelCatalogData, &cat)
+	require.NoError(t, err)
+	cat.Namespace = "default"
+	t.Setenv("NAMESPACE", cat.Namespace)
+	t.Setenv("REGISTRY_ADDRESS", "my-registry.io")
+	platform.InitPlatform()
+
+	client, err := internal.NewFakeClient(&cat, ipr)
+	require.NoError(t, err)
+	env, err := Apply(context.Background(), client, it, nil)
+	require.NoError(t, err)
+	assert.NotEmpty(t, env.Platform)
+
+	assert.Equal(t, "profile-overridden.io", env.Platform.Registry.Address)
 }

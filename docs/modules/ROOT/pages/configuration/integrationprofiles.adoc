@@ -1,6 +1,6 @@
 = Integration Profiles
 
-Users may add an IntegrationProfile resource to any namespace. The profile holds custom settings which can be applied to all Integrations.
+Admin users may add an `IntegrationProfile` resource to any namespace. The profile holds custom settings which can be applied to all Integrations.
 
 The profile must be explicitly selected by an annotation referencing the integration profile name (any resource belonging to the "camel.apache.org" group can select a particular profile configuration).
 
@@ -36,4 +36,33 @@ spec:
 # ...
 ----
 
-The selection of a IntegrationProfile enables new configuration scenarios, for example, sharing global configuration options for groups of Integrations. The main configuration expected here is related to traits.
+The selection of a IntegrationProfile enables new configuration scenarios, for example, sharing global configuration options for groups of Integrations.
+
+== Security
+
+The `IntegrationProfile` is the secure way to provide sensitive building information and common configuration. For example, you can provide a common security configuration to access securely to a container registry. Or, as seen above a common runtime configuration (traits) to adopt. The profile contains all the configuration required for the operator to build, package and run the application. Here a quick snapshot of the main parameters (see more in the API definition):
+
+[source,yaml]
+----
+kind: IntegrationProfile
+apiVersion: camel.apache.org/v1
+metadata:
+  name: my-profile
+spec:
+  build:
+    ...
+    registry:
+      ...
+    maven:
+      ...
+    repositories:
+      ...
+  dependencies:
+    ...
+  traits:
+    ...
+----
+
+The presence of the profile overrides the default operator configuration which is normally configured via environment variables.
+
+NOTE: each Integration can use any IntegrationProfile available in their namespace.

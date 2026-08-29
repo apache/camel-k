@@ -45,12 +45,14 @@ func TestCreateCatalog(t *testing.T) {
 	if strings.Contains(defaults.CamelKRuntimeCatalogVersion, "SNAPSHOT") {
 		maven.DefaultMavenRepositories += ",https://repository.apache.org/content/repositories/snapshots-group@snapshots@id=apache-snapshots"
 	}
+	platform.InitPlatform()
+	pl := platform.GetPlatform(nil, nil)
 	catalog, err := CreateCatalog(
 		context.TODO(),
 		c,
 		"",
-		platform.SingletonPlatform.Maven.MavenSpec,
-		platform.SingletonPlatform.BuildTimeout,
+		pl.Maven.MavenSpec,
+		pl.BuildTimeout,
 		v1.RuntimeSpec{Provider: v1.RuntimeProviderQuarkus, Version: defaults.CamelKRuntimeCatalogVersion},
 		nil,
 		"",
