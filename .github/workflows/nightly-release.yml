@@ -30,8 +30,6 @@ env:
 
 permissions:
   contents: write
-  # Required by Cosign keyless signing to mint the GitHub Actions OIDC token.
-  id-token: write
 
 on:
   schedule:
