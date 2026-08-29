@@ -117,12 +117,10 @@ runs:
         source script/release-assurance-tools.env
         go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@${CYCLONEDX_GOMOD_REF}
         go install github.com/anchore/syft/cmd/syft@${SYFT_REF}
-        go install github.com/sigstore/cosign/v3/cmd/cosign@${COSIGN_REF}
         echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
         go version -m "$(go env GOPATH)/bin/cyclonedx-gomod" | grep -F "github.com/CycloneDX/cyclonedx-gomod ${CYCLONEDX_GOMOD_VERSION}"
         reported_syft_version=$("$(go env GOPATH)/bin/syft" --version | awk '{print $NF}')
         test "$reported_syft_version" = "${SYFT_VERSION#v}"
-        go version -m "$(go env GOPATH)/bin/cosign" | grep -F "github.com/sigstore/cosign/v3 ${COSIGN_VERSION}"
 
     - name: Generate module SBOM
       shell: bash
@@ -154,14 +152,13 @@ runs:
           "${{ env.COMMIT_ID }}" \
           "$CYCLONEDX_GOMOD_VERSION"
 
-    - name: Sign and attest release assurance
+    - name: Verify nightly release assurance
       shell: bash
-      env:
-        COSIGN_YES: "true"
       run: |
-        bash script/attest_release_assurance.sh \
+        ASSURANCE_REQUIRE_LOCAL_ASSETS=true \
+          bash script/verify_release_assurance.sh \
           release-assurance.json \
-          release-assurance.sigstore.json
+          release-assurance.verdict.json
 
     - name: Publish nightly tag
       shell: bash
@@ -217,6 +214,8 @@ runs:
         NOTE: last update on ${{ env.UPD_DATE }}
         ```
         Apache Camel K ${{ env.VERSION }} build for testing purposes only (unstable). This nightly release is using an **unsupported** operator image published as `${{ env.IMAGE_NAME }}:${{ env.VERSION }}`. The available platforms are AMD64 and ARM64.
+
+        The attached `release-assurance.json` and CycloneDX files are unsigned nightly integrity evidence. They bind the generated SBOMs to the exact nightly client and image digests, but they are not Apache release signatures and do not represent a voted release.
         ## Kubectl
         ```
         kubectl apply -k github.com/apache/camel-k/install/overlays/all-namespaces?ref=${{ env.TAG }}
@@ -273,7 +272,7 @@ runs:
       shell: bash
       run: |
         RELEASE_ID=${{ env.RELEASE_ID }}
-        FILES="./camel-k-client*.tar.gz sbom.json ./camel-k-client*.sbom.cdx.json ./camel-k-image-*.sbom.cdx.json release-assurance.json release-assurance.json.sha256 release-assurance.sigstore.json"
+        FILES="./camel-k-client*.tar.gz sbom.json ./camel-k-client*.sbom.cdx.json ./camel-k-image-*.sbom.cdx.json release-assurance.json release-assurance.json.sha256 release-assurance.verdict.json"
 
         for FILE in $FILES; do
           if [ -f "$FILE" ]; then
