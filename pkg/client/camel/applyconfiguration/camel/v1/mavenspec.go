@@ -26,32 +26,14 @@ import (
 // MavenSpecApplyConfiguration represents a declarative configuration of the MavenSpec type for use
 // with apply.
 type MavenSpecApplyConfiguration struct {
-	// The path of the local Maven repository.
-	LocalRepository *string `json:"localRepository,omitempty"`
-	// The Maven properties.
-	Properties map[string]string `json:"properties,omitempty"`
-	// Deprecated: no longer in use.
-	DeprecatedProfiles []ValueSourceApplyConfiguration `json:"profiles,omitempty"`
-	// A reference to the ConfigMap or Secret key that contains
-	// the Maven settings.
-	Settings *ValueSourceApplyConfiguration `json:"settings,omitempty"`
-	// A reference to the ConfigMap or Secret key that contains
-	// the security of the Maven settings.
-	SettingsSecurity *ValueSourceApplyConfiguration `json:"settingsSecurity,omitempty"`
-	// The Secrets name and key, containing the CA certificate(s) used to connect
-	// to remote Maven repositories.
-	// It can contain X.509 certificates, and PKCS#7 formatted certificate chains.
-	// A JKS formatted keystore is automatically created to store the CA certificate(s),
-	// and configured to be used as a trusted certificate(s) by the Maven commands.
-	// Note that the root CA certificates are also imported into the created keystore.
-	CASecrets []corev1.SecretKeySelector `json:"caSecrets,omitempty"`
-	// The Maven build extensions.
-	// See https://maven.apache.org/guides/mini/guide-using-extensions.html.
-	Extension []MavenArtifactApplyConfiguration `json:"extension,omitempty"`
-	// The CLI options that are appended to the list of arguments for Maven commands,
-	// e.g., `-V,--no-transfer-progress,-Dstyle.color=never`.
-	// See https://maven.apache.org/ref/3.9.14/maven-embedder/cli.html.
-	CLIOptions []string `json:"cliOptions,omitempty"`
+	LocalRepository    *string                           `json:"localRepository,omitempty"`
+	Properties         map[string]string                 `json:"properties,omitempty"`
+	DeprecatedProfiles []ValueSourceApplyConfiguration   `json:"profiles,omitempty"`
+	Settings           *ValueSourceApplyConfiguration    `json:"settings,omitempty"`
+	SettingsSecurity   *ValueSourceApplyConfiguration    `json:"settingsSecurity,omitempty"`
+	CASecrets          []corev1.SecretKeySelector        `json:"caSecrets,omitempty"`
+	Extension          []MavenArtifactApplyConfiguration `json:"extension,omitempty"`
+	CLIOptions         []string                          `json:"cliOptions,omitempty"`
 }
 
 // MavenSpecApplyConfiguration constructs a declarative configuration of the MavenSpec type for use with
