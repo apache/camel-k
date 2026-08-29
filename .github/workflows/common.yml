@@ -73,6 +73,9 @@ jobs:
     - name: Install operator
       shell: bash
       run: |
+        # add an env var to include testing maven repo
+        sed -i '/^              value: "camel\.apache\.org\/app"$/a\            - name: MAVEN_REPOSITORIES_ALLOWED\n              value: "https://maven.repository.redhat.com/ga@id=redhat"' \
+        ./install/base/config/manager/operator-deployment.yaml
         kubectl create ns camel-k
         make install-k8s-global
         kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=60s
