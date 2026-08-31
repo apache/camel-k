@@ -32,6 +32,11 @@ docker buildx ls | grep arm
 
 NOTE: if you don't list any available builder, if you're on Ubuntu, you can install quickly QEMU via `sudo apt-get install -y qemu qemu-user-static` and retry to list the ARM64 based builders afterward.
 
+Something else you may need to run before being able to buil ARM64 is to run the following:
+```
+docker run --privileged --rm tonistiigi/binfmt --install all
+```
+
 [[releasing-camel-k]]
 == Release Camel K
 
