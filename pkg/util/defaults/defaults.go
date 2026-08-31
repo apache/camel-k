@@ -23,7 +23,7 @@ package defaults
 
 const (
 	// Version --
-	Version = "2.11.0-SNAPSHOT"
+	Version = "2.11.0"
 
 	// DefaultRuntimeProvider --
 	DefaultRuntimeProvider = "plain-quarkus"
@@ -35,7 +35,7 @@ const (
 	CamelKRuntimeCatalogVersion = "3.15.3"
 
 	// baseImage --
-	baseImage = "eclipse-temurin:17-jdk@sha256:a27c79d44326d5f689668df5fedfee487652066d2a91e172747056cc7fbee6fc"
+	baseImage = "eclipse-temurin:21-jdk"
 
 	// LocalRepository --
 	LocalRepository = "/etc/maven/m2"
