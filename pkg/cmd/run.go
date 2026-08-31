@@ -80,7 +80,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().String("image", "", "An image built externally (ie, via CICD). Enabling it will skip the Integration build phase.")
 	cmd.Flags().StringArrayP("dependency", "d", nil, "A dependency that should be included, e.g., \"camel:mail\" for a Camel component, "+
 		"\"mvn:org.my:app:1.0\" for a Maven dependency")
-	cmd.Flags().BoolP("wait", "w", false, "Wait for the integration to be running")
+	cmd.Flags().BoolP("wait", "w", false, "Wait for the integration to be running or built (if --dont-run-after-build is enabled)")
 	cmd.Flags().StringP("kit", "k", "", "The kit used to run the integration")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a runtime property or a local properties file from a path "+
 		"(syntax: [my-key=my-value|file:/path/to/my-conf.properties])")
@@ -127,9 +127,9 @@ type runCmdOptions struct {
 	*RootCmdOptions `json:"-"`
 
 	// Deprecated: won't be supported in the future
-	Compression bool `mapstructure:"compression" yaml:",omitempty"`
-	Wait        bool `mapstructure:"wait"        yaml:",omitempty"`
-	Logs        bool `mapstructure:"logs"        yaml:",omitempty"`
+	Compression  bool `mapstructure:"compression" yaml:",omitempty"`
+	Wait         bool `mapstructure:"wait"        yaml:",omitempty"`
+	Logs         bool `mapstructure:"logs"        yaml:",omitempty"`
 	// Deprecated: won't be supported in the future
 	Sync bool `mapstructure:"sync" yaml:",omitempty"`
 	// Deprecated: won't be supported in the future
@@ -383,15 +383,20 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 		})
 	}
 	if o.Wait || o.Dev {
+		phase := v1.IntegrationPhaseRunning
+		if o.DontRunAfterBuild {
+			phase = v1.IntegrationPhaseBuildComplete
+		}
+		
 		for {
-			integrationPhase, err := o.waitForIntegrationReady(cmd, c, integration)
-			if err != nil {
-				return err
+			integrationPhase, waitErr := o.waitForIntegrationPhase(cmd, c, integration, phase)
+			if waitErr != nil {
+				return waitErr
 			}
 
 			if integrationPhase == nil || *integrationPhase == v1.IntegrationPhaseError {
 				return fmt.Errorf("integration \"%s\" deployment failed", integration.Name)
-			} else if *integrationPhase == v1.IntegrationPhaseRunning {
+			} else if *integrationPhase == phase {
 				break
 			}
 
@@ -444,7 +449,7 @@ func (o *runCmdOptions) postRun(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *runCmdOptions) waitForIntegrationReady(cmd *cobra.Command, c client.Client, integration *v1.Integration) (*v1.IntegrationPhase, error) {
+func (o *runCmdOptions) waitForIntegrationPhase(cmd *cobra.Command, c client.Client, integration *v1.Integration, wanted v1.IntegrationPhase) (*v1.IntegrationPhase, error) {
 	handler := func(i *v1.Integration) bool {
 		//
 		// TODO when we add health checks, we should Wait until they are passed
@@ -453,7 +458,7 @@ func (o *runCmdOptions) waitForIntegrationReady(cmd *cobra.Command, c client.Cli
 			// TODO remove this log when we make sure that events are always created
 			fmt.Fprintf(cmd.OutOrStdout(), "Progress: integration %q in phase %s\n", integration.Name, string(i.Status.Phase))
 		}
-		if i.Status.Phase == v1.IntegrationPhaseRunning || i.Status.Phase == v1.IntegrationPhaseError {
+		if i.Status.Phase == wanted || i.Status.Phase == v1.IntegrationPhaseError {
 			return false
 		}
 
