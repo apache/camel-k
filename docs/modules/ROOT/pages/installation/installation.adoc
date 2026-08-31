@@ -72,6 +72,168 @@ It's important to notice that when running the single or multiple namespace oper
 
 NOTE: RBAC custom configuration may vary depending on the installation methodology.
 
+[[multi-namespace-kustomize]]
+== Install a multi namespace operator with Kustomize
+
+The repository includes a complete Kustomize example for an operator installed in one namespace and watching two tenant namespaces. The `multi-namespace` overlay installs the operator in `operators`, configures `WATCH_NAMESPACE` to `tenant-a,tenant-b`, and grants the operator's ServiceAccount the required namespaced permissions in both tenant namespaces. The operator also watches its own `operators` namespace for the resources it manages there.
+
+The overlay does not create namespaces. Create the operator and tenant namespaces before applying it:
+
+[source,shell script]
+----
+$ kubectl create namespace operators
+$ kubectl create namespace tenant-a
+$ kubectl create namespace tenant-b
+----
+
+Apply the overlay for the Camel K version you want to install:
+
+[subs=attributes+]
+----
+$ kubectl apply -k github.com/apache/camel-k/install/overlays/multi-namespace?ref=v{last-released-version} --server-side
+----
+
+The example creates the `camel-k-operator-tenant-ab` ServiceAccount in `operators`. Each tenant RoleBinding points to that ServiceAccount across namespaces, so the binding must be installed in every namespace listed in `WATCH_NAMESPACE`. Granting the operator access to only one tenant namespace will leave it unable to reconcile resources in the other namespaces.
+
+Verify the deployment, watched namespaces, and cross-namespace RoleBinding:
+
+[source,shell script]
+----
+$ kubectl -n operators get deployment camel-k-operator-tenant-ab
+$ kubectl -n operators get deployment camel-k-operator-tenant-ab \
+    -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="WATCH_NAMESPACE")].value}{"\n"}'
+tenant-a,tenant-b
+$ kubectl -n tenant-a get rolebinding camel-k-operator-tenant-a \
+    -o jsonpath='{.subjects[0].namespace}/{.subjects[0].name}{"\n"}'
+operators/camel-k-operator-tenant-ab
+----
+
+The overlay is a two-tenant example. To use different namespaces, copy the `tenant-a-ns-rbac` and `tenant-b-ns-rbac` overlay directories, change each `namespace` and `nameSuffix`, update the `WATCH_NAMESPACE` value in `operator/patch-envvars.yaml`, and add the new directories to the top-level `kustomization.yaml`. Keep the RoleBinding subject namespace set to `operators` (or change it together with the operator namespace) and keep its ServiceAccount name aligned with the operator Deployment.
+
+[[multi-namespace-olm]]
+== Install a multi namespace operator with OLM
+
+The Camel K ClusterServiceVersion supports the OLM `MultiNamespace` install mode. In this mode, the `OperatorGroup` selects the tenant namespaces and OLM creates the required namespaced RBAC for the operator ServiceAccount. The operator namespace is the namespace where the `Subscription`, `OperatorGroup`, and operator Deployment are installed.
+
+Create the operator and tenant namespaces first:
+
+[source,shell script]
+----
+$ kubectl create namespace operators
+$ kubectl create namespace tenant-a
+$ kubectl create namespace tenant-b
+----
+
+Create an `OperatorGroup` in the operator namespace. An OLM namespace can have only one `OperatorGroup`; edit the existing group instead of creating a second one when necessary:
+
+[source,yaml]
+----
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: camel-k-multi
+  namespace: operators
+spec:
+  targetNamespaces:
+  - tenant-a
+  - tenant-b
+----
+
+Apply the group, then create the Camel K subscription from OperatorHub:
+
+[source,shell script]
+----
+$ kubectl apply -f operatorgroup.yaml
+$ curl -fsSL https://operatorhub.io/install/camel-k.yaml | kubectl apply -f -
+----
+
+The OperatorHub manifest creates a `Subscription` in `operators` using the `stable-v2` channel and the `operatorhubio-catalog` CatalogSource. If your cluster uses another catalog, keep the same `MultiNamespace` OperatorGroup and change the Subscription's `source` and `sourceNamespace` to match that catalog.
+
+Wait for the CSV to succeed and verify the selected namespaces:
+
+[source,shell script]
+----
+$ kubectl -n operators get csv
+$ kubectl -n operators get operatorgroup camel-k-multi \
+    -o jsonpath='{.spec.targetNamespaces[*]}{"\n"}'
+tenant-a tenant-b
+----
+
+The operator should now reconcile Integrations in both `tenant-a` and `tenant-b`, while an Integration in an unlisted namespace remains outside this OperatorGroup's scope.
+
+[[multi-namespace-helm]]
+== Install a multi namespace operator with Helm
+
+The Helm chart currently exposes two watch modes: the release namespace (`operator.global=false`) and all namespaces (`operator.global=true`). It does not accept a static comma-separated namespace list. To run a Helm-installed operator for selected namespaces, install the chart in the operator namespace and apply a small RBAC overlay for every tenant namespace.
+
+Install the chart using `camel-k` as the release name so the resource names below match the commands:
+
+[source,shell script]
+----
+$ helm repo add camel-k https://apache.github.io/camel-k/charts/
+$ helm repo update
+$ kubectl create namespace operators
+$ kubectl create namespace tenant-a
+$ kubectl create namespace tenant-b
+$ helm install camel-k camel-k/camel-k -n operators \
+    --set operator.global=false \
+    --set operator.env[0].name=REGISTRY_ADDRESS \
+    --set operator.env[0].value=<my-registry-address>
+----
+
+Set the watched namespaces on the chart-created Deployment:
+
+[source,shell script]
+----
+$ kubectl -n operators set env deployment/camel-k-operator \
+    WATCH_NAMESPACE=tenant-a,tenant-b
+----
+
+The chart's namespaced RBAC is scoped to `operators`. Create one small Kustomize overlay per tenant. You can use `install/overlays/multi-namespace/tenant-a-ns-rbac/` and `tenant-b-ns-rbac/` as templates, or use this equivalent overlay (replace `<tenant-namespace>` for each tenant):
+
+[source,yaml]
+----
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: <tenant-namespace>
+resources:
+- github.com/apache/camel-k//pkg/resources/config/rbac/namespaced?ref=v{last-released-version}
+patches:
+- target:
+    kind: RoleBinding
+  patch: |-
+    - op: add
+      path: /subjects/0/namespace
+      value: operators
+    - op: replace
+      path: /subjects/0/name
+      value: camel-k-operator
+----
+
+The patch points every namespaced RoleBinding at `operators/camel-k-operator`, the ServiceAccount created by this Helm release. Save the overlay once for `tenant-a` and once for `tenant-b`, changing only `namespace` and the output directory.
+
+Apply each tenant overlay after the Helm release:
+
+[source,shell script]
+----
+$ kubectl apply -k ./camel-k-multi-namespace/tenant-a-ns-rbac --server-side
+$ kubectl apply -k ./camel-k-multi-namespace/tenant-b-ns-rbac --server-side
+----
+
+Verify the Deployment setting and the cross-namespace permission before creating an Integration:
+
+[source,shell script]
+----
+$ kubectl -n operators get deployment camel-k-operator \
+    -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="WATCH_NAMESPACE")].value}{"\n"}'
+tenant-a,tenant-b
+$ kubectl auth can-i --as=system:serviceaccount:operators:camel-k-operator \
+    -n tenant-a get integrations.camel.apache.org
+yes
+----
+
+Repeat the Deployment patch and re-apply the tenant overlays after a Helm upgrade, or maintain them as a Helm post-renderer. This keeps the chart release and the manually managed tenant RBAC in sync.
+
 [[bootstrap-configuration]]
 == Setup the operator configuration
 
