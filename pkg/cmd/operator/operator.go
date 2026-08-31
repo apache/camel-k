@@ -50,6 +50,7 @@ import (
 	zapctrl "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
+	"sigs.k8s.io/controller-runtime/pkg/metrics/filters"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
@@ -83,7 +84,7 @@ func printVersion() {
 }
 
 // Run starts the Camel K operator.
-func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID string) {
+func Run(healthPort, monitoringPort int32, metricsSecure, metricsAuth bool, metricsCertDir string, leaderElection bool, leaderElectionID string) {
 	flag.Parse()
 
 	// The logger instantiated here can be changed to any logger
@@ -217,7 +218,7 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 		LeaderElectionResourceLock:    resourcelock.LeasesResourceLock,
 		LeaderElectionReleaseOnCancel: true,
 		HealthProbeBindAddress:        ":" + strconv.Itoa(int(healthPort)),
-		Metrics:                       metricsserver.Options{BindAddress: ":" + strconv.Itoa(int(monitoringPort))},
+		Metrics:                       newMetricsServerOptions(monitoringPort, metricsSecure, metricsAuth, metricsCertDir),
 		Cache:                         options,
 	})
 	exitOnError(err, "")
@@ -244,6 +245,18 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	}
 	log.Info("Starting the manager")
 	exitOnError(mgr.Start(ctx), "manager exited non-zero")
+}
+
+func newMetricsServerOptions(monitoringPort int32, secureServing, authEnabled bool, certDir string) metricsserver.Options {
+	options := metricsserver.Options{
+		BindAddress:   ":" + strconv.Itoa(int(monitoringPort)),
+		SecureServing: secureServing,
+		CertDir:       certDir,
+	}
+	if authEnabled {
+		options.FilterProvider = filters.WithAuthenticationAndAuthorization
+	}
+	return options
 }
 
 func getNamespacesSelector(operatorNamespace string, watchNamespace string) map[string]cache.Config {

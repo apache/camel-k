@@ -25,6 +25,7 @@ resources:
 - builder-role.yaml
 - builder-role-openshift.yaml
 - kamelets-viewer-role.yaml
+- metrics-reader-role.yaml
 - builder-role-binding.yaml
 - builder-role-binding-openshift.yaml
 - kamelets-viewer-role-binding.yaml

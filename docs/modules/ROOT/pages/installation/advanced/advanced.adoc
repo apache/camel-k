@@ -25,7 +25,9 @@ Camel K Operator provides certain parameters that would let you enable monitorin
 
 There is a default liveness service that is available at the operator Pod _/healtz_ endpoint on port _8081_. You can change the port parameter if you need to expose under a different port making sure to start the operator with the _--health-port_ to the same value. You also need to change the Deployment template spec to reflect the change on the operator container liveness check.
 
-There is a default metrics service as well available at the operator Pod _/metrics_ endpoint on port _8080_. The port can be also changed. In this case you only need to change the Deployment container operator, changing the _--monitoring-port_ value to the port you want the operator to expose.
+There is a default metrics service as well available at the operator Pod _/metrics_ endpoint on port _8080_. The endpoint uses HTTPS by default. The port can be also changed. In this case you only need to change the Deployment container operator, changing the _--monitoring-port_ value to the port you want the operator to expose.
+
+You can restore the previous HTTP behavior by setting `KAMEL_OPERATOR_METRICS_SECURE=false`. Kubernetes authentication and authorization can be enabled with `KAMEL_OPERATOR_METRICS_AUTH=true`; this requires HTTPS. To use a mounted certificate instead of the generated self-signed certificate, set `KAMEL_OPERATOR_METRICS_CERT_DIR` to a directory containing `tls.crt` and `tls.key`.
 
 The service exposed on the _/metrics_ endpoint is compatible with Prometheus. You can learn more about xref:observability/monitoring/operator.adoc[how to monitor Camel K Operator].
 
@@ -64,6 +66,18 @@ The following environment variables can be configured on the operator Deployment
 |`CAMEL_K_SYNTHETIC_INTEGRATIONS`
 |`false`
 |When set to `true`, enables synthetic Integration support for managing external workloads.
+
+|`KAMEL_OPERATOR_METRICS_SECURE`
+|`true`
+|When set to `true`, serves the operator metrics endpoint over HTTPS.
+
+|`KAMEL_OPERATOR_METRICS_AUTH`
+|`false`
+|When set to `true`, requires Kubernetes authentication and authorization for the operator metrics endpoint. Requires secure metrics serving.
+
+|`KAMEL_OPERATOR_METRICS_CERT_DIR`
+|_empty_
+|Directory containing `tls.crt` and `tls.key` for the metrics endpoint. A self-signed certificate is generated when empty.
 
 |`CAMEL_MONITOR_OPERATOR_LABEL`
 |`camel.apache.org/monitor`

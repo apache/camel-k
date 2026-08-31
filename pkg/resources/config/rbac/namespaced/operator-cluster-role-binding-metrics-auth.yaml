@@ -15,21 +15,16 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: monitoring.coreos.com/v1
-kind: PodMonitor
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
 metadata:
-  name: camel-k-operator
+  name: camel-k-operator-metrics-auth
   labels:
     app: "camel-k"
-    camel.apache.org/component: operator
-spec:
-  selector:
-    matchLabels:
-      app: "camel-k"
-      camel.apache.org/component: operator
-  podMetricsEndpoints:
-    - port: metrics
-      scheme: https
-      tlsConfig:
-        # The operator generates a self-signed certificate when no certificate is configured.
-        insecureSkipVerify: true
+subjects:
+- kind: ServiceAccount
+  name: camel-k-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: camel-k-operator-metrics-auth

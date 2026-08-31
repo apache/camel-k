@@ -18,6 +18,8 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
+
 	"github.com/apache/camel-k/v2/pkg/cmd/operator"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
@@ -32,18 +34,27 @@ const (
 
 func newCmdOperator(rootCmdOptions *RootCmdOptions) (*cobra.Command, *operatorCmdOptions) {
 	options := operatorCmdOptions{}
+	decodeOptions := decode(&options, rootCmdOptions.Flags)
 
 	cmd := cobra.Command{
-		Use:     "operator",
-		Short:   "Run the Camel K operator",
-		Long:    `Run the Camel K operator`,
-		Hidden:  true,
-		PreRunE: decode(&options, rootCmdOptions.Flags),
-		Run:     options.run,
+		Use:    "operator",
+		Short:  "Run the Camel K operator",
+		Long:   `Run the Camel K operator`,
+		Hidden: true,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if err := decodeOptions(cmd, args); err != nil {
+				return err
+			}
+			return options.validate()
+		},
+		Run: options.run,
 	}
 
 	cmd.Flags().Int32("health-port", defaultHealthPort, "The port of the health endpoint")
 	cmd.Flags().Int32("monitoring-port", defaultMonitoringPort, "The port of the metrics endpoint")
+	cmd.Flags().Bool("metrics-secure", true, "Serve the metrics endpoint over HTTPS")
+	cmd.Flags().Bool("metrics-auth", false, "Require Kubernetes authentication and authorization for the metrics endpoint")
+	cmd.Flags().String("metrics-cert-dir", "", "The directory containing tls.crt and tls.key for the metrics endpoint")
 	cmd.Flags().Bool("leader-election", true, "Use leader election")
 	cmd.Flags().String("leader-election-id", "", "Use the given ID as the leader election Lease name")
 
@@ -53,8 +64,18 @@ func newCmdOperator(rootCmdOptions *RootCmdOptions) (*cobra.Command, *operatorCm
 type operatorCmdOptions struct {
 	HealthPort       int32  `mapstructure:"health-port"`
 	MonitoringPort   int32  `mapstructure:"monitoring-port"`
+	MetricsSecure    bool   `mapstructure:"metrics-secure"`
+	MetricsAuth      bool   `mapstructure:"metrics-auth"`
+	MetricsCertDir   string `mapstructure:"metrics-cert-dir"`
 	LeaderElection   bool   `mapstructure:"leader-election"`
 	LeaderElectionID string `mapstructure:"leader-election-id"`
+}
+
+func (o *operatorCmdOptions) validate() error {
+	if o.MetricsAuth && !o.MetricsSecure {
+		return errors.New("metrics authentication requires secure metrics serving")
+	}
+	return nil
 }
 
 func (o *operatorCmdOptions) run(_ *cobra.Command, _ []string) {
@@ -67,5 +88,5 @@ func (o *operatorCmdOptions) run(_ *cobra.Command, _ []string) {
 		}
 	}
 
-	operator.Run(o.HealthPort, o.MonitoringPort, o.LeaderElection, leaderElectionID)
+	operator.Run(o.HealthPort, o.MonitoringPort, o.MetricsSecure, o.MetricsAuth, o.MetricsCertDir, o.LeaderElection, leaderElectionID)
 }

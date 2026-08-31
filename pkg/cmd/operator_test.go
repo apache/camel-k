@@ -59,6 +59,9 @@ func TestOperatorNoFlag(t *testing.T) {
 	// Check default expected values
 	assert.Equal(t, int32(8081), operatorCmdOptions.HealthPort)
 	assert.Equal(t, int32(8080), operatorCmdOptions.MonitoringPort)
+	assert.True(t, operatorCmdOptions.MetricsSecure)
+	assert.False(t, operatorCmdOptions.MetricsAuth)
+	assert.Empty(t, operatorCmdOptions.MetricsCertDir)
 }
 
 func TestOperatorNonExistingFlag(t *testing.T) {
@@ -79,4 +82,39 @@ func TestOperatorMonitoringPortFlag(t *testing.T) {
 	_, err := ExecuteCommand(rootCmd, cmdOperator, "--monitoring-port", "7172")
 	require.NoError(t, err)
 	assert.Equal(t, int32(7172), operatorCmdOptions.MonitoringPort)
+}
+
+func TestOperatorMetricsFlags(t *testing.T) {
+	operatorCmdOptions, rootCmd, _ := initializeOperatorCmdOptions(t)
+	_, err := ExecuteCommand(rootCmd, cmdOperator, "--metrics-secure=true", "--metrics-auth=true", "--metrics-cert-dir", "/etc/camel-k/metrics-certs")
+	require.NoError(t, err)
+	assert.True(t, operatorCmdOptions.MetricsSecure)
+	assert.True(t, operatorCmdOptions.MetricsAuth)
+	assert.Equal(t, "/etc/camel-k/metrics-certs", operatorCmdOptions.MetricsCertDir)
+}
+
+func TestOperatorMetricsEnvironmentVariables(t *testing.T) {
+	t.Setenv("KAMEL_OPERATOR_METRICS_SECURE", "true")
+	t.Setenv("KAMEL_OPERATOR_METRICS_AUTH", "true")
+	t.Setenv("KAMEL_OPERATOR_METRICS_CERT_DIR", "/etc/camel-k/metrics-certs")
+	operatorCmdOptions, rootCmd, _ := initializeOperatorCmdOptions(t)
+	_, err := ExecuteCommand(rootCmd, cmdOperator)
+	require.NoError(t, err)
+	assert.True(t, operatorCmdOptions.MetricsSecure)
+	assert.True(t, operatorCmdOptions.MetricsAuth)
+	assert.Equal(t, "/etc/camel-k/metrics-certs", operatorCmdOptions.MetricsCertDir)
+}
+
+func TestOperatorMetricsSecureEnvironmentVariable(t *testing.T) {
+	t.Setenv("KAMEL_OPERATOR_METRICS_SECURE", "false")
+	operatorCmdOptions, rootCmd, _ := initializeOperatorCmdOptions(t)
+	_, err := ExecuteCommand(rootCmd, cmdOperator)
+	require.NoError(t, err)
+	assert.False(t, operatorCmdOptions.MetricsSecure)
+}
+
+func TestOperatorRejectsMetricsAuthOverHTTP(t *testing.T) {
+	_, rootCmd, _ := initializeOperatorCmdOptions(t)
+	_, err := ExecuteCommand(rootCmd, cmdOperator, "--metrics-secure=false", "--metrics-auth=true")
+	require.ErrorContains(t, err, "metrics authentication requires secure metrics serving")
 }

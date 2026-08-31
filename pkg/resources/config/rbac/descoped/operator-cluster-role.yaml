@@ -224,3 +224,10 @@ rules:
   - subjectaccessreviews
   verbs:
   - create
+# Required by metrics authentication
+- apiGroups:
+  - authentication.k8s.io
+  resources:
+  - tokenreviews
+  verbs:
+  - create
