@@ -79,7 +79,7 @@ func TestMonitorSyntheticIntegrationImportingKindUnavailable(t *testing.T) {
 	handledIt, err := a.Handle(context.TODO(), importedIt)
 	require.Error(t, err)
 	assert.Equal(t, v1.IntegrationPhaseError, handledIt.Status.Phase)
-	assert.Equal(t, corev1.ConditionFalse, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
+	assert.Equal(t, metav1.ConditionFalse, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
 	assert.Equal(t, v1.IntegrationConditionImportingKindAvailableReason, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
 	assert.Equal(t, "cannot create a synthetic environment for SomeKind kind", handledIt.Status.GetCondition(v1.IntegrationConditionReady).Message)
 }
@@ -110,14 +110,14 @@ func TestMonitorSyntheticIntegrationCannotMonitorPods(t *testing.T) {
 		},
 		Status: v1.IntegrationStatus{
 			Phase: v1.IntegrationPhaseRunning,
-			Conditions: []v1.IntegrationCondition{
+			Conditions: []metav1.Condition{
 				{
-					Type:   v1.IntegrationConditionDeploymentAvailable,
-					Status: corev1.ConditionTrue,
+					Type:   string(v1.IntegrationConditionDeploymentAvailable),
+					Status: metav1.ConditionTrue,
 				},
 				{
-					Type:   v1.IntegrationConditionReady,
-					Status: corev1.ConditionTrue,
+					Type:   string(v1.IntegrationConditionReady),
+					Status: metav1.ConditionTrue,
 				},
 			},
 		},
@@ -145,7 +145,7 @@ func TestMonitorSyntheticIntegrationCannotMonitorPods(t *testing.T) {
 	assert.True(t, a.CanHandle(importedIt))
 	handledIt, err := a.Handle(context.TODO(), importedIt)
 	require.NoError(t, err)
-	assert.Equal(t, corev1.ConditionFalse, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
+	assert.Equal(t, metav1.ConditionFalse, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
 	// Check monitoring pods condition
 	assert.Equal(t, v1.IntegrationConditionMonitoringPodsAvailableReason, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
 	assert.Equal(t, "Could not find `camel.apache.org/integration: my-imported-it` label in the Deployment/my-deploy template. Make sure to include this label in the template for Pod monitoring purposes.", handledIt.Status.GetCondition(v1.IntegrationConditionReady).Message)
@@ -180,14 +180,14 @@ func TestMonitorSyntheticIntegrationDeployment(t *testing.T) {
 		},
 		Status: v1.IntegrationStatus{
 			Phase: v1.IntegrationPhaseRunning,
-			Conditions: []v1.IntegrationCondition{
+			Conditions: []metav1.Condition{
 				{
-					Type:   v1.IntegrationConditionDeploymentAvailable,
-					Status: corev1.ConditionTrue,
+					Type:   string(v1.IntegrationConditionDeploymentAvailable),
+					Status: metav1.ConditionTrue,
 				},
 				{
-					Type:   v1.IntegrationConditionReady,
-					Status: corev1.ConditionTrue,
+					Type:   string(v1.IntegrationConditionReady),
+					Status: metav1.ConditionTrue,
 				},
 			},
 		},
@@ -265,7 +265,7 @@ func TestMonitorSyntheticIntegrationDeployment(t *testing.T) {
 	assert.Equal(t, v1.IntegrationPhaseRunning, handledIt.Status.Phase)
 	assert.Equal(t, int32(1), *handledIt.Status.Replicas)
 	// Ready condition
-	assert.Equal(t, corev1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
+	assert.Equal(t, metav1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
 	assert.Equal(t, v1.IntegrationConditionDeploymentReadyReason, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
 	assert.Equal(t, "1/1 ready replicas", handledIt.Status.GetCondition(v1.IntegrationConditionReady).Message)
 
@@ -305,14 +305,14 @@ func TestMonitorSyntheticIntegrationCronJob(t *testing.T) {
 		},
 		Status: v1.IntegrationStatus{
 			Phase: v1.IntegrationPhaseRunning,
-			Conditions: []v1.IntegrationCondition{
+			Conditions: []metav1.Condition{
 				{
-					Type:   v1.IntegrationConditionCronJobAvailable,
-					Status: corev1.ConditionTrue,
+					Type:   string(v1.IntegrationConditionCronJobAvailable),
+					Status: metav1.ConditionTrue,
 				},
 				{
-					Type:   v1.IntegrationConditionReady,
-					Status: corev1.ConditionTrue,
+					Type:   string(v1.IntegrationConditionReady),
+					Status: metav1.ConditionTrue,
 				},
 			},
 		},
@@ -394,7 +394,7 @@ func TestMonitorSyntheticIntegrationCronJob(t *testing.T) {
 	assert.Equal(t, v1.IntegrationPhaseRunning, handledIt.Status.Phase)
 	assert.Equal(t, int32(1), *handledIt.Status.Replicas)
 	// Ready condition
-	assert.Equal(t, corev1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
+	assert.Equal(t, metav1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
 	assert.Equal(t, v1.IntegrationConditionCronJobCreatedReason, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
 	assert.Equal(t, "cronjob created", handledIt.Status.GetCondition(v1.IntegrationConditionReady).Message)
 }
@@ -425,14 +425,14 @@ func TestMonitorSyntheticIntegrationKnativeService(t *testing.T) {
 		},
 		Status: v1.IntegrationStatus{
 			Phase: v1.IntegrationPhaseRunning,
-			Conditions: []v1.IntegrationCondition{
+			Conditions: []metav1.Condition{
 				{
-					Type:   v1.IntegrationConditionKnativeServiceAvailable,
-					Status: corev1.ConditionTrue,
+					Type:   string(v1.IntegrationConditionKnativeServiceAvailable),
+					Status: metav1.ConditionTrue,
 				},
 				{
-					Type:   v1.IntegrationConditionReady,
-					Status: corev1.ConditionTrue,
+					Type:   string(v1.IntegrationConditionReady),
+					Status: metav1.ConditionTrue,
 				},
 			},
 		},
@@ -524,6 +524,6 @@ func TestMonitorSyntheticIntegrationKnativeService(t *testing.T) {
 	assert.Equal(t, v1.IntegrationPhaseRunning, handledIt.Status.Phase)
 	assert.Equal(t, int32(1), *handledIt.Status.Replicas)
 	// Ready condition
-	assert.Equal(t, corev1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
+	assert.Equal(t, metav1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
 	assert.Equal(t, v1.IntegrationConditionKnativeServiceReadyReason, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
 }

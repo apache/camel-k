@@ -76,7 +76,7 @@ func (action *scheduleAction) Handle(ctx context.Context, build *v1.Build) (*v1.
 	return nil, action.toUpdatedStatus(ctx, build, schedulingCondition, v1.BuildPhasePending)
 }
 
-func (action *scheduleAction) toUpdatedCondition(ctx context.Context, build *v1.Build, condition *v1.BuildCondition) error {
+func (action *scheduleAction) toUpdatedCondition(ctx context.Context, build *v1.Build, condition *metav1.Condition) error {
 	return action.patchBuildStatus(ctx, build, func(b *v1.Build) {
 		b.Status = v1.BuildStatus{
 			Phase:      b.Status.Phase,
@@ -88,7 +88,7 @@ func (action *scheduleAction) toUpdatedCondition(ctx context.Context, build *v1.
 	})
 }
 
-func (action *scheduleAction) toUpdatedStatus(ctx context.Context, build *v1.Build, condition *v1.BuildCondition, phase v1.BuildPhase) error {
+func (action *scheduleAction) toUpdatedStatus(ctx context.Context, build *v1.Build, condition *metav1.Condition, phase v1.BuildPhase) error {
 	err := action.patchBuildStatus(ctx, build, func(b *v1.Build) {
 		now := metav1.Now()
 		b.Status = v1.BuildStatus{

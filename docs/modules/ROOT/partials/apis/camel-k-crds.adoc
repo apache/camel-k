@@ -505,71 +505,8 @@ BeanProperties represent an unstructured object properties to be set on a bean.
 
 |===
 
-[#_camel_apache_org_v1_BuildCondition]
-=== BuildCondition
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_BuildStatus, BuildStatus>>
-
-BuildCondition describes the state of a resource at a certain point.
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`type` +
-*xref:#_camel_apache_org_v1_BuildConditionType[BuildConditionType]*
-|
-
-
-Type of integration condition.
-
-|`status` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
-|
-
-
-Status of the condition, one of True, False, Unknown.
-
-|`lastUpdateTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#time-v1-meta[Kubernetes meta/v1.Time]*
-|
-
-
-The last time this condition was updated.
-
-|`lastTransitionTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#time-v1-meta[Kubernetes meta/v1.Time]*
-|
-
-
-Last time the condition transitioned from one status to another.
-
-|`reason` +
-string
-|
-
-
-The reason for the condition's last transition.
-
-|`message` +
-string
-|
-
-
-A human-readable message indicating details about the transition.
-
-
-|===
-
 [#_camel_apache_org_v1_BuildConditionType]
 === BuildConditionType(`string` alias)
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_BuildCondition, BuildCondition>>
 
 BuildConditionType -- .
 
@@ -849,7 +786,7 @@ the reason of the failure (if any)
 the time when it started
 
 |`conditions` +
-*xref:#_camel_apache_org_v1_BuildCondition[[\]BuildCondition]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#condition-v1-meta[[\]Kubernetes meta/v1.Condition]*
 |
 
 
@@ -1135,71 +1072,8 @@ Maven Artifact
 
 |===
 
-[#_camel_apache_org_v1_CamelCatalogCondition]
-=== CamelCatalogCondition
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_CamelCatalogStatus, CamelCatalogStatus>>
-
-CamelCatalogCondition describes the state of a resource at a certain point.
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`type` +
-*xref:#_camel_apache_org_v1_CamelCatalogConditionType[CamelCatalogConditionType]*
-|
-
-
-Type of CamelCatalog condition.
-
-|`status` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
-|
-
-
-Status of the condition, one of True, False, Unknown.
-
-|`lastUpdateTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#time-v1-meta[Kubernetes meta/v1.Time]*
-|
-
-
-The last time this condition was updated.
-
-|`lastTransitionTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#time-v1-meta[Kubernetes meta/v1.Time]*
-|
-
-
-Last time the condition transitioned from one status to another.
-
-|`reason` +
-string
-|
-
-
-The reason for the condition's last transition.
-
-|`message` +
-string
-|
-
-
-A human-readable message indicating details about the transition.
-
-
-|===
-
 [#_camel_apache_org_v1_CamelCatalogConditionType]
 === CamelCatalogConditionType(`string` alias)
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_CamelCatalogCondition, CamelCatalogCondition>>
 
 CamelCatalogConditionType --.
 
@@ -1281,7 +1155,7 @@ ObservedGeneration is the most recent generation observed for this Catalog.
 the actual phase
 
 |`conditions` +
-*xref:#_camel_apache_org_v1_CamelCatalogCondition[[\]CamelCatalogCondition]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#condition-v1-meta[[\]Kubernetes meta/v1.Condition]*
 |
 
 
@@ -2541,156 +2415,14 @@ string
 
 
 
-[#_camel_apache_org_v1_IntegrationCondition]
-=== IntegrationCondition
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
-
-IntegrationCondition describes the state of a resource at a certain point.
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`type` +
-*xref:#_camel_apache_org_v1_IntegrationConditionType[IntegrationConditionType]*
-|
-
-
-Type of integration condition.
-
-|`status` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
-|
-
-
-Status of the condition, one of True, False, Unknown.
-
-|`lastUpdateTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#time-v1-meta[Kubernetes meta/v1.Time]*
-|
-
-
-The last time this condition was updated.
-
-|`lastTransitionTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#time-v1-meta[Kubernetes meta/v1.Time]*
-|
-
-
-Last time the condition transitioned from one status to another.
-
-|`firstTruthyTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#time-v1-meta[Kubernetes meta/v1.Time]*
-|
-
-
-First time the condition status transitioned to True.
-
-|`reason` +
-string
-|
-
-
-The reason for the condition's last transition.
-
-|`message` +
-string
-|
-
-
-A human-readable message indicating details about the transition.
-
-|`pods` +
-*xref:#_camel_apache_org_v1_PodCondition[[\]PodCondition]*
-|
-
-
-DeprecatedPods collect health and conditions information from the owned PODs
-
-Deprecated: may be removed in future releases.
-
-
-|===
-
 [#_camel_apache_org_v1_IntegrationConditionType]
 === IntegrationConditionType(`string` alias)
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_IntegrationCondition, IntegrationCondition>>
 
 IntegrationConditionType --.
 
 
-[#_camel_apache_org_v1_IntegrationKitCondition]
-=== IntegrationKitCondition
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_IntegrationKitStatus, IntegrationKitStatus>>
-
-IntegrationKitCondition describes the state of a resource at a certain point.
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`type` +
-*xref:#_camel_apache_org_v1_IntegrationKitConditionType[IntegrationKitConditionType]*
-|
-
-
-Type of integration condition.
-
-|`status` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
-|
-
-
-Status of the condition, one of True, False, Unknown.
-
-|`lastUpdateTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#time-v1-meta[Kubernetes meta/v1.Time]*
-|
-
-
-The last time this condition was updated.
-
-|`lastTransitionTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#time-v1-meta[Kubernetes meta/v1.Time]*
-|
-
-
-Last time the condition transitioned from one status to another.
-
-|`reason` +
-string
-|
-
-
-The reason for the condition's last transition.
-
-|`message` +
-string
-|
-
-
-A human-readable message indicating details about the transition.
-
-
-|===
-
 [#_camel_apache_org_v1_IntegrationKitConditionType]
 === IntegrationKitConditionType(`string` alias)
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_IntegrationKitCondition, IntegrationKitCondition>>
 
 IntegrationKitConditionType --.
 
@@ -2892,7 +2624,7 @@ string
 the Camel K operator version for which this kit was configured
 
 |`conditions` +
-*xref:#_camel_apache_org_v1_IntegrationKitCondition[[\]IntegrationKitCondition]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#condition-v1-meta[[\]Kubernetes meta/v1.Condition]*
 |
 
 
@@ -3096,71 +2828,8 @@ IntegrationPlatformCluster is the kind of orchestration cluster the platform is 
 Deprecated: no longer in use.
 
 
-[#_camel_apache_org_v1_IntegrationPlatformCondition]
-=== IntegrationPlatformCondition
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_IntegrationPlatformStatus, IntegrationPlatformStatus>>
-
-IntegrationPlatformCondition describes the state of a resource at a certain point.
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`type` +
-*xref:#_camel_apache_org_v1_IntegrationPlatformConditionType[IntegrationPlatformConditionType]*
-|
-
-
-Type of integration condition.
-
-|`status` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
-|
-
-
-Status of the condition, one of True, False, Unknown.
-
-|`lastUpdateTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#time-v1-meta[Kubernetes meta/v1.Time]*
-|
-
-
-The last time this condition was updated.
-
-|`lastTransitionTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#time-v1-meta[Kubernetes meta/v1.Time]*
-|
-
-
-Last time the condition transitioned from one status to another.
-
-|`reason` +
-string
-|
-
-
-The reason for the condition's last transition.
-
-|`message` +
-string
-|
-
-
-A human-readable message indicating details about the transition.
-
-
-|===
-
 [#_camel_apache_org_v1_IntegrationPlatformConditionType]
 === IntegrationPlatformConditionType(`string` alias)
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_IntegrationPlatformCondition, IntegrationPlatformCondition>>
 
 IntegrationPlatformConditionType defines the type of condition.
 
@@ -3306,7 +2975,7 @@ ObservedGeneration is the most recent generation observed for this IntegrationPl
 defines in what phase the IntegrationPlatform is found
 
 |`conditions` +
-*xref:#_camel_apache_org_v1_IntegrationPlatformCondition[[\]IntegrationPlatformCondition]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#condition-v1-meta[[\]Kubernetes meta/v1.Condition]*
 |
 
 
@@ -3750,7 +3419,7 @@ a list of configuration specification.
 Deprecated: use properties instead.
 
 |`conditions` +
-*xref:#_camel_apache_org_v1_IntegrationCondition[[\]IntegrationCondition]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#condition-v1-meta[[\]Kubernetes meta/v1.Condition]*
 |
 
 
@@ -3804,6 +3473,28 @@ the timestamp representing the last time when this integration was deployed.
 
 
 the timestamp representing the last time when this integration was built.
+
+|`firstReadyTimestamp` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+the timestamp representing the first time the Ready condition became true.
+
+This used to be tracked per-condition (FirstTruthyTime on the Ready condition);
+it now lives on the status directly since Conditions was migrated to the
+standard metav1.Condition type, which has no room for extra fields.
+
+|`pods` +
+*xref:#_camel_apache_org_v1_PodCondition[[\]PodCondition]*
+|
+
+
+DeprecatedPods collect health and conditions information from the owned PODs
+
+Deprecated: may be removed in future releases. This used to live on the Ready
+IntegrationCondition; it moved to the status directly when Conditions was
+migrated to the standard metav1.Condition type.
 
 
 |===
@@ -4167,71 +3858,8 @@ JibTask is used to configure Jib.
 
 |===
 
-[#_camel_apache_org_v1_KameletCondition]
-=== KameletCondition
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_KameletStatus, KameletStatus>>
-
-KameletCondition describes the state of a resource at a certain point.
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`type` +
-*xref:#_camel_apache_org_v1_KameletConditionType[KameletConditionType]*
-|
-
-
-Type of kamelet condition.
-
-|`status` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
-|
-
-
-Status of the condition, one of True, False, Unknown.
-
-|`lastUpdateTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#time-v1-meta[Kubernetes meta/v1.Time]*
-|
-
-
-The last time this condition was updated.
-
-|`lastTransitionTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#time-v1-meta[Kubernetes meta/v1.Time]*
-|
-
-
-Last time the condition transitioned from one status to another.
-
-|`reason` +
-string
-|
-
-
-The reason for the condition's last transition.
-
-|`message` +
-string
-|
-
-
-A human-readable message indicating details about the transition.
-
-
-|===
-
 [#_camel_apache_org_v1_KameletConditionType]
 === KameletConditionType(`string` alias)
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_KameletCondition, KameletCondition>>
 
 KameletConditionType --.
 
@@ -4424,7 +4052,7 @@ ObservedGeneration is the most recent generation observed for this Kamelet.
 Phase --
 
 |`conditions` +
-*xref:#_camel_apache_org_v1_KameletCondition[[\]KameletCondition]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#condition-v1-meta[[\]Kubernetes meta/v1.Condition]*
 |
 
 
@@ -4786,80 +4414,8 @@ string
 
 |===
 
-[#_camel_apache_org_v1_PipeCondition]
-=== PipeCondition
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_PipeStatus, PipeStatus>>
-
-PipeCondition describes the state of a resource at a certain point.
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`type` +
-*xref:#_camel_apache_org_v1_PipeConditionType[PipeConditionType]*
-|
-
-
-Type of pipe condition.
-
-|`status` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
-|
-
-
-Status of the condition, one of True, False, Unknown.
-
-|`lastUpdateTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#time-v1-meta[Kubernetes meta/v1.Time]*
-|
-
-
-The last time this condition was updated.
-
-|`lastTransitionTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#time-v1-meta[Kubernetes meta/v1.Time]*
-|
-
-
-Last time the condition transitioned from one status to another.
-
-|`reason` +
-string
-|
-
-
-The reason for the condition's last transition.
-
-|`message` +
-string
-|
-
-
-A human readable message indicating details about the transition.
-
-|`pods` +
-*xref:#_camel_apache_org_v1_PodCondition[[\]PodCondition]*
-|
-
-
-DeprecatedPods collect health and conditions information from the owned PODs
-
-Deprecated: may be removed in future releases.
-
-
-|===
-
 [#_camel_apache_org_v1_PipeConditionType]
 === PipeConditionType(`string` alias)
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_PipeCondition, PipeCondition>>
 
 PipeConditionType --.
 
@@ -4984,11 +4540,20 @@ ObservedGeneration is the most recent generation observed for this Pipe.
 Phase --
 
 |`conditions` +
-*xref:#_camel_apache_org_v1_PipeCondition[[\]PipeCondition]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.36/#condition-v1-meta[[\]Kubernetes meta/v1.Condition]*
 |
 
 
 Conditions --
+
+|`pods` +
+*xref:#_camel_apache_org_v1_PodCondition[[\]PodCondition]*
+|
+
+
+DeprecatedPods collect health and conditions information from the owned PODs
+
+Deprecated: may be removed in future releases.
 
 |`replicas` +
 int32
@@ -5145,8 +4710,8 @@ PluginProperties -- .
 
 *Appears on:*
 
-* <<#_camel_apache_org_v1_IntegrationCondition, IntegrationCondition>>
-* <<#_camel_apache_org_v1_PipeCondition, PipeCondition>>
+* <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
+* <<#_camel_apache_org_v1_PipeStatus, PipeStatus>>
 
 Deprecated: may be removed in future releases.
 

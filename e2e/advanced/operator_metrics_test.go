@@ -422,7 +422,7 @@ func TestMetrics(t *testing.T) {
 			}
 			g.Expect(ts1).NotTo(BeZero())
 			// The end time is reported into the ready condition first truthy time
-			ts2 = it.Status.GetCondition(v1.IntegrationConditionReady).FirstTruthyTime.Time
+			ts2 = it.Status.FirstReadyTimestamp.Time
 			g.Expect(ts2).NotTo(BeZero())
 
 			duration := ts2.Sub(ts1)

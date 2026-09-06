@@ -21,6 +21,7 @@ package v1
 
 import (
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	applyconfigurationsmetav1 "k8s.io/client-go/applyconfigurations/meta/v1"
 )
 
 // PipeStatusApplyConfiguration represents a declarative configuration of the PipeStatus type for use
@@ -33,11 +34,23 @@ type PipeStatusApplyConfiguration struct {
 	// Phase --
 	Phase *camelv1.PipePhase `json:"phase,omitempty"`
 	// Conditions --
-	Conditions []PipeConditionApplyConfiguration `json:"conditions,omitempty"`
+	Conditions     []applyconfigurationsmetav1.ConditionApplyConfiguration `json:"conditions,omitempty"`
+	DeprecatedPods []PodConditionApplyConfiguration                        `json:"pods,omitempty"`
 	// Replicas is the number of actual replicas of the pipe
 	Replicas *int32 `json:"replicas,omitempty"`
 	// Selector allows to identify pods belonging to the pipe
 	Selector *string `json:"selector,omitempty"`
+}
+
+// WithDeprecatedPods adds the given values to the DeprecatedPods field.
+func (b *PipeStatusApplyConfiguration) WithDeprecatedPods(values ...*PodConditionApplyConfiguration) *PipeStatusApplyConfiguration {
+	for i := range values {
+		if values[i] == nil {
+			panic("nil value passed to WithDeprecatedPods")
+		}
+		b.DeprecatedPods = append(b.DeprecatedPods, *values[i])
+	}
+	return b
 }
 
 // PipeStatusApplyConfiguration constructs a declarative configuration of the PipeStatus type for use with
@@ -65,7 +78,7 @@ func (b *PipeStatusApplyConfiguration) WithPhase(value camelv1.PipePhase) *PipeS
 // WithConditions adds the given value to the Conditions field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the Conditions field.
-func (b *PipeStatusApplyConfiguration) WithConditions(values ...*PipeConditionApplyConfiguration) *PipeStatusApplyConfiguration {
+func (b *PipeStatusApplyConfiguration) WithConditions(values ...*applyconfigurationsmetav1.ConditionApplyConfiguration) *PipeStatusApplyConfiguration {
 	for i := range values {
 		if values[i] == nil {
 			panic("nil value passed to WithConditions")

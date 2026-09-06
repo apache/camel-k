@@ -22,6 +22,7 @@ package v1
 import (
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	applyconfigurationsmetav1 "k8s.io/client-go/applyconfigurations/meta/v1"
 )
 
 // BuildStatusApplyConfiguration represents a declarative configuration of the BuildStatus type for use
@@ -50,7 +51,7 @@ type BuildStatusApplyConfiguration struct {
 	// the time when it started
 	StartedAt *metav1.Time `json:"startedAt,omitempty"`
 	// a list of conditions occurred during the build
-	Conditions []BuildConditionApplyConfiguration `json:"conditions,omitempty"`
+	Conditions []applyconfigurationsmetav1.ConditionApplyConfiguration `json:"conditions,omitempty"`
 	// how long it took for the build
 	// Change to Duration / ISO 8601 when CRD uses OpenAPI spec v3
 	// https://github.com/OAI/OpenAPI-Specification/issues/845
@@ -151,7 +152,7 @@ func (b *BuildStatusApplyConfiguration) WithStartedAt(value metav1.Time) *BuildS
 // WithConditions adds the given value to the Conditions field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the Conditions field.
-func (b *BuildStatusApplyConfiguration) WithConditions(values ...*BuildConditionApplyConfiguration) *BuildStatusApplyConfiguration {
+func (b *BuildStatusApplyConfiguration) WithConditions(values ...*applyconfigurationsmetav1.ConditionApplyConfiguration) *BuildStatusApplyConfiguration {
 	for i := range values {
 		if values[i] == nil {
 			panic("nil value passed to WithConditions")

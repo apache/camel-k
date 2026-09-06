@@ -90,7 +90,7 @@ func TestConfigureGatewayTraitDoesSucceed(t *testing.T) {
 
 	// Verify Integration condition as well
 	assert.NotNil(t, environment.Integration.Status.GetCondition(v1.IntegrationConditionExposureAvailable))
-	assert.Equal(t, corev1.ConditionTrue, environment.Integration.Status.GetCondition(v1.IntegrationConditionExposureAvailable).Status)
+	assert.Equal(t, metav1.ConditionTrue, environment.Integration.Status.GetCondition(v1.IntegrationConditionExposureAvailable).Status)
 	assert.Equal(t, "Service is exposed via a Gateway and HTTPRoute named integration-name",
 		environment.Integration.Status.GetCondition(v1.IntegrationConditionExposureAvailable).Message)
 }

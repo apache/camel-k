@@ -113,7 +113,7 @@ func TestMonitorIntegration(t *testing.T) {
 	assert.Equal(t, v1.IntegrationPhaseRunning, handledIt.Status.Phase)
 	assert.Equal(t, int32(1), *handledIt.Status.Replicas)
 	// Ready condition
-	assert.Equal(t, corev1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
+	assert.Equal(t, metav1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
 	assert.Equal(t, v1.IntegrationConditionDeploymentReadyReason, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
 }
 
@@ -134,7 +134,7 @@ func TestMonitorFailureIntegration(t *testing.T) {
 	require.Error(t, err)
 	assert.Equal(t, v1.IntegrationPhaseError, handledIt.Status.Phase)
 	// Ready condition
-	assert.Equal(t, corev1.ConditionFalse, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
+	assert.Equal(t, metav1.ConditionFalse, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
 	assert.Equal(t, v1.IntegrationConditionInitializationFailedReason, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
 }
 
@@ -186,14 +186,14 @@ func nominalEnvironment() (client.Client, *v1.Integration, error) {
 				Kind:       kit.Kind,
 				APIVersion: kit.APIVersion,
 			},
-			Conditions: []v1.IntegrationCondition{
+			Conditions: []metav1.Condition{
 				{
-					Type:   v1.IntegrationConditionDeploymentAvailable,
-					Status: corev1.ConditionTrue,
+					Type:   string(v1.IntegrationConditionDeploymentAvailable),
+					Status: metav1.ConditionTrue,
 				},
 				{
-					Type:   v1.IntegrationConditionReady,
-					Status: corev1.ConditionTrue,
+					Type:   string(v1.IntegrationConditionReady),
+					Status: metav1.ConditionTrue,
 				},
 			},
 		},

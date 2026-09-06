@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -105,38 +106,27 @@ func (in *IntegrationPlatform) ResyncStatusFullConfig() {
 }
 
 // GetCondition returns the condition with the provided type.
-func (in *IntegrationPlatformStatus) GetCondition(condType IntegrationPlatformConditionType) *IntegrationPlatformCondition {
-	for i := range in.Conditions {
-		c := in.Conditions[i]
-		if c.Type == condType {
-			return &c
-		}
-	}
-
-	return nil
+func (in *IntegrationPlatformStatus) GetCondition(condType IntegrationPlatformConditionType) *metav1.Condition {
+	return meta.FindStatusCondition(in.Conditions, string(condType))
 }
 
 // SetCondition sets the condition with the given status, reason, and message.
 func (in *IntegrationPlatformStatus) SetCondition(condType IntegrationPlatformConditionType, status corev1.ConditionStatus, reason string, message string) {
-	in.SetConditions(IntegrationPlatformCondition{
-		Type:               condType,
-		Status:             status,
-		LastUpdateTime:     metav1.Now(),
-		LastTransitionTime: metav1.Now(),
-		Reason:             reason,
-		Message:            message,
+	in.SetConditions(metav1.Condition{
+		Type:    string(condType),
+		Status:  metav1.ConditionStatus(status),
+		Reason:  reason,
+		Message: message,
 	})
 }
 
 // SetErrorCondition sets the condition with the given reason and error message.
 func (in *IntegrationPlatformStatus) SetErrorCondition(condType IntegrationPlatformConditionType, reason string, err error) {
-	in.SetConditions(IntegrationPlatformCondition{
-		Type:               condType,
-		Status:             corev1.ConditionFalse,
-		LastUpdateTime:     metav1.Now(),
-		LastTransitionTime: metav1.Now(),
-		Reason:             reason,
-		Message:            err.Error(),
+	in.SetConditions(metav1.Condition{
+		Type:    string(condType),
+		Status:  metav1.ConditionFalse,
+		Reason:  reason,
+		Message: err.Error(),
 	})
 }
 
@@ -144,40 +134,23 @@ func (in *IntegrationPlatformStatus) SetErrorCondition(condType IntegrationPlatf
 //
 // If a condition that we are about to add already exists and has the same status and
 // reason then we are not going to update.
-func (in *IntegrationPlatformStatus) SetConditions(conditions ...IntegrationPlatformCondition) {
+func (in *IntegrationPlatformStatus) SetConditions(conditions ...metav1.Condition) {
 	for _, condition := range conditions {
-		if condition.LastUpdateTime.IsZero() {
-			condition.LastUpdateTime = metav1.Now()
+		if condition.Reason == "" {
+			// Reason is a required field for metav1.Condition.
+			condition.Reason = string(condition.Status)
 		}
 		if condition.LastTransitionTime.IsZero() {
 			condition.LastTransitionTime = metav1.Now()
 		}
 
-		currentCond := in.GetCondition(condition.Type)
-
-		if currentCond != nil && currentCond.Status == condition.Status && currentCond.Reason == condition.Reason {
-			return
-		}
-		// Do not update lastTransitionTime if the status of the condition doesn't change.
-		if currentCond != nil && currentCond.Status == condition.Status {
-			condition.LastTransitionTime = currentCond.LastTransitionTime
-		}
-
-		in.RemoveCondition(condition.Type)
-		in.Conditions = append(in.Conditions, condition)
+		meta.SetStatusCondition(&in.Conditions, condition)
 	}
 }
 
 // RemoveCondition removes the resource condition with the provided type.
 func (in *IntegrationPlatformStatus) RemoveCondition(condType IntegrationPlatformConditionType) {
-	newConditions := in.Conditions[:0]
-	for _, c := range in.Conditions {
-		if c.Type != condType {
-			newConditions = append(newConditions, c)
-		}
-	}
-
-	in.Conditions = newConditions
+	meta.RemoveStatusCondition(&in.Conditions, string(condType))
 }
 
 // GetTimeout returns the specified duration or a default one.
@@ -189,47 +162,27 @@ func (b *IntegrationPlatformBuildSpec) GetTimeout() metav1.Duration {
 	return *b.Timeout
 }
 
-var _ ResourceCondition = &IntegrationPlatformCondition{}
-
 // GetConditions --.
 func (in *IntegrationPlatformStatus) GetConditions() []ResourceCondition {
 	res := make([]ResourceCondition, 0, len(in.Conditions))
-	for _, c := range in.Conditions {
-		res = append(res, &c)
+	for i := range in.Conditions {
+		res = append(res, (*conditionAdapter)(&in.Conditions[i]))
 	}
 
 	return res
 }
 
 // GetType --.
-func (c *IntegrationPlatformCondition) GetType() string {
-	return string(c.Type)
-}
 
 // GetStatus --.
-func (c *IntegrationPlatformCondition) GetStatus() corev1.ConditionStatus {
-	return c.Status
-}
 
 // GetLastUpdateTime --.
-func (c *IntegrationPlatformCondition) GetLastUpdateTime() metav1.Time {
-	return c.LastUpdateTime
-}
 
 // GetLastTransitionTime --.
-func (c *IntegrationPlatformCondition) GetLastTransitionTime() metav1.Time {
-	return c.LastTransitionTime
-}
 
 // GetReason --.
-func (c *IntegrationPlatformCondition) GetReason() string {
-	return c.Reason
-}
 
 // GetMessage --.
-func (c *IntegrationPlatformCondition) GetMessage() string {
-	return c.Message
-}
 
 // Validate checks the strategy is supported.
 func (b IntegrationPlatformBuildPublishStrategy) Validate() error {

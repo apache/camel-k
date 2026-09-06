@@ -503,7 +503,7 @@ func TestKameletConditionFalse(t *testing.T) {
 	assert.Len(t, environment.Integration.Status.Conditions, 1)
 
 	cond := environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable)
-	assert.Equal(t, corev1.ConditionUnknown, cond.Status)
+	assert.Equal(t, metav1.ConditionUnknown, cond.Status)
 	assert.Equal(t, v1.IntegrationConditionKameletsAvailableReason, cond.Reason)
 	assert.Contains(t, cond.Message, "Kamelets [none] not found")
 }
@@ -558,7 +558,7 @@ func TestKameletConditionTrue(t *testing.T) {
 	assert.Len(t, environment.Integration.Status.Conditions, 1)
 
 	cond := environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable)
-	assert.Equal(t, corev1.ConditionTrue, cond.Status)
+	assert.Equal(t, metav1.ConditionTrue, cond.Status)
 	assert.Equal(t, v1.IntegrationConditionKameletsAvailableReason, cond.Reason)
 	assert.Contains(t, cond.Message, "[none,timer] found")
 
@@ -649,7 +649,7 @@ func TestKameletSyntheticKitConditionTrue(t *testing.T) {
 
 	cond := environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable)
 	assert.NotNil(t, cond)
-	assert.Equal(t, corev1.ConditionTrue, cond.Status)
+	assert.Equal(t, metav1.ConditionTrue, cond.Status)
 	assert.Equal(t, v1.IntegrationConditionKameletsAvailableReason, cond.Reason)
 	assert.Contains(t, cond.Message, "[timer-source] found")
 
@@ -843,7 +843,7 @@ func TestKameletMultiNamespace(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "extra?kameletNamespace=ns1,timer", trait.List)
 	assert.Equal(t,
-		corev1.ConditionTrue,
+		metav1.ConditionTrue,
 		environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable).Status)
 	assert.Contains(t,
 		environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable).Message,
@@ -902,7 +902,7 @@ func TestKameletMultiNamespaceMissing(t *testing.T) {
 	err = trait.Apply(environment)
 	require.NoError(t, err)
 	assert.Equal(t,
-		corev1.ConditionUnknown,
+		metav1.ConditionUnknown,
 		environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable).Status)
 	assert.Contains(t,
 		environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable).Message,

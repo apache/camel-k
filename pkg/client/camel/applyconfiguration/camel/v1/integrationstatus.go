@@ -23,6 +23,7 @@ import (
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	applyconfigurationsmetav1 "k8s.io/client-go/applyconfigurations/meta/v1"
 )
 
 // IntegrationStatusApplyConfiguration represents a declarative configuration of the IntegrationStatus type for use
@@ -65,7 +66,7 @@ type IntegrationStatusApplyConfiguration struct {
 	// Deprecated: use properties instead.
 	Configuration []ConfigurationSpecApplyConfiguration `json:"configuration,omitempty"`
 	// a list of events happened for the Integration
-	Conditions []IntegrationConditionApplyConfiguration `json:"conditions,omitempty"`
+	Conditions []applyconfigurationsmetav1.ConditionApplyConfiguration `json:"conditions,omitempty"`
 	// the operator version
 	Version *string `json:"version,omitempty"`
 	// the number of replicas
@@ -80,6 +81,27 @@ type IntegrationStatusApplyConfiguration struct {
 	DeploymentTimestamp *metav1.Time `json:"lastDeploymentTimestamp,omitempty"`
 	// the timestamp representing the last time when this integration was built.
 	BuildTimestamp *metav1.Time `json:"lastBuildTimestamp,omitempty"`
+	// the timestamp representing the first time the Ready condition became true.
+	FirstReadyTimestamp *metav1.Time `json:"firstReadyTimestamp,omitempty"`
+	// DeprecatedPods collect health and conditions information from the owned PODs.
+	DeprecatedPods []PodConditionApplyConfiguration `json:"pods,omitempty"`
+}
+
+// WithFirstReadyTimestamp sets the FirstReadyTimestamp field in the declarative configuration.
+func (b *IntegrationStatusApplyConfiguration) WithFirstReadyTimestamp(value metav1.Time) *IntegrationStatusApplyConfiguration {
+	b.FirstReadyTimestamp = &value
+	return b
+}
+
+// WithDeprecatedPods adds the given values to the DeprecatedPods field.
+func (b *IntegrationStatusApplyConfiguration) WithDeprecatedPods(values ...*PodConditionApplyConfiguration) *IntegrationStatusApplyConfiguration {
+	for i := range values {
+		if values[i] == nil {
+			panic("nil value passed to WithDeprecatedPods")
+		}
+		b.DeprecatedPods = append(b.DeprecatedPods, *values[i])
+	}
+	return b
 }
 
 // IntegrationStatusApplyConfiguration constructs a declarative configuration of the IntegrationStatus type for use with
@@ -223,7 +245,7 @@ func (b *IntegrationStatusApplyConfiguration) WithConfiguration(values ...*Confi
 // WithConditions adds the given value to the Conditions field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the Conditions field.
-func (b *IntegrationStatusApplyConfiguration) WithConditions(values ...*IntegrationConditionApplyConfiguration) *IntegrationStatusApplyConfiguration {
+func (b *IntegrationStatusApplyConfiguration) WithConditions(values ...*applyconfigurationsmetav1.ConditionApplyConfiguration) *IntegrationStatusApplyConfiguration {
 	for i := range values {
 		if values[i] == nil {
 			panic("nil value passed to WithConditions")

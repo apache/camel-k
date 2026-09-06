@@ -21,6 +21,7 @@ package v1
 
 import (
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	applyconfigurationsmetav1 "k8s.io/client-go/applyconfigurations/meta/v1"
 )
 
 // KameletStatusApplyConfiguration represents a declarative configuration of the KameletStatus type for use
@@ -33,7 +34,7 @@ type KameletStatusApplyConfiguration struct {
 	// Phase --
 	Phase *camelv1.KameletPhase `json:"phase,omitempty"`
 	// Conditions --
-	Conditions []KameletConditionApplyConfiguration `json:"conditions,omitempty"`
+	Conditions []applyconfigurationsmetav1.ConditionApplyConfiguration `json:"conditions,omitempty"`
 	// Properties --
 	Properties []KameletPropertyApplyConfiguration `json:"properties,omitempty"`
 }
@@ -63,7 +64,7 @@ func (b *KameletStatusApplyConfiguration) WithPhase(value camelv1.KameletPhase) 
 // WithConditions adds the given value to the Conditions field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the Conditions field.
-func (b *KameletStatusApplyConfiguration) WithConditions(values ...*KameletConditionApplyConfiguration) *KameletStatusApplyConfiguration {
+func (b *KameletStatusApplyConfiguration) WithConditions(values ...*applyconfigurationsmetav1.ConditionApplyConfiguration) *KameletStatusApplyConfiguration {
 	for i := range values {
 		if values[i] == nil {
 			panic("nil value passed to WithConditions")

@@ -19,7 +19,6 @@ limitations under the License.
 package v1
 
 import (
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -186,7 +185,7 @@ type KameletStatus struct {
 	// Phase --
 	Phase KameletPhase `json:"phase,omitempty"`
 	// Conditions --
-	Conditions []KameletCondition `json:"conditions,omitempty"`
+	Conditions []metav1.Condition `json:"conditions,omitempty"`
 	// Properties --
 	Properties []KameletProperty `json:"properties,omitempty"`
 }
@@ -197,22 +196,6 @@ type KameletProperty struct {
 	Name string `json:"name,omitempty"`
 	// the default value of the property (if any)
 	Default string `json:"default,omitempty"`
-}
-
-// KameletCondition describes the state of a resource at a certain point.
-type KameletCondition struct {
-	// Type of kamelet condition.
-	Type KameletConditionType `json:"type"`
-	// Status of the condition, one of True, False, Unknown.
-	Status corev1.ConditionStatus `json:"status"`
-	// The last time this condition was updated.
-	LastUpdateTime metav1.Time `json:"lastUpdateTime,omitempty"`
-	// Last time the condition transitioned from one status to another.
-	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
-	// The reason for the condition's last transition.
-	Reason string `json:"reason,omitempty"`
-	// A human-readable message indicating details about the transition.
-	Message string `json:"message,omitempty"`
 }
 
 // KameletConditionType --.
