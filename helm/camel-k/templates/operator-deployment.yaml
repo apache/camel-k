@@ -45,6 +45,7 @@ spec:
       imagePullSecrets:
 {{ toYaml .Values.operator.imagePullSecrets | indent 8 }}
     {{- end }}
+      enableServiceLinks: false
 
       containers:
         - command:
