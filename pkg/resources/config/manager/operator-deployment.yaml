@@ -44,6 +44,7 @@ spec:
         app.kubernetes.io/version: "2.12.0-SNAPSHOT"
     spec:
       serviceAccountName: camel-k-operator
+      enableServiceLinks: false
       containers:
         - name: camel-k-operator
           image: docker.io/apache/camel-k:2.12.0-SNAPSHOT

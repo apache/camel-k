@@ -65,4 +65,6 @@ func TestNewBuildPodConfiguration(t *testing.T) {
 	}, pod.Labels)
 	assert.Equal(t, map[string]string{"node": "selector"}, pod.Spec.NodeSelector)
 	assert.Equal(t, map[string]string{"annotation": "value"}, pod.Annotations)
+	require.NotNil(t, pod.Spec.EnableServiceLinks)
+	assert.False(t, *pod.Spec.EnableServiceLinks)
 }
