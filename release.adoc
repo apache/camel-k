@@ -219,7 +219,7 @@ You can edit the draft release and set it to final, marking as last release. You
 
 ```
 ## Installation procedure
-Install the operator looking at the official https://camel.apache.org/camel-k/<2.5.x>/installation/installation.html[Camel K operator <version> installation procedure].
+Install the operator looking at the official [Camel K operator <version> installation procedure](https://camel.apache.org/camel-k/<2.5.x>/installation/installation.html).
 ```
 
 Perform a simple test to verify that everything is in place (running a "Hello World" integration after an installation done with, as an example `kubectl apply -k github.com/apache/camel-k/install/overlays/all-namespaces?ref=v<version> --server-side`). Do a simple final test.
