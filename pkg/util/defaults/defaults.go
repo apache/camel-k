@@ -23,7 +23,7 @@ package defaults
 
 const (
 	// Version --
-	Version = "2.11.0-SNAPSHOT"
+	Version = "2.12.0-SNAPSHOT"
 
 	// DefaultRuntimeProvider --
 	DefaultRuntimeProvider = "plain-quarkus"
