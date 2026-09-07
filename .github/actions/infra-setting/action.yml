@@ -38,6 +38,7 @@ runs:
     with:
       cpus: max
       memory: max
+      container-runtime: docker
 
   - id: minikube-settings
     name: Set docker-env
