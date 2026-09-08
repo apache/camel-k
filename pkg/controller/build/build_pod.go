@@ -25,7 +25,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -77,7 +76,7 @@ func newBuildPod(ctx context.Context, client client.Client, build *v1.Build) *co
 			RestartPolicy:      corev1.RestartPolicyNever,
 			SecurityContext:    podSecurityContext,
 			NodeSelector:       build.BuilderConfiguration().NodeSelector,
-			EnableServiceLinks: ptr.To(false),
+			EnableServiceLinks: new(bool),
 		},
 	}
 
