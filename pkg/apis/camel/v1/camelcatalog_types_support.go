@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -74,78 +75,49 @@ func (c *CamelCatalog) SetOperatorID(operatorID string) {
 }
 
 // GetType --.
-func (c *CamelCatalogCondition) GetType() string {
-	return string(c.Type)
-}
 
 // GetStatus --.
-func (c *CamelCatalogCondition) GetStatus() corev1.ConditionStatus {
-	return c.Status
-}
 
 // GetLastUpdateTime --.
-func (c *CamelCatalogCondition) GetLastUpdateTime() metav1.Time {
-	return c.LastUpdateTime
-}
 
 // GetLastTransitionTime --.
-func (c *CamelCatalogCondition) GetLastTransitionTime() metav1.Time {
-	return c.LastTransitionTime
-}
 
 // GetReason --.
-func (c *CamelCatalogCondition) GetReason() string {
-	return c.Reason
-}
 
 // GetMessage --.
-func (c *CamelCatalogCondition) GetMessage() string {
-	return c.Message
-}
 
 // GetConditions --.
 func (in *CamelCatalogStatus) GetConditions() []ResourceCondition {
 	res := make([]ResourceCondition, 0, len(in.Conditions))
-	for _, c := range in.Conditions {
-		res = append(res, &c)
+	for i := range in.Conditions {
+		res = append(res, (*conditionAdapter)(&in.Conditions[i]))
 	}
 
 	return res
 }
 
 // GetCondition returns the condition with the provided type.
-func (in *CamelCatalogStatus) GetCondition(condType CamelCatalogConditionType) *CamelCatalogCondition {
-	for i := range in.Conditions {
-		c := in.Conditions[i]
-		if c.Type == condType {
-			return &c
-		}
-	}
-
-	return nil
+func (in *CamelCatalogStatus) GetCondition(condType CamelCatalogConditionType) *metav1.Condition {
+	return meta.FindStatusCondition(in.Conditions, string(condType))
 }
 
 // SetCondition --.
 func (in *CamelCatalogStatus) SetCondition(condType CamelCatalogConditionType, status corev1.ConditionStatus, reason string, message string) {
-	in.SetConditions(CamelCatalogCondition{
-		Type:               condType,
-		Status:             status,
-		LastUpdateTime:     metav1.Now(),
-		LastTransitionTime: metav1.Now(),
-		Reason:             reason,
-		Message:            message,
+	in.SetConditions(metav1.Condition{
+		Type:    string(condType),
+		Status:  metav1.ConditionStatus(status),
+		Reason:  reason,
+		Message: message,
 	})
 }
 
 // SetErrorCondition --.
 func (in *CamelCatalogStatus) SetErrorCondition(condType CamelCatalogConditionType, reason string, err error) {
-	in.SetConditions(CamelCatalogCondition{
-		Type:               condType,
-		Status:             corev1.ConditionFalse,
-		LastUpdateTime:     metav1.Now(),
-		LastTransitionTime: metav1.Now(),
-		Reason:             reason,
-		Message:            err.Error(),
+	in.SetConditions(metav1.Condition{
+		Type:    string(condType),
+		Status:  metav1.ConditionFalse,
+		Reason:  reason,
+		Message: err.Error(),
 	})
 }
 
@@ -153,40 +125,23 @@ func (in *CamelCatalogStatus) SetErrorCondition(condType CamelCatalogConditionTy
 //
 // If a condition that we are about to add already exists and has the same status and
 // reason then we are not going to update.
-func (in *CamelCatalogStatus) SetConditions(conditions ...CamelCatalogCondition) {
+func (in *CamelCatalogStatus) SetConditions(conditions ...metav1.Condition) {
 	for _, condition := range conditions {
-		if condition.LastUpdateTime.IsZero() {
-			condition.LastUpdateTime = metav1.Now()
+		if condition.Reason == "" {
+			// Reason is a required field for metav1.Condition.
+			condition.Reason = string(condition.Status)
 		}
 		if condition.LastTransitionTime.IsZero() {
 			condition.LastTransitionTime = metav1.Now()
 		}
 
-		currentCond := in.GetCondition(condition.Type)
-
-		if currentCond != nil && currentCond.Status == condition.Status && currentCond.Reason == condition.Reason {
-			return
-		}
-		// Do not update lastTransitionTime if the status of the condition doesn't change.
-		if currentCond != nil && currentCond.Status == condition.Status {
-			condition.LastTransitionTime = currentCond.LastTransitionTime
-		}
-
-		in.RemoveCondition(condition.Type)
-		in.Conditions = append(in.Conditions, condition)
+		meta.SetStatusCondition(&in.Conditions, condition)
 	}
 }
 
 // RemoveCondition removes the resource condition with the provided type.
 func (in *CamelCatalogStatus) RemoveCondition(condType CamelCatalogConditionType) {
-	newConditions := in.Conditions[:0]
-	for _, c := range in.Conditions {
-		if c.Type != condType {
-			newConditions = append(newConditions, c)
-		}
-	}
-
-	in.Conditions = newConditions
+	meta.RemoveStatusCondition(&in.Conditions, string(condType))
 }
 
 // GetRuntimeVersion returns the Camel K runtime version of the catalog.

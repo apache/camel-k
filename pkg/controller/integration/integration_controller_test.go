@@ -23,7 +23,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -73,8 +72,8 @@ func TestIsIntegrationUpdated(t *testing.T) {
 	tests := []struct {
 		name     string
 		it       *v1.Integration
-		previous *v1.IntegrationCondition
-		next     *v1.IntegrationCondition
+		previous *metav1.Condition
+		next     *metav1.Condition
 		expected bool
 	}{
 		{
@@ -85,9 +84,8 @@ func TestIsIntegrationUpdated(t *testing.T) {
 				},
 			},
 			previous: nil,
-			next: &v1.IntegrationCondition{
-				Status:          corev1.ConditionTrue,
-				FirstTruthyTime: &now,
+			next: &metav1.Condition{
+				Status: metav1.ConditionTrue,
 			},
 			expected: true,
 		},
@@ -97,9 +95,8 @@ func TestIsIntegrationUpdated(t *testing.T) {
 				Status: v1.IntegrationStatus{},
 			},
 			previous: nil,
-			next: &v1.IntegrationCondition{
-				Status:          corev1.ConditionTrue,
-				FirstTruthyTime: &now,
+			next: &metav1.Condition{
+				Status: metav1.ConditionTrue,
 			},
 			expected: false,
 		},
@@ -110,13 +107,11 @@ func TestIsIntegrationUpdated(t *testing.T) {
 					InitializationTimestamp: &now,
 				},
 			},
-			previous: &v1.IntegrationCondition{
-				Status:          corev1.ConditionTrue,
-				FirstTruthyTime: &now,
+			previous: &metav1.Condition{
+				Status: metav1.ConditionTrue,
 			},
-			next: &v1.IntegrationCondition{
-				Status:          corev1.ConditionTrue,
-				FirstTruthyTime: &now,
+			next: &metav1.Condition{
+				Status: metav1.ConditionTrue,
 			},
 			expected: false,
 		},

@@ -23,6 +23,7 @@ import (
 	"sync"
 
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apimachinery/pkg/types"
@@ -41,7 +42,7 @@ type Monitor struct {
 	buildOrderStrategy v1.BuildOrderStrategy
 }
 
-func (bm *Monitor) canSchedule(ctx context.Context, c ctrl.Reader, build *v1.Build) (bool, *v1.BuildCondition, error) {
+func (bm *Monitor) canSchedule(ctx context.Context, c ctrl.Reader, build *v1.Build) (bool, *metav1.Condition, error) {
 	var runningBuildsTotal int32
 	runningBuilds.Range(func(_, v any) bool {
 		runningBuildsTotal++
@@ -139,14 +140,14 @@ func monitorFinishedBuild(build *v1.Build) {
 	runningBuilds.Delete(types.NamespacedName{Namespace: build.Namespace, Name: build.Name}.String())
 }
 
-func scheduledReadyBuildcondition(buildName string) *v1.BuildCondition {
+func scheduledReadyBuildcondition(buildName string) *metav1.Condition {
 	return scheduledBuildcondition(corev1.ConditionTrue, v1.BuildConditionReadyReason, fmt.Sprintf(
 		"the build (%s) is scheduled",
 		buildName,
 	))
 }
 
-func scheduledWaitingBuildcondition(buildName string, reason string) *v1.BuildCondition {
+func scheduledWaitingBuildcondition(buildName string, reason string) *metav1.Condition {
 	return scheduledBuildcondition(corev1.ConditionFalse, v1.BuildConditionWaitingReason, fmt.Sprintf(
 		enqueuedMsg,
 		reason,
@@ -154,10 +155,10 @@ func scheduledWaitingBuildcondition(buildName string, reason string) *v1.BuildCo
 	))
 }
 
-func scheduledBuildcondition(status corev1.ConditionStatus, reason string, msg string) *v1.BuildCondition {
-	return &v1.BuildCondition{
-		Type:    v1.BuildConditionScheduled,
-		Status:  status,
+func scheduledBuildcondition(status corev1.ConditionStatus, reason string, msg string) *metav1.Condition {
+	return &metav1.Condition{
+		Type:    string(v1.BuildConditionScheduled),
+		Status:  metav1.ConditionStatus(status),
 		Reason:  reason,
 		Message: msg,
 	}

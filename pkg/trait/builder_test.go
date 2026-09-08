@@ -199,8 +199,8 @@ func TestCustomTaskBuilderTraitInvalidStrategy(t *testing.T) {
 	// The error will be reported to IntegrationKits
 	require.NoError(t, err)
 	assert.Equal(t, v1.IntegrationKitPhaseError, env.IntegrationKit.Status.Phase)
-	assert.Equal(t, corev1.ConditionFalse, env.IntegrationKit.Status.Conditions[0].Status)
-	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Type, v1.IntegrationKitConditionType("IntegrationKitTasksValid"))
+	assert.Equal(t, metav1.ConditionFalse, env.IntegrationKit.Status.Conditions[0].Status)
+	assert.Equal(t, string(v1.IntegrationKitConditionType("IntegrationKitTasksValid")), env.IntegrationKit.Status.Conditions[0].Type)
 	require.NotNil(t, env.IntegrationKit.Status.Failure)
 	assert.Equal(t, "Pipeline tasks unavailable when using `routine` platform build strategy: use `pod` instead.", env.IntegrationKit.Status.Failure.Reason)
 }
@@ -217,8 +217,8 @@ func TestCustomTaskBuilderTraitInvalidStrategyOverride(t *testing.T) {
 	// The error will be reported to IntegrationKits
 	require.NoError(t, err)
 	assert.Equal(t, v1.IntegrationKitPhaseError, env.IntegrationKit.Status.Phase)
-	assert.Equal(t, corev1.ConditionFalse, env.IntegrationKit.Status.Conditions[0].Status)
-	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Type, v1.IntegrationKitConditionType("IntegrationKitTasksValid"))
+	assert.Equal(t, metav1.ConditionFalse, env.IntegrationKit.Status.Conditions[0].Status)
+	assert.Equal(t, string(v1.IntegrationKitConditionType("IntegrationKitTasksValid")), env.IntegrationKit.Status.Conditions[0].Type)
 	require.NotNil(t, env.IntegrationKit.Status.Failure)
 	assert.Equal(t, "Pipeline tasks unavailable when using `routine` platform build strategy: use `pod` instead.", env.IntegrationKit.Status.Failure.Reason)
 }

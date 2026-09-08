@@ -39,7 +39,7 @@ func TestMonitorSequentialBuilds(t *testing.T) {
 		finished  []*v1.Build
 		build     *v1.Build
 		allowed   bool
-		condition *v1.BuildCondition
+		condition *metav1.Condition
 	}{
 		{
 			name:      "allowNewBuild",
@@ -203,7 +203,7 @@ func TestAllowBuildRequeue(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.False(t, allowed)
-	assert.Equal(t, corev1.ConditionFalse, condition.Status)
+	assert.Equal(t, metav1.ConditionFalse, condition.Status)
 
 	monitorFinishedBuild(runningBuild)
 
@@ -211,7 +211,7 @@ func TestAllowBuildRequeue(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.True(t, allowed)
-	assert.Equal(t, corev1.ConditionTrue, condition.Status)
+	assert.Equal(t, metav1.ConditionTrue, condition.Status)
 }
 
 func TestMonitorFIFOBuilds(t *testing.T) {
@@ -221,7 +221,7 @@ func TestMonitorFIFOBuilds(t *testing.T) {
 		builds    []*v1.Build
 		build     *v1.Build
 		allowed   bool
-		condition *v1.BuildCondition
+		condition *metav1.Condition
 	}{
 		{
 			name:      "allowNewBuild",
@@ -402,7 +402,7 @@ func TestMonitorDependencyMatchingBuilds(t *testing.T) {
 		builds    []*v1.Build
 		build     *v1.Build
 		allowed   bool
-		condition *v1.BuildCondition
+		condition *metav1.Condition
 	}{
 		{
 			name:      "allowNewBuild",
@@ -640,10 +640,10 @@ func cleanRunningBuildsMonitor() {
 	})
 }
 
-func newCondition(status corev1.ConditionStatus, reason string, msg string) *v1.BuildCondition {
-	return &v1.BuildCondition{
-		Type:    v1.BuildConditionScheduled,
-		Status:  status,
+func newCondition(status corev1.ConditionStatus, reason string, msg string) *metav1.Condition {
+	return &metav1.Condition{
+		Type:    string(v1.BuildConditionScheduled),
+		Status:  metav1.ConditionStatus(status),
 		Reason:  reason,
 		Message: msg,
 	}

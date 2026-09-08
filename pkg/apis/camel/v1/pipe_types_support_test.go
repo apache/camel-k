@@ -21,6 +21,9 @@ import (
 	"encoding/json"
 	"testing"
 
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -85,4 +88,26 @@ func TestSetTraits(t *testing.T) {
 	pipe := NewPipe("my-pipe", "my-ns")
 	pipe.SetTraits(&traits)
 	assert.Equal(t, expectedTraits, pipe.Spec.Traits)
+}
+
+func TestPipeStatusSetConditions(t *testing.T) {
+	status := PipeStatus{}
+
+	status.SetCondition(PipeConditionReady, corev1.ConditionTrue, "Ready", "pipe is ready")
+
+	condition := status.GetCondition(PipeConditionReady)
+	require.NotNil(t, condition)
+	assert.Equal(t, metav1.ConditionTrue, condition.Status)
+	assert.False(t, condition.LastTransitionTime.IsZero())
+	transition := condition.LastTransitionTime
+
+	status.SetCondition(PipeConditionReady, corev1.ConditionTrue, "Ready", "updated message")
+	condition = status.GetCondition(PipeConditionReady)
+	require.NotNil(t, condition)
+	assert.Equal(t, transition, condition.LastTransitionTime)
+
+	status.SetCondition(PipeConditionReady, corev1.ConditionFalse, "NotReady", "pipe is not ready")
+	condition = status.GetCondition(PipeConditionReady)
+	require.NotNil(t, condition)
+	assert.Equal(t, metav1.ConditionFalse, condition.Status)
 }

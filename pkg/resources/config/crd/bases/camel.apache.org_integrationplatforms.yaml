@@ -2955,23 +2955,15 @@ spec:
                 type: string
               conditions:
                 description: which are the conditions met (particularly useful when
-                  in ERROR phase)
                 items:
-                  description: IntegrationPlatformCondition describes the state of
-                    a resource at a certain point.
+                  description: Condition contains details for one aspect of the current state of a resource.
                   properties:
                     lastTransitionTime:
-                      description: Last time the condition transitioned from one status
-                        to another.
-                      format: date-time
-                      type: string
-                    lastUpdateTime:
-                      description: The last time this condition was updated.
+                      description: Last time the condition transitioned from one status to another.
                       format: date-time
                       type: string
                     message:
-                      description: A human-readable message indicating details about
-                        the transition.
+                      description: A human-readable message indicating details about the transition.
                       type: string
                     reason:
                       description: The reason for the condition's last transition.
@@ -2980,13 +2972,18 @@ spec:
                       description: Status of the condition, one of True, False, Unknown.
                       type: string
                     type:
-                      description: Type of integration condition.
+                      description: Type of condition.
                       type: string
                   required:
+                  - lastTransitionTime
+                  - message
+                  - reason
                   - status
                   - type
-                  type: object
                 type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
               configuration:
                 description: |-
                   Deprecated:

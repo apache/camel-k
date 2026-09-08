@@ -21,6 +21,7 @@ package v1
 
 import (
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	applyconfigurationsmetav1 "k8s.io/client-go/applyconfigurations/meta/v1"
 )
 
 // CamelCatalogStatusApplyConfiguration represents a declarative configuration of the CamelCatalogStatus type for use
@@ -33,7 +34,7 @@ type CamelCatalogStatusApplyConfiguration struct {
 	// the actual phase
 	Phase *camelv1.CamelCatalogPhase `json:"phase,omitempty"`
 	// a list of events happened for the CamelCatalog
-	Conditions []CamelCatalogConditionApplyConfiguration `json:"conditions,omitempty"`
+	Conditions []applyconfigurationsmetav1.ConditionApplyConfiguration `json:"conditions,omitempty"`
 	// the container image available for building an application with this catalog
 	Image *string `json:"image,omitempty"`
 }
@@ -63,7 +64,7 @@ func (b *CamelCatalogStatusApplyConfiguration) WithPhase(value camelv1.CamelCata
 // WithConditions adds the given value to the Conditions field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the Conditions field.
-func (b *CamelCatalogStatusApplyConfiguration) WithConditions(values ...*CamelCatalogConditionApplyConfiguration) *CamelCatalogStatusApplyConfiguration {
+func (b *CamelCatalogStatusApplyConfiguration) WithConditions(values ...*applyconfigurationsmetav1.ConditionApplyConfiguration) *CamelCatalogStatusApplyConfiguration {
 	for i := range values {
 		if values[i] == nil {
 			panic("nil value passed to WithConditions")

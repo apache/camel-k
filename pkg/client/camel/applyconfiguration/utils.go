@@ -43,8 +43,6 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.BuildApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("BuildahTask"):
 		return &camelv1.BuildahTaskApplyConfiguration{}
-	case v1.SchemeGroupVersion.WithKind("BuildCondition"):
-		return &camelv1.BuildConditionApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("BuildConfiguration"):
 		return &camelv1.BuildConfigurationApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("BuilderTask"):
@@ -61,8 +59,6 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.CamelArtifactExclusionApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("CamelCatalog"):
 		return &camelv1.CamelCatalogApplyConfiguration{}
-	case v1.SchemeGroupVersion.WithKind("CamelCatalogCondition"):
-		return &camelv1.CamelCatalogConditionApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("CamelCatalogSpec"):
 		return &camelv1.CamelCatalogSpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("CamelCatalogStatus"):
@@ -117,12 +113,8 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.HealthCheckResponseApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("Integration"):
 		return &camelv1.IntegrationApplyConfiguration{}
-	case v1.SchemeGroupVersion.WithKind("IntegrationCondition"):
-		return &camelv1.IntegrationConditionApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("IntegrationKit"):
 		return &camelv1.IntegrationKitApplyConfiguration{}
-	case v1.SchemeGroupVersion.WithKind("IntegrationKitCondition"):
-		return &camelv1.IntegrationKitConditionApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("IntegrationKitSpec"):
 		return &camelv1.IntegrationKitSpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("IntegrationKitStatus"):
@@ -133,8 +125,6 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.IntegrationPlatformApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("IntegrationPlatformBuildSpec"):
 		return &camelv1.IntegrationPlatformBuildSpecApplyConfiguration{}
-	case v1.SchemeGroupVersion.WithKind("IntegrationPlatformCondition"):
-		return &camelv1.IntegrationPlatformConditionApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("IntegrationPlatformKameletSpec"):
 		return &camelv1.IntegrationPlatformKameletSpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("IntegrationPlatformSpec"):
@@ -163,8 +153,6 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.JSONSchemaPropsApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("Kamelet"):
 		return &camelv1.KameletApplyConfiguration{}
-	case v1.SchemeGroupVersion.WithKind("KameletCondition"):
-		return &camelv1.KameletConditionApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("KameletProperty"):
 		return &camelv1.KameletPropertyApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("KameletRepositorySpec"):
@@ -187,8 +175,6 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.MavenSpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("Pipe"):
 		return &camelv1.PipeApplyConfiguration{}
-	case v1.SchemeGroupVersion.WithKind("PipeCondition"):
-		return &camelv1.PipeConditionApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("PipeSpec"):
 		return &camelv1.PipeSpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("PipeStatus"):

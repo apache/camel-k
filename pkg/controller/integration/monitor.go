@@ -180,9 +180,9 @@ func (action *monitorAction) monitorPods(ctx context.Context, environment *trait
 		// This is happening when the Deployment, CronJob, etc resources
 		// miss the Integration label, required to identify sibling Pods.
 		integration.Status.SetConditions(
-			v1.IntegrationCondition{
-				Type:   v1.IntegrationConditionReady,
-				Status: corev1.ConditionFalse,
+			metav1.Condition{
+				Type:   string(v1.IntegrationConditionReady),
+				Status: metav1.ConditionFalse,
 				Reason: v1.IntegrationConditionMonitoringPodsAvailableReason,
 				Message: fmt.Sprintf(
 					"Could not find `camel.apache.org/integration: %s` label in the %s template. "+
@@ -250,7 +250,7 @@ func isInInitializationFailed(status v1.IntegrationStatus) bool {
 		return false
 	}
 	if cond := status.GetCondition(v1.IntegrationConditionReady); cond != nil {
-		if cond.Status == corev1.ConditionFalse &&
+		if cond.Status == metav1.ConditionFalse &&
 			cond.Reason == v1.IntegrationConditionInitializationFailedReason {
 			return true
 		}
@@ -261,7 +261,7 @@ func isInInitializationFailed(status v1.IntegrationStatus) bool {
 
 func isInIntegrationKitFailed(status v1.IntegrationStatus) bool {
 	if cond := status.GetCondition(v1.IntegrationConditionKitAvailable); cond != nil {
-		if cond.Status == corev1.ConditionFalse &&
+		if cond.Status == metav1.ConditionFalse &&
 			status.Phase != v1.IntegrationPhaseError {
 			return true
 		}
@@ -509,10 +509,10 @@ func arePodsFailingStatuses(integration *v1.Integration, pendingPods []corev1.Po
 //nolint:staticcheck
 func (action *monitorAction) probeReadiness(ctx context.Context, environment *trait.Environment, integration *v1.Integration, pods []corev1.Pod) (int32, bool, error) {
 	// as a default we assume the Integration is Ready
-	readyCondition := v1.IntegrationCondition{
-		Type:           v1.IntegrationConditionReady,
-		Status:         corev1.ConditionTrue,
-		DeprecatedPods: make([]v1.PodCondition, len(pods)),
+	integration.Status.DeprecatedPods = make([]v1.PodCondition, len(pods))
+	readyCondition := metav1.Condition{
+		Type:   string(v1.IntegrationConditionReady),
+		Status: metav1.ConditionTrue,
 	}
 
 	readyPods := int32(0)
@@ -524,10 +524,10 @@ func (action *monitorAction) probeReadiness(ctx context.Context, environment *tr
 
 	for i := range pods {
 		pod := &pods[i]
-		readyCondition.DeprecatedPods[i].Name = pod.Name
+		integration.Status.DeprecatedPods[i].Name = pod.Name
 		for p := range pod.Status.Conditions {
 			if pod.Status.Conditions[p].Type == corev1.PodReady {
-				readyCondition.DeprecatedPods[i].Condition = pod.Status.Conditions[p]
+				integration.Status.DeprecatedPods[i].Condition = pod.Status.Conditions[p]
 
 				break
 			}
@@ -592,13 +592,13 @@ func (action *monitorAction) probeReadiness(ctx context.Context, environment *tr
 			}
 
 			if errors.Is(err, context.DeadlineExceeded) {
-				readyCondition.DeprecatedPods[i].Condition.Message = fmt.Sprintf("readiness probe timed out for Pod %s/%s", pod.Namespace, pod.Name)
+				integration.Status.DeprecatedPods[i].Condition.Message = fmt.Sprintf("readiness probe timed out for Pod %s/%s", pod.Namespace, pod.Name)
 				runtimeReady = false
 
 				continue
 			}
 			if !k8serrors.IsServiceUnavailable(err) {
-				readyCondition.DeprecatedPods[i].Condition.Message = fmt.Sprintf("readiness probe failed for Pod %s/%s: %s", pod.Namespace, pod.Name, err.Error())
+				integration.Status.DeprecatedPods[i].Condition.Message = fmt.Sprintf("readiness probe failed for Pod %s/%s: %s", pod.Namespace, pod.Name, err.Error())
 				runtimeReady = false
 
 				continue
@@ -616,7 +616,7 @@ func (action *monitorAction) probeReadiness(ctx context.Context, environment *tr
 				runtimeReady = false
 				runtimeFailed = true
 
-				readyCondition.DeprecatedPods[i].Health = append(readyCondition.DeprecatedPods[i].Health, check)
+				integration.Status.DeprecatedPods[i].Health = append(integration.Status.DeprecatedPods[i].Health, check)
 			}
 		}
 	}
@@ -624,14 +624,14 @@ func (action *monitorAction) probeReadiness(ctx context.Context, environment *tr
 	if runtimeFailed {
 		probeReadinessOk = false
 		readyCondition.Reason = v1.IntegrationConditionErrorReason
-		readyCondition.Status = corev1.ConditionFalse
+		readyCondition.Status = metav1.ConditionFalse
 		readyCondition.Message = fmt.Sprintf("%d/%d pods are not ready", unreadyPods, unreadyPods+readyPods)
 		integration.Status.SetConditions(readyCondition)
 	}
 	if !runtimeReady {
 		probeReadinessOk = false
 		readyCondition.Reason = v1.IntegrationConditionRuntimeNotReadyReason
-		readyCondition.Status = corev1.ConditionFalse
+		readyCondition.Status = metav1.ConditionFalse
 		readyCondition.Message = fmt.Sprintf("%d/%d pods are not ready", unreadyPods, unreadyPods+readyPods)
 		integration.Status.SetConditions(readyCondition)
 	}

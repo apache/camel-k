@@ -293,10 +293,10 @@ func testDefaultIntegrationPhaseTraitsSetting(t *testing.T, phase v1.Integration
 		},
 		Status: v1.IntegrationStatus{
 			Phase: phase,
-			Conditions: []v1.IntegrationCondition{
+			Conditions: []metav1.Condition{
 				{
-					Type:   v1.IntegrationConditionDeploymentAvailable,
-					Status: corev1.ConditionTrue,
+					Type:   string(v1.IntegrationConditionDeploymentAvailable),
+					Status: metav1.ConditionTrue,
 				},
 			},
 		},
@@ -366,10 +366,10 @@ func TestAutoInferredServiceTraitsDoNotLeakIntoStatus(t *testing.T) {
 		},
 		Status: v1.IntegrationStatus{
 			Phase: v1.IntegrationPhaseRunning,
-			Conditions: []v1.IntegrationCondition{
+			Conditions: []metav1.Condition{
 				{
-					Type:   v1.IntegrationConditionDeploymentAvailable,
-					Status: corev1.ConditionTrue,
+					Type:   string(v1.IntegrationConditionDeploymentAvailable),
+					Status: metav1.ConditionTrue,
 				},
 			},
 		},
@@ -416,10 +416,10 @@ func TestUserSpecifiedTraitValuesStillAppearInStatus(t *testing.T) {
 		},
 		Status: v1.IntegrationStatus{
 			Phase: v1.IntegrationPhaseRunning,
-			Conditions: []v1.IntegrationCondition{
+			Conditions: []metav1.Condition{
 				{
-					Type:   v1.IntegrationConditionDeploymentAvailable,
-					Status: corev1.ConditionTrue,
+					Type:   string(v1.IntegrationConditionDeploymentAvailable),
+					Status: metav1.ConditionTrue,
 				},
 			},
 		},
@@ -479,10 +479,10 @@ func TestIntegrationTraitsSetting(t *testing.T) {
 		},
 		Status: v1.IntegrationStatus{
 			Phase: v1.IntegrationPhaseRunning,
-			Conditions: []v1.IntegrationCondition{
+			Conditions: []metav1.Condition{
 				{
-					Type:   v1.IntegrationConditionDeploymentAvailable,
-					Status: corev1.ConditionTrue,
+					Type:   string(v1.IntegrationConditionDeploymentAvailable),
+					Status: metav1.ConditionTrue,
 				},
 			},
 		},

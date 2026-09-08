@@ -35,7 +35,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/maven"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	k8stesting "k8s.io/client-go/testing"
@@ -70,7 +69,7 @@ func TestCreate(t *testing.T) {
 	assert.Equal(t, defaults.CamelKRuntimeCatalogVersion, answer.Status.Build.RuntimeVersion)
 	assert.Equal(t, v1.RuntimeProviderQuarkus, answer.Status.Build.RuntimeProvider)
 	assert.NotEqual(t, "", answer.Status.Build.RuntimeCoreVersion)
-	assert.Equal(t, corev1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionCamelCatalogAvailable).Status)
+	assert.Equal(t, metav1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionCamelCatalogAvailable).Status)
 
 	list := v1.NewCamelCatalogList()
 	err = c.List(context.TODO(), &list, k8sclient.InNamespace(ip.Namespace))
@@ -114,7 +113,7 @@ func TestCatalogAlreadyPresent(t *testing.T) {
 
 	assert.Equal(t, v1.IntegrationPlatformPhaseReady, answer.Status.Phase)
 	assert.Equal(t, "4.4.0", answer.Status.Build.RuntimeCoreVersion)
-	assert.Equal(t, corev1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionCamelCatalogAvailable).Status)
+	assert.Equal(t, metav1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionCamelCatalogAvailable).Status)
 }
 
 func TestCreateNewCatalog(t *testing.T) {
@@ -182,10 +181,10 @@ func TestCreateNewCatalog(t *testing.T) {
 	assert.NotNil(t, answer)
 
 	assert.Equal(t, v1.IntegrationPlatformPhaseReady, answer.Status.Phase)
-	assert.Equal(t, corev1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionCamelCatalogAvailable).Status)
+	assert.Equal(t, metav1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionCamelCatalogAvailable).Status)
 	// We don't know exactly which is the core version, it is enough to check is not empty in the test
 	assert.NotEqual(t, "", answer.Status.Build.RuntimeCoreVersion)
-	assert.Equal(t, corev1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionKameletCatalogAvailable).Status)
+	assert.Equal(t, metav1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionKameletCatalogAvailable).Status)
 	assert.Contains(t, answer.Status.GetCondition(v1.IntegrationPlatformConditionKameletCatalogAvailable).Message,
 		fmt.Sprintf("successfully installed Kamelet catalog version %s", answer.Status.Build.RuntimeCoreVersion),
 		"failed 0 Kamelets")
@@ -220,8 +219,8 @@ func TestCreateNewCatalog(t *testing.T) {
 	assert.NotNil(t, answer)
 
 	assert.Equal(t, v1.IntegrationPlatformPhaseReady, answer.Status.Phase)
-	assert.Equal(t, corev1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionCamelCatalogAvailable).Status)
-	assert.Equal(t, corev1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionKameletCatalogAvailable).Status)
+	assert.Equal(t, metav1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionCamelCatalogAvailable).Status)
+	assert.Equal(t, metav1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionKameletCatalogAvailable).Status)
 }
 
 func TestCreateCatalogError(t *testing.T) {
@@ -261,7 +260,7 @@ func TestCreateCatalogError(t *testing.T) {
 	assert.NotNil(t, answer)
 
 	assert.Equal(t, v1.IntegrationPlatformPhaseError, answer.Status.Phase)
-	assert.Equal(t, corev1.ConditionFalse, answer.Status.GetCondition(v1.IntegrationPlatformConditionCamelCatalogAvailable).Status)
+	assert.Equal(t, metav1.ConditionFalse, answer.Status.GetCondition(v1.IntegrationPlatformConditionCamelCatalogAvailable).Status)
 	assert.Equal(t, v1.IntegrationPlatformConditionCamelCatalogAvailableReason, answer.Status.GetCondition(v1.IntegrationPlatformConditionCamelCatalogAvailable).Reason)
 	assert.Contains(t, answer.Status.GetCondition(v1.IntegrationPlatformConditionCamelCatalogAvailable).Message, "camel catalog 0.0.0 not available, please review given runtime version. Error:")
 }

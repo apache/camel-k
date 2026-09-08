@@ -30,6 +30,7 @@ import (
 	"time"
 
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gstruct"
@@ -101,17 +102,17 @@ func TestHealthTrait(t *testing.T) {
 			}
 
 			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
-				Satisfy(func(c *v1.IntegrationCondition) bool {
-					if c.Status != corev1.ConditionFalse {
+				Satisfy(func(c *metav1.Condition) bool {
+					if c.Status != metav1.ConditionFalse {
 						return false
 					}
-					if len(c.DeprecatedPods) != 3 {
+					if len(Integration(t, ctx, ns, name)().Status.DeprecatedPods) != 3 {
 						return false
 					}
 
 					var r *v1.HealthCheckResponse
 
-					for _, pod := range c.DeprecatedPods {
+					for _, pod := range Integration(t, ctx, ns, name)().Status.DeprecatedPods {
 						for h := range pod.Health {
 							if pod.Health[h].Name == "camel-routes" {
 								r = &pod.Health[h]
@@ -193,19 +194,19 @@ func TestHealthTrait(t *testing.T) {
 				WithTransform(IntegrationConditionMessage, Equal("1/1 pods are not ready"))))
 
 			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
-				Satisfy(func(c *v1.IntegrationCondition) bool {
-					if c.Status != corev1.ConditionFalse {
+				Satisfy(func(c *metav1.Condition) bool {
+					if c.Status != metav1.ConditionFalse {
 						return false
 					}
-					if len(c.DeprecatedPods) != 1 {
+					if len(Integration(t, ctx, ns, name)().Status.DeprecatedPods) != 1 {
 						return false
 					}
 
 					var r *v1.HealthCheckResponse
 
-					for h := range c.DeprecatedPods[0].Health {
-						if c.DeprecatedPods[0].Health[h].Name == "camel-routes" {
-							r = &c.DeprecatedPods[0].Health[h]
+					for h := range Integration(t, ctx, ns, name)().Status.DeprecatedPods[0].Health {
+						if Integration(t, ctx, ns, name)().Status.DeprecatedPods[0].Health[h].Name == "camel-routes" {
+							r = &Integration(t, ctx, ns, name)().Status.DeprecatedPods[0].Health[h]
 						}
 					}
 
@@ -278,19 +279,19 @@ func TestHealthTrait(t *testing.T) {
 				WithTransform(IntegrationConditionMessage, Equal("1/1 pods are not ready"))))
 
 			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
-				Satisfy(func(c *v1.IntegrationCondition) bool {
-					if c.Status != corev1.ConditionFalse {
+				Satisfy(func(c *metav1.Condition) bool {
+					if c.Status != metav1.ConditionFalse {
 						return false
 					}
-					if len(c.DeprecatedPods) != 1 {
+					if len(Integration(t, ctx, ns, name)().Status.DeprecatedPods) != 1 {
 						return false
 					}
 
 					var r *v1.HealthCheckResponse
 
-					for h := range c.DeprecatedPods[0].Health {
-						if c.DeprecatedPods[0].Health[h].Name == "camel-routes" {
-							r = &c.DeprecatedPods[0].Health[h]
+					for h := range Integration(t, ctx, ns, name)().Status.DeprecatedPods[0].Health {
+						if Integration(t, ctx, ns, name)().Status.DeprecatedPods[0].Health[h].Name == "camel-routes" {
+							r = &Integration(t, ctx, ns, name)().Status.DeprecatedPods[0].Health[h]
 						}
 					}
 
@@ -311,19 +312,19 @@ func TestHealthTrait(t *testing.T) {
 				}))
 
 			g.Eventually(PipeCondition(t, ctx, ns, name, camelv1.PipeConditionReady), TestTimeoutLong).Should(
-				Satisfy(func(c *camelv1.PipeCondition) bool {
-					if c.Status != corev1.ConditionFalse {
+				Satisfy(func(c *metav1.Condition) bool {
+					if c.Status != metav1.ConditionFalse {
 						return false
 					}
-					if len(c.DeprecatedPods) != 1 {
+					if len(Integration(t, ctx, ns, name)().Status.DeprecatedPods) != 1 {
 						return false
 					}
 
 					var r *v1.HealthCheckResponse
 
-					for h := range c.DeprecatedPods[0].Health {
-						if c.DeprecatedPods[0].Health[h].Name == "camel-routes" {
-							r = &c.DeprecatedPods[0].Health[h]
+					for h := range Integration(t, ctx, ns, name)().Status.DeprecatedPods[0].Health {
+						if Integration(t, ctx, ns, name)().Status.DeprecatedPods[0].Health[h].Name == "camel-routes" {
+							r = &Integration(t, ctx, ns, name)().Status.DeprecatedPods[0].Health[h]
 						}
 					}
 
@@ -363,19 +364,19 @@ func TestHealthTrait(t *testing.T) {
 				WithTransform(IntegrationConditionMessage, Equal("1/1 pods are not ready"))))
 
 			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
-				Satisfy(func(c *v1.IntegrationCondition) bool {
-					if c.Status != corev1.ConditionFalse {
+				Satisfy(func(c *metav1.Condition) bool {
+					if c.Status != metav1.ConditionFalse {
 						return false
 					}
-					if len(c.DeprecatedPods) != 1 {
+					if len(Integration(t, ctx, ns, name)().Status.DeprecatedPods) != 1 {
 						return false
 					}
 
 					var r *v1.HealthCheckResponse
 
-					for h := range c.DeprecatedPods[0].Health {
-						if c.DeprecatedPods[0].Health[h].Name == "never-ready" {
-							r = &c.DeprecatedPods[0].Health[h]
+					for h := range Integration(t, ctx, ns, name)().Status.DeprecatedPods[0].Health {
+						if Integration(t, ctx, ns, name)().Status.DeprecatedPods[0].Health[h].Name == "never-ready" {
+							r = &Integration(t, ctx, ns, name)().Status.DeprecatedPods[0].Health[h]
 						}
 					}
 
@@ -413,19 +414,19 @@ func TestHealthTrait(t *testing.T) {
 				WithTransform(IntegrationConditionMessage, Equal("1/1 pods are not ready"))))
 
 			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
-				Satisfy(func(c *v1.IntegrationCondition) bool {
-					if c.Status != corev1.ConditionFalse {
+				Satisfy(func(c *metav1.Condition) bool {
+					if c.Status != metav1.ConditionFalse {
 						return false
 					}
-					if len(c.DeprecatedPods) != 1 {
+					if len(Integration(t, ctx, ns, name)().Status.DeprecatedPods) != 1 {
 						return false
 					}
 
 					var r *v1.HealthCheckResponse
 
-					for h := range c.DeprecatedPods[0].Health {
-						if c.DeprecatedPods[0].Health[h].Name == "never-ready" && c.DeprecatedPods[0].Health[h].Status == "DOWN" {
-							r = &c.DeprecatedPods[0].Health[h]
+					for h := range Integration(t, ctx, ns, name)().Status.DeprecatedPods[0].Health {
+						if Integration(t, ctx, ns, name)().Status.DeprecatedPods[0].Health[h].Name == "never-ready" && Integration(t, ctx, ns, name)().Status.DeprecatedPods[0].Health[h].Status == "DOWN" {
+							r = &Integration(t, ctx, ns, name)().Status.DeprecatedPods[0].Health[h]
 						}
 					}
 

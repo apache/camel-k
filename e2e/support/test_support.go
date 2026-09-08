@@ -592,8 +592,8 @@ func IntegrationStatusImage(t *testing.T, ctx context.Context, ns string, name s
 	}
 }
 
-func IntegrationCondition(t *testing.T, ctx context.Context, ns string, name string, conditionType v1.IntegrationConditionType) func() *v1.IntegrationCondition {
-	return func() *v1.IntegrationCondition {
+func IntegrationCondition(t *testing.T, ctx context.Context, ns string, name string, conditionType v1.IntegrationConditionType) func() *metav1.Condition {
+	return func() *metav1.Condition {
 		it := Integration(t, ctx, ns, name)()
 		if it == nil {
 			return nil
@@ -602,14 +602,14 @@ func IntegrationCondition(t *testing.T, ctx context.Context, ns string, name str
 	}
 }
 
-func IntegrationConditionReason(c *v1.IntegrationCondition) string {
+func IntegrationConditionReason(c *metav1.Condition) string {
 	if c == nil {
 		return ""
 	}
 	return c.Reason
 }
 
-func IntegrationConditionMessage(c *v1.IntegrationCondition) string {
+func IntegrationConditionMessage(c *metav1.Condition) string {
 	if c == nil {
 		return ""
 	}
@@ -622,7 +622,7 @@ func IntegrationConditionStatus(t *testing.T, ctx context.Context, ns string, na
 		if c == nil {
 			return "Unknown"
 		}
-		return c.Status
+		return corev1.ConditionStatus(c.Status)
 	}
 }
 
@@ -1034,8 +1034,8 @@ func PipeStatusReplicas(t *testing.T, ctx context.Context, ns string, name strin
 	}
 }
 
-func PipeCondition(t *testing.T, ctx context.Context, ns string, name string, conditionType v1.PipeConditionType) func() *v1.PipeCondition {
-	return func() *v1.PipeCondition {
+func PipeCondition(t *testing.T, ctx context.Context, ns string, name string, conditionType v1.PipeConditionType) func() *metav1.Condition {
+	return func() *metav1.Condition {
 		kb := Pipe(t, ctx, ns, name)()
 		if kb == nil {
 			return nil
@@ -1048,21 +1048,21 @@ func PipeCondition(t *testing.T, ctx context.Context, ns string, name string, co
 	}
 }
 
-func PipeConditionStatusExtract(c *v1.PipeCondition) corev1.ConditionStatus {
+func PipeConditionStatusExtract(c *metav1.Condition) corev1.ConditionStatus {
 	if c == nil {
 		return ""
 	}
-	return c.Status
+	return corev1.ConditionStatus(c.Status)
 }
 
-func PipeConditionReason(c *v1.PipeCondition) string {
+func PipeConditionReason(c *metav1.Condition) string {
 	if c == nil {
 		return ""
 	}
 	return c.Reason
 }
 
-func PipeConditionMessage(c *v1.PipeCondition) string {
+func PipeConditionMessage(c *metav1.Condition) string {
 	if c == nil {
 		return ""
 	}
@@ -1079,7 +1079,7 @@ func PipeConditionStatus(t *testing.T, ctx context.Context, ns string, name stri
 		if c == nil {
 			return "ConditionMissing"
 		}
-		return c.Status
+		return corev1.ConditionStatus(c.Status)
 	}
 }
 
@@ -1569,8 +1569,8 @@ func BuildPhase(t *testing.T, ctx context.Context, ns, name string) func() v1.Bu
 	}
 }
 
-func BuildConditions(t *testing.T, ctx context.Context, ns, name string) func() []v1.BuildCondition {
-	return func() []v1.BuildCondition {
+func BuildConditions(t *testing.T, ctx context.Context, ns, name string) func() []metav1.Condition {
+	return func() []metav1.Condition {
 		build := Build(t, ctx, ns, name)()
 		if build != nil && build.Status.Conditions != nil {
 			return build.Status.Conditions
@@ -1579,13 +1579,13 @@ func BuildConditions(t *testing.T, ctx context.Context, ns, name string) func() 
 	}
 }
 
-func BuildCondition(t *testing.T, ctx context.Context, ns string, name string, conditionType v1.BuildConditionType) func() *v1.BuildCondition {
-	return func() *v1.BuildCondition {
+func BuildCondition(t *testing.T, ctx context.Context, ns string, name string, conditionType v1.BuildConditionType) func() *metav1.Condition {
+	return func() *metav1.Condition {
 		build := Build(t, ctx, ns, name)()
 		if build != nil && build.Status.Conditions != nil {
 			return build.Status.GetCondition(conditionType)
 		}
-		return &v1.BuildCondition{}
+		return &metav1.Condition{}
 	}
 }
 

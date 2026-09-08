@@ -27,6 +27,7 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
@@ -98,13 +99,13 @@ func integrationUpdateFunc(c client.Client, old *v1.Integration, it *v1.Integrat
 	// Observe the time to first readiness metric
 	previous := old.Status.GetCondition(v1.IntegrationConditionReady)
 	next := it.Status.GetCondition(v1.IntegrationConditionReady)
-	if isIntegrationUpdated(it, previous, next) {
+	if isIntegrationUpdated(it, previous, next) && it.Status.FirstReadyTimestamp != nil && !it.Status.FirstReadyTimestamp.IsZero() {
 		// Use DeploymentTimestamp if available (for dry-build), else use InitializationTimestamp
 		startTime := it.Status.InitializationTimestamp.Time
 		if it.Status.DeploymentTimestamp != nil && !it.Status.DeploymentTimestamp.IsZero() {
 			startTime = it.Status.DeploymentTimestamp.Time
 		}
-		duration := next.FirstTruthyTime.Sub(startTime)
+		duration := it.Status.FirstReadyTimestamp.Sub(startTime)
 		Log.WithValues("request-namespace", it.Namespace, "request-name", it.Name, "ready-after", duration.Seconds()).
 			ForIntegration(it).Infof("First readiness after %s", duration)
 		timeToFirstReadiness.Observe(duration.Seconds())
@@ -130,14 +131,15 @@ func integrationUpdateFunc(c client.Client, old *v1.Integration, it *v1.Integrat
 		old.Status.Phase != it.Status.Phase
 }
 
-func isIntegrationUpdated(it *v1.Integration, previous, next *v1.IntegrationCondition) bool {
-	if previous == nil || previous.Status != corev1.ConditionTrue && (previous.FirstTruthyTime == nil || previous.FirstTruthyTime.IsZero()) {
-		if next != nil && next.Status == corev1.ConditionTrue && next.FirstTruthyTime != nil && !next.FirstTruthyTime.IsZero() {
-			return it.Status.InitializationTimestamp != nil
-		}
+func isIntegrationUpdated(it *v1.Integration, previous, next *metav1.Condition) bool {
+	if it.Status.InitializationTimestamp == nil {
+		return false
 	}
 
-	return false
+	wasReady := previous != nil && previous.Status == metav1.ConditionTrue
+	isReady := next != nil && next.Status == metav1.ConditionTrue
+
+	return !wasReady && isReady
 }
 
 func integrationKitEnqueueRequestsFromMapFunc(ctx context.Context, c client.Client, kit *v1.IntegrationKit) []reconcile.Request {
@@ -560,11 +562,11 @@ func (r *reconcileIntegration) update(ctx context.Context, base *v1.Integration,
 		)
 
 		if target.Status.Phase == v1.IntegrationPhaseError {
-			if cond := target.Status.GetCondition(v1.IntegrationConditionReady); cond != nil && cond.Status == corev1.ConditionFalse {
+			if cond := target.Status.GetCondition(v1.IntegrationConditionReady); cond != nil && cond.Status == metav1.ConditionFalse {
 				log.Info(
 					"Integration error",
-					"reason", cond.GetReason(),
-					"error-message", cond.GetMessage())
+					"reason", cond.Reason,
+					"error-message", cond.Message)
 			}
 		}
 	}

@@ -80,7 +80,7 @@ func TestPipeIntegrationSpecChanged(t *testing.T) {
 	handledPipe, err := a.Handle(context.TODO(), pipe)
 	require.NoError(t, err)
 	assert.Equal(t, v1.PipePhaseNone, handledPipe.Status.Phase)
-	assert.Equal(t, corev1.ConditionFalse, handledPipe.Status.GetCondition(v1.PipeConditionReady).Status)
+	assert.Equal(t, metav1.ConditionFalse, handledPipe.Status.GetCondition(v1.PipeConditionReady).Status)
 }
 
 func TestPipeIntegrationReady(t *testing.T) {
@@ -125,7 +125,7 @@ func TestPipeIntegrationReady(t *testing.T) {
 	handledPipe, err := a.Handle(context.TODO(), pipe)
 	require.NoError(t, err)
 	assert.Equal(t, v1.PipePhaseReady, handledPipe.Status.Phase)
-	assert.Equal(t, corev1.ConditionTrue, handledPipe.Status.GetCondition(v1.PipeConditionReady).Status)
+	assert.Equal(t, metav1.ConditionTrue, handledPipe.Status.GetCondition(v1.PipeConditionReady).Status)
 }
 
 func TestPipeIntegrationUnknown(t *testing.T) {
@@ -169,7 +169,7 @@ func TestPipeIntegrationUnknown(t *testing.T) {
 	handledPipe, err := a.Handle(context.TODO(), pipe)
 	require.NoError(t, err)
 	assert.Equal(t, v1.PipePhaseReady, handledPipe.Status.Phase)
-	assert.Equal(t, corev1.ConditionUnknown, handledPipe.Status.GetCondition(v1.PipeConditionReady).Status)
+	assert.Equal(t, metav1.ConditionUnknown, handledPipe.Status.GetCondition(v1.PipeConditionReady).Status)
 }
 
 func TestPipeIntegrationError(t *testing.T) {
@@ -214,7 +214,7 @@ func TestPipeIntegrationError(t *testing.T) {
 	handledPipe, err := a.Handle(context.TODO(), pipe)
 	require.NoError(t, err)
 	assert.Equal(t, v1.PipePhaseError, handledPipe.Status.Phase)
-	assert.Equal(t, corev1.ConditionFalse, handledPipe.Status.GetCondition(v1.PipeConditionReady).Status)
+	assert.Equal(t, metav1.ConditionFalse, handledPipe.Status.GetCondition(v1.PipeConditionReady).Status)
 	assert.Equal(t, "Error message", handledPipe.Status.GetCondition(v1.PipeConditionReady).Message)
 }
 
@@ -244,7 +244,7 @@ func TestPipeIntegrationErrorFromPipeErrorPhase(t *testing.T) {
 	handledPipe, err := a.Handle(context.TODO(), pipe)
 	require.Error(t, err)
 	assert.Equal(t, v1.PipePhaseError, handledPipe.Status.Phase)
-	assert.Equal(t, corev1.ConditionFalse, handledPipe.Status.GetCondition(v1.PipeConditionReady).Status)
+	assert.Equal(t, metav1.ConditionFalse, handledPipe.Status.GetCondition(v1.PipeConditionReady).Status)
 	assert.Equal(t, "no ref or URI specified in endpoint", handledPipe.Status.GetCondition(v1.PipeConditionReady).Message)
 }
 
@@ -325,7 +325,7 @@ func TestPipeIntegrationCreatingFromPipeCreatingPhase(t *testing.T) {
 	handledPipe, err := a.Handle(context.TODO(), pipe)
 	require.NoError(t, err)
 	assert.Equal(t, v1.PipePhaseCreating, handledPipe.Status.Phase)
-	assert.Equal(t, corev1.ConditionFalse, handledPipe.Status.GetCondition(v1.PipeConditionReady).Status)
+	assert.Equal(t, metav1.ConditionFalse, handledPipe.Status.GetCondition(v1.PipeConditionReady).Status)
 	assert.Equal(t, "Integration \"my-pipe\" is in \"Creating\" phase", handledPipe.Status.GetCondition(v1.PipeConditionReady).Message)
 }
 
@@ -373,7 +373,7 @@ func TestPipeIntegrationPipeTraitAnnotations(t *testing.T) {
 	handledPipe, err := a.Handle(context.TODO(), pipe)
 	require.NoError(t, err)
 	assert.Equal(t, v1.PipePhaseCreating, handledPipe.Status.Phase)
-	assert.Equal(t, corev1.ConditionFalse, handledPipe.Status.GetCondition(v1.PipeConditionReady).Status)
+	assert.Equal(t, metav1.ConditionFalse, handledPipe.Status.GetCondition(v1.PipeConditionReady).Status)
 	assert.Equal(t, "Integration \"my-pipe\" is in \"Creating\" phase", handledPipe.Status.GetCondition(v1.PipeConditionReady).Message)
 }
 
@@ -416,7 +416,7 @@ func TestPipeIntegrationBuildComplete(t *testing.T) {
 	handledPipe, err := a.Handle(context.TODO(), pipe)
 	require.NoError(t, err)
 	assert.Equal(t, v1.PipePhaseBuildComplete, handledPipe.Status.Phase)
-	assert.Equal(t, corev1.ConditionFalse, handledPipe.Status.GetCondition(v1.PipeConditionReady).Status)
+	assert.Equal(t, metav1.ConditionFalse, handledPipe.Status.GetCondition(v1.PipeConditionReady).Status)
 	assert.Equal(t, "BuildComplete", handledPipe.Status.GetCondition(v1.PipeConditionReady).Reason)
 	assert.Equal(t, "Integration \"my-pipe\" build completed successfully", handledPipe.Status.GetCondition(v1.PipeConditionReady).Message)
 }
