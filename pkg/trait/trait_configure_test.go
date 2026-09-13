@@ -162,22 +162,42 @@ func TestTraitSplitConfiguration(t *testing.T) {
 }
 
 func TestRemovedTraitConfiguration(t *testing.T) {
-	cl, err := internal.NewFakeClient()
-	require.NoError(t, err)
-	env := Environment{
-		Ctx:    context.Background(),
-		Client: cl,
-		Integration: &v1.Integration{
-			Spec: v1.IntegrationSpec{
-				Traits: v1.Traits{
-					DeprecatedLogging: &traitv1.LoggingTrait{
-						Level: "DEBUG",
-					},
-				},
+	for _, test := range []struct {
+		name   string
+		traits v1.Traits
+	}{
+		{
+			name: "logging",
+			traits: v1.Traits{
+				DeprecatedLogging: &traitv1.LoggingTrait{Level: "DEBUG"},
 			},
 		},
+		{
+			name: "master",
+			traits: v1.Traits{
+				DeprecatedMaster: &traitv1.MasterTrait{ResourceName: ptr.To("my-lock")},
+			},
+		},
+		{
+			name: "telemetry",
+			traits: v1.Traits{
+				DeprecatedTelemetry: &traitv1.TelemetryTrait{Endpoint: "http://jaeger:4317"},
+			},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			cl, err := internal.NewFakeClient()
+			require.NoError(t, err)
+			env := Environment{
+				Ctx:    context.Background(),
+				Client: cl,
+				Integration: &v1.Integration{
+					Spec: v1.IntegrationSpec{Traits: test.traits},
+				},
+			}
+			c := NewCatalog(nil)
+			require.NoError(t, c.Configure(&env))
+			assert.Nil(t, c.GetTrait(test.name))
+		})
 	}
-	c := NewCatalog(nil)
-	require.NoError(t, c.Configure(&env))
-	assert.Nil(t, c.GetTrait("logging"))
 }

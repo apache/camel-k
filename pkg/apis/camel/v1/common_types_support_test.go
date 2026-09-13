@@ -18,6 +18,7 @@ limitations under the License.
 package v1
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -35,9 +36,9 @@ func TestTraitsMerge(t *testing.T) {
 			Auto:        ptr.To(false),
 			ServicePort: 81,
 		},
-		Environment: &trait.EnvironmentTrait{
-			ContainerMeta: ptr.To(false),
-			HTTPProxy:     ptr.To(false),
+		DeprecatedLogging: &trait.LoggingTrait{
+			Color: ptr.To(false),
+			Level: "INFO",
 		},
 	}
 	t2 := Traits{
@@ -45,8 +46,9 @@ func TestTraitsMerge(t *testing.T) {
 			Port:     8081,
 			PortName: "http-8081",
 		},
-		Environment: &trait.EnvironmentTrait{
-			HTTPProxy: ptr.To(true),
+		DeprecatedLogging: &trait.LoggingTrait{
+			Color: ptr.To(true),
+			Level: "DEBUG",
 		},
 	}
 
@@ -60,9 +62,23 @@ func TestTraitsMerge(t *testing.T) {
 	assert.Equal(t, int32(81), t1.Container.ServicePort)
 
 	// values from merged trait take precedence over the original ones
-	assert.NotNil(t, t1.Environment)
-	assert.True(t, ptr.Deref(t1.Environment.HTTPProxy, false))
-	assert.False(t, ptr.Deref(t1.Environment.ContainerMeta, true))
+	assert.NotNil(t, t1.DeprecatedLogging)
+	assert.True(t, ptr.Deref(t1.DeprecatedLogging.Color, false))
+	assert.Equal(t, "DEBUG", t1.DeprecatedLogging.Level)
+}
+
+func TestDeprecatedTraitsJSONNames(t *testing.T) {
+	traits := Traits{
+		DeprecatedLogging: &trait.LoggingTrait{Level: "DEBUG"},
+		DeprecatedMaster:  &trait.MasterTrait{ResourceName: ptr.To("my-lock")},
+		DeprecatedTelemetry: &trait.TelemetryTrait{
+			Endpoint: "http://jaeger:4317",
+		},
+	}
+
+	data, err := json.Marshal(traits)
+	require.NoError(t, err)
+	assert.JSONEq(t, `{"logging":{"level":"DEBUG"},"master":{"resourceName":"my-lock"},"telemetry":{"endpoint":"http://jaeger:4317"}}`, string(data))
 }
 
 func TestIntegrationKitTraitsMerge(t *testing.T) {
