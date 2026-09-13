@@ -60,7 +60,7 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, *TraitCondition, erro
 	if e.IntegrationInPhase(v1.IntegrationPhaseRunning, v1.IntegrationPhaseError) {
 		condition := e.Integration.Status.GetCondition(v1.IntegrationConditionDeploymentAvailable)
 
-		return condition != nil && condition.Status == corev1.ConditionTrue, nil, nil
+		return condition != nil && condition.Status == metav1.ConditionTrue, nil, nil
 	}
 
 	// Don't deploy when a different strategy is needed (e.g. Knative, Cron)

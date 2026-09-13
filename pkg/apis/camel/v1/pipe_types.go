@@ -105,31 +105,15 @@ type PipeStatus struct {
 	// Phase --
 	Phase PipePhase `json:"phase,omitempty"`
 	// Conditions --
-	Conditions []PipeCondition `json:"conditions,omitempty"`
-	// Replicas is the number of actual replicas of the pipe
-	Replicas *int32 `json:"replicas,omitempty"`
-	// Selector allows to identify pods belonging to the pipe
-	Selector string `json:"selector,omitempty"`
-}
-
-// PipeCondition describes the state of a resource at a certain point.
-type PipeCondition struct {
-	// Type of pipe condition.
-	Type PipeConditionType `json:"type"`
-	// Status of the condition, one of True, False, Unknown.
-	Status corev1.ConditionStatus `json:"status"`
-	// The last time this condition was updated.
-	LastUpdateTime metav1.Time `json:"lastUpdateTime,omitempty"`
-	// Last time the condition transitioned from one status to another.
-	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
-	// The reason for the condition's last transition.
-	Reason string `json:"reason,omitempty"`
-	// A human readable message indicating details about the transition.
-	Message string `json:"message,omitempty"`
+	Conditions []metav1.Condition `json:"conditions,omitempty"`
 	// DeprecatedPods collect health and conditions information from the owned PODs
 	//
 	// Deprecated: may be removed in future releases.
 	DeprecatedPods []PodCondition `json:"pods,omitempty"`
+	// Replicas is the number of actual replicas of the pipe
+	Replicas *int32 `json:"replicas,omitempty"`
+	// Selector allows to identify pods belonging to the pipe
+	Selector string `json:"selector,omitempty"`
 }
 
 // PipeConditionType --.

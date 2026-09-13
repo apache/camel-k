@@ -25,6 +25,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -128,9 +129,9 @@ func (action *monitorAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.Pip
 
 	case v1.IntegrationPhaseBuildComplete:
 		target.Status.Phase = v1.PipePhaseBuildComplete
-		c := v1.PipeCondition{
-			Type:    v1.PipeConditionReady,
-			Status:  corev1.ConditionFalse,
+		c := metav1.Condition{
+			Type:    string(v1.PipeConditionReady),
+			Status:  metav1.ConditionFalse,
 			Reason:  "BuildComplete",
 			Message: fmt.Sprintf("Integration %q build completed successfully", it.GetName()),
 		}
@@ -139,20 +140,14 @@ func (action *monitorAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.Pip
 	default:
 		target.Status.Phase = v1.PipePhaseCreating
 
-		c := v1.PipeCondition{
-			Type:    v1.PipeConditionReady,
-			Status:  corev1.ConditionFalse,
+		c := metav1.Condition{
+			Type:    string(v1.PipeConditionReady),
+			Status:  metav1.ConditionFalse,
 			Reason:  string(target.Status.Phase),
 			Message: fmt.Sprintf("Integration %q is in %q phase", it.GetName(), target.Status.Phase),
 		}
 
-		//nolint:staticcheck
-		if condition := it.Status.GetCondition(v1.IntegrationConditionReady); condition != nil {
-			if condition.DeprecatedPods != nil {
-				c.DeprecatedPods = make([]v1.PodCondition, 0, len(condition.DeprecatedPods))
-				c.DeprecatedPods = append(c.DeprecatedPods, condition.DeprecatedPods...)
-			}
-		}
+		target.Status.DeprecatedPods = append([]v1.PodCondition(nil), it.Status.DeprecatedPods...)
 
 		target.Status.SetConditions(c)
 	}
@@ -173,18 +168,14 @@ func setPipeReadyCondition(kb *v1.Pipe, it *v1.Integration) {
 			message = fmt.Sprintf("Integration %q readiness condition is %q", it.GetName(), condition.Status)
 		}
 
-		c := v1.PipeCondition{
-			Type:    v1.PipeConditionReady,
+		c := metav1.Condition{
+			Type:    string(v1.PipeConditionReady),
 			Status:  condition.Status,
 			Reason:  condition.Reason,
 			Message: message,
 		}
 
-		//nolint:staticcheck
-		if condition.DeprecatedPods != nil {
-			c.DeprecatedPods = make([]v1.PodCondition, 0, len(condition.DeprecatedPods))
-			c.DeprecatedPods = append(c.DeprecatedPods, condition.DeprecatedPods...)
-		}
+		kb.Status.DeprecatedPods = append([]v1.PodCondition(nil), it.Status.DeprecatedPods...)
 
 		kb.Status.SetConditions(c)
 	} else {

@@ -95,9 +95,9 @@ func (t *prometheusTrait) Apply(e *Environment) error {
 		return nil
 	}
 
-	condition := v1.IntegrationCondition{
-		Type:   v1.IntegrationConditionPrometheusAvailable,
-		Status: corev1.ConditionTrue,
+	condition := metav1.Condition{
+		Type:   string(v1.IntegrationConditionPrometheusAvailable),
+		Status: metav1.ConditionTrue,
 		Reason: v1.IntegrationConditionPrometheusAvailableReason,
 	}
 

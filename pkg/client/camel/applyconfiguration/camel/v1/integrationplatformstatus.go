@@ -21,6 +21,7 @@ package v1
 
 import (
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	applyconfigurationsmetav1 "k8s.io/client-go/applyconfigurations/meta/v1"
 )
 
 // IntegrationPlatformStatusApplyConfiguration represents a declarative configuration of the IntegrationPlatformStatus type for use
@@ -34,7 +35,7 @@ type IntegrationPlatformStatusApplyConfiguration struct {
 	// defines in what phase the IntegrationPlatform is found
 	Phase *camelv1.IntegrationPlatformPhase `json:"phase,omitempty"`
 	// which are the conditions met (particularly useful when in ERROR phase)
-	Conditions []IntegrationPlatformConditionApplyConfiguration `json:"conditions,omitempty"`
+	Conditions []applyconfigurationsmetav1.ConditionApplyConfiguration `json:"conditions,omitempty"`
 	// the Camel K operator version controlling this IntegrationPlatform
 	Version *string `json:"version,omitempty"`
 	// generic information related to the build of Camel K operator software
@@ -119,7 +120,7 @@ func (b *IntegrationPlatformStatusApplyConfiguration) WithPhase(value camelv1.In
 // WithConditions adds the given value to the Conditions field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the Conditions field.
-func (b *IntegrationPlatformStatusApplyConfiguration) WithConditions(values ...*IntegrationPlatformConditionApplyConfiguration) *IntegrationPlatformStatusApplyConfiguration {
+func (b *IntegrationPlatformStatusApplyConfiguration) WithConditions(values ...*applyconfigurationsmetav1.ConditionApplyConfiguration) *IntegrationPlatformStatusApplyConfiguration {
 	for i := range values {
 		if values[i] == nil {
 			panic("nil value passed to WithConditions")

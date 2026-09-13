@@ -101,7 +101,7 @@ func TestApplyDeploymentTraitWhileDeployingIntegrationDoesSucceed(t *testing.T) 
 
 	conditions := environment.Integration.Status.Conditions
 	assert.Len(t, conditions, 1)
-	assert.Equal(t, v1.IntegrationConditionDeploymentAvailable, conditions[0].Type)
+	assert.Equal(t, string(v1.IntegrationConditionDeploymentAvailable), conditions[0].Type)
 	assert.Equal(t, "deployment name is integration-name", conditions[0].Message)
 }
 

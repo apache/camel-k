@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -62,7 +63,7 @@ func (t *securityContextTrait) Configure(e *Environment) (bool, *TraitCondition,
 	// https://knative.dev/docs/serving/configuration/feature-flags/#kubernetes-security-context
 	// The user should instead use container security context.
 	condition := e.Integration.Status.GetCondition(v1.IntegrationConditionKnativeServiceAvailable)
-	if condition != nil && condition.Status == corev1.ConditionTrue {
+	if condition != nil && condition.Status == metav1.ConditionTrue {
 		return false, NewIntegrationConditionPlatformDisabledWithMessage(
 			"SecurityContext",
 			"pod security context is disabled for Knative Service. "+

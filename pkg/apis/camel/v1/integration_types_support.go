@@ -28,6 +28,7 @@ import (
 
 	yaml2 "gopkg.in/yaml.v2"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
@@ -349,7 +350,7 @@ func (in *Integration) IsConditionTrue(conditionType IntegrationConditionType) b
 		return false
 	}
 
-	return cond.Status == corev1.ConditionTrue
+	return cond.Status == metav1.ConditionTrue
 }
 
 // SetReadyCondition sets Ready condition with the given status, reason, and message.
@@ -382,123 +383,68 @@ func (in *Integration) SetDeployingPhase() {
 }
 
 // GetCondition returns the condition with the provided type.
-func (in *IntegrationStatus) GetCondition(condType IntegrationConditionType) *IntegrationCondition {
-	for i := range in.Conditions {
-		c := in.Conditions[i]
-		if c.Type == condType {
-			return &c
-		}
-	}
-
-	return nil
+func (in *IntegrationStatus) GetCondition(condType IntegrationConditionType) *metav1.Condition {
+	return meta.FindStatusCondition(in.Conditions, string(condType))
 }
 
 func (in *IntegrationStatus) SetCondition(condType IntegrationConditionType, status corev1.ConditionStatus, reason string, message string) {
-	in.SetConditions(IntegrationCondition{
-		Type:    condType,
-		Status:  status,
+	in.SetConditions(metav1.Condition{
+		Type:    string(condType),
+		Status:  metav1.ConditionStatus(status),
 		Reason:  reason,
 		Message: message,
 	})
 }
 
 func (in *IntegrationStatus) SetErrorCondition(condType IntegrationConditionType, reason string, err error) {
-	in.SetConditions(IntegrationCondition{
-		Type:    condType,
-		Status:  corev1.ConditionFalse,
+	in.SetConditions(metav1.Condition{
+		Type:    string(condType),
+		Status:  metav1.ConditionFalse,
 		Reason:  reason,
 		Message: err.Error(),
 	})
 }
 
-// SetConditions updates the resource to include the provided conditions.
+// SetConditions updates the resource to include the provided conditions, delegating the
+// well known metav1.Condition semantics (LastTransitionTime handling, etc.) to
+// k8s.io/apimachinery's meta.SetStatusCondition.
 //
-// If a condition that we are about to add already exists and has the same status and
-// reason then we are not going to update.
-func (in *IntegrationStatus) SetConditions(conditions ...IntegrationCondition) {
+// As a side effect, when the Ready condition transitions to True for the first time,
+// IntegrationStatus.FirstReadyTimestamp is recorded. This used to be tracked as a
+// per-condition FirstTruthyTime field, which metav1.Condition has no room for.
+func (in *IntegrationStatus) SetConditions(conditions ...metav1.Condition) {
 	// Round to second precision, as meta.Time fields are marshalled in RFC3339 format
 	now := metav1.Now().Rfc3339Copy()
 	for _, condition := range conditions {
-		currentCond := in.GetCondition(condition.Type)
-
-		if currentCond != nil && currentCond.Status == condition.Status && currentCond.Reason == condition.Reason && currentCond.Message == condition.Message {
-			break
+		if condition.Reason == "" {
+			// Reason is a required field for metav1.Condition.
+			condition.Reason = string(condition.Status)
 		}
-
-		if condition.LastUpdateTime.IsZero() {
-			condition.LastUpdateTime = now
-		}
-
 		if condition.LastTransitionTime.IsZero() {
-			// We may want not to set it when the current condition is nil
 			condition.LastTransitionTime = now
 		}
 
-		if (condition.FirstTruthyTime == nil || condition.FirstTruthyTime.IsZero()) && condition.Status == corev1.ConditionTrue {
-			condition.FirstTruthyTime = &now
+		if condition.Type == string(IntegrationConditionReady) && condition.Status == metav1.ConditionTrue &&
+			(in.FirstReadyTimestamp == nil || in.FirstReadyTimestamp.IsZero()) {
+			in.FirstReadyTimestamp = &now
 		}
 
-		if currentCond != nil {
-			if currentCond.Status == condition.Status {
-				// Do not update LastTransitionTime if the status of the condition doesn't change
-				condition.LastTransitionTime = currentCond.LastTransitionTime
-			}
-			if currentCond.FirstTruthyTime != nil && !currentCond.FirstTruthyTime.IsZero() {
-				// Preserve FirstTruthyTime
-				condition.FirstTruthyTime = currentCond.FirstTruthyTime.DeepCopy()
-			}
-		}
-
-		in.RemoveCondition(condition.Type)
-		in.Conditions = append(in.Conditions, condition)
+		meta.SetStatusCondition(&in.Conditions, condition)
 	}
 }
 
 // RemoveCondition removes the resource condition with the provided type.
 func (in *IntegrationStatus) RemoveCondition(condType IntegrationConditionType) {
-	newConditions := in.Conditions[:0]
-	for _, c := range in.Conditions {
-		if c.Type != condType {
-			newConditions = append(newConditions, c)
-		}
-	}
-
-	in.Conditions = newConditions
+	meta.RemoveStatusCondition(&in.Conditions, string(condType))
 }
-
-var _ ResourceCondition = &IntegrationCondition{}
 
 func (in *IntegrationStatus) GetConditions() []ResourceCondition {
 	res := make([]ResourceCondition, 0, len(in.Conditions))
-	for _, c := range in.Conditions {
-		res = append(res, &c)
+	for i := range in.Conditions {
+		res = append(res, (*conditionAdapter)(&in.Conditions[i]))
 	}
 
 	return res
-}
-
-func (c *IntegrationCondition) GetType() string {
-	return string(c.Type)
-}
-
-func (c *IntegrationCondition) GetStatus() corev1.ConditionStatus {
-	return c.Status
-}
-
-func (c *IntegrationCondition) GetLastUpdateTime() metav1.Time {
-	return c.LastUpdateTime
-}
-
-func (c *IntegrationCondition) GetLastTransitionTime() metav1.Time {
-	return c.LastTransitionTime
-}
-
-func (c *IntegrationCondition) GetReason() string {
-	return c.Reason
-}
-
-func (c *IntegrationCondition) GetMessage() string {
-	return c.Message
 }
 
 // FromYamlDSLString creates a slice of flows from a Camel YAML DSL string.

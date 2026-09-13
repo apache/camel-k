@@ -21,6 +21,7 @@ package v1
 
 import (
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	applyconfigurationsmetav1 "k8s.io/client-go/applyconfigurations/meta/v1"
 )
 
 // IntegrationKitStatusApplyConfiguration represents a declarative configuration of the IntegrationKitStatus type for use
@@ -55,7 +56,7 @@ type IntegrationKitStatusApplyConfiguration struct {
 	// the Camel K operator version for which this kit was configured
 	Version *string `json:"version,omitempty"`
 	// a list of conditions which happened for the events related the kit
-	Conditions []IntegrationKitConditionApplyConfiguration `json:"conditions,omitempty"`
+	Conditions []applyconfigurationsmetav1.ConditionApplyConfiguration `json:"conditions,omitempty"`
 }
 
 // IntegrationKitStatusApplyConfiguration constructs a declarative configuration of the IntegrationKitStatus type for use with
@@ -176,7 +177,7 @@ func (b *IntegrationKitStatusApplyConfiguration) WithVersion(value string) *Inte
 // WithConditions adds the given value to the Conditions field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the Conditions field.
-func (b *IntegrationKitStatusApplyConfiguration) WithConditions(values ...*IntegrationKitConditionApplyConfiguration) *IntegrationKitStatusApplyConfiguration {
+func (b *IntegrationKitStatusApplyConfiguration) WithConditions(values ...*applyconfigurationsmetav1.ConditionApplyConfiguration) *IntegrationKitStatusApplyConfiguration {
 	for i := range values {
 		if values[i] == nil {
 			panic("nil value passed to WithConditions")

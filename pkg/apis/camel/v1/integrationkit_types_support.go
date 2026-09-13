@@ -25,6 +25,7 @@ import (
 
 	"github.com/apache/camel-k/v2/pkg/util/sets"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -129,36 +130,25 @@ func (in *IntegrationKit) HasCapability(capability string) bool {
 }
 
 // GetCondition returns the condition with the provided type.
-func (in *IntegrationKitStatus) GetCondition(condType IntegrationKitConditionType) *IntegrationKitCondition {
-	for i := range in.Conditions {
-		c := in.Conditions[i]
-		if c.Type == condType {
-			return &c
-		}
-	}
-
-	return nil
+func (in *IntegrationKitStatus) GetCondition(condType IntegrationKitConditionType) *metav1.Condition {
+	return meta.FindStatusCondition(in.Conditions, string(condType))
 }
 
 func (in *IntegrationKitStatus) SetCondition(condType IntegrationKitConditionType, status corev1.ConditionStatus, reason string, message string) {
-	in.SetConditions(IntegrationKitCondition{
-		Type:               condType,
-		Status:             status,
-		LastUpdateTime:     metav1.Now(),
-		LastTransitionTime: metav1.Now(),
-		Reason:             reason,
-		Message:            message,
+	in.SetConditions(metav1.Condition{
+		Type:    string(condType),
+		Status:  metav1.ConditionStatus(status),
+		Reason:  reason,
+		Message: message,
 	})
 }
 
 func (in *IntegrationKitStatus) SetErrorCondition(condType IntegrationKitConditionType, reason string, err error) {
-	in.SetConditions(IntegrationKitCondition{
-		Type:               condType,
-		Status:             corev1.ConditionFalse,
-		LastUpdateTime:     metav1.Now(),
-		LastTransitionTime: metav1.Now(),
-		Reason:             reason,
-		Message:            err.Error(),
+	in.SetConditions(metav1.Condition{
+		Type:    string(condType),
+		Status:  metav1.ConditionFalse,
+		Reason:  reason,
+		Message: err.Error(),
 	})
 }
 
@@ -166,48 +156,29 @@ func (in *IntegrationKitStatus) SetErrorCondition(condType IntegrationKitConditi
 //
 // If a condition that we are about to add already exists and has the same status and
 // reason then we are not going to update.
-func (in *IntegrationKitStatus) SetConditions(conditions ...IntegrationKitCondition) {
+func (in *IntegrationKitStatus) SetConditions(conditions ...metav1.Condition) {
 	for _, condition := range conditions {
-		if condition.LastUpdateTime.IsZero() {
-			condition.LastUpdateTime = metav1.Now()
+		if condition.Reason == "" {
+			// Reason is a required field for metav1.Condition.
+			condition.Reason = string(condition.Status)
 		}
 		if condition.LastTransitionTime.IsZero() {
 			condition.LastTransitionTime = metav1.Now()
 		}
 
-		currentCond := in.GetCondition(condition.Type)
-
-		if currentCond != nil && currentCond.Status == condition.Status && currentCond.Reason == condition.Reason {
-			return
-		}
-		// Do not update lastTransitionTime if the status of the condition doesn't change.
-		if currentCond != nil && currentCond.Status == condition.Status {
-			condition.LastTransitionTime = currentCond.LastTransitionTime
-		}
-
-		in.RemoveCondition(condition.Type)
-		in.Conditions = append(in.Conditions, condition)
+		meta.SetStatusCondition(&in.Conditions, condition)
 	}
 }
 
 // RemoveCondition removes the resource condition with the provided type.
 func (in *IntegrationKitStatus) RemoveCondition(condType IntegrationKitConditionType) {
-	newConditions := in.Conditions[:0]
-	for _, c := range in.Conditions {
-		if c.Type != condType {
-			newConditions = append(newConditions, c)
-		}
-	}
-
-	in.Conditions = newConditions
+	meta.RemoveStatusCondition(&in.Conditions, string(condType))
 }
-
-var _ ResourceCondition = &IntegrationKitCondition{}
 
 func (in *IntegrationKitStatus) GetConditions() []ResourceCondition {
 	res := make([]ResourceCondition, 0, len(in.Conditions))
-	for _, c := range in.Conditions {
-		res = append(res, &c)
+	for i := range in.Conditions {
+		res = append(res, (*conditionAdapter)(&in.Conditions[i]))
 	}
 
 	return res
@@ -225,28 +196,4 @@ func (in *IntegrationKitStatus) GetDependenciesPaths() *sets.Set {
 	}
 
 	return s
-}
-
-func (c *IntegrationKitCondition) GetType() string {
-	return string(c.Type)
-}
-
-func (c *IntegrationKitCondition) GetStatus() corev1.ConditionStatus {
-	return c.Status
-}
-
-func (c *IntegrationKitCondition) GetLastUpdateTime() metav1.Time {
-	return c.LastUpdateTime
-}
-
-func (c *IntegrationKitCondition) GetLastTransitionTime() metav1.Time {
-	return c.LastTransitionTime
-}
-
-func (c *IntegrationKitCondition) GetReason() string {
-	return c.Reason
-}
-
-func (c *IntegrationKitCondition) GetMessage() string {
-	return c.Message
 }

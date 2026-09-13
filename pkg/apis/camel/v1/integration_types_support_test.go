@@ -23,6 +23,9 @@ import (
 	"fmt"
 	"testing"
 
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -153,4 +156,31 @@ func TestReadWriteYaml(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotNil(t, data)
 	assert.Equal(t, yaml, string(data))
+}
+
+func TestIntegrationStatusSetConditions(t *testing.T) {
+	status := IntegrationStatus{}
+
+	status.SetCondition(IntegrationConditionReady, corev1.ConditionTrue, "Ready", "integration is ready")
+
+	condition := status.GetCondition(IntegrationConditionReady)
+	require.NotNil(t, condition)
+	assert.Equal(t, metav1.ConditionTrue, condition.Status)
+	assert.False(t, condition.LastTransitionTime.IsZero())
+	require.NotNil(t, status.FirstReadyTimestamp)
+	firstReady := status.FirstReadyTimestamp.DeepCopy()
+	transition := condition.LastTransitionTime
+
+	status.SetCondition(IntegrationConditionReady, corev1.ConditionTrue, "Ready", "updated message")
+
+	condition = status.GetCondition(IntegrationConditionReady)
+	require.NotNil(t, condition)
+	assert.Equal(t, transition, condition.LastTransitionTime)
+	assert.Equal(t, firstReady, status.FirstReadyTimestamp)
+
+	status.SetCondition(IntegrationConditionReady, corev1.ConditionFalse, "NotReady", "integration is not ready")
+	condition = status.GetCondition(IntegrationConditionReady)
+	require.NotNil(t, condition)
+	assert.Equal(t, metav1.ConditionFalse, condition.Status)
+	assert.Equal(t, firstReady, status.FirstReadyTimestamp)
 }

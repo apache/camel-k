@@ -23,7 +23,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -56,10 +55,10 @@ func TestIntegrationExecutedTrait(t *testing.T) {
 			},
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseRunning,
-				Conditions: []v1.IntegrationCondition{
+				Conditions: []metav1.Condition{
 					{
-						Type:   v1.IntegrationConditionDeploymentAvailable,
-						Status: corev1.ConditionTrue,
+						Type:   string(v1.IntegrationConditionDeploymentAvailable),
+						Status: metav1.ConditionTrue,
 					},
 				},
 			},

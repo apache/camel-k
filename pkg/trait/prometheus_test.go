@@ -78,8 +78,8 @@ func TestApplyNominalPrometheusTraitDoesSucceed(t *testing.T) {
 
 	assert.Len(t, environment.Integration.Status.Conditions, 1)
 	condition := environment.Integration.Status.Conditions[0]
-	assert.Equal(t, v1.IntegrationConditionPrometheusAvailable, condition.Type)
-	assert.Equal(t, corev1.ConditionTrue, condition.Status)
+	assert.Equal(t, string(v1.IntegrationConditionPrometheusAvailable), condition.Type)
+	assert.Equal(t, metav1.ConditionTrue, condition.Status)
 }
 
 func TestApplyPrometheusTraitWithoutContainerDoesNotSucceed(t *testing.T) {
@@ -93,8 +93,8 @@ func TestApplyPrometheusTraitWithoutContainerDoesNotSucceed(t *testing.T) {
 
 	assert.Len(t, environment.Integration.Status.Conditions, 1)
 	condition := environment.Integration.Status.Conditions[0]
-	assert.Equal(t, v1.IntegrationConditionPrometheusAvailable, condition.Type)
-	assert.Equal(t, corev1.ConditionFalse, condition.Status)
+	assert.Equal(t, string(v1.IntegrationConditionPrometheusAvailable), condition.Type)
+	assert.Equal(t, metav1.ConditionFalse, condition.Status)
 }
 
 func TestPrometheusTraitGetPodMonitor(t *testing.T) {

@@ -31,6 +31,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestCanHandlePhaseReadyOrError(t *testing.T) {
@@ -90,10 +91,10 @@ func TestMonitorReady(t *testing.T) {
 	assert.NotNil(t, answer)
 
 	assert.Equal(t, v1.IntegrationPlatformPhaseReady, answer.Status.Phase)
-	assert.Equal(t, corev1.ConditionTrue,
+	assert.Equal(t, metav1.ConditionTrue,
 		answer.Status.GetCondition(v1.IntegrationPlatformConditionTypeRegistryAvailable).Status)
 	assert.Nil(t, answer.Status.GetCondition(v1.IntegrationPlatformConditionType("InsecureRegistryWarning")))
-	assert.Equal(t, corev1.ConditionTrue,
+	assert.Equal(t, metav1.ConditionTrue,
 		answer.Status.GetCondition(v1.IntegrationPlatformConditionMavenSettingsAvailable).Status)
 	assert.Equal(t, "3.2.1", answer.Status.Build.RuntimeCoreVersion)
 }
@@ -149,7 +150,7 @@ func TestMonitorDriftDefault(t *testing.T) {
 	assert.NotNil(t, answer)
 
 	assert.Equal(t, v1.IntegrationPlatformPhaseReady, answer.Status.Phase)
-	assert.Equal(t, corev1.ConditionFalse,
+	assert.Equal(t, metav1.ConditionFalse,
 		answer.Status.GetCondition(v1.IntegrationPlatformConditionMavenSettingsAvailable).Status)
 	assert.Equal(t, "3.2.1", answer.Status.Build.RuntimeCoreVersion)
 }
@@ -233,7 +234,7 @@ func TestMonitorMissingRegistryError(t *testing.T) {
 	assert.NotNil(t, answer)
 
 	assert.Equal(t, v1.IntegrationPlatformPhaseError, answer.Status.Phase)
-	assert.Equal(t, corev1.ConditionFalse, answer.Status.GetCondition(v1.IntegrationPlatformConditionTypeRegistryAvailable).Status)
+	assert.Equal(t, metav1.ConditionFalse, answer.Status.GetCondition(v1.IntegrationPlatformConditionTypeRegistryAvailable).Status)
 	assert.Equal(t,
 		v1.IntegrationPlatformConditionTypeRegistryAvailableReason,
 		answer.Status.GetCondition(v1.IntegrationPlatformConditionTypeRegistryAvailable).Reason)
@@ -250,7 +251,7 @@ func TestMonitorMissingRegistryError(t *testing.T) {
 	assert.NotNil(t, answer)
 
 	assert.Equal(t, v1.IntegrationPlatformPhaseReady, answer.Status.Phase)
-	assert.Equal(t, corev1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionTypeRegistryAvailable).Status)
+	assert.Equal(t, metav1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionTypeRegistryAvailable).Status)
 	assert.Equal(t,
 		v1.IntegrationPlatformConditionTypeRegistryAvailableReason,
 		answer.Status.GetCondition(v1.IntegrationPlatformConditionTypeRegistryAvailable).Reason)
@@ -277,7 +278,7 @@ func TestMonitorMissingCatalogError(t *testing.T) {
 	assert.NotNil(t, answer)
 
 	assert.Equal(t, v1.IntegrationPlatformPhaseError, answer.Status.Phase)
-	assert.Equal(t, corev1.ConditionFalse, answer.Status.GetCondition(v1.IntegrationPlatformConditionCamelCatalogAvailable).Status)
+	assert.Equal(t, metav1.ConditionFalse, answer.Status.GetCondition(v1.IntegrationPlatformConditionCamelCatalogAvailable).Status)
 	assert.Equal(t, v1.IntegrationPlatformConditionCamelCatalogAvailableReason, answer.Status.GetCondition(
 		v1.IntegrationPlatformConditionCamelCatalogAvailable).Reason)
 	assert.Equal(t, fmt.Sprintf("camel catalog %s not available, please review given runtime version",
@@ -316,8 +317,8 @@ func TestMonitorWarningInsecureRegistry(t *testing.T) {
 	assert.NotNil(t, answer)
 
 	assert.Equal(t, v1.IntegrationPlatformPhaseReady, answer.Status.Phase)
-	assert.Equal(t, corev1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionTypeRegistryAvailable).Status)
-	assert.Equal(t, corev1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionType("InsecureRegistryWarning")).Status)
+	assert.Equal(t, metav1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionTypeRegistryAvailable).Status)
+	assert.Equal(t, metav1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionType("InsecureRegistryWarning")).Status)
 	assert.Equal(t, "Registry is insecure. This setup should not be used in a production environment.",
 		answer.Status.GetCondition(
 			v1.IntegrationPlatformConditionType("InsecureRegistryWarning")).Message)

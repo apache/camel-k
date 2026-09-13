@@ -21,7 +21,6 @@ import (
 	"context"
 	"testing"
 
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -64,11 +63,11 @@ func TestCamelImportDeployment(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, v1.IntegrationPhaseRunning, handledIt.Status.Phase)
 	// Ready condition
-	assert.Equal(t, corev1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
+	assert.Equal(t, metav1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
 	assert.Equal(t, v1.IntegrationConditionDeploymentReadyReason, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
 	assert.Equal(t, "imported from my-deploy Deployment", handledIt.Status.GetCondition(v1.IntegrationConditionReady).Message)
 	// Deployment condition
-	assert.Equal(t, corev1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionDeploymentAvailable).Status)
+	assert.Equal(t, metav1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionDeploymentAvailable).Status)
 	assert.Equal(t, v1.IntegrationConditionDeploymentAvailableReason, handledIt.Status.GetCondition(v1.IntegrationConditionDeploymentAvailable).Reason)
 	assert.Equal(t, "imported from my-deploy Deployment", handledIt.Status.GetCondition(v1.IntegrationConditionDeploymentAvailable).Message)
 }
@@ -104,11 +103,11 @@ func TestCamelImportCronJob(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, v1.IntegrationPhaseRunning, handledIt.Status.Phase)
 	// Ready condition
-	assert.Equal(t, corev1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
+	assert.Equal(t, metav1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
 	assert.Equal(t, v1.IntegrationConditionDeploymentReadyReason, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
 	assert.Equal(t, "imported from my-cron CronJob", handledIt.Status.GetCondition(v1.IntegrationConditionReady).Message)
 	// CronJob condition
-	assert.Equal(t, corev1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionCronJobAvailable).Status)
+	assert.Equal(t, metav1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionCronJobAvailable).Status)
 	assert.Equal(t, v1.IntegrationConditionCronJobCreatedReason, handledIt.Status.GetCondition(v1.IntegrationConditionCronJobAvailable).Reason)
 	assert.Equal(t, "imported from my-cron CronJob", handledIt.Status.GetCondition(v1.IntegrationConditionCronJobAvailable).Message)
 }
@@ -144,11 +143,11 @@ func TestCamelImportKnativeService(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, v1.IntegrationPhaseRunning, handledIt.Status.Phase)
 	// Ready condition
-	assert.Equal(t, corev1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
+	assert.Equal(t, metav1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
 	assert.Equal(t, v1.IntegrationConditionKnativeServiceReadyReason, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
 	assert.Equal(t, "imported from my-ksvc KnativeService", handledIt.Status.GetCondition(v1.IntegrationConditionReady).Message)
 	// Knative Service condition
-	assert.Equal(t, corev1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionKnativeServiceAvailable).Status)
+	assert.Equal(t, metav1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionKnativeServiceAvailable).Status)
 	assert.Equal(t, v1.IntegrationConditionKnativeServiceAvailableReason, handledIt.Status.GetCondition(v1.IntegrationConditionKnativeServiceAvailable).Reason)
 	assert.Equal(t, "imported from my-ksvc KnativeService", handledIt.Status.GetCondition(v1.IntegrationConditionKnativeServiceAvailable).Message)
 }
@@ -184,7 +183,7 @@ func TestCamelImportUnsupportedKind(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, v1.IntegrationPhaseError, handledIt.Status.Phase)
 	// Ready condition
-	assert.Equal(t, corev1.ConditionFalse, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
+	assert.Equal(t, metav1.ConditionFalse, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
 	assert.Equal(t, v1.IntegrationConditionImportingKindAvailableReason, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
 	assert.Equal(t, "Unsupported SomeKind import kind", handledIt.Status.GetCondition(v1.IntegrationConditionReady).Message)
 }

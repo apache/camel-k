@@ -126,7 +126,7 @@ type IntegrationStatus struct {
 	// Deprecated: use properties instead.
 	Configuration []ConfigurationSpec `json:"configuration,omitempty"`
 	// a list of events happened for the Integration
-	Conditions []IntegrationCondition `json:"conditions,omitempty"`
+	Conditions []metav1.Condition `json:"conditions,omitempty"`
 	// the operator version
 	Version string `json:"version,omitempty"`
 	// the number of replicas
@@ -141,6 +141,18 @@ type IntegrationStatus struct {
 	DeploymentTimestamp *metav1.Time `json:"lastDeploymentTimestamp,omitempty"`
 	// the timestamp representing the last time when this integration was built.
 	BuildTimestamp *metav1.Time `json:"lastBuildTimestamp,omitempty"`
+	// the timestamp representing the first time the Ready condition became true.
+	//
+	// This used to be tracked per-condition (FirstTruthyTime on the Ready condition);
+	// it now lives on the status directly since Conditions was migrated to the
+	// standard metav1.Condition type, which has no room for extra fields.
+	FirstReadyTimestamp *metav1.Time `json:"firstReadyTimestamp,omitempty"`
+	// DeprecatedPods collect health and conditions information from the owned PODs
+	//
+	// Deprecated: may be removed in future releases. This used to live on the Ready
+	// IntegrationCondition; it moved to the status directly when Conditions was
+	// migrated to the standard metav1.Condition type.
+	DeprecatedPods []PodCondition `json:"pods,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -284,28 +296,6 @@ const (
 	// IntegrationConditionImportingKindAvailableReason used (as false) if we're trying to import an unsupported kind.
 	IntegrationConditionImportingKindAvailableReason string = "ImportingKindAvailable"
 )
-
-// IntegrationCondition describes the state of a resource at a certain point.
-type IntegrationCondition struct {
-	// Type of integration condition.
-	Type IntegrationConditionType `json:"type"`
-	// Status of the condition, one of True, False, Unknown.
-	Status corev1.ConditionStatus `json:"status"`
-	// The last time this condition was updated.
-	LastUpdateTime metav1.Time `json:"lastUpdateTime,omitempty"`
-	// Last time the condition transitioned from one status to another.
-	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
-	// First time the condition status transitioned to True.
-	FirstTruthyTime *metav1.Time `json:"firstTruthyTime,omitempty"`
-	// The reason for the condition's last transition.
-	Reason string `json:"reason,omitempty"`
-	// A human-readable message indicating details about the transition.
-	Message string `json:"message,omitempty"`
-	// DeprecatedPods collect health and conditions information from the owned PODs
-	//
-	// Deprecated: may be removed in future releases.
-	DeprecatedPods []PodCondition `json:"pods,omitempty"`
-}
 
 // PodSpecTemplate represent a template used to deploy an Integration `Pod`.
 type PodSpecTemplate struct {

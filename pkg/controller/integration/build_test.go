@@ -28,7 +28,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -238,7 +237,7 @@ func TestIntegrationBuildRunningBuildError(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, handledIt)
 	assert.Equal(t, v1.IntegrationPhaseError, handledIt.Status.Phase)
-	assert.Equal(t, corev1.ConditionFalse, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
+	assert.Equal(t, metav1.ConditionFalse, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
 	assert.Equal(t, "BuildError", handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
 	assert.Equal(t, "build failed", handledIt.Status.GetCondition(v1.IntegrationConditionReady).Message)
 }

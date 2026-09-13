@@ -9308,97 +9308,15 @@ spec:
               conditions:
                 description: a list of events happened for the Integration
                 items:
-                  description: IntegrationCondition describes the state of a resource
-                    at a certain point.
+                  description: Condition contains details for one aspect of the current state of a resource.
                   properties:
-                    firstTruthyTime:
-                      description: First time the condition status transitioned to
-                        True.
-                      format: date-time
-                      type: string
                     lastTransitionTime:
-                      description: Last time the condition transitioned from one status
-                        to another.
-                      format: date-time
-                      type: string
-                    lastUpdateTime:
-                      description: The last time this condition was updated.
+                      description: Last time the condition transitioned from one status to another.
                       format: date-time
                       type: string
                     message:
-                      description: A human-readable message indicating details about
-                        the transition.
+                      description: A human-readable message indicating details about the transition.
                       type: string
-                    pods:
-                      description: |-
-                        DeprecatedPods collect health and conditions information from the owned PODs
-
-                        Deprecated: may be removed in future releases.
-                      items:
-                        description: 'Deprecated: may be removed in future releases.'
-                        properties:
-                          condition:
-                            description: PodCondition contains details for the current
-                              condition of this pod.
-                            properties:
-                              lastProbeTime:
-                                description: Last time we probed the condition.
-                                format: date-time
-                                type: string
-                              lastTransitionTime:
-                                description: Last time the condition transitioned
-                                  from one status to another.
-                                format: date-time
-                                type: string
-                              message:
-                                description: Human-readable message indicating details
-                                  about last transition.
-                                type: string
-                              observedGeneration:
-                                description: If set, this represents the .metadata.generation
-                                  that the pod condition was set based upon.
-                                format: int64
-                                type: integer
-                              reason:
-                                description: Unique, one-word, CamelCase reason for
-                                  the condition's last transition.
-                                type: string
-                              status:
-                                description: |-
-                                  Status is the status of the condition.
-                                  Can be True, False, Unknown.
-                                  More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-conditions
-                                type: string
-                              type:
-                                description: |-
-                                  Type is the type of the condition.
-                                  More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-conditions
-                                type: string
-                            required:
-                            - status
-                            - type
-                            type: object
-                          health:
-                            items:
-                              properties:
-                                data:
-                                  description: |-
-                                    RawMessage is a raw encoded JSON value.
-                                    It implements Marshaler and Unmarshaler and can
-                                    be used to delay JSON decoding or precompute a JSON encoding.
-                                  x-kubernetes-preserve-unknown-fields: true
-                                name:
-                                  type: string
-                                status:
-                                  type: string
-                              type: object
-                            type: array
-                          name:
-                            type: string
-                        required:
-                        - condition
-                        type: object
-                      type: array
                     reason:
                       description: The reason for the condition's last transition.
                       type: string
@@ -9406,13 +9324,18 @@ spec:
                       description: Status of the condition, one of True, False, Unknown.
                       type: string
                     type:
-                      description: Type of integration condition.
+                      description: Type of condition.
                       type: string
                   required:
+                  - lastTransitionTime
+                  - message
+                  - reason
                   - status
                   - type
-                  type: object
                 type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
               configuration:
                 description: |-
                   a list of configuration specification.
@@ -9442,6 +9365,10 @@ spec:
                 type: array
               digest:
                 description: the digest calculated for this Integration
+                type: string
+              firstReadyTimestamp:
+                description: the timestamp representing the first time the Ready condition became true.
+                format: date-time
                 type: string
               generatedSources:
                 description: a list of sources generated for this Integration
@@ -9583,6 +9510,76 @@ spec:
               platform:
                 description: The IntegrationPlatform watching this Integration
                 type: string
+              pods:
+                description: |-
+                  DeprecatedPods collect health and conditions information from the owned PODs
+
+                  Deprecated: may be removed in future releases.
+                items:
+                  description: 'Deprecated: may be removed in future releases.'
+                  properties:
+                    condition:
+                      description: PodCondition contains details for the current
+                        condition of this pod.
+                      properties:
+                        lastProbeTime:
+                          description: Last time we probed the condition.
+                          format: date-time
+                          type: string
+                        lastTransitionTime:
+                          description: Last time the condition transitioned
+                            from one status to another.
+                          format: date-time
+                          type: string
+                        message:
+                          description: Human-readable message indicating details
+                            about last transition.
+                          type: string
+                        observedGeneration:
+                          description: If set, this represents the .metadata.generation
+                            that the pod condition was set based upon.
+                          format: int64
+                          type: integer
+                        reason:
+                          description: Unique, one-word, CamelCase reason for
+                            the condition's last transition.
+                          type: string
+                        status:
+                          description: |-
+                            Status is the status of the condition.
+                            Can be True, False, Unknown.
+                            More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-conditions
+                          type: string
+                        type:
+                          description: |-
+                            Type is the type of the condition.
+                            More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-conditions
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    health:
+                      items:
+                        properties:
+                          data:
+                            description: |-
+                              RawMessage is a raw encoded JSON value.
+                              It implements Marshaler and Unmarshaler and can
+                              be used to delay JSON decoding or precompute a JSON encoding.
+                            x-kubernetes-preserve-unknown-fields: true
+                          name:
+                            type: string
+                          status:
+                            type: string
+                        type: object
+                      type: array
+                    name:
+                      type: string
+                  required:
+                  - condition
+                  type: object
+                type: array
               profile:
                 description: |-
                   the profile needed to run this Integration

@@ -62,7 +62,7 @@ func TestNewPipeError(t *testing.T) {
 	assert.Equal(t, v1.PipePhaseError, handledPipe.Status.Phase)
 	cond := handledPipe.Status.GetCondition(v1.PipeConditionReady)
 	assert.NotNil(t, cond)
-	assert.Equal(t, corev1.ConditionFalse, cond.Status)
+	assert.Equal(t, metav1.ConditionFalse, cond.Status)
 	assert.Equal(t, "IntegrationError", cond.Reason)
 	assert.Equal(t, "no ref or URI specified in endpoint", cond.Message)
 }
@@ -266,7 +266,7 @@ func TestNewPipeUnsupportedRef(t *testing.T) {
 	assert.Equal(t, v1.PipePhaseError, handledPipe.Status.Phase)
 	cond := handledPipe.Status.GetCondition(v1.PipeConditionReady)
 	assert.NotNil(t, cond)
-	assert.Equal(t, corev1.ConditionFalse, cond.Status)
+	assert.Equal(t, metav1.ConditionFalse, cond.Status)
 	assert.Equal(t, "IntegrationError", cond.Reason)
 	assert.Equal(t, "could not find any suitable binding provider for my-api-version/my-kind my-kind-name in namespace ns. "+
 		"Bindings available: [\"kamelet\" \"knative-uri\" \"strimzi\" \"service-ref\" \"camel-uri\" \"knative-ref\"]", cond.Message)

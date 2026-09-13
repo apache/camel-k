@@ -134,58 +134,58 @@ func (action *initializeAction) importFromExternalApp(integration *v1.Integratio
 	return integration, nil
 }
 
-func getCamelAppImportingCondition(kind, message string) []v1.IntegrationCondition {
+func getCamelAppImportingCondition(kind, message string) []metav1.Condition {
 	switch kind {
 	case "Deployment":
-		return []v1.IntegrationCondition{
+		return []metav1.Condition{
 			{
-				Type:    v1.IntegrationConditionDeploymentAvailable,
-				Status:  corev1.ConditionTrue,
+				Type:    string(v1.IntegrationConditionDeploymentAvailable),
+				Status:  metav1.ConditionTrue,
 				Reason:  v1.IntegrationConditionDeploymentAvailableReason,
 				Message: message,
 			},
 			{
-				Type:    v1.IntegrationConditionReady,
-				Status:  corev1.ConditionTrue,
+				Type:    string(v1.IntegrationConditionReady),
+				Status:  metav1.ConditionTrue,
 				Reason:  v1.IntegrationConditionDeploymentReadyReason,
 				Message: message,
 			},
 		}
 	case "CronJob":
-		return []v1.IntegrationCondition{
+		return []metav1.Condition{
 			{
-				Type:    v1.IntegrationConditionCronJobAvailable,
-				Status:  corev1.ConditionTrue,
+				Type:    string(v1.IntegrationConditionCronJobAvailable),
+				Status:  metav1.ConditionTrue,
 				Reason:  v1.IntegrationConditionCronJobCreatedReason,
 				Message: message,
 			},
 			{
-				Type:    v1.IntegrationConditionReady,
-				Status:  corev1.ConditionTrue,
+				Type:    string(v1.IntegrationConditionReady),
+				Status:  metav1.ConditionTrue,
 				Reason:  v1.IntegrationConditionDeploymentReadyReason,
 				Message: message,
 			},
 		}
 	case "KnativeService":
-		return []v1.IntegrationCondition{
+		return []metav1.Condition{
 			{
-				Type:    v1.IntegrationConditionKnativeServiceAvailable,
-				Status:  corev1.ConditionTrue,
+				Type:    string(v1.IntegrationConditionKnativeServiceAvailable),
+				Status:  metav1.ConditionTrue,
 				Reason:  v1.IntegrationConditionKnativeServiceAvailableReason,
 				Message: message,
 			},
 			{
-				Type:    v1.IntegrationConditionReady,
-				Status:  corev1.ConditionTrue,
+				Type:    string(v1.IntegrationConditionReady),
+				Status:  metav1.ConditionTrue,
 				Reason:  v1.IntegrationConditionKnativeServiceReadyReason,
 				Message: message,
 			},
 		}
 	default:
-		return []v1.IntegrationCondition{
+		return []metav1.Condition{
 			{
-				Type:    v1.IntegrationConditionReady,
-				Status:  corev1.ConditionFalse,
+				Type:    string(v1.IntegrationConditionReady),
+				Status:  metav1.ConditionFalse,
 				Reason:  v1.IntegrationConditionImportingKindAvailableReason,
 				Message: fmt.Sprintf("Unsupported %s import kind", kind),
 			},

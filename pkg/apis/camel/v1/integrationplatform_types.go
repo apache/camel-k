@@ -18,7 +18,6 @@ limitations under the License.
 package v1
 
 import (
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -59,7 +58,7 @@ type IntegrationPlatformStatus struct {
 	// defines in what phase the IntegrationPlatform is found
 	Phase IntegrationPlatformPhase `json:"phase,omitempty"`
 	// which are the conditions met (particularly useful when in ERROR phase)
-	Conditions []IntegrationPlatformCondition `json:"conditions,omitempty"`
+	Conditions []metav1.Condition `json:"conditions,omitempty"`
 	// the Camel K operator version controlling this IntegrationPlatform
 	Version string `json:"version,omitempty"`
 	// generic information related to the build of Camel K operator software
@@ -230,19 +229,3 @@ const (
 	// IntegrationPlatformConditionCamelCatalogAvailableReason represents the reason that the IntegrationPlatform is created.
 	IntegrationPlatformConditionCamelCatalogAvailableReason = "IntegrationPlatformCamelCatalogAvailable"
 )
-
-// IntegrationPlatformCondition describes the state of a resource at a certain point.
-type IntegrationPlatformCondition struct {
-	// Type of integration condition.
-	Type IntegrationPlatformConditionType `json:"type"`
-	// Status of the condition, one of True, False, Unknown.
-	Status corev1.ConditionStatus `json:"status"`
-	// The last time this condition was updated.
-	LastUpdateTime metav1.Time `json:"lastUpdateTime,omitempty"`
-	// Last time the condition transitioned from one status to another.
-	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
-	// The reason for the condition's last transition.
-	Reason string `json:"reason,omitempty"`
-	// A human-readable message indicating details about the transition.
-	Message string `json:"message,omitempty"`
-}
