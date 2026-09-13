@@ -35,9 +35,9 @@ func TestTraitsMerge(t *testing.T) {
 			Auto:        ptr.To(false),
 			ServicePort: 81,
 		},
-		Logging: &trait.LoggingTrait{
-			Color: ptr.To(false),
-			Level: "INFO",
+		Environment: &trait.EnvironmentTrait{
+			ContainerMeta: ptr.To(false),
+			HTTPProxy:     ptr.To(false),
 		},
 	}
 	t2 := Traits{
@@ -45,9 +45,8 @@ func TestTraitsMerge(t *testing.T) {
 			Port:     8081,
 			PortName: "http-8081",
 		},
-		Logging: &trait.LoggingTrait{
-			Color: ptr.To(true),
-			Level: "DEBUG",
+		Environment: &trait.EnvironmentTrait{
+			HTTPProxy: ptr.To(true),
 		},
 	}
 
@@ -61,9 +60,9 @@ func TestTraitsMerge(t *testing.T) {
 	assert.Equal(t, int32(81), t1.Container.ServicePort)
 
 	// values from merged trait take precedence over the original ones
-	assert.NotNil(t, t1.Logging)
-	assert.True(t, ptr.Deref(t1.Logging.Color, false))
-	assert.Equal(t, "DEBUG", t1.Logging.Level)
+	assert.NotNil(t, t1.Environment)
+	assert.True(t, ptr.Deref(t1.Environment.HTTPProxy, false))
+	assert.False(t, ptr.Deref(t1.Environment.ContainerMeta, true))
 }
 
 func TestIntegrationKitTraitsMerge(t *testing.T) {

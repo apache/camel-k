@@ -6,6 +6,7 @@ package v1
 
 import (
 	"encoding/json"
+
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -3320,13 +3321,13 @@ func (in *Traits) DeepCopyInto(out *Traits) {
 		*out = new(trait.KnativeServiceTrait)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.Logging != nil {
-		in, out := &in.Logging, &out.Logging
+	if in.DeprecatedLogging != nil {
+		in, out := &in.DeprecatedLogging, &out.DeprecatedLogging
 		*out = new(trait.LoggingTrait)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.Master != nil {
-		in, out := &in.Master, &out.Master
+	if in.DeprecatedMaster != nil {
+		in, out := &in.DeprecatedMaster, &out.DeprecatedMaster
 		*out = new(trait.MasterTrait)
 		(*in).DeepCopyInto(*out)
 	}
@@ -3400,8 +3401,8 @@ func (in *Traits) DeepCopyInto(out *Traits) {
 		*out = new(trait.ServiceBindingTrait)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.Telemetry != nil {
-		in, out := &in.Telemetry, &out.Telemetry
+	if in.DeprecatedTelemetry != nil {
+		in, out := &in.DeprecatedTelemetry, &out.DeprecatedTelemetry
 		*out = new(trait.TelemetryTrait)
 		(*in).DeepCopyInto(*out)
 	}
