@@ -88,6 +88,8 @@ func (c *Catalog) configureTrait(id string, trait map[string]any) error {
 		if err := decodeTrait(trait, catTrait); err != nil {
 			return err
 		}
+	} else if len(trait) > 0 {
+		c.L.Infof("WARN: trait %s does not exist in catalog: ignoring its configuration", id)
 	}
 
 	return nil

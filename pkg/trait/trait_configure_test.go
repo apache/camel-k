@@ -42,10 +42,9 @@ func TestTraitConfiguration(t *testing.T) {
 		Integration: &v1.Integration{
 			Spec: v1.IntegrationSpec{
 				Traits: v1.Traits{
-					Logging: &traitv1.LoggingTrait{
-						JSON:            ptr.To(true),
-						JSONPrettyPrint: ptr.To(false),
-						Level:           "DEBUG",
+					Environment: &traitv1.EnvironmentTrait{
+						ContainerMeta: ptr.To(true),
+						HTTPProxy:     ptr.To(false),
 					},
 					Service: &traitv1.ServiceTrait{
 						Trait: traitv1.Trait{
@@ -59,11 +58,10 @@ func TestTraitConfiguration(t *testing.T) {
 	}
 	c := NewCatalog(nil)
 	require.NoError(t, c.Configure(&env))
-	logging, ok := c.GetTrait("logging").(*loggingTrait)
+	environment, ok := c.GetTrait("environment").(*environmentTrait)
 	require.True(t, ok)
-	assert.True(t, *logging.JSON)
-	assert.False(t, *logging.JSONPrettyPrint)
-	assert.Equal(t, "DEBUG", logging.Level)
+	assert.True(t, *environment.ContainerMeta)
+	assert.False(t, *environment.HTTPProxy)
 	service, ok := c.GetTrait("service").(*serviceTrait)
 	require.True(t, ok)
 	assert.True(t, *service.Enabled)
@@ -161,4 +159,25 @@ func TestTraitSplitConfiguration(t *testing.T) {
 	require.NoError(t, c.Configure(&env))
 	ot, _ := c.GetTrait("owner").(*ownerTrait)
 	assert.Equal(t, []string{"opt1", "opt2"}, ot.TargetLabels)
+}
+
+func TestRemovedTraitConfiguration(t *testing.T) {
+	cl, err := internal.NewFakeClient()
+	require.NoError(t, err)
+	env := Environment{
+		Ctx:    context.Background(),
+		Client: cl,
+		Integration: &v1.Integration{
+			Spec: v1.IntegrationSpec{
+				Traits: v1.Traits{
+					DeprecatedLogging: &traitv1.LoggingTrait{
+						Level: "DEBUG",
+					},
+				},
+			},
+		},
+	}
+	c := NewCatalog(nil)
+	require.NoError(t, c.Configure(&env))
+	assert.Nil(t, c.GetTrait("logging"))
 }

@@ -25,6 +25,7 @@ import (
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -76,8 +77,8 @@ func TestApplyGlobalPlatformSpec(t *testing.T) {
 				},
 			},
 			Traits: v1.Traits{
-				Logging: &trait.LoggingTrait{
-					Level: "DEBUG",
+				Environment: &trait.EnvironmentTrait{
+					HTTPProxy: ptr.To(false),
 				},
 				Container: &trait.ContainerTrait{
 					ImagePullPolicy: corev1.PullAlways,
@@ -112,8 +113,8 @@ func TestApplyGlobalPlatformSpec(t *testing.T) {
 	assert.Equal(t, len(global.Status.Build.Maven.CLIOptions), len(ip.Status.Build.Maven.CLIOptions))
 	assert.Equal(t, global.Status.Build.Maven.CLIOptions, ip.Status.Build.Maven.CLIOptions)
 	assert.NotNil(t, ip.Status.Traits)
-	assert.NotNil(t, ip.Status.Traits.Logging)
-	assert.Equal(t, "DEBUG", ip.Status.Traits.Logging.Level)
+	assert.NotNil(t, ip.Status.Traits.Environment)
+	assert.False(t, ptr.Deref(ip.Status.Traits.Environment.HTTPProxy, true))
 	assert.NotNil(t, ip.Status.Traits.Container)
 	assert.Equal(t, corev1.PullAlways, ip.Status.Traits.Container.ImagePullPolicy)
 	assert.Equal(t, "0.1", ip.Status.Traits.Container.LimitCPU)
@@ -220,8 +221,8 @@ func TestRetainLocalPlatformSpec(t *testing.T) {
 				},
 			},
 			Traits: v1.Traits{
-				Logging: &trait.LoggingTrait{
-					Level: "DEBUG",
+				Environment: &trait.EnvironmentTrait{
+					HTTPProxy: ptr.To(false),
 				},
 				Container: &trait.ContainerTrait{
 					ImagePullPolicy: corev1.PullIfNotPresent,
@@ -277,8 +278,8 @@ func TestRetainLocalPlatformSpec(t *testing.T) {
 	assert.Equal(t, len(global.Status.Build.Maven.CLIOptions), len(ip.Status.Build.Maven.CLIOptions))
 	assert.Equal(t, global.Status.Build.Maven.CLIOptions, ip.Status.Build.Maven.CLIOptions)
 	assert.NotNil(t, ip.Status.Traits)
-	assert.NotNil(t, ip.Status.Traits.Logging)
-	assert.Equal(t, "DEBUG", ip.Status.Traits.Logging.Level)
+	assert.NotNil(t, ip.Status.Traits.Environment)
+	assert.False(t, ptr.Deref(ip.Status.Traits.Environment.HTTPProxy, true))
 	assert.NotNil(t, ip.Status.Traits.Container)
 	assert.Equal(t, corev1.PullAlways, ip.Status.Traits.Container.ImagePullPolicy)
 	assert.Equal(t, "0.1", ip.Status.Traits.Container.LimitCPU)

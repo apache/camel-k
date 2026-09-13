@@ -17,11 +17,12 @@ limitations under the License.
 
 package trait
 
+// WARNING: This trait is no longer in use.
+//
 // The Logging trait is used to configure Integration runtime logging options (such as color and format).
 // The logging backend is provided by Quarkus, whose configuration is documented at https://quarkus.io/guides/logging.
 //
-// WARNING: The Logging trait is **deprecated** and will be removed in future release versions:
-// use Quarkus logging properties directly instead.
+// The Logging trait was removed: use Quarkus logging properties directly instead.
 //
 // Migration example:
 //
@@ -30,6 +31,7 @@ package trait
 //
 // +camel-k:trait=logging.
 // +camel-k:deprecated=2.9.0.
+// +camel-k:internal.
 //
 //nolint:godoclint
 type LoggingTrait struct {

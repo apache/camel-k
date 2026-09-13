@@ -78,10 +78,14 @@ type TraitsApplyConfiguration struct {
 	Knative *trait.KnativeTrait `json:"knative,omitempty"`
 	// The configuration of Knative Service trait
 	KnativeService *trait.KnativeServiceTrait `json:"knative-service,omitempty"`
-	// The configuration of Logging trait
-	Logging *trait.LoggingTrait `json:"logging,omitempty"`
-	// The configuration of Master trait
-	Master *trait.MasterTrait `json:"master,omitempty"`
+	// The configuration of Logging trait.
+	//
+	// Deprecated: no longer in use.
+	DeprecatedLogging *trait.LoggingTrait `json:"logging,omitempty"`
+	// The configuration of Master trait.
+	//
+	// Deprecated: no longer in use.
+	DeprecatedMaster *trait.MasterTrait `json:"master,omitempty"`
 	// The configuration of Mount trait
 	Mount *trait.MountTrait `json:"mount,omitempty"`
 	// The configuration of OpenAPI trait.
@@ -118,8 +122,10 @@ type TraitsApplyConfiguration struct {
 	//
 	// Deprecated: no longer in use.
 	DeprecatedServiceBinding *trait.ServiceBindingTrait `json:"service-binding,omitempty"`
-	// The configuration of Telemetry trait
-	Telemetry *trait.TelemetryTrait `json:"telemetry,omitempty"`
+	// The configuration of Telemetry trait.
+	//
+	// Deprecated: no longer in use.
+	DeprecatedTelemetry *trait.TelemetryTrait `json:"telemetry,omitempty"`
 	// The configuration of Toleration trait
 	Toleration *trait.TolerationTrait `json:"toleration,omitempty"`
 	// Deprecated: no longer in use.
@@ -322,19 +328,19 @@ func (b *TraitsApplyConfiguration) WithKnativeService(value trait.KnativeService
 	return b
 }
 
-// WithLogging sets the Logging field in the declarative configuration to the given value
+// WithDeprecatedLogging sets the DeprecatedLogging field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Logging field is set to the value of the last call.
-func (b *TraitsApplyConfiguration) WithLogging(value trait.LoggingTrait) *TraitsApplyConfiguration {
-	b.Logging = &value
+// If called multiple times, the DeprecatedLogging field is set to the value of the last call.
+func (b *TraitsApplyConfiguration) WithDeprecatedLogging(value trait.LoggingTrait) *TraitsApplyConfiguration {
+	b.DeprecatedLogging = &value
 	return b
 }
 
-// WithMaster sets the Master field in the declarative configuration to the given value
+// WithDeprecatedMaster sets the DeprecatedMaster field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Master field is set to the value of the last call.
-func (b *TraitsApplyConfiguration) WithMaster(value trait.MasterTrait) *TraitsApplyConfiguration {
-	b.Master = &value
+// If called multiple times, the DeprecatedMaster field is set to the value of the last call.
+func (b *TraitsApplyConfiguration) WithDeprecatedMaster(value trait.MasterTrait) *TraitsApplyConfiguration {
+	b.DeprecatedMaster = &value
 	return b
 }
 
@@ -450,11 +456,11 @@ func (b *TraitsApplyConfiguration) WithDeprecatedServiceBinding(value trait.Serv
 	return b
 }
 
-// WithTelemetry sets the Telemetry field in the declarative configuration to the given value
+// WithDeprecatedTelemetry sets the DeprecatedTelemetry field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Telemetry field is set to the value of the last call.
-func (b *TraitsApplyConfiguration) WithTelemetry(value trait.TelemetryTrait) *TraitsApplyConfiguration {
-	b.Telemetry = &value
+// If called multiple times, the DeprecatedTelemetry field is set to the value of the last call.
+func (b *TraitsApplyConfiguration) WithDeprecatedTelemetry(value trait.TelemetryTrait) *TraitsApplyConfiguration {
+	b.DeprecatedTelemetry = &value
 	return b
 }
 

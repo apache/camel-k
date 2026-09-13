@@ -17,6 +17,8 @@ limitations under the License.
 
 package trait
 
+// WARNING: This trait is no longer in use.
+//
 // The Master trait allows to configure the integration to automatically leverage Kubernetes resources for doing
 // leader election and starting *master* routes only on certain instances.
 //
@@ -25,10 +27,9 @@ package trait
 // NOTE: this trait adds special permissions to the integration service account in order to read/write configmaps and read pods.
 // It's recommended to use a different service account than "default" when running the integration.
 //
-// WARNING: The Master trait is **deprecated** and will be removed in future release versions.
-// This trait requires the operator to manage RBAC explicitly, which should be avoided for security
-// and simplicity reasons. Users should manually create the required Role and RoleBinding, then configure
-// Quarkus properties directly:
+// The Master trait was removed: it required the operator to manage RBAC explicitly, which should be
+// avoided for security and simplicity reasons. Users should manually create the required Role and
+// RoleBinding, then configure Quarkus properties directly:
 //
 //	-p quarkus.camel.cluster.kubernetes.resource-name=<integration>-lock
 //	-p quarkus.camel.cluster.kubernetes.resource-type=Lease
@@ -36,6 +37,7 @@ package trait
 //
 // +camel-k:trait=master.
 // +camel-k:deprecated=2.9.0.
+// +camel-k:internal.
 //
 //nolint:godoclint
 type MasterTrait struct {
