@@ -118,6 +118,17 @@ func TestResourcesWithPrefix(t *testing.T) {
 	NoErrorAndNotContains(t, "/", "config/manager/operator-service-account.yaml", WithPrefix)
 }
 
+func TestTemplateResource(t *testing.T) {
+	data, err := TemplateResource("/resources/testdata/template.tmpl", struct {
+		Name string
+	}{
+		Name: "camel-k",
+	})
+
+	require.NoError(t, err)
+	assert.Equal(t, "name: camel-k\n", data)
+}
+
 func TestCRDResources(t *testing.T) {
 	NoErrorAndNotEmptyBytes(t, "/config/crd/bases/camel.apache.org_builds.yaml", Resource)
 	NoErrorAndNotEmptyBytes(t, "/config/crd/bases/camel.apache.org_camelcatalogs.yaml", Resource)

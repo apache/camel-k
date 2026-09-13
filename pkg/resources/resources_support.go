@@ -18,6 +18,7 @@ limitations under the License.
 package resources
 
 import (
+	"bytes"
 	"embed"
 	"fmt"
 	"io"
@@ -25,6 +26,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"text/template"
 
 	"github.com/apache/camel-k/v2/pkg/util"
 )
@@ -58,6 +60,29 @@ func ResourceAsString(name string) (string, error) {
 	data, err := Resource(name)
 
 	return string(data), err
+}
+
+// TemplateResource loads a file resource as go template and processes it using the given parameters.
+func TemplateResource(name string, params any) (string, error) {
+	rawData, err := ResourceAsString(name)
+	if err != nil {
+		return "", err
+	}
+	if rawData == "" {
+		return "", nil
+	}
+
+	tmpl, err := template.New(name).Parse(rawData)
+	if err != nil {
+		return "", err
+	}
+
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, params); err != nil {
+		return "", err
+	}
+
+	return buf.String(), nil
 }
 
 // WithPrefix lists all file names that begins with the give path prefix
