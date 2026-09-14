@@ -18,7 +18,6 @@ limitations under the License.
 package v1
 
 import (
-	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -36,9 +35,9 @@ func TestTraitsMerge(t *testing.T) {
 			Auto:        ptr.To(false),
 			ServicePort: 81,
 		},
-		DeprecatedLogging: &trait.LoggingTrait{
-			Color: ptr.To(false),
-			Level: "INFO",
+		Cron: &trait.CronTrait{
+			Fallback: ptr.To(false),
+			Schedule: "0 * * * *",
 		},
 	}
 	t2 := Traits{
@@ -46,9 +45,9 @@ func TestTraitsMerge(t *testing.T) {
 			Port:     8081,
 			PortName: "http-8081",
 		},
-		DeprecatedLogging: &trait.LoggingTrait{
-			Color: ptr.To(true),
-			Level: "DEBUG",
+		Cron: &trait.CronTrait{
+			Fallback: ptr.To(true),
+			Schedule: "*/5 * * * *",
 		},
 	}
 
@@ -62,23 +61,9 @@ func TestTraitsMerge(t *testing.T) {
 	assert.Equal(t, int32(81), t1.Container.ServicePort)
 
 	// values from merged trait take precedence over the original ones
-	assert.NotNil(t, t1.DeprecatedLogging)
-	assert.True(t, ptr.Deref(t1.DeprecatedLogging.Color, false))
-	assert.Equal(t, "DEBUG", t1.DeprecatedLogging.Level)
-}
-
-func TestDeprecatedTraitsJSONNames(t *testing.T) {
-	traits := Traits{
-		DeprecatedLogging: &trait.LoggingTrait{Level: "DEBUG"},
-		DeprecatedMaster:  &trait.MasterTrait{ResourceName: ptr.To("my-lock")},
-		DeprecatedTelemetry: &trait.TelemetryTrait{
-			Endpoint: "http://jaeger:4317",
-		},
-	}
-
-	data, err := json.Marshal(traits)
-	require.NoError(t, err)
-	assert.JSONEq(t, `{"logging":{"level":"DEBUG"},"master":{"resourceName":"my-lock"},"telemetry":{"endpoint":"http://jaeger:4317"}}`, string(data))
+	assert.NotNil(t, t1.Cron)
+	assert.True(t, ptr.Deref(t1.Cron.Fallback, false))
+	assert.Equal(t, "*/5 * * * *", t1.Cron.Schedule)
 }
 
 func TestIntegrationKitTraitsMerge(t *testing.T) {

@@ -294,23 +294,6 @@ func TestExtractTraitAnnotations(t *testing.T) {
 	assert.Equal(t, "hello", annotations["my-personal-annotation"])
 }
 
-func TestExtractRemovedTraitAnnotations(t *testing.T) {
-	for _, traitID := range []string{"logging", "master", "telemetry"} {
-		t.Run(traitID, func(t *testing.T) {
-			client, err := internal.NewFakeClient()
-			require.NoError(t, err)
-
-			annotation := v1.TraitAnnotationPrefix + traitID + ".enabled"
-			annotations := map[string]string{annotation: "true"}
-
-			traits, err := extractAndDeleteTraits(client, annotations)
-			require.NoError(t, err)
-			assert.Nil(t, traits)
-			assert.NotContains(t, annotations, annotation)
-		})
-	}
-}
-
 func TestExtractTraitAnnotationsError(t *testing.T) {
 	client, err := internal.NewFakeClient()
 	require.NoError(t, err)
