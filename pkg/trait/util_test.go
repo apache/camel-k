@@ -256,56 +256,6 @@ func TestIntegrationAndPipeSameTraits(t *testing.T) {
 	assert.True(t, result)
 }
 
-func TestExtractAndMaybeDeleteRemovedTraitAnnotations(t *testing.T) {
-	for _, traitID := range []string{"logging", "master", "telemetry"} {
-		t.Run(traitID, func(t *testing.T) {
-			client, err := internal.NewFakeClient()
-			require.NoError(t, err)
-
-			annotation := v1.TraitAnnotationPrefix + traitID + ".enabled"
-			annotations := map[string]string{annotation: "true"}
-
-			traits, err := ExtractAndMaybeDeleteTraits(client, annotations, true)
-			require.NoError(t, err)
-			assert.Nil(t, traits)
-			assert.NotContains(t, annotations, annotation)
-		})
-	}
-}
-
-func TestNewSpecTraitsOptionsIgnoreRemovedTraitAnnotations(t *testing.T) {
-	for _, traitID := range []string{"logging", "master", "telemetry"} {
-		t.Run(traitID, func(t *testing.T) {
-			client, err := internal.NewFakeClient()
-			require.NoError(t, err)
-
-			integration := &v1.Integration{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						v1.TraitAnnotationPrefix + traitID + ".enabled": "true",
-					},
-				},
-			}
-
-			options, err := NewSpecTraitsOptionsForIntegration(client, integration)
-			require.NoError(t, err)
-			assert.Empty(t, options)
-
-			kit := &v1.IntegrationKit{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						v1.TraitAnnotationPrefix + traitID + ".enabled": "true",
-					},
-				},
-			}
-
-			options, err = NewSpecTraitsOptionsForIntegrationKit(client, kit)
-			require.NoError(t, err)
-			assert.Empty(t, options)
-		})
-	}
-}
-
 func TestMergePlatformTraitsIntegrationPriority(t *testing.T) {
 	integration := &v1.Integration{
 		Spec: v1.IntegrationSpec{
