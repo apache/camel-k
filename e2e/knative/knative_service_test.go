@@ -55,6 +55,6 @@ func TestKnativeServiceURL(t *testing.T) {
 			url := "http://knativeurl2." + ns + ".svc.cluster.local"
 			g.Eventually(KnativeService(t, ctx, ns, "knativeurl2")().Status.RouteStatusFields.URL.String()).Should(Equal(url))
 		})
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		ExpectExecSucceed(t, g, Kubectl("delete", "it", "--all", "-n", ns))
 	})
 }

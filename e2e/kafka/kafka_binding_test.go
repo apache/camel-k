@@ -46,7 +46,7 @@ func TestKafka(t *testing.T) {
 			// Verify we are consuming some record (the body is null as the timer is pushing nothing)
 			g.Eventually(IntegrationLogs(t, ctx, kafkaNs, "kafka-to-log")).Should(ContainSubstring("Body is null"))
 
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", kafkaNs).Execute()).To(Succeed())
+			ExpectExecSucceed(t, g, Kubectl("delete", "it", "--all", "-n", kafkaNs))
 		})
 
 		t.Run("Strimzi KafkaTopic resource", func(t *testing.T) {
@@ -60,7 +60,7 @@ func TestKafka(t *testing.T) {
 			// Verify we are consuming some record (the body is null as the timer is pushing nothing)
 			g.Eventually(IntegrationLogs(t, ctx, kafkaNs, "kafkatopic-to-log")).Should(ContainSubstring("Body is null"))
 
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", kafkaNs).Execute()).To(Succeed())
+			ExpectExecSucceed(t, g, Kubectl("delete", "it", "--all", "-n", kafkaNs))
 		})
 	}, "kafka")
 }

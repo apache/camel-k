@@ -64,11 +64,11 @@ func TestKafkaKedaAutoscale(t *testing.T) {
 			// Verify we are consuming some record (the body is null as the timer is pushing nothing)
 			g.Eventually(IntegrationLogs(t, ctx, ns, consumerName)).Should(ContainSubstring("Body is null"))
 			// Stop the producer
-			g.Expect(Kamel(t, ctx, "delete", producerName, "-n", ns).Execute()).To(Succeed())
+			ExpectExecSucceed(t, g, Kubectl("delete", "it", producerName, "-n", ns))
 			// Consumer should scale back to 0 after some time as there is no longer traffic
 			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), TestTimeoutMedium).
 				Should(gstruct.PointTo(BeNumerically("==", 0)))
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+			ExpectExecSucceed(t, g, Kubectl("delete", "it", "--all", "-n", ns))
 		})
 	}, "kafka")
 }
@@ -92,7 +92,7 @@ func TestKafkaKedaAutoDiscovery(t *testing.T) {
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["bootstrapServers"]).To(Equal("my-cluster-kafka-bootstrap.kafka.svc:9092"))
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["consumerGroup"]).To(Equal("auto-group"))
 
-			g.Expect(Kamel(t, ctx, "delete", integrationName, "-n", ns).Execute()).To(Succeed())
+			ExpectExecSucceed(t, g, Kubectl("delete", "it", integrationName, "-n", ns))
 		})
 	}, "kafka")
 }
@@ -122,7 +122,7 @@ func TestKafkaKedaAutoDiscoveryWithManualTrigger(t *testing.T) {
 			g.Expect(kafkaTrigger).NotTo(BeNil(), "kafka trigger should be auto-discovered")
 			g.Expect(cronTrigger).NotTo(BeNil(), "cron trigger should exist from manual config")
 
-			g.Expect(Kamel(t, ctx, "delete", integrationName, "-n", ns).Execute()).To(Succeed())
+			ExpectExecSucceed(t, g, Kubectl("delete", "it", integrationName, "-n", ns))
 		})
 	}, "kafka")
 }
@@ -149,7 +149,7 @@ func TestKafkaKedaAutoMetadata(t *testing.T) {
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["lagThreshold"]).To(Equal("100"))
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["activationLagThreshold"]).To(Equal("10"))
 
-			g.Expect(Kamel(t, ctx, "delete", integrationName, "-n", ns).Execute()).To(Succeed())
+			ExpectExecSucceed(t, g, Kubectl("delete", "it", integrationName, "-n", ns))
 		})
 	}, "kafka")
 }
