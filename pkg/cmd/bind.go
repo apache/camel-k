@@ -34,7 +34,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/uri"
 	"github.com/spf13/cobra"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/cli-runtime/pkg/printers"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -194,10 +193,8 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 	name := o.nameFor(source, sink)
 
 	pipe := v1.Pipe{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: o.Namespace,
-			Name:      name,
-		},
+		Namespace: o.Namespace,
+		Name:      name,
 		Spec: v1.PipeSpec{
 			Source: source,
 			Sink:   sink,

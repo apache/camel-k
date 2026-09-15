@@ -128,16 +128,12 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 	}
 
 	deployment := appsv1.Deployment{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Deployment",
-			APIVersion: appsv1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        e.Integration.Name,
-			Namespace:   e.Integration.Namespace,
-			Labels:      kubernetes.DeploymentLabels(e.Integration.Name),
-			Annotations: annotations,
-		},
+		Kind:        "Deployment",
+		APIVersion:  appsv1.SchemeGroupVersion.String(),
+		Name:        e.Integration.Name,
+		Namespace:   e.Integration.Namespace,
+		Labels:      kubernetes.DeploymentLabels(e.Integration.Name),
+		Annotations: annotations,
 		Spec: appsv1.DeploymentSpec{
 			ProgressDeadlineSeconds: &deadline,
 			Replicas:                e.Integration.Spec.Replicas,

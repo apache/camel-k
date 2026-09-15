@@ -26,7 +26,6 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 	gwv1 "sigs.k8s.io/gateway-api/apis/v1"
 )
@@ -132,14 +131,10 @@ func buildGateway(name, namespace, className string, listeners []string) (*gwv1.
 	}
 
 	return &gwv1.Gateway{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: gwv1.GroupVersion.String(),
-			Kind:       "Gateway",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
+		APIVersion: gwv1.GroupVersion.String(),
+		Kind:       "Gateway",
+		Name:       name,
+		Namespace:  namespace,
 		Spec: gwv1.GatewaySpec{
 			GatewayClassName: gwv1.ObjectName(className),
 			Listeners:        gwListeners,
@@ -159,12 +154,8 @@ func buildHTTPRoute(routeName, gatewayName, serviceName, namespace string, servi
 		rule := gwv1.HTTPRouteRule{
 			BackendRefs: []gwv1.HTTPBackendRef{
 				{
-					BackendRef: gwv1.BackendRef{
-						BackendObjectReference: gwv1.BackendObjectReference{
-							Name: gwv1.ObjectName(serviceName),
-							Port: new(p),
-						},
-					},
+					Name: gwv1.ObjectName(serviceName),
+					Port: new(p),
 				},
 			},
 		}
@@ -173,14 +164,10 @@ func buildHTTPRoute(routeName, gatewayName, serviceName, namespace string, servi
 	}
 
 	return &gwv1.HTTPRoute{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: gwv1.GroupVersion.String(),
-			Kind:       "HTTPRoute",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      routeName,
-			Namespace: namespace,
-		},
+		APIVersion: gwv1.GroupVersion.String(),
+		Kind:       "HTTPRoute",
+		Name:       routeName,
+		Namespace:  namespace,
 		Spec: gwv1.HTTPRouteSpec{
 			CommonRouteSpec: gwv1.CommonRouteSpec{
 				ParentRefs: []gwv1.ParentReference{

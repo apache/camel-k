@@ -24,7 +24,6 @@ import (
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 
@@ -153,16 +152,12 @@ func (t *serviceTrait) getServiceFor(itName, itNamespace string) *corev1.Service
 	ports := t.getServicePorts()
 
 	return &corev1.Service{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Service",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        itName,
-			Namespace:   itNamespace,
-			Labels:      labels,
-			Annotations: t.Annotations,
-		},
+		Kind:        "Service",
+		APIVersion:  "v1",
+		Name:        itName,
+		Namespace:   itNamespace,
+		Labels:      labels,
+		Annotations: t.Annotations,
 		Spec: corev1.ServiceSpec{
 			Ports: ports,
 			Selector: map[string]string{

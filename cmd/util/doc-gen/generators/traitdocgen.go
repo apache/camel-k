@@ -254,7 +254,7 @@ func writeMembers(t *types.Type, traitID string, content *[]string) {
 			if json == "" {
 				continue
 			}
-			jsonName := strings.Split(json, ",")[0]
+			jsonName, _, _ := strings.Cut(json, ",")
 
 			res = append(res, "| "+traitID+"."+jsonName)
 			res = append(res, "| "+strings.TrimPrefix(m.Type.Name.Name, "*"))

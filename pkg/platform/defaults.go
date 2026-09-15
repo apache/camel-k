@@ -386,12 +386,10 @@ func setStatusAdditionalInfo(platform *v1.IntegrationPlatform) {
 //nolint:staticcheck
 func createServiceCaBundleConfigMap(ctx context.Context, client client.Client, p *v1.IntegrationPlatform) (*corev1.ConfigMap, error) {
 	cm := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      BuilderServiceAccount + "-ca",
-			Namespace: p.Namespace,
-			Annotations: map[string]string{
-				"service.beta.openshift.io/inject-cabundle": "true",
-			},
+		Name:      BuilderServiceAccount + "-ca",
+		Namespace: p.Namespace,
+		Annotations: map[string]string{
+			"service.beta.openshift.io/inject-cabundle": "true",
 		},
 	}
 
@@ -406,10 +404,8 @@ func createServiceCaBundleConfigMap(ctx context.Context, client client.Client, p
 //nolint:staticcheck
 func createBuilderRegistryRoleBinding(ctx context.Context, client client.Client, p *v1.IntegrationPlatform) error {
 	rb := &rbacv1.RoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      BuilderServiceAccount + "-registry",
-			Namespace: p.Namespace,
-		},
+		Name:      BuilderServiceAccount + "-registry",
+		Namespace: p.Namespace,
 		Subjects: []rbacv1.Subject{
 			{
 				Kind: "ServiceAccount",

@@ -179,23 +179,17 @@ func (p *EndpointProperties) GetPropertyMap() (map[string]string, error) {
 // NewPipe --.
 func NewPipe(namespace string, name string) Pipe {
 	return Pipe{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: SchemeGroupVersion.String(),
-			Kind:       PipeKind,
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      name,
-		},
+		APIVersion: SchemeGroupVersion.String(),
+		Kind:       PipeKind,
+		Namespace:  namespace,
+		Name:       name,
 	}
 }
 
 // NewPipeList --.
 func NewPipeList() PipeList {
 	return PipeList{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: SchemeGroupVersion.String(),
-			Kind:       PipeKind,
-		},
+		APIVersion: SchemeGroupVersion.String(),
+		Kind:       PipeKind,
 	}
 }

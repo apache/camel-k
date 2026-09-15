@@ -50,14 +50,10 @@ const knativeService = "Service"
 
 func CreateSubscription(channelReference corev1.ObjectReference, serviceName string, path string) *messaging.Subscription {
 	return &messaging.Subscription{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: messaging.SchemeGroupVersion.String(),
-			Kind:       "Subscription",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: channelReference.Namespace,
-			Name:      channelReference.Name + "-" + serviceName,
-		},
+		APIVersion: messaging.SchemeGroupVersion.String(),
+		Kind:       "Subscription",
+		Namespace:  channelReference.Namespace,
+		Name:       channelReference.Name + "-" + serviceName,
 		Spec: messaging.SubscriptionSpec{
 			Channel: duckv1.KReference{
 				APIVersion: channelReference.GroupVersionKind().GroupVersion().String(),
@@ -102,14 +98,10 @@ func CreateKnativeServiceTrigger(brokerReference corev1.ObjectReference, service
 
 func CreateTrigger(brokerReference corev1.ObjectReference, subscriberRef duckv1.KReference, eventType string, path string, attributes map[string]string) (*eventing.Trigger, error) {
 	trigger := eventing.Trigger{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: eventing.SchemeGroupVersion.String(),
-			Kind:       "Trigger",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: brokerReference.Namespace,
-			Name:      GetTriggerName(brokerReference.Name, subscriberRef.Name, eventType),
-		},
+		APIVersion: eventing.SchemeGroupVersion.String(),
+		Kind:       "Trigger",
+		Namespace:  brokerReference.Namespace,
+		Name:       GetTriggerName(brokerReference.Name, subscriberRef.Name, eventType),
 		Spec: eventing.TriggerSpec{
 			Broker: brokerReference.Name,
 			Subscriber: duckv1.Destination{
@@ -141,14 +133,10 @@ func GetTriggerName(brokerName string, subscriberName string, eventType string) 
 
 func CreateSinkBinding(source corev1.ObjectReference, target corev1.ObjectReference) *sources.SinkBinding {
 	return &sources.SinkBinding{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: sources.SchemeGroupVersion.String(),
-			Kind:       "SinkBinding",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: source.Namespace,
-			Name:      source.Name,
-		},
+		APIVersion: sources.SchemeGroupVersion.String(),
+		Kind:       "SinkBinding",
+		Namespace:  source.Namespace,
+		Name:       source.Name,
 		Spec: sources.SinkBindingSpec{
 			BindingSpec: duckv1.BindingSpec{
 				Subject: tracker.Reference{

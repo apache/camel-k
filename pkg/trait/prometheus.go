@@ -145,15 +145,11 @@ func (t *prometheusTrait) getPodMonitorFor(e *Environment, portName string) (*mo
 	labels[v1.IntegrationLabel] = e.Integration.Name
 
 	podMonitor := monitoringv1.PodMonitor{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "PodMonitor",
-			APIVersion: monitoringv1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      e.Integration.Name,
-			Namespace: e.Integration.Namespace,
-			Labels:    labels,
-		},
+		Kind:       "PodMonitor",
+		APIVersion: monitoringv1.SchemeGroupVersion.String(),
+		Name:       e.Integration.Name,
+		Namespace:  e.Integration.Namespace,
+		Labels:     labels,
 		Spec: monitoringv1.PodMonitorSpec{
 			Selector: metav1.LabelSelector{
 				MatchLabels: map[string]string{

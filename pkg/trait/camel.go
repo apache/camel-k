@@ -26,7 +26,6 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -336,18 +335,14 @@ func (t *camelTrait) computeUserProperties(e *Environment) []ctrl.Object {
 		maps = append(
 			maps,
 			&corev1.ConfigMap{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "ConfigMap",
-					APIVersion: "v1",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      e.Integration.Name + "-user-properties",
-					Namespace: e.Integration.Namespace,
-					Labels: map[string]string{
-						v1.IntegrationLabel:                e.Integration.Name,
-						"camel.apache.org/properties.type": "user",
-						kubernetes.ConfigMapTypeLabel:      CamelPropertiesType,
-					},
+				Kind:       "ConfigMap",
+				APIVersion: "v1",
+				Name:       e.Integration.Name + "-user-properties",
+				Namespace:  e.Integration.Namespace,
+				Labels: map[string]string{
+					v1.IntegrationLabel:                e.Integration.Name,
+					"camel.apache.org/properties.type": "user",
+					kubernetes.ConfigMapTypeLabel:      CamelPropertiesType,
 				},
 				Data: map[string]string{
 					"application.properties": userProperties,
@@ -363,22 +358,18 @@ func (t *camelTrait) computeUserProperties(e *Environment) []ctrl.Object {
 		}
 
 		cm := corev1.ConfigMap{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "ConfigMap",
-				APIVersion: "v1",
+			Kind:       "ConfigMap",
+			APIVersion: "v1",
+			Name:       fmt.Sprintf("%s-source-%03d", e.Integration.Name, i),
+			Namespace:  e.Integration.Namespace,
+			Labels: map[string]string{
+				v1.IntegrationLabel: e.Integration.Name,
 			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      fmt.Sprintf("%s-source-%03d", e.Integration.Name, i),
-				Namespace: e.Integration.Namespace,
-				Labels: map[string]string{
-					v1.IntegrationLabel: e.Integration.Name,
-				},
-				Annotations: map[string]string{
-					sourceLanguageAnnotation:    string(s.InferLanguage()),
-					sourceLoaderAnnotation:      s.Loader,
-					sourceNameAnnotation:        s.Name,
-					sourceCompressionAnnotation: strconv.FormatBool(s.Compression),
-				},
+			Annotations: map[string]string{
+				sourceLanguageAnnotation:    string(s.InferLanguage()),
+				sourceLoaderAnnotation:      s.Loader,
+				sourceNameAnnotation:        s.Name,
+				sourceCompressionAnnotation: strconv.FormatBool(s.Compression),
 			},
 			Data: map[string]string{
 				"content": s.Content,

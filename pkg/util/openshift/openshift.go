@@ -61,7 +61,7 @@ func GetOpenshiftPodSecurityContextRestricted(ctx context.Context, client kubern
 	}
 
 	supplementalGroups = strings.Split(supplementalGroups, ",")[0]
-	fsGroupStr := strings.Split(supplementalGroups, "/")[0]
+	fsGroupStr, _, _ := strings.Cut(supplementalGroups, "/")
 	fsGroup, err := strconv.ParseInt(fsGroupStr, 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert fsgroup to integer %q: %w", fsGroupStr, err)
@@ -109,7 +109,7 @@ func GetOpenshiftUser(ctx context.Context, client kubernetes.Interface, namespac
 	if !ok {
 		return nil, errors.New("annotation 'openshift.io/sa.scc.uid-range' not found")
 	}
-	uidStr := strings.Split(uidRange, "/")[0]
+	uidStr, _, _ := strings.Cut(uidRange, "/")
 	uid, err := strconv.ParseInt(uidStr, 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert uid to integer %q: %w", uidStr, err)

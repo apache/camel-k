@@ -34,14 +34,10 @@ import (
 // Deprecated: won't be supported in future releases.
 func LookupConfigmap(ctx context.Context, c client.Client, ns string, name string) *corev1.ConfigMap {
 	cm := corev1.ConfigMap{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "ConfigMap",
-			APIVersion: corev1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: ns,
-			Name:      name,
-		},
+		Kind:       "ConfigMap",
+		APIVersion: corev1.SchemeGroupVersion.String(),
+		Namespace:  ns,
+		Name:       name,
 	}
 	key := ctrl.ObjectKey{
 		Namespace: ns,
@@ -71,14 +67,10 @@ func LookupResourceVersion(ctx context.Context, c client.Client, object ctrl.Obj
 // Deprecated: won't be supported in future releases.
 func LookupSecret(ctx context.Context, c client.Client, ns string, name string) *corev1.Secret {
 	secret := corev1.Secret{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Secret",
-			APIVersion: corev1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: ns,
-			Name:      name,
-		},
+		Kind:       "Secret",
+		APIVersion: corev1.SchemeGroupVersion.String(),
+		Namespace:  ns,
+		Name:       name,
 	}
 	key := ctrl.ObjectKey{
 		Namespace: ns,
@@ -96,14 +88,10 @@ func LookupSecret(ctx context.Context, c client.Client, ns string, name string) 
 // LookupPersistentVolumeClaim will look for any k8s PersistentVolumeClaim with a given name in a given namespace.
 func LookupPersistentVolumeClaim(ctx context.Context, c client.Client, ns string, name string) (*corev1.PersistentVolumeClaim, error) {
 	pvc := corev1.PersistentVolumeClaim{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "PersistentVolumeClaim",
-			APIVersion: corev1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: ns,
-			Name:      name,
-		},
+		Kind:       "PersistentVolumeClaim",
+		APIVersion: corev1.SchemeGroupVersion.String(),
+		Namespace:  ns,
+		Name:       name,
 	}
 	key := ctrl.ObjectKey{
 		Namespace: ns,
@@ -121,14 +109,10 @@ func LookupPersistentVolumeClaim(ctx context.Context, c client.Client, ns string
 // LookupStorageClass will look for any k8s StorageClass with a given name in a given namespace.
 func LookupStorageClass(ctx context.Context, c client.Client, ns string, name string) (*storagev1.StorageClass, error) {
 	sc := storagev1.StorageClass{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "StorageClass",
-			APIVersion: storagev1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: ns,
-			Name:      name,
-		},
+		Kind:       "StorageClass",
+		APIVersion: storagev1.SchemeGroupVersion.String(),
+		Namespace:  ns,
+		Name:       name,
 	}
 	key := ctrl.ObjectKey{
 		Namespace: ns,
@@ -165,14 +149,10 @@ func LookupDefaultStorageClass(ctx context.Context, c client.Client) (*storagev1
 // LookupServiceAccount will look for any k8s ServiceAccount with a given name in a given namespace.
 func LookupServiceAccount(ctx context.Context, c client.Client, ns string, name string) (*corev1.ServiceAccount, error) {
 	sa := corev1.ServiceAccount{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "ServiceAccount",
-			APIVersion: corev1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: ns,
-			Name:      name,
-		},
+		Kind:       "ServiceAccount",
+		APIVersion: corev1.SchemeGroupVersion.String(),
+		Namespace:  ns,
+		Name:       name,
 	}
 	key := ctrl.ObjectKey{
 		Namespace: ns,
@@ -190,14 +170,10 @@ func LookupServiceAccount(ctx context.Context, c client.Client, ns string, name 
 // LookupRole will look for any k8s Role with a given name in a given namespace.
 func LookupRole(ctx context.Context, c client.Client, ns string, name string) (*rbacv1.Role, error) {
 	r := rbacv1.Role{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Role",
-			APIVersion: rbacv1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: ns,
-			Name:      name,
-		},
+		Kind:       "Role",
+		APIVersion: rbacv1.SchemeGroupVersion.String(),
+		Namespace:  ns,
+		Name:       name,
 	}
 	key := ctrl.ObjectKey{
 		Namespace: ns,
@@ -215,14 +191,10 @@ func LookupRole(ctx context.Context, c client.Client, ns string, name string) (*
 // LookupRoleBinding will look for any k8s RoleBinding with a given name in a given namespace.
 func LookupRoleBinding(ctx context.Context, c client.Client, ns string, name string) (*rbacv1.RoleBinding, error) {
 	rb := rbacv1.RoleBinding{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "RoleBinding",
-			APIVersion: rbacv1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: ns,
-			Name:      name,
-		},
+		Kind:       "RoleBinding",
+		APIVersion: rbacv1.SchemeGroupVersion.String(),
+		Namespace:  ns,
+		Name:       name,
 	}
 	key := ctrl.ObjectKey{
 		Namespace: ns,
@@ -240,14 +212,10 @@ func LookupRoleBinding(ctx context.Context, c client.Client, ns string, name str
 // LookupService will look for any k8s Service with a given name in a given namespace.
 func LookupService(ctx context.Context, c client.Client, ns string, name string) (*corev1.Service, error) {
 	svc := corev1.Service{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Service",
-			APIVersion: corev1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: ns,
-			Name:      name,
-		},
+		Kind:       "Service",
+		APIVersion: corev1.SchemeGroupVersion.String(),
+		Namespace:  ns,
+		Name:       name,
 	}
 	key := ctrl.ObjectKey{
 		Namespace: ns,

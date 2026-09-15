@@ -32,23 +32,17 @@ const IntegrationKitLabel = "camel.apache.org/integrationkit"
 
 func NewIntegrationKit(namespace string, name string) *IntegrationKit {
 	return &IntegrationKit{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: SchemeGroupVersion.String(),
-			Kind:       IntegrationKitKind,
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      name,
-		},
+		APIVersion: SchemeGroupVersion.String(),
+		Kind:       IntegrationKitKind,
+		Namespace:  namespace,
+		Name:       name,
 	}
 }
 
 func NewIntegrationKitList() IntegrationKitList {
 	return IntegrationKitList{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: SchemeGroupVersion.String(),
-			Kind:       IntegrationKitKind,
-		},
+		APIVersion: SchemeGroupVersion.String(),
+		Kind:       IntegrationKitKind,
 	}
 }
 

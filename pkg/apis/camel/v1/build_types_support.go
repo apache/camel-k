@@ -27,14 +27,10 @@ import (
 
 func NewBuild(namespace string, name string) *Build {
 	return &Build{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: SchemeGroupVersion.String(),
-			Kind:       BuildKind,
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      name,
-		},
+		APIVersion: SchemeGroupVersion.String(),
+		Kind:       BuildKind,
+		Namespace:  namespace,
+		Name:       name,
 	}
 }
 

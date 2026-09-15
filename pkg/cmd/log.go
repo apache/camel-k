@@ -26,7 +26,6 @@ import (
 	k8slog "github.com/apache/camel-k/v2/pkg/util/kubernetes/log"
 	"github.com/spf13/cobra"
 	k8errors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -74,14 +73,10 @@ func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
 	integrationID := args[0]
 
 	integration := v1.Integration{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       v1.IntegrationKind,
-			APIVersion: v1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: o.Namespace,
-			Name:      integrationID,
-		},
+		Kind:       v1.IntegrationKind,
+		APIVersion: v1.SchemeGroupVersion.String(),
+		Namespace:  o.Namespace,
+		Name:       integrationID,
 	}
 	key := k8sclient.ObjectKey{
 		Namespace: o.Namespace,
@@ -156,14 +151,10 @@ func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
 			}
 
 			integrationKit := v1.IntegrationKit{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       v1.IntegrationKitKind,
-					APIVersion: v1.SchemeGroupVersion.String(),
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: integration.Status.IntegrationKit.Namespace,
-					Name:      integration.Status.IntegrationKit.Name,
-				},
+				Kind:       v1.IntegrationKitKind,
+				APIVersion: v1.SchemeGroupVersion.String(),
+				Namespace:  integration.Status.IntegrationKit.Namespace,
+				Name:       integration.Status.IntegrationKit.Name,
 			}
 			ikKey := k8sclient.ObjectKey{
 				Namespace: integration.Status.IntegrationKit.Namespace,

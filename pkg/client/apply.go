@@ -130,8 +130,7 @@ func isIncompatibleServerError(err error) bool {
 	}
 	// 415: Unsupported media type means we're talking to a server which doesn't
 	// support server-side apply.
-	var serr *k8serrors.StatusError
-	if errors.As(err, &serr) {
+	if serr, ok := errors.AsType[*k8serrors.StatusError](err); ok {
 		return serr.Status().Code == http.StatusUnsupportedMediaType
 	}
 	// Non-StatusError means the error isn't because the server is incompatible.

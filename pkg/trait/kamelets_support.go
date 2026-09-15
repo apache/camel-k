@@ -25,7 +25,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const KameletBundleType = "kamelets-bundle"
@@ -74,20 +73,16 @@ func (kb *kameletBundle) toConfigmaps(itName, itNamespace string) ([]*corev1.Con
 
 func newBundleConfigmap(name, namespace string, id int) *corev1.ConfigMap {
 	return &corev1.ConfigMap{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "ConfigMap",
-			APIVersion: "v1",
+		Kind:       "ConfigMap",
+		APIVersion: "v1",
+		Name:       fmt.Sprintf("%s-%s-%03d", KameletBundleType, name, id),
+		Namespace:  namespace,
+		Labels: map[string]string{
+			v1.IntegrationLabel:           name,
+			kubernetes.ConfigMapTypeLabel: KameletBundleType,
 		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-%s-%03d", KameletBundleType, name, id),
-			Namespace: namespace,
-			Labels: map[string]string{
-				v1.IntegrationLabel:           name,
-				kubernetes.ConfigMapTypeLabel: KameletBundleType,
-			},
-			Annotations: map[string]string{
-				kubernetes.ConfigMapAutogenLabel: boolean.TrueString,
-			},
+		Annotations: map[string]string{
+			kubernetes.ConfigMapAutogenLabel: boolean.TrueString,
 		},
 		Data: map[string]string{},
 	}

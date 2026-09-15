@@ -50,23 +50,17 @@ const (
 
 func NewIntegration(namespace string, name string) Integration {
 	return Integration{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: SchemeGroupVersion.String(),
-			Kind:       IntegrationKind,
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      name,
-		},
+		APIVersion: SchemeGroupVersion.String(),
+		Kind:       IntegrationKind,
+		Namespace:  namespace,
+		Name:       name,
 	}
 }
 
 func NewIntegrationList() IntegrationList {
 	return IntegrationList{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: SchemeGroupVersion.String(),
-			Kind:       IntegrationKind,
-		},
+		APIVersion: SchemeGroupVersion.String(),
+		Kind:       IntegrationKind,
 	}
 }
 
@@ -139,10 +133,8 @@ func (in *Integration) OriginalSourcesOnly() []SourceSpec {
 	if len(in.Spec.Flows) > 0 {
 		content, _ := ToYamlDSL(in.Spec.Flows)
 		sources = append(sources, SourceSpec{
-			DataSpec: DataSpec{
-				Name:    IntegrationFlowEmbeddedSourceName,
-				Content: string(content),
-			},
+			Name:    IntegrationFlowEmbeddedSourceName,
+			Content: string(content),
 		})
 	}
 
@@ -270,10 +262,8 @@ func (in *Integration) Configurations() []ConfigurationSpec {
 
 func NewSourceSpec(name string, content string, language Language) SourceSpec {
 	return SourceSpec{
-		DataSpec: DataSpec{
-			Name:    name,
-			Content: content,
-		},
+		Name:     name,
+		Content:  content,
 		Language: language,
 	}
 }

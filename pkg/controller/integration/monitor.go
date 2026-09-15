@@ -44,7 +44,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/digest"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	utilResource "github.com/apache/camel-k/v2/pkg/util/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // NewMonitorAction is an action used to monitor manager Integrations.
@@ -325,26 +324,18 @@ func getIntegrationSecretAndConfigmapResourceVersions(ctx context.Context, clien
 			if conf, parseErr := utilResource.ParseConfig(c); parseErr == nil {
 				if conf.StorageType() == utilResource.StorageTypeConfigmap {
 					cm := corev1.ConfigMap{
-						TypeMeta: metav1.TypeMeta{
-							Kind:       corev1.ResourceConfigMaps.String(),
-							APIVersion: corev1.SchemeGroupVersion.String(),
-						},
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: integration.Namespace,
-							Name:      conf.Name(),
-						},
+						Kind:       corev1.ResourceConfigMaps.String(),
+						APIVersion: corev1.SchemeGroupVersion.String(),
+						Namespace:  integration.Namespace,
+						Name:       conf.Name(),
 					}
 					configmaps = append(configmaps, kubernetes.LookupResourceVersion(ctx, client, &cm))
 				} else if conf.StorageType() == utilResource.StorageTypeSecret {
 					sec := corev1.Secret{
-						TypeMeta: metav1.TypeMeta{
-							Kind:       corev1.ResourceSecrets.String(),
-							APIVersion: corev1.SchemeGroupVersion.String(),
-						},
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: integration.Namespace,
-							Name:      conf.Name(),
-						},
+						Kind:       corev1.ResourceSecrets.String(),
+						APIVersion: corev1.SchemeGroupVersion.String(),
+						Namespace:  integration.Namespace,
+						Name:       conf.Name(),
 					}
 					secrets = append(secrets, kubernetes.LookupResourceVersion(ctx, client, &sec))
 				}

@@ -211,14 +211,10 @@ func getCamelAppObject(ctx context.Context, c client.Client, kind, namespace, na
 		return c.BatchV1().CronJobs(namespace).Get(ctx, name, metav1.GetOptions{})
 	case "KnativeService":
 		ksvc := &serving.Service{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Service",
-				APIVersion: serving.SchemeGroupVersion.String(),
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-			},
+			Kind:       "Service",
+			APIVersion: serving.SchemeGroupVersion.String(),
+			Name:       name,
+			Namespace:  namespace,
 		}
 		err := c.Get(ctx, ctrl.ObjectKeyFromObject(ksvc), ksvc)
 

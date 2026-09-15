@@ -37,7 +37,6 @@ import (
 	"github.com/spf13/viper"
 
 	p "github.com/gertd/go-pluralize"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -47,14 +46,10 @@ const (
 // DeleteIntegration --.
 func DeleteIntegration(ctx context.Context, c client.Client, name string, namespace string) error {
 	integration := v1.Integration{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       v1.IntegrationKind,
-			APIVersion: v1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      name,
-		},
+		Kind:       v1.IntegrationKind,
+		APIVersion: v1.SchemeGroupVersion.String(),
+		Namespace:  namespace,
+		Name:       name,
 	}
 
 	return c.Delete(ctx, &integration)

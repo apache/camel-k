@@ -61,20 +61,18 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, pipe *v1.Pipe) (
 	}
 
 	it := v1.Integration{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace:   pipe.Namespace,
-			Name:        pipe.Name,
-			Annotations: annotations,
-			Labels:      util.CopyMap(pipe.Labels),
-			OwnerReferences: []metav1.OwnerReference{
-				{
-					APIVersion:         pipe.APIVersion,
-					Kind:               pipe.Kind,
-					Name:               pipe.Name,
-					UID:                pipe.UID,
-					Controller:         &controller,
-					BlockOwnerDeletion: &blockOwnerDeletion,
-				},
+		Namespace:   pipe.Namespace,
+		Name:        pipe.Name,
+		Annotations: annotations,
+		Labels:      util.CopyMap(pipe.Labels),
+		OwnerReferences: []metav1.OwnerReference{
+			{
+				APIVersion:         pipe.APIVersion,
+				Kind:               pipe.Kind,
+				Name:               pipe.Name,
+				UID:                pipe.UID,
+				Controller:         &controller,
+				BlockOwnerDeletion: &blockOwnerDeletion,
 			},
 		},
 	}

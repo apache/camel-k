@@ -59,10 +59,8 @@ func (t *initTrait) Apply(e *Environment) error {
 			return err
 		}
 		e.Integration.Status.AddOrReplaceGeneratedSources(v1.SourceSpec{
-			DataSpec: v1.DataSpec{
-				Name:    v1.IntegrationFlowEmbeddedSourceName,
-				Content: string(content),
-			},
+			Name:    v1.IntegrationFlowEmbeddedSourceName,
+			Content: string(content),
 		})
 	}
 

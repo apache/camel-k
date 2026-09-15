@@ -260,16 +260,12 @@ func (t *cronTrait) getCronJobFor(e *Environment) *batchv1.CronJob {
 		backoffLimit = *t.BackoffLimit
 	}
 	cronjob := batchv1.CronJob{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "CronJob",
-			APIVersion: batchv1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        e.Integration.Name,
-			Namespace:   e.Integration.Namespace,
-			Labels:      kubernetes.DeploymentLabels(e.Integration.Name),
-			Annotations: e.Integration.Annotations,
-		},
+		Kind:        "CronJob",
+		APIVersion:  batchv1.SchemeGroupVersion.String(),
+		Name:        e.Integration.Name,
+		Namespace:   e.Integration.Namespace,
+		Labels:      kubernetes.DeploymentLabels(e.Integration.Name),
+		Annotations: e.Integration.Annotations,
 		Spec: batchv1.CronJobSpec{
 			Schedule:                t.Schedule,
 			TimeZone:                t.TimeZone,

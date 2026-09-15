@@ -149,16 +149,12 @@ func (action *buildAction) createBuild(ctx context.Context, kit *v1.IntegrationK
 	v1.SetBuilderConfigurationTasks(env.Pipeline, buildConfig)
 
 	build := &v1.Build{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: v1.SchemeGroupVersion.String(),
-			Kind:       v1.BuildKind,
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace:   kit.Namespace,
-			Name:        kit.Name,
-			Labels:      labels,
-			Annotations: annotations,
-		},
+		APIVersion:  v1.SchemeGroupVersion.String(),
+		Kind:        v1.BuildKind,
+		Namespace:   kit.Namespace,
+		Name:        kit.Name,
+		Labels:      labels,
+		Annotations: annotations,
 		Spec: v1.BuildSpec{
 			Tasks: env.Pipeline,
 		},

@@ -24,7 +24,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var (
@@ -78,14 +77,10 @@ func NewTolerations(taints []string) ([]corev1.Toleration, error) {
 func NewPersistentVolumeClaim(
 	ns, name, storageClassName string, capacityStorage resource.Quantity, accessMode corev1.PersistentVolumeAccessMode) *corev1.PersistentVolumeClaim {
 	pvc := corev1.PersistentVolumeClaim{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "PersistentVolumeClaim",
-			APIVersion: corev1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: ns,
-			Name:      name,
-		},
+		Kind:       "PersistentVolumeClaim",
+		APIVersion: corev1.SchemeGroupVersion.String(),
+		Namespace:  ns,
+		Name:       name,
 		Spec: corev1.PersistentVolumeClaimSpec{
 			StorageClassName: &storageClassName,
 			AccessModes: []corev1.PersistentVolumeAccessMode{

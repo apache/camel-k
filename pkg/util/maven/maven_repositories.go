@@ -28,6 +28,7 @@ var DefaultRepositories = defaultRepositories{}
 
 type defaultRepositories struct{}
 
+//nolint:unparam // it implements an interface
 func (o defaultRepositories) apply(settings *Settings) error {
 	for _, repository := range defaultMavenRepositories() {
 		settings.Profiles[0].Repositories = upsertRepository(repository, settings.Profiles[0].Repositories)

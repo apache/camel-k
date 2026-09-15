@@ -51,4 +51,4 @@ type Configuration struct {
 // +kubebuilder:pruning:PreserveUnknownFields
 //
 // Deprecated: for backward compatibility.
-type RawMessage []byte //nolint: recvcheck
+type RawMessage []byte
