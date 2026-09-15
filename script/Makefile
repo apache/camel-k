@@ -340,6 +340,12 @@ test-gateway:
 	go test -timeout 10m -v ./e2e/gateway -tags=integration $(GOTESTFMT)
 
 #
+# Cert-manager tests that require the presence of cert-manager
+#
+test-cert-manager:
+	go test -timeout 10m -v ./e2e/cert-manager -tags=integration $(GOTESTFMT)
+
+#
 # Quarkus native test (requires certain CPU and memory conditions)
 #
 test-quarkus-native:

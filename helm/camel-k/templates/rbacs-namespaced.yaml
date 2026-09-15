@@ -214,6 +214,23 @@ kind: Role
 metadata:
   labels:
     app: camel-k
+  name: {{ include "camel-k.fullname" . }}-operator-certmanager
+rules:
+- apiGroups:
+  - cert-manager.io
+  resources:
+  - issuers
+  - clusterissuers
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app: camel-k
   name: {{ include "camel-k.fullname" . }}-operator-events
 rules:
 - apiGroups:
@@ -461,6 +478,20 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: {{ include "camel-k.fullname" . }}-operator
+subjects:
+- kind: ServiceAccount
+  name: {{ include "camel-k.fullname" . }}-operator
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app: camel-k
+  name: {{ include "camel-k.fullname" . }}-operator-certmanager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "camel-k.fullname" . }}-operator-certmanager
 subjects:
 - kind: ServiceAccount
   name: {{ include "camel-k.fullname" . }}-operator

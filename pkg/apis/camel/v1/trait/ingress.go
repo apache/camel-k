@@ -55,4 +55,15 @@ type IngressTrait struct {
 	TLSHosts []string `json:"tlsHosts,omitempty" property:"tls-hosts"`
 	// To configure tls secret name
 	TLSSecretName string `json:"tlsSecretName,omitempty" property:"tls-secret-name"`
+	// To automatically discover and configure a cert-manager Issuer or ClusterIssuer
+	// for TLS certificate issuance, in place of manually providing a secret.
+	TLSCertManagerAuto *bool `json:"tlsCertManagerAuto,omitempty" property:"tls-cert-manager-auto"`
+	// The name of the cert-manager Issuer or ClusterIssuer to use for automatic
+	// TLS certificate issuance. If set, cert-manager availability and the issuer's
+	// existence are verified, bypassing auto-discovery.
+	TLSIssuerName string `json:"tlsIssuerName,omitempty" property:"tls-issuer-name"`
+	// The kind of the cert-manager issuer to use: `Issuer` (namespaced) or
+	// `ClusterIssuer` (cluster-scoped). Defaults to `ClusterIssuer` when
+	// tlsIssuerName is set without a kind.
+	TLSIssuerKind string `json:"tlsIssuerKind,omitempty" property:"tls-issuer-kind"`
 }

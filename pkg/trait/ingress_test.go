@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -26,10 +27,13 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/internal"
+	"github.com/apache/camel-k/v2/pkg/util/certmanager"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
@@ -333,6 +337,144 @@ func TestConfigureTLSWithoutSecretNameIngressTraitWDoesSucceed(t *testing.T) {
 	conditions := environment.Integration.Status.Conditions
 	assert.Len(t, conditions, 1)
 	assert.Equal(t, "service-name(hostname) -> service-name(http)", conditions[0].Message)
+}
+
+func TestApplyIngressTraitCertManagerAutoNotInstalledDoesNoop(t *testing.T) {
+	ingressTrait, environment := createNominalIngressTest()
+	ingressTrait.TLSCertManagerAuto = ptr.To(true)
+	environment.Ctx = context.Background()
+	fakeClient, err := internal.NewFakeClient()
+	require.NoError(t, err)
+	environment.Client = fakeClient
+
+	err = ingressTrait.Apply(environment)
+
+	require.NoError(t, err)
+	environment.Resources.Visit(func(resource runtime.Object) {
+		if ingress, ok := resource.(*networkingv1.Ingress); ok {
+			assert.Nil(t, ingress.Spec.TLS)
+			assert.NotContains(t, ingress.Annotations, certmanager.AnnotationClusterIssuer)
+			assert.NotContains(t, ingress.Annotations, certmanager.AnnotationIssuer)
+		}
+	})
+}
+
+func TestApplyIngressTraitCertManagerAutoNoIssuerDoesNoop(t *testing.T) {
+	ingressTrait, environment := createNominalIngressTest()
+	ingressTrait.TLSCertManagerAuto = ptr.To(true)
+	environment.Ctx = context.Background()
+	fakeClient, err := internal.NewFakeClient()
+	require.NoError(t, err)
+	fakeClient.(*internal.FakeClient).EnableCertManagerDiscovery()
+	environment.Client = fakeClient
+
+	err = ingressTrait.Apply(environment)
+
+	require.NoError(t, err)
+	environment.Resources.Visit(func(resource runtime.Object) {
+		if ingress, ok := resource.(*networkingv1.Ingress); ok {
+			assert.Nil(t, ingress.Spec.TLS)
+			assert.NotContains(t, ingress.Annotations, certmanager.AnnotationClusterIssuer)
+		}
+	})
+}
+
+func TestApplyIngressTraitCertManagerAutoClusterIssuerFoundDoesSucceed(t *testing.T) {
+	ingressTrait, environment := createNominalIngressTest()
+	ingressTrait.TLSCertManagerAuto = ptr.To(true)
+	environment.Ctx = context.Background()
+
+	clusterIssuer := newClusterIssuer("letsencrypt-prod")
+	fakeClient, err := internal.NewFakeClient(clusterIssuer)
+	require.NoError(t, err)
+	fakeClient.(*internal.FakeClient).EnableCertManagerDiscovery()
+	environment.Client = fakeClient
+
+	err = ingressTrait.Apply(environment)
+
+	require.NoError(t, err)
+	environment.Resources.Visit(func(resource runtime.Object) {
+		if ingress, ok := resource.(*networkingv1.Ingress); ok {
+			assert.Equal(t, "letsencrypt-prod", ingress.Annotations[certmanager.AnnotationClusterIssuer])
+			require.NotNil(t, ingress.Spec.TLS)
+			assert.Equal(t, []string{"hostname"}, ingress.Spec.TLS[0].Hosts)
+			assert.Equal(t, "service-name-tls", ingress.Spec.TLS[0].SecretName)
+		}
+	})
+}
+
+func TestApplyIngressTraitForcedIssuerExistsDoesSucceed(t *testing.T) {
+	ingressTrait, environment := createNominalIngressTest()
+	ingressTrait.TLSIssuerName = "my-issuer"
+	ingressTrait.TLSIssuerKind = "Issuer"
+	environment.Ctx = context.Background()
+	environment.Integration.Namespace = "namespace"
+
+	issuer := newIssuer("my-issuer", "namespace")
+	fakeClient, err := internal.NewFakeClient(issuer)
+	require.NoError(t, err)
+	fakeClient.(*internal.FakeClient).EnableCertManagerDiscovery()
+	environment.Client = fakeClient
+
+	err = ingressTrait.Apply(environment)
+
+	require.NoError(t, err)
+	environment.Resources.Visit(func(resource runtime.Object) {
+		if ingress, ok := resource.(*networkingv1.Ingress); ok {
+			assert.Equal(t, "my-issuer", ingress.Annotations[certmanager.AnnotationIssuer])
+			require.NotNil(t, ingress.Spec.TLS)
+			assert.Equal(t, "service-name-tls", ingress.Spec.TLS[0].SecretName)
+		}
+	})
+}
+
+func TestApplyIngressTraitForcedIssuerMissingDoesNotSucceed(t *testing.T) {
+	ingressTrait, environment := createNominalIngressTest()
+	ingressTrait.TLSIssuerName = "missing-issuer"
+	environment.Ctx = context.Background()
+
+	fakeClient, err := internal.NewFakeClient()
+	require.NoError(t, err)
+	fakeClient.(*internal.FakeClient).EnableCertManagerDiscovery()
+	environment.Client = fakeClient
+
+	err = ingressTrait.Apply(environment)
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "missing-issuer")
+	assert.Contains(t, err.Error(), "not found")
+}
+
+func TestApplyIngressTraitForcedIssuerCertManagerNotInstalledDoesNotSucceed(t *testing.T) {
+	ingressTrait, environment := createNominalIngressTest()
+	ingressTrait.TLSIssuerName = "my-issuer"
+	environment.Ctx = context.Background()
+
+	fakeClient, err := internal.NewFakeClient()
+	require.NoError(t, err)
+	environment.Client = fakeClient
+
+	err = ingressTrait.Apply(environment)
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "cert-manager is not installed")
+}
+
+func newClusterIssuer(name string) *unstructured.Unstructured {
+	u := &unstructured.Unstructured{}
+	u.SetGroupVersionKind(certmanager.ClusterIssuerGVK)
+	u.SetName(name)
+
+	return u
+}
+
+func newIssuer(name, namespace string) *unstructured.Unstructured {
+	u := &unstructured.Unstructured{}
+	u.SetGroupVersionKind(certmanager.IssuerGVK)
+	u.SetName(name)
+	u.SetNamespace(namespace)
+
+	return u
 }
 
 func createNominalIngressTestWithIngressClassName(ingressClassName string) (*ingressTrait, *Environment) {

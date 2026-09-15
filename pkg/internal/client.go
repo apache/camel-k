@@ -155,6 +155,7 @@ type FakeClient struct {
 	enabledOpenshift       bool
 	enabledKnativeServing  bool
 	enabledKnativeEventing bool
+	enabledCertManager     bool
 }
 
 func (c *FakeClient) Intercept(intercept *interceptor.Funcs) {
@@ -206,6 +207,10 @@ func (c *FakeClient) EnableOpenshiftDiscovery() {
 	c.enabledOpenshift = true
 }
 
+func (c *FakeClient) EnableCertManagerDiscovery() {
+	c.enabledCertManager = true
+}
+
 func (c *FakeClient) DisableKnativeServing() {
 	c.enabledKnativeServing = false
 }
@@ -229,6 +234,7 @@ func (c *FakeClient) Discovery() discovery.DiscoveryInterface {
 		enabledOpenshift:       c.enabledOpenshift,
 		enabledKnativeServing:  c.enabledKnativeServing,
 		enabledKnativeEventing: c.enabledKnativeEventing,
+		enabledCertManager:     c.enabledCertManager,
 	}
 }
 
@@ -280,6 +286,7 @@ type FakeDiscovery struct {
 	enabledOpenshift       bool
 	enabledKnativeServing  bool
 	enabledKnativeEventing bool
+	enabledCertManager     bool
 }
 
 func (f *FakeDiscovery) ServerResourcesForGroupVersion(groupVersion string) (*metav1.APIResourceList, error) {
@@ -294,6 +301,19 @@ func (f *FakeDiscovery) ServerResourcesForGroupVersion(groupVersion string) (*me
 				Group: "image.openshift.io",
 			}, "")
 		}
+	}
+
+	// used to verify if cert-manager is installed
+	if groupVersion == "cert-manager.io/v1" {
+		if f.enabledCertManager {
+			return &metav1.APIResourceList{
+				GroupVersion: "cert-manager.io/v1",
+			}, nil
+		}
+
+		return nil, k8serrors.NewNotFound(schema.GroupResource{
+			Group: "cert-manager.io",
+		}, "")
 	}
 
 	// used to verify if Knative Serving is installed
