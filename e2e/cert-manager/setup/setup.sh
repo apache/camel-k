@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -6,7 +8,7 @@
 # (the "License"); you may not use this file except in compliance with
 # the License.  You may obtain a copy of the License at
 #
-#      http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,28 +17,14 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-#
-# rbac resources applicable for all kubernetes platforms - namespaced operator
-#
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
+CERT_MANAGER_VERSION="v1.21.2"
+TIMEOUT="150s"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-resources:
-- operator-role-certmanager.yaml
-- operator-role-events.yaml
-- operator-role.yaml
-- operator-role-keda.yaml
-- operator-role-knative.yaml
-- operator-role-leases.yaml
-- operator-role-openshift.yaml
-- operator-role-podmonitors.yaml
-- operator-role-strimzi.yaml
-- operator-role-binding.yaml
-- operator-role-binding-certmanager.yaml
-- operator-role-binding-events.yaml
-- operator-role-binding-keda.yaml
-- operator-role-binding-knative.yaml
-- operator-role-binding-leases.yaml
-- operator-role-binding-openshift.yaml
-- operator-role-binding-podmonitors.yaml
-- operator-role-binding-strimzi.yaml
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/${CERT_MANAGER_VERSION}/cert-manager.yaml
+kubectl wait --for=condition=available deployment/cert-manager -n cert-manager --timeout=$TIMEOUT
+kubectl wait --for=condition=available deployment/cert-manager-webhook -n cert-manager --timeout=$TIMEOUT
+kubectl wait --for=condition=available deployment/cert-manager-cainjector -n cert-manager --timeout=$TIMEOUT
+
+# Install a self-signed ClusterIssuer for test purposes
+kubectl apply -f $SCRIPT_DIR/cluster-issuer.yaml
