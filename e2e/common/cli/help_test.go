@@ -43,9 +43,9 @@ func TestKamelCLIHelp(t *testing.T) {
 		g.Expect(helpMsg).To(ContainSubstring("Flags:"))
 	})
 
-	t.Run("'get' command help (short flag)", func(t *testing.T) {
-		helpMsg := GetOutputString(Kamel(t, ctx, "get", "-h"))
-		g.Expect(helpMsg).To(ContainSubstring("Get the status of integrations deployed on Kubernetes"))
+	t.Run("'run' command help (short flag)", func(t *testing.T) {
+		helpMsg := GetOutputString(Kamel(t, ctx, "run", "-h"))
+		g.Expect(helpMsg).To(ContainSubstring("Build and run the Integration on Kubernetes"))
 		g.Expect(helpMsg).To(ContainSubstring("Usage:"))
 		g.Expect(helpMsg).To(ContainSubstring("Flags:"))
 	})

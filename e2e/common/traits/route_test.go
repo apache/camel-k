@@ -102,7 +102,7 @@ func TestRunRoutes(t *testing.T) {
 			route := Route(t, ctx, ns, integrationName)
 			url := fmt.Sprintf("http://%s/hello?name=Simple", route().Spec.Host)
 			g.Eventually(httpRequest(url, false), TestTimeoutShort).Should(Equal("Hello Simple"))
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).Should(BeNil())
+			ExpectExecSucceed(t, g, Kubectl("delete", "it", "--all", "-n", ns))
 			g.Eventually(Route(t, ctx, ns, integrationName), TestTimeoutMedium).Should(BeNil())
 		})
 
@@ -119,7 +119,7 @@ func TestRunRoutes(t *testing.T) {
 			route := Route(t, ctx, ns, integrationName)
 			url := fmt.Sprintf("https://%s/hello?name=TLS_Edge", route().Spec.Host)
 			g.Eventually(httpRequest(url, true), TestTimeoutShort).Should(Equal("Hello TLS_Edge"))
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).Should(BeNil())
+			ExpectExecSucceed(t, g, Kubectl("delete", "it", "--all", "-n", ns))
 			g.Eventually(Route(t, ctx, ns, integrationName), TestTimeoutMedium).Should(BeNil())
 		})
 
@@ -137,7 +137,7 @@ func TestRunRoutes(t *testing.T) {
 			code := "TLS_EdgeCustomCertificate"
 			url := fmt.Sprintf("https://%s/hello?name=%s", route().Spec.Host, code)
 			g.Eventually(httpRequest(url, true), TestTimeoutShort).Should(Equal("Hello " + code))
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).Should(BeNil())
+			ExpectExecSucceed(t, g, Kubectl("delete", "it", "--all", "-n", ns))
 			g.Eventually(Route(t, ctx, ns, integrationName), TestTimeoutMedium).Should(BeNil())
 		})
 
@@ -155,7 +155,7 @@ func TestRunRoutes(t *testing.T) {
 			code := "TLS_Passthrough"
 			url := fmt.Sprintf("https://%s/hello?name=%s", route().Spec.Host, code)
 			g.Eventually(httpRequest(url, true), TestTimeoutShort).Should(Equal("Hello " + code))
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).Should(BeNil())
+			ExpectExecSucceed(t, g, Kubectl("delete", "it", "--all", "-n", ns))
 			g.Eventually(Route(t, ctx, ns, integrationName), TestTimeoutMedium).Should(BeNil())
 		})
 
@@ -173,12 +173,12 @@ func TestRunRoutes(t *testing.T) {
 			code := "TLS_Reencrypt"
 			url := fmt.Sprintf("https://%s/hello?name=%s", route().Spec.Host, code)
 			g.Eventually(httpRequest(url, true), TestTimeoutShort).Should(Equal("Hello " + code))
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).Should(BeNil())
+			ExpectExecSucceed(t, g, Kubectl("delete", "it", "--all", "-n", ns))
 			g.Eventually(Route(t, ctx, ns, integrationName), TestTimeoutMedium).Should(BeNil())
 		})
 
 		t.Run("Route annotations added", func(t *testing.T) {
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).Should(BeNil())
+			ExpectExecSucceed(t, g, Kubectl("delete", "it", "--all", "-n", ns))
 			g.Expect(KamelRun(t, ctx, ns, "files/PlatformHttpServer.java", "-t", "route.annotations.'haproxy.router.openshift.io/balance'=roundrobin").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, integrationName), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(Route(t, ctx, ns, integrationName), TestTimeoutMedium).ShouldNot(BeNil())

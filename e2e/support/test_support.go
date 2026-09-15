@@ -1186,7 +1186,7 @@ func DeleteIntegrations(t *testing.T, ctx context.Context, ns string) func() (in
 			return 0, nil
 		}
 
-		if err := Kamel(t, ctx, "delete", "--all", "-n", ns).Execute(); err != nil {
+		if err := Kubectl("delete", "it", "--all", "-n", ns).Run(); err != nil {
 			return 0, err
 		}
 
