@@ -79,15 +79,11 @@ func (t *pdbTrait) Apply(e *Environment) error {
 
 func (t *pdbTrait) podDisruptionBudgetFor(integration *v1.Integration) *policyv1.PodDisruptionBudget {
 	pdb := &policyv1.PodDisruptionBudget{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "PodDisruptionBudget",
-			APIVersion: policyv1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      integration.Name,
-			Namespace: integration.Namespace,
-			Labels:    integration.Labels,
-		},
+		Kind:       "PodDisruptionBudget",
+		APIVersion: policyv1.SchemeGroupVersion.String(),
+		Name:       integration.Name,
+		Namespace:  integration.Namespace,
+		Labels:     integration.Labels,
 		Spec: policyv1.PodDisruptionBudgetSpec{
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{

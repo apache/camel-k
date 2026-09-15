@@ -25,7 +25,6 @@ import (
 	"github.com/Masterminds/semver"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
 	console "github.com/openshift/api/console/v1"
@@ -118,12 +117,10 @@ func OpenShiftConsoleDownloadLink(ctx context.Context, c client.Client) error {
 
 	// Create the ConsoleCLIDownload for Kamel CLI
 	link := console.ConsoleCLIDownload{
-		ObjectMeta: metav1.ObjectMeta{
-			Annotations: map[string]string{
-				kamelVersionAnnotation: defaults.Version,
-			},
-			Name: KamelCLIDownloadName,
+		Annotations: map[string]string{
+			kamelVersionAnnotation: defaults.Version,
 		},
+		Name: KamelCLIDownloadName,
 		Spec: console.ConsoleCLIDownloadSpec{
 			DisplayName: KamelCLIDownloadDisplayName,
 			Description: KamelCLIDownloadDescription,

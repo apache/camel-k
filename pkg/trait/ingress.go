@@ -25,7 +25,6 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 )
 
@@ -105,23 +104,17 @@ func (t *ingressTrait) Apply(e *Environment) error {
 	}
 
 	ingress := networkingv1.Ingress{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Ingress",
-			APIVersion: networkingv1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        service.Name,
-			Namespace:   service.Namespace,
-			Annotations: t.Annotations,
-		},
+		Kind:        "Ingress",
+		APIVersion:  networkingv1.SchemeGroupVersion.String(),
+		Name:        service.Name,
+		Namespace:   service.Namespace,
+		Annotations: t.Annotations,
 		Spec: networkingv1.IngressSpec{
 			Rules: []networkingv1.IngressRule{
 				{
 					Host: t.Host,
-					IngressRuleValue: networkingv1.IngressRuleValue{
-						HTTP: &networkingv1.HTTPIngressRuleValue{
-							Paths: t.getPaths(service),
-						},
+					HTTP: &networkingv1.HTTPIngressRuleValue{
+						Paths: t.getPaths(service),
 					},
 				},
 			},

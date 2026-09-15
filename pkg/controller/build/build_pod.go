@@ -24,7 +24,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -58,19 +57,15 @@ func newBuildPod(ctx context.Context, client client.Client, build *v1.Build) *co
 		}
 	}
 	pod := &corev1.Pod{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: corev1.SchemeGroupVersion.String(),
-			Kind:       "Pod",
+		APIVersion: corev1.SchemeGroupVersion.String(),
+		Kind:       "Pod",
+		Namespace:  build.Namespace,
+		Name:       buildPodName(build),
+		Labels: map[string]string{
+			"camel.apache.org/build":     build.Name,
+			"camel.apache.org/component": "builder",
 		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: build.Namespace,
-			Name:      buildPodName(build),
-			Labels: map[string]string{
-				"camel.apache.org/build":     build.Name,
-				"camel.apache.org/component": "builder",
-			},
-			Annotations: build.BuilderConfiguration().Annotations,
-		},
+		Annotations: build.BuilderConfiguration().Annotations,
 		Spec: corev1.PodSpec{
 			ServiceAccountName: platform.BuilderServiceAccount,
 			RestartPolicy:      corev1.RestartPolicyNever,
@@ -148,14 +143,10 @@ func configureResources(taskName string, build *v1.Build, container *corev1.Cont
 
 func deleteBuilderPod(ctx context.Context, c ctrl.Writer, build *v1.Build) error {
 	pod := corev1.Pod{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: corev1.SchemeGroupVersion.String(),
-			Kind:       "Pod",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: build.Namespace,
-			Name:      buildPodName(build),
-		},
+		APIVersion: corev1.SchemeGroupVersion.String(),
+		Kind:       "Pod",
+		Namespace:  build.Namespace,
+		Name:       buildPodName(build),
 	}
 
 	err := c.Delete(ctx, &pod)
@@ -188,10 +179,8 @@ func addBuildTaskToPod(ctx context.Context, client client.Client, build *v1.Buil
 		pod.Spec.Volumes = append(pod.Spec.Volumes,
 			// EmptyDir volume used to share the build state across tasks
 			corev1.Volume{
-				Name: builderVolume,
-				VolumeSource: corev1.VolumeSource{
-					EmptyDir: &corev1.EmptyDirVolumeSource{},
-				},
+				Name:     builderVolume,
+				EmptyDir: &corev1.EmptyDirVolumeSource{},
 			},
 		)
 	}
@@ -211,10 +200,8 @@ func addBuildTaskToPod(ctx context.Context, client client.Client, build *v1.Buil
 				Name: registry.RegistrySecretConfEnvVar,
 				ValueFrom: &corev1.EnvVarSource{
 					SecretKeyRef: &corev1.SecretKeySelector{
-						LocalObjectReference: corev1.LocalObjectReference{
-							Name: registrySecretName,
-						},
-						Key: registry.RegistryDockerConfFilename,
+						Name: registrySecretName,
+						Key:  registry.RegistryDockerConfFilename,
 					},
 				},
 			},

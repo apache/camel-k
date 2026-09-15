@@ -49,10 +49,8 @@ func ParseEmptyDirVolume(item string) (*corev1.Volume, *corev1.VolumeMount, erro
 
 	volume := &corev1.Volume{
 		Name: refName,
-		VolumeSource: corev1.VolumeSource{
-			EmptyDir: &corev1.EmptyDirVolumeSource{
-				SizeLimit: &parsed,
-			},
+		EmptyDir: &corev1.EmptyDirVolumeSource{
+			SizeLimit: &parsed,
 		},
 	}
 
@@ -86,10 +84,8 @@ func ParseAndCreateVolume(e *Environment, item string) (*corev1.Volume, *corev1.
 
 	volume = &corev1.Volume{
 		Name: kubernetes.SanitizeLabel(volumeName),
-		VolumeSource: corev1.VolumeSource{
-			PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-				ClaimName: volumeName,
-			},
+		PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+			ClaimName: volumeName,
 		},
 	}
 

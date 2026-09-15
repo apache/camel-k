@@ -28,59 +28,45 @@ var (
 	// KnownChannelKinds are known channel kinds belonging to Knative.
 	KnownChannelKinds = []GroupVersionKindResource{
 		{
-			GroupVersionKind: schema.GroupVersionKind{
-				Kind:    "Channel",
-				Group:   "messaging.knative.dev",
-				Version: "v1",
-			},
+			Kind:     "Channel",
+			Group:    "messaging.knative.dev",
+			Version:  "v1",
 			Resource: "channels",
 		},
 		{
-			GroupVersionKind: schema.GroupVersionKind{
-				Kind:    "Channel",
-				Group:   "messaging.knative.dev",
-				Version: "v1beta1",
-			},
+			Kind:     "Channel",
+			Group:    "messaging.knative.dev",
+			Version:  "v1beta1",
 			Resource: "channels",
 		},
 		{
-			GroupVersionKind: schema.GroupVersionKind{
-				Kind:    "InMemoryChannel",
-				Group:   "messaging.knative.dev",
-				Version: "v1",
-			},
+			Kind:     "InMemoryChannel",
+			Group:    "messaging.knative.dev",
+			Version:  "v1",
 			Resource: "inmemorychannels",
 		},
 		{
-			GroupVersionKind: schema.GroupVersionKind{
-				Kind:    "InMemoryChannel",
-				Group:   "messaging.knative.dev",
-				Version: "v1beta1",
-			},
+			Kind:     "InMemoryChannel",
+			Group:    "messaging.knative.dev",
+			Version:  "v1beta1",
 			Resource: "inmemorychannels",
 		},
 		{
-			GroupVersionKind: schema.GroupVersionKind{
-				Kind:    "KafkaChannel",
-				Group:   "messaging.knative.dev",
-				Version: "v1beta1",
-			},
+			Kind:     "KafkaChannel",
+			Group:    "messaging.knative.dev",
+			Version:  "v1beta1",
 			Resource: "kafkachannels",
 		},
 		{
-			GroupVersionKind: schema.GroupVersionKind{
-				Kind:    "KafkaChannel",
-				Group:   "messaging.knative.dev",
-				Version: "v1alpha1",
-			},
+			Kind:     "KafkaChannel",
+			Group:    "messaging.knative.dev",
+			Version:  "v1alpha1",
 			Resource: "kafkachannels",
 		},
 		{
-			GroupVersionKind: schema.GroupVersionKind{
-				Kind:    "NatssChannel",
-				Group:   "messaging.knative.dev",
-				Version: "v1alpha1",
-			},
+			Kind:     "NatssChannel",
+			Group:    "messaging.knative.dev",
+			Version:  "v1alpha1",
 			Resource: "natsschannels",
 		},
 	}
@@ -88,27 +74,21 @@ var (
 	// KnownEndpointKinds are known endpoint kinds belonging to Knative.
 	KnownEndpointKinds = []GroupVersionKindResource{
 		{
-			GroupVersionKind: schema.GroupVersionKind{
-				Kind:    "Service",
-				Group:   "serving.knative.dev",
-				Version: "v1",
-			},
+			Kind:     "Service",
+			Group:    "serving.knative.dev",
+			Version:  "v1",
 			Resource: "services",
 		},
 		{
-			GroupVersionKind: schema.GroupVersionKind{
-				Kind:    "Service",
-				Group:   "serving.knative.dev",
-				Version: "v1beta1",
-			},
+			Kind:     "Service",
+			Group:    "serving.knative.dev",
+			Version:  "v1beta1",
 			Resource: "services",
 		},
 		{
-			GroupVersionKind: schema.GroupVersionKind{
-				Kind:    "Service",
-				Group:   "serving.knative.dev",
-				Version: "v1alpha1",
-			},
+			Kind:     "Service",
+			Group:    "serving.knative.dev",
+			Version:  "v1alpha1",
 			Resource: "services",
 		},
 	}
@@ -116,19 +96,15 @@ var (
 	// KnownBrokerKinds are known broker kinds belonging to Knative.
 	KnownBrokerKinds = []GroupVersionKindResource{
 		{
-			GroupVersionKind: schema.GroupVersionKind{
-				Kind:    "Broker",
-				Group:   "eventing.knative.dev",
-				Version: "v1",
-			},
+			Kind:     "Broker",
+			Group:    "eventing.knative.dev",
+			Version:  "v1",
 			Resource: "brokers",
 		},
 		{
-			GroupVersionKind: schema.GroupVersionKind{
-				Kind:    "Broker",
-				Group:   "eventing.knative.dev",
-				Version: "v1beta1",
-			},
+			Kind:     "Broker",
+			Group:    "eventing.knative.dev",
+			Version:  "v1beta1",
 			Resource: "brokers",
 		},
 	}

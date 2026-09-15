@@ -227,16 +227,12 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 	}
 
 	svc := serving.Service{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Service",
-			APIVersion: serving.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        e.Integration.Name,
-			Namespace:   e.Integration.Namespace,
-			Labels:      serviceLabels,
-			Annotations: serviceAnnotations,
-		},
+		Kind:        "Service",
+		APIVersion:  serving.SchemeGroupVersion.String(),
+		Name:        e.Integration.Name,
+		Namespace:   e.Integration.Namespace,
+		Labels:      serviceLabels,
+		Annotations: serviceAnnotations,
 		Spec: serving.ServiceSpec{
 			ConfigurationSpec: serving.ConfigurationSpec{
 				Template: serving.RevisionTemplateSpec{

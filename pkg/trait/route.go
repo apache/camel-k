@@ -23,7 +23,6 @@ import (
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 
@@ -108,18 +107,14 @@ func (t *routeTrait) Apply(e *Environment) error {
 		return err
 	}
 	route := routev1.Route{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Route",
-			APIVersion: routev1.GroupVersion.String(),
+		Kind:       "Route",
+		APIVersion: routev1.GroupVersion.String(),
+		Name:       t.service.Name,
+		Namespace:  t.service.Namespace,
+		Labels: map[string]string{
+			v1.IntegrationLabel: e.Integration.Name,
 		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      t.service.Name,
-			Namespace: t.service.Namespace,
-			Labels: map[string]string{
-				v1.IntegrationLabel: e.Integration.Name,
-			},
-			Annotations: t.Annotations,
-		},
+		Annotations: t.Annotations,
 		Spec: routev1.RouteSpec{
 			Port: &routev1.RoutePort{
 				TargetPort: intstr.FromString(servicePortName),

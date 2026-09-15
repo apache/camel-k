@@ -408,9 +408,7 @@ func getVolume(volName, storageType, storageName, filterKey, filterValue string)
 	switch storageType {
 	case configmapStorageType:
 		volume.ConfigMap = &corev1.ConfigMapVolumeSource{
-			LocalObjectReference: corev1.LocalObjectReference{
-				Name: storageName,
-			},
+			Name:  storageName,
 			Items: items,
 		}
 	case secretStorageType:

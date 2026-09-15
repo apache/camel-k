@@ -63,15 +63,11 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 	status := initializeStatusFrom(t.build.Status, t.task.BaseImage)
 
 	bc := &buildv1.BuildConfig{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: buildv1.GroupVersion.String(),
-			Kind:       "BuildConfig",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "camel-k-" + t.build.Name,
-			Namespace: t.build.Namespace,
-			Labels:    t.build.Labels,
-		},
+		APIVersion: buildv1.GroupVersion.String(),
+		Kind:       "BuildConfig",
+		Name:       "camel-k-" + t.build.Name,
+		Namespace:  t.build.Namespace,
+		Labels:     t.build.Labels,
 		Spec: buildv1.BuildConfigSpec{
 			CommonSpec: buildv1.CommonSpec{
 				Source: buildv1.BuildSource{
@@ -103,15 +99,11 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 	}
 
 	is := &imagev1.ImageStream{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: imagev1.GroupVersion.String(),
-			Kind:       "ImageStream",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "camel-k-" + t.build.Name,
-			Namespace: t.build.Namespace,
-			Labels:    t.build.Labels,
-		},
+		APIVersion: imagev1.GroupVersion.String(),
+		Kind:       "ImageStream",
+		Name:       "camel-k-" + t.build.Name,
+		Namespace:  t.build.Namespace,
+		Labels:     t.build.Labels,
 		Spec: imagev1.ImageStreamSpec{
 			LookupPolicy: imagev1.ImageLookupPolicy{
 				Local: true,

@@ -29,7 +29,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/spf13/cobra"
 	k8errors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -99,10 +98,8 @@ func (command *deleteCmdOptions) run(cmd *cobra.Command, args []string) error {
 		}
 	} else if command.DeleteAll {
 		integrationList := v1.IntegrationList{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: v1.SchemeGroupVersion.String(),
-				Kind:       v1.IntegrationKind,
-			},
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       v1.IntegrationKind,
 		}
 
 		err := c.List(command.Context, &integrationList, k8sclient.InNamespace(command.Namespace))
@@ -148,14 +145,10 @@ func deletePipeIfExists(ctx context.Context, c client.Client, integration *v1.In
 	}
 
 	binding := v1.Pipe{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       kind,
-			APIVersion: v1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: integration.Namespace,
-			Name:      name,
-		},
+		Kind:       kind,
+		APIVersion: v1.SchemeGroupVersion.String(),
+		Namespace:  integration.Namespace,
+		Name:       name,
 	}
 	err := c.Delete(ctx, &binding)
 	if k8errors.IsNotFound(err) {

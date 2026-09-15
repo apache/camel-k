@@ -27,24 +27,18 @@ import (
 // NewIntegrationPlatformList --.
 func NewIntegrationPlatformList() IntegrationPlatformList {
 	return IntegrationPlatformList{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: SchemeGroupVersion.String(),
-			Kind:       IntegrationPlatformKind,
-		},
+		APIVersion: SchemeGroupVersion.String(),
+		Kind:       IntegrationPlatformKind,
 	}
 }
 
 // NewIntegrationPlatform --.
 func NewIntegrationPlatform(namespace string, name string) IntegrationPlatform {
 	return IntegrationPlatform{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: SchemeGroupVersion.String(),
-			Kind:       IntegrationPlatformKind,
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      name,
-		},
+		APIVersion: SchemeGroupVersion.String(),
+		Kind:       IntegrationPlatformKind,
+		Namespace:  namespace,
+		Name:       name,
 	}
 }
 

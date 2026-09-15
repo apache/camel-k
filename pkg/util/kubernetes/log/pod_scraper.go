@@ -156,14 +156,10 @@ func (s *PodScraper) handleAndRestart(ctx context.Context, err error, wait time.
 //nolint:nestif
 func (s *PodScraper) waitForPodRunning(ctx context.Context, namespace string, podName string, defaultContainerName string) (string, error) {
 	pod := corev1.Pod{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Pod",
-			APIVersion: corev1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      podName,
-			Namespace: namespace,
-		},
+		Kind:       "Pod",
+		APIVersion: corev1.SchemeGroupVersion.String(),
+		Name:       podName,
+		Namespace:  namespace,
 	}
 	podClient := s.client.CoreV1().Pods(pod.Namespace)
 	watcher, err := podClient.Watch(ctx, metav1.ListOptions{

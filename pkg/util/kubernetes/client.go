@@ -23,7 +23,6 @@ import (
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
@@ -108,14 +107,10 @@ func GetUnstructured(context context.Context, client ctrl.Reader, gvk schema.Gro
 
 func GetConfigMap(context context.Context, client ctrl.Reader, name string, namespace string) (*corev1.ConfigMap, error) {
 	configMap := &corev1.ConfigMap{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "ConfigMap",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
+		Kind:       "ConfigMap",
+		APIVersion: "v1",
+		Name:       name,
+		Namespace:  namespace,
 	}
 
 	if err := client.Get(context, ctrl.ObjectKeyFromObject(configMap), configMap); err != nil {
@@ -127,14 +122,10 @@ func GetConfigMap(context context.Context, client ctrl.Reader, name string, name
 
 func GetSecret(context context.Context, client ctrl.Reader, name string, namespace string) (*corev1.Secret, error) {
 	secret := &corev1.Secret{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Secret",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
+		Kind:       "Secret",
+		APIVersion: "v1",
+		Name:       name,
+		Namespace:  namespace,
 	}
 
 	if err := client.Get(context, ctrl.ObjectKeyFromObject(secret), secret); err != nil {

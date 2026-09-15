@@ -95,10 +95,8 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 		replicasCount[key] = replicas
 
 		return true, &autoscalingv1.Scale{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      obj.Name,
-				Namespace: action.GetNamespace(),
-			},
+			Name:      obj.Name,
+			Namespace: action.GetNamespace(),
 			Spec: autoscalingv1.ScaleSpec{
 				Replicas: replicas,
 			},
@@ -110,10 +108,8 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 
 		key := fmt.Sprintf("%s:%s:%s/%s", action.GetResource().Group, action.GetResource().Resource, action.GetNamespace(), action.GetName())
 		obj := &autoscalingv1.Scale{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      action.GetName(),
-				Namespace: action.GetNamespace(),
-			},
+			Name:      action.GetName(),
+			Namespace: action.GetNamespace(),
 			Spec: autoscalingv1.ScaleSpec{
 				Replicas: replicasCount[key],
 			},

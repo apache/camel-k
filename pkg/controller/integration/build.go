@@ -135,16 +135,12 @@ func (action *buildAction) createBuild(ctx context.Context, it *v1.Integration) 
 	}
 
 	build := &v1.Build{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: v1.SchemeGroupVersion.String(),
-			Kind:       v1.BuildKind,
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace:   it.Namespace,
-			Name:        it.Name,
-			Labels:      labels,
-			Annotations: annotations,
-		},
+		APIVersion:  v1.SchemeGroupVersion.String(),
+		Kind:        v1.BuildKind,
+		Namespace:   it.Namespace,
+		Name:        it.Name,
+		Labels:      labels,
+		Annotations: annotations,
 		Spec: v1.BuildSpec{
 			Tasks:   env.Pipeline,
 			Timeout: metav1.Duration{Duration: timeout},
@@ -245,16 +241,12 @@ func (action *buildAction) handleBuildRunning(ctx context.Context, it *v1.Integr
 // createBuilderServiceAccount creates the builder SA in the ns namespace.
 func (action *buildAction) createBuilderServiceAccount(ctx context.Context, ns string) error {
 	sa := &corev1.ServiceAccount{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "ServiceAccount",
-			APIVersion: corev1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: ns,
-			Name:      platform.BuilderServiceAccount,
-			Labels: map[string]string{
-				"app": "camel-k",
-			},
+		Kind:       "ServiceAccount",
+		APIVersion: corev1.SchemeGroupVersion.String(),
+		Namespace:  ns,
+		Name:       platform.BuilderServiceAccount,
+		Labels: map[string]string{
+			"app": "camel-k",
 		},
 	}
 	action.L.Infof("Creating %s ServiceAccount in namespace %s", sa.Name, sa.Namespace)
@@ -265,16 +257,12 @@ func (action *buildAction) createBuilderServiceAccount(ctx context.Context, ns s
 // createBuilderRole creates the builder role in the ns namespace.
 func (action *buildAction) createBuilderRole(ctx context.Context, ns string) error {
 	r := &rbacv1.Role{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Role",
-			APIVersion: corev1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: ns,
-			Name:      platform.BuilderServiceAccount,
-			Labels: map[string]string{
-				"app": "camel-k",
-			},
+		Kind:       "Role",
+		APIVersion: corev1.SchemeGroupVersion.String(),
+		Namespace:  ns,
+		Name:       platform.BuilderServiceAccount,
+		Labels: map[string]string{
+			"app": "camel-k",
 		},
 		Rules: []rbacv1.PolicyRule{
 			{
@@ -297,16 +285,12 @@ func (action *buildAction) createBuilderRole(ctx context.Context, ns string) err
 // createBuilderRole creates the builder role in the ns namespace.
 func (action *buildAction) createBuilderRoleBinding(ctx context.Context, ns string) error {
 	rb := &rbacv1.RoleBinding{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "RoleBinding",
-			APIVersion: rbacv1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: ns,
-			Name:      platform.BuilderServiceAccount,
-			Labels: map[string]string{
-				"app": "camel-k",
-			},
+		Kind:       "RoleBinding",
+		APIVersion: rbacv1.SchemeGroupVersion.String(),
+		Namespace:  ns,
+		Name:       platform.BuilderServiceAccount,
+		Labels: map[string]string{
+			"app": "camel-k",
 		},
 		Subjects: []rbacv1.Subject{
 			{

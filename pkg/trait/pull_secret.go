@@ -22,7 +22,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -142,14 +141,10 @@ func (t *pullSecretTrait) newImagePullerRoleBinding(e *Environment) *rbacv1.Role
 	}
 
 	return &rbacv1.RoleBinding{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "RoleBinding",
-			APIVersion: rbacv1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: targetNamespace,
-			Name:      fmt.Sprintf("camel-k-puller-%s-%s", e.Integration.Namespace, serviceAccount),
-		},
+		Kind:       "RoleBinding",
+		APIVersion: rbacv1.SchemeGroupVersion.String(),
+		Namespace:  targetNamespace,
+		Name:       fmt.Sprintf("camel-k-puller-%s-%s", e.Integration.Namespace, serviceAccount),
 		RoleRef: rbacv1.RoleRef{
 			Kind: "ClusterRole",
 			Name: "system:image-puller",

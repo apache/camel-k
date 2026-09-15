@@ -128,7 +128,7 @@ func (c *Command) optionsFromEnv() ([]string, []string) {
 		for _, extraOption := range c.context.ExtraMavenOpts {
 			// Basic duplicated key detection, that should be improved
 			// to support a wider range of JVM options
-			key := strings.SplitN(extraOption, "=", 2)[0]
+			key, _, _ := strings.Cut(extraOption, "=")
 			exists := false
 			for _, opt := range options {
 				if strings.HasPrefix(opt, key) {

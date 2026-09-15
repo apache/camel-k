@@ -29,7 +29,6 @@ import (
 	kedamapper "github.com/apache/camel-k/v2/pkg/trait/keda"
 	_ "github.com/apache/camel-k/v2/pkg/trait/keda/scalers"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 )
 
@@ -66,14 +65,10 @@ func (t *kedaTrait) Apply(e *Environment) error {
 	triggers, auths := t.populateTriggers(e.Integration.Name, e.Integration.Namespace)
 	scaleTarget := t.getScaleTarget(e.Integration)
 	scaledObject := &v1alpha1.ScaledObject{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-			Kind:       "ScaledObject",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      e.Integration.Name,
-			Namespace: e.Integration.Namespace,
-		},
+		APIVersion: v1alpha1.SchemeGroupVersion.String(),
+		Kind:       "ScaledObject",
+		Name:       e.Integration.Name,
+		Namespace:  e.Integration.Namespace,
 		Spec: v1alpha1.ScaledObjectSpec{
 			ScaleTargetRef:   scaleTarget,
 			PollingInterval:  t.PollingInterval,
@@ -116,14 +111,10 @@ func (t *kedaTrait) populateTriggers(itName, itNamespace string) ([]v1alpha1.Sca
 
 func populateTriggerAuth(secrets []*traitv1.KedaSecret, itName, itNamespace, kedaType string) *v1alpha1.TriggerAuthentication {
 	triggerAuth := &v1alpha1.TriggerAuthentication{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-			Kind:       "TriggerAuthentication",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-%s", itName, kedaType),
-			Namespace: itNamespace,
-		},
+		APIVersion: v1alpha1.SchemeGroupVersion.String(),
+		Kind:       "TriggerAuthentication",
+		Name:       fmt.Sprintf("%s-%s", itName, kedaType),
+		Namespace:  itNamespace,
 		Spec: v1alpha1.TriggerAuthenticationSpec{
 			SecretTargetRef: make([]v1alpha1.AuthSecretTargetRef, 0, len(secrets)),
 		},

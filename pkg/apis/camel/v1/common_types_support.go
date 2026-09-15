@@ -231,20 +231,16 @@ func DecodeValueSource(input string, defaultKey string) (ValueSource, error) {
 		if sub[0] == "configmap" {
 			return ValueSource{
 				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: sub[1],
-					},
-					Key: key,
+					Name: sub[1],
+					Key:  key,
 				},
 			}, nil
 		}
 		if sub[0] == "secret" {
 			return ValueSource{
 				SecretKeyRef: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: sub[1],
-					},
-					Key: key,
+					Name: sub[1],
+					Key:  key,
 				},
 			}, nil
 		}

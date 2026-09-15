@@ -25,14 +25,10 @@ import (
 // NewIntegrationProfile --.
 func NewIntegrationProfile(namespace string, name string) IntegrationProfile {
 	return IntegrationProfile{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: SchemeGroupVersion.String(),
-			Kind:       IntegrationProfileKind,
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      name,
-		},
+		APIVersion: SchemeGroupVersion.String(),
+		Kind:       IntegrationProfileKind,
+		Namespace:  namespace,
+		Name:       name,
 	}
 }
 

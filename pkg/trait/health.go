@@ -283,12 +283,10 @@ func newProbe(
 	initialDelay, timeout, period, success, failure int32,
 ) *corev1.Probe {
 	return &corev1.Probe{
-		ProbeHandler: corev1.ProbeHandler{
-			HTTPGet: &corev1.HTTPGetAction{
-				Path:   path,
-				Scheme: scheme,
-				Port:   *resolverPort,
-			},
+		HTTPGet: &corev1.HTTPGetAction{
+			Path:   path,
+			Scheme: scheme,
+			Port:   *resolverPort,
 		},
 		InitialDelaySeconds: initialDelay,
 		TimeoutSeconds:      timeout,

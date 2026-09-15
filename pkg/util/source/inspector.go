@@ -194,21 +194,15 @@ func InspectorForLanguage(catalog *camel.RuntimeCatalog, language v1.Language) I
 	switch language {
 	case v1.LanguageJavaSource:
 		return &JavaSourceInspector{
-			baseInspector: baseInspector{
-				catalog: catalog,
-			},
+			catalog: catalog,
 		}
 	case v1.LanguageXML:
 		return &XMLInspector{
-			baseInspector: baseInspector{
-				catalog: catalog,
-			},
+			catalog: catalog,
 		}
 	case v1.LanguageYaml:
 		return &YAMLInspector{
-			baseInspector: baseInspector{
-				catalog: catalog,
-			},
+			catalog: catalog,
 		}
 	}
 

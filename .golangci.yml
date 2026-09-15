@@ -26,6 +26,7 @@ linters:
     - err113
     - exhaustive
     - exhaustruct
+    - exhaustruct_v5
     - funcorder
     - funlen
     - gochecknoglobals

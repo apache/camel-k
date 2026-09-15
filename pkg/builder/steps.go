@@ -85,7 +85,7 @@ func registerSteps(steps any) {
 
 	for i := range v.NumField() {
 		field := t.Field(i)
-		if step, ok := v.Field(i).Interface().(Step); ok {
+		if step, ok := reflect.TypeAssert[Step](v.Field(i)); ok {
 			id := t.PkgPath() + "/" + field.Name
 			// Set the fully qualified step ID
 			reflect.Indirect(v.Field(i).Elem()).FieldByName("StepID").SetString(id)

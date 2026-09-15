@@ -29,7 +29,6 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/events"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -174,10 +173,8 @@ func integrationKitEnqueueRequestsFromMapFunc(ctx context.Context, c client.Clie
 
 		log.Infof("Kit %s ready, notify integration: %s", kit.Name, integration.Name)
 		requests = append(requests, reconcile.Request{
-			NamespacedName: types.NamespacedName{
-				Namespace: integration.Namespace,
-				Name:      integration.Name,
-			},
+			Namespace: integration.Namespace,
+			Name:      integration.Name,
 		})
 	}
 
@@ -239,10 +236,8 @@ func enqueueRequestsFromConfigFunc(ctx context.Context, c client.Client, res ctr
 		if found {
 			log.Infof("%s %s updated, wake-up integration: %s", res.GetObjectKind(), res.GetName(), integration.Name)
 			requests = append(requests, reconcile.Request{
-				NamespacedName: types.NamespacedName{
-					Namespace: integration.Namespace,
-					Name:      integration.Name,
-				},
+				Namespace: integration.Namespace,
+				Name:      integration.Name,
 			})
 		}
 	}
@@ -273,10 +268,8 @@ func integrationPlatformEnqueueRequestsFromMapFunc(ctx context.Context, c client
 			if integration.Status.Phase == v1.IntegrationPhaseWaitingForPlatform {
 				log.Infof("Platform %s ready, wake-up integration: %s", p.Name, integration.Name)
 				requests = append(requests, reconcile.Request{
-					NamespacedName: types.NamespacedName{
-						Namespace: integration.Namespace,
-						Name:      integration.Name,
-					},
+					Namespace: integration.Namespace,
+					Name:      integration.Name,
 				})
 			}
 		}
@@ -400,10 +393,8 @@ func watchIntegrationResources(c client.Client, b *builder.Builder) {
 
 				return []reconcile.Request{
 					{
-						NamespacedName: types.NamespacedName{
-							Namespace: pod.GetNamespace(),
-							Name:      pod.Labels[v1.IntegrationLabel],
-						},
+						Namespace: pod.GetNamespace(),
+						Name:      pod.Labels[v1.IntegrationLabel],
 					},
 				}
 			})).

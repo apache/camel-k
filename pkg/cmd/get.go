@@ -21,8 +21,6 @@ import (
 	"fmt"
 	"text/tabwriter"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/spf13/cobra"
@@ -57,10 +55,8 @@ func (o *getCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	integrationList := v1.IntegrationList{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: v1.SchemeGroupVersion.String(),
-			Kind:       "Integration",
-		},
+		APIVersion: v1.SchemeGroupVersion.String(),
+		Kind:       "Integration",
 	}
 
 	namespace := o.Namespace

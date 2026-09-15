@@ -289,15 +289,11 @@ func (t *builderTrait) Apply(e *Environment) error {
 	switch e.Platform.PublishStrategy {
 	case v1.IntegrationPlatformBuildPublishStrategyJib:
 		jibTask := v1.Task{Jib: &v1.JibTask{
-			BaseTask: v1.BaseTask{
-				Name:          "jib",
-				Configuration: *taskConfOrDefault(tasksConf, "jib"),
-			},
-			PublishTask: v1.PublishTask{
-				BaseImage: t.getBaseImage(e),
-				Image:     imageName,
-				Registry:  e.Platform.Registry,
-			},
+			Name:          "jib",
+			Configuration: *taskConfOrDefault(tasksConf, "jib"),
+			BaseImage:     t.getBaseImage(e),
+			Image:         imageName,
+			Registry:      e.Platform.Registry,
 		}}
 		if t.ImagePlatforms != nil {
 			jibTask.Jib.Configuration.ImagePlatforms = t.ImagePlatforms
@@ -306,15 +302,11 @@ func (t *builderTrait) Apply(e *Environment) error {
 	//nolint:staticcheck
 	case v1.IntegrationPlatformBuildPublishStrategyS2I:
 		pipelineTasks = append(pipelineTasks, v1.Task{S2i: &v1.S2iTask{
-			BaseTask: v1.BaseTask{
-				Name:          "s2i",
-				Configuration: *taskConfOrDefault(tasksConf, "s2i"),
-			},
-			PublishTask: v1.PublishTask{
-				BaseImage: t.getBaseImage(e),
-				Image:     imageName,
-			},
-			Tag: tag,
+			Name:          "s2i",
+			Configuration: *taskConfOrDefault(tasksConf, "s2i"),
+			BaseImage:     t.getBaseImage(e),
+			Image:         imageName,
+			Tag:           tag,
 		}})
 	}
 
@@ -434,14 +426,12 @@ func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfigurati
 	dependencies := getDependencies(e)
 
 	task := &v1.BuilderTask{
-		BaseTask: v1.BaseTask{
-			Name:          "builder",
-			Configuration: *taskConf,
-		},
-		BaseImage:    t.getBaseImage(e),
-		Runtime:      e.CamelCatalog.Runtime,
-		Dependencies: dependencies,
-		Maven:        maven,
+		Name:          "builder",
+		Configuration: *taskConf,
+		BaseImage:     t.getBaseImage(e),
+		Runtime:       e.CamelCatalog.Runtime,
+		Dependencies:  dependencies,
+		Maven:         maven,
 	}
 
 	if e.Integration != nil && e.Integration.Spec.Git != nil {
@@ -573,10 +563,8 @@ func parseTask(task string, tasksConf map[string]*v1.BuildConfiguration, imageNa
 	}
 	parsedTask := v1.Task{
 		Custom: &v1.UserTask{
-			BaseTask: v1.BaseTask{
-				Name:          splitted[0],
-				Configuration: *taskConfOrDefault(tasksConf, splitted[0]),
-			},
+			Name:              splitted[0],
+			Configuration:     *taskConfOrDefault(tasksConf, splitted[0]),
 			PublishingImage:   imageName,
 			ContainerImage:    splitted[1],
 			ContainerCommands: splitContainerCommand(splitted[2]),

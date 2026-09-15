@@ -354,17 +354,13 @@ func valueSource(envName string) (v1.ValueSource, error) {
 		switch kind {
 		case "configmap":
 			valueSource.ConfigMapKeyRef = &corev1.ConfigMapKeySelector{
-				LocalObjectReference: corev1.LocalObjectReference{
-					Name: name,
-				},
-				Key: key,
+				Name: name,
+				Key:  key,
 			}
 		case "secret":
 			valueSource.SecretKeyRef = &corev1.SecretKeySelector{
-				LocalObjectReference: corev1.LocalObjectReference{
-					Name: name,
-				},
-				Key: key,
+				Name: name,
+				Key:  key,
 			}
 		default:
 			return valueSource, errors.New("invalid value source format: unsupported " + kind)
@@ -388,10 +384,8 @@ func caSecrets() []corev1.SecretKeySelector {
 				continue
 			}
 			caSecrets = append(caSecrets, corev1.SecretKeySelector{
-				LocalObjectReference: corev1.LocalObjectReference{
-					Name: subparts[0],
-				},
-				Key: subparts[1],
+				Name: subparts[0],
+				Key:  subparts[1],
 			})
 		}
 	}

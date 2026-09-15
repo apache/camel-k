@@ -38,7 +38,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/cli-runtime/pkg/printers"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -671,14 +670,10 @@ func showIntegrationOutput(cmd *cobra.Command, integration *v1.Integration, outp
 
 func (o *runCmdOptions) getIntegration(cmd *cobra.Command, c client.Client, namespace, name string) (*v1.Integration, *v1.Integration, error) {
 	it := &v1.Integration{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       v1.IntegrationKind,
-			APIVersion: v1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      name,
-		},
+		Kind:       v1.IntegrationKind,
+		APIVersion: v1.SchemeGroupVersion.String(),
+		Namespace:  namespace,
+		Name:       name,
 	}
 
 	existing := &v1.Integration{}
@@ -754,11 +749,9 @@ func (o *runCmdOptions) resolveSources(cmd *cobra.Command, sources []string, it 
 			it.Spec.AddFlows(flows...)
 		} else {
 			it.Spec.AddSources(v1.SourceSpec{
-				DataSpec: v1.DataSpec{
-					Name:        source.Name,
-					Content:     source.Content,
-					Compression: source.Compress,
-				},
+				Name:        source.Name,
+				Content:     source.Content,
+				Compression: source.Compress,
 			})
 		}
 	}

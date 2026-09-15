@@ -332,7 +332,7 @@ func ExtractAndMaybeDeleteTraits(c client.Client, annotations map[string]string,
 		//nolint:staticcheck
 		if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
 			key := strings.ReplaceAll(k, v1.TraitAnnotationPrefix, "")
-			traitID := strings.Split(key, ".")[0]
+			traitID, _, _ := strings.Cut(key, ".")
 			if err := ValidateTrait(catalog, traitID); err != nil {
 				return nil, err
 			}
