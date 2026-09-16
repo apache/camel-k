@@ -30,7 +30,7 @@ import (
 //
 // Integration is the Schema for the integrations API.
 type IntegrationApplyConfiguration struct {
-	metav1.TypeMetaApplyConfiguration    `json:",inline"`
+	metav1.TypeMetaApplyConfiguration    `json:""`
 	*metav1.ObjectMetaApplyConfiguration `json:"metadata,omitempty"`
 	// the desired Integration specification
 	Spec *IntegrationSpecApplyConfiguration `json:"spec,omitempty"`

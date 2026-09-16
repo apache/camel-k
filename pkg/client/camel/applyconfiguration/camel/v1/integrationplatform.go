@@ -35,7 +35,7 @@ import (
 //
 // Deprecated: see documentation to switch to environment variable based configuration.
 type IntegrationPlatformApplyConfiguration struct {
-	metav1.TypeMetaApplyConfiguration    `json:",inline"`
+	metav1.TypeMetaApplyConfiguration    `json:""`
 	*metav1.ObjectMetaApplyConfiguration `json:"metadata,omitempty"`
 	Spec                                 *IntegrationPlatformSpecApplyConfiguration   `json:"spec,omitempty"`
 	Status                               *IntegrationPlatformStatusApplyConfiguration `json:"status,omitempty"`

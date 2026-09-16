@@ -29,7 +29,7 @@ import (
 // Template is an unstructured object representing a Kamelet template in YAML/JSON DSL.
 type TemplateApplyConfiguration struct {
 	// an unstructured raw message
-	camelv1.RawMessage `json:",inline"`
+	camelv1.RawMessage `json:""`
 }
 
 // TemplateApplyConfiguration constructs a declarative configuration of the Template type for use with

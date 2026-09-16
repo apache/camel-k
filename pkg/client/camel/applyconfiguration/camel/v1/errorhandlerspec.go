@@ -28,7 +28,7 @@ import (
 //
 // ErrorHandlerSpec represents an unstructured object for an error handler.
 type ErrorHandlerSpecApplyConfiguration struct {
-	camelv1.RawMessage `json:",omitempty,inline"`
+	camelv1.RawMessage `json:",omitempty"`
 }
 
 // ErrorHandlerSpecApplyConfiguration constructs a declarative configuration of the ErrorHandlerSpec type for use with

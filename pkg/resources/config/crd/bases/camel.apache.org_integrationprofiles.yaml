@@ -20,7 +20,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.20.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: integrationprofiles.camel.apache.org
 spec:
   group: camel.apache.org
@@ -168,7 +168,9 @@ spec:
                               description: Selects a key of a ConfigMap.
                               properties:
                                 key:
-                                  description: The key to select.
+                                  description: |-
+                                    The key to select from the ConfigMap's Data field.
+                                    Keys in the BinaryData field are not currently propagated to container env vars.
                                   type: string
                                 name:
                                   default: ""
@@ -227,7 +229,9 @@ spec:
                             description: Selects a key of a ConfigMap.
                             properties:
                               key:
-                                description: The key to select.
+                                description: |-
+                                  The key to select from the ConfigMap's Data field.
+                                  Keys in the BinaryData field are not currently propagated to container env vars.
                                 type: string
                               name:
                                 default: ""
@@ -280,7 +284,9 @@ spec:
                             description: Selects a key of a ConfigMap.
                             properties:
                               key:
-                                description: The key to select.
+                                description: |-
+                                  The key to select from the ConfigMap's Data field.
+                                  Keys in the BinaryData field are not currently propagated to container env vars.
                                 type: string
                               name:
                                 default: ""
@@ -2612,7 +2618,9 @@ spec:
                               description: Selects a key of a ConfigMap.
                               properties:
                                 key:
-                                  description: The key to select.
+                                  description: |-
+                                    The key to select from the ConfigMap's Data field.
+                                    Keys in the BinaryData field are not currently propagated to container env vars.
                                   type: string
                                 name:
                                   default: ""
@@ -2671,7 +2679,9 @@ spec:
                             description: Selects a key of a ConfigMap.
                             properties:
                               key:
-                                description: The key to select.
+                                description: |-
+                                  The key to select from the ConfigMap's Data field.
+                                  Keys in the BinaryData field are not currently propagated to container env vars.
                                 type: string
                               name:
                                 default: ""
@@ -2724,7 +2734,9 @@ spec:
                             description: Selects a key of a ConfigMap.
                             properties:
                               key:
-                                description: The key to select.
+                                description: |-
+                                  The key to select from the ConfigMap's Data field.
+                                  Keys in the BinaryData field are not currently propagated to container env vars.
                                 type: string
                               name:
                                 default: ""

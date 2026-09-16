@@ -29,16 +29,45 @@ import (
 	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/listers/camel/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
+	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	watch "k8s.io/apimachinery/pkg/watch"
 	cache "k8s.io/client-go/tools/cache"
 )
 
 // CamelCatalogInformer provides access to a shared informer and lister for
-// CamelCatalogs.
+// CamelCatalogs. Prefer using the type-safe variant (see [TypedCamelCatalogInformer]).
 type CamelCatalogInformer interface {
 	Informer() cache.SharedIndexInformer
 	Lister() camelv1.CamelCatalogLister
 }
+
+// TypedCamelCatalogInformer provides access to a shared informer and lister for
+// CamelCatalogs, including the type-safe TypedInformer variant.
+// It is a superset of CamelCatalogInformer.
+type TypedCamelCatalogInformer interface {
+	Informer() cache.SharedIndexInformer
+	TypedInformer() CamelCatalogIndexInformer
+	Lister() camelv1.CamelCatalogLister
+}
+
+// CamelCatalogIndexInformer is a wrapper around the underlying [cache.SharedIndexInformer]
+// with type-safe variants of several methods.
+type CamelCatalogIndexInformer cache.TypedSharedIndexInformer[*apiscamelv1.CamelCatalog]
+
+// CamelCatalogHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerFuncs] for CamelCatalog.
+type CamelCatalogHandlerFuncs = cache.TypedResourceEventHandlerFuncs[*apiscamelv1.CamelCatalog]
+
+// CamelCatalogDetailedHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerDetailedFuncs] for CamelCatalog.
+type CamelCatalogDetailedHandlerFuncs = cache.TypedResourceEventHandlerDetailedFuncs[*apiscamelv1.CamelCatalog]
+
+// CamelCatalogFilteringHandler is a specialization of [cache.TypedFilteringResourceEventHandler] for CamelCatalog.
+type CamelCatalogFilteringHandler = cache.TypedFilteringResourceEventHandler[*apiscamelv1.CamelCatalog]
+
+// CamelCatalogIndexers is a specialization of [cache.TypedIndexers] for CamelCatalog.
+type CamelCatalogIndexers = cache.TypedIndexers[*apiscamelv1.CamelCatalog]
+
+// DeletedCamelCatalog is a specialization of [cache.DeletedObject] for CamelCatalog.
+type DeletedCamelCatalog = cache.DeletedObject[*apiscamelv1.CamelCatalog]
 
 type camelCatalogInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
@@ -49,55 +78,132 @@ type camelCatalogInformer struct {
 // NewCamelCatalogInformer constructs a new informer for CamelCatalog type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedCamelCatalogInformer]).
 func NewCamelCatalogInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredCamelCatalogInformer(client, namespace, resyncPeriod, indexers, nil)
+	return NewCamelCatalogInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers})
+}
+
+// NewTypedCamelCatalogInformer constructs a new informer for CamelCatalog type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedCamelCatalogInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers CamelCatalogIndexers) CamelCatalogIndexInformer {
+	return NewTypedCamelCatalogInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers)})
 }
 
 // NewFilteredCamelCatalogInformer constructs a new informer for CamelCatalog type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedFilteredCamelCatalogInformer]).
 func NewFilteredCamelCatalogInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
-	return cache.NewSharedIndexInformer(
+	return NewTypedCamelCatalogInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers, TweakListOptions: tweakListOptions})
+}
+
+// NewTypedFilteredCamelCatalogInformer constructs a new informer for CamelCatalog type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedFilteredCamelCatalogInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers CamelCatalogIndexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) CamelCatalogIndexInformer {
+	return NewTypedCamelCatalogInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers), TweakListOptions: tweakListOptions})
+}
+
+// NewCamelCatalogInformerWithOptions constructs a new informer for CamelCatalog type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedCamelCatalogInformerWithOptions]).
+func NewCamelCatalogInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) cache.SharedIndexInformer {
+	return NewTypedCamelCatalogInformerWithOptions(client, namespace, options)
+}
+
+// NewTypedCamelCatalogInformerWithOptions constructs a new informer for CamelCatalog type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedCamelCatalogInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) CamelCatalogIndexInformer {
+	gvr := schema.GroupVersionResource{Group: "camel.apache.org", Version: "v1", Resource: "camelcatalogs"}
+	identifier := options.InformerName.WithResource(gvr)
+	tweakListOptions := options.TweakListOptions
+	return cache.NewTypedSharedIndexInformer[*apiscamelv1.CamelCatalog](cache.NewSharedIndexInformerWithOptions(
 		cache.ToListWatcherWithWatchListSemantics(&cache.ListWatch{
-			ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
+			ListFunc: func(opts metav1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.CamelV1().CamelCatalogs(namespace).List(context.Background(), options)
+				return client.CamelV1().CamelCatalogs(namespace).List(context.Background(), opts)
 			},
-			WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
+			WatchFunc: func(opts metav1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.CamelV1().CamelCatalogs(namespace).Watch(context.Background(), options)
+				return client.CamelV1().CamelCatalogs(namespace).Watch(context.Background(), opts)
 			},
-			ListWithContextFunc: func(ctx context.Context, options metav1.ListOptions) (runtime.Object, error) {
+			ListWithContextFunc: func(ctx context.Context, opts metav1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.CamelV1().CamelCatalogs(namespace).List(ctx, options)
+				return client.CamelV1().CamelCatalogs(namespace).List(ctx, opts)
 			},
-			WatchFuncWithContext: func(ctx context.Context, options metav1.ListOptions) (watch.Interface, error) {
+			WatchFuncWithContext: func(ctx context.Context, opts metav1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.CamelV1().CamelCatalogs(namespace).Watch(ctx, options)
+				return client.CamelV1().CamelCatalogs(namespace).Watch(ctx, opts)
 			},
 		}, client),
 		&apiscamelv1.CamelCatalog{},
-		resyncPeriod,
-		indexers,
-	)
+		cache.SharedIndexInformerOptions{
+			ResyncPeriod: options.ResyncPeriod,
+			Indexers:     options.Indexers,
+			Identifier:   identifier,
+		},
+	))
 }
 
 func (f *camelCatalogInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredCamelCatalogInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+	return NewTypedCamelCatalogInformerWithOptions(client, f.namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, InformerName: f.factory.InformerName(), TweakListOptions: f.tweakListOptions})
 }
 
 func (f *camelCatalogInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&apiscamelv1.CamelCatalog{}, f.defaultInformer)
+	return f.TypedInformer()
+}
+
+func (f *camelCatalogInformer) TypedInformer() CamelCatalogIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*apiscamelv1.CamelCatalog](f.factory.InformerFor(&apiscamelv1.CamelCatalog{}, f.defaultInformer))
 }
 
 func (f *camelCatalogInformer) Lister() camelv1.CamelCatalogLister {
 	return camelv1.NewCamelCatalogLister(f.Informer().GetIndexer())
+}
+
+// ToTypedCamelCatalogInformer converts an untyped informer into a TypedCamelCatalogInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *CamelCatalog. If that is not the case, calling type-safe methods of the returned
+// TypedCamelCatalogInformer leads to runtime panics. A safer alternative is to pass
+// around a TypedCamelCatalogInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToTypedCamelCatalogInformer(informer CamelCatalogInformer) TypedCamelCatalogInformer {
+	if informer, ok := informer.(TypedCamelCatalogInformer); ok {
+		return informer
+	}
+	return &camelCatalogTypedInformerAdapter{informer}
+}
+
+type camelCatalogTypedInformerAdapter struct {
+	CamelCatalogInformer
+}
+
+func (a *camelCatalogTypedInformerAdapter) TypedInformer() CamelCatalogIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*apiscamelv1.CamelCatalog](a.Informer())
+}
+
+// ToCamelCatalogIndexInformer converts an untyped informer into a CamelCatalogIndexInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *CamelCatalog. If that is not the case, calling type-safe methods of the returned
+// CamelCatalogIndexInformer leads to runtime panics. A safer alternative is to pass
+// around a CamelCatalogIndexInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToCamelCatalogIndexInformer(informer cache.SharedIndexInformer) CamelCatalogIndexInformer {
+	if informer, ok := informer.(CamelCatalogIndexInformer); ok {
+		return informer
+	}
+	return cache.NewTypedSharedIndexInformer[*apiscamelv1.CamelCatalog](informer)
 }

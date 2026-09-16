@@ -29,7 +29,7 @@ import (
 // JSON represents any valid JSON value.
 // These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
 type JSONApplyConfiguration struct {
-	camelv1.RawMessage `json:",inline"`
+	camelv1.RawMessage `json:""`
 }
 
 // JSONApplyConfiguration constructs a declarative configuration of the JSON type for use with

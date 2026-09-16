@@ -29,16 +29,45 @@ import (
 	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/listers/camel/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
+	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	watch "k8s.io/apimachinery/pkg/watch"
 	cache "k8s.io/client-go/tools/cache"
 )
 
 // IntegrationPlatformInformer provides access to a shared informer and lister for
-// IntegrationPlatforms.
+// IntegrationPlatforms. Prefer using the type-safe variant (see [TypedIntegrationPlatformInformer]).
 type IntegrationPlatformInformer interface {
 	Informer() cache.SharedIndexInformer
 	Lister() camelv1.IntegrationPlatformLister
 }
+
+// TypedIntegrationPlatformInformer provides access to a shared informer and lister for
+// IntegrationPlatforms, including the type-safe TypedInformer variant.
+// It is a superset of IntegrationPlatformInformer.
+type TypedIntegrationPlatformInformer interface {
+	Informer() cache.SharedIndexInformer
+	TypedInformer() IntegrationPlatformIndexInformer
+	Lister() camelv1.IntegrationPlatformLister
+}
+
+// IntegrationPlatformIndexInformer is a wrapper around the underlying [cache.SharedIndexInformer]
+// with type-safe variants of several methods.
+type IntegrationPlatformIndexInformer cache.TypedSharedIndexInformer[*apiscamelv1.IntegrationPlatform]
+
+// IntegrationPlatformHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerFuncs] for IntegrationPlatform.
+type IntegrationPlatformHandlerFuncs = cache.TypedResourceEventHandlerFuncs[*apiscamelv1.IntegrationPlatform]
+
+// IntegrationPlatformDetailedHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerDetailedFuncs] for IntegrationPlatform.
+type IntegrationPlatformDetailedHandlerFuncs = cache.TypedResourceEventHandlerDetailedFuncs[*apiscamelv1.IntegrationPlatform]
+
+// IntegrationPlatformFilteringHandler is a specialization of [cache.TypedFilteringResourceEventHandler] for IntegrationPlatform.
+type IntegrationPlatformFilteringHandler = cache.TypedFilteringResourceEventHandler[*apiscamelv1.IntegrationPlatform]
+
+// IntegrationPlatformIndexers is a specialization of [cache.TypedIndexers] for IntegrationPlatform.
+type IntegrationPlatformIndexers = cache.TypedIndexers[*apiscamelv1.IntegrationPlatform]
+
+// DeletedIntegrationPlatform is a specialization of [cache.DeletedObject] for IntegrationPlatform.
+type DeletedIntegrationPlatform = cache.DeletedObject[*apiscamelv1.IntegrationPlatform]
 
 type integrationPlatformInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
@@ -49,55 +78,132 @@ type integrationPlatformInformer struct {
 // NewIntegrationPlatformInformer constructs a new informer for IntegrationPlatform type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedIntegrationPlatformInformer]).
 func NewIntegrationPlatformInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredIntegrationPlatformInformer(client, namespace, resyncPeriod, indexers, nil)
+	return NewIntegrationPlatformInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers})
+}
+
+// NewTypedIntegrationPlatformInformer constructs a new informer for IntegrationPlatform type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedIntegrationPlatformInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers IntegrationPlatformIndexers) IntegrationPlatformIndexInformer {
+	return NewTypedIntegrationPlatformInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers)})
 }
 
 // NewFilteredIntegrationPlatformInformer constructs a new informer for IntegrationPlatform type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedFilteredIntegrationPlatformInformer]).
 func NewFilteredIntegrationPlatformInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
-	return cache.NewSharedIndexInformer(
+	return NewTypedIntegrationPlatformInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers, TweakListOptions: tweakListOptions})
+}
+
+// NewTypedFilteredIntegrationPlatformInformer constructs a new informer for IntegrationPlatform type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedFilteredIntegrationPlatformInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers IntegrationPlatformIndexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) IntegrationPlatformIndexInformer {
+	return NewTypedIntegrationPlatformInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers), TweakListOptions: tweakListOptions})
+}
+
+// NewIntegrationPlatformInformerWithOptions constructs a new informer for IntegrationPlatform type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedIntegrationPlatformInformerWithOptions]).
+func NewIntegrationPlatformInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) cache.SharedIndexInformer {
+	return NewTypedIntegrationPlatformInformerWithOptions(client, namespace, options)
+}
+
+// NewTypedIntegrationPlatformInformerWithOptions constructs a new informer for IntegrationPlatform type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedIntegrationPlatformInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) IntegrationPlatformIndexInformer {
+	gvr := schema.GroupVersionResource{Group: "camel.apache.org", Version: "v1", Resource: "integrationplatforms"}
+	identifier := options.InformerName.WithResource(gvr)
+	tweakListOptions := options.TweakListOptions
+	return cache.NewTypedSharedIndexInformer[*apiscamelv1.IntegrationPlatform](cache.NewSharedIndexInformerWithOptions(
 		cache.ToListWatcherWithWatchListSemantics(&cache.ListWatch{
-			ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
+			ListFunc: func(opts metav1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.CamelV1().IntegrationPlatforms(namespace).List(context.Background(), options)
+				return client.CamelV1().IntegrationPlatforms(namespace).List(context.Background(), opts)
 			},
-			WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
+			WatchFunc: func(opts metav1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.CamelV1().IntegrationPlatforms(namespace).Watch(context.Background(), options)
+				return client.CamelV1().IntegrationPlatforms(namespace).Watch(context.Background(), opts)
 			},
-			ListWithContextFunc: func(ctx context.Context, options metav1.ListOptions) (runtime.Object, error) {
+			ListWithContextFunc: func(ctx context.Context, opts metav1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.CamelV1().IntegrationPlatforms(namespace).List(ctx, options)
+				return client.CamelV1().IntegrationPlatforms(namespace).List(ctx, opts)
 			},
-			WatchFuncWithContext: func(ctx context.Context, options metav1.ListOptions) (watch.Interface, error) {
+			WatchFuncWithContext: func(ctx context.Context, opts metav1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.CamelV1().IntegrationPlatforms(namespace).Watch(ctx, options)
+				return client.CamelV1().IntegrationPlatforms(namespace).Watch(ctx, opts)
 			},
 		}, client),
 		&apiscamelv1.IntegrationPlatform{},
-		resyncPeriod,
-		indexers,
-	)
+		cache.SharedIndexInformerOptions{
+			ResyncPeriod: options.ResyncPeriod,
+			Indexers:     options.Indexers,
+			Identifier:   identifier,
+		},
+	))
 }
 
 func (f *integrationPlatformInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredIntegrationPlatformInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+	return NewTypedIntegrationPlatformInformerWithOptions(client, f.namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, InformerName: f.factory.InformerName(), TweakListOptions: f.tweakListOptions})
 }
 
 func (f *integrationPlatformInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&apiscamelv1.IntegrationPlatform{}, f.defaultInformer)
+	return f.TypedInformer()
+}
+
+func (f *integrationPlatformInformer) TypedInformer() IntegrationPlatformIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*apiscamelv1.IntegrationPlatform](f.factory.InformerFor(&apiscamelv1.IntegrationPlatform{}, f.defaultInformer))
 }
 
 func (f *integrationPlatformInformer) Lister() camelv1.IntegrationPlatformLister {
 	return camelv1.NewIntegrationPlatformLister(f.Informer().GetIndexer())
+}
+
+// ToTypedIntegrationPlatformInformer converts an untyped informer into a TypedIntegrationPlatformInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *IntegrationPlatform. If that is not the case, calling type-safe methods of the returned
+// TypedIntegrationPlatformInformer leads to runtime panics. A safer alternative is to pass
+// around a TypedIntegrationPlatformInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToTypedIntegrationPlatformInformer(informer IntegrationPlatformInformer) TypedIntegrationPlatformInformer {
+	if informer, ok := informer.(TypedIntegrationPlatformInformer); ok {
+		return informer
+	}
+	return &integrationPlatformTypedInformerAdapter{informer}
+}
+
+type integrationPlatformTypedInformerAdapter struct {
+	IntegrationPlatformInformer
+}
+
+func (a *integrationPlatformTypedInformerAdapter) TypedInformer() IntegrationPlatformIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*apiscamelv1.IntegrationPlatform](a.Informer())
+}
+
+// ToIntegrationPlatformIndexInformer converts an untyped informer into a IntegrationPlatformIndexInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *IntegrationPlatform. If that is not the case, calling type-safe methods of the returned
+// IntegrationPlatformIndexInformer leads to runtime panics. A safer alternative is to pass
+// around a IntegrationPlatformIndexInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToIntegrationPlatformIndexInformer(informer cache.SharedIndexInformer) IntegrationPlatformIndexInformer {
+	if informer, ok := informer.(IntegrationPlatformIndexInformer); ok {
+		return informer
+	}
+	return cache.NewTypedSharedIndexInformer[*apiscamelv1.IntegrationPlatform](informer)
 }

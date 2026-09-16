@@ -28,7 +28,7 @@ import (
 //
 // EndpointProperties is a key/value struct represented as JSON raw to allow numeric/boolean values.
 type EndpointPropertiesApplyConfiguration struct {
-	camelv1.RawMessage `json:",inline"`
+	camelv1.RawMessage `json:""`
 }
 
 // EndpointPropertiesApplyConfiguration constructs a declarative configuration of the EndpointProperties type for use with

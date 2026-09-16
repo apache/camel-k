@@ -24,7 +24,7 @@ package v1
 //
 // BuilderTask is the generic task in charge of building the application image.
 type BuilderTaskApplyConfiguration struct {
-	BaseTaskApplyConfiguration `json:",inline"`
+	BaseTaskApplyConfiguration `json:""`
 	// the base image layer
 	BaseImage *string `json:"baseImage,omitempty"`
 	// the configuration required for the runtime application

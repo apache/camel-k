@@ -24,7 +24,7 @@ package v1
 //
 // UserTask is used to execute any generic custom operation.
 type UserTaskApplyConfiguration struct {
-	BaseTaskApplyConfiguration `json:",inline"`
+	BaseTaskApplyConfiguration `json:""`
 	// the container image to use
 	ContainerImage *string `json:"image,omitempty"`
 	// the user id used to run the container

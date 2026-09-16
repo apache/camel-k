@@ -26,8 +26,8 @@ package v1
 //
 // Deprecated: no longer in use.
 type KanikoTaskApplyConfiguration struct {
-	BaseTaskApplyConfiguration    `json:",inline"`
-	PublishTaskApplyConfiguration `json:",inline"`
+	BaseTaskApplyConfiguration    `json:""`
+	PublishTaskApplyConfiguration `json:""`
 	// log more information
 	Verbose *bool `json:"verbose,omitempty"`
 	// use a cache

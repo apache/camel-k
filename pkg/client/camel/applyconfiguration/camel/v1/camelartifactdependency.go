@@ -25,7 +25,7 @@ package v1
 // CamelArtifactDependency represent a maven's dependency.
 type CamelArtifactDependencyApplyConfiguration struct {
 	// the maven dependency
-	MavenArtifactApplyConfiguration `json:",inline"`
+	MavenArtifactApplyConfiguration `json:""`
 	// provide a list of artifacts to exclude for this dependency
 	Exclusions []CamelArtifactExclusionApplyConfiguration `json:"exclusions,omitempty"`
 }

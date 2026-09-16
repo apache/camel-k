@@ -33,7 +33,7 @@ import (
 // in order to be reused by any other `Integration` which has the same required set of capabilities. An `IntegrationKit`
 // may be used for other kits as a base container layer, when the `incremental` build option is enabled.
 type IntegrationKitApplyConfiguration struct {
-	metav1.TypeMetaApplyConfiguration    `json:",inline"`
+	metav1.TypeMetaApplyConfiguration    `json:""`
 	*metav1.ObjectMetaApplyConfiguration `json:"metadata,omitempty"`
 	// the desired configuration
 	Spec *IntegrationKitSpecApplyConfiguration `json:"spec,omitempty"`

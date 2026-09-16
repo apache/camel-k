@@ -31,7 +31,7 @@ import (
 // Deprecated: superseded by each Trait type, left for backward compatibility.
 type TraitConfigurationApplyConfiguration struct {
 	// generic raw message, typically a map containing the keys (trait parameters) and the values (either single text or array)
-	camelv1.RawMessage `json:",inline"`
+	camelv1.RawMessage `json:""`
 }
 
 // TraitConfigurationApplyConfiguration constructs a declarative configuration of the TraitConfiguration type for use with

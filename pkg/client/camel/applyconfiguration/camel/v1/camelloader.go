@@ -25,7 +25,7 @@ package v1
 // CamelLoader represents the configuration required to load a DSL.
 type CamelLoaderApplyConfiguration struct {
 	// the base Maven artifact required
-	MavenArtifactApplyConfiguration `json:",inline"`
+	MavenArtifactApplyConfiguration `json:""`
 	// a list of DSLs supported
 	Languages []string `json:"languages,omitempty"`
 	// a list of additional dependencies required beside the base one

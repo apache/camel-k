@@ -28,7 +28,7 @@ import (
 //
 // IntegrationPlatformStatus defines the observed state of IntegrationPlatform.
 type IntegrationPlatformStatusApplyConfiguration struct {
-	IntegrationPlatformSpecApplyConfiguration `json:",inline"`
+	IntegrationPlatformSpecApplyConfiguration `json:""`
 	// ObservedGeneration is the most recent generation observed for this IntegrationPlatform.
 	ObservedGeneration *int64 `json:"observedGeneration,omitempty"`
 	// defines in what phase the IntegrationPlatform is found

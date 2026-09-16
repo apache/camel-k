@@ -30,7 +30,7 @@ import (
 //
 // CamelCatalog represents the languages, components, data formats and capabilities enabled on a given runtime provider. The catalog may be statically generated.
 type CamelCatalogApplyConfiguration struct {
-	metav1.TypeMetaApplyConfiguration    `json:",inline"`
+	metav1.TypeMetaApplyConfiguration    `json:""`
 	*metav1.ObjectMetaApplyConfiguration `json:"metadata,omitempty"`
 	// the actual state of the catalog
 	Status *CamelCatalogStatusApplyConfiguration `json:"status,omitempty"`

@@ -26,8 +26,8 @@ package v1
 //
 // Deprecated: no longer in use.
 type BuildahTaskApplyConfiguration struct {
-	BaseTaskApplyConfiguration    `json:",inline"`
-	PublishTaskApplyConfiguration `json:",inline"`
+	BaseTaskApplyConfiguration    `json:""`
+	PublishTaskApplyConfiguration `json:""`
 	// The platform of build image
 	Platform *string `json:"platform,omitempty"`
 	// log more information

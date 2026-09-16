@@ -46,7 +46,7 @@ type IntegrationProfileBuildSpecApplyConfiguration struct {
 	// Maven repositories used to build the Camel applications
 	Repositories []string `json:"repositories,omitempty"`
 	// the configuration required to build an Integration container image
-	BuildConfiguration *BuildConfigurationApplyConfiguration `json:",inline"`
+	BuildConfiguration *BuildConfigurationApplyConfiguration `json:"BuildConfiguration,omitempty"`
 	// the strategy to adopt for publishing an Integration container image
 	PublishStrategy *camelv1.IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
 	// the maximum amount of parallel running pipelines started by this operator instance

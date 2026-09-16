@@ -30,7 +30,7 @@ import (
 //
 // Deprecated: no longer in use.
 type DeprecatedIntegrationProfileStatusApplyConfiguration struct {
-	IntegrationProfileSpecApplyConfiguration `json:",inline"`
+	IntegrationProfileSpecApplyConfiguration `json:""`
 	// ObservedGeneration is the most recent generation observed for this IntegrationProfile.
 	ObservedGeneration *int64 `json:"observedGeneration,omitempty"`
 	// defines in what phase the IntegrationProfile is found

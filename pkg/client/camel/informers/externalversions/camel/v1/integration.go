@@ -29,16 +29,45 @@ import (
 	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/listers/camel/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
+	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	watch "k8s.io/apimachinery/pkg/watch"
 	cache "k8s.io/client-go/tools/cache"
 )
 
 // IntegrationInformer provides access to a shared informer and lister for
-// Integrations.
+// Integrations. Prefer using the type-safe variant (see [TypedIntegrationInformer]).
 type IntegrationInformer interface {
 	Informer() cache.SharedIndexInformer
 	Lister() camelv1.IntegrationLister
 }
+
+// TypedIntegrationInformer provides access to a shared informer and lister for
+// Integrations, including the type-safe TypedInformer variant.
+// It is a superset of IntegrationInformer.
+type TypedIntegrationInformer interface {
+	Informer() cache.SharedIndexInformer
+	TypedInformer() IntegrationIndexInformer
+	Lister() camelv1.IntegrationLister
+}
+
+// IntegrationIndexInformer is a wrapper around the underlying [cache.SharedIndexInformer]
+// with type-safe variants of several methods.
+type IntegrationIndexInformer cache.TypedSharedIndexInformer[*apiscamelv1.Integration]
+
+// IntegrationHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerFuncs] for Integration.
+type IntegrationHandlerFuncs = cache.TypedResourceEventHandlerFuncs[*apiscamelv1.Integration]
+
+// IntegrationDetailedHandlerFuncs is a specialization of [cache.TypedResourceEventHandlerDetailedFuncs] for Integration.
+type IntegrationDetailedHandlerFuncs = cache.TypedResourceEventHandlerDetailedFuncs[*apiscamelv1.Integration]
+
+// IntegrationFilteringHandler is a specialization of [cache.TypedFilteringResourceEventHandler] for Integration.
+type IntegrationFilteringHandler = cache.TypedFilteringResourceEventHandler[*apiscamelv1.Integration]
+
+// IntegrationIndexers is a specialization of [cache.TypedIndexers] for Integration.
+type IntegrationIndexers = cache.TypedIndexers[*apiscamelv1.Integration]
+
+// DeletedIntegration is a specialization of [cache.DeletedObject] for Integration.
+type DeletedIntegration = cache.DeletedObject[*apiscamelv1.Integration]
 
 type integrationInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
@@ -49,55 +78,132 @@ type integrationInformer struct {
 // NewIntegrationInformer constructs a new informer for Integration type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedIntegrationInformer]).
 func NewIntegrationInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredIntegrationInformer(client, namespace, resyncPeriod, indexers, nil)
+	return NewIntegrationInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers})
+}
+
+// NewTypedIntegrationInformer constructs a new informer for Integration type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedIntegrationInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers IntegrationIndexers) IntegrationIndexInformer {
+	return NewTypedIntegrationInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers)})
 }
 
 // NewFilteredIntegrationInformer constructs a new informer for Integration type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedFilteredIntegrationInformer]).
 func NewFilteredIntegrationInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
-	return cache.NewSharedIndexInformer(
+	return NewTypedIntegrationInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers, TweakListOptions: tweakListOptions})
+}
+
+// NewTypedFilteredIntegrationInformer constructs a new informer for Integration type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedFilteredIntegrationInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers IntegrationIndexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) IntegrationIndexInformer {
+	return NewTypedIntegrationInformerWithOptions(client, namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.TypedIndexersToIndexers(indexers), TweakListOptions: tweakListOptions})
+}
+
+// NewIntegrationInformerWithOptions constructs a new informer for Integration type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+// If you really need an independent one, prefer using the type-safe variant (see [NewTypedIntegrationInformerWithOptions]).
+func NewIntegrationInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) cache.SharedIndexInformer {
+	return NewTypedIntegrationInformerWithOptions(client, namespace, options)
+}
+
+// NewTypedIntegrationInformerWithOptions constructs a new informer for Integration type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewTypedIntegrationInformerWithOptions(client versioned.Interface, namespace string, options internalinterfaces.InformerOptions) IntegrationIndexInformer {
+	gvr := schema.GroupVersionResource{Group: "camel.apache.org", Version: "v1", Resource: "integrations"}
+	identifier := options.InformerName.WithResource(gvr)
+	tweakListOptions := options.TweakListOptions
+	return cache.NewTypedSharedIndexInformer[*apiscamelv1.Integration](cache.NewSharedIndexInformerWithOptions(
 		cache.ToListWatcherWithWatchListSemantics(&cache.ListWatch{
-			ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
+			ListFunc: func(opts metav1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.CamelV1().Integrations(namespace).List(context.Background(), options)
+				return client.CamelV1().Integrations(namespace).List(context.Background(), opts)
 			},
-			WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
+			WatchFunc: func(opts metav1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.CamelV1().Integrations(namespace).Watch(context.Background(), options)
+				return client.CamelV1().Integrations(namespace).Watch(context.Background(), opts)
 			},
-			ListWithContextFunc: func(ctx context.Context, options metav1.ListOptions) (runtime.Object, error) {
+			ListWithContextFunc: func(ctx context.Context, opts metav1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.CamelV1().Integrations(namespace).List(ctx, options)
+				return client.CamelV1().Integrations(namespace).List(ctx, opts)
 			},
-			WatchFuncWithContext: func(ctx context.Context, options metav1.ListOptions) (watch.Interface, error) {
+			WatchFuncWithContext: func(ctx context.Context, opts metav1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.CamelV1().Integrations(namespace).Watch(ctx, options)
+				return client.CamelV1().Integrations(namespace).Watch(ctx, opts)
 			},
 		}, client),
 		&apiscamelv1.Integration{},
-		resyncPeriod,
-		indexers,
-	)
+		cache.SharedIndexInformerOptions{
+			ResyncPeriod: options.ResyncPeriod,
+			Indexers:     options.Indexers,
+			Identifier:   identifier,
+		},
+	))
 }
 
 func (f *integrationInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredIntegrationInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+	return NewTypedIntegrationInformerWithOptions(client, f.namespace, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, InformerName: f.factory.InformerName(), TweakListOptions: f.tweakListOptions})
 }
 
 func (f *integrationInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&apiscamelv1.Integration{}, f.defaultInformer)
+	return f.TypedInformer()
+}
+
+func (f *integrationInformer) TypedInformer() IntegrationIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*apiscamelv1.Integration](f.factory.InformerFor(&apiscamelv1.Integration{}, f.defaultInformer))
 }
 
 func (f *integrationInformer) Lister() camelv1.IntegrationLister {
 	return camelv1.NewIntegrationLister(f.Informer().GetIndexer())
+}
+
+// ToTypedIntegrationInformer converts an untyped informer into a TypedIntegrationInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *Integration. If that is not the case, calling type-safe methods of the returned
+// TypedIntegrationInformer leads to runtime panics. A safer alternative is to pass
+// around a TypedIntegrationInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToTypedIntegrationInformer(informer IntegrationInformer) TypedIntegrationInformer {
+	if informer, ok := informer.(TypedIntegrationInformer); ok {
+		return informer
+	}
+	return &integrationTypedInformerAdapter{informer}
+}
+
+type integrationTypedInformerAdapter struct {
+	IntegrationInformer
+}
+
+func (a *integrationTypedInformerAdapter) TypedInformer() IntegrationIndexInformer {
+	return cache.NewTypedSharedIndexInformer[*apiscamelv1.Integration](a.Informer())
+}
+
+// ToIntegrationIndexInformer converts an untyped informer into a IntegrationIndexInformer.
+//
+// WARNING: this conversion is only safe if the informer handles objects of type
+// *Integration. If that is not the case, calling type-safe methods of the returned
+// IntegrationIndexInformer leads to runtime panics. A safer alternative is to pass
+// around a IntegrationIndexInformer instances that was obtained from a
+// SharedInformerFactory.
+func ToIntegrationIndexInformer(informer cache.SharedIndexInformer) IntegrationIndexInformer {
+	if informer, ok := informer.(IntegrationIndexInformer); ok {
+		return informer
+	}
+	return cache.NewTypedSharedIndexInformer[*apiscamelv1.Integration](informer)
 }
