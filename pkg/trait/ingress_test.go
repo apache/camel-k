@@ -27,11 +27,11 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	certmanagerv1 "github.com/apache/camel-k/v2/pkg/apis/duck/certmanager/v1"
 	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/certmanager"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -345,7 +345,8 @@ func TestApplyIngressTraitCertManagerAutoNotInstalledDoesNoop(t *testing.T) {
 	environment.Ctx = context.Background()
 	fakeClient, err := internal.NewFakeClient()
 	require.NoError(t, err)
-	environment.Client = fakeClient
+	fakeClient.(*internal.FakeClient).DisableCertManagerDiscovery()
+	ingressTrait.Client = fakeClient
 
 	_, _, err = ingressTrait.Configure(environment)
 	require.NoError(t, err)
@@ -367,8 +368,7 @@ func TestApplyIngressTraitCertManagerAutoNoIssuerDoesNoop(t *testing.T) {
 	environment.Ctx = context.Background()
 	fakeClient, err := internal.NewFakeClient()
 	require.NoError(t, err)
-	fakeClient.(*internal.FakeClient).EnableCertManagerDiscovery()
-	environment.Client = fakeClient
+	ingressTrait.Client = fakeClient
 
 	_, _, err = ingressTrait.Configure(environment)
 	require.NoError(t, err)
@@ -391,8 +391,7 @@ func TestApplyIngressTraitCertManagerAutoClusterIssuerFoundDoesSucceed(t *testin
 	clusterIssuer := newClusterIssuer("letsencrypt-prod")
 	fakeClient, err := internal.NewFakeClient(clusterIssuer)
 	require.NoError(t, err)
-	fakeClient.(*internal.FakeClient).EnableCertManagerDiscovery()
-	environment.Client = fakeClient
+	ingressTrait.Client = fakeClient
 
 	_, _, err = ingressTrait.Configure(environment)
 	require.NoError(t, err)
@@ -419,8 +418,7 @@ func TestApplyIngressTraitForcedIssuerExistsDoesSucceed(t *testing.T) {
 	issuer := newIssuer("my-issuer", "namespace")
 	fakeClient, err := internal.NewFakeClient(issuer)
 	require.NoError(t, err)
-	fakeClient.(*internal.FakeClient).EnableCertManagerDiscovery()
-	environment.Client = fakeClient
+	ingressTrait.Client = fakeClient
 
 	_, _, err = ingressTrait.Configure(environment)
 	require.NoError(t, err)
@@ -443,8 +441,7 @@ func TestApplyIngressTraitForcedIssuerMissingDoesNotSucceed(t *testing.T) {
 
 	fakeClient, err := internal.NewFakeClient()
 	require.NoError(t, err)
-	fakeClient.(*internal.FakeClient).EnableCertManagerDiscovery()
-	environment.Client = fakeClient
+	ingressTrait.Client = fakeClient
 
 	_, _, err = ingressTrait.Configure(environment)
 
@@ -460,7 +457,8 @@ func TestApplyIngressTraitForcedIssuerCertManagerNotInstalledDoesNotSucceed(t *t
 
 	fakeClient, err := internal.NewFakeClient()
 	require.NoError(t, err)
-	environment.Client = fakeClient
+	fakeClient.(*internal.FakeClient).DisableCertManagerDiscovery()
+	ingressTrait.Client = fakeClient
 
 	_, _, err = ingressTrait.Configure(environment)
 
@@ -468,21 +466,16 @@ func TestApplyIngressTraitForcedIssuerCertManagerNotInstalledDoesNotSucceed(t *t
 	assert.Contains(t, err.Error(), "cert-manager is not installed")
 }
 
-func newClusterIssuer(name string) *unstructured.Unstructured {
-	u := &unstructured.Unstructured{}
-	u.SetGroupVersionKind(certmanager.ClusterIssuerGVK)
-	u.SetName(name)
-
-	return u
+func newClusterIssuer(name string) *certmanagerv1.ClusterIssuer {
+	return &certmanagerv1.ClusterIssuer{
+		ObjectMeta: metav1.ObjectMeta{Name: name},
+	}
 }
 
-func newIssuer(name, namespace string) *unstructured.Unstructured {
-	u := &unstructured.Unstructured{}
-	u.SetGroupVersionKind(certmanager.IssuerGVK)
-	u.SetName(name)
-	u.SetNamespace(namespace)
-
-	return u
+func newIssuer(name, namespace string) *certmanagerv1.Issuer {
+	return &certmanagerv1.Issuer{
+		ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: namespace},
+	}
 }
 
 func createNominalIngressTestWithIngressClassName(ingressClassName string) (*ingressTrait, *Environment) {

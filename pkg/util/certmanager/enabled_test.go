@@ -27,10 +27,11 @@ import (
 	"github.com/stretchr/testify/require"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
+	certmanagerv1 "github.com/apache/camel-k/v2/pkg/apis/duck/certmanager/v1"
 	"github.com/apache/camel-k/v2/pkg/internal"
 )
 
@@ -56,26 +57,21 @@ func (m *errorMockReader) Get(ctx context.Context, key ctrl.ObjectKey, obj ctrl.
 	return m.Reader.Get(ctx, key, obj, opts...)
 }
 
-func newUnstructuredClusterIssuer(name string) *unstructured.Unstructured {
-	u := &unstructured.Unstructured{}
-	u.SetGroupVersionKind(ClusterIssuerGVK)
-	u.SetName(name)
-
-	return u
+func newClusterIssuer(name string) *certmanagerv1.ClusterIssuer {
+	return &certmanagerv1.ClusterIssuer{
+		ObjectMeta: metav1.ObjectMeta{Name: name},
+	}
 }
 
-func newUnstructuredIssuer(namespace, name string) *unstructured.Unstructured {
-	u := &unstructured.Unstructured{}
-	u.SetGroupVersionKind(IssuerGVK)
-	u.SetNamespace(namespace)
-	u.SetName(name)
-
-	return u
+func newIssuer(namespace, name string) *certmanagerv1.Issuer {
+	return &certmanagerv1.Issuer{
+		ObjectMeta: metav1.ObjectMeta{Namespace: namespace, Name: name},
+	}
 }
 
 func TestListClusterIssuers(t *testing.T) {
-	ci1 := newUnstructuredClusterIssuer("letsencrypt-staging")
-	ci2 := newUnstructuredClusterIssuer("letsencrypt-prod")
+	ci1 := newClusterIssuer("letsencrypt-staging")
+	ci2 := newClusterIssuer("letsencrypt-prod")
 
 	c, err := internal.NewFakeClient(ci1, ci2)
 	require.NoError(t, err)
@@ -86,7 +82,7 @@ func TestListClusterIssuers(t *testing.T) {
 }
 
 func TestGetClusterIssuer(t *testing.T) {
-	ci := newUnstructuredClusterIssuer("my-cluster-issuer")
+	ci := newClusterIssuer("my-cluster-issuer")
 
 	c, err := internal.NewFakeClient(ci)
 	require.NoError(t, err)
@@ -101,9 +97,9 @@ func TestGetClusterIssuer(t *testing.T) {
 }
 
 func TestListIssuers(t *testing.T) {
-	i1 := newUnstructuredIssuer("ns1", "issuer-b")
-	i2 := newUnstructuredIssuer("ns1", "issuer-a")
-	i3 := newUnstructuredIssuer("ns2", "issuer-other")
+	i1 := newIssuer("ns1", "issuer-b")
+	i2 := newIssuer("ns1", "issuer-a")
+	i3 := newIssuer("ns2", "issuer-other")
 
 	c, err := internal.NewFakeClient(i1, i2, i3)
 	require.NoError(t, err)
@@ -122,7 +118,7 @@ func TestListIssuers(t *testing.T) {
 }
 
 func TestGetIssuer(t *testing.T) {
-	i := newUnstructuredIssuer("test-ns", "my-issuer")
+	i := newIssuer("test-ns", "my-issuer")
 
 	c, err := internal.NewFakeClient(i)
 	require.NoError(t, err)
@@ -145,7 +141,7 @@ func TestCRDsAbsentEntirely(t *testing.T) {
 	require.NoError(t, err)
 
 	noKindMatchErr := &meta.NoKindMatchError{
-		GroupKind:        schema.GroupKind{Group: CertManagerAPIGroup, Kind: "ClusterIssuerList"},
+		GroupKind:        schema.GroupKind{Group: certmanagerv1.CertManagerGroup, Kind: "ClusterIssuerList"},
 		SearchedVersions: []string{"v1"},
 	}
 
@@ -202,7 +198,7 @@ func TestCRDsAbsentViaNotFoundError(t *testing.T) {
 	require.NoError(t, err)
 
 	notFoundErr := k8serrors.NewNotFound(
-		schema.GroupResource{Group: CertManagerAPIGroup, Resource: "clusterissuers"},
+		schema.GroupResource{Group: certmanagerv1.CertManagerGroup, Resource: "clusterissuers"},
 		"my-ci",
 	)
 

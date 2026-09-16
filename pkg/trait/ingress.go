@@ -191,11 +191,12 @@ func (t *ingressTrait) Apply(e *Environment) error {
 func (t *ingressTrait) resolveCertManagerIssuer(e *Environment) (annotationKey, issuerName string, err error) {
 	namespace := e.Integration.Namespace
 
+	installed, err := certmanager.IsInstalled(t.Client)
+	if err != nil {
+		return "", "", err
+	}
+
 	if t.TLSIssuerName != "" {
-		installed, err := certmanager.IsInstalled(e.Client)
-		if err != nil {
-			return "", "", err
-		}
 		if !installed {
 			return "", "", fmt.Errorf("cert-manager is not installed but tlsIssuerName %q was set", t.TLSIssuerName)
 		}
@@ -207,7 +208,7 @@ func (t *ingressTrait) resolveCertManagerIssuer(e *Environment) (annotationKey, 
 
 		switch kind {
 		case "Issuer":
-			exists, err := certmanager.GetIssuer(e.Ctx, e.Client, namespace, t.TLSIssuerName)
+			exists, err := certmanager.GetIssuer(e.Ctx, t.Client, namespace, t.TLSIssuerName)
 			if err != nil {
 				return "", "", err
 			}
@@ -217,7 +218,7 @@ func (t *ingressTrait) resolveCertManagerIssuer(e *Environment) (annotationKey, 
 
 			return certmanager.AnnotationIssuer, t.TLSIssuerName, nil
 		case "ClusterIssuer":
-			exists, err := certmanager.GetClusterIssuer(e.Ctx, e.Client, t.TLSIssuerName)
+			exists, err := certmanager.GetClusterIssuer(e.Ctx, t.Client, t.TLSIssuerName)
 			if err != nil {
 				return "", "", err
 			}
@@ -231,19 +232,11 @@ func (t *ingressTrait) resolveCertManagerIssuer(e *Environment) (annotationKey, 
 		}
 	}
 
-	if !ptr.Deref(t.TLSCertManagerAuto, false) {
+	if !ptr.Deref(t.TLSCertManagerAuto, false) || !installed {
 		return "", "", nil
 	}
 
-	installed, err := certmanager.IsInstalled(e.Client)
-	if err != nil {
-		return "", "", err
-	}
-	if !installed {
-		return "", "", nil
-	}
-
-	clusterIssuers, err := certmanager.ListClusterIssuers(e.Ctx, e.Client)
+	clusterIssuers, err := certmanager.ListClusterIssuers(e.Ctx, t.Client)
 	if err != nil {
 		return "", "", err
 	}
@@ -251,7 +244,7 @@ func (t *ingressTrait) resolveCertManagerIssuer(e *Environment) (annotationKey, 
 		return certmanager.AnnotationClusterIssuer, clusterIssuers[0], nil
 	}
 
-	issuers, err := certmanager.ListIssuers(e.Ctx, e.Client, namespace)
+	issuers, err := certmanager.ListIssuers(e.Ctx, t.Client, namespace)
 	if err != nil {
 		return "", "", err
 	}
