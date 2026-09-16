@@ -347,6 +347,8 @@ func TestApplyIngressTraitCertManagerAutoNotInstalledDoesNoop(t *testing.T) {
 	require.NoError(t, err)
 	environment.Client = fakeClient
 
+	_, _, err = ingressTrait.Configure(environment)
+	require.NoError(t, err)
 	err = ingressTrait.Apply(environment)
 
 	require.NoError(t, err)
@@ -368,6 +370,8 @@ func TestApplyIngressTraitCertManagerAutoNoIssuerDoesNoop(t *testing.T) {
 	fakeClient.(*internal.FakeClient).EnableCertManagerDiscovery()
 	environment.Client = fakeClient
 
+	_, _, err = ingressTrait.Configure(environment)
+	require.NoError(t, err)
 	err = ingressTrait.Apply(environment)
 
 	require.NoError(t, err)
@@ -390,6 +394,8 @@ func TestApplyIngressTraitCertManagerAutoClusterIssuerFoundDoesSucceed(t *testin
 	fakeClient.(*internal.FakeClient).EnableCertManagerDiscovery()
 	environment.Client = fakeClient
 
+	_, _, err = ingressTrait.Configure(environment)
+	require.NoError(t, err)
 	err = ingressTrait.Apply(environment)
 
 	require.NoError(t, err)
@@ -416,6 +422,8 @@ func TestApplyIngressTraitForcedIssuerExistsDoesSucceed(t *testing.T) {
 	fakeClient.(*internal.FakeClient).EnableCertManagerDiscovery()
 	environment.Client = fakeClient
 
+	_, _, err = ingressTrait.Configure(environment)
+	require.NoError(t, err)
 	err = ingressTrait.Apply(environment)
 
 	require.NoError(t, err)
@@ -438,7 +446,7 @@ func TestApplyIngressTraitForcedIssuerMissingDoesNotSucceed(t *testing.T) {
 	fakeClient.(*internal.FakeClient).EnableCertManagerDiscovery()
 	environment.Client = fakeClient
 
-	err = ingressTrait.Apply(environment)
+	_, _, err = ingressTrait.Configure(environment)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "missing-issuer")
@@ -454,7 +462,7 @@ func TestApplyIngressTraitForcedIssuerCertManagerNotInstalledDoesNotSucceed(t *t
 	require.NoError(t, err)
 	environment.Client = fakeClient
 
-	err = ingressTrait.Apply(environment)
+	_, _, err = ingressTrait.Configure(environment)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "cert-manager is not installed")
