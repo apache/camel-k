@@ -40,6 +40,9 @@ const (
 type ingressTrait struct {
 	BaseTrait
 	traitv1.IngressTrait `property:",squash"`
+
+	certManagerAnnotationKey string
+	certManagerIssuerName    string
 }
 
 func newIngressTrait() Trait {
@@ -78,6 +81,16 @@ func (t *ingressTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 		if e.Resources.GetUserServiceForIntegration(e.Integration) == nil {
 			return false, nil, nil
 		}
+	}
+
+	if t.TLSSecretName == "" && (len(t.TLSHosts) > 0 || t.Host != "") &&
+		(t.TLSIssuerName != "" || ptr.Deref(t.TLSCertManagerAuto, false)) {
+		annotationKey, issuerName, err := t.resolveCertManagerIssuer(e)
+		if err != nil {
+			return false, nil, err
+		}
+		t.certManagerAnnotationKey = annotationKey
+		t.certManagerIssuerName = issuerName
 	}
 
 	//nolint:staticcheck
@@ -128,27 +141,22 @@ func (t *ingressTrait) Apply(e *Environment) error {
 	tlsHosts := t.TLSHosts
 	secretName := t.TLSSecretName
 
-	// The cert-manager path only activates when the user has not manually provided a
-	// secret name. It may fall back to t.Host so that auto-discovery also works for the
-	// common single-host case, without changing the pre-existing manual TLS behavior
-	// (which requires TLSHosts to be set explicitly and never considers t.Host).
+	// The cert-manager annotation/issuer, if any, was already resolved in Configure().
+	// This only consumes that decision; it never talks to the cluster itself. It may
+	// fall back to t.Host so that auto-discovery also works for the common single-host
+	// case, without changing the pre-existing manual TLS behavior (which requires
+	// TLSHosts to be set explicitly and never considers t.Host).
 	if secretName == "" {
 		if len(tlsHosts) == 0 && t.Host != "" {
 			tlsHosts = []string{t.Host}
 		}
 
-		if len(tlsHosts) > 0 {
-			annotationKey, issuerName, err := t.resolveCertManagerIssuer(e)
-			if err != nil {
-				return err
+		if len(tlsHosts) > 0 && t.certManagerIssuerName != "" {
+			if ingress.Annotations == nil {
+				ingress.Annotations = map[string]string{}
 			}
-			if issuerName != "" {
-				if ingress.Annotations == nil {
-					ingress.Annotations = map[string]string{}
-				}
-				ingress.Annotations[annotationKey] = issuerName
-				secretName = service.Name + "-tls"
-			}
+			ingress.Annotations[t.certManagerAnnotationKey] = t.certManagerIssuerName
+			secretName = service.Name + "-tls"
 		}
 	}
 
