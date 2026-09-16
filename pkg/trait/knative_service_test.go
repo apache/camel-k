@@ -49,6 +49,7 @@ const (
 )
 
 func TestKnativeService(t *testing.T) {
+	t.Setenv(kubernetes.CamelMonitorOperatorLabelEnvVar, "my-dashboard-label")
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
@@ -125,6 +126,9 @@ func TestKnativeService(t *testing.T) {
 	})
 
 	assert.NotNil(t, s)
+	assert.Equal(t, KnativeServiceTestName, s.Labels["my-dashboard-label"])
+	assert.Equal(t, KnativeServiceTestName, s.Spec.ConfigurationSpec.Template.ObjectMeta.Labels["my-dashboard-label"])
+	assert.Equal(t, KnativeServiceTestName, s.Spec.ConfigurationSpec.Template.ObjectMeta.Labels[v1.IntegrationLabel])
 
 	spec := s.Spec.ConfigurationSpec.Template.Spec
 
