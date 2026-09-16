@@ -80,7 +80,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().String("image", "", "An image built externally (ie, via CICD). Enabling it will skip the Integration build phase.")
 	cmd.Flags().StringArrayP("dependency", "d", nil, "A dependency that should be included, e.g., \"camel:mail\" for a Camel component, "+
 		"\"mvn:org.my:app:1.0\" for a Maven dependency")
-	cmd.Flags().BoolP("wait", "w", false, "Wait for the integration to be running or built (if --dont-run-after-build is enabled)")
+	cmd.Flags().BoolP("wait", "w", false, "Wait for the integration to be running or built")
 	cmd.Flags().StringP("kit", "k", "", "The kit used to run the integration")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a runtime property or a local properties file from a path "+
 		"(syntax: [my-key=my-value|file:/path/to/my-conf.properties])")
