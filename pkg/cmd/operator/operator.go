@@ -202,6 +202,8 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 		selectors[&batchv1.CronJob{}] = selector
 	}
 
+	platform.CertManagerInstalled, _ = kubernetes.IsAPIResourceInstalled(bootstrapClient, "cert-manager.io/v1", "ClusterIssuer")
+
 	options := cache.Options{
 		ByObject: selectors,
 	}

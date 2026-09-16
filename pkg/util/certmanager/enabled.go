@@ -23,8 +23,6 @@ import (
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	certmanagerv1 "github.com/apache/camel-k/v2/pkg/apis/duck/certmanager/v1"
@@ -44,21 +42,6 @@ func isResourceNotFoundError(err error) bool {
 	}
 
 	return k8serrors.IsNotFound(err) || meta.IsNoMatchError(err) || kubernetesutil.IsUnknownAPIError(err)
-}
-
-// IsInstalled returns true if connected to a cluster with cert-manager installed.
-func IsInstalled(c kubernetes.Interface) (bool, error) {
-	_, err := c.Discovery().ServerResourcesForGroupVersion(schema.GroupVersion{
-		Group:   certmanagerv1.CertManagerGroup,
-		Version: certmanagerv1.CertManagerVersion,
-	}.String())
-	if isResourceNotFoundError(err) {
-		return false, nil
-	} else if err != nil {
-		return false, err
-	}
-
-	return true, nil
 }
 
 // ListClusterIssuers returns all ClusterIssuer names available in the cluster.

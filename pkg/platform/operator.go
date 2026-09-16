@@ -44,6 +44,10 @@ const OperatorLockName = "camel-k-lock"
 
 var OperatorImage string
 
+// CertManagerInstalled is computed once at operator bootstrap and reports whether
+// cert-manager's ClusterIssuer CRD is available on the cluster.
+var CertManagerInstalled bool
+
 // IsCurrentOperatorGlobal returns true if the operator is configured to watch all namespaces.
 func IsCurrentOperatorGlobal() bool {
 	if watchNamespace, envSet := os.LookupEnv(OperatorWatchNamespaceEnvVariable); !envSet || strings.TrimSpace(watchNamespace) == "" {
