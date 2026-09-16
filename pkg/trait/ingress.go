@@ -23,6 +23,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/certmanager"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
@@ -198,13 +199,8 @@ func (t *ingressTrait) Apply(e *Environment) error {
 func (t *ingressTrait) resolveCertManagerIssuer(e *Environment) (annotationKey, issuerName string, err error) {
 	namespace := e.Integration.Namespace
 
-	installed, err := certmanager.IsInstalled(t.Client)
-	if err != nil {
-		return "", "", err
-	}
-
 	if t.TLSIssuerName != "" {
-		if !installed {
+		if !platform.CertManagerInstalled {
 			return "", "", fmt.Errorf("cert-manager is not installed but tlsIssuerName %q was set", t.TLSIssuerName)
 		}
 
@@ -239,7 +235,7 @@ func (t *ingressTrait) resolveCertManagerIssuer(e *Environment) (annotationKey, 
 		}
 	}
 
-	if !ptr.Deref(t.TLSCertManagerAuto, false) || !installed {
+	if !ptr.Deref(t.TLSCertManagerAuto, false) || !platform.CertManagerInstalled {
 		return "", "", nil
 	}
 

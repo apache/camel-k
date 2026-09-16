@@ -33,6 +33,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	certmanagerv1 "github.com/apache/camel-k/v2/pkg/apis/duck/certmanager/v1"
 	"github.com/apache/camel-k/v2/pkg/internal"
+	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/certmanager"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
@@ -340,12 +341,14 @@ func TestConfigureTLSWithoutSecretNameIngressTraitWDoesSucceed(t *testing.T) {
 }
 
 func TestApplyIngressTraitCertManagerAutoNotInstalledDoesNoop(t *testing.T) {
+	platform.CertManagerInstalled = false
+	t.Cleanup(func() { platform.CertManagerInstalled = false })
+
 	ingressTrait, environment := createNominalIngressTest()
 	ingressTrait.TLSCertManagerAuto = ptr.To(true)
 	environment.Ctx = context.Background()
 	fakeClient, err := internal.NewFakeClient()
 	require.NoError(t, err)
-	fakeClient.(*internal.FakeClient).DisableCertManagerDiscovery()
 	ingressTrait.Client = fakeClient
 
 	_, _, err = ingressTrait.Configure(environment)
@@ -363,6 +366,9 @@ func TestApplyIngressTraitCertManagerAutoNotInstalledDoesNoop(t *testing.T) {
 }
 
 func TestApplyIngressTraitCertManagerAutoNoIssuerDoesNoop(t *testing.T) {
+	platform.CertManagerInstalled = true
+	t.Cleanup(func() { platform.CertManagerInstalled = false })
+
 	ingressTrait, environment := createNominalIngressTest()
 	ingressTrait.TLSCertManagerAuto = ptr.To(true)
 	environment.Ctx = context.Background()
@@ -384,6 +390,9 @@ func TestApplyIngressTraitCertManagerAutoNoIssuerDoesNoop(t *testing.T) {
 }
 
 func TestApplyIngressTraitCertManagerAutoClusterIssuerFoundDoesSucceed(t *testing.T) {
+	platform.CertManagerInstalled = true
+	t.Cleanup(func() { platform.CertManagerInstalled = false })
+
 	ingressTrait, environment := createNominalIngressTest()
 	ingressTrait.TLSCertManagerAuto = ptr.To(true)
 	environment.Ctx = context.Background()
@@ -409,6 +418,9 @@ func TestApplyIngressTraitCertManagerAutoClusterIssuerFoundDoesSucceed(t *testin
 }
 
 func TestApplyIngressTraitForcedIssuerExistsDoesSucceed(t *testing.T) {
+	platform.CertManagerInstalled = true
+	t.Cleanup(func() { platform.CertManagerInstalled = false })
+
 	ingressTrait, environment := createNominalIngressTest()
 	ingressTrait.TLSIssuerName = "my-issuer"
 	ingressTrait.TLSIssuerKind = "Issuer"
@@ -435,6 +447,9 @@ func TestApplyIngressTraitForcedIssuerExistsDoesSucceed(t *testing.T) {
 }
 
 func TestApplyIngressTraitForcedIssuerMissingDoesNotSucceed(t *testing.T) {
+	platform.CertManagerInstalled = true
+	t.Cleanup(func() { platform.CertManagerInstalled = false })
+
 	ingressTrait, environment := createNominalIngressTest()
 	ingressTrait.TLSIssuerName = "missing-issuer"
 	environment.Ctx = context.Background()
@@ -451,13 +466,15 @@ func TestApplyIngressTraitForcedIssuerMissingDoesNotSucceed(t *testing.T) {
 }
 
 func TestApplyIngressTraitForcedIssuerCertManagerNotInstalledDoesNotSucceed(t *testing.T) {
+	platform.CertManagerInstalled = false
+	t.Cleanup(func() { platform.CertManagerInstalled = false })
+
 	ingressTrait, environment := createNominalIngressTest()
 	ingressTrait.TLSIssuerName = "my-issuer"
 	environment.Ctx = context.Background()
 
 	fakeClient, err := internal.NewFakeClient()
 	require.NoError(t, err)
-	fakeClient.(*internal.FakeClient).DisableCertManagerDiscovery()
 	ingressTrait.Client = fakeClient
 
 	_, _, err = ingressTrait.Configure(environment)
