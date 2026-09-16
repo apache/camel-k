@@ -31,7 +31,7 @@ import (
 // Change format to 'duration' when CRD uses OpenAPI spec v3 (https://github.com/OAI/OpenAPI-Specification/issues/845)
 // Build is the Schema for the builds API.
 type BuildApplyConfiguration struct {
-	metav1.TypeMetaApplyConfiguration    `json:",inline"`
+	metav1.TypeMetaApplyConfiguration    `json:""`
 	*metav1.ObjectMetaApplyConfiguration `json:"metadata,omitempty"`
 	Spec                                 *BuildSpecApplyConfiguration   `json:"spec,omitempty"`
 	Status                               *BuildStatusApplyConfiguration `json:"status,omitempty"`

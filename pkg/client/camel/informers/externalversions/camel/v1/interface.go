@@ -26,21 +26,21 @@ import (
 // Interface provides access to all the informers in this group version.
 type Interface interface {
 	// Builds returns a BuildInformer.
-	Builds() BuildInformer
+	Builds() TypedBuildInformer
 	// CamelCatalogs returns a CamelCatalogInformer.
-	CamelCatalogs() CamelCatalogInformer
+	CamelCatalogs() TypedCamelCatalogInformer
 	// Integrations returns a IntegrationInformer.
-	Integrations() IntegrationInformer
+	Integrations() TypedIntegrationInformer
 	// IntegrationKits returns a IntegrationKitInformer.
-	IntegrationKits() IntegrationKitInformer
+	IntegrationKits() TypedIntegrationKitInformer
 	// IntegrationPlatforms returns a IntegrationPlatformInformer.
-	IntegrationPlatforms() IntegrationPlatformInformer
+	IntegrationPlatforms() TypedIntegrationPlatformInformer
 	// IntegrationProfiles returns a IntegrationProfileInformer.
-	IntegrationProfiles() IntegrationProfileInformer
+	IntegrationProfiles() TypedIntegrationProfileInformer
 	// Kamelets returns a KameletInformer.
-	Kamelets() KameletInformer
+	Kamelets() TypedKameletInformer
 	// Pipes returns a PipeInformer.
-	Pipes() PipeInformer
+	Pipes() TypedPipeInformer
 }
 
 type version struct {
@@ -54,42 +54,42 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
 }
 
-// Builds returns a BuildInformer.
-func (v *version) Builds() BuildInformer {
+// Builds returns a TypedBuildInformer.
+func (v *version) Builds() TypedBuildInformer {
 	return &buildInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// CamelCatalogs returns a CamelCatalogInformer.
-func (v *version) CamelCatalogs() CamelCatalogInformer {
+// CamelCatalogs returns a TypedCamelCatalogInformer.
+func (v *version) CamelCatalogs() TypedCamelCatalogInformer {
 	return &camelCatalogInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// Integrations returns a IntegrationInformer.
-func (v *version) Integrations() IntegrationInformer {
+// Integrations returns a TypedIntegrationInformer.
+func (v *version) Integrations() TypedIntegrationInformer {
 	return &integrationInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// IntegrationKits returns a IntegrationKitInformer.
-func (v *version) IntegrationKits() IntegrationKitInformer {
+// IntegrationKits returns a TypedIntegrationKitInformer.
+func (v *version) IntegrationKits() TypedIntegrationKitInformer {
 	return &integrationKitInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// IntegrationPlatforms returns a IntegrationPlatformInformer.
-func (v *version) IntegrationPlatforms() IntegrationPlatformInformer {
+// IntegrationPlatforms returns a TypedIntegrationPlatformInformer.
+func (v *version) IntegrationPlatforms() TypedIntegrationPlatformInformer {
 	return &integrationPlatformInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// IntegrationProfiles returns a IntegrationProfileInformer.
-func (v *version) IntegrationProfiles() IntegrationProfileInformer {
+// IntegrationProfiles returns a TypedIntegrationProfileInformer.
+func (v *version) IntegrationProfiles() TypedIntegrationProfileInformer {
 	return &integrationProfileInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// Kamelets returns a KameletInformer.
-func (v *version) Kamelets() KameletInformer {
+// Kamelets returns a TypedKameletInformer.
+func (v *version) Kamelets() TypedKameletInformer {
 	return &kameletInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// Pipes returns a PipeInformer.
-func (v *version) Pipes() PipeInformer {
+// Pipes returns a TypedPipeInformer.
+func (v *version) Pipes() TypedPipeInformer {
 	return &pipeInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }

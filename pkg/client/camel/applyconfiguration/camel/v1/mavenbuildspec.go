@@ -29,7 +29,7 @@ import (
 // MavenBuildSpec defines the Maven configuration plus additional repositories to use.
 type MavenBuildSpecApplyConfiguration struct {
 	// base Maven specification
-	MavenSpecApplyConfiguration `json:",inline"`
+	MavenSpecApplyConfiguration `json:""`
 	// additional repositories
 	Repositories []RepositoryApplyConfiguration `json:"repositories,omitempty"`
 	// Servers (auth)

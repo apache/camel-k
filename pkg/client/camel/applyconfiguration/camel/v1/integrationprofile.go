@@ -31,7 +31,7 @@ import (
 // IntegrationProfile is the resource used to apply user defined settings to the Camel K operator behavior.
 // It defines the behavior of all Custom Resources (`IntegrationKit`, `Integration`, `Kamelet`) in the given namespace.
 type IntegrationProfileApplyConfiguration struct {
-	metav1.TypeMetaApplyConfiguration    `json:",inline"`
+	metav1.TypeMetaApplyConfiguration    `json:""`
 	*metav1.ObjectMetaApplyConfiguration `json:"metadata,omitempty"`
 	Spec                                 *IntegrationProfileSpecApplyConfiguration `json:"spec,omitempty"`
 	// Deprecated: no longer in use.

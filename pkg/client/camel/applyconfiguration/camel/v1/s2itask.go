@@ -24,8 +24,8 @@ package v1
 //
 // S2iTask is used to configure S2I.
 type S2iTaskApplyConfiguration struct {
-	BaseTaskApplyConfiguration    `json:",inline"`
-	PublishTaskApplyConfiguration `json:",inline"`
+	BaseTaskApplyConfiguration    `json:""`
+	PublishTaskApplyConfiguration `json:""`
 	// used by the ImageStream
 	Tag *string `json:"tag,omitempty"`
 }

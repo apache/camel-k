@@ -29,7 +29,7 @@ import (
 // SourceSpec defines the configuration for one or more routes to be executed in a certain Camel DSL language.
 type SourceSpecApplyConfiguration struct {
 	// contains configuration related to the source code
-	DataSpecApplyConfiguration `json:",inline"`
+	DataSpecApplyConfiguration `json:""`
 	// specify which is the language (Camel DSL) used to interpret this source code
 	Language *camelv1.Language `json:"language,omitempty"`
 	// Loader is an optional id of the org.apache.camel.k.RoutesLoader that will

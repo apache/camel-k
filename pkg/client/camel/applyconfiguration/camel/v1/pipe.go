@@ -30,7 +30,7 @@ import (
 //
 // Pipe is the Schema for the Pipe API.
 type PipeApplyConfiguration struct {
-	metav1.TypeMetaApplyConfiguration    `json:",inline"`
+	metav1.TypeMetaApplyConfiguration    `json:""`
 	*metav1.ObjectMetaApplyConfiguration `json:"metadata,omitempty"`
 	// the specification of a Pipe
 	Spec *PipeSpecApplyConfiguration `json:"spec,omitempty"`

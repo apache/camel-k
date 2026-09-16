@@ -26,8 +26,8 @@ package v1
 //
 // Deprecated: no longer in use.
 type SpectrumTaskApplyConfiguration struct {
-	BaseTaskApplyConfiguration    `json:",inline"`
-	PublishTaskApplyConfiguration `json:",inline"`
+	BaseTaskApplyConfiguration    `json:""`
+	PublishTaskApplyConfiguration `json:""`
 }
 
 // SpectrumTaskApplyConfiguration constructs a declarative configuration of the SpectrumTask type for use with

@@ -30,7 +30,7 @@ import (
 //
 // Kamelet is the Schema for the kamelets API.
 type KameletApplyConfiguration struct {
-	metav1.TypeMetaApplyConfiguration    `json:",inline"`
+	metav1.TypeMetaApplyConfiguration    `json:""`
 	*metav1.ObjectMetaApplyConfiguration `json:"metadata,omitempty"`
 	// the desired specification
 	Spec *KameletSpecApplyConfiguration `json:"spec,omitempty"`

@@ -25,7 +25,7 @@ package v1
 // CamelArtifact represent the configuration for a feature offered by Camel.
 type CamelArtifactApplyConfiguration struct {
 	// Base Camel Artifact dependency
-	CamelArtifactDependencyApplyConfiguration `json:",inline"`
+	CamelArtifactDependencyApplyConfiguration `json:""`
 	// accepted URI schemes
 	Schemes []CamelSchemeApplyConfiguration `json:"schemes,omitempty"`
 	// accepted languages

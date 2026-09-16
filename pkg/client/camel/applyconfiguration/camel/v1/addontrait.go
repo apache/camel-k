@@ -29,7 +29,7 @@ import (
 // AddonTrait represents the configuration of an addon trait.
 type AddonTraitApplyConfiguration struct {
 	// Generic raw message, typically a map containing the keys (trait parameters) and the values (either single text or array)
-	camelv1.RawMessage `json:",inline"`
+	camelv1.RawMessage `json:""`
 }
 
 // AddonTraitApplyConfiguration constructs a declarative configuration of the AddonTrait type for use with

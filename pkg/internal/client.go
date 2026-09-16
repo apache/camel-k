@@ -218,9 +218,9 @@ func (c *FakeClient) AuthorizationV1() authorizationv1.AuthorizationV1Interface 
 	}
 }
 
-func (c *FakeClient) Discovery() discovery.DiscoveryInterface {
+func (c *FakeClient) Discovery() discovery.DiscoveryInterfaces {
 	return &FakeDiscovery{
-		DiscoveryInterface:     c.Interface.Discovery(),
+		DiscoveryInterfaces:    c.Interface.Discovery(),
 		disabledGroups:         c.disabledGroups,
 		enabledOpenshift:       c.enabledOpenshift,
 		enabledKnativeServing:  c.enabledKnativeServing,
@@ -270,7 +270,7 @@ func (f *FakeSAR) Create(ctx context.Context, sar *authv1.SubjectAccessReview, o
 }
 
 type FakeDiscovery struct {
-	discovery.DiscoveryInterface
+	discovery.DiscoveryInterfaces
 
 	disabledGroups         []string
 	enabledOpenshift       bool
@@ -320,5 +320,5 @@ func (f *FakeDiscovery) ServerResourcesForGroupVersion(groupVersion string) (*me
 		}
 	}
 
-	return f.DiscoveryInterface.ServerResourcesForGroupVersion(groupVersion)
+	return f.DiscoveryInterfaces.ServerResourcesForGroupVersion(groupVersion)
 }
