@@ -79,7 +79,8 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 		return strings.Contains(gvk.Group, "camel")
 	})...)
 	clientset := fakeclientset.NewSimpleClientset(filterObjects(scheme, initObjs, func(gvk schema.GroupVersionKind) bool {
-		return !strings.Contains(gvk.Group, "camel") && !strings.Contains(gvk.Group, "knative")
+		return !strings.Contains(gvk.Group, "camel") && !strings.Contains(gvk.Group, "knative") &&
+			!strings.Contains(gvk.Group, "cert-manager")
 	})...)
 	replicasCount := make(map[string]int32)
 	fakescaleclient := fakescale.FakeScaleClient{}
@@ -129,6 +130,7 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 		scales:                 &fakescaleclient,
 		enabledKnativeServing:  true,
 		enabledKnativeEventing: true,
+		enabledCertManager:     true,
 	}, nil
 }
 
@@ -207,16 +209,16 @@ func (c *FakeClient) EnableOpenshiftDiscovery() {
 	c.enabledOpenshift = true
 }
 
-func (c *FakeClient) EnableCertManagerDiscovery() {
-	c.enabledCertManager = true
-}
-
 func (c *FakeClient) DisableKnativeServing() {
 	c.enabledKnativeServing = false
 }
 
 func (c *FakeClient) DisableKnativeEventing() {
 	c.enabledKnativeEventing = false
+}
+
+func (c *FakeClient) DisableCertManagerDiscovery() {
+	c.enabledCertManager = false
 }
 
 func (c *FakeClient) AuthorizationV1() authorizationv1.AuthorizationV1Interface {

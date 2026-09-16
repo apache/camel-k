@@ -23,40 +23,19 @@ import (
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
+	certmanagerv1 "github.com/apache/camel-k/v2/pkg/apis/duck/certmanager/v1"
 	kubernetesutil "github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
 const (
-	// CertManagerAPIGroup is the API group for cert-manager.
-	CertManagerAPIGroup = "cert-manager.io"
-	// CertManagerAPIVersion is the current API version for cert-manager.
-	CertManagerAPIVersion = "v1"
-
 	// AnnotationClusterIssuer is the Ingress annotation to specify a ClusterIssuer.
 	AnnotationClusterIssuer = "cert-manager.io/cluster-issuer"
 	// AnnotationIssuer is the Ingress annotation to specify a namespaced Issuer.
 	AnnotationIssuer = "cert-manager.io/issuer"
-)
-
-var (
-	// ClusterIssuerGVK is the GroupVersionKind for cert-manager ClusterIssuer.
-	ClusterIssuerGVK = schema.GroupVersionKind{
-		Group:   CertManagerAPIGroup,
-		Version: CertManagerAPIVersion,
-		Kind:    "ClusterIssuer",
-	}
-
-	// IssuerGVK is the GroupVersionKind for cert-manager Issuer.
-	IssuerGVK = schema.GroupVersionKind{
-		Group:   CertManagerAPIGroup,
-		Version: CertManagerAPIVersion,
-		Kind:    "Issuer",
-	}
 )
 
 func isResourceNotFoundError(err error) bool {
@@ -70,8 +49,8 @@ func isResourceNotFoundError(err error) bool {
 // IsInstalled returns true if connected to a cluster with cert-manager installed.
 func IsInstalled(c kubernetes.Interface) (bool, error) {
 	_, err := c.Discovery().ServerResourcesForGroupVersion(schema.GroupVersion{
-		Group:   CertManagerAPIGroup,
-		Version: CertManagerAPIVersion,
+		Group:   certmanagerv1.CertManagerGroup,
+		Version: certmanagerv1.CertManagerVersion,
 	}.String())
 	if isResourceNotFoundError(err) {
 		return false, nil
@@ -84,13 +63,7 @@ func IsInstalled(c kubernetes.Interface) (bool, error) {
 
 // ListClusterIssuers returns all ClusterIssuer names available in the cluster.
 func ListClusterIssuers(ctx context.Context, c ctrl.Reader) ([]string, error) {
-	list := &unstructured.UnstructuredList{}
-	list.SetGroupVersionKind(schema.GroupVersionKind{
-		Group:   CertManagerAPIGroup,
-		Version: CertManagerAPIVersion,
-		Kind:    "ClusterIssuerList",
-	})
-
+	list := &certmanagerv1.ClusterIssuerList{}
 	if err := c.List(ctx, list); err != nil {
 		if isResourceNotFoundError(err) {
 			return nil, nil
@@ -101,7 +74,7 @@ func ListClusterIssuers(ctx context.Context, c ctrl.Reader) ([]string, error) {
 
 	names := make([]string, 0, len(list.Items))
 	for _, item := range list.Items {
-		names = append(names, item.GetName())
+		names = append(names, item.Name)
 	}
 	sort.Strings(names)
 
@@ -110,7 +83,7 @@ func ListClusterIssuers(ctx context.Context, c ctrl.Reader) ([]string, error) {
 
 // GetClusterIssuer checks if a specific ClusterIssuer exists in the cluster.
 func GetClusterIssuer(ctx context.Context, c ctrl.Reader, name string) (bool, error) {
-	_, err := kubernetesutil.GetUnstructured(ctx, c, ClusterIssuerGVK, name, "")
+	err := c.Get(ctx, ctrl.ObjectKey{Name: name}, &certmanagerv1.ClusterIssuer{})
 	if err != nil {
 		if isResourceNotFoundError(err) {
 			return false, nil
@@ -124,13 +97,7 @@ func GetClusterIssuer(ctx context.Context, c ctrl.Reader, name string) (bool, er
 
 // ListIssuers returns all Issuer names available in a specific namespace.
 func ListIssuers(ctx context.Context, c ctrl.Reader, namespace string) ([]string, error) {
-	list := &unstructured.UnstructuredList{}
-	list.SetGroupVersionKind(schema.GroupVersionKind{
-		Group:   CertManagerAPIGroup,
-		Version: CertManagerAPIVersion,
-		Kind:    "IssuerList",
-	})
-
+	list := &certmanagerv1.IssuerList{}
 	if err := c.List(ctx, list, ctrl.InNamespace(namespace)); err != nil {
 		if isResourceNotFoundError(err) {
 			return nil, nil
@@ -141,7 +108,7 @@ func ListIssuers(ctx context.Context, c ctrl.Reader, namespace string) ([]string
 
 	names := make([]string, 0, len(list.Items))
 	for _, item := range list.Items {
-		names = append(names, item.GetName())
+		names = append(names, item.Name)
 	}
 	sort.Strings(names)
 
@@ -150,7 +117,7 @@ func ListIssuers(ctx context.Context, c ctrl.Reader, namespace string) ([]string
 
 // GetIssuer checks if a specific namespaced Issuer exists.
 func GetIssuer(ctx context.Context, c ctrl.Reader, namespace, name string) (bool, error) {
-	_, err := kubernetesutil.GetUnstructured(ctx, c, IssuerGVK, name, namespace)
+	err := c.Get(ctx, ctrl.ObjectKey{Name: name, Namespace: namespace}, &certmanagerv1.Issuer{})
 	if err != nil {
 		if isResourceNotFoundError(err) {
 			return false, nil
