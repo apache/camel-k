@@ -237,9 +237,10 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 			ConfigurationSpec: serving.ConfigurationSpec{
 				Template: serving.RevisionTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
-						Labels: map[string]string{
-							v1.IntegrationLabel: e.Integration.Name,
-						},
+						// DeploymentLabels propagates the Camel Monitor label
+						// (CAMEL_MONITOR_OPERATOR_LABEL) to the revision Pods,
+						// mirroring the deployment trait behavior.
+						Labels:      kubernetes.DeploymentLabels(e.Integration.Name),
 						Annotations: revisionAnnotations,
 					},
 					Spec: serving.RevisionSpec{
