@@ -126,9 +126,9 @@ type runCmdOptions struct {
 	*RootCmdOptions `json:"-"`
 
 	// Deprecated: won't be supported in the future
-	Compression  bool `mapstructure:"compression" yaml:",omitempty"`
-	Wait         bool `mapstructure:"wait"        yaml:",omitempty"`
-	Logs         bool `mapstructure:"logs"        yaml:",omitempty"`
+	Compression bool `mapstructure:"compression" yaml:",omitempty"`
+	Wait        bool `mapstructure:"wait"        yaml:",omitempty"`
+	Logs        bool `mapstructure:"logs"        yaml:",omitempty"`
 	// Deprecated: won't be supported in the future
 	Sync bool `mapstructure:"sync" yaml:",omitempty"`
 	// Deprecated: won't be supported in the future
@@ -386,7 +386,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 		if o.DontRunAfterBuild {
 			phase = v1.IntegrationPhaseBuildComplete
 		}
-		
+
 		for {
 			integrationPhase, waitErr := o.waitForIntegrationPhase(cmd, c, integration, phase)
 			if waitErr != nil {
