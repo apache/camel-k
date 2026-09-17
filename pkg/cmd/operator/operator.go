@@ -202,7 +202,10 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 		selectors[&batchv1.CronJob{}] = selector
 	}
 
-	platform.CertManagerInstalled, _ = kubernetes.IsAPIResourceInstalled(bootstrapClient, "cert-manager.io/v1", "ClusterIssuer")
+	if platform.CertManagerInstalled, err= kubernetes.IsAPIResourceInstalled(bootstrapClient, "cert-manager.io/v1", "ClusterIssuer"); err!=nil{
+		log.Error(err, "failed to check for cert-manager presence, assuming not installed")
+	}
+
 
 	options := cache.Options{
 		ByObject: selectors,
