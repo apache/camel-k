@@ -90,6 +90,7 @@ runs:
         echo "VERSION=$V" >> $GITHUB_ENV
         echo "TAG=v$V" >> $GITHUB_ENV
         echo "UPD_DATE=$D" >> $GITHUB_ENV
+        echo "BUILD_SOURCE_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
         IMAGE_NAME=docker.io/${TEST_DOCKER_HUB_USERNAME:-testcamelk}/camel-k
         echo "Using IMAGE_NAME=$IMAGE_NAME"
         echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
@@ -110,30 +111,63 @@ runs:
       run: |
         NOTEST=1 make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} BUNDLE_IMAGE_NAME=docker.io/testcamelk/camel-k-bundle bundle-push
 
-    - name: Install SBOM generator
+    - name: Install assurance tools
       shell: bash
       run: |
-        go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@latest
-        echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+        source script/release-assurance-tools.env
+        go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@${CYCLONEDX_GOMOD_REF}
+        go install github.com/anchore/syft/cmd/syft@${SYFT_REF}
+        echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+        go version -m "$(go env GOPATH)/bin/cyclonedx-gomod" | grep -F "github.com/CycloneDX/cyclonedx-gomod ${CYCLONEDX_GOMOD_VERSION}"
+        reported_syft_version=$("$(go env GOPATH)/bin/syft" --version | awk '{print $NF}')
+        test "$reported_syft_version" = "${SYFT_VERSION#v}"
 
-    - name: Generate SBOM
+    - name: Generate module SBOM
       shell: bash
-      run: cyclonedx-gomod mod -licenses -json -output sbom.json
+      run: cyclonedx-gomod mod -licenses -json -noserial -notimestamp -output sbom.json
 
-    - name: Commit and push nightly branch
+    - name: Prepare nightly release commit
       shell: bash
       env:
         CI_USER: "github-actions[bot]"
         CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
-        CI_TOKEN: ${{ inputs.secretGithubToken }}
       run: |
         git config --local user.email "$CI_EMAIL"
         git config --local user.name "$CI_USER"
         git add docs/charts/
         git commit -am 'chore(ci): ${{ env.TAG }} release updates' || echo "No nightly release updates changes to commit"
         echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_ENV
-        git tag ${{ env.TAG }} $(git rev-parse HEAD)
-        git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" tag ${{ env.TAG }} -f || echo "No nightly release updates changes to push"
+
+    - name: Generate release assurance
+      shell: bash
+      env:
+        SYFT_CHECK_FOR_APP_UPDATE: "false"
+      run: |
+        source script/release-assurance-tools.env
+        export SYFT_VERSION
+        bash script/generate_release_assurance.sh \
+          "${{ env.VERSION }}" \
+          "${{ env.TAG }}" \
+          "${{ env.BUILD_SOURCE_SHA }}" \
+          "${{ env.COMMIT_ID }}" \
+          "$CYCLONEDX_GOMOD_VERSION"
+
+    - name: Verify nightly release assurance
+      shell: bash
+      run: |
+        ASSURANCE_REQUIRE_LOCAL_ASSETS=true \
+          bash script/verify_release_assurance.sh \
+          release-assurance.json \
+          release-assurance.verdict.json
+
+    - name: Publish nightly tag
+      shell: bash
+      env:
+        CI_USER: "github-actions[bot]"
+        CI_TOKEN: ${{ inputs.secretGithubToken }}
+      run: |
+        git tag -f "${{ env.TAG }}" "${{ env.COMMIT_ID }}"
+        git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" "refs/tags/${{ env.TAG }}" --force || echo "No nightly release updates changes to push"
 
     - name: Create release first time
       shell: bash
@@ -180,6 +214,8 @@ runs:
         NOTE: last update on ${{ env.UPD_DATE }}
         ```
         Apache Camel K ${{ env.VERSION }} build for testing purposes only (unstable). This nightly release is using an **unsupported** operator image published as `${{ env.IMAGE_NAME }}:${{ env.VERSION }}`. The available platforms are AMD64 and ARM64.
+
+        The attached `release-assurance.json` and CycloneDX files are unsigned nightly integrity evidence. They bind the generated SBOMs to the exact nightly client and image digests, but they are not Apache release signatures and do not represent a voted release.
         ## Kubectl
         ```
         kubectl apply -k github.com/apache/camel-k/install/overlays/all-namespaces?ref=${{ env.TAG }}
@@ -236,7 +272,7 @@ runs:
       shell: bash
       run: |
         RELEASE_ID=${{ env.RELEASE_ID }}
-        FILES="./camel-k-client*.tar.gz sbom.json"
+        FILES="./camel-k-client*.tar.gz sbom.json ./camel-k-client*.sbom.cdx.json ./camel-k-image-*.sbom.cdx.json release-assurance.json release-assurance.json.sha256 release-assurance.verdict.json"
 
         for FILE in $FILES; do
           if [ -f "$FILE" ]; then
