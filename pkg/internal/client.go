@@ -261,7 +261,8 @@ type FakeSAR struct {
 // Create fake create implementation (needed in cross namespace Kamelets test). Only allow `cross-ns-sa` user in `default` namespace.
 func (f *FakeSAR) Create(ctx context.Context, sar *authv1.SubjectAccessReview, opts metav1.CreateOptions) (*authv1.SubjectAccessReview, error) {
 	ra := sar.Spec.ResourceAttributes
-	allowed := sar.Spec.User == "system:serviceaccount:default:cross-ns-sa" && ra.Verb == "get" && ra.Resource == "kamelets"
+	allowed := sar.Spec.User == "system:serviceaccount:default:cross-ns-sa" && ra.Verb == "get" &&
+		ra.Resource == "kamelets" && ra.Name != "restricted-kamelet"
 
 	sar.Status.Allowed = allowed
 	sar.Status.Reason = "mocked"

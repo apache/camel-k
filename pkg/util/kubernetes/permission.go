@@ -56,14 +56,15 @@ func CheckSelfPermission(ctx context.Context, client kubernetes.Interface, group
 
 // CheckServiceAccountPermission verify if a given Service Account can access a given resource.
 // Service Account must be provided as "system:serviceaccount:namespace:name" format.
-func CheckServiceAccountPermission(ctx context.Context, client kubernetes.Interface, sa, group, resources, namespace, verb string) (bool, error) {
+func CheckServiceAccountPermission(ctx context.Context, client kubernetes.Interface, sa, group, resource, namespace, name, verb string) (bool, error) {
 	sarReview := &authorizationv1.SubjectAccessReview{
 		Spec: authorizationv1.SubjectAccessReviewSpec{
 			User: sa,
 			ResourceAttributes: &authorizationv1.ResourceAttributes{
 				Group:     group,
 				Namespace: namespace,
-				Resource:  resources,
+				Resource:  resource,
+				Name:      name,
 				Verb:      verb,
 			},
 		},
