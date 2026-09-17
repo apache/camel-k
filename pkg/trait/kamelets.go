@@ -202,33 +202,40 @@ func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet,
 // calculateNamespaces is in charge to scan the kamelets specification and provide a list of
 // namespaces where to look for Kamelets.
 func (t *kameletsTrait) calculateNamespaces(e *Environment, defaultNamespaces ...string) ([]string, error) {
-	namespaces, err := calculateNamespaces(strings.Split(t.List, ","))
+	kamelets := strings.Split(t.List, ",")
+	namespaces, err := calculateNamespaces(kamelets)
 	if err != nil {
 		return namespaces, err
 	}
-	if len(namespaces) > 0 {
-		if e.Integration.Spec.ServiceAccountName == "" {
-			return nil, errors.New("you must to use an authorized ServiceAccount to access cross-namespace resources kamelets. " +
-				"Set it in the Integration spec accordingly")
+	if len(namespaces) > 0 && e.Integration.Spec.ServiceAccountName == "" {
+		return nil, errors.New("you must to use an authorized ServiceAccount to access cross-namespace resources kamelets. " +
+			"Set it in the Integration spec accordingly")
+	}
+	// verify an SA exists and it is authorized for each Kamelet
+	for _, kml := range kamelets {
+		ns, err := getKameletNamespace(kml)
+		if err != nil {
+			return nil, fmt.Errorf("could not parse kamelet namespace: %w", err)
 		}
-		// verify an SA exists and it is authorized for Kamelets in that namespace
-		for _, ns := range namespaces {
-			ok, err := kubernetes.CheckServiceAccountPermission(
-				e.Ctx,
-				e.Client,
-				fmt.Sprintf("system:serviceaccount:%s:%s", e.Integration.Namespace, e.Integration.Spec.ServiceAccountName),
-				v1.SchemeGroupVersion.Group,
-				"kamelets",
-				ns,
-				"get",
-			)
-			if err != nil {
-				return nil, err
-			}
-			if !ok {
-				return nil, fmt.Errorf("cross-namespace Integration reference authorization denied for the ServiceAccount %s and resources kamelets",
-					e.Integration.Spec.ServiceAccountName)
-			}
+		if ns == "" {
+			continue
+		}
+		ok, err := kubernetes.CheckServiceAccountPermission(
+			e.Ctx,
+			e.Client,
+			fmt.Sprintf("system:serviceaccount:%s:%s", e.Integration.Namespace, e.Integration.Spec.ServiceAccountName),
+			v1.SchemeGroupVersion.Group,
+			"kamelets",
+			ns,
+			getKameletKey(kml),
+			"get",
+		)
+		if err != nil {
+			return nil, err
+		}
+		if !ok {
+			return nil, fmt.Errorf("cross-namespace Integration reference authorization denied for the ServiceAccount %s and resources kamelets",
+				e.Integration.Spec.ServiceAccountName)
 		}
 	}
 
