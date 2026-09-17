@@ -1,0 +1,12 @@
+= Cert-Manager configuration
+
+"https://cert-manager.io[cert-manager]" is a Kubernetes add-on to automate the management and issuance of TLS certificates. Camel K's Ingress trait can leverage cert-manager to automatically discover and use an existing Issuer or ClusterIssuer, annotating the generated Ingress so cert-manager handles certificate issuance and renewal.
+
+NOTE: cert-manager is an optional configuration. It is not required to run Camel K.
+
+[[install-cert-manager]]
+== Cert-Manager privileges
+
+Camel K needs certain privileges to read cert-manager's Issuer and ClusterIssuer resources. The installation procedure should take care of these privileges regardless of the installation methodology you're using.
+
+NOTE: you should https://cert-manager.io/docs/installation/[install cert-manager] before installing and running the Camel K Operator. This is required because the operator checks for cert-manager's presence once at startup. If you install cert-manager after Camel K, you must restart the Camel K operator Pod for auto-discovery to take effect.

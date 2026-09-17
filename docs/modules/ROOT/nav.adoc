@@ -5,6 +5,7 @@
 * xref:installation/installation.adoc[Installation]
 ** xref:installation/registry.adoc[Configure Registry]
 ** xref:installation/builds.adoc[Configure Builds]
+** xref:installation/cert-manager.adoc[Configure Cert-Manager]
 ** xref:installation/keda.adoc[Configure Keda]
 ** xref:installation/knative.adoc[Configure Knative]
 ** xref:installation/upgrade.adoc[Upgrade]
