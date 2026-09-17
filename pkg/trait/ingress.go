@@ -196,48 +196,16 @@ func (t *ingressTrait) Apply(e *Environment) error {
 // no annotation should be applied (cert-manager auto-discovery is disabled, cert-manager
 // is not installed, or no issuer is found). A forced TLSIssuerName is verified to exist
 // and returns an error if it does not; auto-discovery degrades to a no-op instead.
-func (t *ingressTrait) resolveCertManagerIssuer(e *Environment) (annotationKey, issuerName string, err error) {
-	namespace := e.Integration.Namespace
-
+func (t *ingressTrait) resolveCertManagerIssuer(e *Environment) (string, string, error) {
 	if t.TLSIssuerName != "" {
-		if !platform.CertManagerInstalled {
-			return "", "", fmt.Errorf("cert-manager is not installed but tlsIssuerName %q was set", t.TLSIssuerName)
-		}
-
-		kind := t.TLSIssuerKind
-		if kind == "" {
-			kind = "ClusterIssuer"
-		}
-
-		switch kind {
-		case "Issuer":
-			exists, err := certmanager.GetIssuer(e.Ctx, t.Client, namespace, t.TLSIssuerName)
-			if err != nil {
-				return "", "", err
-			}
-			if !exists {
-				return "", "", fmt.Errorf("issuer %q not found in namespace %q", t.TLSIssuerName, namespace)
-			}
-
-			return certmanager.AnnotationIssuer, t.TLSIssuerName, nil
-		case "ClusterIssuer":
-			exists, err := certmanager.GetClusterIssuer(e.Ctx, t.Client, t.TLSIssuerName)
-			if err != nil {
-				return "", "", err
-			}
-			if !exists {
-				return "", "", fmt.Errorf("clusterissuer %q not found", t.TLSIssuerName)
-			}
-
-			return certmanager.AnnotationClusterIssuer, t.TLSIssuerName, nil
-		default:
-			return "", "", fmt.Errorf("invalid tlsIssuerKind %q: must be %q or %q", kind, "Issuer", "ClusterIssuer")
-		}
+		return t.resolveForcedCertManagerIssuer(e)
 	}
 
 	if !ptr.Deref(t.TLSCertManagerAuto, false) || !platform.CertManagerInstalled {
 		return "", "", nil
 	}
+
+	namespace := e.Integration.Namespace
 
 	clusterIssuers, err := certmanager.ListClusterIssuers(e.Ctx, t.Client)
 	if err != nil {
@@ -256,6 +224,46 @@ func (t *ingressTrait) resolveCertManagerIssuer(e *Environment) (annotationKey, 
 	}
 
 	return "", "", nil
+}
+
+// resolveForcedCertManagerIssuer verifies the existence of the user-forced
+// TLSIssuerName/TLSIssuerKind and returns its annotation key and name, or an
+// error if cert-manager or the named issuer is not available.
+func (t *ingressTrait) resolveForcedCertManagerIssuer(e *Environment) (string, string, error) {
+	if !platform.CertManagerInstalled {
+		return "", "", fmt.Errorf("cert-manager is not installed but tlsIssuerName %q was set", t.TLSIssuerName)
+	}
+
+	namespace := e.Integration.Namespace
+	kind := t.TLSIssuerKind
+	if kind == "" {
+		kind = "ClusterIssuer"
+	}
+
+	switch kind {
+	case "Issuer":
+		exists, err := certmanager.GetIssuer(e.Ctx, t.Client, namespace, t.TLSIssuerName)
+		if err != nil {
+			return "", "", err
+		}
+		if !exists {
+			return "", "", fmt.Errorf("issuer %q not found in namespace %q", t.TLSIssuerName, namespace)
+		}
+
+		return certmanager.AnnotationIssuer, t.TLSIssuerName, nil
+	case "ClusterIssuer":
+		exists, err := certmanager.GetClusterIssuer(e.Ctx, t.Client, t.TLSIssuerName)
+		if err != nil {
+			return "", "", err
+		}
+		if !exists {
+			return "", "", fmt.Errorf("clusterissuer %q not found", t.TLSIssuerName)
+		}
+
+		return certmanager.AnnotationClusterIssuer, t.TLSIssuerName, nil
+	default:
+		return "", "", fmt.Errorf("invalid tlsIssuerKind %q: must be %q or %q", kind, "Issuer", "ClusterIssuer")
+	}
 }
 
 func (t *ingressTrait) getPaths(service *corev1.Service) []networkingv1.HTTPIngressPath {
