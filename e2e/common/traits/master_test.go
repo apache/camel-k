@@ -49,6 +49,7 @@ func TestMasterTrait(t *testing.T) {
 			// Run using Quarkus properties instead of deprecated trait
 			g.Expect(KamelRun(t, ctx, ns, "files/Master.java",
 				"-d", "camel:kubernetes",
+				"-d", "mvn:org.apache.camel.quarkus:camel-quarkus-kubernetes-cluster-service",
 				"-p", fmt.Sprintf("quarkus.camel.cluster.kubernetes.resource-name=%s-lock", name),
 				"-p", "quarkus.camel.cluster.kubernetes.resource-type=Lease",
 				"-p", fmt.Sprintf("quarkus.camel.cluster.kubernetes.labels.\"camel.apache.org/integration\"=%s", name),
@@ -68,6 +69,7 @@ func TestMasterTrait(t *testing.T) {
 
 			g.Expect(KamelRun(t, ctx, ns, "files/Master.java", "--name", nameFirst,
 				"-d", "camel:kubernetes",
+				"-d", "mvn:org.apache.camel.quarkus:camel-quarkus-kubernetes-cluster-service",
 				"--label", "leader-group=same",
 				"-t", "owner.target-labels=leader-group",
 				"-p", fmt.Sprintf("quarkus.camel.cluster.kubernetes.resource-name=%s", lockName),
@@ -79,6 +81,7 @@ func TestMasterTrait(t *testing.T) {
 
 			g.Expect(KamelRun(t, ctx, ns, "files/Master.java", "--name", nameSecond,
 				"-d", "camel:kubernetes",
+				"-d", "mvn:org.apache.camel.quarkus:camel-quarkus-kubernetes-cluster-service",
 				"--label", "leader-group=same",
 				"-t", "owner.target-labels=leader-group",
 				"-p", fmt.Sprintf("quarkus.camel.cluster.kubernetes.resource-name=%s", lockName),
