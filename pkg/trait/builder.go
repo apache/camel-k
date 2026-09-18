@@ -264,7 +264,9 @@ func (t *builderTrait) Apply(e *Environment) error {
 			pipelineTasks = append(pipelineTasks, ct...)
 		}
 	} else {
-		t.L.Info("Custom tasks are disabled by operator configuration: the tasks will be ignored")
+		if len(t.Tasks) > 0 {
+			t.L.Info("Custom tasks are disabled by operator configuration: the tasks will be ignored")
+		}
 		// Useful to report in status no custom task was executed
 		t.Tasks = []string{}
 	}
