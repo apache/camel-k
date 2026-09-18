@@ -61,8 +61,16 @@ spec:
         - name: registry
           image: registry:3
           env:
+            - name: REGISTRY_HTTP_ADDR
+              value: 0.0.0.0:443
+            - name: REGISTRY_HTTP_TLS_CERTIFICATE
+              value: /certs/tls.crt
+            - name: REGISTRY_HTTP_TLS_KEY
+              value: /certs/tls.key
             - name: REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY
               value: /registry-data
+            # Required to include a secret credential
+            # We can skip them in case we want an open access
             - name: REGISTRY_AUTH
               value: htpasswd
             - name: REGISTRY_AUTH_HTPASSWD_REALM
@@ -72,11 +80,16 @@ spec:
           ports:
             - containerPort: 5000
               name: registry
+            - containerPort: 443
+              name: https
           volumeMounts:
             - name: registry-data
               mountPath: /registry-data
             - name: registry-auth
               mountPath: /auth
+              readOnly: true
+            - name: registry-tls
+              mountPath: /certs
               readOnly: true
           resources:
             requests:
@@ -91,3 +104,6 @@ spec:
         - name: registry-auth
           secret:
             secretName: registry-auth
+        - name: registry-tls
+          secret:
+            secretName: registry-tls
