@@ -60,28 +60,6 @@ runs:
     - name: Set up QEMU (required by multi platform build)
       uses: docker/setup-qemu-action@06116385d9baf250c9f4dcb4858b16962ea869c3
 
-    #
-    # IMPORTANT:
-    # Do we really want to run smoke test?
-    # We can skip unless we see the usage of the nightly is widespread and it makes sense to run some smoke
-    # test before releasing
-    #
-
-    # - name: Infra setting
-    #   uses: ./.github/actions/infra-setting
-
-    # - name: Install operator
-    #   shell: bash
-    #   run: |
-    #     kubectl create ns camel-k
-    #     make install-k8s-global
-    #     kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=60s
-
-    # - name: Run test
-    #   shell: bash
-    #   run: |
-    #     DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-common
-
     - name: Get nightly version and update date
       shell: bash
       run: |
@@ -94,21 +72,10 @@ runs:
         echo "Using IMAGE_NAME=$IMAGE_NAME"
         echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
 
-    - name: Login to staging container registry
-      uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee
-      with:
-        username: ${{ inputs.secretDockerHubUser }}
-        password: ${{ inputs.secretDockerHubPassword }}
-
     - name: Build and release containers
       shell: bash
       run: |
-        NOTEST=1 make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} bundle release-helm images-nightly release-nightly
-
-    - name: Build and push OLM bundle
-      shell: bash
-      run: |
-        NOTEST=1 make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} BUNDLE_IMAGE_NAME=docker.io/testcamelk/camel-k-bundle bundle-push
+        NOTEST=1 make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} bundle release-helm images-nightly cross-compile
 
     - name: Install SBOM generator
       shell: bash
@@ -253,3 +220,19 @@ runs:
         done
 
         echo "Release ${{ env.TAG }} created successfully with artifacts."
+
+    - name: Login to staging container registry
+      uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee
+      with:
+        username: ${{ inputs.secretDockerHubUser }}
+        password: ${{ inputs.secretDockerHubPassword }}
+
+    - name: Push release containers
+      shell: bash
+      run: |
+        NOTEST=1 make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} images-push-all
+
+    - name: Build and push OLM bundle
+      shell: bash
+      run: |
+        NOTEST=1 make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} BUNDLE_IMAGE_NAME=docker.io/testcamelk/camel-k-bundle bundle-push
