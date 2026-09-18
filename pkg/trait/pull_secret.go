@@ -24,10 +24,10 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/utils/ptr"
 
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/log"
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
@@ -51,20 +51,22 @@ func newPullSecretTrait() Trait {
 }
 
 func (t *pullSecretTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
+	var condition *TraitCondition
+	var err error
 	if e.Integration == nil {
-		return false, nil, nil
+		return false, condition, nil
 	}
 	if !ptr.Deref(t.Enabled, true) {
 		return false, NewIntegrationConditionUserDisabled("PullSecret"), nil
 	}
 	if !e.IntegrationInRunningPhases() {
-		return false, nil, nil
+		return false, condition, nil
 	}
 
 	if ptr.Deref(t.Auto, true) {
-		err := t.autoConfigure(e)
+		condition, err = t.autoConfigure(e)
 		if err != nil {
-			return false, nil, err
+			return false, condition, err
 		}
 	}
 
@@ -75,16 +77,17 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, *TraitCondition, erro
 	//nolint:staticcheck
 	t.deprecatedImagePullerDelegation = t.ImagePullerDelegation
 
-	return t.secretName != "" || ptr.Deref(t.deprecatedImagePullerDelegation, false), nil, nil
+	return t.secretName != "" || ptr.Deref(t.deprecatedImagePullerDelegation, false), condition, nil
 }
-func (t *pullSecretTrait) autoConfigure(e *Environment) error {
+func (t *pullSecretTrait) autoConfigure(e *Environment) (*TraitCondition, error) {
+	var condition *TraitCondition
 	if t.deprecatedImagePullerDelegation == nil {
 		var isOpenShift bool
 		if t.Client != nil {
 			var err error
 			isOpenShift, err = openshift.IsOpenShift(t.Client)
 			if err != nil {
-				return err
+				return condition, err
 			}
 		}
 		isOperatorGlobal := platform.IsCurrentOperatorGlobal()
@@ -95,12 +98,19 @@ func (t *pullSecretTrait) autoConfigure(e *Environment) error {
 
 	if t.SecretName == "" && e.Platform.Registry.Secret != "" {
 		// This is deprecated and will be removed in future versions
-		log.Info("Setting the configured operator pull secret. This feature is deprecated and will be removed in the future. " +
-			"Use pull-secret trait explicitly instead.")
 		t.secretName = e.Platform.Registry.Secret
+
+		condition = NewIntegrationCondition(
+			"PullSecret",
+			v1.IntegrationConditionTraitInfo,
+			corev1.ConditionTrue,
+			TraitConfigurationReason,
+			"Setting the configured operator pull secret: this feature is deprecated and will be removed in the future. "+
+				"Use pull-secret trait explicitly instead.",
+		)
 	}
 
-	return nil
+	return condition, nil
 }
 
 func (t *pullSecretTrait) Apply(e *Environment) error {
