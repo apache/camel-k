@@ -37,7 +37,7 @@ import (
 func TestRunCronExample(t *testing.T) {
 	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		
+
 		t.Run("cron-fallback", func(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "files/cron-fallback.yaml").Execute()).To(Succeed())
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "cron-fallback", v1.IntegrationConditionReady), TestTimeoutMedium).Should(
