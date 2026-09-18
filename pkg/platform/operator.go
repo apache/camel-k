@@ -36,7 +36,6 @@ import (
 const (
 	OperatorWatchNamespaceEnvVariable = "WATCH_NAMESPACE"
 	operatorNamespaceEnvVariable      = "NAMESPACE"
-	operatorPodNameEnvVariable        = "POD_NAME"
 	OperatorBuildStrategyEnvVar       = "BUILD_STRATEGY"
 )
 
@@ -70,15 +69,6 @@ func GetOperatorWatchNamespace() string {
 func GetOperatorNamespace() string {
 	if podNamespace, envSet := os.LookupEnv(operatorNamespaceEnvVariable); envSet {
 		return podNamespace
-	}
-
-	return ""
-}
-
-// GetOperatorPodName returns the pod that is running the current operator (if any).
-func GetOperatorPodName() string {
-	if podName, envSet := os.LookupEnv(operatorPodNameEnvVariable); envSet {
-		return podName
 	}
 
 	return ""

@@ -310,18 +310,6 @@ func SortedMapKeys(m map[string]any) []string {
 	return res
 }
 
-func SortedStringMapKeys(m map[string]string) []string {
-	res := make([]string, len(m))
-	i := 0
-	for k := range m {
-		res[i] = k
-		i++
-	}
-	sort.Strings(res)
-
-	return res
-}
-
 // CopyMap clones a map of strings.
 func CopyMap(source map[string]string) map[string]string {
 	if source == nil {
