@@ -346,7 +346,7 @@ test-gateway: gotestfmt-install
 #
 # Cert-manager tests that require the presence of cert-manager
 #
-test-cert-manager:
+test-cert-manager: gotestfmt-install
 	go test -timeout 10m -v ./e2e/cert-manager -tags=integration $(GOTESTFMT)
 
 #
