@@ -32,6 +32,7 @@ DEFAULT_RUNTIME_VERSION := 3.39.1
 # The last camel-k-runtime catalog
 # we keep using it until we support the CamelCatalog CR
 CK_RUNTIME_CATALOG_VERSION := 3.15.3
+
 # Kubernetes tooling
 CONTROLLER_GEN_VERSION := v0.22.0
 CONTROLLER_GEN=$(GOBIN)/controller-gen
@@ -39,13 +40,18 @@ CODEGEN_VERSION := v0.37.0
 OPERATOR_SDK_VERSION := v1.30.0
 KUSTOMIZE_VERSION := v5.7.1
 OPM_VERSION := v1.61.0
+
 # Golang tooling
 LINTER ?= $(LOCALBIN)/golangci-lint
 DEADCODE ?= $(LOCALBIN)/deadcode
 GOVULNCHECK ?= $(LOCALBIN)/govulncheck
 GOIMPORT ?= $(LOCALBIN)/goimports
 LINTER_VERSION ?= v2.13.2
-GOVULNCHECK_VERSION ?= latest
+GOVULNCHECK_VERSION ?= v1.8.0
+GOIMPORTS_VERSION ?= v0.50.0
+GOTESTFMT_VERSION ?= v2.5.0
+DEADCODE_VERSION ?= v0.50.0
+
 LINT_GOGC ?= 20
 LINT_DEADLINE ?= 10m
 DEBUG_MODE ?= false
@@ -242,7 +248,7 @@ build-platform: build build-kamel-platform
 
 ci-build: clean codegen set-version check-licenses dir-licenses build-kamel cross-compile
 
-do-build: gotestfmt-install
+do-build:
 ifeq ($(DO_TEST_PREBUILD),true)
 TEST_PREBUILD = build
 else
@@ -250,9 +256,7 @@ TEST_PREBUILD =
 endif
 
 gotestfmt-install:
-ifeq (, $(shell command -v gotestfmt 2> /dev/null))
-	go install github.com/gotesttools/gotestfmt/v2/cmd/gotestfmt@latest
-endif
+	go install github.com/gotesttools/gotestfmt/v2/cmd/gotestfmt@$(GOTESTFMT_VERSION)
 
 # Build images without running unit tests
 # NOTEST=1 make images
@@ -268,7 +272,7 @@ endif
 # Common tests that do not require any customized operator setting. They can leverage a unique namespaced operator installation to reduce
 # the time to complete (they are used also as smoke test for nightly release)
 #
-test-common:
+test-common: gotestfmt-install
 	FAILED=0; \
 	go test -p $(TEST_COMMON_PARALLEL_COUNT) -timeout 90m -v ./e2e/common/... --parallel 1 -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
@@ -276,7 +280,7 @@ test-common:
 #
 # Smoke tests are a subset of common tests used to quickly verify the operator
 #
-test-smoke:
+test-smoke: gotestfmt-install
 	FAILED=0; \
 	go test -p $(TEST_COMMON_PARALLEL_COUNT) -timeout 45m -v \
 		./e2e/common/languages \
@@ -288,7 +292,7 @@ test-smoke:
 #
 # Common tests that require some particular operator setting or need to be installed in multiple namespaces
 #
-test-advanced:
+test-advanced: gotestfmt-install
 	FAILED=0; \
 	go test -p 1 -timeout 90m -v ./e2e/advanced --parallel $(TEST_ADVANCED_PARALLEL_COUNT) -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
@@ -296,7 +300,7 @@ test-advanced:
 #
 # Installation and upgrade procedure test using
 #
-test-install:
+test-install: gotestfmt-install
 	FAILED=0; \
 	go test -timeout 20m -v ./e2e/install/kustomize -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	go test -timeout 20m -v ./e2e/install/helm -tags=integration $(GOTESTFMT) || ((FAILED++)); \
@@ -306,7 +310,7 @@ test-install:
 #
 # Installation procedure test via OLM
 #
-test-install-olm:
+test-install-olm: gotestfmt-install
 	FAILED=0; \
 	go test -timeout 20m -v ./e2e/install/olm -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
@@ -314,7 +318,7 @@ test-install-olm:
 #
 # Knative tests that require the presence of Knative configuration
 #
-test-knative:
+test-knative: gotestfmt-install
 	FAILED=0; \
 	go test -timeout 60m -v ./e2e/knative -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
@@ -322,7 +326,7 @@ test-knative:
 #
 # Kafka tests that require the presence of Strimzi operator configuration
 #
-test-kafka:
+test-kafka: gotestfmt-install
 	FAILED=0; \
 	go test -timeout 20m -v ./e2e/kafka -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
@@ -330,19 +334,19 @@ test-kafka:
 #
 # Telemetry tests that require the configuration of telemetry endpoints
 #
-test-telemetry:
+test-telemetry: gotestfmt-install
 	go test -timeout 30m -v ./e2e/telemetry -tags=integration $(GOTESTFMT)
 
 #
 # Gateway tests that require the configuration of a gateway (Envoy)
 #
-test-gateway:
+test-gateway: gotestfmt-install
 	go test -timeout 10m -v ./e2e/gateway -tags=integration $(GOTESTFMT)
 
 #
 # Quarkus native test (requires certain CPU and memory conditions)
 #
-test-quarkus-native:
+test-quarkus-native: gotestfmt-install
 	go test -timeout 180m -v ./e2e/native -tags=integration $(GOTESTFMT)
 
 build-kamel:
@@ -425,7 +429,7 @@ fmt: goimport
 	go fmt ./...
 
 dead-code:
-	GOBIN=$(LOCALBIN) go install golang.org/x/tools/cmd/deadcode@latest
+	GOBIN=$(LOCALBIN) go install golang.org/x/tools/cmd/deadcode@$(DEADCODE_VERSION)
 	GOGC=$(LINT_GOGC) $(DEADCODE) ./...
 
 
@@ -748,7 +752,7 @@ govulncheck:
 
 .PHONY: goimport
 goimport:
-	GOBIN=$(LOCALBIN) go install golang.org/x/tools/cmd/goimports@latest
+	GOBIN=$(LOCALBIN) go install golang.org/x/tools/cmd/goimports@$(GOIMPORTS_VERSION)
 
 #####
 # START Local installation procedure. Handy for development purpose
