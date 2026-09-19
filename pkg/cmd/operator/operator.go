@@ -240,6 +240,26 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	defer installCancel()
 	install.OperatorStartupOptionalTools(installCtx, bootstrapClient, log)
 
+	devRegistryEnvVal, devReg := os.LookupEnv("ENABLE_DEV_REGISTRY")
+	if devReg && devRegistryEnvVal == "true" {
+		// Only enable registry protected by secret if configured
+		devRegistrySecretEnvVal, devRegSecret := os.LookupEnv("ENABLE_DEV_REGISTRY_SECRET")
+		withSecret := devRegSecret && devRegistrySecretEnvVal == "true"
+		log.Info("Installing development container registry")
+		if withSecret {
+			log.Info("NOTE: ENABLE_DEV_REGISTRY_SECRET is set, mind to provide a secret with the default values in the Integration namespace " +
+				"and to pull images with it.")
+		}
+		log.Info("WARNING: the internal development container registry is ephemeral and not secured. " +
+			"It MUST be considered for DEVELOPMENT and DEMO purposes only. Make sure to read documentation and switch to " +
+			"a production grade container registry when moving the operator to a production environment.")
+		registryCtx, registryCancel := context.WithTimeout(ctx, 1*time.Minute)
+		defer registryCancel()
+		if err := install.OperatorStartupRegistry(registryCtx, bootstrapClient, withSecret); err != nil {
+			log.Error(err, "could not install the development container registry")
+		}
+	}
+
 	synthEnvVal, synth := os.LookupEnv("CAMEL_K_SYNTHETIC_INTEGRATIONS")
 	if synth && synthEnvVal == "true" {
 		log.Info("Starting the synthetic Integration manager. " +
