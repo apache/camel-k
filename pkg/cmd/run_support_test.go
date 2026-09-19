@@ -23,23 +23,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFilterFileLocation(t *testing.T) {
-	optionFileLocations := []string{
-		"file:/path/to/valid/file",
-		"file:app.properties",
-		"configmap:my-configmap",
-		"secret:my-secret",
-		"file:/validfile@/tmp/destination",
-	}
-
-	filteredOptions := filterFileLocation(optionFileLocations)
-
-	assert.Equal(t, 3, len(filteredOptions))
-	assert.Equal(t, "/path/to/valid/file", filteredOptions[0])
-	assert.Equal(t, "app.properties", filteredOptions[1])
-	assert.Equal(t, "/validfile", filteredOptions[2])
-}
-
 func TestExtractTraitNames(t *testing.T) {
 	traitProps := []string{"container.enabled=true", "no-trait.noval=1", "nothing"}
 	tn := extractTraitNames(traitProps)

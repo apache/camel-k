@@ -64,18 +64,6 @@ func parseConfig(ctx context.Context, cmd *cobra.Command, c client.Client, confi
 	return nil
 }
 
-func filterFileLocation(maybeFileLocations []string) []string {
-	filteredOptions := make([]string, 0)
-	for _, option := range maybeFileLocations {
-		if strings.HasPrefix(option, "file:") {
-			localPath, _ := resource.ParseFileValue(strings.Replace(option, "file:", "", 1))
-			filteredOptions = append(filteredOptions, localPath)
-		}
-	}
-
-	return filteredOptions
-}
-
 func keyValueProps(value string) (*properties.Properties, error) {
 	return properties.Load([]byte(value), properties.UTF8)
 }

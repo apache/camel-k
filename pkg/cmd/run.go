@@ -24,12 +24,10 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"os/signal"
 	"path"
 	"reflect"
 	"strconv"
 	"strings"
-	"syscall"
 
 	"github.com/magiconair/properties"
 
@@ -54,7 +52,6 @@ import (
 	k8slog "github.com/apache/camel-k/v2/pkg/util/kubernetes/log"
 	"github.com/apache/camel-k/v2/pkg/util/property"
 	"github.com/apache/camel-k/v2/pkg/util/resource"
-	"github.com/apache/camel-k/v2/pkg/util/sync"
 	"github.com/apache/camel-k/v2/pkg/util/watch"
 )
 
@@ -93,8 +90,6 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 		"key optionally represents the configmap/secret key to be filtered and path represents the destination path)")
 	cmd.Flags().StringArray("maven-repository", nil, "Add a maven repository")
 	cmd.Flags().Bool("logs", false, "Print integration logs")
-	cmd.Flags().Bool("sync", false, "[Deprecated] Synchronize the local source file with the cluster, republishing at each change")
-	cmd.Flags().Bool("dev", false, "[Deprecated] Enable Dev mode (equivalent to \"-w --logs --sync\")")
 	cmd.Flags().Bool("use-flows", true, "Write yaml sources as Flow objects in the integration custom resource")
 	cmd.Flags().StringP("operator-id", "x", "", "Operator id selected to manage this integration.")
 	cmd.Flags().String("profile", "", "Trait profile used for deployment")
@@ -129,12 +124,8 @@ type runCmdOptions struct {
 	Compression bool `mapstructure:"compression" yaml:",omitempty"`
 	Wait        bool `mapstructure:"wait"        yaml:",omitempty"`
 	Logs        bool `mapstructure:"logs"        yaml:",omitempty"`
-	// Deprecated: won't be supported in the future
-	Sync bool `mapstructure:"sync" yaml:",omitempty"`
-	// Deprecated: won't be supported in the future
-	Dev      bool `mapstructure:"dev"       yaml:",omitempty"`
-	UseFlows bool `mapstructure:"use-flows" yaml:",omitempty"`
-	Save     bool `kamel:"omitsave"         mapstructure:"save" yaml:",omitempty"`
+	UseFlows    bool `mapstructure:"use-flows" yaml:",omitempty"`
+	Save        bool `kamel:"omitsave"         mapstructure:"save" yaml:",omitempty"`
 	// Deprecated: won't be supported in the future
 	IntegrationKit     string `mapstructure:"kit"                 yaml:",omitempty"`
 	IntegrationName    string `mapstructure:"name"                yaml:",omitempty"`
@@ -259,10 +250,6 @@ func (o *runCmdOptions) validate(cmd *cobra.Command) error {
 		return err
 	}
 
-	if o.OutputFormat != "" && o.Dev {
-		return errors.New("cannot use --dev with -o/--output option")
-	}
-
 	for _, label := range o.Labels {
 		parts := strings.Split(label, "=")
 		if len(parts) != 2 {
@@ -297,11 +284,6 @@ func (o *runCmdOptions) validate(cmd *cobra.Command) error {
 	// Deprecated: to be removed
 	if o.Compression {
 		fmt.Fprintf(cmd.OutOrStdout(), "Compression property is deprecated. It will be removed from future releases.\n")
-	}
-
-	// Deprecated: to be removed
-	if o.Sync || o.Dev {
-		fmt.Fprintf(cmd.OutOrStdout(), "Dev and Sync properties are deprecated. They will be removed from future releases.\n")
 	}
 
 	var client client.Client
@@ -348,32 +330,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if o.Dev {
-		cs := make(chan os.Signal, 1)
-		signal.Notify(cs, os.Interrupt, syscall.SIGTERM)
-		go func() {
-			<-cs
-			if o.Context.Err() != nil {
-				// Context canceled
-				return
-			}
-			fmt.Fprintln(cmd.OutOrStdout(), "Run integration terminating")
-			err := DeleteIntegration(o.Context, c, integration.Name, integration.Namespace)
-			if err != nil {
-				fmt.Fprintln(cmd.ErrOrStderr(), err)
-				os.Exit(1)
-			}
-			os.Exit(0)
-		}()
-	}
-
-	if o.Sync || o.Dev {
-		err = o.syncIntegration(cmd, c, args)
-		if err != nil {
-			return err
-		}
-	}
-	if o.Logs || o.Dev || o.Wait {
+	if o.Logs || o.Wait {
 		//nolint:errcheck
 		go watch.HandleIntegrationEvents(o.Context, c, integration, func(event *corev1.Event) bool {
 			fmt.Fprintln(cmd.OutOrStdout(), event.Message)
@@ -381,7 +338,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 			return true
 		})
 	}
-	if o.Wait || o.Dev {
+	if o.Wait {
 		phase := v1.IntegrationPhaseRunning
 		if o.DontRunAfterBuild {
 			phase = v1.IntegrationPhaseBuildComplete
@@ -409,14 +366,11 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 			integration.ResourceVersion = existing.ResourceVersion
 		}
 	}
-	if o.Logs || o.Dev {
+	if o.Logs {
 		err = k8slog.Print(o.Context, cmd, c, integration, nil, cmd.OutOrStdout())
 		if err != nil {
 			return err
 		}
-	}
-
-	if o.Sync || o.Logs || o.Dev {
 		// Let's add a Wait point, otherwise the script terminates
 		<-o.RootContext.Done()
 	}
@@ -465,75 +419,6 @@ func (o *runCmdOptions) waitForIntegrationPhase(cmd *cobra.Command, c client.Cli
 	}
 
 	return watch.HandleIntegrationStateChanges(o.Context, c, integration, handler)
-}
-
-func (o *runCmdOptions) syncIntegration(cmd *cobra.Command, c client.Client, sources []string) error {
-	// Let's watch all relevant files when in dev mode
-	res := filterFileLocation(o.Resources)
-	cfg := filterFileLocation(o.Configs)
-	prop := filterFileLocation(o.Properties)
-	buildProp := filterFileLocation(o.BuildProperties)
-
-	files := make([]string, 0,
-		len(sources)+len(res)+len(cfg)+len(prop)+len(buildProp),
-	)
-
-	files = append(files, sources...)
-	files = append(files, res...)
-	files = append(files, cfg...)
-	files = append(files, prop...)
-	files = append(files, buildProp...)
-
-	for _, s := range files {
-		ok, err := source.IsLocalAndFileExists(s)
-		if err != nil {
-			return err
-		}
-		if ok {
-			changes, err := sync.File(o.Context, s)
-			if err != nil {
-				return err
-			}
-			go func() {
-				for {
-					select {
-					case <-o.Context.Done():
-						return
-					case <-changes:
-						// let's create a new command to parse modeline changes and update our integration
-						newCmd, _, err := createKamelWithModelineCommand(o.RootContext, os.Args[1:])
-						newCmd.SetOut(cmd.OutOrStdout())
-						newCmd.SetErr(cmd.ErrOrStderr())
-						if err != nil {
-							fmt.Fprintln(newCmd.ErrOrStderr(), "Unable to sync integration: ", err.Error())
-
-							continue
-						}
-						newCmd.Args = o.validateArgs
-						newCmd.PreRunE = o.decode
-						newCmd.RunE = func(cmd *cobra.Command, args []string) error {
-							_, err := o.createOrUpdateIntegration(cmd, c, sources)
-
-							return err
-						}
-						newCmd.PostRunE = nil
-
-						// cancel the existing command to release watchers
-						o.ContextCancel()
-						// run the new one
-						err = newCmd.Execute()
-						if err != nil {
-							fmt.Fprintln(newCmd.ErrOrStderr(), "Unable to sync integration: ", err.Error())
-						}
-					}
-				}
-			}()
-		} else {
-			fmt.Fprintf(cmd.ErrOrStderr(), "Warning: the following URL will not be watched for changes: %s\n", s)
-		}
-	}
-
-	return nil
 }
 
 func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.Client, sources []string) (*v1.Integration, error) {
