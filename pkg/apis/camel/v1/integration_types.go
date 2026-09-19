@@ -281,8 +281,6 @@ const (
 	IntegrationConditionKameletsAvailableReason string = "KameletsAvailable"
 	// IntegrationConditionKameletsNotAvailableReason --.
 	IntegrationConditionKameletsNotAvailableReason string = "KameletsNotAvailable"
-	// IntegrationConditionImportingKindAvailableReason used (as false) if we're trying to import an unsupported kind.
-	IntegrationConditionImportingKindAvailableReason string = "ImportingKindAvailable"
 )
 
 // IntegrationCondition describes the state of a resource at a certain point.

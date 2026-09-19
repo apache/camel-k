@@ -313,18 +313,3 @@ func TestCamelCatalogSemver(t *testing.T) {
 	// 2.x will translate with 2.16.1 as it is already existing
 	assert.Equal(t, "2.16.1", environment.CamelCatalog.GetRuntimeVersion())
 }
-
-func TestCamelTraitSyntheticIntegration(t *testing.T) {
-	trait, environment := createNominalCamelTest(true)
-	environment.Integration.Status = v1.IntegrationStatus{}
-	environment.Integration.Annotations = make(map[string]string)
-	environment.Integration.Annotations[v1.IntegrationSyntheticLabel] = boolean.TrueString
-
-	configured, condition, err := trait.Configure(environment)
-	require.NoError(t, err)
-	assert.Equal(t, "explicitly disabled by the platform: synthetic integration", condition.message)
-	assert.False(t, configured)
-
-	assert.Equal(t, v1.RuntimeProvider(""), environment.Integration.Status.RuntimeProvider)
-	assert.Equal(t, "", environment.Integration.Status.RuntimeVersion)
-}

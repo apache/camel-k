@@ -37,12 +37,6 @@ const (
 	IntegrationLabel = "camel.apache.org/integration"
 	// IntegrationGenerationLabel is used to check on outdated integration resources that can be removed by garbage collection.
 	IntegrationGenerationLabel = "camel.apache.org/generation"
-	// IntegrationSyntheticLabel is used to tag k8s synthetic Integrations.
-	IntegrationSyntheticLabel = "camel.apache.org/is-synthetic"
-	// IntegrationImportedKindLabel specifies from what kind of resource an Integration was imported.
-	IntegrationImportedKindLabel = "camel.apache.org/imported-from-kind"
-	// IntegrationImportedNameLabel specifies from what resource an Integration was imported.
-	IntegrationImportedNameLabel = "camel.apache.org/imported-from-name"
 
 	// IntegrationFlowEmbeddedSourceName --.
 	IntegrationFlowEmbeddedSourceName = "camel-k-embedded-flow.yaml"
@@ -350,11 +344,6 @@ func (in *Integration) SetReadyCondition(status corev1.ConditionStatus, reason, 
 // SetReadyConditionError sets Ready condition to False with the given error message.
 func (in *Integration) SetReadyConditionError(err string) {
 	in.SetReadyCondition(corev1.ConditionFalse, IntegrationConditionErrorReason, err)
-}
-
-// IsSynthetic returns true for synthetic Integrations (non managed, likely imported from external deployments).
-func (in *Integration) IsSynthetic() bool {
-	return in.Annotations[IntegrationSyntheticLabel] == "true"
 }
 
 // SetBuildCompletePhase set the proper building phase and the related timestamps.

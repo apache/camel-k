@@ -56,9 +56,6 @@ func (l *loggingTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	if !ptr.Deref(l.Enabled, true) {
 		return false, NewIntegrationConditionUserDisabled("Logging"), nil
 	}
-	if e.Integration.IsSynthetic() {
-		return false, NewIntegrationConditionPlatformDisabledWithMessage("Logging", "synthetic integration"), nil
-	}
 
 	condition := NewIntegrationCondition(
 		"Logging",

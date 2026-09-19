@@ -79,11 +79,10 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 
 	return monitoring.NewInstrumentedReconciler(
 		&reconcileIntegration{
-			client:           c,
-			scheme:           mgr.GetScheme(),
-			recorder:         mgr.GetEventRecorder("camel-k-integration-controller"),
-			syntheticActions: append(append([]Action{}, base...), NewMonitorSyntheticAction()),
-			baseActions:      append(append([]Action{}, base...), NewMonitorAction()),
+			client:      c,
+			scheme:      mgr.GetScheme(),
+			recorder:    mgr.GetEventRecorder("camel-k-integration-controller"),
+			baseActions: append(append([]Action{}, base...), NewMonitorAction()),
 		},
 		schema.GroupVersionKind{
 			Group:   v1.SchemeGroupVersion.Group,
@@ -436,11 +435,10 @@ var _ reconcile.Reconciler = &reconcileIntegration{}
 type reconcileIntegration struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the API server
-	client           client.Client
-	scheme           *runtime.Scheme
-	recorder         events.EventRecorder
-	syntheticActions []Action
-	baseActions      []Action
+	client      client.Client
+	scheme      *runtime.Scheme
+	recorder    events.EventRecorder
+	baseActions []Action
 }
 
 // Reconcile reads that state of the cluster for an Integration object and makes changes based on the state read
@@ -485,12 +483,7 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 	target := instance.DeepCopy()
 	targetLog := rlog.ForIntegration(target)
 
-	actions := r.baseActions
-	if instance.IsSynthetic() {
-		actions = r.syntheticActions
-	}
-
-	for _, a := range actions {
+	for _, a := range r.baseActions {
 		a.InjectClient(r.client)
 		a.InjectLogger(targetLog)
 

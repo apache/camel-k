@@ -160,11 +160,6 @@ const (
 	IntegrationKitTypeUser = "user"
 	// IntegrationKitTypeExternal identifies a Kit created by any third party.
 	IntegrationKitTypeExternal = "external"
-	// IntegrationKitTypeSynthetic identifies a synthetic Kit (generated for any container image for which the operator cannot make any assumption).
-	//
-	// Deprecated: synthetic Integration Kits are replaced by non managed build Integrations.
-	IntegrationKitTypeSynthetic = "synthetic"
-
 	// IntegrationKitLayoutLabel labels the kit layout.
 	IntegrationKitLayoutLabel = "camel.apache.org/kit.layout"
 
