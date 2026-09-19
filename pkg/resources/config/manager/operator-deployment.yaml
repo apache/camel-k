@@ -81,6 +81,9 @@ spec:
             # You can provide a different SA for builder Pods
             - name: BUILDER_SA
               value: "camel-k-builder"
+            # Demo only: turn it off or remove the variable in a production environment.
+            - name: ENABLE_DEV_REGISTRY
+              value: "true"
           # Attempt to read bootstrap configuration from configmap or secret
           envFrom:
             - configMapRef:

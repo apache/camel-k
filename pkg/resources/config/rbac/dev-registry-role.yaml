@@ -15,18 +15,16 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-#
-# rbac resources applicable for all kubernetes platforms
-#
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-resources:
-- builder-role.yaml
-- builder-role-openshift.yaml
-- dev-registry-role.yaml
-- kamelets-viewer-role.yaml
-- builder-role-binding.yaml
-- builder-role-binding-openshift.yaml
-- dev-registry-role-binding.yaml
-- kamelets-viewer-role-binding.yaml
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-dev-registry
+  labels:
+    app: "camel-k"
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
