@@ -44,21 +44,8 @@ func (action *monitorAction) CanHandle(kit *v1.IntegrationKit) bool {
 }
 
 func (action *monitorAction) Handle(ctx context.Context, kit *v1.IntegrationKit) (*v1.IntegrationKit, error) {
-	//nolint: staticcheck
-	if kit.IsExternal() || kit.IsSynthetic() {
+	if kit.IsExternal() {
 		// do nothing, it's not a managed kit
-		// if it's a syntetic Kit add a condition to warn this is a
-		// deprecated feature which may be removed soon.
-		if kit.IsSynthetic() {
-			kit.Status.SetCondition(
-				v1.IntegrationKitConditionType("SyntheticKitDeprecated"),
-				corev1.ConditionTrue,
-				"DeprecationNotice",
-				"Synthetic IntegrationKit feature is deprecated and will be removed soon.",
-			)
-			action.L.Infof("WARN: Synthetic IntegrationKit feature is deprecated and will be removed soon.")
-		}
-
 		return kit, nil
 	}
 	hash, err := digest.ComputeForIntegrationKit(kit)

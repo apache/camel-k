@@ -4102,7 +4102,7 @@ spec:
                         type: boolean
                       image:
                         description: |-
-                          The main container image to use for the Integration. When using this parameter the operator will create a synthetic IntegrationKit which
+                          The main container image to use for the Integration. When using this parameter the operator will create an IntegrationKit which
                           won't be able to execute traits requiring CamelCatalog. If the container image you're using is coming from an IntegrationKit, use instead
                           Integration `.spec.integrationKit` parameter. If you're moving the Integration across environments, you will also need to create an "external" IntegrationKit.
                         type: string
@@ -6673,7 +6673,7 @@ spec:
                         type: boolean
                       image:
                         description: |-
-                          The main container image to use for the Integration. When using this parameter the operator will create a synthetic IntegrationKit which
+                          The main container image to use for the Integration. When using this parameter the operator will create an IntegrationKit which
                           won't be able to execute traits requiring CamelCatalog. If the container image you're using is coming from an IntegrationKit, use instead
                           Integration `.spec.integrationKit` parameter. If you're moving the Integration across environments, you will also need to create an "external" IntegrationKit.
                         type: string
@@ -9205,7 +9205,7 @@ spec:
                         type: boolean
                       image:
                         description: |-
-                          The main container image to use for the Integration. When using this parameter the operator will create a synthetic IntegrationKit which
+                          The main container image to use for the Integration. When using this parameter the operator will create an IntegrationKit which
                           won't be able to execute traits requiring CamelCatalog. If the container image you're using is coming from an IntegrationKit, use instead
                           Integration `.spec.integrationKit` parameter. If you're moving the Integration across environments, you will also need to create an "external" IntegrationKit.
                         type: string
@@ -11725,7 +11725,7 @@ spec:
                         type: boolean
                       image:
                         description: |-
-                          The main container image to use for the Integration. When using this parameter the operator will create a synthetic IntegrationKit which
+                          The main container image to use for the Integration. When using this parameter the operator will create an IntegrationKit which
                           won't be able to execute traits requiring CamelCatalog. If the container image you're using is coming from an IntegrationKit, use instead
                           Integration `.spec.integrationKit` parameter. If you're moving the Integration across environments, you will also need to create an "external" IntegrationKit.
                         type: string
@@ -21307,7 +21307,7 @@ spec:
                         type: boolean
                       image:
                         description: |-
-                          The main container image to use for the Integration. When using this parameter the operator will create a synthetic IntegrationKit which
+                          The main container image to use for the Integration. When using this parameter the operator will create an IntegrationKit which
                           won't be able to execute traits requiring CamelCatalog. If the container image you're using is coming from an IntegrationKit, use instead
                           Integration `.spec.integrationKit` parameter. If you're moving the Integration across environments, you will also need to create an "external" IntegrationKit.
                         type: string
@@ -23715,7 +23715,7 @@ spec:
                         type: boolean
                       image:
                         description: |-
-                          The main container image to use for the Integration. When using this parameter the operator will create a synthetic IntegrationKit which
+                          The main container image to use for the Integration. When using this parameter the operator will create an IntegrationKit which
                           won't be able to execute traits requiring CamelCatalog. If the container image you're using is coming from an IntegrationKit, use instead
                           Integration `.spec.integrationKit` parameter. If you're moving the Integration across environments, you will also need to create an "external" IntegrationKit.
                         type: string
@@ -34660,7 +34660,7 @@ spec:
                             type: boolean
                           image:
                             description: |-
-                              The main container image to use for the Integration. When using this parameter the operator will create a synthetic IntegrationKit which
+                              The main container image to use for the Integration. When using this parameter the operator will create an IntegrationKit which
                               won't be able to execute traits requiring CamelCatalog. If the container image you're using is coming from an IntegrationKit, use instead
                               Integration `.spec.integrationKit` parameter. If you're moving the Integration across environments, you will also need to create an "external" IntegrationKit.
                             type: string
@@ -36990,7 +36990,7 @@ spec:
                         type: boolean
                       image:
                         description: |-
-                          The main container image to use for the Integration. When using this parameter the operator will create a synthetic IntegrationKit which
+                          The main container image to use for the Integration. When using this parameter the operator will create an IntegrationKit which
                           won't be able to execute traits requiring CamelCatalog. If the container image you're using is coming from an IntegrationKit, use instead
                           Integration `.spec.integrationKit` parameter. If you're moving the Integration across environments, you will also need to create an "external" IntegrationKit.
                         type: string

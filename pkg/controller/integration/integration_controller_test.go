@@ -38,33 +38,18 @@ func TestActions(t *testing.T) {
 		NewBuildCompleteAction(),
 	}
 	reconciler := reconcileIntegration{
-		syntheticActions: append(append([]Action{}, base...), NewMonitorSyntheticAction()),
-		baseActions:      append(append([]Action{}, base...), NewMonitorAction()),
+		baseActions: append(append([]Action{}, base...), NewMonitorAction()),
 	}
 
-	t.Run("non-synthetic", func(t *testing.T) {
-		actions := reconciler.baseActions
-		require.Len(t, actions, 6)
+	actions := reconciler.baseActions
+	require.Len(t, actions, 6)
 
-		assert.IsType(t, &platformSetupAction{}, actions[0])
-		assert.IsType(t, &initializeAction{}, actions[1])
-		assert.IsType(t, &buildAction{}, actions[2])
-		assert.IsType(t, &buildKitAction{}, actions[3])
-		assert.IsType(t, &buildCompleteAction{}, actions[4])
-		assert.IsType(t, &monitorAction{}, actions[5])
-	})
-
-	t.Run("synthetic", func(t *testing.T) {
-		actions := reconciler.syntheticActions
-		require.Len(t, actions, 6)
-
-		assert.IsType(t, &platformSetupAction{}, actions[0])
-		assert.IsType(t, &initializeAction{}, actions[1])
-		assert.IsType(t, &buildAction{}, actions[2])
-		assert.IsType(t, &buildKitAction{}, actions[3])
-		assert.IsType(t, &buildCompleteAction{}, actions[4])
-		assert.IsType(t, &monitorSyntheticAction{}, actions[5])
-	})
+	assert.IsType(t, &platformSetupAction{}, actions[0])
+	assert.IsType(t, &initializeAction{}, actions[1])
+	assert.IsType(t, &buildAction{}, actions[2])
+	assert.IsType(t, &buildKitAction{}, actions[3])
+	assert.IsType(t, &buildCompleteAction{}, actions[4])
+	assert.IsType(t, &monitorAction{}, actions[5])
 }
 
 func TestIsIntegrationUpdated(t *testing.T) {
