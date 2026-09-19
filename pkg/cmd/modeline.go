@@ -46,10 +46,8 @@ var (
 		"language": true, // language is a marker modeline option for other tools
 	}
 	disallowedOptions = map[string]bool{
-		"dev":  true,
 		"wait": true,
 		"logs": true,
-		"sync": true,
 	}
 
 	// file options must be considered relative to the source files they belong to.
