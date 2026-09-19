@@ -35,9 +35,9 @@ func TestTraitsMerge(t *testing.T) {
 			Auto:        ptr.To(false),
 			ServicePort: 81,
 		},
-		Logging: &trait.LoggingTrait{
-			Color: ptr.To(false),
-			Level: "INFO",
+		Cron: &trait.CronTrait{
+			Fallback: ptr.To(false),
+			Schedule: "0 * * * *",
 		},
 	}
 	t2 := Traits{
@@ -45,9 +45,9 @@ func TestTraitsMerge(t *testing.T) {
 			Port:     8081,
 			PortName: "http-8081",
 		},
-		Logging: &trait.LoggingTrait{
-			Color: ptr.To(true),
-			Level: "DEBUG",
+		Cron: &trait.CronTrait{
+			Fallback: ptr.To(true),
+			Schedule: "*/5 * * * *",
 		},
 	}
 
@@ -61,9 +61,9 @@ func TestTraitsMerge(t *testing.T) {
 	assert.Equal(t, int32(81), t1.Container.ServicePort)
 
 	// values from merged trait take precedence over the original ones
-	assert.NotNil(t, t1.Logging)
-	assert.True(t, ptr.Deref(t1.Logging.Color, false))
-	assert.Equal(t, "DEBUG", t1.Logging.Level)
+	assert.NotNil(t, t1.Cron)
+	assert.True(t, ptr.Deref(t1.Cron.Fallback, false))
+	assert.Equal(t, "*/5 * * * *", t1.Cron.Schedule)
 }
 
 func TestIntegrationKitTraitsMerge(t *testing.T) {

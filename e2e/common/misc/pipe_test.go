@@ -55,7 +55,7 @@ func TestPipe(t *testing.T) {
 					"-p", "sink.loggerName=integrationLogger",
 					"-p", "error-handler.loggerName=kameletErrorHandler",
 					// Needed in the test to make sure to do the right string comparison later
-					"-t", "logging.color=false",
+					"-t", "camel.properties=quarkus.console.color=false",
 					"--name", "throw-error-binding").Execute()).To(Succeed())
 
 				g.Eventually(IntegrationPodPhase(t, ctx, ns, "throw-error-binding"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -76,7 +76,7 @@ func TestPipe(t *testing.T) {
 					"-p", "sink.loggerName=integrationLogger",
 					"-p", "error-handler.loggerName=kameletErrorHandler",
 					// Needed in the test to make sure to do the right string comparison later
-					"-t", "logging.color=false",
+					"-t", "camel.properties=quarkus.console.color=false",
 					"--name", "no-error-binding").Execute()).To(Succeed())
 
 				g.Eventually(IntegrationPodPhase(t, ctx, ns, "no-error-binding"), TestTimeoutLong).Should(Equal(corev1.PodRunning))

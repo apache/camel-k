@@ -240,10 +240,14 @@ type Traits struct {
 	Knative *trait.KnativeTrait `json:"knative,omitempty" property:"knative"`
 	// The configuration of Knative Service trait
 	KnativeService *trait.KnativeServiceTrait `json:"knative-service,omitempty" property:"knative-service"`
-	// The configuration of Logging trait
-	Logging *trait.LoggingTrait `json:"logging,omitempty" property:"logging"`
-	// The configuration of Master trait
-	Master *trait.MasterTrait `json:"master,omitempty" property:"master"`
+	// The configuration of Logging trait.
+	//
+	// Deprecated: no longer in use.
+	DeprecatedLogging *trait.LoggingTrait `json:"logging,omitempty" property:"logging"`
+	// The configuration of Master trait.
+	//
+	// Deprecated: no longer in use.
+	DeprecatedMaster *trait.MasterTrait `json:"master,omitempty" property:"master"`
 	// The configuration of Mount trait
 	Mount *trait.MountTrait `json:"mount,omitempty" property:"mount"`
 	// The configuration of OpenAPI trait.
@@ -280,8 +284,10 @@ type Traits struct {
 	//
 	// Deprecated: no longer in use.
 	DeprecatedServiceBinding *trait.ServiceBindingTrait `json:"service-binding,omitempty" property:"service-binding"`
-	// The configuration of Telemetry trait
-	Telemetry *trait.TelemetryTrait `json:"telemetry,omitempty" property:"telemetry"`
+	// The configuration of Telemetry trait.
+	//
+	// Deprecated: no longer in use.
+	DeprecatedTelemetry *trait.TelemetryTrait `json:"telemetry,omitempty" property:"telemetry"`
 	// The configuration of Toleration trait
 	Toleration *trait.TolerationTrait `json:"toleration,omitempty" property:"toleration"`
 

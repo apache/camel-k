@@ -18,11 +18,7 @@ limitations under the License.
 package resources
 
 import (
-	"fmt"
 	"testing"
-
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/util/yaml"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -120,35 +116,6 @@ func TestResourcesWithPrefix(t *testing.T) {
 
 	// need to get to at least the same directory as the required files
 	NoErrorAndNotContains(t, "/", "config/manager/operator-service-account.yaml", WithPrefix)
-}
-
-func TestTemplateResource(t *testing.T) {
-	fname := "master-role-lease.tmpl"
-	name := "myintegration-master"
-	ns := "test-nm"
-
-	templateData := struct {
-		Namespace      string
-		Name           string
-		ServiceAccount string
-	}{
-		Namespace:      ns,
-		Name:           name,
-		ServiceAccount: "default",
-	}
-
-	data, err := TemplateResource(fmt.Sprintf("/resources/addons/master/%s", fname), templateData)
-	require.NoError(t, err)
-
-	jsonSrc, err := yaml.ToJSON([]byte(data))
-	require.NoError(t, err)
-
-	uns := unstructured.Unstructured{}
-	err = uns.UnmarshalJSON(jsonSrc)
-	require.NoError(t, err)
-
-	assert.Equal(t, uns.GetName(), name)
-	assert.Equal(t, uns.GetNamespace(), ns)
 }
 
 func TestCRDResources(t *testing.T) {

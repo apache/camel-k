@@ -17,24 +17,25 @@ limitations under the License.
 
 package trait
 
+// WARNING: This trait is no longer in use.
+//
 // The Telemetry trait can be used to automatically publish tracing information to an OTLP compatible collector.
 //
 // The trait is able to automatically discover the telemetry OTLP endpoint available in the namespace (supports **Jaerger** in version 1.35+).
 //
 // The Telemetry trait is disabled by default.
 //
-// WARNING: The Telemetry trait is **deprecated** and will be removed in future release versions.
-// The same behavior can be achieved via properties and dependencies configuration.
+// The Telemetry trait was removed: the same behavior can be achieved via properties and
+// dependencies configuration.
 //
 // Migration example:
 //
 //	Before: --trait telemetry.endpoint=http://jaeger:4317
 //	After:  -p quarkus.otel.exporter.otlp.traces.endpoint=http://jaeger:4317
 //
-// WARNING: The Telemetry trait can't be enabled at the same time as the Tracing trait.
-//
 // +camel-k:trait=telemetry.
 // +camel-k:deprecated=2.9.0.
+// +camel-k:internal.
 //
 //nolint:godoclint
 type TelemetryTrait struct {

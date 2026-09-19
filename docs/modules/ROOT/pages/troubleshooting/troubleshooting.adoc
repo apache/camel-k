@@ -11,7 +11,7 @@ Most of the time, your Integration build cycle runs fine. Then a Deployment and 
 
 First of all, you need to try to check the log of the application. Try using `kamel logs test` or `kubectl logs test-7856cb497b-smfkq`. If there is some problem within your Camel application, you will typically discover it at runtime only. Checking the logs and understanding the reason of the failure there should be the easiest approach.
 
-NOTE: use logging trait to change the level of log, if needed.
+NOTE: use the `quarkus.log.level` property to change the level of log, if needed (ie, `kamel run test.yaml -p quarkus.log.level=DEBUG`).
 
 [[troubleshoot-integration-cr]]
 == Checking Integration custom resource

@@ -269,7 +269,7 @@ func TestExecutedTraitsCondition(t *testing.T) {
 		v1.IntegrationConditionTraitInfo,
 		corev1.ConditionTrue,
 		"TraitConfiguration",
-		"Applied traits: camel,environment,logging,deployer,deployment,gc,container,security-context,mount,health,quarkus,jvm,owner",
+		"Applied traits: camel,environment,deployer,deployment,gc,container,security-context,mount,health,quarkus,jvm,owner",
 	)
 	assert.Contains(t, conditions, expectedCondition)
 }

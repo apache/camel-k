@@ -21,7 +21,3 @@ metadata:
   name: debug
   labels:
     app: "camel-k"
-spec:
-  traits:
-    logging:
-      level: DEBUG
