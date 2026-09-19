@@ -58,7 +58,6 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/controller"
-	"github.com/apache/camel-k/v2/pkg/controller/synthetic"
 	"github.com/apache/camel-k/v2/pkg/install"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util"
@@ -240,12 +239,6 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	defer installCancel()
 	install.OperatorStartupOptionalTools(installCtx, bootstrapClient, log)
 
-	synthEnvVal, synth := os.LookupEnv("CAMEL_K_SYNTHETIC_INTEGRATIONS")
-	if synth && synthEnvVal == "true" {
-		log.Info("Starting the synthetic Integration manager. " +
-			"WARNING: this is a deprecated feature and will be removed in future versions, use Camel Dashboard project instead.")
-		exitOnError(synthetic.ManageSyntheticIntegrations(ctx, ctrlClient, mgr.GetCache()), "synthetic Integration manager error")
-	}
 	log.Info("Starting the manager")
 	exitOnError(mgr.Start(ctx), "manager exited non-zero")
 }
