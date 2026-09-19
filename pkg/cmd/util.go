@@ -43,18 +43,6 @@ const (
 	offlineCommandLabel = "camel.apache.org/cmd.offline"
 )
 
-// DeleteIntegration --.
-func DeleteIntegration(ctx context.Context, c client.Client, name string, namespace string) error {
-	integration := v1.Integration{
-		Kind:       v1.IntegrationKind,
-		APIVersion: v1.SchemeGroupVersion.String(),
-		Namespace:  namespace,
-		Name:       name,
-	}
-
-	return c.Delete(ctx, &integration)
-}
-
 func bindPFlagsHierarchy(cmd *cobra.Command, v *viper.Viper) error {
 	for _, c := range cmd.Commands() {
 		if err := bindPFlags(c, v); err != nil {

@@ -105,8 +105,6 @@ func TestRunNoFlag(t *testing.T) {
 	// Check default expected values
 	assert.False(t, runCmdOptions.Wait)
 	assert.False(t, runCmdOptions.Logs)
-	assert.False(t, runCmdOptions.Sync)
-	assert.False(t, runCmdOptions.Dev)
 	assert.True(t, runCmdOptions.UseFlows)
 	assert.False(t, runCmdOptions.Compression)
 	assert.False(t, runCmdOptions.Save)
@@ -137,23 +135,6 @@ func TestRunDependencyFlag(t *testing.T) {
 	assert.Equal(t, "dependency1", runCmdOptions.Dependencies[0])
 	assert.Equal(t, "dependency2", runCmdOptions.Dependencies[1])
 	assert.Equal(t, "dependency3", runCmdOptions.Dependencies[2])
-}
-
-func TestRunDevFlag(t *testing.T) {
-	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := ExecuteCommand(rootCmd, cmdRun, "--dev", integrationSource)
-	require.NoError(t, err)
-	assert.True(t, runCmdOptions.Dev)
-}
-
-func TestRunDevModeOutputFlag(t *testing.T) {
-	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := ExecuteCommand(rootCmd, cmdRun, "--dev", "-o", "yaml", integrationSource)
-	assert.True(t, runCmdOptions.Dev)
-	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
-	require.Error(t, err)
-	assert.Equal(t, "cannot use --dev with -o/--output option",
-		err.Error())
 }
 
 func TestRunEnvFlag(t *testing.T) {
@@ -380,13 +361,6 @@ func TestRunSourceFlag(t *testing.T) {
 	require.NoError(t, err)
 	assert.Len(t, runCmdOptions.Sources, 1)
 	assert.Equal(t, "source1", runCmdOptions.Sources[0])
-}
-
-func TestRunSyncFlag(t *testing.T) {
-	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := ExecuteCommand(rootCmd, cmdRun, "--sync", integrationSource)
-	require.NoError(t, err)
-	assert.True(t, runCmdOptions.Sync)
 }
 
 func TestRunExistingTraitFlag(t *testing.T) {
