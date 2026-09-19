@@ -105,6 +105,7 @@ func verifyResourceRBAC(ctx BindingContext, e v1.Endpoint) error {
 		e.Ref.GroupVersionKind().Group,
 		resources,
 		e.Ref.Namespace,
+		e.Ref.Name,
 		"get",
 	)
 

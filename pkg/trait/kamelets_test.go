@@ -850,6 +850,29 @@ func TestKameletMultiNamespace(t *testing.T) {
 		"Kamelets [extra,timer] found in cluster")
 }
 
+func TestKameletMultiNamespaceDeniedResource(t *testing.T) {
+	flow := `
+- from:
+    uri: kamelet:timer
+    steps:
+    - to: kamelet:extra?kameletNamespace=ns1
+    - to: kamelet:restricted-kamelet?kameletNamespace=ns1
+`
+	trait, environment := createKameletsTestEnvironment(flow)
+	environment.Integration.Namespace = "default"
+	environment.Integration.Spec.ServiceAccountName = "cross-ns-sa"
+
+	enabled, condition, err := trait.Configure(environment)
+	require.NoError(t, err)
+	assert.True(t, enabled)
+	assert.Nil(t, condition)
+
+	err = trait.Apply(environment)
+	require.Error(t, err)
+	assert.Equal(t, "cross-namespace Integration reference authorization denied for the ServiceAccount cross-ns-sa "+
+		"and resources kamelets", err.Error())
+}
+
 func TestKameletMultiNamespaceMissing(t *testing.T) {
 	flow := `
 - from:
