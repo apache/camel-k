@@ -11,7 +11,7 @@ from("imap://admin@myserver.com")
 
 Since the integration has a endpoint starting with the **"imap:" prefix**, Camel K is able to **automatically add the "camel-mail" component** to the list of required dependencies. The `seda:` endpoint belongs to `camel-core` that is automatically added to all integrations, so Camel K will not add additional dependencies for it. This dependency resolution mechanism is transparent to the user, that will just see the integration running.
 
-Automatic resolution is also a nice feature in _dev mode_, because you are allowed to add all components you need *without exiting the dev loop*.
+Automatic resolution is also a nice feature while you iterate on an integration, because you are allowed to add all components you need *without editing the list of dependencies by hand*.
 
 NOTE: Camel K won't be able to resolve automatically the dependencies when your routes specify dynamic URIs.
 
