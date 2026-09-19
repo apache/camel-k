@@ -75,10 +75,6 @@ func (t *camelTrait) Matches(trait Trait) bool {
 }
 
 func (t *camelTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
-	if e.Integration != nil && e.Integration.IsSynthetic() {
-		return false, NewIntegrationConditionPlatformDisabledWithMessage("Camel", "synthetic integration"), nil
-	}
-
 	if t.RuntimeProvider == "" {
 		t.runtimeProvider = determineRuntimeProvider(e)
 	} else {
@@ -91,9 +87,7 @@ func (t *camelTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	}
 
 	var cond *TraitCondition
-	//nolint: staticcheck
-	if (e.Integration != nil && (!e.Integration.IsManagedBuild() || e.Integration.IsGitBuild())) ||
-		(e.IntegrationKit != nil && e.IntegrationKit.IsSynthetic()) {
+	if e.Integration != nil && (!e.Integration.IsManagedBuild() || e.Integration.IsGitBuild()) {
 		// We set a condition to warn the user the catalog used to run the Integration
 		// may differ from the runtime version which we don't control
 		cond = NewIntegrationCondition(
@@ -133,11 +127,8 @@ func (t *camelTrait) Apply(e *Environment) error {
 		}
 	}
 	if e.IntegrationKit != nil {
-		//nolint: staticcheck
-		if !e.IntegrationKit.IsSynthetic() {
-			e.IntegrationKit.Status.RuntimeVersion = t.runtimeVersion
-			e.IntegrationKit.Status.RuntimeProvider = t.runtimeProvider
-		}
+		e.IntegrationKit.Status.RuntimeVersion = t.runtimeVersion
+		e.IntegrationKit.Status.RuntimeProvider = t.runtimeProvider
 		e.IntegrationKit.Status.Catalog = &v1.Catalog{
 			Version:  e.CamelCatalog.Runtime.Version,
 			Provider: e.CamelCatalog.Runtime.Provider,

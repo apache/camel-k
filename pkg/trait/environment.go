@@ -67,9 +67,6 @@ func (t *environmentTrait) Configure(e *Environment) (bool, *TraitCondition, err
 	if e.Integration == nil {
 		return false, nil, nil
 	}
-	if e.Integration.IsSynthetic() {
-		return false, NewIntegrationConditionPlatformDisabledWithMessage("Environment", "synthetic integration"), nil
-	}
 
 	return e.IntegrationInRunningPhases(), nil, nil
 }
