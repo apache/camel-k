@@ -615,7 +615,7 @@ func templateOrFail(template map[string]interface{}) *v1.Template {
 	return &t
 }
 
-func TestKameletSyntheticKitConditionTrue(t *testing.T) {
+func TestKameletWithoutCatalogConditionTrue(t *testing.T) {
 	trait, environment := createKameletsTestEnvironment(
 		"",
 		&v1.Kamelet{
@@ -660,7 +660,7 @@ func TestKameletSyntheticKitConditionTrue(t *testing.T) {
 	assert.Contains(t, kameletsBundle.Data, "timer-source.kamelet.yaml", "uri: timer:tick")
 }
 
-func TestKameletSyntheticKitAutoConditionFalse(t *testing.T) {
+func TestKameletWithoutCatalogAutoConditionFalse(t *testing.T) {
 	trait, environment := createKameletsTestEnvironment(
 		"",
 		&v1.Kamelet{

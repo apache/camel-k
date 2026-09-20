@@ -270,10 +270,10 @@ func createNominalHealthTrait(t *testing.T) (*healthTrait, *Environment) {
 	return trait, environment
 }
 
-func TestApplyHealthTraitSyntheticKit(t *testing.T) {
+func TestApplyHealthTraitWithoutCatalog(t *testing.T) {
 	enabled := true
 	ht, environment := createNominalHealthTrait(t)
-	// Simulate a synthetic Kit which has not catalog attached
+	// Simulate a Kit which has no catalog attached
 	environment.CamelCatalog = nil
 	ht.Enabled = ptr.To(true)
 	ht.LivenessProbeEnabled = &enabled

@@ -1268,7 +1268,7 @@ func NewFakeEnvironment(t *testing.T, source v1.SourceSpec) Environment {
 	return environment
 }
 
-func NewFakeEnvironmentForSyntheticKit(t *testing.T) Environment {
+func NewFakeEnvironmentForKitWithoutCatalog(t *testing.T) Environment {
 	t.Helper()
 	client, _ := newFakeClient("ns")
 	traitCatalog := NewCatalog(nil)
@@ -1513,16 +1513,16 @@ func fromCamelProperties(appProps map[string]string) (*knativeapi.CamelEnvironme
 	return &env, nil
 }
 
-func TestKnativeSyntheticKitDefault(t *testing.T) {
-	e := NewFakeEnvironmentForSyntheticKit(t)
+func TestKnativeKitWithoutCatalogDefault(t *testing.T) {
+	e := NewFakeEnvironmentForKitWithoutCatalog(t)
 	knTrait, _ := newKnativeTrait().(*knativeTrait)
 	ok, _, err := knTrait.Configure(&e)
 	require.NoError(t, err)
 	assert.False(t, ok)
 }
 
-func TestKnativeSyntheticKitEnabled(t *testing.T) {
-	e := NewFakeEnvironmentForSyntheticKit(t)
+func TestKnativeKitWithoutCatalogEnabled(t *testing.T) {
+	e := NewFakeEnvironmentForKitWithoutCatalog(t)
 	knTrait, _ := newKnativeTrait().(*knativeTrait)
 	knTrait.Enabled = ptr.To(true)
 	ok, _, err := knTrait.Configure(&e)
