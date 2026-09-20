@@ -160,6 +160,7 @@ const (
 	IntegrationKitTypeUser = "user"
 	// IntegrationKitTypeExternal identifies a Kit created by any third party.
 	IntegrationKitTypeExternal = "external"
+
 	// IntegrationKitLayoutLabel labels the kit layout.
 	IntegrationKitLayoutLabel = "camel.apache.org/kit.layout"
 
