@@ -660,7 +660,7 @@ func TestKameletWithoutCatalogConditionTrue(t *testing.T) {
 	assert.Contains(t, kameletsBundle.Data, "timer-source.kamelet.yaml", "uri: timer:tick")
 }
 
-func TestKameletWithoutCatalogAutoConditionFalse(t *testing.T) {
+func TestKameletNoSourcesAutoConditionFalse(t *testing.T) {
 	trait, environment := createKameletsTestEnvironment(
 		"",
 		&v1.Kamelet{
