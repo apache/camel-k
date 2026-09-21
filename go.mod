@@ -14,7 +14,7 @@ require (
 	github.com/google/go-github/v72 v72.0.0
 	github.com/google/uuid v1.6.0
 	github.com/jpillora/backoff v1.0.0
-	github.com/magiconair/properties v1.18.11
+	github.com/magiconair/properties v1.18.12
 	github.com/mattn/go-shellwords v1.0.15
 	github.com/onsi/gomega v1.43.0
 	// go get github.com/openshift/api@release-4.21
