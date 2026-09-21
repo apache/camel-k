@@ -57,8 +57,8 @@ type ContainerTrait struct {
 	ServicePortName string `json:"servicePortName,omitempty" property:"service-port-name"`
 	// The main container name. It's named `integration` by default.
 	Name string `json:"name,omitempty" property:"name"`
-	// The main container image to use for the Integration. When using this parameter the operator will create an IntegrationKit which
-	// won't be able to execute traits requiring CamelCatalog. If the container image you're using is coming from an IntegrationKit, use instead
+	// The main container image to use for the Integration. When using this parameter, any trait requiring a
+	// CamelCatalog won't be able to execute. If the container image you're using is coming from an IntegrationKit, use instead
 	// Integration `.spec.integrationKit` parameter. If you're moving the Integration across environments, you will also need to create an "external" IntegrationKit.
 	Image string `json:"image,omitempty" property:"image"`
 	// The pull policy: Always|Never|IfNotPresent
