@@ -40,24 +40,21 @@ superpowers.
 //
 //nolint:containedctx
 type RootCmdOptions struct {
-	RootContext   context.Context    `mapstructure:"-"`
-	Context       context.Context    `mapstructure:"-"`
-	ContextCancel context.CancelFunc `mapstructure:"-"`
-	_client       client.Client      `mapstructure:"-"`
-	Flags         *viper.Viper       `mapstructure:"-"`
-	KubeConfig    string             `mapstructure:"kube-config"`
-	Namespace     string             `mapstructure:"namespace"`
-	Verbose       bool               `mapstructure:"verbose"     yaml:",omitempty"`
+	RootContext context.Context `mapstructure:"-"`
+	Context     context.Context `mapstructure:"-"`
+	_client     client.Client   `mapstructure:"-"`
+	Flags       *viper.Viper    `mapstructure:"-"`
+	KubeConfig  string          `mapstructure:"kube-config"`
+	Namespace   string          `mapstructure:"namespace"`
+	Verbose     bool            `mapstructure:"verbose"     yaml:",omitempty"`
 }
 
 // NewKamelCommand --.
 func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
-	childCtx, childCancel := context.WithCancel(ctx)
 	options := RootCmdOptions{
-		RootContext:   ctx,
-		Context:       childCtx,
-		ContextCancel: childCancel,
-		Flags:         viper.New(),
+		RootContext: ctx,
+		Context:     ctx,
+		Flags:       viper.New(),
 	}
 
 	cmd := kamelPreAddCommandInit(&options)
