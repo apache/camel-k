@@ -124,8 +124,8 @@ type runCmdOptions struct {
 	Compression bool `mapstructure:"compression" yaml:",omitempty"`
 	Wait        bool `mapstructure:"wait"        yaml:",omitempty"`
 	Logs        bool `mapstructure:"logs"        yaml:",omitempty"`
-	UseFlows    bool `mapstructure:"use-flows" yaml:",omitempty"`
-	Save        bool `kamel:"omitsave"         mapstructure:"save" yaml:",omitempty"`
+	UseFlows    bool `mapstructure:"use-flows"   yaml:",omitempty"`
+	Save        bool `kamel:"omitsave"           mapstructure:"save" yaml:",omitempty"`
 	// Deprecated: won't be supported in the future
 	IntegrationKit     string `mapstructure:"kit"                 yaml:",omitempty"`
 	IntegrationName    string `mapstructure:"name"                yaml:",omitempty"`
