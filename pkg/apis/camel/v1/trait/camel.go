@@ -34,4 +34,7 @@ type CamelTrait struct {
 	RuntimeVersion string `json:"runtimeVersion,omitempty" property:"runtime-version"`
 	// A list of properties to be provided to the Integration runtime
 	Properties []string `json:"properties,omitempty" property:"properties"`
+
+	// Whether to skip the default Camel Observability Services dependency
+	SkipObservabilityServices *bool `json:"skipObservabilityServices,omitempty" property:"skip-observability-services"`
 }

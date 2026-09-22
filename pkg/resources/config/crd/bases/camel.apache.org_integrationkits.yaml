@@ -386,6 +386,10 @@ spec:
                           You can use a fixed version (for example "3.2.3") or a semantic version (for example "3.x") which will try to resolve
                           to the best matching Catalog existing on the cluster (Default, the one provided by the operator version).
                         type: string
+                      skipObservabilityServices:
+                        description: Whether to skip the default Camel Observability
+                          Services dependency
+                        type: boolean
                     type: object
                   quarkus:
                     description: |-

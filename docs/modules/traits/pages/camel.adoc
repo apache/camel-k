@@ -43,6 +43,10 @@ to the best matching Catalog existing on the cluster (Default, the one provided 
 | []string
 | A list of properties to be provided to the Integration runtime
 
+| camel.skipObservabilityServices
+| bool
+| Whether to skip the default Camel Observability Services dependency
+
 |===
 
 NOTE: the variable names are "snake case" if you're using in `kamel` CLI, for example `trait.myParam` has to be translated as `-t trait.my-param`

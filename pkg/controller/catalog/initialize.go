@@ -110,7 +110,7 @@ func (action *initializeAction) addPlainQuarkusCatalog(ctx context.Context, cata
 			// opinionated set of observability services
 			{
 				GroupID:    v1.MavenQuarkusGroupID,
-				ArtifactID: "camel-quarkus-observability-services",
+				ArtifactID: v1.CamelQuarkusObservabilityServicesArtifactID,
 			},
 		}
 		if clonedCatalog.Spec.Runtime.Capabilities != nil {

@@ -24,6 +24,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/sets"
+	"k8s.io/utils/ptr"
 )
 
 const (
@@ -50,6 +51,16 @@ func (t *dependenciesTrait) Configure(e *Environment) (bool, *TraitCondition, er
 	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization), nil, nil
 }
 
+func (t *dependenciesTrait) isSkipObservabilityServices(e *Environment) bool {
+	if ct := e.Catalog.GetTrait(camelTraitID); ct != nil {
+		if camel, ok := ct.(*camelTrait); ok {
+			return ptr.Deref(camel.SkipObservabilityServices, false)
+		}
+	}
+
+	return false
+}
+
 func (t *dependenciesTrait) Apply(e *Environment) error {
 	if e.Integration.Status.Dependencies == nil {
 		e.Integration.Status.Dependencies = make([]string, 0)
@@ -64,8 +75,15 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 		dependencies.Add(e.Integration.Spec.Dependencies...)
 	}
 
+	skipObservabilityServices := t.isSkipObservabilityServices(e)
+
 	// Add runtime specific dependencies
 	for _, d := range e.CamelCatalog.Runtime.Dependencies {
+		if skipObservabilityServices &&
+			d.GroupID == v1.MavenQuarkusGroupID &&
+			d.ArtifactID == v1.CamelQuarkusObservabilityServicesArtifactID {
+			continue
+		}
 		dependencies.Add(d.GetDependencyID())
 	}
 
