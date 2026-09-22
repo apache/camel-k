@@ -234,8 +234,8 @@ func (t *kameletsTrait) calculateNamespaces(e *Environment, defaultNamespaces ..
 			return nil, err
 		}
 		if !ok {
-			return nil, fmt.Errorf("cross-namespace Integration reference authorization denied for the ServiceAccount %s and resources kamelets",
-				e.Integration.Spec.ServiceAccountName)
+			return nil, fmt.Errorf("cross-namespace Integration reference authorization denied for the ServiceAccount %s and Kamelet %s in namespace %s",
+				e.Integration.Spec.ServiceAccountName, getKameletKey(kml), ns)
 		}
 	}
 

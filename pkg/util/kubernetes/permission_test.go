@@ -19,10 +19,13 @@ package kubernetes
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	authorizationv1 "k8s.io/api/authorization/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes/fake"
 	k8stesting "k8s.io/client-go/testing"
 
@@ -59,5 +62,38 @@ func TestCheckServiceAccountPermissionByResourceName(t *testing.T) {
 		"camel.apache.org", "kamelets", "target", "denied-kamelet", "get",
 	)
 	require.NoError(t, err)
+	require.False(t, allowed)
+}
+
+func TestCheckServiceAccountPermissionForbidden(t *testing.T) {
+	client := fake.NewSimpleClientset()
+	client.PrependReactor("create", "subjectaccessreviews", func(k8stesting.Action) (bool, runtime.Object, error) {
+		return true, nil, apierrors.NewForbidden(
+			schema.GroupResource{Group: "authorization.k8s.io", Resource: "subjectaccessreviews"},
+			"",
+			errors.New("forbidden"),
+		)
+	})
+
+	allowed, err := CheckServiceAccountPermission(
+		context.Background(), client, "system:serviceaccount:source:integration",
+		"camel.apache.org", "kamelets", "target", "denied-kamelet", "get",
+	)
+	require.NoError(t, err)
+	require.False(t, allowed)
+}
+
+func TestCheckServiceAccountPermissionError(t *testing.T) {
+	expected := errors.New("subject access review failed")
+	client := fake.NewSimpleClientset()
+	client.PrependReactor("create", "subjectaccessreviews", func(k8stesting.Action) (bool, runtime.Object, error) {
+		return true, nil, expected
+	})
+
+	allowed, err := CheckServiceAccountPermission(
+		context.Background(), client, "system:serviceaccount:source:integration",
+		"camel.apache.org", "kamelets", "target", "denied-kamelet", "get",
+	)
+	require.ErrorIs(t, err, expected)
 	require.False(t, allowed)
 }
