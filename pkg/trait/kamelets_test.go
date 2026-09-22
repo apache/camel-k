@@ -18,11 +18,14 @@ limitations under the License.
 package trait
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	camelclient "github.com/apache/camel-k/v2/pkg/client"
 
 	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
@@ -32,8 +35,20 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	kubernetesfake "k8s.io/client-go/kubernetes/fake"
+	authorizationclientv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
+	k8stesting "k8s.io/client-go/testing"
 	"k8s.io/utils/ptr"
 )
+
+type authorizationClient struct {
+	camelclient.Client
+	authorization authorizationclientv1.AuthorizationV1Interface
+}
+
+func (c *authorizationClient) AuthorizationV1() authorizationclientv1.AuthorizationV1Interface {
+	return c.authorization
+}
 
 func TestConfigurationNoKameletsUsed(t *testing.T) {
 	trait, environment := createKameletsTestEnvironment(`
@@ -772,12 +787,26 @@ func TestKameletNamespaceParameter(t *testing.T) {
 
 func TestCalculateKameletNamespaces(t *testing.T) {
 	namespaces, err := calculateNamespaces(
-		[]string{"my-kamelet", "my-kamelet?kameletNamespace=ns1", "my-kamelet?kameletVersion=v2&kameletNamespace=ns2"},
+		[]string{
+			"my-kamelet",
+			"my-kamelet?kameletNamespace=ns1",
+			"another-kamelet?kameletNamespace=ns1",
+			"my-kamelet?kameletVersion=v2&kameletNamespace=ns2",
+		},
 	)
 	require.NoError(t, err)
 	assert.Len(t, namespaces, 2)
 	assert.Contains(t, namespaces, "ns1")
 	assert.Contains(t, namespaces, "ns2")
+}
+
+func TestCalculateKameletNamespacesInvalidReference(t *testing.T) {
+	trait, environment := createKameletsTestEnvironment("")
+	trait.List = "invalid%reference?kameletNamespace=ns1"
+
+	namespaces, err := trait.calculateNamespaces(environment)
+	require.ErrorContains(t, err, "could not parse kamelet namespace")
+	assert.Nil(t, namespaces)
 }
 
 func TestKameletMultiNamespace(t *testing.T) {
@@ -835,7 +864,7 @@ func TestKameletMultiNamespace(t *testing.T) {
 	err = trait.Apply(environment)
 	require.Error(t, err)
 	assert.Equal(t, "cross-namespace Integration reference authorization denied for the ServiceAccount unauth-sa "+
-		"and resources kamelets", err.Error())
+		"and Kamelet extra in namespace ns1", err.Error())
 	// Now we should good to go
 	environment.Integration.Namespace = "default"
 	environment.Integration.Spec.ServiceAccountName = "cross-ns-sa"
@@ -870,7 +899,38 @@ func TestKameletMultiNamespaceDeniedResource(t *testing.T) {
 	err = trait.Apply(environment)
 	require.Error(t, err)
 	assert.Equal(t, "cross-namespace Integration reference authorization denied for the ServiceAccount cross-ns-sa "+
-		"and resources kamelets", err.Error())
+		"and Kamelet restricted-kamelet in namespace ns1", err.Error())
+}
+
+func TestKameletMultiNamespacePermissionCheckError(t *testing.T) {
+	flow := `
+- from:
+    uri: kamelet:timer
+    steps:
+    - to: kamelet:extra?kameletNamespace=ns1
+`
+	trait, environment := createKameletsTestEnvironment(flow)
+	environment.Ctx = context.Background()
+	environment.Integration.Namespace = "default"
+	environment.Integration.Spec.ServiceAccountName = "cross-ns-sa"
+
+	authorizationError := errors.New("subject access review failed")
+	client := kubernetesfake.NewSimpleClientset()
+	client.PrependReactor("create", "subjectaccessreviews", func(k8stesting.Action) (bool, runtime.Object, error) {
+		return true, nil, authorizationError
+	})
+	environment.Client = &authorizationClient{
+		Client:        environment.Client,
+		authorization: client.AuthorizationV1(),
+	}
+
+	enabled, condition, err := trait.Configure(environment)
+	require.NoError(t, err)
+	assert.True(t, enabled)
+	assert.Nil(t, condition)
+
+	err = trait.Apply(environment)
+	require.ErrorIs(t, err, authorizationError)
 }
 
 func TestKameletMultiNamespaceMissing(t *testing.T) {
