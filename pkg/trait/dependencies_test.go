@@ -25,6 +25,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"k8s.io/utils/ptr"
 )
 
 func TestDependenciesTraitApplicability(t *testing.T) {
@@ -394,4 +395,82 @@ func TestIntegrationProfileDependency(t *testing.T) {
 			"profileDependency2",
 		},
 	)
+}
+
+func TestDependenciesTraitSkipObservabilityServices(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+	catalog.Runtime.Dependencies = []v1.MavenArtifact{
+		{
+			GroupID:    v1.MavenQuarkusGroupID,
+			ArtifactID: "camel-quarkus-core",
+		},
+		{
+			GroupID:    v1.MavenQuarkusGroupID,
+			ArtifactID: v1.CamelQuarkusObservabilityServicesArtifactID,
+		},
+	}
+
+	e := &Environment{
+		Catalog:      NewEnvironmentTestCatalog(),
+		CamelCatalog: catalog,
+		Integration: &v1.Integration{
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseInitialization,
+			},
+		},
+	}
+
+	camelTrait, ok := e.Catalog.GetTrait(camelTraitID).(*camelTrait)
+	require.True(t, ok)
+	camelTrait.SkipObservabilityServices = ptr.To(true)
+
+	trait := newDependenciesTrait()
+	enabled, condition, err := trait.Configure(e)
+	require.NoError(t, err)
+	assert.Nil(t, condition)
+	assert.True(t, enabled)
+
+	err = trait.Apply(e)
+	require.NoError(t, err)
+
+	assert.Contains(t, e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-core")
+	assert.NotContains(t, e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-observability-services")
+}
+
+func TestDependenciesTraitObservabilityServicesDefault(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+	catalog.Runtime.Dependencies = []v1.MavenArtifact{
+		{
+			GroupID:    v1.MavenQuarkusGroupID,
+			ArtifactID: "camel-quarkus-core",
+		},
+		{
+			GroupID:    v1.MavenQuarkusGroupID,
+			ArtifactID: v1.CamelQuarkusObservabilityServicesArtifactID,
+		},
+	}
+
+	e := &Environment{
+		Catalog:      NewEnvironmentTestCatalog(),
+		CamelCatalog: catalog,
+		Integration: &v1.Integration{
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseInitialization,
+			},
+		},
+	}
+
+	trait := newDependenciesTrait()
+	enabled, condition, err := trait.Configure(e)
+	require.NoError(t, err)
+	assert.Nil(t, condition)
+	assert.True(t, enabled)
+
+	err = trait.Apply(e)
+	require.NoError(t, err)
+
+	assert.Contains(t, e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-core")
+	assert.Contains(t, e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-observability-services")
 }

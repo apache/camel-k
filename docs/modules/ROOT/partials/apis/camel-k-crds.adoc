@@ -6830,6 +6830,13 @@ to the best matching Catalog existing on the cluster (Default, the one provided 
 
 A list of properties to be provided to the Integration runtime
 
+|`skipObservabilityServices` +
+bool
+|
+
+
+Whether to skip the default Camel Observability Services dependency
+
 
 |===
 
