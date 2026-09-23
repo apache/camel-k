@@ -332,6 +332,14 @@ test-kafka: gotestfmt-install
 	exit $${FAILED}
 
 #
+# ArkMQ tests that require the presence of ArkMQ operator configuration
+#
+test-arkmq: gotestfmt-install
+	FAILED=0; \
+	go test -timeout 20m -v ./e2e/arkmq -tags=integration $(GOTESTFMT) || ((FAILED++)); \
+	exit $${FAILED}
+
+#
 # Telemetry tests that require the configuration of telemetry endpoints
 #
 test-telemetry: gotestfmt-install
