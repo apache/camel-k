@@ -22,12 +22,11 @@ import (
 
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	arkmqv1beta1 "github.com/apache/camel-k/v2/pkg/apis/duck/arkmq/v1beta1"
-	"github.com/apache/camel-k/v2/pkg/client/arkmq/clientset/internalclientset"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/uri"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func init() {
@@ -41,9 +40,7 @@ type camelArkMQ struct {
 }
 
 // ArkMQBindingProvider allows connecting to an ArkMQ queue via Binding.
-type ArkMQBindingProvider struct {
-	Client internalclientset.Interface
-}
+type ArkMQBindingProvider struct{}
 
 func (a ArkMQBindingProvider) ID() string {
 	return "arkmq"
@@ -195,17 +192,8 @@ func (a ArkMQBindingProvider) lookupBrokerURL(ctx BindingContext, address *arkmq
 }
 
 func (a ArkMQBindingProvider) fallbackBrokerName(ctx BindingContext, namespace, addressName string) (string, error) {
-	client := a.Client
-	if client == nil {
-		arkmqClient, err := internalclientset.NewForConfig(ctx.Client.GetConfig())
-		if err != nil {
-			return "", err
-		}
-		client = arkmqClient
-	}
-
-	brokers, err := client.BrokerV1beta1().ActiveMQArtemises(namespace).List(ctx.Ctx, v1.ListOptions{})
-	if err != nil {
+	var brokers arkmqv1beta1.ActiveMQArtemisList
+	if err := ctx.Client.List(ctx.Ctx, &brokers, ctrl.InNamespace(namespace)); err != nil {
 		return "", err
 	}
 	if len(brokers.Items) == 0 {
@@ -220,17 +208,12 @@ func (a ArkMQBindingProvider) fallbackBrokerName(ctx BindingContext, namespace, 
 }
 
 func (a ArkMQBindingProvider) getBrokerURL(ctx BindingContext, clusterName, namespace string) (string, error) {
-	client := a.Client
-	if client == nil {
-		arkmqClient, err := internalclientset.NewForConfig(ctx.Client.GetConfig())
-		if err != nil {
-			return "", err
-		}
-		client = arkmqClient
+	var broker arkmqv1beta1.ActiveMQArtemis
+	key := ctrl.ObjectKey{
+		Namespace: namespace,
+		Name:      clusterName,
 	}
-
-	broker, err := client.BrokerV1beta1().ActiveMQArtemises(namespace).Get(ctx.Ctx, clusterName, v1.GetOptions{})
-	if err != nil {
+	if err := ctx.Client.Get(ctx.Ctx, key, &broker); err != nil {
 		return "", err
 	}
 
@@ -245,67 +228,56 @@ func (a ArkMQBindingProvider) getBrokerURL(ctx BindingContext, clusterName, name
 	}
 
 	svcName := fmt.Sprintf("%s-hdls-svc", clusterName)
-	if ctx.Client != nil {
-		svc, err := kubernetes.LookupService(ctx.Ctx, ctx.Client, namespace, svcName)
+	svc, err := kubernetes.LookupService(ctx.Ctx, ctx.Client, namespace, svcName)
+	if err != nil {
+		return "", err
+	}
+	if svc == nil {
+		svc, err = kubernetes.LookupService(ctx.Ctx, ctx.Client, namespace, clusterName)
 		if err != nil {
 			return "", err
 		}
-		if svc == nil {
-			svc, err = kubernetes.LookupService(ctx.Ctx, ctx.Client, namespace, clusterName)
-			if err != nil {
-				return "", err
-			}
-		}
-		if svc == nil {
-			return "", fmt.Errorf("could not find service %s in namespace %s for ArkMQ broker %s", svcName, namespace, clusterName)
-		}
-
-		for _, p := range svc.Spec.Ports {
-			if p.Name == "core" || p.Name == "all" || p.Name == "openwire" || p.Port == 61616 {
-				port = p.Port
-				break
-			}
-		}
-
-		if svc.Namespace != "" {
-			return fmt.Sprintf("tcp://%s.%s.svc:%d", svc.Name, svc.Namespace, port), nil
-		}
-		return fmt.Sprintf("tcp://%s:%d", svc.Name, port), nil
+	}
+	if svc == nil {
+		return "", fmt.Errorf("could not find service %s in namespace %s for ArkMQ broker %s", svcName, namespace, clusterName)
 	}
 
-	if namespace != "" {
-		return fmt.Sprintf("tcp://%s.%s.svc:%d", svcName, namespace, port), nil
+	for _, p := range svc.Spec.Ports {
+		if p.Name == "core" || p.Name == "all" || p.Name == "openwire" || p.Port == 61616 {
+			port = p.Port
+			break
+		}
 	}
-	return fmt.Sprintf("tcp://%s:%d", svcName, port), nil
+
+	if svc.Namespace != "" {
+		return fmt.Sprintf("tcp://%s.%s.svc:%d", svc.Name, svc.Namespace, port), nil
+	}
+	return fmt.Sprintf("tcp://%s:%d", svc.Name, port), nil
 }
 
 func (a ArkMQBindingProvider) lookupAddress(ctx BindingContext, endpoint camelv1.Endpoint) (*arkmqv1beta1.ActiveMQArtemisAddress, error) {
-	client := a.Client
-	if client == nil {
-		arkmqClient, err := internalclientset.NewForConfig(ctx.Client.GetConfig())
-		if err != nil {
-			return nil, err
-		}
-		client = arkmqClient
-	}
-
 	namespace := endpoint.Ref.Namespace
 	if namespace == "" {
 		namespace = ctx.Namespace
 	}
 
+	var address arkmqv1beta1.ActiveMQArtemisAddress
+	key := ctrl.ObjectKey{
+		Namespace: namespace,
+		Name:      endpoint.Ref.Name,
+	}
 	// first check by ActiveMQArtemisAddress name
-	address, err := client.BrokerV1beta1().ActiveMQArtemisAddresses(namespace).Get(ctx.Ctx, endpoint.Ref.Name, v1.GetOptions{})
+	err := ctx.Client.Get(ctx.Ctx, key, &address)
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return nil, err
 	}
 	if err == nil {
-		return address, nil
+		return &address, nil
 	}
 
 	// if not found, then look at spec.queueName or spec.addressName
-	addresses, err := client.BrokerV1beta1().ActiveMQArtemisAddresses(namespace).List(ctx.Ctx, v1.ListOptions{})
-	if err != nil {
+	var addresses arkmqv1beta1.ActiveMQArtemisAddressList
+	if err := ctx.Client.List(ctx.Ctx, &addresses, ctrl.InNamespace(namespace)); err != nil {
 		return nil, fmt.Errorf("couldn't find any ActiveMQArtemisAddress with either name, queueName or addressName %s; error %w", endpoint.Ref.Name, err)
 	}
 	for i := range addresses.Items {
