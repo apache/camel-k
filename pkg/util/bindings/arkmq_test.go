@@ -223,6 +223,91 @@ func TestArkMQLookupAddressByName(t *testing.T) {
 	assert.Equal(t, "jms:queue:events-queue?brokerURL=tcp%3A%2F%2Fmybroker-hdls-svc.test.svc%3A61616", binding.URI)
 }
 
+func TestArkMQBrokerDirect(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	broker := &arkmqv1beta1.ActiveMQArtemis{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "mybroker",
+		},
+		Status: arkmqv1beta1.ActiveMQArtemisStatus{
+			PortStatus: []arkmqv1beta1.ActiveMQArtemisPortStatus{
+				{
+					Name: "core",
+					Port: 61616,
+				},
+			},
+		},
+	}
+
+	client, err := internal.NewFakeClient()
+	require.NoError(t, err)
+
+	bindingContext := BindingContext{
+		Ctx:       ctx,
+		Client:    client,
+		Namespace: "test",
+		Profile:   camelv1.TraitProfileKubernetes,
+	}
+
+	// 1. With "destination" property
+	endpoint := camelv1.Endpoint{
+		Ref: &corev1.ObjectReference{
+			Kind:       "ActiveMQArtemis",
+			Name:       "mybroker",
+			APIVersion: "broker.amq.io/v1beta1",
+		},
+		Properties: asEndpointProperties(map[string]string{
+			"destination": "orders",
+		}),
+	}
+
+	provider := ArkMQBindingProvider{
+		Client: fake.NewSimpleClientset(broker),
+	}
+
+	binding, err := provider.Translate(bindingContext, EndpointContext{
+		Type: camelv1.EndpointTypeSink,
+	}, endpoint)
+	require.NoError(t, err)
+	assert.NotNil(t, binding)
+	assert.Equal(t, "jms:queue:orders?brokerURL=tcp%3A%2F%2Fmybroker-hdls-svc.test.svc%3A61616", binding.URI)
+
+	// 2. With "queue" property fallback
+	endpointQueue := camelv1.Endpoint{
+		Ref: &corev1.ObjectReference{
+			Kind:       "ActiveMQArtemis",
+			Name:       "mybroker",
+			APIVersion: "broker.amq.io/v1beta1",
+		},
+		Properties: asEndpointProperties(map[string]string{
+			"queue": "invoices",
+		}),
+	}
+	binding, err = provider.Translate(bindingContext, EndpointContext{
+		Type: camelv1.EndpointTypeSink,
+	}, endpointQueue)
+	require.NoError(t, err)
+	assert.NotNil(t, binding)
+	assert.Equal(t, "jms:queue:invoices?brokerURL=tcp%3A%2F%2Fmybroker-hdls-svc.test.svc%3A61616", binding.URI)
+
+	// 3. Missing destination/queue property returns error
+	endpointMissing := camelv1.Endpoint{
+		Ref: &corev1.ObjectReference{
+			Kind:       "ActiveMQArtemis",
+			Name:       "mybroker",
+			APIVersion: "broker.amq.io/v1beta1",
+		},
+	}
+	_, err = provider.Translate(bindingContext, EndpointContext{
+		Type: camelv1.EndpointTypeSink,
+	}, endpointMissing)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "missing destination or queue property")
+}
+
 func TestArkMQUnsupportedKind(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -237,7 +322,7 @@ func TestArkMQUnsupportedKind(t *testing.T) {
 		Profile:   camelv1.TraitProfileKubernetes,
 	}
 
-	for _, kind := range []string{"ActiveMQArtemisQueue", "ActiveMQArtemis", "UnknownKind"} {
+	for _, kind := range []string{"ActiveMQArtemisQueue", "UnknownKind"} {
 		endpoint := camelv1.Endpoint{
 			Ref: &corev1.ObjectReference{
 				Kind:       kind,
@@ -250,7 +335,7 @@ func TestArkMQUnsupportedKind(t *testing.T) {
 			Type: camelv1.EndpointTypeSink,
 		}, endpoint)
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "Can only work with ActiveMQArtemisAddress kind")
+		assert.Contains(t, err.Error(), "Can only work with ActiveMQArtemis or ActiveMQArtemisAddress kind")
 	}
 }
 
