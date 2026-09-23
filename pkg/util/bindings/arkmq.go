@@ -23,6 +23,7 @@ import (
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	arkmqv1beta1 "github.com/apache/camel-k/v2/pkg/apis/duck/arkmq/v1beta1"
 	"github.com/apache/camel-k/v2/pkg/client/arkmq/clientset/internalclientset"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/uri"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -211,10 +212,39 @@ func (a ArkMQBindingProvider) getBrokerURL(ctx BindingContext, clusterName, name
 		}
 	}
 
-	if namespace != "" {
-		return fmt.Sprintf("tcp://%s-hdls-svc.%s.svc:%d", clusterName, namespace, port), nil
+	svcName := fmt.Sprintf("%s-hdls-svc", clusterName)
+	if ctx.Client != nil {
+		svc, err := kubernetes.LookupService(ctx.Ctx, ctx.Client, namespace, svcName)
+		if err != nil {
+			return "", err
+		}
+		if svc == nil {
+			svc, err = kubernetes.LookupService(ctx.Ctx, ctx.Client, namespace, clusterName)
+			if err != nil {
+				return "", err
+			}
+		}
+		if svc == nil {
+			return "", fmt.Errorf("could not find service %s in namespace %s for ArkMQ broker %s", svcName, namespace, clusterName)
+		}
+
+		for _, p := range svc.Spec.Ports {
+			if p.Name == "core" || p.Name == "all" || p.Name == "openwire" || p.Port == 61616 {
+				port = p.Port
+				break
+			}
+		}
+
+		if svc.Namespace != "" {
+			return fmt.Sprintf("tcp://%s.%s.svc:%d", svc.Name, svc.Namespace, port), nil
+		}
+		return fmt.Sprintf("tcp://%s:%d", svc.Name, port), nil
 	}
-	return fmt.Sprintf("tcp://%s-hdls-svc:%d", clusterName, port), nil
+
+	if namespace != "" {
+		return fmt.Sprintf("tcp://%s.%s.svc:%d", svcName, namespace, port), nil
+	}
+	return fmt.Sprintf("tcp://%s:%d", svcName, port), nil
 }
 
 func (a ArkMQBindingProvider) lookupAddress(ctx BindingContext, endpoint camelv1.Endpoint) (*arkmqv1beta1.ActiveMQArtemisAddress, error) {
