@@ -23,7 +23,6 @@ import (
 
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	arkmqv1beta1 "github.com/apache/camel-k/v2/pkg/apis/duck/arkmq/v1beta1"
-	"github.com/apache/camel-k/v2/pkg/client/arkmq/clientset/internalclientset/fake"
 	"github.com/apache/camel-k/v2/pkg/internal"
 
 	"github.com/stretchr/testify/assert"
@@ -110,7 +109,7 @@ func TestArkMQLookupAddress(t *testing.T) {
 		},
 	}
 
-	client, err := internal.NewFakeClient(svc)
+	client, err := internal.NewFakeClient(broker, address, svc)
 	require.NoError(t, err)
 
 	bindingContext := BindingContext{
@@ -128,9 +127,7 @@ func TestArkMQLookupAddress(t *testing.T) {
 		},
 	}
 
-	provider := ArkMQBindingProvider{
-		Client: fake.NewSimpleClientset(broker, address),
-	}
+	provider := ArkMQBindingProvider{}
 
 	binding, err := provider.Translate(bindingContext, EndpointContext{
 		Type: camelv1.EndpointTypeSink,
@@ -155,7 +152,7 @@ func TestArkMQMulticastUnsupported(t *testing.T) {
 		},
 	}
 
-	client, err := internal.NewFakeClient()
+	client, err := internal.NewFakeClient(address)
 	require.NoError(t, err)
 
 	bindingContext := BindingContext{
@@ -173,9 +170,7 @@ func TestArkMQMulticastUnsupported(t *testing.T) {
 		},
 	}
 
-	provider := ArkMQBindingProvider{
-		Client: fake.NewSimpleClientset(address),
-	}
+	provider := ArkMQBindingProvider{}
 
 	_, err = provider.Translate(bindingContext, EndpointContext{
 		Type: camelv1.EndpointTypeSink,
@@ -223,7 +218,7 @@ func TestArkMQLookupAddressByName(t *testing.T) {
 		},
 	}
 
-	client, err := internal.NewFakeClient(svc)
+	client, err := internal.NewFakeClient(broker, address, svc)
 	require.NoError(t, err)
 
 	bindingContext := BindingContext{
@@ -241,9 +236,7 @@ func TestArkMQLookupAddressByName(t *testing.T) {
 		},
 	}
 
-	provider := ArkMQBindingProvider{
-		Client: fake.NewSimpleClientset(broker, address),
-	}
+	provider := ArkMQBindingProvider{}
 
 	binding, err := provider.Translate(bindingContext, EndpointContext{
 		Type: camelv1.EndpointTypeSink,
@@ -287,7 +280,7 @@ func TestArkMQBrokerDirect(t *testing.T) {
 		},
 	}
 
-	client, err := internal.NewFakeClient(svc)
+	client, err := internal.NewFakeClient(broker, svc)
 	require.NoError(t, err)
 
 	bindingContext := BindingContext{
@@ -309,9 +302,7 @@ func TestArkMQBrokerDirect(t *testing.T) {
 		}),
 	}
 
-	provider := ArkMQBindingProvider{
-		Client: fake.NewSimpleClientset(broker),
-	}
+	provider := ArkMQBindingProvider{}
 
 	binding, err := provider.Translate(bindingContext, EndpointContext{
 		Type: camelv1.EndpointTypeSink,
@@ -364,7 +355,7 @@ func TestArkMQMissingService(t *testing.T) {
 		},
 	}
 
-	client, err := internal.NewFakeClient() // no service in client!
+	client, err := internal.NewFakeClient(broker) // no service in client!
 	require.NoError(t, err)
 
 	bindingContext := BindingContext{
@@ -385,9 +376,7 @@ func TestArkMQMissingService(t *testing.T) {
 		}),
 	}
 
-	provider := ArkMQBindingProvider{
-		Client: fake.NewSimpleClientset(broker),
-	}
+	provider := ArkMQBindingProvider{}
 
 	_, err = provider.Translate(bindingContext, EndpointContext{
 		Type: camelv1.EndpointTypeSink,
@@ -438,7 +427,7 @@ func TestArkMQMissingBrokerLabel(t *testing.T) {
 		},
 	}
 
-	client, err := internal.NewFakeClient()
+	client, err := internal.NewFakeClient(address)
 	require.NoError(t, err)
 
 	bindingContext := BindingContext{
@@ -456,9 +445,7 @@ func TestArkMQMissingBrokerLabel(t *testing.T) {
 		},
 	}
 
-	provider := ArkMQBindingProvider{
-		Client: fake.NewSimpleClientset(address),
-	}
+	provider := ArkMQBindingProvider{}
 
 	_, err = provider.Translate(bindingContext, EndpointContext{
 		Type: camelv1.EndpointTypeSink,
@@ -512,7 +499,7 @@ func TestArkMQBrokerFallback(t *testing.T) {
 		},
 	}
 
-	client, err := internal.NewFakeClient(svc)
+	client, err := internal.NewFakeClient(broker, address, svc)
 	require.NoError(t, err)
 
 	bindingContext := BindingContext{
@@ -530,9 +517,7 @@ func TestArkMQBrokerFallback(t *testing.T) {
 		},
 	}
 
-	provider := ArkMQBindingProvider{
-		Client: fake.NewSimpleClientset(broker, address),
-	}
+	provider := ArkMQBindingProvider{}
 
 	binding, err := provider.Translate(bindingContext, EndpointContext{
 		Type: camelv1.EndpointTypeSink,
@@ -566,7 +551,7 @@ func TestArkMQMultipleBrokersFallback(t *testing.T) {
 		},
 	}
 
-	client, err := internal.NewFakeClient()
+	client, err := internal.NewFakeClient(broker1, broker2, address)
 	require.NoError(t, err)
 
 	bindingContext := BindingContext{
@@ -584,9 +569,7 @@ func TestArkMQMultipleBrokersFallback(t *testing.T) {
 		},
 	}
 
-	provider := ArkMQBindingProvider{
-		Client: fake.NewSimpleClientset(broker1, broker2, address),
-	}
+	provider := ArkMQBindingProvider{}
 
 	_, err = provider.Translate(bindingContext, EndpointContext{
 		Type: camelv1.EndpointTypeSink,
