@@ -31,6 +31,7 @@ resources:
 - operator-cluster-role-openshift.yaml
 - operator-cluster-role-podmonitors.yaml
 - operator-cluster-role-strimzi.yaml
+- operator-cluster-role-arkmq.yaml
 - operator-cluster-role-binding-certmanager.yaml
 - operator-cluster-role-binding-events.yaml
 - operator-cluster-role-binding-keda.yaml
@@ -39,4 +40,5 @@ resources:
 - operator-cluster-role-binding-openshift.yaml
 - operator-cluster-role-binding-podmonitors.yaml
 - operator-cluster-role-binding-strimzi.yaml
+- operator-cluster-role-binding-arkmq.yaml
 - operator-cluster-role-binding.yaml
