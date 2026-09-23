@@ -464,7 +464,135 @@ func TestArkMQMissingBrokerLabel(t *testing.T) {
 		Type: camelv1.EndpointTypeSink,
 	}, endpoint)
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "no \"ActiveMQArtemis\" label or applyTo defined on address")
+	assert.Contains(t, err.Error(), "no ActiveMQArtemis broker found in namespace test")
+}
+
+func TestArkMQBrokerFallback(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	broker := &arkmqv1beta1.ActiveMQArtemis{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "default-broker",
+		},
+		Status: arkmqv1beta1.ActiveMQArtemisStatus{
+			PortStatus: []arkmqv1beta1.ActiveMQArtemisPortStatus{
+				{
+					Name: "core",
+					Port: 61616,
+				},
+			},
+		},
+	}
+
+	address := &arkmqv1beta1.ActiveMQArtemisAddress{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "unattached-address",
+		},
+		Spec: arkmqv1beta1.ActiveMQArtemisAddressSpec{
+			QueueName: "my-fallback-queue",
+			// No applyTo and no labels!
+		},
+	}
+
+	svc := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "default-broker-hdls-svc",
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				{
+					Name: "core",
+					Port: 61616,
+				},
+			},
+		},
+	}
+
+	client, err := internal.NewFakeClient(svc)
+	require.NoError(t, err)
+
+	bindingContext := BindingContext{
+		Ctx:       ctx,
+		Client:    client,
+		Namespace: "test",
+		Profile:   camelv1.TraitProfileKubernetes,
+	}
+
+	endpoint := camelv1.Endpoint{
+		Ref: &corev1.ObjectReference{
+			Kind:       "ActiveMQArtemisAddress",
+			Name:       "unattached-address",
+			APIVersion: "broker.amq.io/v1beta1",
+		},
+	}
+
+	provider := ArkMQBindingProvider{
+		Client: fake.NewSimpleClientset(broker, address),
+	}
+
+	binding, err := provider.Translate(bindingContext, EndpointContext{
+		Type: camelv1.EndpointTypeSink,
+	}, endpoint)
+	require.NoError(t, err)
+	assert.NotNil(t, binding)
+	assert.Equal(t, "jms:queue:my-fallback-queue?brokerURL=tcp%3A%2F%2Fdefault-broker-hdls-svc.test.svc%3A61616", binding.URI)
+}
+
+func TestArkMQMultipleBrokersFallback(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	broker1 := &arkmqv1beta1.ActiveMQArtemis{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "broker-1",
+		},
+	}
+	broker2 := &arkmqv1beta1.ActiveMQArtemis{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "broker-2",
+		},
+	}
+
+	address := &arkmqv1beta1.ActiveMQArtemisAddress{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "unattached-address",
+		},
+	}
+
+	client, err := internal.NewFakeClient()
+	require.NoError(t, err)
+
+	bindingContext := BindingContext{
+		Ctx:       ctx,
+		Client:    client,
+		Namespace: "test",
+		Profile:   camelv1.TraitProfileKubernetes,
+	}
+
+	endpoint := camelv1.Endpoint{
+		Ref: &corev1.ObjectReference{
+			Kind:       "ActiveMQArtemisAddress",
+			Name:       "unattached-address",
+			APIVersion: "broker.amq.io/v1beta1",
+		},
+	}
+
+	provider := ArkMQBindingProvider{
+		Client: fake.NewSimpleClientset(broker1, broker2, address),
+	}
+
+	_, err = provider.Translate(bindingContext, EndpointContext{
+		Type: camelv1.EndpointTypeSink,
+	}, endpoint)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "multiple ActiveMQArtemis brokers found in namespace test (2 found)")
 }
 
 func TestArkMQPassThrough(t *testing.T) {

@@ -175,16 +175,48 @@ func (a ArkMQBindingProvider) lookupBrokerURL(ctx BindingContext, address *arkmq
 	if clusterName == "" && address.Labels != nil {
 		clusterName = address.Labels[arkmqv1beta1.ArkMQBrokerLabel]
 	}
-	if clusterName == "" {
-		return "", fmt.Errorf("no %q label or applyTo defined on address %s", arkmqv1beta1.ArkMQBrokerLabel, endpoint.Ref.Name)
-	}
 
 	namespace := endpoint.Ref.Namespace
 	if namespace == "" {
 		namespace = ctx.Namespace
 	}
 
+	if clusterName == "" {
+		// By default, the resource is reconciled by the existing broker in the same namespace.
+		// Fallback to looking for an ActiveMQArtemis broker in the namespace.
+		fallbackName, err := a.fallbackBrokerName(ctx, namespace, endpoint.Ref.Name)
+		if err != nil {
+			return "", err
+		}
+		clusterName = fallbackName
+	}
+
 	return a.getBrokerURL(ctx, clusterName, namespace)
+}
+
+func (a ArkMQBindingProvider) fallbackBrokerName(ctx BindingContext, namespace, addressName string) (string, error) {
+	client := a.Client
+	if client == nil {
+		arkmqClient, err := internalclientset.NewForConfig(ctx.Client.GetConfig())
+		if err != nil {
+			return "", err
+		}
+		client = arkmqClient
+	}
+
+	brokers, err := client.BrokerV1beta1().ActiveMQArtemises(namespace).List(ctx.Ctx, v1.ListOptions{})
+	if err != nil {
+		return "", err
+	}
+	if len(brokers.Items) == 0 {
+		return "", fmt.Errorf("no ActiveMQArtemis broker found in namespace %s for address %s", namespace, addressName)
+	}
+	if len(brokers.Items) > 1 {
+		return "", fmt.Errorf("multiple ActiveMQArtemis brokers found in namespace %s (%d found); specify %q label or applyTo on address %s",
+			namespace, len(brokers.Items), arkmqv1beta1.ArkMQBrokerLabel, addressName)
+	}
+
+	return brokers.Items[0].Name, nil
 }
 
 func (a ArkMQBindingProvider) getBrokerURL(ctx BindingContext, clusterName, namespace string) (string, error) {
