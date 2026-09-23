@@ -574,6 +574,58 @@ func TestNewPipeArkMQSourceBinding(t *testing.T) {
 		"\"uri\":\"jms:queue:my-queue?brokerURL=tcp%3A%2F%2Fmy-broker-hdls-svc%3A61616\"},\"id\":\"binding\"}}", string(flow))
 }
 
+func TestNewPipeArkMQBrokerBinding(t *testing.T) {
+	pipe := &v1.Pipe{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       v1.PipeKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "ns",
+			Name:      "my-pipe-broker",
+		},
+		Spec: v1.PipeSpec{
+			Sink: v1.Endpoint{
+				Ref: &corev1.ObjectReference{
+					Kind:       "ActiveMQArtemis",
+					Name:       "my-broker",
+					APIVersion: "broker.amq.io/v1beta1",
+				},
+				Properties: asEndpointProperties(map[string]string{
+					"destination": "my-orders",
+					"brokerURL":   "tcp://my-broker-hdls-svc:61616",
+				}),
+			},
+			Source: v1.Endpoint{
+				URI: ptr.To("direct:something"),
+			},
+		},
+	}
+	c, err := internal.NewFakeClient(pipe)
+	require.NoError(t, err)
+
+	a := NewInitializeAction()
+	a.InjectLogger(log.Log)
+	a.InjectClient(c)
+	assert.Equal(t, "initialize", a.Name())
+	assert.True(t, a.CanHandle(pipe))
+	handledPipe, err := a.Handle(context.TODO(), pipe)
+	require.NoError(t, err)
+	assert.Equal(t, v1.PipePhaseCreating, handledPipe.Status.Phase)
+	// Check integration which should have been created
+	expectedIT := v1.NewIntegration(pipe.Namespace, pipe.Name)
+	err = c.Get(context.Background(), ctrl.ObjectKeyFromObject(&expectedIT), &expectedIT)
+	require.NoError(t, err)
+	assert.Equal(t, pipe.Name, expectedIT.Name)
+	assert.Equal(t, v1.IntegrationPhaseNone, expectedIT.Status.Phase)
+	assert.Equal(t, "Pipe", expectedIT.Labels[kubernetes.CamelCreatorLabelKind])
+	assert.Equal(t, "my-pipe-broker", expectedIT.Labels[kubernetes.CamelCreatorLabelName])
+	flow, err := json.Marshal(expectedIT.Spec.Flows[0].RawMessage)
+	require.NoError(t, err)
+	assert.Equal(t, "{\"route\":{\"from\":{\"steps\":[{\"to\":\"jms:queue:my-orders?brokerURL=tcp%3A%2F%2Fmy-broker-hdls-svc%3A61616\"}],"+
+		"\"uri\":\"direct:something\"},\"id\":\"binding\"}}", string(flow))
+}
+
 func asEndpointProperties(props map[string]string) *v1.EndpointProperties {
 	serialized, err := json.Marshal(props)
 	if err != nil {

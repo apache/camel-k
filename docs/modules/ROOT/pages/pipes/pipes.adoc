@@ -179,15 +179,43 @@ KafkaTopics require the Strimzi operator and a configured KafkaTopic`.
 
 === Binding to ArkMQ queues
 
-Another typical use case is consume/produce events directly from an ActiveMQArtemisAddress custom resource (managed by https://arkmq.org/[ArkMQ] / ActiveMQ Artemis operator):
+A Pipe can consume or produce events directly using an ArkMQ / ActiveMQ Artemis broker (managed by https://arkmq.org/[ArkMQ] / ActiveMQ Artemis operator).
 
-.beer-event-to-queue.yaml
+You can bind directly to the `ActiveMQArtemis` broker resource and specify the destination queue:
+
+.beer-event-to-broker.yaml
 [source,yaml,subs="attributes+"]
 ----
 apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
-  name: beer-event-to-queue
+  name: beer-event-to-broker
+spec:
+  source:
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1alpha1
+      name: beer-source
+    properties:
+      period: 5000
+  sink:
+    ref:
+      kind: ActiveMQArtemis
+      apiVersion: broker.amq.io/v1beta1
+      name: my-broker
+    properties:
+      destination: beer-events
+----
+
+Alternatively, you can bind to an `ActiveMQArtemisAddress` custom resource:
+
+.beer-event-to-address.yaml
+[source,yaml,subs="attributes+"]
+----
+apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  name: beer-event-to-address
 spec:
   source:
     ref:
@@ -205,7 +233,7 @@ spec:
 
 [NOTE]
 ====
-ActiveMQArtemisAddress requires the ActiveMQ Artemis / ArkMQ operator and an existing broker cluster.
+ArkMQ bindings require the ActiveMQ Artemis / ArkMQ operator and an existing broker deployment.
 ====
 
 === Binding to Knative resources

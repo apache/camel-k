@@ -76,12 +76,56 @@ func (a ArkMQBindingProvider) Translate(ctx BindingContext, _ EndpointContext, e
 
 // toCamelArkMQ serializes an endpoint to a camelArkMQ struct.
 func (a ArkMQBindingProvider) toCamelArkMQ(ctx BindingContext, endpoint camelv1.Endpoint) (*camelArkMQ, error) {
-	if endpoint.Ref.Kind != arkmqv1beta1.ArkMQKindAddress {
-		return nil, fmt.Errorf("invalid endpoint kind %q. Can only work with %s kind",
-			endpoint.Ref.Kind, arkmqv1beta1.ArkMQKindAddress)
+	switch endpoint.Ref.Kind {
+	case arkmqv1beta1.ArkMQKindBroker:
+		return a.fromBrokerToCamel(ctx, endpoint)
+	case arkmqv1beta1.ArkMQKindAddress:
+		return a.fromAddressToCamel(ctx, endpoint)
 	}
 
-	return a.fromAddressToCamel(ctx, endpoint)
+	return nil, fmt.Errorf("invalid endpoint kind %q. Can only work with %s or %s kind",
+		endpoint.Ref.Kind, arkmqv1beta1.ArkMQKindBroker, arkmqv1beta1.ArkMQKindAddress)
+}
+
+// Verify and transform an ActiveMQArtemis broker resource to Camel JMS queue endpoint parameters.
+func (a ArkMQBindingProvider) fromBrokerToCamel(ctx BindingContext, endpoint camelv1.Endpoint) (*camelArkMQ, error) {
+	props, err := endpoint.Properties.GetPropertyMap()
+	if err != nil {
+		return nil, err
+	}
+	if props == nil {
+		props = make(map[string]string)
+	}
+
+	queueName := props["destination"]
+	if queueName == "" {
+		queueName = props["queue"]
+	}
+	if queueName == "" {
+		return nil, fmt.Errorf("invalid endpoint configuration: missing destination or queue property on %s %s",
+			endpoint.Ref.Kind, endpoint.Ref.Name)
+	}
+	delete(props, "destination")
+	delete(props, "queue")
+
+	if props["brokerURL"] == "" {
+		namespace := endpoint.Ref.Namespace
+		if namespace == "" {
+			namespace = ctx.Namespace
+		}
+
+		brokerURL, err := a.getBrokerURL(ctx, endpoint.Ref.Name, namespace)
+		if err != nil {
+			return nil, err
+		}
+
+		props["brokerURL"] = brokerURL
+	}
+
+	return &camelArkMQ{
+		queueName:  queueName,
+		properties: props,
+	}, nil
 }
 
 // Verify and transform an ActiveMQArtemisAddress resource to Camel JMS queue endpoint parameters.
