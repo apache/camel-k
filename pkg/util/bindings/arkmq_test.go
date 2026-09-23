@@ -95,7 +95,22 @@ func TestArkMQLookupAddress(t *testing.T) {
 		},
 	}
 
-	client, err := internal.NewFakeClient()
+	svc := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "mybroker-hdls-svc",
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				{
+					Name: "core",
+					Port: 61616,
+				},
+			},
+		},
+	}
+
+	client, err := internal.NewFakeClient(svc)
 	require.NoError(t, err)
 
 	bindingContext := BindingContext{
@@ -193,7 +208,22 @@ func TestArkMQLookupAddressByName(t *testing.T) {
 		},
 	}
 
-	client, err := internal.NewFakeClient()
+	svc := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "mybroker-hdls-svc",
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				{
+					Name: "core",
+					Port: 61616,
+				},
+			},
+		},
+	}
+
+	client, err := internal.NewFakeClient(svc)
 	require.NoError(t, err)
 
 	bindingContext := BindingContext{
@@ -242,7 +272,22 @@ func TestArkMQBrokerDirect(t *testing.T) {
 		},
 	}
 
-	client, err := internal.NewFakeClient()
+	svc := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "mybroker-hdls-svc",
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				{
+					Name: "core",
+					Port: 61616,
+				},
+			},
+		},
+	}
+
+	client, err := internal.NewFakeClient(svc)
 	require.NoError(t, err)
 
 	bindingContext := BindingContext{
@@ -306,6 +351,49 @@ func TestArkMQBrokerDirect(t *testing.T) {
 	}, endpointMissing)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "missing destination or queue property")
+}
+
+func TestArkMQMissingService(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	broker := &arkmqv1beta1.ActiveMQArtemis{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "mybroker",
+		},
+	}
+
+	client, err := internal.NewFakeClient() // no service in client!
+	require.NoError(t, err)
+
+	bindingContext := BindingContext{
+		Ctx:       ctx,
+		Client:    client,
+		Namespace: "test",
+		Profile:   camelv1.TraitProfileKubernetes,
+	}
+
+	endpoint := camelv1.Endpoint{
+		Ref: &corev1.ObjectReference{
+			Kind:       "ActiveMQArtemis",
+			Name:       "mybroker",
+			APIVersion: "broker.amq.io/v1beta1",
+		},
+		Properties: asEndpointProperties(map[string]string{
+			"destination": "orders",
+		}),
+	}
+
+	provider := ArkMQBindingProvider{
+		Client: fake.NewSimpleClientset(broker),
+	}
+
+	_, err = provider.Translate(bindingContext, EndpointContext{
+		Type: camelv1.EndpointTypeSink,
+	}, endpoint)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "could not find service mybroker-hdls-svc in namespace test")
 }
 
 func TestArkMQUnsupportedKind(t *testing.T) {

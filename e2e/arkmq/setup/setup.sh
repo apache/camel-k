@@ -39,3 +39,4 @@ kubectl wait activemqartemis/my-broker --for=condition=Ready --timeout=300s -n a
 
 #### Setup an ActiveMQ Artemis queue address
 kubectl apply -f $SCRIPT_DIR/queue.yaml -n arkmq
+kubectl wait activemqartemisaddress/my-queue --for=condition=Ready --timeout=120s -n arkmq
