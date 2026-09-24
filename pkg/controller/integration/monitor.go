@@ -410,11 +410,6 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(
 	ctx context.Context, controller controller, environment *trait.Environment, integration *v1.Integration,
 	pendingPods []corev1.Pod, runningPods []corev1.Pod,
 ) error {
-	// A pending Pod that cannot be scheduled or pull its image carries the root cause,
-	// which the controller status would hide behind, e.g., an exceeded progress deadline.
-	if arePodsFailingStatuses(integration, pendingPods, nil) {
-		return nil
-	}
 	if done, err := controller.checkReadyCondition(ctx); done || err != nil {
 		// There may be pods that are not ready but still probable for getting error messages.
 		// Ignore returned error from probing as it's expected when the ctrl obj is not ready.
@@ -422,7 +417,7 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(
 
 		return err
 	}
-	if arePodsFailingStatuses(integration, nil, runningPods) {
+	if arePodsFailingStatuses(integration, pendingPods, runningPods) {
 		return nil
 	}
 	readyPods, probeOk, err := action.probeReadiness(ctx, environment, integration, runningPods)
