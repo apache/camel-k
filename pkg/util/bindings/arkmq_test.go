@@ -61,7 +61,11 @@ func TestArkMQDirect(t *testing.T) {
 	}, endpoint)
 	require.NoError(t, err)
 	assert.NotNil(t, binding)
-	assert.Equal(t, "jms:queue:myqueue?brokerURL=tcp%3A%2F%2Fcustom-broker%3A61616", binding.URI)
+	assert.Equal(t, "amqp:queue:myqueue", binding.URI)
+	assert.Equal(t, map[string]string{
+		"quarkus.qpid-jms.url":            "amqp://custom-broker:61616",
+		"camel.component.amqp.broker-url": "amqp://custom-broker:61616",
+	}, binding.ApplicationProperties)
 }
 
 func TestArkMQLookupAddress(t *testing.T) {
@@ -134,7 +138,11 @@ func TestArkMQLookupAddress(t *testing.T) {
 	}, endpoint)
 	require.NoError(t, err)
 	assert.NotNil(t, binding)
-	assert.Equal(t, "jms:queue:resolved-queue?brokerURL=tcp%3A%2F%2Fmybroker-hdls-svc.test.svc%3A61616", binding.URI)
+	assert.Equal(t, "amqp:queue:resolved-queue", binding.URI)
+	assert.Equal(t, map[string]string{
+		"quarkus.qpid-jms.url":            "amqp://mybroker-hdls-svc.test.svc:61616",
+		"camel.component.amqp.broker-url": "amqp://mybroker-hdls-svc.test.svc:61616",
+	}, binding.ApplicationProperties)
 }
 
 func TestArkMQMulticastUnsupported(t *testing.T) {
@@ -243,7 +251,11 @@ func TestArkMQLookupAddressByName(t *testing.T) {
 	}, endpoint)
 	require.NoError(t, err)
 	assert.NotNil(t, binding)
-	assert.Equal(t, "jms:queue:events-queue?brokerURL=tcp%3A%2F%2Fmybroker-hdls-svc.test.svc%3A61616", binding.URI)
+	assert.Equal(t, "amqp:queue:events-queue", binding.URI)
+	assert.Equal(t, map[string]string{
+		"quarkus.qpid-jms.url":            "amqp://mybroker-hdls-svc.test.svc:61616",
+		"camel.component.amqp.broker-url": "amqp://mybroker-hdls-svc.test.svc:61616",
+	}, binding.ApplicationProperties)
 }
 
 func TestArkMQBrokerDirect(t *testing.T) {
@@ -309,7 +321,11 @@ func TestArkMQBrokerDirect(t *testing.T) {
 	}, endpoint)
 	require.NoError(t, err)
 	assert.NotNil(t, binding)
-	assert.Equal(t, "jms:queue:orders?brokerURL=tcp%3A%2F%2Fmybroker-hdls-svc.test.svc%3A61616", binding.URI)
+	assert.Equal(t, "amqp:queue:orders", binding.URI)
+	assert.Equal(t, map[string]string{
+		"quarkus.qpid-jms.url":            "amqp://mybroker-hdls-svc.test.svc:61616",
+		"camel.component.amqp.broker-url": "amqp://mybroker-hdls-svc.test.svc:61616",
+	}, binding.ApplicationProperties)
 
 	// 2. With "queue" property fallback
 	endpointQueue := camelv1.Endpoint{
@@ -327,7 +343,11 @@ func TestArkMQBrokerDirect(t *testing.T) {
 	}, endpointQueue)
 	require.NoError(t, err)
 	assert.NotNil(t, binding)
-	assert.Equal(t, "jms:queue:invoices?brokerURL=tcp%3A%2F%2Fmybroker-hdls-svc.test.svc%3A61616", binding.URI)
+	assert.Equal(t, "amqp:queue:invoices", binding.URI)
+	assert.Equal(t, map[string]string{
+		"quarkus.qpid-jms.url":            "amqp://mybroker-hdls-svc.test.svc:61616",
+		"camel.component.amqp.broker-url": "amqp://mybroker-hdls-svc.test.svc:61616",
+	}, binding.ApplicationProperties)
 
 	// 3. Missing destination/queue property returns error
 	endpointMissing := camelv1.Endpoint{
@@ -524,7 +544,11 @@ func TestArkMQBrokerFallback(t *testing.T) {
 	}, endpoint)
 	require.NoError(t, err)
 	assert.NotNil(t, binding)
-	assert.Equal(t, "jms:queue:my-fallback-queue?brokerURL=tcp%3A%2F%2Fdefault-broker-hdls-svc.test.svc%3A61616", binding.URI)
+	assert.Equal(t, "amqp:queue:my-fallback-queue", binding.URI)
+	assert.Equal(t, map[string]string{
+		"quarkus.qpid-jms.url":            "amqp://default-broker-hdls-svc.test.svc:61616",
+		"camel.component.amqp.broker-url": "amqp://default-broker-hdls-svc.test.svc:61616",
+	}, binding.ApplicationProperties)
 }
 
 func TestArkMQMultipleBrokersFallback(t *testing.T) {
