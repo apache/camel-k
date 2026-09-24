@@ -25,7 +25,6 @@ cd $location/../pkg/client
 rm -rf camel
 rm -rf strimzi
 rm -rf keda
-rm -rf arkmq
 
 echo "Generating Go client code..."
 
