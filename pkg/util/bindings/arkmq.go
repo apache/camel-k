@@ -19,6 +19,8 @@ package bindings
 
 import (
 	"fmt"
+	"net"
+	"strconv"
 
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	arkmqv1beta1 "github.com/apache/camel-k/v2/pkg/apis/duck/arkmq/v1beta1"
@@ -37,6 +39,9 @@ type camelArkMQ struct {
 	queueName  string
 	properties map[string]string
 }
+
+// defaultArtemisPort is the default core port for ActiveMQ Artemis.
+const defaultArtemisPort = int32(61616)
 
 // ArkMQBindingProvider allows connecting to an ArkMQ queue via Binding.
 type ArkMQBindingProvider struct{}
@@ -136,6 +141,7 @@ func (a ArkMQBindingProvider) fromAddressToCamel(ctx BindingContext, endpoint ca
 	}
 
 	queueName := endpoint.Ref.Name
+	//nolint:nestif
 	if props["brokerURL"] == "" {
 		address, err := a.lookupAddress(ctx, endpoint)
 		if err != nil {
@@ -216,11 +222,12 @@ func (a ArkMQBindingProvider) getBrokerURL(ctx BindingContext, clusterName, name
 		return "", err
 	}
 
-	port := int32(61616)
+	port := defaultArtemisPort
 	for _, p := range broker.Status.PortStatus {
 		if p.Name == "core" || p.Name == "all" || p.Name == "openwire" {
 			if p.Port > 0 {
 				port = p.Port
+
 				break
 			}
 		}
@@ -228,7 +235,7 @@ func (a ArkMQBindingProvider) getBrokerURL(ctx BindingContext, clusterName, name
 
 	// NOTE: this is a first implementation that follows the ArkMQ headless service naming convention (<clusterName>-hdls-svc),
 	// but further development may be needed to make it more consistent.
-	svcName := fmt.Sprintf("%s-hdls-svc", clusterName)
+	svcName := clusterName + "-hdls-svc"
 	svc, err := kubernetes.LookupService(ctx.Ctx, ctx.Client, namespace, svcName)
 	if err != nil {
 		return "", err
@@ -244,16 +251,19 @@ func (a ArkMQBindingProvider) getBrokerURL(ctx BindingContext, clusterName, name
 	}
 
 	for _, p := range svc.Spec.Ports {
-		if p.Name == "core" || p.Name == "all" || p.Name == "openwire" || p.Port == 61616 {
+		if p.Name == "core" || p.Name == "all" || p.Name == "openwire" || p.Port == defaultArtemisPort {
 			port = p.Port
+
 			break
 		}
 	}
 
+	host := svc.Name
 	if svc.Namespace != "" {
-		return fmt.Sprintf("tcp://%s.%s.svc:%d", svc.Name, svc.Namespace, port), nil
+		host = svc.Name + "." + svc.Namespace + ".svc"
 	}
-	return fmt.Sprintf("tcp://%s:%d", svc.Name, port), nil
+
+	return "tcp://" + net.JoinHostPort(host, strconv.Itoa(int(port))), nil
 }
 
 func (a ArkMQBindingProvider) lookupAddress(ctx BindingContext, endpoint camelv1.Endpoint) (*arkmqv1beta1.ActiveMQArtemisAddress, error) {
