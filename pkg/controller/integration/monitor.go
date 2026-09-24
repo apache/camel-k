@@ -410,6 +410,11 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(
 	ctx context.Context, controller controller, environment *trait.Environment, integration *v1.Integration,
 	pendingPods []corev1.Pod, runningPods []corev1.Pod,
 ) error {
+	// A pending Pod that cannot be scheduled or pull its image carries the root cause,
+	// which the controller status would hide behind, e.g., an exceeded progress deadline.
+	if arePodsFailingStatuses(integration, pendingPods, nil) {
+		return nil
+	}
 	if done, err := controller.checkReadyCondition(ctx); done || err != nil {
 		// There may be pods that are not ready but still probable for getting error messages.
 		// Ignore returned error from probing as it's expected when the ctrl obj is not ready.
@@ -417,7 +422,7 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(
 
 		return err
 	}
-	if arePodsFailingStatuses(integration, pendingPods, runningPods) {
+	if arePodsFailingStatuses(integration, nil, runningPods) {
 		return nil
 	}
 	readyPods, probeOk, err := action.probeReadiness(ctx, environment, integration, runningPods)
@@ -457,8 +462,9 @@ func arePodsFailingStatuses(integration *v1.Integration, pendingPods []corev1.Po
 		containers = append(containers, pod.Status.InitContainerStatuses...)
 		containers = append(containers, pod.Status.ContainerStatuses...)
 		for _, container := range containers {
-			// Check the images are pulled
-			if waiting := container.State.Waiting; waiting != nil && waiting.Reason == "ImagePullBackOff" {
+			// Check the images are pulled. The kubelet alternates between both reasons while retrying.
+			if waiting := container.State.Waiting; waiting != nil &&
+				(waiting.Reason == "ErrImagePull" || waiting.Reason == "ImagePullBackOff") {
 				integration.Status.Phase = v1.IntegrationPhaseError
 				integration.SetReadyConditionError(waiting.Message)
 

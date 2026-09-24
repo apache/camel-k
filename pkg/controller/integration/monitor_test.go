@@ -138,6 +138,57 @@ func TestMonitorFailureIntegration(t *testing.T) {
 	assert.Equal(t, v1.IntegrationConditionInitializationFailedReason, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
 }
 
+func TestMonitorImagePullFailure(t *testing.T) {
+	pullErr := `failed to pull image "registry/camel-k-kit": no basic auth credentials`
+	progressDeadlineExceeded := appsv1.DeploymentCondition{
+		Type:    appsv1.DeploymentProgressing,
+		Status:  corev1.ConditionFalse,
+		Reason:  "ProgressDeadlineExceeded",
+		Message: `ReplicaSet "my-it-5d8f7" has timed out progressing.`,
+	}
+
+	tc := []struct {
+		name       string
+		reason     string
+		conditions []appsv1.DeploymentCondition
+	}{
+		{name: "back-off", reason: "ImagePullBackOff"},
+		{name: "pull error", reason: "ErrImagePull"},
+		{name: "back-off after progress deadline", reason: "ImagePullBackOff", conditions: []appsv1.DeploymentCondition{progressDeadlineExceeded}},
+		{name: "pull error after progress deadline", reason: "ErrImagePull", conditions: []appsv1.DeploymentCondition{progressDeadlineExceeded}},
+	}
+
+	for _, test := range tc {
+		t.Run(test.name, func(t *testing.T) {
+			it := &v1.Integration{
+				ObjectMeta: metav1.ObjectMeta{Namespace: "ns", Name: "my-it"},
+				Status:     v1.IntegrationStatus{Phase: v1.IntegrationPhaseRunning},
+			}
+			deploy := &appsv1.Deployment{Status: appsv1.DeploymentStatus{Conditions: test.conditions}}
+			pod := corev1.Pod{
+				Status: corev1.PodStatus{
+					Phase: corev1.PodPending,
+					ContainerStatuses: []corev1.ContainerStatus{{
+						Name:  "integration",
+						State: corev1.ContainerState{Waiting: &corev1.ContainerStateWaiting{Reason: test.reason, Message: pullErr}},
+					}},
+				},
+			}
+
+			a := monitorAction{}
+			err := a.updateIntegrationPhaseAndReadyCondition(context.TODO(),
+				&deploymentController{obj: deploy, integration: it}, nil, it, []corev1.Pod{pod}, nil)
+			require.NoError(t, err)
+			assert.Equal(t, v1.IntegrationPhaseError, it.Status.Phase)
+			ready := it.Status.GetCondition(v1.IntegrationConditionReady)
+			require.NotNil(t, ready)
+			assert.Equal(t, corev1.ConditionFalse, ready.Status)
+			assert.Equal(t, v1.IntegrationConditionErrorReason, ready.Reason)
+			assert.Equal(t, pullErr, ready.Message)
+		})
+	}
+}
+
 func nominalEnvironment() (client.Client, *v1.Integration, error) {
 	catalog := &v1.CamelCatalog{
 		TypeMeta: metav1.TypeMeta{
