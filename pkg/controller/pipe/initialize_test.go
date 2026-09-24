@@ -519,8 +519,10 @@ func TestNewPipeArkMQBinding(t *testing.T) {
 	assert.Equal(t, "my-pipe", expectedIT.Labels[kubernetes.CamelCreatorLabelName])
 	flow, err := json.Marshal(expectedIT.Spec.Flows[0].RawMessage)
 	require.NoError(t, err)
-	assert.Equal(t, "{\"route\":{\"from\":{\"steps\":[{\"to\":\"jms:queue:my-queue?brokerURL=tcp%3A%2F%2Fmy-broker-hdls-svc%3A61616\"}],"+
+	assert.Equal(t, "{\"route\":{\"from\":{\"steps\":[{\"to\":\"amqp:queue:my-queue\"}],"+
 		"\"uri\":\"direct:something\"},\"id\":\"binding\"}}", string(flow))
+	assert.Equal(t, "amqp://my-broker-hdls-svc:61616", expectedIT.Spec.GetConfigurationProperty("quarkus.qpid-jms.url"))
+	assert.Equal(t, "amqp://my-broker-hdls-svc:61616", expectedIT.Spec.GetConfigurationProperty("camel.component.amqp.broker-url"))
 }
 
 func TestNewPipeArkMQSourceBinding(t *testing.T) {
@@ -571,7 +573,9 @@ func TestNewPipeArkMQSourceBinding(t *testing.T) {
 	flow, err := json.Marshal(expectedIT.Spec.Flows[0].RawMessage)
 	require.NoError(t, err)
 	assert.Equal(t, "{\"route\":{\"from\":{\"steps\":[{\"to\":\"log:info\"}],"+
-		"\"uri\":\"jms:queue:my-queue?brokerURL=tcp%3A%2F%2Fmy-broker-hdls-svc%3A61616\"},\"id\":\"binding\"}}", string(flow))
+		"\"uri\":\"amqp:queue:my-queue\"},\"id\":\"binding\"}}", string(flow))
+	assert.Equal(t, "amqp://my-broker-hdls-svc:61616", expectedIT.Spec.GetConfigurationProperty("quarkus.qpid-jms.url"))
+	assert.Equal(t, "amqp://my-broker-hdls-svc:61616", expectedIT.Spec.GetConfigurationProperty("camel.component.amqp.broker-url"))
 }
 
 func TestNewPipeArkMQBrokerBinding(t *testing.T) {
@@ -622,8 +626,10 @@ func TestNewPipeArkMQBrokerBinding(t *testing.T) {
 	assert.Equal(t, "my-pipe-broker", expectedIT.Labels[kubernetes.CamelCreatorLabelName])
 	flow, err := json.Marshal(expectedIT.Spec.Flows[0].RawMessage)
 	require.NoError(t, err)
-	assert.Equal(t, "{\"route\":{\"from\":{\"steps\":[{\"to\":\"jms:queue:my-orders?brokerURL=tcp%3A%2F%2Fmy-broker-hdls-svc%3A61616\"}],"+
+	assert.Equal(t, "{\"route\":{\"from\":{\"steps\":[{\"to\":\"amqp:queue:my-orders\"}],"+
 		"\"uri\":\"direct:something\"},\"id\":\"binding\"}}", string(flow))
+	assert.Equal(t, "amqp://my-broker-hdls-svc:61616", expectedIT.Spec.GetConfigurationProperty("quarkus.qpid-jms.url"))
+	assert.Equal(t, "amqp://my-broker-hdls-svc:61616", expectedIT.Spec.GetConfigurationProperty("camel.component.amqp.broker-url"))
 }
 
 func asEndpointProperties(props map[string]string) *v1.EndpointProperties {

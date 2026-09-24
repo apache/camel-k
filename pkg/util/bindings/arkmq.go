@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"net"
 	"strconv"
+	"strings"
 
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	arkmqv1beta1 "github.com/apache/camel-k/v2/pkg/apis/duck/arkmq/v1beta1"
@@ -34,13 +35,14 @@ func init() {
 	RegisterBindingProvider(ArkMQBindingProvider{})
 }
 
-// camelArkMQ represents the configuration required by Camel JMS component for ArkMQ.
+// camelArkMQ represents the configuration required by Camel AMQP component for ArkMQ.
 type camelArkMQ struct {
 	queueName  string
+	brokerURL  string
 	properties map[string]string
 }
 
-// defaultArtemisPort is the default core port for ActiveMQ Artemis.
+// defaultArtemisPort is the default port for ActiveMQ Artemis.
 const defaultArtemisPort = int32(61616)
 
 // ArkMQBindingProvider allows connecting to an ArkMQ queue via Binding.
@@ -68,11 +70,18 @@ func (a ArkMQBindingProvider) Translate(ctx BindingContext, _ EndpointContext, e
 	if err != nil {
 		return nil, err
 	}
-	arkmqURI := "jms:queue:" + camelArkMQ.queueName
+	arkmqURI := "amqp:queue:" + camelArkMQ.queueName
 	arkmqURI = uri.AppendParameters(arkmqURI, camelArkMQ.properties)
 
+	appProps := make(map[string]string)
+	if camelArkMQ.brokerURL != "" {
+		appProps["quarkus.qpid-jms.url"] = camelArkMQ.brokerURL
+		appProps["camel.component.amqp.broker-url"] = camelArkMQ.brokerURL
+	}
+
 	return &Binding{
-		URI: arkmqURI,
+		URI:                   arkmqURI,
+		ApplicationProperties: appProps,
 	}, nil
 }
 
@@ -89,7 +98,7 @@ func (a ArkMQBindingProvider) toCamelArkMQ(ctx BindingContext, endpoint camelv1.
 		endpoint.Ref.Kind, arkmqv1beta1.ArkMQKindBroker, arkmqv1beta1.ArkMQKindAddress)
 }
 
-// Verify and transform an ActiveMQArtemis broker resource to Camel JMS queue endpoint parameters.
+// Verify and transform an ActiveMQArtemis broker resource to Camel AMQP queue endpoint parameters.
 func (a ArkMQBindingProvider) fromBrokerToCamel(ctx BindingContext, endpoint camelv1.Endpoint) (*camelArkMQ, error) {
 	props, err := endpoint.Properties.GetPropertyMap()
 	if err != nil {
@@ -110,27 +119,39 @@ func (a ArkMQBindingProvider) fromBrokerToCamel(ctx BindingContext, endpoint cam
 	delete(props, "destination")
 	delete(props, "queue")
 
-	if props["brokerURL"] == "" {
-		namespace := endpoint.Ref.Namespace
-		if namespace == "" {
-			namespace = ctx.Namespace
-		}
+	brokerURL := props["brokerURL"]
+	if brokerURL == "" {
+		brokerURL = props["brokerUrl"]
+	}
+	delete(props, "brokerURL")
+	delete(props, "brokerUrl")
 
-		brokerURL, err := a.getBrokerURL(ctx, endpoint.Ref.Name, namespace)
-		if err != nil {
-			return nil, err
-		}
+	if brokerURL != "" {
+		return &camelArkMQ{
+			queueName:  queueName,
+			brokerURL:  normalizeBrokerURL(brokerURL),
+			properties: props,
+		}, nil
+	}
 
-		props["brokerURL"] = brokerURL
+	namespace := endpoint.Ref.Namespace
+	if namespace == "" {
+		namespace = ctx.Namespace
+	}
+
+	brokerURL, err = a.getBrokerURL(ctx, endpoint.Ref.Name, namespace)
+	if err != nil {
+		return nil, err
 	}
 
 	return &camelArkMQ{
 		queueName:  queueName,
+		brokerURL:  brokerURL,
 		properties: props,
 	}, nil
 }
 
-// Verify and transform an ActiveMQArtemisAddress resource to Camel JMS queue endpoint parameters.
+// Verify and transform an ActiveMQArtemisAddress resource to Camel AMQP queue endpoint parameters.
 func (a ArkMQBindingProvider) fromAddressToCamel(ctx BindingContext, endpoint camelv1.Endpoint) (*camelArkMQ, error) {
 	props, err := endpoint.Properties.GetPropertyMap()
 	if err != nil {
@@ -141,35 +162,54 @@ func (a ArkMQBindingProvider) fromAddressToCamel(ctx BindingContext, endpoint ca
 	}
 
 	queueName := endpoint.Ref.Name
-	//nolint:nestif
-	if props["brokerURL"] == "" {
-		address, err := a.lookupAddress(ctx, endpoint)
-		if err != nil {
-			return nil, err
-		}
+	brokerURL := props["brokerURL"]
+	if brokerURL == "" {
+		brokerURL = props["brokerUrl"]
+	}
+	delete(props, "brokerURL")
+	delete(props, "brokerUrl")
 
-		if address.Spec.RoutingType == "multicast" {
-			return nil, fmt.Errorf("multicast addresses (topics) are not supported on queue binding %s", endpoint.Ref.Name)
-		}
+	if brokerURL != "" {
+		return &camelArkMQ{
+			queueName:  queueName,
+			brokerURL:  normalizeBrokerURL(brokerURL),
+			properties: props,
+		}, nil
+	}
 
-		if address.Spec.QueueName != "" {
-			queueName = address.Spec.QueueName
-		} else if address.Spec.AddressName != "" {
-			queueName = address.Spec.AddressName
-		}
+	address, err := a.lookupAddress(ctx, endpoint)
+	if err != nil {
+		return nil, err
+	}
 
-		brokerURL, err := a.lookupBrokerURL(ctx, address, endpoint)
-		if err != nil {
-			return nil, err
-		}
+	if address.Spec.RoutingType == "multicast" {
+		return nil, fmt.Errorf("multicast addresses (topics) are not supported on queue binding %s", endpoint.Ref.Name)
+	}
 
-		props["brokerURL"] = brokerURL
+	if address.Spec.QueueName != "" {
+		queueName = address.Spec.QueueName
+	} else if address.Spec.AddressName != "" {
+		queueName = address.Spec.AddressName
+	}
+
+	brokerURL, err = a.lookupBrokerURL(ctx, address, endpoint)
+	if err != nil {
+		return nil, err
 	}
 
 	return &camelArkMQ{
 		queueName:  queueName,
+		brokerURL:  brokerURL,
 		properties: props,
 	}, nil
+}
+
+func normalizeBrokerURL(url string) string {
+	if after, ok := strings.CutPrefix(url, "tcp://"); ok {
+		return "amqp://" + after
+	}
+
+	return url
 }
 
 func (a ArkMQBindingProvider) lookupBrokerURL(ctx BindingContext, address *arkmqv1beta1.ActiveMQArtemisAddress, endpoint camelv1.Endpoint) (string, error) {
@@ -224,7 +264,7 @@ func (a ArkMQBindingProvider) getBrokerURL(ctx BindingContext, clusterName, name
 
 	port := defaultArtemisPort
 	for _, p := range broker.Status.PortStatus {
-		if p.Name == "core" || p.Name == "all" || p.Name == "openwire" {
+		if p.Name == "amqp" || p.Name == "all" || p.Name == "core" || p.Name == "openwire" {
 			if p.Port > 0 {
 				port = p.Port
 
@@ -251,7 +291,7 @@ func (a ArkMQBindingProvider) getBrokerURL(ctx BindingContext, clusterName, name
 	}
 
 	for _, p := range svc.Spec.Ports {
-		if p.Name == "core" || p.Name == "all" || p.Name == "openwire" || p.Port == defaultArtemisPort {
+		if p.Name == "amqp" || p.Name == "all" || p.Name == "core" || p.Name == "openwire" || p.Port == defaultArtemisPort {
 			port = p.Port
 
 			break
@@ -263,7 +303,7 @@ func (a ArkMQBindingProvider) getBrokerURL(ctx BindingContext, clusterName, name
 		host = svc.Name + "." + svc.Namespace + ".svc"
 	}
 
-	return "tcp://" + net.JoinHostPort(host, strconv.Itoa(int(port))), nil
+	return "amqp://" + net.JoinHostPort(host, strconv.Itoa(int(port))), nil
 }
 
 func (a ArkMQBindingProvider) lookupAddress(ctx BindingContext, endpoint camelv1.Endpoint) (*arkmqv1beta1.ActiveMQArtemisAddress, error) {
