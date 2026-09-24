@@ -182,10 +182,6 @@ func (a ArkMQBindingProvider) fromAddressToCamel(ctx BindingContext, endpoint ca
 		return nil, err
 	}
 
-	if address.Spec.RoutingType == "multicast" {
-		return nil, fmt.Errorf("multicast addresses (topics) are not supported on queue binding %s", endpoint.Ref.Name)
-	}
-
 	if address.Spec.QueueName != "" {
 		queueName = address.Spec.QueueName
 	} else if address.Spec.AddressName != "" {

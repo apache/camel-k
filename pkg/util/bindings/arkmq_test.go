@@ -145,9 +145,24 @@ func TestArkMQLookupAddress(t *testing.T) {
 	}, binding.ApplicationProperties)
 }
 
-func TestArkMQMulticastUnsupported(t *testing.T) {
+func TestArkMQMulticastSupported(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	broker := &arkmqv1beta1.ActiveMQArtemis{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "mybroker",
+		},
+		Status: arkmqv1beta1.ActiveMQArtemisStatus{
+			PortStatus: []arkmqv1beta1.ActiveMQArtemisPortStatus{
+				{
+					Name: "core",
+					Port: 61616,
+				},
+			},
+		},
+	}
 
 	address := &arkmqv1beta1.ActiveMQArtemisAddress{
 		ObjectMeta: metav1.ObjectMeta{
@@ -155,12 +170,28 @@ func TestArkMQMulticastUnsupported(t *testing.T) {
 			Name:      "mytopic",
 		},
 		Spec: arkmqv1beta1.ActiveMQArtemisAddressSpec{
+			AddressName: "my-multicast-topic",
 			RoutingType: "multicast",
 			ApplyTo:     "mybroker",
 		},
 	}
 
-	client, err := internal.NewFakeClient(address)
+	svc := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "mybroker-hdls-svc",
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				{
+					Name: "core",
+					Port: 61616,
+				},
+			},
+		},
+	}
+
+	client, err := internal.NewFakeClient(broker, address, svc)
 	require.NoError(t, err)
 
 	bindingContext := BindingContext{
@@ -180,11 +211,16 @@ func TestArkMQMulticastUnsupported(t *testing.T) {
 
 	provider := ArkMQBindingProvider{}
 
-	_, err = provider.Translate(bindingContext, EndpointContext{
+	binding, err := provider.Translate(bindingContext, EndpointContext{
 		Type: camelv1.EndpointTypeSink,
 	}, endpoint)
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "multicast addresses (topics) are not supported on queue binding mytopic")
+	require.NoError(t, err)
+	assert.NotNil(t, binding)
+	assert.Equal(t, "amqp:queue:my-multicast-topic", binding.URI)
+	assert.Equal(t, map[string]string{
+		"quarkus.qpid-jms.url":            "amqp://mybroker-hdls-svc.test.svc:61616",
+		"camel.component.amqp.broker-url": "amqp://mybroker-hdls-svc.test.svc:61616",
+	}, binding.ApplicationProperties)
 }
 
 func TestArkMQLookupAddressByName(t *testing.T) {
