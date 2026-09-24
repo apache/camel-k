@@ -24,7 +24,6 @@ import (
 	arkmqv1beta1 "github.com/apache/camel-k/v2/pkg/apis/duck/arkmq/v1beta1"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/uri"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -268,28 +267,11 @@ func (a ArkMQBindingProvider) lookupAddress(ctx BindingContext, endpoint camelv1
 		Namespace: namespace,
 		Name:      endpoint.Ref.Name,
 	}
-	// first check by ActiveMQArtemisAddress name
-	err := ctx.Client.Get(ctx.Ctx, key, &address)
-	if err != nil && !k8serrors.IsNotFound(err) {
+	if err := ctx.Client.Get(ctx.Ctx, key, &address); err != nil {
 		return nil, err
 	}
-	if err == nil {
-		return &address, nil
-	}
 
-	// if not found, then look at spec.queueName or spec.addressName
-	var addresses arkmqv1beta1.ActiveMQArtemisAddressList
-	if err := ctx.Client.List(ctx.Ctx, &addresses, ctrl.InNamespace(namespace)); err != nil {
-		return nil, fmt.Errorf("couldn't find any ActiveMQArtemisAddress with either name, queueName or addressName %s; error %w", endpoint.Ref.Name, err)
-	}
-	for i := range addresses.Items {
-		item := &addresses.Items[i]
-		if item.Spec.AddressName == endpoint.Ref.Name || item.Spec.QueueName == endpoint.Ref.Name {
-			return item, nil
-		}
-	}
-
-	return nil, fmt.Errorf("couldn't find any ActiveMQArtemisAddress with either name, queueName or addressName %s", endpoint.Ref.Name)
+	return &address, nil
 }
 
 func (a ArkMQBindingProvider) Order() int {
