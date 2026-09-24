@@ -227,6 +227,8 @@ func (a ArkMQBindingProvider) getBrokerURL(ctx BindingContext, clusterName, name
 		}
 	}
 
+	// NOTE: this is a first implementation that follows the ArkMQ headless service naming convention (<clusterName>-hdls-svc),
+	// but further development may be needed to make it more consistent.
 	svcName := fmt.Sprintf("%s-hdls-svc", clusterName)
 	svc, err := kubernetes.LookupService(ctx.Ctx, ctx.Client, namespace, svcName)
 	if err != nil {
