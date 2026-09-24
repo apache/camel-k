@@ -232,6 +232,22 @@ func TestXMLDataFormat(t *testing.T) {
 	}
 }
 
+const xmlMasterEndpoint = `
+<camelContext xmlns="http://camel.apache.org/schema/spring">
+  <route>
+    <from uri="master:lock:timer:tick"/>
+    <to uri="log:info"/>
+  </route>
+</camelContext>
+`
+
+func TestXMLMasterDelegate(t *testing.T) {
+	inspector := newTestXMLInspector(t)
+	assertExtract(t, inspector, xmlMasterEndpoint, func(meta *Metadata) {
+		assert.ElementsMatch(t, []string{"camel:master", "camel:timer", "camel:log"}, meta.Dependencies.List())
+	})
+}
+
 func TestXMLReplaceURI(t *testing.T) {
 	inspector := newTestXMLInspector(t)
 

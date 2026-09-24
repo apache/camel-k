@@ -408,6 +408,22 @@ func TestYAMLDataFormat(t *testing.T) {
 	}
 }
 
+const yamlMasterEndpoint = `
+- from:
+    uri: master:lock:timer:tick
+    parameters:
+      period: 1000
+    steps:
+    - to: log:info
+`
+
+func TestYAMLMasterDelegate(t *testing.T) {
+	inspector := newTestYAMLInspector(t)
+	assertExtract(t, inspector, yamlMasterEndpoint, func(meta *Metadata) {
+		assert.ElementsMatch(t, []string{"camel:master", "camel:timer", "camel:log"}, meta.Dependencies.List())
+	})
+}
+
 const yamlKameletEipNoID = `
 - from:
     uri: timer:tick

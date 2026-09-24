@@ -154,6 +154,36 @@ func TestJavaSourceDataFormat(t *testing.T) {
 	}
 }
 
+func TestJavaSourceMasterDelegate(t *testing.T) {
+	tc := []struct {
+		source string
+		deps   []string
+	}{
+		{
+			source: `from("master:lock:timer:tick").to("log:info");`,
+			deps:   []string{"camel:master", "camel:timer", "camel:log"},
+		},
+		{
+			source: `from("master:lock:timer:tick?period=1000").to("log:info");`,
+			deps:   []string{"camel:master", "camel:timer", "camel:log"},
+		},
+		{
+			source: `from("master:lock:{{delegate}}").to("log:info");`,
+			deps:   []string{"camel:master", "camel:log"},
+		},
+	}
+
+	inspector := newTestJavaSourceInspector(t)
+	for i := range tc {
+		test := tc[i]
+		t.Run(fmt.Sprintf("TestJavaSourceMasterDelegate-%d", i), func(t *testing.T) {
+			assertExtract(t, inspector, test.source, func(meta *Metadata) {
+				assert.ElementsMatch(t, test.deps, meta.Dependencies.List())
+			})
+		})
+	}
+}
+
 func TestJavaReplaceURI(t *testing.T) {
 	inspector := newTestJavaSourceInspector(t)
 

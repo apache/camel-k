@@ -400,6 +400,15 @@ func (i *baseInspector) addDependenciesFromURI(uri string, scheme *v1.CamelSchem
 		meta.AddDependency(df.GetDependencyID())
 	}
 
+	if scheme.ID == "master" {
+		// master:namespace:delegateUri[?options]
+		// The delegate endpoint is the one that consumes, so it needs its own dependencies.
+		// The master component is consumer only.
+		if parts := strings.SplitN(uri, ":", 3); len(parts) == 3 {
+			return i.addDependencies(parts[2], meta, true)
+		}
+	}
+
 	return nil
 }
 
