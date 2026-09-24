@@ -28,7 +28,6 @@ yq -i ".asciidoc.attributes.last-released-version = \"$LAST_RELEASED_VERSION\"" 
 yq -i ".asciidoc.attributes.kustomize-version = \"$KUSTOMIZE_VERSION\"" $location/../docs/antora.yml
 
 echo "Scraping information from go.mod"
-KNATIVE_API_VERSION=$(grep '^.*knative.dev/eventing ' $location/../go.mod | sed 's/^.* //' | sed 's/^.//')
 KUBE_API_VERSION=$(grep '^.*k8s.io/api ' $location/../go.mod | sed 's/^.* //' | sed 's/^.//')
 OPERATOR_FWK_API_VERSION=$(grep '^.*github.com/operator-framework/api ' $location/../go.mod | sed 's/^.* //' | sed 's/^.//')
 SERVICE_BINDING_OP_VERSION=$(grep '^.*github.com/redhat-developer/service-binding-operator ' $location/../go.mod | sed 's/^.* //' | sed 's/^.//')
@@ -36,12 +35,17 @@ PROMETHEUS_OP_VERSION=$(grep '^.*github.com/prometheus-operator/prometheus-opera
 
 echo "Kubernetes API version: $KUBE_API_VERSION"
 echo "Operator Framework API version: $OPERATOR_FWK_API_VERSION"
-echo "Knative API version: $KNATIVE_API_VERSION"
 echo "Service Binding Operator version: $SERVICE_BINDING_OP_VERSION"
 echo "Prometheus Operator version: $PROMETHEUS_OP_VERSION"
 
 yq -i ".asciidoc.attributes.kubernetes-api-version = \"$KUBE_API_VERSION\"" $location/../docs/antora.yml
 yq -i ".asciidoc.attributes.operator-fwk-api-version = \"$OPERATOR_FWK_API_VERSION\"" $location/../docs/antora.yml
-yq -i ".asciidoc.attributes.knative-api-version = \"$KNATIVE_API_VERSION\"" $location/../docs/antora.yml
 yq -i ".asciidoc.attributes.service-binding-op-version = \"$SERVICE_BINDING_OP_VERSION\"" $location/../docs/antora.yml
 yq -i ".asciidoc.attributes.prometheus-op-version = \"$PROMETHEUS_OP_VERSION\"" $location/../docs/antora.yml
+
+echo "Scraping information from e2e/knative/files/setup.sh"
+KNATIVE_VERSION=$(grep '^KNATIVE_VERSION=' $location/../e2e/knative/files/setup.sh | sed 's/^.*=//')
+
+echo "Knative version: $KNATIVE_VERSION"
+
+yq -i ".asciidoc.attributes.knative-api-version = \"$KNATIVE_VERSION\"" $location/../docs/antora.yml
