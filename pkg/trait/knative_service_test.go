@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"encoding/json"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -30,10 +31,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 
-	serving "knative.dev/serving/pkg/apis/serving/v1"
-
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	serving "github.com/apache/camel-k/v2/pkg/apis/duck/knative/serving/v1"
 	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
@@ -641,4 +641,73 @@ func TestKnativeServiceAuto(t *testing.T) {
 			Enabled: ptr.To(true),
 		},
 	}, traits.KnativeService)
+}
+
+func TestKnativeServiceSerialization(t *testing.T) {
+	tr, ok := newKnativeServiceTrait().(*knativeServiceTrait)
+	require.True(t, ok)
+	tr.Class = "hpa.autoscaling.knative.dev"
+	tr.Metric = "cpu"
+	tr.Target = ptr.To(80)
+	tr.MinScale = ptr.To(1)
+	tr.MaxScale = ptr.To(5)
+	tr.RolloutDuration = "60s"
+	tr.Visibility = "cluster-local"
+	tr.TimeoutSeconds = ptr.To(int64(44))
+	tr.Annotations = map[string]string{"my-annotation": "my-value"}
+
+	e := &Environment{
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "my-it",
+				Namespace: "my-ns",
+			},
+			Spec: v1.IntegrationSpec{
+				ServiceAccountName: "my-sa",
+			},
+		},
+	}
+
+	svc, err := tr.getServiceFor(e)
+	require.NoError(t, err)
+	actual, err := json.Marshal(svc)
+	require.NoError(t, err)
+	assert.JSONEq(t, `{
+		"kind": "Service",
+		"apiVersion": "serving.knative.dev/v1",
+		"metadata": {
+			"name": "my-it",
+			"namespace": "my-ns",
+			"labels": {
+				"bindings.knative.dev/include": "true",
+				"camel.apache.org/integration": "my-it",
+				"networking.knative.dev/visibility": "cluster-local"
+			},
+			"annotations": {
+				"my-annotation": "my-value",
+				"serving.knative.dev/rolloutDuration": "60s"
+			}
+		},
+		"spec": {
+			"template": {
+				"metadata": {
+					"labels": {"camel.apache.org/integration": "my-it"},
+					"annotations": {
+						"autoscaling.knative.dev/class": "hpa.autoscaling.knative.dev",
+						"autoscaling.knative.dev/maxScale": "5",
+						"autoscaling.knative.dev/metric": "cpu",
+						"autoscaling.knative.dev/minScale": "1",
+						"autoscaling.knative.dev/target": "80",
+						"kubectl.kubernetes.io/default-container": "integration"
+					}
+				},
+				"spec": {
+					"containers": null,
+					"serviceAccountName": "my-sa",
+					"timeoutSeconds": 44
+				}
+			}
+		},
+		"status": {}
+	}`, string(actual))
 }
