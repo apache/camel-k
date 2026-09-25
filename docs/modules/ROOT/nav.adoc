@@ -105,6 +105,7 @@
 * API
 ** xref:apis/camel-k.adoc[Camel K v1]
 * xref:contributing/developers.adoc[Contributing]
+** xref:contributing/keda-scaler.adoc[KEDA scaler mappings]
 ** xref:contributing/local-development.adoc[Local development]
 *** xref:contributing/local-execution.adoc[Operator - local execution]
 *** xref:contributing/remote-debugging.adoc[Operator - remote debug]
