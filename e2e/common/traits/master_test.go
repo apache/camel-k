@@ -55,7 +55,7 @@ func TestMasterTrait(t *testing.T) {
 			).Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+			ExpectExecSucceed(t, g, Kubectl("delete", "it", "--all", "-n", ns))
 		})
 
 		t.Run("only one integration with master runs using properties", func(t *testing.T) {

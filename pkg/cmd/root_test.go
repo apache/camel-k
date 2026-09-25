@@ -52,6 +52,17 @@ func kamelTestPreAddCommandInit() (*RootCmdOptions, *cobra.Command) {
 	return kamelTestPreAddCommandInitWithClient(fakeClient)
 }
 
+func TestDeprecatedCommandsAreNotRegistered(t *testing.T) {
+	command, err := NewKamelCommand(context.Background())
+	require.NoError(t, err)
+
+	for _, name := range []string{"delete", "get", "kit"} {
+		found, _, err := command.Find([]string{name})
+		require.Error(t, err)
+		require.Same(t, command, found)
+	}
+}
+
 func TestLoadFromEnvVar(t *testing.T) {
 	// shows how to include a "," character inside an env value see VAR1 value
 	require.NoError(t, os.Setenv("KAMEL_RUN_ENVS", "\"VAR1=value,\"\"othervalue\"\"\",VAR2=value2"))
