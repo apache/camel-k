@@ -25,6 +25,7 @@ cd $location/../pkg/client
 rm -rf camel
 rm -rf strimzi
 rm -rf keda
+rm -rf arkmq
 
 echo "Generating Go client code..."
 
@@ -57,6 +58,15 @@ $(go env GOPATH)/bin/client-gen \
   --input-base=github.com/apache/camel-k/v2/pkg/apis/duck \
   --output-dir=./keda/clientset/ \
   --output-pkg=github.com/apache/camel-k/v2/pkg/client/keda/clientset
+
+$(go env GOPATH)/bin/client-gen \
+  --input arkmq/v1beta1 \
+  --go-header-file=../../script/headers/default.txt \
+  --input-base=github.com/apache/camel-k/v2/pkg/apis/duck \
+  --output-dir=./arkmq/clientset/ \
+  --output-pkg=github.com/apache/camel-k/v2/pkg/client/arkmq/clientset
+
+
 
 $(go env GOPATH)/bin/lister-gen \
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1" \

@@ -80,7 +80,8 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 	})...)
 	clientset := fakeclientset.NewSimpleClientset(filterObjects(scheme, initObjs, func(gvk schema.GroupVersionKind) bool {
 		return !strings.Contains(gvk.Group, "camel") && !strings.Contains(gvk.Group, "knative") &&
-			!strings.Contains(gvk.Group, "cert-manager")
+			!strings.Contains(gvk.Group, "cert-manager") && !strings.Contains(gvk.Group, "amq.io") &&
+			!strings.Contains(gvk.Group, "strimzi")
 	})...)
 	replicasCount := make(map[string]int32)
 	fakescaleclient := fakescale.FakeScaleClient{}
