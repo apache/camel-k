@@ -72,18 +72,12 @@ jobs:
       run: |
         ./e2e/kafka/setup/setup.sh
 
-    - name: Create operator namespace
-      shell: bash
-      run: |
-        kubectl create ns camel-k
-
-    - name: Registry setting
-      uses: ./.github/actions/registry-setting
-
     - name: Install operator
       shell: bash
       run: |
-        make install-k8s-global
+        kubectl create ns camel-k
+        kubectl apply -k install/overlays/all-namespaces/ --server-side --force-conflicts
+        kubectl wait --for=condition=available deployment/camel-k-operator -n camel-k --timeout=60s
 
     - name: Run test
       shell: bash

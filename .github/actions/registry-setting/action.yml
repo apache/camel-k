@@ -16,7 +16,7 @@
 # ---------------------------------------------------------------------------
 
 name: registry-setting
-description: 'Setting registry'
+description: 'Setting registry externally'
 
 runs:
   using: "composite"
@@ -30,7 +30,7 @@ runs:
       # Create a self-signed certificate
       openssl req -x509 -newkey rsa:2048 -nodes   -keyout registry.key   -out registry.crt   -days 7   -subj "/CN=registry"
       kubectl create secret tls registry-tls --cert=registry.crt --key=registry.key -n registry
-      kubectl apply -f .github/actions/registry-setting/registry.yaml -n registry
+      kubectl apply -f .github/actions/ext-registry-setting/registry.yaml -n registry
       kubectl wait --for=condition=available deployment/registry -n registry --timeout=60s
       KAMEL_INSTALL_REGISTRY="$(kubectl -n registry get service registry -o jsonpath='{.spec.clusterIP}')"
       echo "KAMEL_INSTALL_REGISTRY=$KAMEL_INSTALL_REGISTRY" >> "$GITHUB_ENV"
