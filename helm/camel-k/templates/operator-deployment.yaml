@@ -64,16 +64,6 @@ spec:
               value: {{ .Values.operator.logLevel }}
             - name: OPERATOR_NAME
               value: camel-k
-
-            # Registry vars
-            - name: REGISTRY_ADDRESS
-              value: ""
-            - name: REGISTRY_SECRET
-              value: ""
-            # Set true only for testing purposes
-            - name: REGISTRY_INSECURE
-              value: "false"
-
             - name: POD_NAME
               valueFrom:
                 fieldRef:
@@ -82,6 +72,17 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+            # Used to automatically enable Camel Monitor operator project monitoring
+            # Keep the default value or change it to the same label used by the project
+            # Note: remove the variable to disable the feature.
+            - name: CAMEL_MONITOR_OPERATOR_LABEL
+              value: "camel.apache.org/monitor"
+            # You can provide a different SA for builder Pods
+            - name: BUILDER_SA
+              value: "camel-k-builder"
+            # Demo only: turn it off or remove the variable in a production environment.
+            - name: ENABLE_DEV_REGISTRY
+              value: "true"
             - name: OPERATOR_ID
               value: {{ .Values.operator.operatorId }}
             {{- with .Values.operator.extraEnv }}

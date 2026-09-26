@@ -104,7 +104,7 @@ jobs:
     - name: Infra setting
       uses: ./.github/actions/infra-setting
 
-    - name: Create registry secret namespace
+    - name: Create registry secret configuration namespace
       shell: bash
       run: |
         kubectl create ns camel-k

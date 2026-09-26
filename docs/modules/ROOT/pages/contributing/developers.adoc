@@ -165,12 +165,11 @@ If you want to test Helm installation
 
 * Build the Helm chart: `make release-helm`
 * Build the project and the image: `make images`
-* Set the internal registry: `export REGISTRY_ADDRESS=$(kubectl -n kube-system get service registry -o jsonpath='{.spec.clusterIP}')`
 * Install with Helm (look at the latest version produced by `make release-helm`)
 
 [source]
 ----
-helm install camel-k-dev docs/charts/camel-k-2.4.0-SNAPSHOT.tgz --set platform.build.registry.address=${REGISTRY_ADDRESS} --set platform.build.registry.insecure=true --set operator.image=apache/camel-k:2.4.0-SNAPSHOT
+helm install camel-k-dev docs/charts/camel-k-2.4.0-SNAPSHOT.tgz --set operator.image=apache/camel-k:2.4.0-SNAPSHOT
 ----
 
 * To uninstall: `helm uninstall camel-k-dev`

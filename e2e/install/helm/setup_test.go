@@ -43,9 +43,6 @@ func TestHelmInstallation(t *testing.T) {
 		// as we must make the procedure to install them accordingly
 		g.Expect(CRDs(t)()).Should(BeNil(), "No Camel K CRDs should be previously installed for this test")
 
-		registry := os.Getenv("KAMEL_INSTALL_REGISTRY")
-		g.Expect(registry).NotTo(BeEmpty(), "KAMEL_INSTALL_REGISTRY env var must not be empty")
-
 		operatorID := "helm-ck"
 		os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../")
 		ExpectExecSucceed(t, g,
@@ -54,14 +51,6 @@ func TestHelmInstallation(t *testing.T) {
 				"install",
 				"camel-k",
 				fmt.Sprintf("../../../docs/charts/camel-k-%s.tgz", defaults.Version),
-				"--set", "operator.env[0].name=REGISTRY_ADDRESS",
-				"--set", "operator.env[0].value="+registry,
-				// We expect the testing infra to make it available a secret
-				// named "my-registry" in the installation namespace
-				"--set", "operator.env[1].name=REGISTRY_SECRET",
-				"--set", "operator.env[1].value=my-registry",
-				"--set", "operator.env[2].name=REGISTRY_INSECURE",
-				"--set-string", "operator.env[2].value=true",
 				"--set", fmt.Sprintf("operator.operatorId=%s", operatorID),
 				"-n", operatorNs,
 				"--force",

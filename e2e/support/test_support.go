@@ -80,6 +80,7 @@ import (
 )
 
 const kubeConfigEnvVar = "KUBECONFIG"
+const registrySecret = "ck-dev-registry"
 
 var TestDefaultNamespace = "default"
 
@@ -213,7 +214,7 @@ func KamelRunWithID(t *testing.T, ctx context.Context, operatorID string, namesp
 
 func kamelRunWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string, args ...string) *cobra.Command {
 	if os.Getenv("E2E_TEST_REGISTRY_SECRET_COPY") == "true" {
-		args = append(args, "-t", "pull-secret.secret-name=my-registry")
+		args = append(args, "-t", "pull-secret.secret-name="+registrySecret)
 	}
 	return kamelCommandWithContext(t, ctx, "run", operatorID, namespace, args...)
 }
@@ -1941,7 +1942,7 @@ func WithNamedTestNamespace(t *testing.T, doRun func(context.Context, *gomega.Wi
 func WithExistingNamedTestNamespace(t *testing.T, doRun func(context.Context, *gomega.WithT, string), namespace string) {
 	// Required to copy the registry secret previously set on the camel-k namespace
 	if os.Getenv("E2E_TEST_REGISTRY_SECRET_COPY") == "true" {
-		copySecret(t, testContext, TestClient(t), "my-registry", "camel-k", namespace)
+		copySecret(t, testContext, TestClient(t), registrySecret, "camel-k", namespace)
 	}
 	// Required to copy the registry config previously set on the camel-k namespace
 	// This is used by "advanced" tests which are installing the operator on their own
@@ -2100,7 +2101,7 @@ func NewNamedTestNamespace(t *testing.T, ctx context.Context, name string) ctrl.
 
 	// Required to copy the registry secret previously set on the camel-k namespace
 	if os.Getenv("E2E_TEST_REGISTRY_SECRET_COPY") == "true" {
-		copySecret(t, ctx, c, "my-registry", "camel-k", name)
+		copySecret(t, ctx, c, registrySecret, "camel-k", name)
 	}
 	// Required to copy the registry config previously set on the camel-k namespace
 	// This is used by "advanced" tests which are installing the operator on their own
