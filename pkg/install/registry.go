@@ -34,35 +34,61 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/yaml"
+
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	ctrlcli "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+const serviceRegistryClusterIPTimeout = 30 * time.Second
+const serviceRegistryClusterIPPollingTime = 500 * time.Millisecond
+
+type registryConf struct {
+	clusterIP                string
+	insecure                 string
+	dockerRegistrySecretName string
+}
+
+// CreateContainerRegistrySelfSignedCerts is in charge to generate a self signed certificate for development
+// and internal use only.
+func CreateContainerRegistrySelfSignedCerts(ctx context.Context, key, crt string) error {
+	cmd := exec.CommandContext(ctx, "openssl",
+		"req", "-x509", "-newkey", "rsa:2048", "-nodes",
+		"-keyout", key,
+		"-out", crt,
+		"-days", "365",
+		"-subj", "/CN=registry",
+	)
+
+	return cmd.Run()
+}
+
 // OperatorStartupRegistry tries to install optional development container registry.
-func OperatorStartupRegistry(ctx context.Context, c client.Client, withSecret bool) error {
+func OperatorStartupRegistry(ctx context.Context, c client.Client, withSecret bool, crtSecret *corev1.Secret) (*registryConf, error) {
 	secret, err := resources.Resource("/resources/registry/secret.yaml")
 	if err != nil {
-		return fmt.Errorf("could not load development container registry Secret configuration: %w", err)
+		return nil, fmt.Errorf("could not load development container registry Secret configuration: %w", err)
 	}
 	var registrySecret corev1.Secret
 	if err = yaml.Unmarshal(secret, &registrySecret); err != nil {
-		return fmt.Errorf("could not parse development container registry Secret configuration: %w", err)
+		return nil, fmt.Errorf("could not parse development container registry Secret configuration: %w", err)
 	}
 
 	service, err := resources.Resource("/resources/registry/service.yaml")
 	if err != nil {
-		return fmt.Errorf("could not load development container registry Service configuration: %w", err)
+		return nil, fmt.Errorf("could not load development container registry Service configuration: %w", err)
 	}
 	var registryService corev1.Service
 	if err = yaml.Unmarshal(service, &registryService); err != nil {
-		return fmt.Errorf("could not parse development container registry Service configuration: %w", err)
+		return nil, fmt.Errorf("could not parse development container registry Service configuration: %w", err)
 	}
 
 	deploy, err := resources.Resource("/resources/registry/deploy.yaml")
 	if err != nil {
-		return fmt.Errorf("could not load development container registry Deployment configuration: %w", err)
+		return nil, fmt.Errorf("could not load development container registry Deployment configuration: %w", err)
 	}
 	var registryDeploy appsv1.Deployment
 	if err = yaml.Unmarshal(deploy, &registryDeploy); err != nil {
-		return fmt.Errorf("could not parse development container registry Deployment configuration: %w", err)
+		return nil, fmt.Errorf("could not parse development container registry Deployment configuration: %w", err)
 	}
 
 	if withSecret && len(registryDeploy.Spec.Template.Spec.Containers) > 0 {
@@ -83,88 +109,88 @@ func OperatorStartupRegistry(ctx context.Context, c client.Client, withSecret bo
 			})
 	}
 
+	deployNamespace := platform.GetOperatorNamespace()
 	// Get owner reference to operator deployment to manage garbage collection
-	ref, err := getOwnerRef(ctx, c)
+	ref, err := getOwnerRef(ctx, c, "camel-k-operator", deployNamespace)
 	if err != nil {
-		return fmt.Errorf("could not get operator deployment ownership: %w", err)
+		return nil, fmt.Errorf("could not get operator deployment ownership: %w", err)
 	}
 
-	// create self signed certificate
-	cmd := exec.Command("openssl",
-		"req", "-x509", "-newkey", "rsa:2048", "-nodes",
-		"-keyout", "/tmp/registry.key",
-		"-out", "/tmp/registry.crt",
-		"-days", "365",
-		"-subj", "/CN=registry",
-	)
-
-	if err = cmd.Run(); err != nil {
-		return fmt.Errorf("could not generate development container registry self signed certificate: %w", err)
-	}
-	crtSecret, err := kubernetes.TLSSecretFromFiles(ctx, "camel-k", "registry-tls", "/tmp/registry.crt", "/tmp/registry.key")
-	if err != nil {
-		return fmt.Errorf("could not generate development container registry self signed certificate secret: %w", err)
-	}
 	crtSecret.SetOwnerReferences([]metav1.OwnerReference{*ref})
-	if err := c.Create(ctx, crtSecret); err != nil {
-		return fmt.Errorf("could not create development container registry push secret: %w", err)
+	if err := replace(ctx, c, crtSecret); err != nil {
+		return nil, fmt.Errorf("could not create development container registry push secret: %w", err)
 	}
 
-	registrySecret.SetNamespace("camel-k")
-	registryService.SetNamespace("camel-k")
-	registryDeploy.SetNamespace("camel-k")
+	registrySecret.SetNamespace(deployNamespace)
+	registryService.SetNamespace(deployNamespace)
+	registryDeploy.SetNamespace(deployNamespace)
 	registrySecret.SetOwnerReferences([]metav1.OwnerReference{*ref})
 	registryService.SetOwnerReferences([]metav1.OwnerReference{*ref})
 	registryDeploy.SetOwnerReferences([]metav1.OwnerReference{*ref})
 
 	// Try to create the resources now
-	if err := c.Create(ctx, &registrySecret); err != nil {
-		return fmt.Errorf("could not create development container registry Secret configuration: %w", err)
+	if err := replace(ctx, c, &registrySecret); err != nil {
+		return nil, fmt.Errorf("could not create development container registry Secret configuration: %w", err)
 	}
-	if err := c.Create(ctx, &registryService); err != nil {
-		return fmt.Errorf("could not create development container registry Service configuration: %w", err)
+	if err := replace(ctx, c, &registryService); err != nil {
+		return nil, fmt.Errorf("could not create development container registry Service configuration: %w", err)
 	}
-	if err := c.Create(ctx, &registryDeploy); err != nil {
-		return fmt.Errorf("could not create development container registry Deployment configuration: %w", err)
+	if err := replace(ctx, c, &registryDeploy); err != nil {
+		return nil, fmt.Errorf("could not create development container registry Deployment configuration: %w", err)
 	}
 
 	// Get the cluster IP and use it to configure internally the operator
-	clusterIP, err := waitForClusterIP(ctx, c, registryService.GetNamespace(), registryService.GetName(), 30*time.Second)
+	clusterIP, err := waitForClusterIP(ctx, c, registryService.GetNamespace(), registryService.GetName(), serviceRegistryClusterIPTimeout)
 	if err != nil {
-		return fmt.Errorf("could not get development container registry Service IP: %w", err)
+		return nil, fmt.Errorf("could not get development container registry Service IP: %w", err)
 	}
 
-	dockerRegistrySecret, err := kubernetes.DockerRegistrySecret(ctx, "camel-k", "ck-dev-registry", clusterIP, "admin", "password")
+	dockerRegistrySecret, err := kubernetes.DockerRegistrySecret(ctx, deployNamespace, "ck-dev-registry", clusterIP, "admin", "password")
 	if err != nil {
-		return fmt.Errorf("could not generate development container registry push secret: %w", err)
+		return nil, fmt.Errorf("could not generate development container registry push secret: %w", err)
 	}
 	dockerRegistrySecret.SetOwnerReferences([]metav1.OwnerReference{*ref})
-	if err := c.Create(ctx, dockerRegistrySecret); err != nil {
-		return fmt.Errorf("could not create development container registry push secret: %w", err)
+	if err := replace(ctx, c, dockerRegistrySecret); err != nil {
+		return nil, fmt.Errorf("could not create development container registry push secret: %w", err)
 	}
 
-	log.Infof("Setting up development container registry configuration environment variables (registry IP %s). Notice that it overrides the operator configuration"+
-		" but it won't override any IntegrationProfile configuration.", clusterIP)
-	os.Setenv("REGISTRY_ADDRESS", clusterIP)
-	os.Setenv("REGISTRY_INSECURE", "false")
-	os.Setenv("REGISTRY_SECRET", dockerRegistrySecret.GetName())
-	// We must reinitialize to get those values just changed in the default platform configuration
-	platform.InitPlatform()
-
-	return nil
+	return &registryConf{
+		clusterIP:                clusterIP,
+		insecure:                 "false",
+		dockerRegistrySecretName: dockerRegistrySecret.GetName(),
+	}, nil
 }
 
-func getOwnerRef(ctx context.Context, c client.Client) (*metav1.OwnerReference, error) {
-	operatorDeploy := &appsv1.Deployment{}
+// OverrideRegistryConfiguration is in charge to change the registry configuration at runtime.
+func OverrideRegistryConfiguration(conf *registryConf) {
+	if conf == nil {
+		return
+	}
+	log.Infof("Setting up development container registry configuration environment variables (registry IP %s). Notice that it overrides the operator configuration"+
+		" but it won't override any IntegrationProfile configuration.", conf.clusterIP)
+	os.Setenv("REGISTRY_ADDRESS", conf.clusterIP)
+	os.Setenv("REGISTRY_INSECURE", conf.insecure)
+	os.Setenv("REGISTRY_SECRET", conf.dockerRegistrySecretName)
+	// We must reinitialize to get those values just changed in the default platform configuration
+	platform.InitPlatform()
+}
 
-	err := c.Get(ctx, types.NamespacedName{
-		// TODO: change theme
-		Name:      "camel-k-operator",
-		Namespace: "camel-k",
-	}, operatorDeploy)
-	if err != nil {
+func getOwnerRef(ctx context.Context, c client.Client, operatorName, deployNamespace string) (*metav1.OwnerReference, error) {
+	var deployments appsv1.DeploymentList
+
+	if err := c.List(ctx, &deployments,
+		ctrlcli.InNamespace(deployNamespace),
+		ctrlcli.MatchingLabels{"name": operatorName},
+	); err != nil {
 		return nil, err
 	}
+
+	if len(deployments.Items) != 1 {
+		return nil, fmt.Errorf("expected exactly one deployment with label name=%s in namespace %s, got %d",
+			operatorName, deployNamespace, len(deployments.Items))
+	}
+
+	operatorDeploy := &deployments.Items[0]
 
 	ownerRef := metav1.OwnerReference{
 		APIVersion:         "apps/v1",
@@ -182,7 +208,7 @@ func waitForClusterIP(ctx context.Context, c client.Client, namespace, name stri
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	ticker := time.NewTicker(500 * time.Millisecond)
+	ticker := time.NewTicker(serviceRegistryClusterIPPollingTime)
 	defer ticker.Stop()
 
 	for {
@@ -212,4 +238,25 @@ func waitForClusterIP(ctx context.Context, c client.Client, namespace, name stri
 		case <-ticker.C:
 		}
 	}
+}
+
+func replace(ctx context.Context, c client.Client, obj ctrlcli.Object) error {
+	copied := obj.DeepCopyObject()
+
+	current, ok := copied.(ctrlcli.Object)
+	if !ok {
+		return fmt.Errorf("DeepCopyObject returned %T, expected controller runtime Object", copied)
+	}
+
+	err := c.Get(ctx, ctrlcli.ObjectKeyFromObject(obj), current)
+	if apierrors.IsNotFound(err) {
+		return c.Create(ctx, obj)
+	}
+	if err != nil {
+		return err
+	}
+
+	obj.SetResourceVersion(current.GetResourceVersion())
+
+	return c.Update(ctx, obj)
 }

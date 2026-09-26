@@ -37,7 +37,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestKustomizeDescoped(t *testing.T) {
+func TestKustomizeAllNamespaces(t *testing.T) {
 	kustomizeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		// Let's make sure no CRD is yet available in the cluster

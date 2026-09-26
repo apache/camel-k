@@ -47,7 +47,7 @@ func TestKustomizeSingleNamespace(t *testing.T) {
 		WithNamedTestNamespace(t, func(ctx context.Context, g *WithT, tenantNs string) {
 			// Let's make sure no CRD is yet available in the cluster
 			// as we must make the procedure to install them accordingly
-			g.Eventually(CRDs(t)).Should(BeNil(), "No Camel K CRDs should be previously installed for this test")
+			g.Expect(CRDs(t)()).Should(BeNil(), "No Camel K CRDs should be previously installed for this test")
 			ExpectExecSucceed(t, g, Kubectl(
 				"apply",
 				"-k",

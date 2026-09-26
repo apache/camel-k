@@ -24,7 +24,6 @@ package advanced
 
 import (
 	"context"
-	"os"
 	"strings"
 	"testing"
 
@@ -53,16 +52,7 @@ func TestHTTPProxy(t *testing.T) {
 		// Retrieve the Kubernetes Service ClusterIPs to populate the NO_PROXY environment variable
 		svc := Service(t, ctx, TestDefaultNamespace, "kubernetes")()
 		g.Expect(svc).NotTo(BeNil())
-
 		noProxy = append(noProxy, svc.Spec.ClusterIPs...)
-
-		// Retrieve the internal container registry to populate the NO_PROXY environment variable
-		if registry, ok := os.LookupEnv("KAMEL_INSTALL_REGISTRY"); ok {
-			domain := RegistryRegexp.FindString(registry)
-			g.Expect(domain).NotTo(BeNil())
-			domain = strings.Split(domain, ":")[0]
-			noProxy = append(noProxy, domain)
-		}
 
 		// Install Camel K with the HTTP proxy environment variable
 		InstallOperatorWithConf(t, ctx, g, ns, "", false,

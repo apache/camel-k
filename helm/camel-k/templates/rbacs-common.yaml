@@ -104,6 +104,61 @@ kind: Role
 metadata:
   labels:
     app: camel-k
+  name: {{ include "camel-k.fullname" . }}-dev-registry
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  resourceNames:
+  - registry-auth
+  - registry-tls
+  - ck-dev-registry
+  resources:
+  - secrets
+  verbs:
+  - get
+  - update
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+- apiGroups:
+  - apps
+  resourceNames:
+  - registry
+  resources:
+  - deployments
+  verbs:
+  - get
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  resourceNames:
+  - registry
+  resources:
+  - services
+  verbs:
+  - get
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app: camel-k
   name: {{ include "camel-k.fullname" . }}-kamelet-viewer
 rules:
 - apiGroups:
@@ -142,6 +197,20 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: {{ include "camel-k.fullname" . }}-builder
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app: camel-k
+  name: {{ include "camel-k.fullname" . }}-dev-registry
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "camel-k.fullname" . }}-dev-registry
+subjects:
+- kind: ServiceAccount
+  name: {{ include "camel-k.fullname" . }}-operator
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

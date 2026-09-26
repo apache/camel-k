@@ -26,7 +26,6 @@ import (
 	"os"
 
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type dockerConfigJSON struct {
@@ -50,6 +49,7 @@ func buildDockerConfigJSON(server, username, password string) ([]byte, error) {
 			},
 		},
 	}
+
 	return json.Marshal(cfg)
 }
 
@@ -61,11 +61,9 @@ func DockerRegistrySecret(ctx context.Context, namespace, name, server, username
 	}
 
 	secret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Type: corev1.SecretTypeDockerConfigJson,
+		Name:      name,
+		Namespace: namespace,
+		Type:      corev1.SecretTypeDockerConfigJson,
 		Data: map[string][]byte{
 			corev1.DockerConfigJsonKey: dockerCfgJSON,
 		},
@@ -77,7 +75,7 @@ func DockerRegistrySecret(ctx context.Context, namespace, name, server, username
 // TLSSecretFromFiles mirrors `kubectl create secret tls --cert=<path> --key=<path>`,
 // reading the cert/key from disk and validating them the same way kubectl does
 // (tls.X509KeyPair) before submitting to the API.
-func TLSSecretFromFiles(ctx context.Context, namespace, name string, certPath, keyPath string) (*corev1.Secret, error) {
+func TLSSecretFromFiles(ctx context.Context, namespace, name string, keyPath, certPath string) (*corev1.Secret, error) {
 	certData, err := os.ReadFile(certPath)
 	if err != nil {
 		return nil, fmt.Errorf("reading cert file %q: %w", certPath, err)
@@ -95,11 +93,9 @@ func TLSSecretFromFiles(ctx context.Context, namespace, name string, certPath, k
 	}
 
 	secret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Type: corev1.SecretTypeTLS,
+		Name:      name,
+		Namespace: namespace,
+		Type:      corev1.SecretTypeTLS,
 		Data: map[string][]byte{
 			corev1.TLSCertKey:       certData,
 			corev1.TLSPrivateKeyKey: keyData,

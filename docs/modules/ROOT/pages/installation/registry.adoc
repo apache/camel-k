@@ -6,11 +6,9 @@ image::architecture/camel-k-registry.svg[Container registry in action, width=800
 
 The Camel K operator is in charge to build a Camel application and to "containerize" it, storing the result into a container registry. The same registry is used by the cluster to run the Camel application. Basically the operator push the image and the cluster pull it from the same source.
 
-For the reason above it's important that you provide a container registry which is accessible from both the operator Pod and the cluster internal mechanisms. However, a **default registry** is present in certain platforms such as _Minikube_, _Openshift_ or _Docker Desktop_.
+For the reason above it's important that you provide a container registry which is accessible from both the operator Pod and the cluster internal mechanisms. However, a **default registry** is available when running quick starts and demos.
 
-For any other platform that do not provide a default container registry, then, a container registry must be provided accordingly.
-
-You will need to add or edit any existing registry environment variable configuration according your installation method. These are the variables you can configure:
+When ready to move to a real enterprise environment, then you're expected to configure the registry. You will need to add or edit any existing registry environment variable configuration according your installation method. These are the variables you can configure:
 
 [cols="1,3,2", options="header"]
 |===
@@ -58,6 +56,13 @@ kubectl create secret docker-registry registry --docker-server <my-registry-addr
 NOTE: you must include `--docker-server docker.io` value also if you're using Docker Hub. The default value provided by `kubectl` won't.
 
 As each registry may have a slightly different way of securing the access you can use the generic guidelines provided in and adjust accordingly (more information in the xref:installation/registry/registry-secret.adoc[Secret registry configuration] guide). We expect that at the end of the process you have a public address (1) an _organization_ (2) (optional, see details below) and a _secret_ (3) values that will be used to configure the registry.
+
+[[pull-secret]]
+=== Deployment pull secret
+
+When you're using a secured registry protected via secret, you will also need to provide a secret via `pull-secret.secretName` trait parameter. We advice to separate the credentials used by the operator to **push** a container from the credentials required to **pull** the container. The operators requires **write** privileges, whilst the container only requires **read** privileges to get the container.
+
+The **read** secret you will be using via trait configuration must be available in the same Integration namespace.
 
 [[organization]]
 === Role of the organization parameter
