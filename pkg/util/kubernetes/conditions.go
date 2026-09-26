@@ -22,8 +22,8 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 
-	knative "knative.dev/pkg/apis"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
+	knative "github.com/apache/camel-k/v2/pkg/apis/duck/knative/apis"
+	servingv1 "github.com/apache/camel-k/v2/pkg/apis/duck/knative/serving/v1"
 )
 
 func GetPodCondition(pod corev1.Pod, conditionType corev1.PodConditionType) *corev1.PodCondition {

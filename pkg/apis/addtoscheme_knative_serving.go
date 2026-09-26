@@ -18,7 +18,7 @@ limitations under the License.
 package apis
 
 import (
-	serving "knative.dev/serving/pkg/apis/serving/v1"
+	serving "github.com/apache/camel-k/v2/pkg/apis/duck/knative/serving/v1"
 )
 
 func init() {

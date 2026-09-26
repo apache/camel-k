@@ -25,11 +25,11 @@ import (
 	"unicode"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	eventingv1 "github.com/apache/camel-k/v2/pkg/apis/duck/knative/eventing/v1"
+	messagingv1 "github.com/apache/camel-k/v2/pkg/apis/duck/knative/messaging/v1"
+	servingv1 "github.com/apache/camel-k/v2/pkg/apis/duck/knative/serving/v1"
 
 	corev1 "k8s.io/api/core/v1"
-	eventingv1 "knative.dev/eventing/pkg/apis/eventing/v1"
-	messagingv1 "knative.dev/eventing/pkg/apis/messaging/v1"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 )
 
 const (

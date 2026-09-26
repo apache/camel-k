@@ -28,7 +28,7 @@ Below you can find a list of the main dependencies and APIs used by Camel K and 
 |Camel K Version
 |Kubernetes API
 |Operator Framework API
-|Knative API
+|Knative
 |Prometheus Operator
 |Kustomize version
 |===
