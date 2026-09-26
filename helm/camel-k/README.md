@@ -2,24 +2,6 @@
 
 Apache Camel K is the lightweight integration platform for Kubernetes: the easiest way to build and manage your Camel applications on Kubernetes. This chart deploys the Camel K operator and all resources needed to natively run Apache Camel Integrations on any Kubernetes cluster.
 
-## Prerequisites
-
-- A container image registry installed and configured for pull
-- For production environments, a registry secret containing the access to container registry
-
-### Minikube
-
-Minikube offers a container registry addon, which it makes very well suited for local Camel K development and testing purposes:
-
-```bash
-$ minikube addons enable registry
-...
-$ kubectl -n kube-system get service registry -o jsonpath='{.spec.clusterIP}'
-a.b.c.d
-```
-
-You can use the container registry ClusterIP result `a.b.c.d` as `REGISTRY_ADDRESS` configuration.
-
 ## Installation procedure
 
 To install the chart, first add the Camel K repository:
@@ -30,17 +12,11 @@ $ helm repo add camel-k https://apache.github.io/camel-k/charts
 
 ## Install the operator
 
-When installing the operator you must at least include the container registry to use (either the address or the service to use):
-
 ```bash
-$ helm install camel-k camel-k/camel-k --set global=true \
-  --set operator.env[0].name=REGISTRY_ADDRESS \
-  --set operator.env[0].value=<my-registry-address> \
-  --set operator.env[1].name=REGISTRY_SECRET \
-  --set operator.env[1].value=<my-registry-secret>
+$ helm install camel-k camel-k/camel-k --set global=true
 ```
 
-**Note**: if you're running a local Minikube installation, you can use the registry ClusterIP as `REGISTRY_ADDRESS`, skip the `REGISTRY_SECRET` and add `REGISTRY_INSECURE=true` environment variables.
+The procedure is installing the operator and a side default development container registry you can use for local development. See official documentation to learn how to configure a production grade container registry instead.
 
 ## Test your installation
 

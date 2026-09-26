@@ -3,26 +3,6 @@
 
 Camel K allows us to run Camel integrations directly on a Kubernetes cluster. To use it, you need to be connected to a cloud environment or to a local cluster created for development purposes (ie, Minikube or Kind).
 
-[[registry]]
-== Container registry configuration
-
-You will need a container registry available in order to push and pull the generated Camel applications. The easiest way to configure it is to store the configuration on a Configmap which will be used by the operator:
-
-```
-$ kubectl create ns camel-k
-
-$ kubectl create configmap camel-k-operator-configmap-configuration \
-  --from-literal=REGISTRY_ADDRESS="docker.io" \
-  --from-literal=REGISTRY_SECRET="my-docker-secret"
-  -n camel-k
-```
-
-NOTE: the configuration needs to be available in the namespace where the operator will run.
-
-Have a further look at the xref:installation/registry.adoc[production ready registry configuration documentation].
-
-You can now install and run the Camel K operator. You can do it via any of the following methodologies:
-
 [[kustomize]]
 == Installation via Kustomize
 
@@ -104,6 +84,29 @@ Camel K installation is usually straightforward, but for certain cluster types y
 
 - xref:installation/platform/gke.adoc[Google Kubernetes Engine (GKE)]
 - xref:installation/platform/iks.adoc[IBM Kubernetes Services (IKS)]
+
+[[registry]]
+== Development container registry configuration
+
+Camel K needs a container registry in order to push the generated Camel applications and Kubernetes needs the same registry to pull and run them live. The project offers a default development container registry that will simplify quick starts, demo and testing. When running the project for the first time or in a local environment you shouldn't worry as it will be completely transparent to you. The development registry is controlled through the following environment variables configuration:
+
+[cols="1,3,2", options="header"]
+|===
+| Name | Description | Default Value
+
+| ENABLE_DEV_REGISTRY
+| Run a demo container registry application in the same namespace as the Camel K Operator.
+| true
+
+| ENABLE_DEV_REGISTRY_SECURE
+| Whether to secure the demo container registry with a default test user (`admin/password`). In this case you need to provide a secret in the Integration namespace and use the `pull-secret` trait configuration. Be aware that the operator will store a secret named `ck-dev-registry` in the same namespace where it is installed. You may copy and use it in your Integration namespace for local development purposes.
+| false
+
+|===
+
+When ready to move to a real enterprise installation you will need to turn the flag off (or remove it) and provide a proper xref:installation/registry.adoc[production ready registry configuration].
+
+NOTE: if you don't remove the `ENABLE_DEV_REGISTRY` parameter, the operator will overwrite any registry configuration at startup with its internal demo registry.
 
 [[fine-tuning]]
 == Fine Tuning

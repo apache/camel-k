@@ -66,6 +66,11 @@ import (
 	logutil "github.com/apache/camel-k/v2/pkg/util/log"
 )
 
+const (
+	devRegistryselfSignedKey = "/tmp/registry.key"
+	devRegistryselfSignedCrt = "/tmp/registry.crt"
+)
+
 var log = logutil.Log.WithName("cmd")
 
 func printVersion() {
@@ -238,6 +243,38 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	installCtx, installCancel := context.WithTimeout(ctx, 1*time.Minute)
 	defer installCancel()
 	install.OperatorStartupOptionalTools(installCtx, bootstrapClient, log)
+
+	devRegistryEnvVal, devReg := os.LookupEnv("ENABLE_DEV_REGISTRY")
+	if devReg && devRegistryEnvVal == "true" {
+		// Only enable registry protected by secret if configured
+		devRegistrySecretEnvVal, devRegSecret := os.LookupEnv("ENABLE_DEV_REGISTRY_SECRET")
+		withSecret := devRegSecret && devRegistrySecretEnvVal == "true"
+		log.Info("Installing development container registry")
+		if withSecret {
+			log.Info("NOTE: ENABLE_DEV_REGISTRY_SECRET is set, mind to provide a secret with the expected default values (see docs) " +
+				" in the Integration namespace and to pull images with it.")
+		}
+		log.Info("WARNING: the internal development container registry is ephemeral and not secured. " +
+			"It MUST be considered for DEVELOPMENT and DEMO purposes only. Make sure to read documentation and switch to " +
+			"a production grade container registry when moving the operator to a production environment.")
+		registryCtx, registryCancel := context.WithTimeout(ctx, 1*time.Minute)
+		defer registryCancel()
+		if err := install.CreateContainerRegistrySelfSignedCerts(devRegistryselfSignedKey, devRegistryselfSignedCrt); err != nil {
+			log.Error(err, "could not generate development container registry self signed certificate")
+		}
+		crtSecret, err := kubernetes.TLSSecretFromFiles(ctx, operatorNamespace, "registry-tls", devRegistryselfSignedKey, devRegistryselfSignedCrt)
+		if err != nil {
+			log.Error(err, "could not generate development container registry self signed certificate secret")
+
+			return
+		}
+		overrideConf, err := install.OperatorStartupRegistry(registryCtx, bootstrapClient, withSecret, crtSecret)
+		if err == nil {
+			install.OverrideRegistryConfiguration(overrideConf)
+		} else {
+			log.Error(err, "could not install the development container registry")
+		}
+	}
 
 	log.Info("Starting the manager")
 	exitOnError(mgr.Start(ctx), "manager exited non-zero")

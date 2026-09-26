@@ -15,19 +15,34 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-name: ck-conf-setting
+name: registry-setting
 description: 'Setting registry'
 
 runs:
   using: "composite"
 
   steps:
-  - id: ck-conf-settings
-    name: Create a common configuration required by tests
+  - id: registry-settings
+    name: Create an auth secured registry
     shell: bash
     run: |
+      kubectl create ns registry
+      # Create a self-signed certificate
+      openssl req -x509 -newkey rsa:2048 -nodes   -keyout registry.key   -out registry.crt   -days 7   -subj "/CN=registry"
+      kubectl create secret tls registry-tls --cert=registry.crt --key=registry.key -n registry
+      kubectl apply -f .github/actions/registry-setting/registry.yaml -n registry
+      kubectl wait --for=condition=available deployment/registry -n registry --timeout=60s
+      KAMEL_INSTALL_REGISTRY="$(kubectl -n registry get service registry -o jsonpath='{.spec.clusterIP}')"
+      echo "KAMEL_INSTALL_REGISTRY=$KAMEL_INSTALL_REGISTRY" >> "$GITHUB_ENV"
+      echo "Setting registry as $KAMEL_INSTALL_REGISTRY which is required by certain tests"
+      kubectl create secret docker-registry my-registry \
+        --docker-server $KAMEL_INSTALL_REGISTRY \
+        --docker-username admin \
+        --docker-password password \
+        -n camel-k
       kubectl create configmap camel-k-operator-configmap-configuration \
-        --from-literal=ENABLE_DEV_REGISTRY_SECRET="true" \
+        --from-literal=REGISTRY_ADDRESS="$KAMEL_INSTALL_REGISTRY" \
+        --from-literal=REGISTRY_SECRET="my-registry" \
         --from-literal=MAVEN_REPOSITORIES_ALLOWED="https://maven.repository.redhat.com/ga@id=redhat" \
         -n camel-k
       E2E_TEST_REGISTRY_SECRET_COPY=true

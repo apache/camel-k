@@ -15,18 +15,60 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-#
-# rbac resources applicable for all kubernetes platforms
-#
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
+# Required to setup an internal development registry. You can skip this configuration in a production environment.
+# Note that the resources names must match the ones expected in the code, which, are static.
 
-resources:
-- builder-role.yaml
-- builder-role-openshift.yaml
-- dev-registry-role.yaml
-- kamelets-viewer-role.yaml
-- builder-role-binding.yaml
-- builder-role-binding-openshift.yaml
-- dev-registry-role-binding.yaml
-- kamelets-viewer-role-binding.yaml
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-dev-registry
+  labels:
+    app: "camel-k"
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+- apiGroups:
+    - ""
+  resources:
+    - secrets
+  verbs:
+    - get
+    - update
+  resourceNames:
+    - registry-auth
+    - registry-tls
+    - ck-dev-registry
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+    - get
+    - update
+  resourceNames:
+    - registry
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+    - get
+    - update
+  resourceNames:
+    - registry
