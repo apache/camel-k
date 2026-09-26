@@ -25,9 +25,11 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+ARKMQ_OPERATOR_VERSION="${1:-"v2.2.2"}"
+
 kubectl create namespace arkmq --dry-run=client -o yaml | kubectl apply -f -
-kubectl apply --server-side -f https://github.com/arkmq-org/arkmq-org-broker-operator/releases/latest/download/arkmq-org-broker-operator.yaml -n arkmq
-kubectl rollout status deployment arkmq-org-broker-operator -n arkmq --timeout=180s
+kubectl apply --server-side -f "https://github.com/arkmq-org/arkmq-org-broker-operator/releases/download/${ARKMQ_OPERATOR_VERSION}/activemq-artemis-operator.yaml"
+kubectl rollout status deployment activemq-artemis-controller-manager -n activemq-artemis-operator --timeout=180s
 
 # Wait for CRDs to be established
 kubectl wait --for=condition=established crd/activemqartemises.broker.amq.io --timeout=60s
