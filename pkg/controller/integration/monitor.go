@@ -457,8 +457,9 @@ func arePodsFailingStatuses(integration *v1.Integration, pendingPods []corev1.Po
 		containers = append(containers, pod.Status.InitContainerStatuses...)
 		containers = append(containers, pod.Status.ContainerStatuses...)
 		for _, container := range containers {
-			// Check the images are pulled
-			if waiting := container.State.Waiting; waiting != nil && waiting.Reason == "ImagePullBackOff" {
+			// Check the images are pulled. The kubelet alternates between both reasons while retrying.
+			if waiting := container.State.Waiting; waiting != nil &&
+				(waiting.Reason == "ErrImagePull" || waiting.Reason == "ImagePullBackOff") {
 				integration.Status.Phase = v1.IntegrationPhaseError
 				integration.SetReadyConditionError(waiting.Message)
 
