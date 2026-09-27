@@ -29,10 +29,9 @@ import (
 // routing the events received on a Channel to a Subscriber.
 type Subscription struct {
 	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   SubscriptionSpec   `json:"spec"`
-	Status SubscriptionStatus `json:"status,omitempty"`
+	Spec SubscriptionSpec `json:"spec,omitempty"`
 }
 
 // SubscriptionSpec specifies the Channel for incoming events and the Subscriber processing them.
@@ -43,29 +42,6 @@ type SubscriptionSpec struct {
 	// Subscriber is reference to the function for processing events.
 	// +optional
 	Subscriber *apis.Destination `json:"subscriber,omitempty"`
-
-	// Reply specifies how to handle events returned from the Subscriber target.
-	// +optional
-	Reply *apis.Destination `json:"reply,omitempty"`
-}
-
-// SubscriptionStatus represents the current state of a Subscription.
-type SubscriptionStatus struct {
-	apis.Status `json:",inline"`
-
-	// PhysicalSubscription is the fully resolved values that this Subscription represents.
-	PhysicalSubscription SubscriptionStatusPhysicalSubscription `json:"physicalSubscription,omitempty"`
-}
-
-// SubscriptionStatusPhysicalSubscription represents the fully resolved values for this Subscription.
-type SubscriptionStatusPhysicalSubscription struct {
-	// SubscriberURI is the fully resolved URI for spec.subscriber.
-	// +optional
-	SubscriberURI *apis.URL `json:"subscriberUri,omitempty"`
-
-	// ReplyURI is the fully resolved URI for the spec.reply.
-	// +optional
-	ReplyURI *apis.URL `json:"replyUri,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -73,7 +49,7 @@ type SubscriptionStatusPhysicalSubscription struct {
 // SubscriptionList contains a list of Subscription.
 type SubscriptionList struct {
 	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata"`
+	metav1.ListMeta `json:"metadata,omitempty"`
 
 	Items []Subscription `json:"items"`
 }
@@ -85,26 +61,11 @@ type Channel struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   ChannelSpec   `json:"spec,omitempty"`
 	Status ChannelStatus `json:"status,omitempty"`
-}
-
-// ChannelSpec holds the desired state of the Channel.
-type ChannelSpec struct {
-	// ChannelTemplate specifies which Channel CRD to use to create the backing Channel.
-	// +optional
-	ChannelTemplate *ChannelTemplateSpec `json:"channelTemplate,omitempty"`
-}
-
-// ChannelTemplateSpec identifies the underlying Channel implementation.
-type ChannelTemplateSpec struct {
-	metav1.TypeMeta `json:",inline"`
 }
 
 // ChannelStatus represents the current state of a Channel.
 type ChannelStatus struct {
-	apis.Status `json:",inline"`
-
 	// AddressStatus is the part where the Channel fulfills the Addressable contract.
 	apis.AddressStatus `json:",inline"`
 }

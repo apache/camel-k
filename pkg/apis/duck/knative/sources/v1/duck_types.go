@@ -31,8 +31,7 @@ type SinkBinding struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   SinkBindingSpec   `json:"spec"`
-	Status SinkBindingStatus `json:"status"`
+	Spec SinkBindingSpec `json:"spec,omitempty"`
 }
 
 // SinkBindingSpec holds the desired state of the SinkBinding.
@@ -42,11 +41,6 @@ type SinkBindingSpec struct {
 
 	// BindingSpec provides the Subject to augment.
 	apis.BindingSpec `json:",inline"`
-}
-
-// SinkBindingStatus communicates the observed state of the SinkBinding.
-type SinkBindingStatus struct {
-	apis.Status `json:",inline"`
 }
 
 // +kubebuilder:object:root=true

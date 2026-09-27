@@ -57,8 +57,7 @@ func TestCreateSinkBinding(t *testing.T) {
 		"spec": {
 			"sink": {"ref": {"kind": "Channel", "name": "my-channel", "apiVersion": "messaging.knative.dev/v1"}},
 			"subject": {"apiVersion": "apps/v1", "kind": "Deployment", "name": "my-source"}
-		},
-		"status": {}
+		}
 	}`, string(actual))
 }
 
@@ -88,8 +87,7 @@ func TestCreateSubscription(t *testing.T) {
 				"ref": {"kind": "Service", "name": "my-service", "apiVersion": "serving.knative.dev/v1"},
 				"uri": "/channels/my-channel"
 			}
-		},
-		"status": {"physicalSubscription": {}}
+		}
 	}`, string(actual))
 }
 
@@ -122,8 +120,7 @@ func TestCreateKnativeServiceTrigger(t *testing.T) {
 				"ref": {"kind": "Service", "name": "my-service", "apiVersion": "serving.knative.dev/v1"},
 				"uri": "/events/evt.type"
 			}
-		},
-		"status": {}
+		}
 	}`, string(actual))
 }
 

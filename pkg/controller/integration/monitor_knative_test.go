@@ -19,6 +19,7 @@ package integration
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -26,6 +27,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/duck/knative/apis"
@@ -126,4 +128,74 @@ func TestKnativeServiceControllerMissingCondition(t *testing.T) {
 	cond := c.integration.Status.GetCondition(v1.IntegrationConditionReady)
 	require.NotNil(t, cond)
 	assert.Equal(t, corev1.ConditionFalse, cond.Status)
+}
+
+// knativeServicePayload mimics a Knative Serving Service as returned by the API server:
+// it carries a number of fields the duck type does not model, which must be ignored.
+const knativeServicePayload = `{
+	"apiVersion": "serving.knative.dev/v1",
+	"kind": "Service",
+	"metadata": {"name": "my-ksvc", "namespace": "ns", "generation": 2},
+	"spec": {
+		"template": {
+			"metadata": {"labels": {"camel.apache.org/integration": "my-it"}},
+			"spec": {
+				"containerConcurrency": 0,
+				"containers": [{"name": "integration", "image": "my-image"}],
+				"enableServiceLinks": false,
+				"timeoutSeconds": 300
+			}
+		},
+		"traffic": [{"latestRevision": true, "percent": 100}]
+	},
+	"status": {
+		"address": {"url": "http://my-ksvc.ns.svc.cluster.local"},
+		"conditions": [
+			{"lastTransitionTime": "2026-01-02T03:04:05Z", "status": "True", "type": "ConfigurationsReady"},
+			{"lastTransitionTime": "2026-01-02T03:04:05Z", "status": "False", "type": "Ready",
+				"reason": "RevisionFailed", "message": "Revision \"my-ksvc-00001\" failed with message: Container failed."},
+			{"lastTransitionTime": "2026-01-02T03:04:05Z", "status": "False", "type": "RoutesReady",
+				"reason": "RevisionMissing", "message": "Configuration \"my-ksvc\" does not have any ready Revision.", "severity": "Info"}
+		],
+		"latestCreatedRevisionName": "my-ksvc-00001",
+		"latestReadyRevisionName": "my-ksvc-00001",
+		"observedGeneration": 2,
+		"traffic": [{"latestRevision": true, "percent": 100, "revisionName": "my-ksvc-00001"}],
+		"url": "http://my-ksvc.ns.example.com"
+	}
+}`
+
+func TestKnativeServiceControllerFromAPIServerPayload(t *testing.T) {
+	svc := &servingv1.Service{}
+	require.NoError(t, json.Unmarshal([]byte(knativeServicePayload), svc))
+
+	assert.Equal(t, "http://my-ksvc.ns.example.com", svc.Status.URL.String())
+	require.NotNil(t, svc.Status.Address)
+	assert.Equal(t, "my-ksvc.ns.svc.cluster.local", svc.Status.Address.URL.Host)
+	assert.Equal(t, int64(300), ptr.Deref(svc.Spec.Template.Spec.TimeoutSeconds, 0))
+	assert.Len(t, svc.Spec.Template.Spec.Containers, 1)
+
+	c := &knativeServiceController{
+		obj: svc,
+		integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns",
+				Name:      "my-it",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseRunning,
+			},
+		},
+	}
+	assert.True(t, c.hasTemplateIntegrationLabel())
+	assert.Equal(t, "KnativeService/my-ksvc", c.getControllerName())
+
+	done, err := c.checkReadyCondition(context.TODO())
+	require.NoError(t, err)
+	assert.True(t, done)
+	assert.Equal(t, v1.IntegrationPhaseError, c.integration.Status.Phase)
+	cond := c.integration.Status.GetCondition(v1.IntegrationConditionReady)
+	require.NotNil(t, cond)
+	assert.Equal(t, corev1.ConditionFalse, cond.Status)
+	assert.Contains(t, cond.Message, "my-ksvc-00001")
 }
