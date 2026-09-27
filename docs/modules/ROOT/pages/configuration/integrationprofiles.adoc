@@ -1,8 +1,17 @@
 = Integration Profiles
 
-Admin users may add an `IntegrationProfile` resource to any namespace. The profile holds custom settings which can be applied to all Integrations.
+Admin users may add an `IntegrationProfile` resource to any namespace. The profile holds custom settings which can be applied to Integrations.
 
-The profile must be explicitly selected by an annotation referencing the integration profile name (any resource belonging to the "camel.apache.org" group can select a particular profile configuration).
+== Profile Resolution Precedence
+
+The operator resolves the `IntegrationProfile` to apply to an `Integration` (or `Pipe`) using the following order of precedence:
+
+1. **User-provided profile (via resource annotation):** The resource specifies the profile name in the `camel.apache.org/integration-profile.id` annotation.
+2. **Namespace-annotated profile (via namespace annotation):** If the resource has no annotation, the operator checks if the Kubernetes `Namespace` has a `camel.apache.org/integration-profile.id` annotation designating the default profile for that namespace.
+3. **`default` profile convention:** If neither the resource nor the namespace is annotated, the operator looks for an `IntegrationProfile` named `default` in the same namespace.
+4. **Default operator configuration:** If no profile is found, the operator falls back to its baseline configuration configured via operator environment variables.
+
+== Explicit Selection (Resource Annotation)
 
 To specify which profile should be used for an Integration, the resource can be annotated like in the following example:
 
@@ -36,7 +45,41 @@ spec:
 # ...
 ----
 
-The selection of a IntegrationProfile enables new configuration scenarios, for example, sharing global configuration options for groups of Integrations.
+== Namespace Default (Namespace Annotation)
+
+Administrators can set a default profile for all integrations in a namespace by annotating the Kubernetes `Namespace`:
+
+[source,yaml]
+----
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: my-team
+  annotations:
+    camel.apache.org/integration-profile.id: my-team-profile
+----
+
+Any Integration created in `my-team` without an explicit profile annotation will automatically use `my-team-profile`.
+
+== Default Profile Convention
+
+Alternatively, an administrator can simply create an `IntegrationProfile` named `default` in the namespace:
+
+[source,yaml]
+----
+kind: IntegrationProfile
+apiVersion: camel.apache.org/v1
+metadata:
+  name: default
+spec:
+  traits:
+    camel:
+      runtimeProvider: plain-quarkus
+----
+
+Any Integration deployed into this namespace without an explicit annotation will automatically use this `default` profile.
+
+The selection of an IntegrationProfile enables new configuration scenarios, for example, sharing global configuration options for groups of Integrations.
 
 == Security
 
