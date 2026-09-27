@@ -31,8 +31,7 @@ type Trigger struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   TriggerSpec   `json:"spec,omitempty"`
-	Status TriggerStatus `json:"status,omitempty"`
+	Spec TriggerSpec `json:"spec,omitempty"`
 }
 
 // TriggerSpec defines the desired state of the Trigger.
@@ -52,15 +51,7 @@ type TriggerSpec struct {
 type TriggerFilter struct {
 	// Attributes filters events by exact match on event context attributes.
 	// +optional
-	Attributes TriggerFilterAttributes `json:"attributes,omitempty"`
-}
-
-// TriggerFilterAttributes is a map of context attribute names to values for filtering by equality.
-type TriggerFilterAttributes map[string]string
-
-// TriggerStatus represents the current state of a Trigger.
-type TriggerStatus struct {
-	apis.Status `json:",inline"`
+	Attributes map[string]string `json:"attributes,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -81,21 +72,11 @@ type Broker struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   BrokerSpec   `json:"spec,omitempty"`
 	Status BrokerStatus `json:"status,omitempty"`
-}
-
-// BrokerSpec defines the desired state of the Broker.
-type BrokerSpec struct {
-	// Config is a KReference to the configuration that specifies configuration options for this Broker.
-	// +optional
-	Config *apis.KReference `json:"config,omitempty"`
 }
 
 // BrokerStatus represents the current state of a Broker.
 type BrokerStatus struct {
-	apis.Status `json:",inline"`
-
 	// AddressStatus is the part where the Broker fulfills the Addressable contract.
 	apis.AddressStatus `json:",inline"`
 }

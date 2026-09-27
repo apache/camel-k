@@ -19,17 +19,9 @@ package apis
 
 // Status is the common status of the Knative resources.
 type Status struct {
-	// ObservedGeneration is the 'Generation' of the resource that was last processed by the controller.
-	// +optional
-	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
-
 	// Conditions the latest available observations of a resource's current state.
 	// +optional
 	Conditions Conditions `json:"conditions,omitempty"`
-
-	// Annotations is additional Status fields for the resource to save some additional state.
-	// +optional
-	Annotations map[string]string `json:"annotations,omitempty"`
 }
 
 // AddressStatus is the status of an addressable resource.
@@ -61,10 +53,6 @@ type KReference struct {
 	// Kind of the referent.
 	Kind string `json:"kind"`
 
-	// Namespace of the referent.
-	// +optional
-	Namespace string `json:"namespace,omitempty"`
-
 	// Name of the referent.
 	Name string `json:"name"`
 
@@ -94,10 +82,6 @@ type Reference struct {
 	// Kind of the referent.
 	// +optional
 	Kind string `json:"kind,omitempty"`
-
-	// Namespace of the referent.
-	// +optional
-	Namespace string `json:"namespace,omitempty"`
 
 	// Name of the referent.
 	// +optional

@@ -1406,7 +1406,6 @@ func newFakeClient(namespace string) (client.Client, error) {
 				Namespace: namespace,
 				Name:      "default",
 			},
-			Spec: eventing.BrokerSpec{},
 			Status: eventing.BrokerStatus{
 				AddressStatus: apis.AddressStatus{
 					Address: &apis.Addressable{
@@ -1426,7 +1425,7 @@ func newFakeClient(namespace string) (client.Client, error) {
 			},
 			Spec: eventing.TriggerSpec{
 				Filter: &eventing.TriggerFilter{
-					Attributes: eventing.TriggerFilterAttributes{
+					Attributes: map[string]string{
 						"type": "event-source-1",
 					},
 				},

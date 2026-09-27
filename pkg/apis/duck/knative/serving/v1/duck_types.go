@@ -43,9 +43,6 @@ type Service struct {
 type ServiceSpec struct {
 	// ConfigurationSpec holds the desired state of the Configuration.
 	ConfigurationSpec `json:",inline"`
-
-	// RouteSpec holds the desired state of the Route.
-	RouteSpec `json:",inline"`
 }
 
 // ConfigurationSpec holds the desired state of the Configuration.
@@ -65,69 +62,17 @@ type RevisionTemplateSpec struct {
 type RevisionSpec struct {
 	corev1.PodSpec `json:",inline"`
 
-	// ContainerConcurrency specifies the maximum allowed in-flight (concurrent) requests per container of the Revision.
-	// +optional
-	ContainerConcurrency *int64 `json:"containerConcurrency,omitempty"`
-
 	// TimeoutSeconds is the maximum duration in seconds that the request instance is allowed to respond to a request.
 	// +optional
 	TimeoutSeconds *int64 `json:"timeoutSeconds,omitempty"`
-}
-
-// RouteSpec holds the desired state of the Route.
-type RouteSpec struct {
-	// Traffic specifies how to distribute traffic over a collection of revisions and configurations.
-	// +optional
-	Traffic []TrafficTarget `json:"traffic,omitempty"`
-}
-
-// TrafficTarget holds a single entry of the routing table for a Route.
-type TrafficTarget struct {
-	// Tag is optionally used to expose a dedicated url for referencing this target exclusively.
-	// +optional
-	Tag string `json:"tag,omitempty"`
-
-	// RevisionName of a specific revision to which to send this portion of traffic.
-	// +optional
-	RevisionName string `json:"revisionName,omitempty"`
-
-	// ConfigurationName of a configuration to whose latest revision we will send this portion of traffic.
-	// +optional
-	ConfigurationName string `json:"configurationName,omitempty"`
-
-	// LatestRevision indicates that the latest ready Revision of the Configuration should be used for this traffic target.
-	// +optional
-	LatestRevision *bool `json:"latestRevision,omitempty"`
-
-	// Percent indicates the percent of traffic that is to be routed to this Revision or Configuration.
-	// +optional
-	Percent *int64 `json:"percent,omitempty"`
-
-	// URL displays the URL for accessing named traffic targets. It is only present in the status.
-	// +optional
-	URL *apis.URL `json:"url,omitempty"`
 }
 
 // ServiceStatus represents the status of the Service resource.
 type ServiceStatus struct {
 	apis.Status `json:",inline"`
 
-	// ConfigurationStatusFields represents the current Configuration.
-	ConfigurationStatusFields `json:",inline"`
-
 	// RouteStatusFields represents the current Route.
 	RouteStatusFields `json:",inline"`
-}
-
-// ConfigurationStatusFields holds the fields of the Configuration status.
-type ConfigurationStatusFields struct {
-	// LatestReadyRevisionName holds the name of the latest Revision that has become ready.
-	// +optional
-	LatestReadyRevisionName string `json:"latestReadyRevisionName,omitempty"`
-
-	// LatestCreatedRevisionName is the last revision that was created from this Configuration.
-	// +optional
-	LatestCreatedRevisionName string `json:"latestCreatedRevisionName,omitempty"`
 }
 
 // RouteStatusFields holds the fields of the Route status.
@@ -139,10 +84,6 @@ type RouteStatusFields struct {
 	// Address holds the information needed for a Route to be the target of an event.
 	// +optional
 	Address *apis.Addressable `json:"address,omitempty"`
-
-	// Traffic holds the configured traffic distribution.
-	// +optional
-	Traffic []TrafficTarget `json:"traffic,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -150,7 +91,7 @@ type RouteStatusFields struct {
 // ServiceList contains a list of Service.
 type ServiceList struct {
 	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata"`
+	metav1.ListMeta `json:"metadata,omitempty"`
 
 	Items []Service `json:"items"`
 }

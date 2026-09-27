@@ -42,10 +42,3 @@ yq -i ".asciidoc.attributes.kubernetes-api-version = \"$KUBE_API_VERSION\"" $loc
 yq -i ".asciidoc.attributes.operator-fwk-api-version = \"$OPERATOR_FWK_API_VERSION\"" $location/../docs/antora.yml
 yq -i ".asciidoc.attributes.service-binding-op-version = \"$SERVICE_BINDING_OP_VERSION\"" $location/../docs/antora.yml
 yq -i ".asciidoc.attributes.prometheus-op-version = \"$PROMETHEUS_OP_VERSION\"" $location/../docs/antora.yml
-
-echo "Scraping information from e2e/knative/files/setup.sh"
-KNATIVE_VERSION=$(grep '^KNATIVE_VERSION=' $location/../e2e/knative/files/setup.sh | sed 's/^.*=//')
-
-echo "Knative version: $KNATIVE_VERSION"
-
-yq -i ".asciidoc.attributes.knative-api-version = \"$KNATIVE_VERSION\"" $location/../docs/antora.yml
