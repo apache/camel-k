@@ -23,16 +23,15 @@ Below you can find a list of the main dependencies and APIs used by Camel K and 
 
 [caption=]
 .Kubernetes and other dependencies
-[width="100%",cols="4,2,2,2,2,2",options="header"]
+[width="100%",cols="4,2,2,2,2",options="header"]
 |===
 |Camel K Version
 |Kubernetes API
 |Operator Framework API
-|Knative
 |Prometheus Operator
 |Kustomize version
 |===
 
 //cannot use top level index.adoc as the page with the query is always omitted.
-indexTable::[version="*",relative="running/running.adoc",cellformats="util.ckRef(pageComponentDisplayVersion, pageComponentVersion)|kubernetesApiVersion|operatorFwkApiVersion|knativeApiVersion|prometheusOpVersion|kustomizeVersion", requires={requires},transform=util.sortCompatibilityItems]
+indexTable::[version="*",relative="running/running.adoc",cellformats="util.ckRef(pageComponentDisplayVersion, pageComponentVersion)|kubernetesApiVersion|operatorFwkApiVersion|prometheusOpVersion|kustomizeVersion", requires={requires},transform=util.sortCompatibilityItems]
 

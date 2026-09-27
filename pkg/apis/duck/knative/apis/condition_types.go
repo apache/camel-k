@@ -30,9 +30,6 @@ type ConditionType string
 // ConditionReady specifies that the resource is ready.
 const ConditionReady ConditionType = "Ready"
 
-// ConditionSeverity expresses the severity of a Condition Type failing.
-type ConditionSeverity string
-
 // Condition defines a readiness condition for a Knative resource.
 type Condition struct {
 	// Type of condition.
@@ -40,14 +37,6 @@ type Condition struct {
 
 	// Status of the condition, one of True, False, Unknown.
 	Status corev1.ConditionStatus `json:"status"`
-
-	// Severity with which to treat failures of this type of condition.
-	// +optional
-	Severity ConditionSeverity `json:"severity,omitempty"`
-
-	// LastTransitionTime is the last time the condition transitioned from one status to another.
-	// +optional
-	LastTransitionTime VolatileTime `json:"lastTransitionTime,omitempty"`
 
 	// The reason for the condition's last transition.
 	// +optional
