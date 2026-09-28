@@ -93,8 +93,8 @@ func TestArkMQLookupAddress(t *testing.T) {
 			Name:      "myaddress",
 		},
 		Spec: arkmqv1beta1.ActiveMQArtemisAddressSpec{
-			QueueName: "resolved-queue",
-			ApplyTo:   "mybroker",
+			QueueName:      "resolved-queue",
+			ApplyToCrNames: []string{"mybroker"},
 		},
 	}
 
@@ -170,9 +170,9 @@ func TestArkMQMulticastSupported(t *testing.T) {
 			Name:      "mytopic",
 		},
 		Spec: arkmqv1beta1.ActiveMQArtemisAddressSpec{
-			AddressName: "my-multicast-topic",
-			RoutingType: "multicast",
-			ApplyTo:     "mybroker",
+			AddressName:    "my-multicast-topic",
+			RoutingType:    "multicast",
+			ApplyToCrNames: []string{"mybroker"},
 		},
 	}
 
@@ -536,7 +536,7 @@ func TestArkMQBrokerFallback(t *testing.T) {
 		},
 		Spec: arkmqv1beta1.ActiveMQArtemisAddressSpec{
 			QueueName: "my-fallback-queue",
-			// No applyTo and no labels!
+			// No applyToCrNames and no labels!
 		},
 	}
 
@@ -668,4 +668,81 @@ func TestArkMQPassThrough(t *testing.T) {
 	binding, err = ArkMQBindingProvider{}.Translate(bindingContext, EndpointContext{}, endpoint)
 	require.NoError(t, err)
 	assert.Nil(t, binding)
+}
+
+func TestArkMQApplyToCrNamesWildcardFallback(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	broker := &arkmqv1beta1.ActiveMQArtemis{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "only-broker",
+		},
+		Status: arkmqv1beta1.ActiveMQArtemisStatus{
+			PortStatus: []arkmqv1beta1.ActiveMQArtemisPortStatus{
+				{
+					Name: "core",
+					Port: 61616,
+				},
+			},
+		},
+	}
+
+	address := &arkmqv1beta1.ActiveMQArtemisAddress{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "wildcard-address",
+		},
+		Spec: arkmqv1beta1.ActiveMQArtemisAddressSpec{
+			QueueName:      "my-wildcard-queue",
+			ApplyToCrNames: []string{"*"},
+		},
+	}
+
+	svc := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "only-broker-hdls-svc",
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				{
+					Name: "core",
+					Port: 61616,
+				},
+			},
+		},
+	}
+
+	client, err := internal.NewFakeClient(broker, address, svc)
+	require.NoError(t, err)
+
+	bindingContext := BindingContext{
+		Ctx:       ctx,
+		Client:    client,
+		Namespace: "test",
+		Profile:   camelv1.TraitProfileKubernetes,
+	}
+
+	endpoint := camelv1.Endpoint{
+		Ref: &corev1.ObjectReference{
+			Kind:       "ActiveMQArtemisAddress",
+			Name:       "wildcard-address",
+			APIVersion: "broker.amq.io/v1beta1",
+		},
+	}
+
+	provider := ArkMQBindingProvider{}
+
+	binding, err := provider.Translate(bindingContext, EndpointContext{
+		Type: camelv1.EndpointTypeSink,
+	}, endpoint)
+	require.NoError(t, err)
+	assert.NotNil(t, binding)
+	assert.Equal(t, "amqp:queue:my-wildcard-queue", binding.URI)
+	assert.Equal(t, map[string]string{
+		"quarkus.qpid-jms.url":            "amqp://only-broker-hdls-svc.test.svc:61616",
+		"camel.component.amqp.broker-url": "amqp://only-broker-hdls-svc.test.svc:61616",
+	}, binding.ApplicationProperties)
 }

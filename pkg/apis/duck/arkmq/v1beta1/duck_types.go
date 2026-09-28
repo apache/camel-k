@@ -43,10 +43,10 @@ type ActiveMQArtemisAddress struct {
 
 // ActiveMQArtemisAddressSpec is the duck of an ActiveMQArtemisAddress spec.
 type ActiveMQArtemisAddressSpec struct {
-	AddressName string `json:"addressName,omitempty"`
-	QueueName   string `json:"queueName,omitempty"`
-	RoutingType string `json:"routingType,omitempty"`
-	ApplyTo     string `json:"applyTo,omitempty"`
+	AddressName    string   `json:"addressName,omitempty"`
+	QueueName      string   `json:"queueName,omitempty"`
+	RoutingType    string   `json:"routingType,omitempty"`
+	ApplyToCrNames []string `json:"applyToCrNames,omitempty"`
 }
 
 // +kubebuilder:object:root=true
