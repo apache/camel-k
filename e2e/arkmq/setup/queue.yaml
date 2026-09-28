@@ -23,4 +23,5 @@ spec:
   addressName: my-queue
   queueName: my-queue
   routingType: anycast
-  applyTo: my-broker
+  applyToCrNames:
+  - my-broker

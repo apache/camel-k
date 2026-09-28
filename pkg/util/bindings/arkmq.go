@@ -209,7 +209,10 @@ func normalizeBrokerURL(url string) string {
 }
 
 func (a ArkMQBindingProvider) lookupBrokerURL(ctx BindingContext, address *arkmqv1beta1.ActiveMQArtemisAddress, endpoint camelv1.Endpoint) (string, error) {
-	clusterName := address.Spec.ApplyTo
+	clusterName := ""
+	if len(address.Spec.ApplyToCrNames) > 0 && address.Spec.ApplyToCrNames[0] != "" && address.Spec.ApplyToCrNames[0] != "*" {
+		clusterName = address.Spec.ApplyToCrNames[0]
+	}
 	if clusterName == "" && address.Labels != nil {
 		clusterName = address.Labels[arkmqv1beta1.ArkMQBrokerLabel]
 	}
@@ -241,7 +244,7 @@ func (a ArkMQBindingProvider) fallbackBrokerName(ctx BindingContext, namespace, 
 		return "", fmt.Errorf("no ActiveMQArtemis broker found in namespace %s for address %s", namespace, addressName)
 	}
 	if len(brokers.Items) > 1 {
-		return "", fmt.Errorf("multiple ActiveMQArtemis brokers found in namespace %s (%d found); specify %q label or applyTo on address %s",
+		return "", fmt.Errorf("multiple ActiveMQArtemis brokers found in namespace %s (%d found); specify %q label or applyToCrNames on address %s",
 			namespace, len(brokers.Items), arkmqv1beta1.ArkMQBrokerLabel, addressName)
 	}
 
