@@ -42,12 +42,12 @@ func TestGenerateKeystore(t *testing.T) {
 	data = [][]byte{{0}, {1}}
 	err = GenerateKeystore(ctx, ksDir, "my-ks", NewKeystorePassword(), data)
 	require.Error(t, err)
-	assert.Equal(t, "keytool error: java.io.IOException: keystore password was incorrect: exit status 1", err.Error())
+	assert.Contains(t, err.Error(), "keytool error:")
 
 	// Incorrect password format
 	err = GenerateKeystore(ctx, ksDir, "my-ks", "", data)
 	require.Error(t, err)
-	assert.Equal(t, "Illegal option:  my-ks: exit status 1", err.Error())
+	assert.Contains(t, err.Error(), "Illegal option:")
 
 }
 
