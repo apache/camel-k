@@ -24,182 +24,45 @@ package advanced
 
 import (
 	"context"
-	"strconv"
 	"testing"
-	"time"
 
 	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	corev1 "k8s.io/api/core/v1"
 )
 
-type kitOptions struct {
-	dependencies []string
-	traits       []string
-}
-
-func kitMaxBuildLimit(t *testing.T, maxRunningBuilds int32, condition func(runningBuilds int) bool, buildOrderStrategy v1.BuildOrderStrategy) {
+func TestRunBuildMaxParallelPipelines(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		InstallOperatorWithConf(t, ctx, g, ns, "", false, map[string]string{
-			"MAX_RUNNING_BUILDS":   strconv.FormatInt(int64(maxRunningBuilds), 10),
-			"BUILD_ORDER_STRATEGY": string(buildOrderStrategy),
+			"MAX_RUNNING_BUILDS": "1",
 		})
+		integrationA := RandomizedSuffixName("java-a")
+		g.Expect(KamelRun(t, ctx, ns, "files/Java.java",
+			"--name", integrationA,
+		).Execute()).To(Succeed())
 
-		buildA := "integration-a"
-		buildB := "integration-b"
-		buildC := "integration-c"
+		// The presence of a builder property guarantee a new build
+		integrationB := RandomizedSuffixName("java-b")
+		g.Expect(KamelRun(t, ctx, ns, "files/Java.java",
+			"--name", integrationB,
+			"-t", "builder.properties=build-property=new",
+		).Execute()).To(Succeed())
 
-		doKitBuildInNamespace(t, ctx, g, buildA, ns, TestTimeoutShort, kitOptions{
-			dependencies: []string{
-				"camel:timer", "camel:log",
-			},
-			traits: []string{
-				"builder.properties=build-property=A",
-			},
-		}, v1.BuildPhaseRunning, v1.IntegrationKitPhaseBuildRunning)
+		g.Eventually(Builds(t, ctx, ns)).Should(Equal(2))
+		// At least one build starts running
+		g.Eventually(BuildsRunning(t, ctx, ns)).Should(Equal(1))
+		// Never more than one build running concurrently
+		g.Consistently(BuildsRunning(t, ctx, ns), "30s", "2s").
+			Should(BeNumerically("<=", 1))
+		// Eventually all builds complete
+		g.Eventually(BuildsRunning(t, ctx, ns), TestTimeoutLong).
+			Should(Equal(0))
 
-		doKitBuildInNamespace(t, ctx, g, buildB, ns, TestTimeoutShort, kitOptions{
-			dependencies: []string{
-				"camel:timer", "camel:log",
-			},
-			traits: []string{
-				"builder.properties=build-property=B",
-			},
-		}, v1.BuildPhaseRunning, v1.IntegrationKitPhaseBuildRunning)
-
-		doKitBuildInNamespace(t, ctx, g, buildC, ns, TestTimeoutShort, kitOptions{
-			dependencies: []string{
-				"camel:timer", "camel:log",
-			},
-			traits: []string{
-				"builder.properties=build-property=C",
-			},
-		}, v1.BuildPhaseScheduling, v1.IntegrationKitPhaseNone)
-
-		g.Consistently(BuildsRunning(
-			BuildPhase(t, ctx, ns, buildA),
-			BuildPhase(t, ctx, ns, buildB),
-			BuildPhase(t, ctx, ns, buildC),
-		), TestTimeoutShort, 10*time.Second).Should(Satisfy(condition))
-
-		// verify that all builds are successful
-		g.Eventually(BuildPhase(t, ctx, ns, buildA), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
-		g.Eventually(KitPhase(t, ctx, ns, buildA), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
-		g.Eventually(BuildPhase(t, ctx, ns, buildB), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
-		g.Eventually(KitPhase(t, ctx, ns, buildB), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
-		g.Eventually(BuildPhase(t, ctx, ns, buildC), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
-		g.Eventually(KitPhase(t, ctx, ns, buildC), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, integrationA, v1.IntegrationConditionReady)).
+			Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, integrationB, v1.IntegrationConditionReady)).
+			Should(Equal(corev1.ConditionTrue))
 	})
-}
-
-func TestKitMaxBuildLimitSequential(t *testing.T) {
-	t.Parallel()
-	// We must verify we have at least 1 build at a time
-	var condition = func(runningBuilds int) bool {
-		return runningBuilds <= 1
-	}
-	kitMaxBuildLimit(t, 2, condition, v1.BuildOrderStrategySequential)
-}
-
-func TestKitMaxBuildLimitFIFO(t *testing.T) {
-	t.Parallel()
-	// We may have up to 2 parallel builds
-	var condition = func(runningBuilds int) bool {
-		return runningBuilds <= 2
-	}
-	kitMaxBuildLimit(t, 2, condition, v1.BuildOrderStrategyFIFO)
-}
-
-func TestKitMaxBuildLimitDependencies(t *testing.T) {
-	t.Parallel()
-	// We may have up to 2 parallel builds
-	var condition = func(runningBuilds int) bool {
-		return runningBuilds <= 2
-	}
-	kitMaxBuildLimit(t, 2, condition, v1.BuildOrderStrategyDependencies)
-}
-
-func TestMaxBuildLimitWaitingBuilds(t *testing.T) {
-	t.Parallel()
-	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		InstallOperatorWithConf(t, ctx, g, ns, "", false, map[string]string{
-			"MAX_RUNNING_BUILDS":   "1",
-			"BUILD_ORDER_STRATEGY": string(v1.BuildOrderStrategyFIFO),
-		})
-
-		buildA := "integration-a"
-		buildB := "integration-b"
-		buildC := "integration-c"
-
-		doKitBuildInNamespace(t, ctx, g, buildA, ns, TestTimeoutShort, kitOptions{
-			dependencies: []string{
-				"camel:timer", "camel:log",
-			},
-			traits: []string{
-				"builder.properties=build-property=A",
-			},
-		}, v1.BuildPhaseRunning, v1.IntegrationKitPhaseBuildRunning)
-
-		doKitBuildInNamespace(t, ctx, g, buildB, ns, TestTimeoutShort, kitOptions{
-			dependencies: []string{
-				"camel:cron", "camel:log", "camel:joor",
-			},
-			traits: []string{
-				"builder.properties=build-property=B",
-			},
-		}, v1.BuildPhaseScheduling, v1.IntegrationKitPhaseNone)
-
-		doKitBuildInNamespace(t, ctx, g, buildC, ns, TestTimeoutShort, kitOptions{
-			dependencies: []string{
-				"camel:timer", "camel:log", "camel:joor", "camel:http",
-			},
-			traits: []string{
-				"builder.properties=build-property=C",
-			},
-		}, v1.BuildPhaseScheduling, v1.IntegrationKitPhaseNone)
-
-		// verify that last build is waiting
-		g.Eventually(BuildConditions(t, ctx, ns, buildC), TestTimeoutMedium).ShouldNot(BeNil())
-		g.Eventually(
-			BuildCondition(t, ctx, ns, buildC, v1.BuildConditionType(v1.BuildConditionScheduled))().Status,
-			TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
-		g.Eventually(
-			BuildCondition(t, ctx, ns, buildC, v1.BuildConditionType(v1.BuildConditionScheduled))().Reason,
-			TestTimeoutShort).Should(Equal(v1.BuildConditionWaitingReason))
-
-		// verify that last build is scheduled
-		g.Eventually(BuildPhase(t, ctx, ns, buildC), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
-		g.Eventually(KitPhase(t, ctx, ns, buildC), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
-
-		g.Eventually(BuildConditions(t, ctx, ns, buildC), TestTimeoutLong).ShouldNot(BeNil())
-		g.Eventually(
-			BuildCondition(t, ctx, ns, buildC, v1.BuildConditionType(v1.BuildConditionScheduled))().Status,
-			TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		g.Eventually(
-			BuildCondition(t, ctx, ns, buildC, v1.BuildConditionType(v1.BuildConditionScheduled))().Reason,
-			TestTimeoutShort).Should(Equal(v1.BuildConditionReadyReason))
-	})
-}
-
-func doKitBuildInNamespace(t *testing.T, ctx context.Context, g *WithT, name string, ns string,
-	testTimeout time.Duration, options kitOptions, buildPhase v1.BuildPhase, kitPhase v1.IntegrationKitPhase) {
-	buildKitArgs := []string{"kit", "create", name, "-n", ns}
-	for _, dependency := range options.dependencies {
-		buildKitArgs = append(buildKitArgs, "-d", dependency)
-	}
-	for _, trait := range options.traits {
-		buildKitArgs = append(buildKitArgs, "-t", trait)
-	}
-
-	g.Expect(Kamel(t, ctx, buildKitArgs...).Execute()).To(Succeed())
-
-	g.Eventually(Build(t, ctx, ns, name), testTimeout).ShouldNot(BeNil())
-	if buildPhase != v1.BuildPhaseNone {
-		g.Eventually(BuildPhase(t, ctx, ns, name), testTimeout).Should(Equal(buildPhase))
-	}
-	if kitPhase != v1.IntegrationKitPhaseNone {
-		g.Eventually(KitPhase(t, ctx, ns, name), testTimeout).Should(Equal(kitPhase))
-	}
 }

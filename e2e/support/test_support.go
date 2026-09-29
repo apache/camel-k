@@ -1599,15 +1599,32 @@ func BuildFailureRecoveryAttempt(t *testing.T, ctx context.Context, ns, name str
 	}
 }
 
-func BuildsRunning(predicates ...func() v1.BuildPhase) func() int {
+func BuildsRunning(t *testing.T, ctx context.Context, ns string) func() int {
 	return func() int {
-		runningBuilds := 0
-		for _, predicate := range predicates {
-			if predicate() == v1.BuildPhaseRunning {
-				runningBuilds++
+		lst := v1.BuildList{}
+		if err := TestClient(t).List(ctx, &lst, ctrl.InNamespace(ns)); err != nil {
+			failTest(t, err)
+		}
+
+		running := 0
+		for _, build := range lst.Items {
+			if build.Status.Phase == v1.BuildPhaseRunning {
+				running++
 			}
 		}
-		return runningBuilds
+
+		return running
+	}
+}
+
+func Builds(t *testing.T, ctx context.Context, ns string) func() int {
+	return func() int {
+		lst := v1.BuildList{}
+		if err := TestClient(t).List(ctx, &lst, ctrl.InNamespace(ns)); err != nil {
+			failTest(t, err)
+		}
+
+		return len(lst.Items)
 	}
 }
 
