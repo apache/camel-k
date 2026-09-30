@@ -19,17 +19,24 @@ package bindings
 
 import (
 	"context"
+	"errors"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	strimziv1 "github.com/apache/camel-k/v2/pkg/apis/duck/strimzi/v1"
-	"github.com/apache/camel-k/v2/pkg/client/strimzi/clientset/internalclientset/fake"
 	"github.com/apache/camel-k/v2/pkg/internal"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/rest"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func TestStrimziDirect(t *testing.T) {
@@ -98,13 +105,15 @@ func TestStrimziLookup(t *testing.T) {
 		},
 	}
 
-	client := fake.NewSimpleClientset(&cluster, &topic)
-	provider := StrimziBindingProvider{
-		Client: client,
-	}
+	client, err := internal.NewFakeClient()
+	require.NoError(t, err)
+	require.NoError(t, client.Create(ctx, &cluster))
+	require.NoError(t, client.Create(ctx, &topic))
+	provider := StrimziBindingProvider{}
 
 	bindingContext := BindingContext{
 		Ctx:       ctx,
+		Client:    client,
 		Namespace: "test",
 		Profile:   camelv1.TraitProfileKubernetes,
 	}
@@ -161,13 +170,15 @@ func TestStrimziLookupByTopicName(t *testing.T) {
 		},
 	}
 
-	client := fake.NewSimpleClientset(&cluster, &topic)
-	provider := StrimziBindingProvider{
-		Client: client,
-	}
+	client, err := internal.NewFakeClient()
+	require.NoError(t, err)
+	require.NoError(t, client.Create(ctx, &cluster))
+	require.NoError(t, client.Create(ctx, &topic))
+	provider := StrimziBindingProvider{}
 
 	bindingContext := BindingContext{
 		Ctx:       ctx,
+		Client:    client,
 		Namespace: "test",
 		Profile:   camelv1.TraitProfileKubernetes,
 	}
@@ -211,13 +222,14 @@ func TestStrimziKafkaCR(t *testing.T) {
 		},
 	}
 
-	client := fake.NewSimpleClientset(&cluster)
-	provider := StrimziBindingProvider{
-		Client: client,
-	}
+	client, err := internal.NewFakeClient()
+	require.NoError(t, err)
+	require.NoError(t, client.Create(ctx, &cluster))
+	provider := StrimziBindingProvider{}
 
 	bindingContext := BindingContext{
 		Ctx:       ctx,
+		Client:    client,
 		Namespace: "test",
 		Profile:   camelv1.TraitProfileKubernetes,
 	}
@@ -264,13 +276,14 @@ func TestStrimziPassThrough(t *testing.T) {
 		},
 	}
 
-	client := fake.NewSimpleClientset(&cluster)
-	provider := StrimziBindingProvider{
-		Client: client,
-	}
+	client, err := internal.NewFakeClient()
+	require.NoError(t, err)
+	require.NoError(t, client.Create(ctx, &cluster))
+	provider := StrimziBindingProvider{}
 
 	bindingContext := BindingContext{
 		Ctx:       ctx,
+		Client:    client,
 		Namespace: "test",
 		Profile:   camelv1.TraitProfileKubernetes,
 	}
@@ -288,4 +301,122 @@ func TestStrimziPassThrough(t *testing.T) {
 	}, endpoint)
 	require.NoError(t, err)
 	assert.Nil(t, binding)
+}
+
+func TestStrimziLookupTopicNamespace(t *testing.T) {
+	for _, tc := range []struct {
+		name      string
+		namespace string
+		topicName string
+		wantName  string
+	}{
+		{name: "context namespace", topicName: "shared", wantName: "local"},
+		{name: "explicit namespace", namespace: "other", topicName: "shared", wantName: "remote"},
+		{name: "resource name", topicName: "local", wantName: "local"},
+		{name: "missing topic", topicName: "missing"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := context.Background()
+			client, err := internal.NewFakeClient()
+			require.NoError(t, err)
+			for _, topic := range []strimziv1.KafkaTopic{
+				{ObjectMeta: metav1.ObjectMeta{Name: "aaa-unrelated", Namespace: "test"}},
+				{ObjectMeta: metav1.ObjectMeta{Name: "local", Namespace: "test"}, Status: strimziv1.KafkaTopicStatus{TopicName: "shared"}},
+				{ObjectMeta: metav1.ObjectMeta{Name: "remote", Namespace: "other"}, Status: strimziv1.KafkaTopicStatus{TopicName: "shared"}},
+			} {
+				require.NoError(t, client.Create(ctx, &topic))
+			}
+			topic, err := (StrimziBindingProvider{}).lookupTopic(BindingContext{
+				Ctx: ctx, Client: client, Namespace: "test",
+			}, camelv1.Endpoint{Ref: &v1.ObjectReference{Name: tc.topicName, Namespace: tc.namespace}})
+			if tc.wantName == "" {
+				require.Error(t, err)
+				assert.Nil(t, topic)
+				return
+			}
+			require.NoError(t, err)
+			require.NotNil(t, topic)
+			assert.Equal(t, tc.wantName, topic.Name)
+		})
+	}
+}
+
+func TestStrimziMissingCluster(t *testing.T) {
+	client, err := internal.NewFakeClient()
+	require.NoError(t, err)
+	servers, err := (StrimziBindingProvider{}).getBootstrapServers(BindingContext{
+		Ctx: context.Background(), Client: client,
+	}, "missing", "test")
+	require.Error(t, err)
+	assert.True(t, k8serrors.IsNotFound(err))
+	assert.Empty(t, servers)
+}
+
+func TestStrimziBypassesCache(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		kind    string
+		refName string
+	}{
+		{name: "cluster", kind: "Kafka", refName: "cluster"},
+		{name: "topic", kind: "KafkaTopic", refName: "topic"},
+		{name: "topic status name", kind: "KafkaTopic", refName: "shared"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				var response string
+				switch r.URL.Path {
+				case "/apis/kafka.strimzi.io/v1/namespaces/other/kafkas/cluster":
+					response = `{"apiVersion":"kafka.strimzi.io/v1","kind":"Kafka","metadata":{"name":"cluster","namespace":"other"},"status":{"listeners":[{"name":"plain","bootstrapServers":"live:9092"}]}}`
+				case "/apis/kafka.strimzi.io/v1/namespaces/other/kafkatopics/topic":
+					response = `{"apiVersion":"kafka.strimzi.io/v1","kind":"KafkaTopic","metadata":{"name":"topic","namespace":"other","labels":{"strimzi.io/cluster":"cluster"}}}`
+				case "/apis/kafka.strimzi.io/v1/namespaces/other/kafkatopics/shared":
+					w.WriteHeader(http.StatusNotFound)
+					response = `{"kind":"Status","apiVersion":"v1","status":"Failure","reason":"NotFound","code":404}`
+				case "/apis/kafka.strimzi.io/v1/namespaces/other/kafkatopics":
+					response = `{"apiVersion":"kafka.strimzi.io/v1","kind":"KafkaTopicList","items":[{"metadata":{"name":"topic","namespace":"other","labels":{"strimzi.io/cluster":"cluster"}},"status":{"topicName":"shared"}}]}`
+				default:
+					http.NotFound(w, r)
+					return
+				}
+				_, err := w.Write([]byte(response))
+				assert.NoError(t, err)
+			}))
+			defer server.Close()
+			mapper := meta.NewDefaultRESTMapper([]schema.GroupVersion{strimziv1.SchemeGroupVersion})
+			mapper.Add(strimziv1.SchemeGroupVersion.WithKind("Kafka"), meta.RESTScopeNamespace)
+			mapper.Add(strimziv1.SchemeGroupVersion.WithKind("KafkaTopic"), meta.RESTScopeNamespace)
+			client, err := internal.NewFakeClient()
+			require.NoError(t, err)
+			liveClient, err := ctrl.New(&rest.Config{Host: server.URL}, ctrl.Options{
+				Scheme: client.GetScheme(), Mapper: mapper,
+				Cache: &ctrl.CacheOptions{Reader: strimziRejectingCache{}},
+			})
+			require.NoError(t, err)
+			client.(*internal.FakeClient).Client = liveClient
+			endpoint := camelv1.Endpoint{Ref: &v1.ObjectReference{
+				APIVersion: "kafka.strimzi.io/v1", Kind: tc.kind, Name: tc.refName, Namespace: "other",
+			}}
+			if tc.kind == "Kafka" {
+				endpoint.Properties = asEndpointProperties(map[string]string{"topic": tc.refName})
+			}
+			binding, err := (StrimziBindingProvider{}).Translate(BindingContext{
+				Ctx: context.Background(), Client: client, Namespace: "test",
+			}, EndpointContext{}, endpoint)
+			require.NoError(t, err)
+			require.NotNil(t, binding)
+			assert.Equal(t, "kafka:"+tc.refName+"?brokers=live%3A9092", binding.URI)
+		})
+	}
+}
+
+type strimziRejectingCache struct{}
+
+func (strimziRejectingCache) Get(context.Context, ctrl.ObjectKey, ctrl.Object, ...ctrl.GetOption) error {
+	return errors.New("Strimzi reads must not use the cache")
+}
+
+func (strimziRejectingCache) List(context.Context, ctrl.ObjectList, ...ctrl.ListOption) error {
+	return errors.New("Strimzi reads must not use the cache")
 }
