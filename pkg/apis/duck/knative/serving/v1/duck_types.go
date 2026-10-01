@@ -25,7 +25,7 @@ import (
 )
 
 // ServiceConditionReady is set when the service is configured and has available backends ready to receive traffic.
-const ServiceConditionReady = apis.ConditionReady
+const ServiceConditionReady = "Ready"
 
 // +kubebuilder:object:root=true
 

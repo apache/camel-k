@@ -44,8 +44,6 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
 		&Trigger{},
 		&TriggerList{},
-		&Broker{},
-		&BrokerList{},
 	)
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
 

@@ -23,7 +23,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 
@@ -31,7 +30,7 @@ import (
 	servingv1 "github.com/apache/camel-k/v2/pkg/apis/duck/knative/serving/v1"
 )
 
-func newKnativeServiceWithStatus(t *testing.T, url string, ready corev1.ConditionStatus) *servingv1.Service {
+func newKnativeServiceWithStatus(t *testing.T, url string, ready metav1.ConditionStatus) *servingv1.Service {
 	t.Helper()
 	parsed, err := apis.ParseURL(url)
 	require.NoError(t, err)
@@ -43,7 +42,7 @@ func newKnativeServiceWithStatus(t *testing.T, url string, ready corev1.Conditio
 		},
 		Status: servingv1.ServiceStatus{
 			Status: apis.Status{
-				Conditions: apis.Conditions{
+				Conditions: []metav1.Condition{
 					{Type: servingv1.ServiceConditionReady, Status: ready},
 				},
 			},
@@ -60,16 +59,16 @@ func TestStatusChangedPredicateKnativeService(t *testing.T) {
 
 	// A URL with user information makes url.URL carry an unexported *url.Userinfo:
 	// the semantic equality can only compare it through the URL equality function.
-	old := newKnativeServiceWithStatus(t, "http://user:pass@my-ksvc.ns.svc.cluster.local", corev1.ConditionTrue)
+	old := newKnativeServiceWithStatus(t, "http://user:pass@my-ksvc.ns.svc.cluster.local", metav1.ConditionTrue)
 
 	same := old.DeepCopy()
 	same.Generation++
 	assert.False(t, p.Update(event.UpdateEvent{ObjectOld: old, ObjectNew: same}))
 
-	changedURL := newKnativeServiceWithStatus(t, "http://user:pass@my-ksvc.ns.svc.cluster.local/other", corev1.ConditionTrue)
+	changedURL := newKnativeServiceWithStatus(t, "http://user:pass@my-ksvc.ns.svc.cluster.local/other", metav1.ConditionTrue)
 	assert.True(t, p.Update(event.UpdateEvent{ObjectOld: old, ObjectNew: changedURL}))
 
-	notReady := newKnativeServiceWithStatus(t, "http://user:pass@my-ksvc.ns.svc.cluster.local", corev1.ConditionFalse)
+	notReady := newKnativeServiceWithStatus(t, "http://user:pass@my-ksvc.ns.svc.cluster.local", metav1.ConditionFalse)
 	assert.True(t, p.Update(event.UpdateEvent{ObjectOld: old, ObjectNew: notReady}))
 
 	assert.False(t, p.Update(event.UpdateEvent{ObjectOld: nil, ObjectNew: same}))
