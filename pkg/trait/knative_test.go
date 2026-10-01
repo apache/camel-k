@@ -28,6 +28,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -1307,14 +1308,6 @@ func NewFakeEnvironmentForKitWithoutCatalog(t *testing.T) Environment {
 }
 
 func newFakeClient(namespace string) (client.Client, error) {
-	channelSourceURL, err := apis.ParseURL("http://channel-source-1.host/")
-	if err != nil {
-		return nil, err
-	}
-	channelSinkURL, err := apis.ParseURL("http://channel-sink-1.host/")
-	if err != nil {
-		return nil, err
-	}
 	sink1URL, err := apis.ParseURL("http://endpoint-sink-1.host/")
 	if err != nil {
 		return nil, err
@@ -1323,42 +1316,35 @@ func newFakeClient(namespace string) (client.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	brokerURL, err := apis.ParseURL("http://broker-default.host/")
-	if err != nil {
-		return nil, err
-	}
 
+	// The Channel and Broker resources are only read as unstructured objects
 	return internal.NewFakeClient(
-		&messaging.Channel{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Channel",
-				APIVersion: messaging.SchemeGroupVersion.String(),
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: namespace,
-				Name:      "channel-source-1",
-			},
-			Status: messaging.ChannelStatus{
-				AddressStatus: apis.AddressStatus{
-					Address: &apis.Addressable{
-						URL: channelSourceURL,
+		&unstructured.Unstructured{
+			Object: map[string]any{
+				"apiVersion": messaging.SchemeGroupVersion.String(),
+				"kind":       "Channel",
+				"metadata": map[string]any{
+					"namespace": namespace,
+					"name":      "channel-source-1",
+				},
+				"status": map[string]any{
+					"address": map[string]any{
+						"url": "http://channel-source-1.host/",
 					},
 				},
 			},
 		},
-		&messaging.Channel{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Channel",
-				APIVersion: messaging.SchemeGroupVersion.String(),
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: namespace,
-				Name:      "channel-sink-1",
-			},
-			Status: messaging.ChannelStatus{
-				AddressStatus: apis.AddressStatus{
-					Address: &apis.Addressable{
-						URL: channelSinkURL,
+		&unstructured.Unstructured{
+			Object: map[string]any{
+				"apiVersion": messaging.SchemeGroupVersion.String(),
+				"kind":       "Channel",
+				"metadata": map[string]any{
+					"namespace": namespace,
+					"name":      "channel-sink-1",
+				},
+				"status": map[string]any{
+					"address": map[string]any{
+						"url": "http://channel-sink-1.host/",
 					},
 				},
 			},
@@ -1397,19 +1383,17 @@ func newFakeClient(namespace string) (client.Client, error) {
 				},
 			},
 		},
-		&eventing.Broker{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: eventing.SchemeGroupVersion.String(),
-				Kind:       "Broker",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: namespace,
-				Name:      "default",
-			},
-			Status: eventing.BrokerStatus{
-				AddressStatus: apis.AddressStatus{
-					Address: &apis.Addressable{
-						URL: brokerURL,
+		&unstructured.Unstructured{
+			Object: map[string]any{
+				"apiVersion": eventing.SchemeGroupVersion.String(),
+				"kind":       "Broker",
+				"metadata": map[string]any{
+					"namespace": namespace,
+					"name":      "default",
+				},
+				"status": map[string]any{
+					"address": map[string]any{
+						"url": "http://broker-default.host/",
 					},
 				},
 			},

@@ -28,8 +28,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	"github.com/apache/camel-k/v2/pkg/apis/duck/knative/apis"
 	eventing "github.com/apache/camel-k/v2/pkg/apis/duck/knative/eventing/v1"
 	"github.com/apache/camel-k/v2/pkg/internal"
 )
@@ -125,34 +125,31 @@ func TestCreateKnativeServiceTrigger(t *testing.T) {
 }
 
 func TestGetSinkURL(t *testing.T) {
-	brokerURL, err := apis.ParseURL("http://broker-ingress.knative-eventing.svc.cluster.local/my-ns/default")
-	require.NoError(t, err)
+	// The Broker resources are only read as unstructured objects
 	client, err := internal.NewFakeClient(
-		&eventing.Broker{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Broker",
-				APIVersion: eventing.SchemeGroupVersion.String(),
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "my-ns",
-				Name:      "default",
-			},
-			Status: eventing.BrokerStatus{
-				AddressStatus: apis.AddressStatus{
-					Address: &apis.Addressable{
-						URL: brokerURL,
+		&unstructured.Unstructured{
+			Object: map[string]any{
+				"apiVersion": eventing.SchemeGroupVersion.String(),
+				"kind":       "Broker",
+				"metadata": map[string]any{
+					"namespace": "my-ns",
+					"name":      "default",
+				},
+				"status": map[string]any{
+					"address": map[string]any{
+						"url": "http://broker-ingress.knative-eventing.svc.cluster.local/my-ns/default",
 					},
 				},
 			},
 		},
-		&eventing.Broker{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Broker",
-				APIVersion: eventing.SchemeGroupVersion.String(),
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "my-ns",
-				Name:      "not-ready",
+		&unstructured.Unstructured{
+			Object: map[string]any{
+				"apiVersion": eventing.SchemeGroupVersion.String(),
+				"kind":       "Broker",
+				"metadata": map[string]any{
+					"namespace": "my-ns",
+					"name":      "not-ready",
+				},
 			},
 		},
 		&corev1.Service{

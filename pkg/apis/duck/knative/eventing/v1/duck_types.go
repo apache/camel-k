@@ -63,30 +63,3 @@ type TriggerList struct {
 
 	Items []Trigger `json:"items"`
 }
-
-// +kubebuilder:object:root=true
-
-// Broker is a partial schema of the Knative Eventing Broker resource: a pool of
-// events that are consumable using Triggers.
-type Broker struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	Status BrokerStatus `json:"status,omitempty"`
-}
-
-// BrokerStatus represents the current state of a Broker.
-type BrokerStatus struct {
-	// AddressStatus is the part where the Broker fulfills the Addressable contract.
-	apis.AddressStatus `json:",inline"`
-}
-
-// +kubebuilder:object:root=true
-
-// BrokerList contains a list of Broker.
-type BrokerList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-
-	Items []Broker `json:"items"`
-}

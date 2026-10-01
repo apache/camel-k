@@ -30,11 +30,10 @@ import (
 	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/apis/duck/knative/apis"
 	servingv1 "github.com/apache/camel-k/v2/pkg/apis/duck/knative/serving/v1"
 )
 
-func newKnativeServiceController(ready *apis.Condition) *knativeServiceController {
+func newKnativeServiceController(ready *metav1.Condition) *knativeServiceController {
 	svc := &servingv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "ns",
@@ -42,7 +41,7 @@ func newKnativeServiceController(ready *apis.Condition) *knativeServiceControlle
 		},
 	}
 	if ready != nil {
-		svc.Status.Conditions = apis.Conditions{*ready}
+		svc.Status.Conditions = []metav1.Condition{*ready}
 	}
 
 	return &knativeServiceController{
@@ -60,9 +59,9 @@ func newKnativeServiceController(ready *apis.Condition) *knativeServiceControlle
 }
 
 func TestKnativeServiceControllerReady(t *testing.T) {
-	c := newKnativeServiceController(&apis.Condition{
+	c := newKnativeServiceController(&metav1.Condition{
 		Type:   servingv1.ServiceConditionReady,
-		Status: corev1.ConditionTrue,
+		Status: metav1.ConditionTrue,
 	})
 
 	done, err := c.checkReadyCondition(context.TODO())
@@ -78,9 +77,9 @@ func TestKnativeServiceControllerReady(t *testing.T) {
 }
 
 func TestKnativeServiceControllerRevisionFailed(t *testing.T) {
-	c := newKnativeServiceController(&apis.Condition{
+	c := newKnativeServiceController(&metav1.Condition{
 		Type:    servingv1.ServiceConditionReady,
-		Status:  corev1.ConditionFalse,
+		Status:  metav1.ConditionFalse,
 		Reason:  "RevisionFailed",
 		Message: "revision failed",
 	})
@@ -96,9 +95,9 @@ func TestKnativeServiceControllerRevisionFailed(t *testing.T) {
 }
 
 func TestKnativeServiceControllerNotReady(t *testing.T) {
-	c := newKnativeServiceController(&apis.Condition{
+	c := newKnativeServiceController(&metav1.Condition{
 		Type:    servingv1.ServiceConditionReady,
-		Status:  corev1.ConditionFalse,
+		Status:  metav1.ConditionFalse,
 		Reason:  "Deploying",
 		Message: "still deploying",
 	})
@@ -114,6 +113,27 @@ func TestKnativeServiceControllerNotReady(t *testing.T) {
 	assert.Equal(t, corev1.ConditionFalse, cond.Status)
 	assert.Equal(t, "Deploying", cond.Reason)
 	assert.Equal(t, "still deploying", cond.Message)
+}
+
+func TestKnativeServiceControllerUnknown(t *testing.T) {
+	c := newKnativeServiceController(&metav1.Condition{
+		Type:    servingv1.ServiceConditionReady,
+		Status:  metav1.ConditionUnknown,
+		Reason:  "RevisionMissing",
+		Message: "waiting for the revision",
+	})
+
+	done, err := c.checkReadyCondition(context.TODO())
+	require.NoError(t, err)
+	assert.False(t, done)
+	assert.Equal(t, v1.IntegrationPhaseRunning, c.integration.Status.Phase)
+
+	assert.False(t, c.updateReadyCondition(0))
+	cond := c.integration.Status.GetCondition(v1.IntegrationConditionReady)
+	require.NotNil(t, cond)
+	assert.Equal(t, corev1.ConditionFalse, cond.Status)
+	assert.Equal(t, "RevisionMissing", cond.Reason)
+	assert.Equal(t, "waiting for the revision", cond.Message)
 }
 
 func TestKnativeServiceControllerMissingCondition(t *testing.T) {

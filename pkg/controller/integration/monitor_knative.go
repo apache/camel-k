@@ -21,6 +21,7 @@ import (
 	"context"
 
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	servingv1 "github.com/apache/camel-k/v2/pkg/apis/duck/knative/serving/v1"
@@ -36,8 +37,8 @@ var _ controller = &knativeServiceController{}
 
 func (c *knativeServiceController) checkReadyCondition(ctx context.Context) (bool, error) {
 	// Check the KnativeService conditions
-	if ready := kubernetes.GetKnativeServiceCondition(*c.obj, servingv1.ServiceConditionReady); ready.IsFalse() &&
-		ready.GetReason() == "RevisionFailed" {
+	if ready := kubernetes.GetKnativeServiceCondition(*c.obj, servingv1.ServiceConditionReady); ready != nil &&
+		ready.Status == metav1.ConditionFalse && ready.Reason == "RevisionFailed" {
 		c.integration.Status.Phase = v1.IntegrationPhaseError
 		c.integration.SetReadyConditionError(ready.Message)
 
@@ -49,14 +50,19 @@ func (c *knativeServiceController) checkReadyCondition(ctx context.Context) (boo
 
 func (c *knativeServiceController) updateReadyCondition(readyPods int32) bool {
 	ready := kubernetes.GetKnativeServiceCondition(*c.obj, servingv1.ServiceConditionReady)
-	if ready.IsTrue() {
+	if ready == nil {
+		c.integration.SetReadyCondition(corev1.ConditionFalse, "", "")
+
+		return false
+	}
+	if ready.Status == metav1.ConditionTrue {
 		c.integration.SetReadyCondition(corev1.ConditionTrue,
 			v1.IntegrationConditionKnativeServiceReadyReason, "")
 
 		return true
 	}
 	c.integration.SetReadyCondition(corev1.ConditionFalse,
-		ready.GetReason(), ready.GetMessage())
+		ready.Reason, ready.Message)
 
 	return false
 }

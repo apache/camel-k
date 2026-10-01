@@ -17,18 +17,17 @@ limitations under the License.
 
 package apis
 
+import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
 // Status is the common status of the Knative resources.
 type Status struct {
 	// Conditions the latest available observations of a resource's current state.
+	// The Knative conditions are read as Kubernetes API conditions, as they share
+	// the fields Camel K uses (type, status, reason and message).
 	// +optional
-	Conditions Conditions `json:"conditions,omitempty"`
-}
-
-// AddressStatus is the status of an addressable resource.
-type AddressStatus struct {
-	// Address is a single Addressable address.
-	// +optional
-	Address *Addressable `json:"address,omitempty"`
+	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
 
 // Addressable is a destination for message delivery.
