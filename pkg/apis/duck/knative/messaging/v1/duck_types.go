@@ -53,29 +53,3 @@ type SubscriptionList struct {
 
 	Items []Subscription `json:"items"`
 }
-
-// +kubebuilder:object:root=true
-
-// Channel is a partial schema of the Knative Eventing Channel resource.
-type Channel struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	Status ChannelStatus `json:"status,omitempty"`
-}
-
-// ChannelStatus represents the current state of a Channel.
-type ChannelStatus struct {
-	// AddressStatus is the part where the Channel fulfills the Addressable contract.
-	apis.AddressStatus `json:",inline"`
-}
-
-// +kubebuilder:object:root=true
-
-// ChannelList contains a list of Channel.
-type ChannelList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-
-	Items []Channel `json:"items"`
-}
