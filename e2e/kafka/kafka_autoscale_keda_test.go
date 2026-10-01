@@ -64,11 +64,11 @@ func TestKafkaKedaAutoscale(t *testing.T) {
 			// Verify we are consuming some record (the body is null as the timer is pushing nothing)
 			g.Eventually(IntegrationLogs(t, ctx, ns, consumerName)).Should(ContainSubstring("Body is null"))
 			// Stop the producer
-			ExpectExecSucceed(t, g, Kubectl("delete", "it", producerName, "-n", ns))
+			ExpectExecSucceed(t, g, Kubectl("delete", "pipe", producerName, "-n", ns))
 			// Consumer should scale back to 0 after some time as there is no longer traffic
 			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), TestTimeoutMedium).
 				Should(gstruct.PointTo(BeNumerically("==", 0)))
-			ExpectExecSucceed(t, g, Kubectl("delete", "it", "--all", "-n", ns))
+			ExpectExecSucceed(t, g, Kubectl("delete", "pipe", "--all", "-n", ns))
 		})
 	}, "kafka")
 }
