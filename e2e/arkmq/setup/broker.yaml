@@ -22,3 +22,10 @@ metadata:
 spec:
   deploymentPlan:
     size: 1
+  acceptors:
+  - name: all
+    port: 61616
+    protocols: amqp,core
+  - name: amqp
+    port: 5672
+    protocols: amqp
