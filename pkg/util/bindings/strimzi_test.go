@@ -20,23 +20,20 @@ package bindings
 import (
 	"context"
 	"errors"
-	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	strimziv1 "github.com/apache/camel-k/v2/pkg/apis/duck/strimzi/v1"
+	"github.com/apache/camel-k/v2/pkg/client/strimzi/clientset/internalclientset/fake"
 	"github.com/apache/camel-k/v2/pkg/internal"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/rest"
-	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+	"k8s.io/apimachinery/pkg/runtime"
+	k8stesting "k8s.io/client-go/testing"
 )
 
 func TestStrimziDirect(t *testing.T) {
@@ -105,15 +102,13 @@ func TestStrimziLookup(t *testing.T) {
 		},
 	}
 
-	client, err := internal.NewFakeClient()
-	require.NoError(t, err)
-	require.NoError(t, client.Create(ctx, &cluster))
-	require.NoError(t, client.Create(ctx, &topic))
-	provider := StrimziBindingProvider{}
+	client := fake.NewSimpleClientset(&cluster, &topic)
+	provider := StrimziBindingProvider{
+		Client: client,
+	}
 
 	bindingContext := BindingContext{
 		Ctx:       ctx,
-		Client:    client,
 		Namespace: "test",
 		Profile:   camelv1.TraitProfileKubernetes,
 	}
@@ -170,15 +165,13 @@ func TestStrimziLookupByTopicName(t *testing.T) {
 		},
 	}
 
-	client, err := internal.NewFakeClient()
-	require.NoError(t, err)
-	require.NoError(t, client.Create(ctx, &cluster))
-	require.NoError(t, client.Create(ctx, &topic))
-	provider := StrimziBindingProvider{}
+	client := fake.NewSimpleClientset(&cluster, &topic)
+	provider := StrimziBindingProvider{
+		Client: client,
+	}
 
 	bindingContext := BindingContext{
 		Ctx:       ctx,
-		Client:    client,
 		Namespace: "test",
 		Profile:   camelv1.TraitProfileKubernetes,
 	}
@@ -222,14 +215,13 @@ func TestStrimziKafkaCR(t *testing.T) {
 		},
 	}
 
-	client, err := internal.NewFakeClient()
-	require.NoError(t, err)
-	require.NoError(t, client.Create(ctx, &cluster))
-	provider := StrimziBindingProvider{}
+	client := fake.NewSimpleClientset(&cluster)
+	provider := StrimziBindingProvider{
+		Client: client,
+	}
 
 	bindingContext := BindingContext{
 		Ctx:       ctx,
-		Client:    client,
 		Namespace: "test",
 		Profile:   camelv1.TraitProfileKubernetes,
 	}
@@ -276,14 +268,13 @@ func TestStrimziPassThrough(t *testing.T) {
 		},
 	}
 
-	client, err := internal.NewFakeClient()
-	require.NoError(t, err)
-	require.NoError(t, client.Create(ctx, &cluster))
-	provider := StrimziBindingProvider{}
+	client := fake.NewSimpleClientset(&cluster)
+	provider := StrimziBindingProvider{
+		Client: client,
+	}
 
 	bindingContext := BindingContext{
 		Ctx:       ctx,
-		Client:    client,
 		Namespace: "test",
 		Profile:   camelv1.TraitProfileKubernetes,
 	}
@@ -303,120 +294,91 @@ func TestStrimziPassThrough(t *testing.T) {
 	assert.Nil(t, binding)
 }
 
-func TestStrimziLookupTopicNamespace(t *testing.T) {
+func TestStrimziNamespace(t *testing.T) {
 	for _, tc := range []struct {
 		name      string
 		namespace string
-		topicName string
-		wantName  string
+		wantURI   string
 	}{
-		{name: "context namespace", topicName: "shared", wantName: "local"},
-		{name: "explicit namespace", namespace: "other", topicName: "shared", wantName: "remote"},
-		{name: "resource name", topicName: "local", wantName: "local"},
-		{name: "missing topic", topicName: "missing"},
+		{name: "context namespace", wantURI: "kafka:topic?brokers=local%3A9092"},
+		{name: "explicit namespace", namespace: "other", wantURI: "kafka:topic?brokers=remote%3A9092"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			ctx := context.Background()
-			client, err := internal.NewFakeClient()
+			client := fake.NewSimpleClientset(
+				&strimziv1.KafkaTopic{Name: "topic", Namespace: "test", Labels: map[string]string{strimziv1.StrimziKafkaClusterLabel: "local-cluster"}},
+				&strimziv1.KafkaTopic{Name: "topic", Namespace: "other", Labels: map[string]string{strimziv1.StrimziKafkaClusterLabel: "remote-cluster"}},
+				&strimziv1.Kafka{Name: "local-cluster", Namespace: "test", Status: strimziv1.KafkaStatus{Listeners: []strimziv1.KafkaStatusListener{{Name: "plain", BootstrapServers: "local:9092"}}}},
+				&strimziv1.Kafka{Name: "remote-cluster", Namespace: "other", Status: strimziv1.KafkaStatus{Listeners: []strimziv1.KafkaStatusListener{{Name: "plain", BootstrapServers: "remote:9092"}}}},
+			)
+			binding, err := (StrimziBindingProvider{Client: client}).Translate(BindingContext{
+				Ctx: context.Background(), Namespace: "test",
+			}, EndpointContext{}, camelv1.Endpoint{Ref: &v1.ObjectReference{
+				APIVersion: "kafka.strimzi.io/v1", Kind: "KafkaTopic", Name: "topic", Namespace: tc.namespace,
+			}})
 			require.NoError(t, err)
-			for _, topic := range []strimziv1.KafkaTopic{
-				{ObjectMeta: metav1.ObjectMeta{Name: "aaa-unrelated", Namespace: "test"}},
-				{ObjectMeta: metav1.ObjectMeta{Name: "local", Namespace: "test"}, Status: strimziv1.KafkaTopicStatus{TopicName: "shared"}},
-				{ObjectMeta: metav1.ObjectMeta{Name: "remote", Namespace: "other"}, Status: strimziv1.KafkaTopicStatus{TopicName: "shared"}},
-			} {
-				require.NoError(t, client.Create(ctx, &topic))
-			}
-			topic, err := (StrimziBindingProvider{}).lookupTopic(BindingContext{
-				Ctx: ctx, Client: client, Namespace: "test",
-			}, camelv1.Endpoint{Ref: &v1.ObjectReference{Name: tc.topicName, Namespace: tc.namespace}})
-			if tc.wantName == "" {
-				require.Error(t, err)
-				assert.Nil(t, topic)
-				return
-			}
-			require.NoError(t, err)
-			require.NotNil(t, topic)
-			assert.Equal(t, tc.wantName, topic.Name)
+			require.NotNil(t, binding)
+			assert.Equal(t, tc.wantURI, binding.URI)
 		})
 	}
 }
 
 func TestStrimziMissingCluster(t *testing.T) {
-	client, err := internal.NewFakeClient()
-	require.NoError(t, err)
-	servers, err := (StrimziBindingProvider{}).getBootstrapServers(BindingContext{
-		Ctx: context.Background(), Client: client,
-	}, "missing", "test")
+	provider := StrimziBindingProvider{Client: fake.NewSimpleClientset()}
+	servers, err := provider.getBootstrapServers(BindingContext{Ctx: context.Background()}, "missing", "test")
 	require.Error(t, err)
 	assert.True(t, k8serrors.IsNotFound(err))
 	assert.Empty(t, servers)
 }
 
-func TestStrimziBypassesCache(t *testing.T) {
+func TestStrimziListenerValidation(t *testing.T) {
 	for _, tc := range []struct {
-		name    string
-		kind    string
-		refName string
+		name      string
+		listeners []strimziv1.KafkaStatusListener
+		wantError string
 	}{
-		{name: "cluster", kind: "Kafka", refName: "cluster"},
-		{name: "topic", kind: "KafkaTopic", refName: "topic"},
-		{name: "topic status name", kind: "KafkaTopic", refName: "shared"},
+		{name: "no listeners", wantError: `cluster "cluster" has no listeners of name "plain"`},
+		{name: "only TLS", listeners: []strimziv1.KafkaStatusListener{{Name: "tls", BootstrapServers: "tls:9093"}}, wantError: `cluster "cluster" has no listeners of name "plain"`},
+		{name: "empty bootstrap servers", listeners: []strimziv1.KafkaStatusListener{{Name: "plain"}}, wantError: `cluster "cluster" has no bootstrap servers in "plain" listener`},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				w.Header().Set("Content-Type", "application/json")
-				var response string
-				switch r.URL.Path {
-				case "/apis/kafka.strimzi.io/v1/namespaces/other/kafkas/cluster":
-					response = `{"apiVersion":"kafka.strimzi.io/v1","kind":"Kafka","metadata":{"name":"cluster","namespace":"other"},"status":{"listeners":[{"name":"plain","bootstrapServers":"live:9092"}]}}`
-				case "/apis/kafka.strimzi.io/v1/namespaces/other/kafkatopics/topic":
-					response = `{"apiVersion":"kafka.strimzi.io/v1","kind":"KafkaTopic","metadata":{"name":"topic","namespace":"other","labels":{"strimzi.io/cluster":"cluster"}}}`
-				case "/apis/kafka.strimzi.io/v1/namespaces/other/kafkatopics/shared":
-					w.WriteHeader(http.StatusNotFound)
-					response = `{"kind":"Status","apiVersion":"v1","status":"Failure","reason":"NotFound","code":404}`
-				case "/apis/kafka.strimzi.io/v1/namespaces/other/kafkatopics":
-					response = `{"apiVersion":"kafka.strimzi.io/v1","kind":"KafkaTopicList","items":[{"metadata":{"name":"topic","namespace":"other","labels":{"strimzi.io/cluster":"cluster"}},"status":{"topicName":"shared"}}]}`
-				default:
-					http.NotFound(w, r)
-					return
-				}
-				_, err := w.Write([]byte(response))
-				assert.NoError(t, err)
-			}))
-			defer server.Close()
-			mapper := meta.NewDefaultRESTMapper([]schema.GroupVersion{strimziv1.SchemeGroupVersion})
-			mapper.Add(strimziv1.SchemeGroupVersion.WithKind("Kafka"), meta.RESTScopeNamespace)
-			mapper.Add(strimziv1.SchemeGroupVersion.WithKind("KafkaTopic"), meta.RESTScopeNamespace)
-			client, err := internal.NewFakeClient()
-			require.NoError(t, err)
-			liveClient, err := ctrl.New(&rest.Config{Host: server.URL}, ctrl.Options{
-				Scheme: client.GetScheme(), Mapper: mapper,
-				Cache: &ctrl.CacheOptions{Reader: strimziRejectingCache{}},
-			})
-			require.NoError(t, err)
-			client.(*internal.FakeClient).Client = liveClient
-			endpoint := camelv1.Endpoint{Ref: &v1.ObjectReference{
-				APIVersion: "kafka.strimzi.io/v1", Kind: tc.kind, Name: tc.refName, Namespace: "other",
-			}}
-			if tc.kind == "Kafka" {
-				endpoint.Properties = asEndpointProperties(map[string]string{"topic": tc.refName})
-			}
-			binding, err := (StrimziBindingProvider{}).Translate(BindingContext{
-				Ctx: context.Background(), Client: client, Namespace: "test",
-			}, EndpointContext{}, endpoint)
-			require.NoError(t, err)
-			require.NotNil(t, binding)
-			assert.Equal(t, "kafka:"+tc.refName+"?brokers=live%3A9092", binding.URI)
+			provider := StrimziBindingProvider{Client: fake.NewSimpleClientset(&strimziv1.Kafka{
+				Name: "cluster", Namespace: "test",
+				Status: strimziv1.KafkaStatus{Listeners: tc.listeners},
+			})}
+			servers, err := provider.getBootstrapServers(BindingContext{Ctx: context.Background()}, "cluster", "test")
+			require.EqualError(t, err, tc.wantError)
+			assert.Empty(t, servers)
 		})
 	}
 }
 
-type strimziRejectingCache struct{}
-
-func (strimziRejectingCache) Get(context.Context, ctrl.ObjectKey, ctrl.Object, ...ctrl.GetOption) error {
-	return errors.New("Strimzi reads must not use the cache")
+func TestStrimziLookupErrors(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		verb string
+	}{
+		{name: "get failure", verb: "get"},
+		{name: "list failure", verb: "list"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			client := fake.NewSimpleClientset()
+			wantErr := errors.New("API request failed")
+			client.PrependReactor(tc.verb, "kafkatopics", func(k8stesting.Action) (bool, runtime.Object, error) {
+				return true, nil, wantErr
+			})
+			topic, err := (StrimziBindingProvider{Client: client}).lookupTopic(BindingContext{
+				Ctx: context.Background(), Namespace: "test",
+			}, camelv1.Endpoint{Ref: &v1.ObjectReference{Name: "missing"}})
+			require.ErrorIs(t, err, wantErr)
+			assert.Nil(t, topic)
+		})
+	}
 }
 
-func (strimziRejectingCache) List(context.Context, ctrl.ObjectList, ...ctrl.ListOption) error {
-	return errors.New("Strimzi reads must not use the cache")
+func TestStrimziMissingTopic(t *testing.T) {
+	provider := StrimziBindingProvider{Client: fake.NewSimpleClientset()}
+	topic, err := provider.lookupTopic(BindingContext{Ctx: context.Background(), Namespace: "test"},
+		camelv1.Endpoint{Ref: &v1.ObjectReference{Name: "missing"}})
+	require.EqualError(t, err, "couldn't find any KafkaTopic with either name or topicName missing")
+	assert.Nil(t, topic)
 }
