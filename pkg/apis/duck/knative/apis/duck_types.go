@@ -1,0 +1,88 @@
+/*
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package apis
+
+import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+// Status is the common status of the Knative resources.
+type Status struct {
+	// Conditions the latest available observations of a resource's current state.
+	// The Knative conditions are read as Kubernetes API conditions, as they share
+	// the fields Camel K uses (type, status, reason and message).
+	// +optional
+	Conditions []metav1.Condition `json:"conditions,omitempty"`
+}
+
+// Addressable is a destination for message delivery.
+type Addressable struct {
+	// URL is the address URL.
+	URL *URL `json:"url,omitempty"`
+}
+
+// Destination represents a target of an invocation over HTTP.
+type Destination struct {
+	// Ref points to an Addressable.
+	// +optional
+	Ref *KReference `json:"ref,omitempty"`
+
+	// URI can be an absolute URL pointing to the target or a relative URI resolved against Ref.
+	// +optional
+	URI *URL `json:"uri,omitempty"`
+}
+
+// KReference contains enough information to refer to another object.
+type KReference struct {
+	// Kind of the referent.
+	Kind string `json:"kind"`
+
+	// Name of the referent.
+	Name string `json:"name"`
+
+	// API version of the referent.
+	// +optional
+	APIVersion string `json:"apiVersion,omitempty"`
+}
+
+// SourceSpec is the minimum resource shape to adhere to the Source specification.
+type SourceSpec struct {
+	// Sink is a reference to an object that will resolve to a uri to use as the sink.
+	Sink Destination `json:"sink,omitempty"`
+}
+
+// BindingSpec is the minimum resource shape to adhere to the Binding specification.
+type BindingSpec struct {
+	// Subject references the resource whose runtime contract should be augmented by the Binding.
+	Subject Reference `json:"subject"`
+}
+
+// Reference identifies the subject of a Binding.
+type Reference struct {
+	// API version of the referent.
+	// +optional
+	APIVersion string `json:"apiVersion,omitempty"`
+
+	// Kind of the referent.
+	// +optional
+	Kind string `json:"kind,omitempty"`
+
+	// Name of the referent.
+	// +optional
+	Name string `json:"name,omitempty"`
+}

@@ -25,9 +25,8 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/utils/ptr"
 
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
-
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	servingv1 "github.com/apache/camel-k/v2/pkg/apis/duck/knative/serving/v1"
 )
 
 const (

@@ -28,12 +28,13 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	olm "github.com/operator-framework/api/pkg/operators/v1alpha1"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
+	servingv1 "github.com/apache/camel-k/v2/pkg/apis/duck/knative/serving/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
 	"github.com/apache/camel-k/v2/pkg/util/knative"
@@ -156,7 +157,10 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 	}
 
 	if installed, _ := knative.IsServingInstalled(c); installed {
-		var ksrvs servingv1.ServiceList
+		// List the Knative Services as unstructured objects, so that the dump carries
+		// the complete resources rather than the partial schema of the duck type.
+		var ksrvs unstructured.UnstructuredList
+		ksrvs.SetGroupVersionKind(servingv1.SchemeGroupVersion.WithKind("ServiceList"))
 		err = c.List(ctx, &ksrvs)
 		if err == nil {
 			t.Logf("Found %d Knative services:\n", len(ksrvs.Items))

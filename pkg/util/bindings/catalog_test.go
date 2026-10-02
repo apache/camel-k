@@ -23,9 +23,9 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	eventing "github.com/apache/camel-k/v2/pkg/apis/duck/knative/eventing/v1"
 	"github.com/apache/camel-k/v2/pkg/internal"
 	corev1 "k8s.io/api/core/v1"
-	eventing "knative.dev/eventing/pkg/apis/eventing/v1"
 
 	"github.com/stretchr/testify/require"
 )

@@ -26,10 +26,9 @@ import (
 	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/apimachinery/pkg/util/strategicpatch"
 
-	serving "knative.dev/serving/pkg/apis/serving/v1"
-
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	serving "github.com/apache/camel-k/v2/pkg/apis/duck/knative/serving/v1"
 )
 
 const podTraitOrder = 1800
