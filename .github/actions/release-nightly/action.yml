@@ -58,8 +58,8 @@ runs:
         sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
     - name: Set up QEMU (required by multi platform build)
-      uses: docker/setup-qemu-action@06116385d9baf250c9f4dcb4858b16962ea869c3
-
+      uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8
+      
     - name: Get nightly version and update date
       shell: bash
       run: |
@@ -222,7 +222,7 @@ runs:
         echo "Release ${{ env.TAG }} created successfully with artifacts."
 
     - name: Login to staging container registry
-      uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee
+      uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0
       with:
         username: ${{ inputs.secretDockerHubUser }}
         password: ${{ inputs.secretDockerHubPassword }}
