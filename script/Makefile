@@ -28,7 +28,7 @@ VERSION ?= 2.12.0-SNAPSHOT
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
 LAST_RELEASED_VERSION ?= 2.11.0
 DEFAULT_RUNTIME_PROVIDER := plain-quarkus
-DEFAULT_RUNTIME_VERSION := 3.39.1
+DEFAULT_RUNTIME_VERSION := 3.40.1
 # The last camel-k-runtime catalog
 # we keep using it until we support the CamelCatalog CR
 CK_RUNTIME_CATALOG_VERSION := 3.15.3
@@ -298,13 +298,20 @@ test-advanced: gotestfmt-install
 	exit $${FAILED}
 
 #
-# Installation and upgrade procedure test using
+# Installation procedure test using
 #
 test-install: gotestfmt-install
 	FAILED=0; \
-	go test -timeout 20m -v ./e2e/install/kustomize -tags=integration $(GOTESTFMT) || ((FAILED++)); \
-	go test -timeout 20m -v ./e2e/install/helm -tags=integration $(GOTESTFMT) || ((FAILED++)); \
-	go test -timeout 60m -v ./e2e/install/upgrade -tags=integration $(GOTESTFMT) || ((FAILED++)); \
+	go test -timeout 15m -v ./e2e/install/kustomize -tags=integration $(GOTESTFMT) || ((FAILED++)); \
+	go test -timeout 15m -v ./e2e/install/helm -tags=integration $(GOTESTFMT) || ((FAILED++)); \
+	exit $${FAILED}
+
+#
+# Upgrade procedure test using
+#
+test-upgrade: gotestfmt-install
+	FAILED=0; \
+	go test -timeout 15m -v ./e2e/upgrade -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
 
 #
