@@ -1,0 +1,150 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+name: network-policy
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'pkg/apis/camel/v1/trait/service.go'
+      - 'pkg/apis/camel/v1/trait/zz_generated.deepcopy.go'
+      - 'pkg/trait/service.go'
+      - 'pkg/trait/service_test.go'
+      - 'e2e/common/traits/network_policy_test.go'
+      - 'e2e/common/traits/files/PlatformHttpServer.java'
+      - '.github/workflows/network-policy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  CAMEL_K_TEST_TIMEOUT_SHORT: 2m
+  CAMEL_K_TEST_TIMEOUT_MEDIUM: 5m
+  CAMEL_K_TEST_TIMEOUT_LONG: 10m
+
+jobs:
+  network-policy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          submodules: recursive
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: 'go.mod'
+          check-latest: true
+
+      - name: Set up Kubectl
+        uses: azure/setup-kubectl@3e0aec4d80787158d308d7b364cb1b702e7feb7f
+
+      - name: Start Minikube with Calico
+        uses: medyagh/setup-minikube@v0.0.21
+        with:
+          cpus: max
+          memory: max
+          container-runtime: docker
+          cni: calico
+
+      - name: Build Camel K images
+        shell: bash
+        run: |
+          eval "$(minikube -p minikube docker-env)"
+          LAST_RELEASED_VERSION="$(make get-last-released-version)"
+          echo "LAST_RELEASED_VERSION=$LAST_RELEASED_VERSION" >> "$GITHUB_ENV"
+          NOTEST=true make images
+
+      - name: Install operator
+        shell: bash
+        run: |
+          kubectl create ns camel-k
+          kubectl create configmap camel-k-operator-configmap-configuration \
+            --from-literal=ENABLE_DEV_REGISTRY_SECRET="true" \
+            --from-literal=MAVEN_REPOSITORIES_ALLOWED="https://maven.repository.redhat.com/ga@id=redhat" \
+            -n camel-k
+          echo "E2E_TEST_REGISTRY_SECRET_COPY=true" >> "$GITHUB_ENV"
+
+          kubectl apply -k install/overlays/all-namespaces/ --server-side --force-conflicts
+          kubectl wait --for=condition=available deployment/camel-k-operator -n camel-k --timeout=60s
+
+      - name: Run NetworkPolicy E2E test
+        shell: bash
+        run: |
+          set -o pipefail
+          go test -p 1 -timeout 30m -v \
+            ./e2e/common/traits \
+            -run '^TestServiceNetworkPolicy
+
+      - name: Collect Kubernetes diagnostics
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          mkdir -p network-policy-diagnostics
+
+          kubectl get pods -A -o wide > network-policy-diagnostics/pods.txt 2>&1
+          kubectl get svc -A -o wide > network-policy-diagnostics/services.txt 2>&1
+          kubectl get networkpolicy -A -o yaml > network-policy-diagnostics/networkpolicies.yaml 2>&1
+          kubectl get events -A --sort-by=.lastTimestamp > network-policy-diagnostics/events.txt 2>&1
+
+          kubectl -n camel-k get pods -o wide > network-policy-diagnostics/operator-pods.txt 2>&1
+          kubectl -n camel-k logs deployment/camel-k-operator --all-containers --tail=-1 > network-policy-diagnostics/operator.log 2>&1
+
+          find . -maxdepth 1 -name 'network-policy-test.log' -exec cp {} network-policy-diagnostics/ \;
+
+      - name: Upload NetworkPolicy diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: network-policy-e2e-diagnostics
+          path: network-policy-diagnostics/
+          if-no-files-found: warn
+ \
+            -tags=integration \
+            -count=1 | tee network-policy-test.log
+
+      - name: Collect Kubernetes diagnostics
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          mkdir -p network-policy-diagnostics
+
+          kubectl get pods -A -o wide > network-policy-diagnostics/pods.txt 2>&1
+          kubectl get svc -A -o wide > network-policy-diagnostics/services.txt 2>&1
+          kubectl get networkpolicy -A -o yaml > network-policy-diagnostics/networkpolicies.yaml 2>&1
+          kubectl get events -A --sort-by=.lastTimestamp > network-policy-diagnostics/events.txt 2>&1
+
+          kubectl -n camel-k get pods -o wide > network-policy-diagnostics/operator-pods.txt 2>&1
+          kubectl -n camel-k logs deployment/camel-k-operator --all-containers --tail=-1 > network-policy-diagnostics/operator.log 2>&1
+
+          find . -maxdepth 1 -name 'network-policy-test.log' -exec cp {} network-policy-diagnostics/ \;
+
+      - name: Upload NetworkPolicy diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: network-policy-e2e-diagnostics
+          path: network-policy-diagnostics/
+          if-no-files-found: warn

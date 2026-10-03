@@ -54,6 +54,18 @@ Deprecated: Use service type instead.
 | map[string]string
 | The labels added to the Service object.
 
+| service.networkPolicyEnabled
+| bool
+| Enables the NetworkPolicy managed by the Service trait. Defaults to false. When enabled, at least one of the namespace or pod selectors must be configured.
+
+| service.networkPolicyNamespaceSelector
+| map[string]string
+| Labels used to restrict the source namespaces allowed by the NetworkPolicy.
+
+| service.networkPolicyPodSelector
+| map[string]string
+| Labels used to restrict the source pods allowed by the NetworkPolicy.
+
 | service.ports
 | []string
 | List of container ports available in the container to expose

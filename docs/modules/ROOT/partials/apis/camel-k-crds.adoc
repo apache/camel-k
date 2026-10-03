@@ -9717,6 +9717,24 @@ map[string]string
 
 The labels added to the Service object.
 
+|`networkPolicyEnabled` +
+bool
+|
+
+Enables the NetworkPolicy managed by the Service trait. Defaults to false. When enabled, at least one of the namespace or pod selectors must be configured.
+
+|`networkPolicyNamespaceSelector` +
+map[string]string
+|
+
+Labels used to restrict the source namespaces allowed by the NetworkPolicy.
+
+|`networkPolicyPodSelector` +
+map[string]string
+|
+
+Labels used to restrict the source pods allowed by the NetworkPolicy.
+
 |`ports` +
 []string
 |

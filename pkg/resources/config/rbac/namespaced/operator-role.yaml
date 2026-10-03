@@ -163,6 +163,17 @@ rules:
   - get
   - list
   - patch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - networkpolicies
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - watch
 # Required by gateway trait
 - apiGroups:
   - gateway.networking.k8s.io
