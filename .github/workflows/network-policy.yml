@@ -91,8 +91,34 @@ jobs:
       - name: Run NetworkPolicy E2E test
         shell: bash
         run: |
+          set -o pipefail
           go test -p 1 -timeout 30m -v \
             ./e2e/common/traits \
-            -run '^TestServiceNetworkPolicy$' \
+            -run '^TestServiceNetworkPolicy \
             -tags=integration \
-            -count=1
+            -count=1 | tee network-policy-test.log
+
+      - name: Collect Kubernetes diagnostics
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          mkdir -p network-policy-diagnostics
+
+          kubectl get pods -A -o wide > network-policy-diagnostics/pods.txt 2>&1
+          kubectl get svc -A -o wide > network-policy-diagnostics/services.txt 2>&1
+          kubectl get networkpolicy -A -o yaml > network-policy-diagnostics/networkpolicies.yaml 2>&1
+          kubectl get events -A --sort-by=.lastTimestamp > network-policy-diagnostics/events.txt 2>&1
+
+          kubectl -n camel-k get pods -o wide > network-policy-diagnostics/operator-pods.txt 2>&1
+          kubectl -n camel-k logs deployment/camel-k-operator --all-containers --tail=-1 > network-policy-diagnostics/operator.log 2>&1
+
+          find . -maxdepth 1 -name 'network-policy-test.log' -exec cp {} network-policy-diagnostics/ \;
+
+      - name: Upload NetworkPolicy diagnostics
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: network-policy-e2e-diagnostics
+          path: network-policy-diagnostics/
+          if-no-files-found: warn
