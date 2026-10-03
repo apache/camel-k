@@ -15,7 +15,7 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-name: install
+name: upgrade
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -58,7 +58,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  install:
+  upgrade:
     runs-on: ubuntu-latest
     steps:
 
@@ -71,21 +71,15 @@ jobs:
     - name: Infra setting
       uses: ./.github/actions/infra-setting
 
-    - name: Install Helm
+    - name: Create upgrade test namespace
       shell: bash
       run: |
-        sudo apt-get install curl gpg apt-transport-https --yes
-        curl -fsSL https://packages.buildkite.com/helm-linux/helm-debian/gpgkey | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
-        echo "deb [signed-by=/usr/share/keyrings/helm.gpg] https://packages.buildkite.com/helm-linux/helm-debian/any/ any main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
-        sudo apt-get update
-        sudo apt-get install helm
+        kubectl create ns camel-k
 
-    - name: Build Helm chart
-      shell: bash
-      run: |
-        make release-helm
+    - name: Registry setting
+      uses: ./.github/actions/registry-setting
 
     - name: Run tests
       shell: bash
       run: |
-        DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-install
+        DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-upgrade

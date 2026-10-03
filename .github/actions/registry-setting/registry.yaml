@@ -71,12 +71,12 @@ spec:
               value: /registry-data
             # Required to include a secret credential
             # We can skip them in case we want an open access
-            - name: REGISTRY_AUTH
-              value: htpasswd
-            - name: REGISTRY_AUTH_HTPASSWD_REALM
-              value: Registry Realm
-            - name: REGISTRY_AUTH_HTPASSWD_PATH
-              value: /auth/htpasswd
+            # - name: REGISTRY_AUTH
+            #   value: htpasswd
+            # - name: REGISTRY_AUTH_HTPASSWD_REALM
+            #   value: Registry Realm
+            # - name: REGISTRY_AUTH_HTPASSWD_PATH
+            #   value: /auth/htpasswd
           ports:
             - containerPort: 5000
               name: registry
