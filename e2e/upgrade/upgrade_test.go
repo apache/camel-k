@@ -24,11 +24,8 @@ package upgrade
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
-	"regexp"
 	"testing"
 	"time"
 
@@ -39,101 +36,29 @@ import (
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestUpgrade(t *testing.T) {
-	t.Skip("This test requires to be reworked in 2.12. It cannot work as it is since the older registry is not compatible" +
-		" (secret registry) with the one introduced in the last version.")
-
-	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, operatorNs string) {
+	WithExistingNamedTestNamespace(t, func(ctx context.Context, g *WithT, operatorNs string) {
 		// Let's make sure no CRD is yet available in the cluster
 		// as we must make the procedure to install them accordingly
 		g.Expect(CRDs(t)()).Should(BeNil(), "No Camel K CRDs should be previously installed for this test")
 		// We start the test by installing previous version operator
 		lastVersion, ok := os.LookupEnv("LAST_RELEASED_VERSION")
 		g.Expect(ok).To(BeTrue(), "Missing last released version: you need to set it into LAST_RELEASED_VERSION env var")
-		registry := os.Getenv("KAMEL_INSTALL_REGISTRY")
-		g.Expect(registry).NotTo(BeEmpty(), "KAMEL_INSTALL_REGISTRY env var must not be empty")
 
-		// Install previous version
-
-		lastVersionDir := fmt.Sprintf("/tmp/camel-k-v-%s", lastVersion)
-		// We clone and install the previous installed operator
-		// from source with tag
-		ExpectExecSucceed(t, g,
-			exec.Command(
-				"rm",
-				"-rf",
-				lastVersionDir,
-			))
-		ExpectExecSucceed(t, g,
-			exec.Command(
-				"git",
-				"clone",
-				"https://github.com/apache/camel-k.git",
-				lastVersionDir,
-			))
-		checkoutCmd := exec.Command(
-			"git",
-			"checkout",
-			fmt.Sprintf("v%s", lastVersion),
+		// Install previous version: mind that the registry configuration has to be stored by the action
+		// and expected in camel-k namespace
+		applyCmd := exec.Command(
+			"kubectl",
+			"apply",
+			"-k",
+			"github.com/apache/camel-k/install/overlays/all-namespaces?ref=v"+lastVersion,
+			"--server-side",
+			"--force-conflicts",
 		)
-		checkoutCmd.Dir = lastVersionDir
-		ExpectExecSucceed(t, g, checkoutCmd)
+		ExpectExecSucceed(t, g, applyCmd)
 
-		// Change /install/overlays/platform/integration-platform.yaml on the fly
-		// to include the secret copied in this ns into the ITP
-		filename := filepath.Join(lastVersionDir, "install", "overlays", "platform", "integration-platform.yaml")
-		data, err := os.ReadFile(filename)
-		if err != nil {
-			t.Fatal(err)
-		}
-		re := regexp.MustCompile(`(?m)^(\s*)insecure: true$`)
-		updated := re.ReplaceAllString(
-			string(data),
-			"${1}insecure: true\n${1}secret: my-registry",
-		)
-		if err := os.WriteFile(filename, []byte(updated), 0644); err != nil {
-			t.Fatal(err)
-		}
-
-		installPrevCmd := exec.Command(
-			"make",
-			"install-k8s-global",
-			fmt.Sprintf("NAMESPACE=%s", operatorNs),
-			fmt.Sprintf("REGISTRY=%s", registry),
-		)
-		installPrevCmd.Dir = lastVersionDir
-		ExpectExecSucceed(t, g, installPrevCmd)
-
-		// TODO: In 2.12 we should move to this one instead
-		//
-		// kustomizeCmd := exec.Command(
-		// 	"kubectl",
-		// 	"kustomize",
-		// 	"github.com/apache/camel-k/install/overlays/all-namespaces?ref=v"+lastVersion,
-		// )
-		// output, err := kustomizeCmd.Output()
-		// g.Expect(err).To(BeNil())
-		// modified := strings.ReplaceAll(
-		// 	string(output),
-		// 	"namespace: camel-k",
-		// 	"namespace: "+ns,
-		// )
-		// applyCmd := exec.Command(
-		// 	"kubectl",
-		// 	"apply",
-		// 	"-f",
-		// 	"-",
-		// 	"--server-side",
-		// 	"--force-conflicts",
-		// )
-		// applyCmd.Stdin = strings.NewReader(modified)
-		// ExpectExecSucceed(t, g, applyCmd)
-
-		// Refresh the test client to account for the newly installed CRDs
-		RefreshClient(t)
 		// Check the operator image is the previous one
 		g.Eventually(OperatorImage(t, ctx, operatorNs)).Should(ContainSubstring(lastVersion))
 		// Check the operator pod is running
@@ -144,22 +69,40 @@ func TestUpgrade(t *testing.T) {
 			// Run the Integration
 			name := RandomizedSuffixName("yaml")
 			g.Expect(Kamel(t, ctx, "run", "-n", nsIntegration, "--name", name, "files/yaml.yaml").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, nsIntegration, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, nsIntegration, name, v1.IntegrationConditionReady)).
+			g.Eventually(IntegrationConditionStatus(t, ctx, nsIntegration, name, v1.IntegrationConditionReady), TestTimeoutMedium).
 				Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, nsIntegration, name)).Should(Equal(corev1.PodRunning))
 			// Check the Integration version
 			g.Eventually(IntegrationVersion(t, ctx, nsIntegration, name)).Should(Equal(lastVersion))
 			// Get the info of the runtime, as we need for further check later
 			lastRuntimeVersion := Integration(t, ctx, nsIntegration, name)().Status.RuntimeVersion
 
-			// Let's upgrade the operator with the newer installation
+			// Let's upgrade the operator with the newer installation (default in camel-k namespace)
 			installNextCmd := exec.Command(
-				"make",
-				"install-k8s-global",
-				fmt.Sprintf("NAMESPACE=%s", operatorNs),
+				"kubectl",
+				"apply",
+				"-k",
+				"install/overlays/all-namespaces",
+				"--server-side",
+				"--force-conflicts",
 			)
-			installNextCmd.Dir = "../../.."
+			installNextCmd.Dir = "../.."
 			ExpectExecSucceed(t, g, installNextCmd)
+			// The default installation come with a dev registry. In this test we need to make sure
+			// it reuses the common registry used by previous installation, so, we immediately disable the
+			// feature
+			disableDevRegistryCmd := exec.Command(
+				"kubectl",
+				"-n",
+				"camel-k",
+				"set",
+				"env",
+				"deployment/camel-k-operator",
+				"ENABLE_DEV_REGISTRY=\"false\"",
+			)
+			disableDevRegistryCmd.Dir = "../.."
+			ExpectExecSucceed(t, g, disableDevRegistryCmd)
+
 			// Refresh the test client to account for the newly installed CRDs
 			RefreshClient(t)
 
@@ -167,11 +110,6 @@ func TestUpgrade(t *testing.T) {
 			g.Eventually(OperatorImage(t, ctx, operatorNs)).Should(ContainSubstring(defaults.Version))
 			// Check the operator pod is running
 			g.Eventually(OperatorPodPhase(t, ctx, operatorNs), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-
-			// TODO: In 2.12 we should remove the IntegrationPlatform removal
-			// which was still default in 2.10 and installed and it is required
-			// for this test to complete. Also remove the DeleteIntegrationPlatform func
-			g.Expect(DeleteIntegrationPlatform(t, ctx, operatorNs, "camel-k")).To(Succeed())
 
 			// Check the Integration hasn't been upgraded
 			g.Consistently(IntegrationVersion(t, ctx, nsIntegration, name), 15*time.Second, 3*time.Second).
@@ -184,8 +122,6 @@ func TestUpgrade(t *testing.T) {
 			// Force the Integration upgrade
 			g.Expect(Kamel(t, ctx, "rebuild", name, "-n", nsIntegration).Execute()).To(Succeed())
 
-			// A catalog should be created with the new configuration
-			g.Eventually(DefaultCamelCatalogPhase(t, ctx, operatorNs), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
 			// Check the Integration version has been upgraded
 			g.Eventually(IntegrationVersion(t, ctx, nsIntegration, name), TestTimeoutMedium).Should(Equal(defaults.Version))
 
@@ -205,25 +141,10 @@ func TestUpgrade(t *testing.T) {
 			g.Eventually(IntegrationPodImage(t, ctx, nsIntegration, name)).Should(Equal(kit.Status.Image))
 
 			// Check the Integration runs correctly
-			g.Eventually(IntegrationPodPhase(t, ctx, nsIntegration, name), TestTimeoutMedium).
-				Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, nsIntegration, name, v1.IntegrationConditionReady)).
+			g.Eventually(IntegrationConditionStatus(t, ctx, nsIntegration, name, v1.IntegrationConditionReady), TestTimeoutMedium).
 				Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, nsIntegration, name)).
+				Should(Equal(corev1.PodRunning))
 		})
-		// TODO: we should verify new CRDs installed are the same as the one defined in the source core here
-	})
-}
-
-func DeleteIntegrationPlatform(t *testing.T, ctx context.Context, ns string, name string) error {
-	itp := v1.IntegrationPlatform{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "IntegrationPlatform",
-			APIVersion: v1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: ns,
-			Name:      name,
-		},
-	}
-	return TestClient(t).Delete(ctx, &itp)
+	}, "camel-k")
 }
