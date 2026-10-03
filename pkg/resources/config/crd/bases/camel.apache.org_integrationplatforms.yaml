@@ -2491,6 +2491,21 @@ spec:
 
                           Deprecated: Use service type instead.
                         type: boolean
+                      networkPolicyEnabled:
+                        description: |-
+                          Enables the NetworkPolicy managed by the Service trait. Defaults to false.
+                          When enabled, at least one of the namespace or pod selectors must be configured.
+                        type: boolean
+                      networkPolicyNamespaceSelector:
+                        additionalProperties:
+                          type: string
+                        description: Labels used to restrict the source namespaces allowed by the NetworkPolicy.
+                        type: object
+                      networkPolicyPodSelector:
+                        additionalProperties:
+                          type: string
+                        description: Labels used to restrict the source pods allowed by the NetworkPolicy.
+                        type: object
                       ports:
                         description: |-
                           List of container ports available in the container to expose
