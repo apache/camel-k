@@ -177,6 +177,17 @@ rules:
   - list
   - patch
 - apiGroups:
+  - networking.k8s.io
+  resources:
+  - networkpolicies
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - watch
+- apiGroups:
   - gateway.networking.k8s.io
   resources:
   - gateways
