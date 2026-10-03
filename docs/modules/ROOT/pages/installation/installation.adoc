@@ -52,58 +52,6 @@ When you decide to install the operator, you can decide to install the following
 
 The namespace(s) to watch is configured via `WATCH_NAMESPACE` variable in the operator `Deployment` resource. You can provide an empty value (watch all namespaces), a single value (watch either the own namespace or any other namespace) or a comma separated value (watching as many namespaces as provided).
 
-=== Multi-namespace operator with Kustomize
-
-The repository includes a ready-to-use Kustomize overlay for a single operator installed in one namespace and watching multiple tenant namespaces. The example overlay installs the operator in `operators`, sets `WATCH_NAMESPACE=tenant-a,tenant-b`, and creates a namespaced Role and RoleBinding for each tenant. The tenant RoleBindings are patched so the subject is the operator ServiceAccount in `operators`.
-
-Before applying the overlay, create the namespaces used by the example:
-
-[source,shell script]
-----
-kubectl create namespace operators
-kubectl create namespace tenant-a
-kubectl create namespace tenant-b
-----
-
-You can inspect the generated resources without applying them:
-
-[source,shell script]
-----
-kubectl kustomize https://github.com/apache/camel-k/install/overlays/multi-namespace?ref=v{last-released-version}
-----
-
-Apply the complete example with:
-
-[subs=attributes+]
-----
-kubectl apply -k github.com/apache/camel-k/install/overlays/multi-namespace?ref=v{last-released-version} --server-side
-----
-
-The example uses the following identities:
-
-* Operator namespace: `operators`
-* Watched namespaces: `tenant-a`, `tenant-b`
-* Operator Deployment and ServiceAccount suffix: `-tenant-ab` (for example, `camel-k-operator-tenant-ab`)
-* Tenant Role/RoleBinding suffixes: `-tenant-a` and `-tenant-b`
-* Tenant RoleBinding subject: the `camel-k-operator-tenant-ab` ServiceAccount in the `operators` namespace
-
-Verify the result in all three namespaces:
-
-[source,shell script]
-----
-kubectl get deployment,serviceaccount -n operators
-kubectl get role,rolebinding -n tenant-a
-kubectl get role,rolebinding -n tenant-b
-kubectl get pods -n operators
-----
-
-The namespaced Role contains the permissions required for Camel K resources and supporting Kubernetes resources in each watched tenant namespace. Optional integrations such as KEDA, Knative, OpenShift, cert-manager, Prometheus Operator, or Strimzi may require their corresponding supplemental RBAC resources from the same namespaced base. Keep those resources when the matching trait or integration is enabled.
-
-This overlay is a starting point for a two-tenant example. For a different set of namespaces, copy the tenant RBAC overlay for each tenant, set its `namespace` and RoleBinding subject patch to the target namespace and ServiceAccount, and change the operator Deployment `WATCH_NAMESPACE` value to the same comma-separated namespace list. Keep every tenant RoleBinding namespaced in the tenant it grants access to.
-
-NOTE: The operator ServiceAccount is intentionally referenced across namespaces: the RoleBinding lives in each tenant namespace, while its `subjects` entry points to the ServiceAccount in `operators`. This is how a namespaced Role grants the single operator access to resources in each watched tenant namespace without granting it cluster-wide access.
-
-
 It's important to notice that when running the single or multiple namespace operator, you _may_ need to provide the RBACs which are expected by the operator to run properly. For such a configuration you can take as a reference the `Kustomize` examples available in `/install/overlays/single-namespace/` and `/install/overlays/multi-namespace/`. The last topology is probably the most secure as it will avoid the operator to access to any resource outside those namespaces for which you've provided the proper security rules.
 
 NOTE: RBAC custom configuration may vary depending on the installation methodology.
