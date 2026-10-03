@@ -28,23 +28,21 @@ runs:
     run: |
       kubectl create ns registry
       # Create a self-signed certificate
-      openssl req -x509 -newkey rsa:2048 -nodes   -keyout registry.key   -out registry.crt   -days 7   -subj "/CN=registry"
+      openssl req -x509 -newkey rsa:2048 -nodes -keyout registry.key -out registry.crt -days 7 -subj "/CN=registry"
       kubectl create secret tls registry-tls --cert=registry.crt --key=registry.key -n registry
       kubectl apply -f .github/actions/ext-registry-setting/registry.yaml -n registry
       kubectl wait --for=condition=available deployment/registry -n registry --timeout=60s
-      KAMEL_INSTALL_REGISTRY="$(kubectl -n registry get service registry -o jsonpath='{.spec.clusterIP}')"
-      echo "KAMEL_INSTALL_REGISTRY=$KAMEL_INSTALL_REGISTRY" >> "$GITHUB_ENV"
-      echo "Setting registry as $KAMEL_INSTALL_REGISTRY which is required by certain tests"
-      kubectl create secret docker-registry my-registry \
-        --docker-server $KAMEL_INSTALL_REGISTRY \
-        --docker-username admin \
-        --docker-password password \
-        -n camel-k
+      DEV_REGISTRY="$(kubectl -n registry get service registry -o jsonpath='{.spec.clusterIP}')"
+
+      # Useful if we want to include a registry with authentication (we must uncomment the registry deployment as well)
+      # kubectl create secret docker-registry my-registry \
+      #   --docker-server $KAMEL_INSTALL_REGISTRY \
+      #   --docker-username admin \
+      #   --docker-password password \
+      #   -n camel-k
+
       kubectl create configmap camel-k-operator-configmap-configuration \
-        --from-literal=REGISTRY_ADDRESS="$KAMEL_INSTALL_REGISTRY" \
-        --from-literal=REGISTRY_SECRET="my-registry" \
-        --from-literal=MAVEN_REPOSITORIES_ALLOWED="https://maven.repository.redhat.com/ga@id=redhat" \
+        --from-literal=REGISTRY_ADDRESS="$DEV_REGISTRY" \
+      # Uncomment to provide a push secret
+      #  --from-literal=REGISTRY_SECRET="my-registry" \
         -n camel-k
-      E2E_TEST_REGISTRY_SECRET_COPY=true
-      echo "E2E_TEST_REGISTRY_SECRET_COPY=$E2E_TEST_REGISTRY_SECRET_COPY" >> $GITHUB_ENV
-      echo "Setting E2E_TEST_REGISTRY_SECRET_COPY=true in order to automate the copy of the pull secret and the setting in each test"
