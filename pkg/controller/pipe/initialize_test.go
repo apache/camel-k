@@ -262,14 +262,14 @@ func TestNewPipeUnsupportedRef(t *testing.T) {
 	handledPipe, err := a.Handle(context.TODO(), pipe)
 	require.Error(t, err)
 	assert.Equal(t, "could not find any suitable binding provider for my-api-version/my-kind my-kind-name in namespace ns. "+
-		"Bindings available: [\"kamelet\" \"knative-uri\" \"strimzi\" \"service-ref\" \"camel-uri\" \"knative-ref\"]", err.Error())
+		"Bindings available: [\"arkmq\" \"kamelet\" \"knative-uri\" \"strimzi\" \"service-ref\" \"camel-uri\" \"knative-ref\"]", err.Error())
 	assert.Equal(t, v1.PipePhaseError, handledPipe.Status.Phase)
 	cond := handledPipe.Status.GetCondition(v1.PipeConditionReady)
 	assert.NotNil(t, cond)
 	assert.Equal(t, corev1.ConditionFalse, cond.Status)
 	assert.Equal(t, "IntegrationError", cond.Reason)
 	assert.Equal(t, "could not find any suitable binding provider for my-api-version/my-kind my-kind-name in namespace ns. "+
-		"Bindings available: [\"kamelet\" \"knative-uri\" \"strimzi\" \"service-ref\" \"camel-uri\" \"knative-ref\"]", cond.Message)
+		"Bindings available: [\"arkmq\" \"kamelet\" \"knative-uri\" \"strimzi\" \"service-ref\" \"camel-uri\" \"knative-ref\"]", cond.Message)
 }
 
 func TestNewPipeKnativeURIBinding(t *testing.T) {
@@ -470,6 +470,166 @@ func TestNewPipeStrimziKafkaBinding(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "{\"route\":{\"from\":{\"steps\":[{\"to\":\"kafka:mytopic?brokers=my-cluster-kafka-bootstrap%3A9092\"}],"+
 		"\"uri\":\"direct:something\"},\"id\":\"binding\"}}", string(flow))
+}
+
+func TestNewPipeArkMQBinding(t *testing.T) {
+	pipe := &v1.Pipe{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       v1.PipeKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "ns",
+			Name:      "my-pipe",
+		},
+		Spec: v1.PipeSpec{
+			Sink: v1.Endpoint{
+				Ref: &corev1.ObjectReference{
+					Kind:       "ActiveMQArtemisAddress",
+					Name:       "my-queue",
+					APIVersion: "broker.amq.io/v1beta1",
+				},
+				Properties: asEndpointProperties(map[string]string{
+					"brokerURL": "tcp://my-broker-hdls-svc:61616",
+				}),
+			},
+			Source: v1.Endpoint{
+				URI: ptr.To("direct:something"),
+			},
+		},
+	}
+	c, err := internal.NewFakeClient(pipe)
+	require.NoError(t, err)
+
+	a := NewInitializeAction()
+	a.InjectLogger(log.Log)
+	a.InjectClient(c)
+	assert.Equal(t, "initialize", a.Name())
+	assert.True(t, a.CanHandle(pipe))
+	handledPipe, err := a.Handle(context.TODO(), pipe)
+	require.NoError(t, err)
+	assert.Equal(t, v1.PipePhaseCreating, handledPipe.Status.Phase)
+	// Check integration which should have been created
+	expectedIT := v1.NewIntegration(pipe.Namespace, pipe.Name)
+	err = c.Get(context.Background(), ctrl.ObjectKeyFromObject(&expectedIT), &expectedIT)
+	require.NoError(t, err)
+	assert.Equal(t, pipe.Name, expectedIT.Name)
+	assert.Equal(t, v1.IntegrationPhaseNone, expectedIT.Status.Phase)
+	assert.Equal(t, "Pipe", expectedIT.Labels[kubernetes.CamelCreatorLabelKind])
+	assert.Equal(t, "my-pipe", expectedIT.Labels[kubernetes.CamelCreatorLabelName])
+	flow, err := json.Marshal(expectedIT.Spec.Flows[0].RawMessage)
+	require.NoError(t, err)
+	assert.Equal(t, "{\"route\":{\"from\":{\"steps\":[{\"to\":\"amqp:queue:my-queue\"}],"+
+		"\"uri\":\"direct:something\"},\"id\":\"binding\"}}", string(flow))
+	assert.Equal(t, "amqp://my-broker-hdls-svc:61616", expectedIT.Spec.GetConfigurationProperty("quarkus.qpid-jms.url"))
+	assert.Equal(t, "amqp://my-broker-hdls-svc:61616", expectedIT.Spec.GetConfigurationProperty("camel.component.amqp.broker-url"))
+}
+
+func TestNewPipeArkMQSourceBinding(t *testing.T) {
+	pipe := &v1.Pipe{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       v1.PipeKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "ns",
+			Name:      "my-pipe-source",
+		},
+		Spec: v1.PipeSpec{
+			Source: v1.Endpoint{
+				Ref: &corev1.ObjectReference{
+					Kind:       "ActiveMQArtemisAddress",
+					Name:       "my-queue",
+					APIVersion: "broker.amq.io/v1beta1",
+				},
+				Properties: asEndpointProperties(map[string]string{
+					"brokerURL": "tcp://my-broker-hdls-svc:61616",
+				}),
+			},
+			Sink: v1.Endpoint{
+				URI: ptr.To("log:info"),
+			},
+		},
+	}
+	c, err := internal.NewFakeClient(pipe)
+	require.NoError(t, err)
+
+	a := NewInitializeAction()
+	a.InjectLogger(log.Log)
+	a.InjectClient(c)
+	assert.Equal(t, "initialize", a.Name())
+	assert.True(t, a.CanHandle(pipe))
+	handledPipe, err := a.Handle(context.TODO(), pipe)
+	require.NoError(t, err)
+	assert.Equal(t, v1.PipePhaseCreating, handledPipe.Status.Phase)
+	// Check integration which should have been created
+	expectedIT := v1.NewIntegration(pipe.Namespace, pipe.Name)
+	err = c.Get(context.Background(), ctrl.ObjectKeyFromObject(&expectedIT), &expectedIT)
+	require.NoError(t, err)
+	assert.Equal(t, pipe.Name, expectedIT.Name)
+	assert.Equal(t, v1.IntegrationPhaseNone, expectedIT.Status.Phase)
+	assert.Equal(t, "Pipe", expectedIT.Labels[kubernetes.CamelCreatorLabelKind])
+	assert.Equal(t, "my-pipe-source", expectedIT.Labels[kubernetes.CamelCreatorLabelName])
+	flow, err := json.Marshal(expectedIT.Spec.Flows[0].RawMessage)
+	require.NoError(t, err)
+	assert.Equal(t, "{\"route\":{\"from\":{\"steps\":[{\"to\":\"log:info\"}],"+
+		"\"uri\":\"amqp:queue:my-queue\"},\"id\":\"binding\"}}", string(flow))
+	assert.Equal(t, "amqp://my-broker-hdls-svc:61616", expectedIT.Spec.GetConfigurationProperty("quarkus.qpid-jms.url"))
+	assert.Equal(t, "amqp://my-broker-hdls-svc:61616", expectedIT.Spec.GetConfigurationProperty("camel.component.amqp.broker-url"))
+}
+
+func TestNewPipeArkMQBrokerBinding(t *testing.T) {
+	pipe := &v1.Pipe{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       v1.PipeKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "ns",
+			Name:      "my-pipe-broker",
+		},
+		Spec: v1.PipeSpec{
+			Sink: v1.Endpoint{
+				Ref: &corev1.ObjectReference{
+					Kind:       "ActiveMQArtemis",
+					Name:       "my-broker",
+					APIVersion: "broker.amq.io/v1beta1",
+				},
+				Properties: asEndpointProperties(map[string]string{
+					"destination": "my-orders",
+					"brokerURL":   "tcp://my-broker-hdls-svc:61616",
+				}),
+			},
+			Source: v1.Endpoint{
+				URI: ptr.To("direct:something"),
+			},
+		},
+	}
+	c, err := internal.NewFakeClient(pipe)
+	require.NoError(t, err)
+
+	a := NewInitializeAction()
+	a.InjectLogger(log.Log)
+	a.InjectClient(c)
+	assert.Equal(t, "initialize", a.Name())
+	assert.True(t, a.CanHandle(pipe))
+	handledPipe, err := a.Handle(context.TODO(), pipe)
+	require.NoError(t, err)
+	assert.Equal(t, v1.PipePhaseCreating, handledPipe.Status.Phase)
+	// Check integration which should have been created
+	expectedIT := v1.NewIntegration(pipe.Namespace, pipe.Name)
+	err = c.Get(context.Background(), ctrl.ObjectKeyFromObject(&expectedIT), &expectedIT)
+	require.NoError(t, err)
+	assert.Equal(t, pipe.Name, expectedIT.Name)
+	assert.Equal(t, v1.IntegrationPhaseNone, expectedIT.Status.Phase)
+	assert.Equal(t, "Pipe", expectedIT.Labels[kubernetes.CamelCreatorLabelKind])
+	assert.Equal(t, "my-pipe-broker", expectedIT.Labels[kubernetes.CamelCreatorLabelName])
+	flow, err := json.Marshal(expectedIT.Spec.Flows[0].RawMessage)
+	require.NoError(t, err)
+	assert.Equal(t, "{\"route\":{\"from\":{\"steps\":[{\"to\":\"amqp:queue:my-orders\"}],"+
+		"\"uri\":\"direct:something\"},\"id\":\"binding\"}}", string(flow))
+	assert.Equal(t, "amqp://my-broker-hdls-svc:61616", expectedIT.Spec.GetConfigurationProperty("quarkus.qpid-jms.url"))
+	assert.Equal(t, "amqp://my-broker-hdls-svc:61616", expectedIT.Spec.GetConfigurationProperty("camel.component.amqp.broker-url"))
 }
 
 func asEndpointProperties(props map[string]string) *v1.EndpointProperties {
