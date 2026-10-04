@@ -61,6 +61,21 @@ metadata:
 
 Any Integration created in `my-team` without an explicit profile annotation will automatically use `my-team-profile`.
 
+NOTE: The administrator must also create the `IntegrationProfile` named `my-team-profile` in that namespace. If it does not exist, the operator will fail to resolve the profile and report an error. For example:
+
+[source,yaml]
+----
+kind: IntegrationProfile
+apiVersion: camel.apache.org/v1
+metadata:
+  name: my-team-profile
+  namespace: my-team
+spec:
+  traits:
+    camel:
+      runtimeProvider: plain-quarkus
+----
+
 == Default Profile Convention
 
 Alternatively, an administrator can simply create an `IntegrationProfile` named `default` in the namespace:
