@@ -39,5 +39,5 @@ You can also provide those configuration in the Camel K configmap:
 kubectl create configmap camel-k-operator-configmap-configuration \
   --from-literal=REGISTRY_ADDRESS="10.102.190.238" \
   --from-literal=REGISTRY_INSECURE="true" \
-  -n camel-k
+  -n camel
 ```

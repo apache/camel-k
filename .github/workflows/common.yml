@@ -73,22 +73,22 @@ jobs:
     - name: Install operator
       shell: bash
       run: |
-        kubectl create ns camel-k
+        kubectl create ns camel
         # the extra configuration is required to run the container registry with secret
         kubectl create configmap camel-k-operator-configmap-configuration \
           --from-literal=ENABLE_DEV_REGISTRY_SECRET="true" \
           --from-literal=MAVEN_REPOSITORIES_ALLOWED="https://maven.repository.redhat.com/ga@id=redhat" \
-          -n camel-k
+          -n camel
         # make the test aware that each Integration requires a pull secret
         E2E_TEST_REGISTRY_SECRET_COPY=true
         echo "E2E_TEST_REGISTRY_SECRET_COPY=$E2E_TEST_REGISTRY_SECRET_COPY" >> $GITHUB_ENV
         echo "Setting E2E_TEST_REGISTRY_SECRET_COPY=true in order to automate the copy of the pull secret and the setting in each test"
 
         kubectl apply -k install/overlays/all-namespaces/ --server-side --force-conflicts
-        kubectl wait --for=condition=available deployment/camel-k-operator -n camel-k --timeout=60s
+        kubectl wait --for=condition=available deployment/camel-k-operator -n camel --timeout=60s
         # Install Apache Kamelets catalog
         mvn -q dependency:copy -Dartifact=org.apache.camel.kamelets:camel-kamelets:4.22.0:jar -Dmdep.useBaseVersion=true -DoutputDirectory=/tmp
-        unzip /tmp/camel-kamelets-4.22.0.jar -d /tmp && kubectl apply -f /tmp/kamelets -n camel-k
+        unzip /tmp/camel-kamelets-4.22.0.jar -d /tmp && kubectl apply -f /tmp/kamelets -n camel
 
     - name: Run test
       shell: bash

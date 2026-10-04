@@ -1956,9 +1956,9 @@ func WithNamedTestNamespace(t *testing.T, doRun func(context.Context, *gomega.Wi
 }
 
 func WithExistingNamedTestNamespace(t *testing.T, doRun func(context.Context, *gomega.WithT, string), namespace string) {
-	// Required to copy the registry secret previously set on the camel-k namespace
+	// Required to copy the registry secret previously set on the camel namespace
 	if os.Getenv("E2E_TEST_REGISTRY_SECRET_COPY") == "true" {
-		copySecret(t, testContext, TestClient(t), registrySecret, "camel-k", namespace)
+		copySecret(t, testContext, TestClient(t), registrySecret, "camel", namespace)
 	}
 
 	invokeUserTestCode(t, testContext, namespace, doRun)
@@ -1968,7 +1968,7 @@ func invokeUserTestCode(t *testing.T, ctx context.Context, ns string, doRun func
 	defer func() {
 		DumpNamespace(t, ctx, ns)
 		// Also dump the operator namespace in case it's common
-		DumpNamespace(t, ctx, "camel-k")
+		DumpNamespace(t, ctx, "camel")
 	}()
 
 	g := gomega.NewWithT(t)
@@ -2110,9 +2110,9 @@ func NewNamedTestNamespace(t *testing.T, ctx context.Context, name string) ctrl.
 		namespaceOrProject = namespace
 	}
 
-	// Required to copy the registry secret previously set on the camel-k namespace
+	// Required to copy the registry secret previously set on the camel namespace
 	if os.Getenv("E2E_TEST_REGISTRY_SECRET_COPY") == "true" {
-		copySecret(t, ctx, c, registrySecret, "camel-k", name)
+		copySecret(t, ctx, c, registrySecret, "camel", name)
 	}
 
 	return namespaceOrProject

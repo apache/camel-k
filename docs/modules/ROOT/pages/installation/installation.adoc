@@ -13,7 +13,7 @@ https://kustomize.io[Kustomize] provides a declarative approach to the configura
 $ kubectl apply -k github.com/apache/camel-k/install/overlays/all-namespaces?ref=v{last-released-version} --server-side
 ----
 
-You can specify as `ref` parameter the version you're willing to install (ie, `v{last-released-version}`). The command above will install a descoped (global) operator in the camel-k namespace. This is the suggested configuration in order to manage Integrations in all namespaces.
+You can specify as `ref` parameter the version you're willing to install (ie, `v{last-released-version}`). The command above will install a descoped (global) operator in the camel namespace. This is the suggested configuration in order to manage Integrations in all namespaces.
 
 [[helm]]
 == Installation via Helm Hub
@@ -22,7 +22,7 @@ Camel K is available in Helm Hub:
 
 ```
 $ helm repo add camel-k https://apache.github.io/camel-k/charts/
-$ helm install camel-k camel-k/camel-k -n camel-k
+$ helm install camel-k camel-k/camel-k -n camel
 ```
 
 More instructions on the https://hub.helm.sh/charts/camel-k/camel-k[Camel K Helm] page.
@@ -67,7 +67,7 @@ Each installation method have its proper way to setup configuration. A common on
 In order to verify that the operator is up and running, you should be able to see a Camel K operator `Pod` running in the namespace used, for example:
 
 ```
-kubectl get pods -n camel-k
+kubectl get pods -n camel
 NAME                                READY   STATUS    RESTARTS   AGE
 camel-k-operator-5b686db99f-c2k2s   1/1     Running   0          3m46s
 ```

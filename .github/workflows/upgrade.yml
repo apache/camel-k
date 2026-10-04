@@ -74,7 +74,7 @@ jobs:
     - name: Create upgrade test namespace
       shell: bash
       run: |
-        kubectl create ns camel-k
+        kubectl create ns camel
 
     - name: Registry setting
       uses: ./.github/actions/registry-setting
