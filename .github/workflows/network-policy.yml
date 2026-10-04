@@ -72,12 +72,12 @@ jobs:
       - name: Install operator
         shell: bash
         run: |
-          kubectl create ns camel-k
+          kubectl create ns camel
           kubectl create configmap camel-k-operator-configmap-configuration \
             --from-literal=MAVEN_REPOSITORIES_ALLOWED="https://maven.repository.redhat.com/ga@id=redhat" \
-            -n camel-k
+            -n camel
           kubectl apply -k install/overlays/all-namespaces/ --server-side --force-conflicts
-          kubectl wait --for=condition=available deployment/camel-k-operator -n camel-k --timeout=60s
+          kubectl wait --for=condition=available deployment/camel-k-operator -n camel --timeout=60s
 
       - name: Run NetworkPolicy E2E test
         shell: bash

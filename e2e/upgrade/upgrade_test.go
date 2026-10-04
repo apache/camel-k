@@ -24,8 +24,10 @@ package upgrade
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -48,12 +50,23 @@ func TestUpgrade(t *testing.T) {
 		g.Expect(ok).To(BeTrue(), "Missing last released version: you need to set it into LAST_RELEASED_VERSION env var")
 
 		// Install previous version: mind that the registry configuration has to be stored by the action
-		// and expected in camel-k namespace
+		// and expected in operatorNs namespace. Since previous versions used the camel-k namespace in their
+		// kustomization overlay, we wrap the remote overlay with a local kustomization to target operatorNs.
+		kustDir := t.TempDir()
+		kustFile := filepath.Join(kustDir, "kustomization.yaml")
+		kustContent := fmt.Sprintf(`apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- github.com/apache/camel-k/install/overlays/all-namespaces?ref=v%s
+namespace: %s
+`, lastVersion, operatorNs)
+		g.Expect(os.WriteFile(kustFile, []byte(kustContent), 0o600)).To(Succeed())
+
 		applyCmd := exec.Command(
 			"kubectl",
 			"apply",
 			"-k",
-			"github.com/apache/camel-k/install/overlays/all-namespaces?ref=v"+lastVersion,
+			kustDir,
 			"--server-side",
 			"--force-conflicts",
 		)
@@ -77,7 +90,7 @@ func TestUpgrade(t *testing.T) {
 			// Get the info of the runtime, as we need for further check later
 			lastRuntimeVersion := Integration(t, ctx, nsIntegration, name)().Status.RuntimeVersion
 
-			// Let's upgrade the operator with the newer installation (default in camel-k namespace)
+			// Let's upgrade the operator with the newer installation (default in camel namespace)
 			installNextCmd := exec.Command(
 				"kubectl",
 				"apply",
@@ -94,7 +107,7 @@ func TestUpgrade(t *testing.T) {
 			disableDevRegistryCmd := exec.Command(
 				"kubectl",
 				"-n",
-				"camel-k",
+				operatorNs,
 				"set",
 				"env",
 				"deployment/camel-k-operator",
@@ -146,5 +159,5 @@ func TestUpgrade(t *testing.T) {
 			g.Eventually(IntegrationPodPhase(t, ctx, nsIntegration, name)).
 				Should(Equal(corev1.PodRunning))
 		})
-	}, "camel-k")
+	}, "camel")
 }
