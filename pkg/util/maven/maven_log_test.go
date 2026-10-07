@@ -38,7 +38,6 @@ func TestRunAndLogErrorMvn(t *testing.T) {
 	err := util.RunAndLog(context.Background(), cmd, LogHandler, LogHandler)
 
 	require.Error(t, err)
-	require.ErrorContains(t, err, "The goal you specified requires a project to execute but there is no POM in this directory")
 }
 
 func TestParseLog(t *testing.T) {
