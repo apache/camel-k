@@ -55,6 +55,9 @@ jobs:
         VERSION="$(make get-version | sed s/-SNAPSHOT//)-nightly"
         sed -i "s#apache/camel-k:$THIS_VERSION#testcamelk/camel-k:$VERSION#g" install/base/config/manager/operator-deployment.yaml
         kubectl create ns camel-k
+        kubectl create configmap camel-k-operator-configmap-configuration \
+          --from-literal=MAVEN_REPOSITORIES_ALLOWED="https://maven.repository.redhat.com/ga@id=redhat" \
+          -n camel-k
         kubectl apply -k install/overlays/all-namespaces/ --server-side --force-conflicts
         kubectl wait --for=condition=available deployment/camel-k-operator -n camel-k --timeout=60s
         # Install Apache Kamelets catalog
@@ -92,6 +95,9 @@ jobs:
         VERSION="$(make get-version | sed s/-SNAPSHOT//)-nightly-21-jdk"
         CUSTOM_IMAGE=testcamelk/camel-k CUSTOM_VERSION=$VERSION make bundle
         kubectl create ns camel-k
+        kubectl create configmap camel-k-operator-configmap-configuration \
+          --from-literal=MAVEN_REPOSITORIES_ALLOWED="https://maven.repository.redhat.com/ga@id=redhat" \
+          -n camel-k        
         kubectl apply -k install/overlays/all-namespaces/ --server-side --force-conflicts
         kubectl wait --for=condition=available deployment/camel-k-operator -n camel-k --timeout=60s
         # Install Apache Kamelets catalog
