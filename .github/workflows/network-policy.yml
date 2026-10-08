@@ -33,7 +33,7 @@ on:
       - 'e2e/common/traits/files/NetworkPolicyConsumer.java'
       - '.github/actions/infra-setting/action.yml'
       - '.github/workflows/network-policy.yml'
-      - 'Makefile'
+      - 'script/Makefile'
   workflow_dispatch:
 
 permissions:

@@ -275,7 +275,13 @@ endif
 test-common: gotestfmt-install
 	FAILED=0; \
 	go test -p $(TEST_COMMON_PARALLEL_COUNT) -timeout 90m -v ./e2e/common/... --parallel 1 -tags=integration $(GOTESTFMT) || ((FAILED++)); \
-	exit $${FAILED}
+	exit ${FAILED}
+
+#
+# NetworkPolicy test that requires a Calico-backed Minikube cluster
+#
+test-network-policy: gotestfmt-install
+	go test -p 1 -timeout 45m -v ./e2e/common/traits --parallel 1 -tags=integration -run '^TestServiceNetworkPolicy$' $(GOTESTFMT)
 
 #
 # Smoke tests are a subset of common tests used to quickly verify the operator
