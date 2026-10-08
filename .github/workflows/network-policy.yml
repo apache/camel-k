@@ -30,8 +30,10 @@ on:
       - 'pkg/trait/service.go'
       - 'pkg/trait/service_test.go'
       - 'e2e/common/traits/network_policy_test.go'
-      - 'e2e/common/traits/files/PlatformHttpServer.java'
+      - 'e2e/common/traits/files/NetworkPolicyConsumer.java'
+      - '.github/actions/infra-setting/action.yml'
       - '.github/workflows/network-policy.yml'
+      - 'Makefile'
   workflow_dispatch:
 
 permissions:
@@ -53,72 +55,21 @@ jobs:
           persist-credentials: false
           submodules: recursive
 
-      - name: Set up Go
-        uses: actions/setup-go@v6
+      - name: Infra setting
+        uses: ./.github/actions/infra-setting
         with:
-          go-version-file: 'go.mod'
-          check-latest: true
-
-      - name: Set up Kubectl
-        uses: azure/setup-kubectl@829323503d1be3d00ac8346e5391ca0b07a9ab0d
-
-      - name: Start Minikube with Calico
-        uses: medyagh/setup-minikube@v0.0.21
-        with:
-          cpus: max
-          memory: max
-          container-runtime: docker
           cni: calico
-
-      - name: Build Camel K images
-        shell: bash
-        run: |
-          eval "$(minikube -p minikube docker-env)"
-          LAST_RELEASED_VERSION="$(make get-last-released-version)"
-          echo "LAST_RELEASED_VERSION=$LAST_RELEASED_VERSION" >> "$GITHUB_ENV"
-          NOTEST=true make images
 
       - name: Install operator
         shell: bash
         run: |
           kubectl create ns camel-k
           kubectl create configmap camel-k-operator-configmap-configuration \
-            --from-literal=ENABLE_DEV_REGISTRY_SECRET="true" \
             --from-literal=MAVEN_REPOSITORIES_ALLOWED="https://maven.repository.redhat.com/ga@id=redhat" \
             -n camel-k
-          echo "E2E_TEST_REGISTRY_SECRET_COPY=true" >> "$GITHUB_ENV"
-
           kubectl apply -k install/overlays/all-namespaces/ --server-side --force-conflicts
           kubectl wait --for=condition=available deployment/camel-k-operator -n camel-k --timeout=60s
 
       - name: Run NetworkPolicy E2E test
         shell: bash
-        run: |
-          set -o pipefail
-          go test -p 1 -timeout 45m -v \
-            ./e2e/common/traits \
-            --parallel 1 \
-            -tags=integration \
-            -run '^TestServiceNetworkPolicy$' 2>&1 | tee network-policy-test.log
-
-      - name: Collect Kubernetes diagnostics
-        if: always()
-        shell: bash
-        run: |
-          set +e
-          mkdir -p network-policy-diagnostics
-          kubectl get pods -A -o wide > network-policy-diagnostics/pods.txt 2>&1
-          kubectl get svc -A -o wide > network-policy-diagnostics/services.txt 2>&1
-          kubectl get networkpolicy -A -o yaml > network-policy-diagnostics/networkpolicies.yaml 2>&1
-          kubectl get events -A --sort-by=.lastTimestamp > network-policy-diagnostics/events.txt 2>&1
-          kubectl -n camel-k get pods -o wide > network-policy-diagnostics/operator-pods.txt 2>&1
-          kubectl -n camel-k logs deployment/camel-k-operator --all-containers --tail=-1 > network-policy-diagnostics/operator.log 2>&1
-          cp network-policy-test.log network-policy-diagnostics/ 2>/dev/null || true
-
-      - name: Upload NetworkPolicy diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: network-policy-e2e-diagnostics
-          path: network-policy-diagnostics/
-          if-no-files-found: warn
+        run: make test-network-policy

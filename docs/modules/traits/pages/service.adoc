@@ -92,3 +92,18 @@ $ kamel run PlatformHttpServer.java -p quarkus.http.port=8085 -t container.ports
 +
 [source,console]
 $ kamel run MyUDPServer.java -t container.ports=udp;95;UDP -t service.ports=udp;95;9095;UDP
+
+* Restrict a Service with an ingress NetworkPolicy. The example allows requests only from pods labeled app: my-client in namespaces labeled kubernetes.io/metadata.name: backend:
++
+[source,yaml]
+----
+spec:
+  traits:
+    service:
+      enabled: true
+      network-policy-enabled: true
+      network-policy-namespace-selector:
+        kubernetes.io/metadata.name: backend
+      network-policy-pod-selector:
+        app: my-client
+----
