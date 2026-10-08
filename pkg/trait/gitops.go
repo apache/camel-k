@@ -117,7 +117,7 @@ func (t *gitOpsTrait) pushGitOpsItInGitRepo(ctx context.Context, it *v1.Integrat
 	}
 
 	// Clone repo
-	repo, err := util.CloneGitProjectWithUsername(gitConf, dir, t.getUsername(), token)
+	repo, err := util.CloneGitProject(gitConf, dir, t.getUsername(), token)
 	if err != nil {
 		return err
 	}

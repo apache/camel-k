@@ -63,7 +63,7 @@ func cloneWithRecorder(t *testing.T, clone func(conf v1.GitConfigSpec, dir strin
 
 func TestCloneGitProjectDefaultUsername(t *testing.T) {
 	recorder := cloneWithRecorder(t, func(conf v1.GitConfigSpec, dir string) error {
-		_, err := CloneGitProject(conf, dir, "my-token")
+		_, err := CloneGitProject(conf, dir, DefaultGitUsername, "my-token")
 
 		return err
 	})
@@ -72,9 +72,9 @@ func TestCloneGitProjectDefaultUsername(t *testing.T) {
 	assert.Equal(t, "my-token", recorder.password)
 }
 
-func TestCloneGitProjectWithUsername(t *testing.T) {
+func TestCloneGitProject(t *testing.T) {
 	recorder := cloneWithRecorder(t, func(conf v1.GitConfigSpec, dir string) error {
-		_, err := CloneGitProjectWithUsername(conf, dir, "x-token-auth", "my-token")
+		_, err := CloneGitProject(conf, dir, "x-token-auth", "my-token")
 
 		return err
 	})
@@ -83,19 +83,9 @@ func TestCloneGitProjectWithUsername(t *testing.T) {
 	assert.Equal(t, "my-token", recorder.password)
 }
 
-func TestCloneGitProjectWithEmptyUsername(t *testing.T) {
-	recorder := cloneWithRecorder(t, func(conf v1.GitConfigSpec, dir string) error {
-		_, err := CloneGitProjectWithUsername(conf, dir, "", "my-token")
-
-		return err
-	})
-	assert.True(t, recorder.ok)
-	assert.Equal(t, DefaultGitUsername, recorder.username)
-}
-
 func TestCloneGitProjectWithoutToken(t *testing.T) {
 	recorder := cloneWithRecorder(t, func(conf v1.GitConfigSpec, dir string) error {
-		_, err := CloneGitProjectWithUsername(conf, dir, "x-token-auth", "")
+		_, err := CloneGitProject(conf, dir, "x-token-auth", "")
 
 		return err
 	})
