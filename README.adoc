@@ -4,7 +4,6 @@
 = :camel: + :cloud: = Apache Camel K
 
 image:https://img.shields.io/github/license/openshift/origin.svg?maxAge=2592000["Licensed under Apache License version 2.0", link="https://www.apache.org/licenses/LICENSE-2.0"]
-image:https://goreportcard.com/badge/github.com/apache/camel-k["Go Report Card", link="https://goreportcard.com/report/github.com/apache/camel-k"]
 image:https://godoc.org/github.com/apache/camel-k?status.svg["GoDoc", link="https://godoc.org/github.com/apache/camel-k"]
 image:https://github.com/apache/camel-k/workflows/build/badge.svg["Build", link="https://github.com/apache/camel-k/actions/workflows/build.yml"]
 image:https://github.com/apache/camel-k/actions/workflows/nightly-release.yml/badge.svg["Nightly releases", link="https://github.com/apache/camel-k/actions/workflows/nightly-release.yml"]
@@ -38,8 +37,6 @@ You can use Camel DSL to define your `Integration`. Just save it in a file and u
 ----
 kamel run hello.yaml
 ----
-
-You can even run your integrations in a `dev` mode. Change the code and see the **changes automatically applied (instantly)** to the remote integration pod! We have provided link:/examples[more examples] that you can use to inspire your next `Integration` development.
 
 https://camel.apache.org/camel-k/next/running/running.html[See more details.]
 
