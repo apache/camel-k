@@ -98,7 +98,7 @@ Camel K needs a container registry in order to push the generated Camel applicat
 | Run a demo container registry application in the same namespace as the Camel K Operator.
 | true
 
-| ENABLE_DEV_REGISTRY_SECURE
+| ENABLE_DEV_REGISTRY_SECRET
 | Whether to secure the demo container registry with a default test user (`admin/password`). In this case you need to provide a secret in the Integration namespace and use the `pull-secret` trait configuration. Be aware that the operator will store a secret named `ck-dev-registry` in the same namespace where it is installed. You may copy and use it in your Integration namespace for local development purposes.
 | false
 
