@@ -8230,6 +8230,11 @@ spec:
                             description: the URL of the repository where the project
                               is stored.
                             type: string
+                          username:
+                            description: |-
+                              the username used to authenticate against the Git server, together with the token stored in `secret` (default `camel-k`).
+                              Some Git servers validate it, for example Bitbucket Cloud access tokens require `x-token-auth`.
+                            type: string
                         type: object
                       health:
                         description: The configuration of Health trait
@@ -10563,6 +10568,11 @@ spec:
                       url:
                         description: the URL of the repository where the project is
                           stored.
+                        type: string
+                      username:
+                        description: |-
+                          the username used to authenticate against the Git server, together with the token stored in `secret` (default `camel-k`).
+                          Some Git servers validate it, for example Bitbucket Cloud access tokens require `x-token-auth`.
                         type: string
                     type: object
                   health:

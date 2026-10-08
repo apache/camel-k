@@ -20,6 +20,8 @@ package trait
 import (
 	"context"
 	"errors"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -276,4 +278,44 @@ func TestGitOpsPipeRequiresURL(t *testing.T) {
 	err := trait.pushGitOpsItInGitRepo(context.TODO(), &it, tmpGitDir, "fake")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "gitops trait requires a git URL when used with a Pipe")
+}
+
+func TestGitOpsUsername(t *testing.T) {
+	trait, _ := newGitOpsTrait().(*gitOpsTrait)
+	assert.Equal(t, "camel-k", trait.getUsername())
+	trait.Username = "x-token-auth"
+	assert.Equal(t, "x-token-auth", trait.getUsername())
+}
+
+func TestGitOpsPushRepoUsesUsername(t *testing.T) {
+	testCases := []struct {
+		name     string
+		username string
+		expected string
+	}{
+		{name: "default", username: "", expected: "camel-k"},
+		{name: "custom", username: "x-token-auth", expected: "x-token-auth"},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var gotUsername, gotPassword string
+			var gotAuth bool
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				gotUsername, gotPassword, gotAuth = r.BasicAuth()
+				w.WriteHeader(http.StatusUnauthorized)
+			}))
+			defer server.Close()
+
+			trait, _ := newGitOpsTrait().(*gitOpsTrait)
+			trait.URL = server.URL + "/repo.git"
+			trait.Username = tc.username
+			it := v1.NewIntegration("default", "test")
+
+			err := trait.pushGitOpsItInGitRepo(context.TODO(), &it, t.TempDir(), "my-token")
+			require.Error(t, err)
+			assert.True(t, gotAuth)
+			assert.Equal(t, tc.expected, gotUsername)
+			assert.Equal(t, "my-token", gotPassword)
+		})
+	}
 }

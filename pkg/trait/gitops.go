@@ -117,7 +117,7 @@ func (t *gitOpsTrait) pushGitOpsItInGitRepo(ctx context.Context, it *v1.Integrat
 	}
 
 	// Clone repo
-	repo, err := util.CloneGitProject(gitConf, dir, token)
+	repo, err := util.CloneGitProjectWithUsername(gitConf, dir, t.getUsername(), token)
 	if err != nil {
 		return err
 	}
@@ -195,7 +195,7 @@ func (t *gitOpsTrait) pushGitOpsItInGitRepo(ctx context.Context, it *v1.Integrat
 	gitPushOptions := &git.PushOptions{
 		RemoteURL: gitConf.URL,
 		Auth: &http.BasicAuth{
-			Username: "camel-k",
+			Username: t.getUsername(),
 			Password: token,
 		},
 		RefSpecs: []config.RefSpec{
@@ -292,6 +292,15 @@ func (t *gitOpsTrait) getIntegrationsDirectory() string {
 	}
 
 	return t.IntegrationDirectory
+}
+
+// Return the trait username parameter or a default value.
+func (t *gitOpsTrait) getUsername() string {
+	if t.Username == "" {
+		return util.DefaultGitUsername
+	}
+
+	return t.Username
 }
 
 // Return the trait committer name parameter or a default value.
