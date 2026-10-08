@@ -75,7 +75,7 @@ func cloneProject(ctx *builderContext) error {
 	if ctx.Build.Git.Path != "" {
 		gitClonePath = filepath.Join(ctx.Path, "repo")
 	}
-	if _, err := util.CloneGitProject(*ctx.Build.Git, gitClonePath, secretToken); err != nil {
+	if _, err := util.CloneGitProject(*ctx.Build.Git, gitClonePath, util.DefaultGitUsername, secretToken); err != nil {
 		return err
 	}
 	if ctx.Build.Git.Path != "" {
