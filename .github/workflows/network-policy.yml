@@ -21,14 +21,6 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - 'pkg/apis/camel/v1/trait/service.go'
-      - 'pkg/apis/camel/v1/trait/zz_generated.deepcopy.go'
-      - 'pkg/trait/service.go'
-      - 'pkg/trait/service_test.go'
-      - 'e2e/common/traits/network_policy_test.go'
-      - 'e2e/common/traits/files/PlatformHttpServer.java'
-      - '.github/workflows/network-policy.yml'
   push:
     branches:
       - main
