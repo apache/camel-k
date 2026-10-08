@@ -31,6 +31,9 @@ type GitOpsTrait struct {
 	URL string `json:"url,omitempty" property:"url"`
 	// the Kubernetes secret where the Git token is stored. The operator will pick up the first secret key only, whichever the name it is.
 	Secret string `json:"secret,omitempty" property:"secret"`
+	// the username used to authenticate against the Git server, together with the token stored in `secret` (default `camel-k`).
+	// Some Git servers validate it, for example Bitbucket Cloud access tokens require `x-token-auth`.
+	Username string `json:"username,omitempty" property:"username"`
 	// the git branch to check out.
 	Branch string `json:"branch,omitempty" property:"branch"`
 	// the git tag to check out.
