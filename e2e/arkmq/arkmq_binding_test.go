@@ -44,7 +44,7 @@ func TestArkMQ(t *testing.T) {
 			// Verify we are consuming records from the queue
 			g.Eventually(IntegrationLogs(t, ctx, arkmqNs, "arkmq-to-log")).Should(ContainSubstring("Body is null"))
 
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", arkmqNs).Execute()).To(Succeed())
+			ExpectExecSucceed(t, g, Kubectl("delete", "pipe", "--all", "-n", arkmqNs))
 		})
 	}, "arkmq")
 }
