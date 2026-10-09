@@ -121,9 +121,9 @@ func StringSliceUniqueConcat(slice *[]string, items []string) bool {
 }
 
 func SubstringBefore(s string, substr string) string {
-	index := strings.LastIndex(s, substr)
-	if index != -1 {
-		return s[:index]
+	before, _, ok := strings.CutLast(s, substr)
+	if ok {
+		return before
 	}
 
 	return ""

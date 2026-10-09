@@ -46,7 +46,7 @@ LINTER ?= $(LOCALBIN)/golangci-lint
 DEADCODE ?= $(LOCALBIN)/deadcode
 GOVULNCHECK ?= $(LOCALBIN)/govulncheck
 GOIMPORT ?= $(LOCALBIN)/goimports
-LINTER_VERSION ?= v2.13.2
+LINTER_VERSION ?= v2.14.0
 GOVULNCHECK_VERSION ?= v1.8.0
 GOIMPORTS_VERSION ?= v0.50.0
 GOTESTFMT_VERSION ?= v2.5.0
@@ -163,7 +163,7 @@ endef
 export LICENSE_HEADER
 default: build
 
-update-docs: build-resources
+update-docs:
 	./script/update_docs.sh
 
 bump-replace:
@@ -242,7 +242,7 @@ codegen-tools-install:
 	go install k8s.io/code-generator/cmd/informer-gen@$(CODEGEN_VERSION)
 	go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_GEN_VERSION)
 
-build: codegen build-resources test build-kamel build-compile-integration-tests
+build: codegen test build-kamel build-compile-integration-tests
 
 build-platform: build build-kamel-platform
 
@@ -384,9 +384,6 @@ ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
 	# Symbolic link to a local CLI
 	ln -sf build/_output/bin/kamel-$(IMAGE_ARCH) ./kamel
 endif
-
-build-resources:
-	./script/get_catalog.sh $(CK_RUNTIME_CATALOG_VERSION)
 
 build-compile-integration-tests:
 ifndef NOTEST
@@ -591,13 +588,13 @@ cross-compile:
 	# be processed as a single argument by the cross compile script
 	./script/cross_compile.sh $(CUSTOM_VERSION) $(subst ","\",$(GOFLAGS))
 
-release-staging: clean codegen set-version check-licenses build-resources images-all images-tag-staging-all images-push-staging-all cross-compile release-helm bundle-push-staging git-tag sbomgen
+release-staging: clean codegen set-version check-licenses images-all images-tag-staging-all images-push-staging-all cross-compile release-helm bundle-push-staging git-tag sbomgen
 
 sbomgen:
 	cyclonedx-gomod mod -licenses -json -output sbom.json
 
 # Build images
-images-nightly: clean codegen set-version build-resources images-all
+images-nightly: clean codegen set-version images-all
 
 # Release artifacts
 release-nightly: cross-compile images-push-all
@@ -606,7 +603,7 @@ release-helm:
 	./script/set_version.sh ${VERSION}
 	./script/release_helm.sh ${VERSION}
 
-.PHONY: do-build build build-kamel build-kamel-platform build-resources dep codegen images images-push image-build test check clean release cross-compile package-examples set-version git-tag check-licenses build-resources release-helm release-staging release-nightly get-staging-repo get-version
+.PHONY: do-build build build-kamel build-kamel-platform dep codegen images images-push image-build test check clean release cross-compile package-examples set-version git-tag check-licenses release-helm release-staging release-nightly get-staging-repo get-version
 .PHONY: kubectl kustomize operator-sdk opm
 
 kubectl:
