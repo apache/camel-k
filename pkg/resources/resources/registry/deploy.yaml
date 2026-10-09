@@ -32,6 +32,8 @@ spec:
         - name: registry
           image: registry:3
           env:
+            - name: REGISTRY_LOG_LEVEL
+              value: info          
             - name: REGISTRY_HTTP_ADDR
               value: 0.0.0.0:443
             - name: REGISTRY_HTTP_TLS_CERTIFICATE
@@ -48,7 +50,7 @@ spec:
             # - name: REGISTRY_AUTH_HTPASSWD_REALM
             #   value: Registry Realm
             # - name: REGISTRY_AUTH_HTPASSWD_PATH
-            #   value: /auth/htpasswd
+            #   value: /auth/htpasswd   
           ports:
             - containerPort: 5000
               name: registry
