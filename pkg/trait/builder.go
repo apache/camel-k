@@ -229,7 +229,10 @@ func (t *builderTrait) Apply(e *Environment) error {
 		return err
 	}
 
-	imageName := getImageName(e)
+	imageName, err := getImageName(e)
+	if err != nil {
+		return err
+	}
 
 	// Building task
 	builderTask, err := t.builderTask(e, taskConfOrDefault(tasksConf, "builder"))
@@ -485,7 +488,10 @@ func getDependencies(e *Environment) []string {
 	return nil
 }
 
-func getImageName(e *Environment) string {
+func getImageName(e *Environment) (string, error) {
+	if e.Platform.Registry.Address == "" {
+		return "", errors.New("missing registry address")
+	}
 	var imageName string
 	if e.IntegrationKit != nil {
 		imageName = fmt.Sprintf("%s:%s", e.IntegrationKit.Name, e.IntegrationKit.ResourceVersion)
@@ -498,7 +504,7 @@ func getImageName(e *Environment) string {
 		organization = e.Platform.CatalogNamespace
 	}
 
-	return e.Platform.Registry.Address + "/" + organization + "/camel-k-" + imageName
+	return e.Platform.Registry.Address + "/" + organization + "/camel-k-" + imageName, nil
 }
 
 func (t *builderTrait) getBaseImage(e *Environment) string {
@@ -511,7 +517,10 @@ func (t *builderTrait) getBaseImage(e *Environment) string {
 }
 
 func (t *builderTrait) determineCustomTasks(e *Environment, builderTask *v1.BuilderTask, tasksConf map[string]*v1.BuildConfiguration) ([]v1.Task, error) {
-	imageName := getImageName(e)
+	imageName, err := getImageName(e)
+	if err != nil {
+		return nil, err
+	}
 
 	realBuildStrategy := builderTask.Configuration.Strategy
 	if realBuildStrategy == "" {
