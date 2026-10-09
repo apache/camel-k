@@ -248,14 +248,20 @@ func TestReplace(t *testing.T) {
 	})
 }
 
+func TestOperatorStartupRegistryWithSecret(t *testing.T) {
+	testOperatorStartupRegistry(t, true)
+}
+
 func TestOperatorStartupRegistry(t *testing.T) {
+	testOperatorStartupRegistry(t, false)
+}
+
+func testOperatorStartupRegistry(t *testing.T, withSecret bool) {
 	t.Setenv("NAMESPACE", "camel-k")
 
 	crtSecret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "fake-secret",
-			Namespace: "camel-k",
-		},
+		Name:      "fake-secret",
+		Namespace: "camel-k",
 		Data: map[string][]byte{
 			"foo": []byte("bar"),
 		},
@@ -271,7 +277,7 @@ func TestOperatorStartupRegistry(t *testing.T) {
 	conf, err := OperatorStartupRegistry(
 		context.Background(),
 		fakeClient,
-		false,
+		withSecret,
 		crtSecret,
 	)
 
@@ -280,7 +286,11 @@ func TestOperatorStartupRegistry(t *testing.T) {
 
 	assert.Equal(t, "10.96.0.20", conf.clusterIP)
 	assert.Equal(t, "false", conf.insecure)
-	assert.Equal(t, "ck-dev-registry", conf.dockerRegistrySecretName)
+	if withSecret {
+		assert.Equal(t, "ck-dev-registry", conf.dockerRegistrySecretName)
+	} else {
+		assert.Equal(t, "", conf.dockerRegistrySecretName)
+	}
 }
 
 // Useful to simulate Kubernetes IP assignment.
