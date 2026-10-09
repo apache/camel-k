@@ -42,6 +42,9 @@ import (
 const serviceRegistryClusterIPTimeout = 30 * time.Second
 const serviceRegistryClusterIPPollingTime = 500 * time.Millisecond
 
+//nolint:gosec // not a secret
+const registrySecretDefaultName = "ck-dev-registry"
+
 type registryConf struct {
 	clusterIP                string
 	insecure                 string
@@ -145,19 +148,23 @@ func OperatorStartupRegistry(ctx context.Context, c client.Client, withSecret bo
 		return nil, fmt.Errorf("could not get development container registry Service IP: %w", err)
 	}
 
-	dockerRegistrySecret, err := kubernetes.DockerRegistrySecret(ctx, deployNamespace, "ck-dev-registry", clusterIP, "admin", "password")
-	if err != nil {
-		return nil, fmt.Errorf("could not generate development container registry push secret: %w", err)
-	}
-	dockerRegistrySecret.SetOwnerReferences([]metav1.OwnerReference{*ref})
-	if err := replace(ctx, c, dockerRegistrySecret); err != nil {
-		return nil, fmt.Errorf("could not create development container registry push secret: %w", err)
+	dockerRegistrySecretName := ""
+	if withSecret {
+		dockerRegistrySecret, err := kubernetes.DockerRegistrySecret(ctx, deployNamespace, registrySecretDefaultName, clusterIP, "admin", "password")
+		if err != nil {
+			return nil, fmt.Errorf("could not generate development container registry push secret: %w", err)
+		}
+		dockerRegistrySecret.SetOwnerReferences([]metav1.OwnerReference{*ref})
+		if err := replace(ctx, c, dockerRegistrySecret); err != nil {
+			return nil, fmt.Errorf("could not create development container registry push secret: %w", err)
+		}
+		dockerRegistrySecretName = dockerRegistrySecret.GetName()
 	}
 
 	return &registryConf{
 		clusterIP:                clusterIP,
 		insecure:                 "false",
-		dockerRegistrySecretName: dockerRegistrySecret.GetName(),
+		dockerRegistrySecretName: dockerRegistrySecretName,
 	}, nil
 }
 
