@@ -18,7 +18,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package common
+package networkpolicy
 
 import (
 	"context"
@@ -28,8 +28,8 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
@@ -80,8 +80,8 @@ func TestServiceNetworkPolicy(t *testing.T) {
 			"--name", deniedName,
 		).Execute()).To(Succeed())
 
-		g.Eventually(IntegrationPodPhase(t, ctx, ns, allowedName), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-		g.Eventually(IntegrationPodPhase(t, ctx, ns, deniedName), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, allowedName, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, deniedName, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
 
 		allowedPod := IntegrationPod(t, ctx, ns, allowedName)()
 		deniedPod := IntegrationPod(t, ctx, ns, deniedName)()

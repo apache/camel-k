@@ -281,7 +281,7 @@ test-common: gotestfmt-install
 # NetworkPolicy test that requires a Calico-backed Minikube cluster
 #
 test-network-policy: gotestfmt-install
-	go test -p 1 -timeout 45m -v ./e2e/common/traits --parallel 1 -tags=integration -run '^TestServiceNetworkPolicy$$' $(GOTESTFMT)
+	go test -p 1 -timeout 20m -v ./e2e/networkpolicy --parallel 1 -tags=integration -run '^TestServiceNetworkPolicy$$' $(GOTESTFMT)
 
 #
 # Smoke tests are a subset of common tests used to quickly verify the operator
