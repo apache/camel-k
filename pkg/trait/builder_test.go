@@ -778,3 +778,34 @@ func TestBuilderTraitTasksEnabledByDefault(t *testing.T) {
 	}
 	assert.False(t, found, "custom task must not be present when builder.tasks is disabled (default)")
 }
+
+func TestGetImageNameOk(t *testing.T) {
+	env := Environment{
+		Platform: platform.Platform{
+			Registry: v1.RegistrySpec{
+				Address: "1.2.3.4",
+			},
+			CatalogNamespace: "camel-k",
+		},
+		Integration: &v1.Integration{
+			Name:            "my-it",
+			ResourceVersion: "987",
+		},
+	}
+	imageName, err := getImageName(&env)
+	require.NoError(t, err)
+	assert.Equal(t, "1.2.3.4/camel-k/camel-k-my-it:987", imageName)
+}
+
+func TestGetImageNameFail(t *testing.T) {
+	env := Environment{
+		Platform: platform.Platform{},
+		Integration: &v1.Integration{
+			Name:            "my-it",
+			ResourceVersion: "987",
+		},
+	}
+	_, err := getImageName(&env)
+	require.Error(t, err)
+	assert.Equal(t, "missing registry address", err.Error())
+}

@@ -24,6 +24,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/internal"
+	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 	"github.com/stretchr/testify/assert"
@@ -34,15 +35,13 @@ import (
 )
 
 func TestIntegrationBuildSubmitted(t *testing.T) {
+	t.Setenv("REGISTRY_ADDRESS", "1.2.3.4")
+	platform.InitPlatform()
 	it := &v1.Integration{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: v1.SchemeGroupVersion.String(),
-			Kind:       v1.IntegrationKind,
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: "ns",
-			Name:      "my-it",
-		},
+		APIVersion: v1.SchemeGroupVersion.String(),
+		Kind:       v1.IntegrationKind,
+		Namespace:  "ns",
+		Name:       "my-it",
 		Spec: v1.IntegrationSpec{
 			Git: &v1.GitConfigSpec{
 				URL: "missing",
@@ -53,14 +52,10 @@ func TestIntegrationBuildSubmitted(t *testing.T) {
 		},
 	}
 	catalog := &v1.CamelCatalog{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: v1.SchemeGroupVersion.String(),
-			Kind:       v1.CamelCatalogKind,
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: "ns",
-			Name:      "camel-k-catalog",
-		},
+		APIVersion: v1.SchemeGroupVersion.String(),
+		Kind:       v1.CamelCatalogKind,
+		Namespace:  "ns",
+		Name:       "camel-k-catalog",
 		Spec: v1.CamelCatalogSpec{
 			Runtime: v1.RuntimeSpec{
 				Provider: v1.RuntimeProviderQuarkus,
@@ -88,14 +83,10 @@ func TestIntegrationBuildSubmitted(t *testing.T) {
 
 	// Verify the downstream build created
 	expectedBuild := &v1.Build{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: v1.SchemeGroupVersion.String(),
-			Kind:       v1.BuildKind,
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: "ns",
-			Name:      "my-it",
-		},
+		APIVersion: v1.SchemeGroupVersion.String(),
+		Kind:       v1.BuildKind,
+		Namespace:  "ns",
+		Name:       "my-it",
 	}
 	err = c.Get(context.Background(), ctrl.ObjectKeyFromObject(expectedBuild), expectedBuild)
 	require.NoError(t, err)
