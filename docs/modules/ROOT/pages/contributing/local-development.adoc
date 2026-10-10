@@ -24,11 +24,11 @@ For other cluster types you may check the specific documentation. As soon as you
 make images
 ----
 
-This command will build and publish your actual Camel K development version to the container registry. At this stage installing the Camel K development version will be as easy as a typical installation. We are supporting a series of makefile targets to let you easily install the operator on your local cluster in one single line. These targets are though to cover plain Kubernetes and Openshift cluster in either global (default in `camel-k` namespace) and namespaced (default in `default` namespace) installation:
+This command will build and publish your actual Camel K development version to the container registry. At this stage installing the Camel K development version will be as easy as a typical installation. We are supporting a series of makefile targets to let you easily install the operator on your local cluster in one single line. These targets are though to cover plain Kubernetes and Openshift cluster in either global (default in `camel` namespace) and namespaced (default in `default` namespace) installation:
 
 [source]
 ----
-make install-k8s-global (default in camel-k namespace)
+make install-k8s-global (default in camel namespace)
 make install-k8s-ns (default in default namespace)
 ----
 

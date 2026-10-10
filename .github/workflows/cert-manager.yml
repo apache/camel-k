@@ -75,9 +75,9 @@ jobs:
     - name: Install operator
       shell: bash
       run: |
-        kubectl create ns camel-k
+        kubectl create ns camel
         kubectl apply -k install/overlays/all-namespaces/ --server-side --force-conflicts
-        kubectl wait --for=condition=available deployment/camel-k-operator -n camel-k --timeout=60s
+        kubectl wait --for=condition=available deployment/camel-k-operator -n camel --timeout=60s
 
     - name: Run test
       shell: bash
