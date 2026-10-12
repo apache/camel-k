@@ -45,6 +45,7 @@ on:
       - 'LICENSE'
       - 'NOTICE'
   workflow_dispatch:
+
 permissions:
   contents: read
 
