@@ -43,6 +43,13 @@ type ServiceTrait struct {
 	Annotations map[string]string `json:"annotations,omitempty" property:"annotations"`
 	// The labels added to the Service object.
 	Labels map[string]string `json:"labels,omitempty" property:"labels"`
+	// Enables the NetworkPolicy managed by the Service trait. Defaults to false.
+	// When enabled, at least one of the namespace or pod selectors must be configured.
+	NetworkPolicyEnabled *bool `json:"networkPolicyEnabled,omitempty" property:"network-policy-enabled"`
+	// Labels used to restrict the source namespaces allowed by the NetworkPolicy.
+	NetworkPolicyNamespaceSelector map[string]string `json:"networkPolicyNamespaceSelector,omitempty" property:"network-policy-namespace-selector"`
+	// Labels used to restrict the source pods allowed by the NetworkPolicy.
+	NetworkPolicyPodSelector map[string]string `json:"networkPolicyPodSelector,omitempty" property:"network-policy-pod-selector"`
 	// List of container ports available in the container to expose
 	// (syntax: <port-name>;<port-number>;<container-port-number>[;<port-protocol]).
 	// When omitted, `port-protocol` (admitted values `TCP`, `UDP` or `SCTP`) is `TCP`.

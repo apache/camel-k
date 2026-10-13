@@ -1475,6 +1475,25 @@ func (in *ServiceTrait) DeepCopyInto(out *ServiceTrait) {
 			(*out)[key] = val
 		}
 	}
+	if in.NetworkPolicyEnabled != nil {
+		in, out := &in.NetworkPolicyEnabled, &out.NetworkPolicyEnabled
+		*out = new(bool)
+		**out = **in
+	}
+	if in.NetworkPolicyNamespaceSelector != nil {
+		in, out := &in.NetworkPolicyNamespaceSelector, &out.NetworkPolicyNamespaceSelector
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
+	if in.NetworkPolicyPodSelector != nil {
+		in, out := &in.NetworkPolicyPodSelector, &out.NetworkPolicyPodSelector
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	if in.Ports != nil {
 		in, out := &in.Ports, &out.Ports
 		*out = make([]string, len(*in))

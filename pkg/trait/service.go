@@ -18,12 +18,15 @@ limitations under the License.
 package trait
 
 import (
+	"errors"
 	"fmt"
 	"maps"
 	"strconv"
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
+	networkingv1 "k8s.io/api/networking/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 
@@ -139,9 +142,64 @@ func (t *serviceTrait) Apply(e *Environment) error {
 		}
 		svc.Spec.Type = serviceType
 	}
+	var networkPolicy *networkingv1.NetworkPolicy
+	if ptr.Deref(t.NetworkPolicyEnabled, false) {
+		var err error
+		networkPolicy, err = t.getNetworkPolicyFor(e.Integration.Name, e.Integration.Namespace)
+		if err != nil {
+			return err
+		}
+	}
+
 	e.Resources.Add(svc)
+	if networkPolicy != nil {
+		e.Resources.Add(networkPolicy)
+	}
 
 	return nil
+}
+
+func (t *serviceTrait) getNetworkPolicyFor(itName, itNamespace string) (*networkingv1.NetworkPolicy, error) {
+	if len(t.NetworkPolicyNamespaceSelector) == 0 && len(t.NetworkPolicyPodSelector) == 0 {
+		return nil, errors.New("network policy is enabled but no namespace or pod selector is configured")
+	}
+
+	from := networkingv1.NetworkPolicyPeer{}
+	if len(t.NetworkPolicyNamespaceSelector) > 0 {
+		from.NamespaceSelector = &metav1.LabelSelector{
+			MatchLabels: maps.Clone(t.NetworkPolicyNamespaceSelector),
+		}
+	}
+	if len(t.NetworkPolicyPodSelector) > 0 {
+		from.PodSelector = &metav1.LabelSelector{
+			MatchLabels: maps.Clone(t.NetworkPolicyPodSelector),
+		}
+	}
+
+	policy := &networkingv1.NetworkPolicy{
+		Name:      itName,
+		Namespace: itNamespace,
+		Labels: map[string]string{
+			v1.IntegrationLabel: itName,
+		},
+		Kind:       "NetworkPolicy",
+		APIVersion: networkingv1.SchemeGroupVersion.String(),
+		Spec: networkingv1.NetworkPolicySpec{
+			PodSelector: metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					v1.IntegrationLabel: itName,
+				},
+			},
+			PolicyTypes: []networkingv1.PolicyType{
+				networkingv1.PolicyTypeIngress,
+			},
+			Ingress: []networkingv1.NetworkPolicyIngressRule{
+				{From: []networkingv1.NetworkPolicyPeer{from}},
+			},
+		},
+	}
+
+	return policy, nil
 }
 
 func (t *serviceTrait) getServiceFor(itName, itNamespace string) *corev1.Service {

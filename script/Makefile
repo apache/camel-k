@@ -278,6 +278,14 @@ test-common: gotestfmt-install
 	exit $${FAILED}
 
 #
+# NetworkPolicy test that requires a Calico-backed Minikube cluster
+#
+test-network-policy: gotestfmt-install
+	FAILED=0; \
+	go test -p $(TEST_COMMON_PARALLEL_COUNT) -timeout 20m -v ./e2e/networkpolicy/... --parallel 1 -tags=integration $(GOTESTFMT) || ((FAILED++)); \
+	if ((FAILED)); then exit 1; fi
+
+#
 # Smoke tests are a subset of common tests used to quickly verify the operator
 #
 test-smoke: gotestfmt-install

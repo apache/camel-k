@@ -18,6 +18,12 @@
 name: infra-setting
 description: 'Setting CI infrastructure'
 
+inputs:
+  cni:
+    description: 'CNI plug-in to use for Minikube'
+    required: false
+    default: ''
+
 runs:
   using: "composite"
 
@@ -39,6 +45,7 @@ runs:
       cpus: max
       memory: max
       container-runtime: docker
+      cni: ${{ inputs.cni }}
 
   - id: minikube-settings
     name: Set docker-env

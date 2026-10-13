@@ -25,7 +25,9 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 
@@ -791,3 +793,96 @@ func TestServicePorts(t *testing.T) {
 		Protocol:   corev1.ProtocolUDP,
 	})
 }
+
+func TestServiceNetworkPolicyDisabledByDefault(t *testing.T) {
+	trait := &serviceTrait{
+		ServiceTrait: traitv1.ServiceTrait{
+			Trait: traitv1.Trait{Enabled: ptr.To(true)},
+			Auto:  ptr.To(false),
+		},
+	}
+
+	environment := Environment{
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{Name: ServiceTestName, Namespace: ServiceTestNamespace},
+		},
+		Resources: kubernetes.NewCollection(),
+	}
+
+	require.NoError(t, trait.Apply(&environment))
+
+	assert.Nil(t, findNetworkPolicy(environment.Resources))
+}
+
+func TestServiceNetworkPolicyUsesCombinedSelectors(t *testing.T) {
+	trait := &serviceTrait{
+		ServiceTrait: traitv1.ServiceTrait{
+			Trait: traitv1.Trait{Enabled: ptr.To(true)},
+			Auto:  ptr.To(false),
+			NetworkPolicyEnabled: ptr.To(true),
+			NetworkPolicyNamespaceSelector: map[string]string{
+				"kubernetes.io/metadata.name": ServiceTestNamespace,
+				"environment":                "backend",
+			},
+			NetworkPolicyPodSelector: map[string]string{
+				"app":  "client",
+				"tier": "trusted",
+			},
+		},
+	}
+
+	environment := Environment{
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{Name: ServiceTestName, Namespace: ServiceTestNamespace},
+		},
+		Resources: kubernetes.NewCollection(),
+	}
+
+	require.NoError(t, trait.Apply(&environment))
+
+	networkPolicy := findNetworkPolicy(environment.Resources)
+	require.NotNil(t, networkPolicy)
+	assert.Equal(t, ServiceTestName, networkPolicy.Name)
+	assert.Equal(t, ServiceTestNamespace, networkPolicy.Namespace)
+	assert.Equal(t, map[string]string{v1.IntegrationLabel: ServiceTestName}, networkPolicy.Spec.PodSelector.MatchLabels)
+	assert.Equal(t, []networkingv1.PolicyType{networkingv1.PolicyTypeIngress}, networkPolicy.Spec.PolicyTypes)
+	require.Len(t, networkPolicy.Spec.Ingress, 1)
+	require.Len(t, networkPolicy.Spec.Ingress[0].From, 1)
+
+	peer := networkPolicy.Spec.Ingress[0].From[0]
+	assert.Equal(t, trait.NetworkPolicyNamespaceSelector, peer.NamespaceSelector.MatchLabels)
+	assert.Equal(t, trait.NetworkPolicyPodSelector, peer.PodSelector.MatchLabels)
+}
+
+func TestServiceNetworkPolicyRequiresSelector(t *testing.T) {
+	trait := &serviceTrait{
+		ServiceTrait: traitv1.ServiceTrait{
+			Trait: traitv1.Trait{Enabled: ptr.To(true)},
+			Auto:  ptr.To(false),
+			NetworkPolicyEnabled: ptr.To(true),
+		},
+	}
+
+	environment := Environment{
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{Name: ServiceTestName, Namespace: ServiceTestNamespace},
+		},
+		Resources: kubernetes.NewCollection(),
+	}
+
+	err := trait.Apply(&environment)
+	require.Error(t, err)
+	assert.Equal(t, "network policy is enabled but no namespace or pod selector is configured", err.Error())
+	assert.Nil(t, environment.Resources.GetServiceForIntegration(environment.Integration))
+}
+
+func findNetworkPolicy(resources *kubernetes.Collection) *networkingv1.NetworkPolicy {
+	var result *networkingv1.NetworkPolicy
+	resources.Visit(func(resource runtime.Object) {
+		if networkPolicy, ok := resource.(*networkingv1.NetworkPolicy); ok {
+			result = networkPolicy
+		}
+	})
+	return result
+}
+
