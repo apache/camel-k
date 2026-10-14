@@ -21,6 +21,10 @@ name: Nightly check against ARM64 architecture and JDK21
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  CAMEL_K_TEST_TIMEOUT_SHORT: 2m
+  CAMEL_K_TEST_TIMEOUT_MEDIUM: 5m
+  CAMEL_K_TEST_TIMEOUT_LONG: 10m
+  CAMEL_K_TEST_TIMEOUT_VERY_LONG: 30m
 
 on:
   schedule:
