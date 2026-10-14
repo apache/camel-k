@@ -2415,12 +2415,6 @@ spec:
                           type: string
                         description: The labels added to the Service object.
                         type: object
-                      nodePort:
-                        description: |-
-                          Enable Service to be exposed as NodePort (default `false`).
-
-                          Deprecated: Use service type instead.
-                        type: boolean
                       networkPolicyEnabled:
                         description: |-
                           Enables the NetworkPolicy managed by the Service trait. Defaults to false.
@@ -2429,13 +2423,21 @@ spec:
                       networkPolicyNamespaceSelector:
                         additionalProperties:
                           type: string
-                        description: Labels used to restrict the source namespaces allowed by the NetworkPolicy.
+                        description: Labels used to restrict the source namespaces
+                          allowed by the NetworkPolicy.
                         type: object
                       networkPolicyPodSelector:
                         additionalProperties:
                           type: string
-                        description: Labels used to restrict the source pods allowed by the NetworkPolicy.
+                        description: Labels used to restrict the source pods allowed
+                          by the NetworkPolicy.
                         type: object
+                      nodePort:
+                        description: |-
+                          Enable Service to be exposed as NodePort (default `false`).
+
+                          Deprecated: Use service type instead.
+                        type: boolean
                       ports:
                         description: |-
                           List of container ports available in the container to expose
@@ -4958,6 +4960,23 @@ spec:
                         additionalProperties:
                           type: string
                         description: The labels added to the Service object.
+                        type: object
+                      networkPolicyEnabled:
+                        description: |-
+                          Enables the NetworkPolicy managed by the Service trait. Defaults to false.
+                          When enabled, at least one of the namespace or pod selectors must be configured.
+                        type: boolean
+                      networkPolicyNamespaceSelector:
+                        additionalProperties:
+                          type: string
+                        description: Labels used to restrict the source namespaces
+                          allowed by the NetworkPolicy.
+                        type: object
+                      networkPolicyPodSelector:
+                        additionalProperties:
+                          type: string
+                        description: Labels used to restrict the source pods allowed
+                          by the NetworkPolicy.
                         type: object
                       nodePort:
                         description: |-

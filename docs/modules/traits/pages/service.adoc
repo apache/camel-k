@@ -56,7 +56,8 @@ Deprecated: Use service type instead.
 
 | service.networkPolicyEnabled
 | bool
-| Enables the NetworkPolicy managed by the Service trait. Defaults to false. When enabled, at least one of the namespace or pod selectors must be configured.
+| Enables the NetworkPolicy managed by the Service trait. Defaults to false.
+When enabled, at least one of the namespace or pod selectors must be configured.
 
 | service.networkPolicyNamespaceSelector
 | map[string]string
