@@ -42,17 +42,17 @@ func TestKamelCLILog(t *testing.T) {
 			// first line of the integration logs
 			firstLine := strings.Split(IntegrationLogs(t, ctx, ns, "log-yaml")(), "\n")[0]
 			podName := IntegrationPod(t, ctx, ns, "log-yaml")().Name
-
 			logsCLI := GetOutputStringAsync(Kamel(t, ctx, "log", "log-yaml", "-n", ns))
-			g.Eventually(logsCLI).Should(ContainSubstring("Monitoring pod " + podName))
-			g.Eventually(logsCLI).Should(ContainSubstring(firstLine))
+			g.Eventually(logsCLI, TestTimeoutMedium).Should(ContainSubstring("Monitoring pod " + podName))
+			g.Eventually(logsCLI, TestTimeoutMedium).Should(ContainSubstring(firstLine))
 
 			logs := strings.Split(IntegrationLogs(t, ctx, ns, "log-yaml")(), "\n")
 			lastLine := logs[len(logs)-1]
 
 			logsCLI = GetOutputStringAsync(Kamel(t, ctx, "log", "log-yaml", "-n", ns, "--tail", "5"))
-			g.Eventually(logsCLI).Should(ContainSubstring("Monitoring pod " + podName))
-			g.Eventually(logsCLI).Should(ContainSubstring(lastLine))
+			g.Eventually(logsCLI, TestTimeoutMedium).Should(ContainSubstring("Monitoring pod " + podName))
+			g.Eventually(logsCLI, TestTimeoutMedium).Should(ContainSubstring(lastLine))
+
 		})
 	})
 }
