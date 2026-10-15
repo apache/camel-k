@@ -18,6 +18,7 @@ limitations under the License.
 package source
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -61,6 +62,10 @@ func isGlobCandidate(uri string) (bool, error) {
 func isExistingFile(uri string) (bool, error) {
 	info, err := os.Stat(uri)
 	if err != nil {
+		if errors.Is(err, fs.ErrPermission) {
+			return false, fmt.Errorf("file system error while looking for %s: %w", uri, err)
+		}
+
 		if os.IsNotExist(err) {
 			return false, nil
 		}
@@ -77,7 +82,6 @@ func isExistingFile(uri string) (bool, error) {
 
 	return !info.IsDir(), nil
 }
-
 func hasSupportedScheme(uri string) bool {
 	if strings.HasPrefix(strings.ToLower(uri), gistScheme+":") ||
 		strings.HasPrefix(strings.ToLower(uri), githubScheme+":") ||
