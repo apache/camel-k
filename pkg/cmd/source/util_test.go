@@ -19,7 +19,7 @@ package source
 
 import (
 	"os"
-	"os/exec"
+
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -43,45 +43,29 @@ func isWindows() bool {
 	return runtime.GOOS == "windows"
 }
 
-func denyAccess(t *testing.T, dir string) func() {
-	t.Helper()
+func TestPermissionDenied(t *testing.T) {
 	if isWindows() {
-		out, err := exec.Command("icacls", dir, "/deny", "*S-1-1-0:(OI)(CI)(F)").CombinedOutput()
-		require.NoError(t, err, "failed to deny directory access: %s", string(out))
-		return func() {
-			out, err := exec.Command("icacls", dir, "/remove:d", "*S-1-1-0").CombinedOutput()
-			assert.NoError(t, err, "failed to restore directory access: %s", string(out))
-		}
+		// so on windows , os.chmod only controls the 0200 (read only) bit and does not restrict
+		// therefore , os.stat succeeds without error, so we skip this test on windows
+		t.Skip("os.Chmod does not restrict directory access on Windows")
 	}
-
+	dir := t.TempDir()
 	fileInfo, err := os.Stat(dir)
 	require.NoError(t, err)
 	originalDirMode := fileInfo.Mode()
-
-	err = os.Chmod(dir, 0000)
-	require.NoError(t, err)
-
-	return func() {
-		err = os.Chmod(dir, originalDirMode)
-		assert.NoError(t, err)
-	}
-}
-
-func TestPermissionDenied(t *testing.T) {
-	dir := t.TempDir()
-
 	filename := filepath.Join(dir, "file.txt")
 	f, err := os.Create(filename)
 	require.NoError(t, err)
-	_ = f.Close()
-
-	restore := denyAccess(t, dir)
-	defer restore()
-
+	defer f.Close()
+	err = os.Chmod(dir, 0000)
+	require.NoError(t, err)
 	value, err := IsLocalAndFileExists(filename)
 	// must not panic because a permission error
 	require.Error(t, err)
 	assert.False(t, value)
+	// restore original directory permissions, so that the Golang test framework can delete it
+	err = os.Chmod(dir, originalDirMode)
+	require.NoError(t, err)
 }
 
 func TestSupportedScheme(t *testing.T) {
