@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -30,40 +31,51 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
-	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
 //nolint:staticcheck
 func GetIntegrationPlatform(context context.Context, client ctrl.Reader, name string, namespace string) (*v1.IntegrationPlatform, error) {
 	platform := v1.NewIntegrationPlatform(namespace, name)
-	log.Debugf("Integration Platform [name: %s], [namespace: %s], [objectkey: %s]", name, namespace, ctrl.ObjectKeyFromObject(&platform))
 	if err := client.Get(context, ctrl.ObjectKeyFromObject(&platform), &platform); err != nil {
-		log.Debugf("Integration platform Error: %v", err)
-
 		return nil, err
 	}
 
 	return &platform, nil
 }
 
-func GetIntegrationProfile(context context.Context, client ctrl.Reader, name string, namespace string) (*v1.IntegrationProfile, error) {
-	integrationProfile := v1.NewIntegrationProfile(namespace, name)
-	log.Debugf("Integration Profile [name: %s], [namespace: %s], [objectkey: %s]", name, namespace, ctrl.ObjectKeyFromObject(&integrationProfile))
+// GetIntegrationProfile return an integration profile provided as the resource parameter (ie, profile-namespace/profile-id).
+func GetIntegrationProfile(context context.Context, client ctrl.Reader, resource string) (*v1.IntegrationProfile, error) {
+	resourceSplit := strings.Split(resource, "/")
+	if len(resourceSplit) != 2 || resourceSplit[0] == "" || resourceSplit[1] == "" {
+		return nil, errors.New("wrong format for IntegrationProfile, expected profile-namespace/profile-id")
+	}
+	integrationProfile := v1.NewIntegrationProfile(resourceSplit[0], resourceSplit[1])
 	if err := client.Get(context, ctrl.ObjectKeyFromObject(&integrationProfile), &integrationProfile); err != nil {
-		log.Debugf("Integration profile Error: %v", err)
-
 		return nil, err
 	}
 
 	return &integrationProfile, nil
 }
 
+// GetIntegrationProfileResource to safely get the integration profile namespace and id.
+// NOTE: IntegrationKit and Build use an operator generated annotation value to calculate the namespace.
+// User should never be able to set the profile namespace annotation.
+func GetIntegrationProfileResource(o ctrl.Object) string {
+	if v1.GetAnnotation(v1.IntegrationProfileAnnotation, o) == "" {
+		return ""
+	}
+
+	namespace := o.GetNamespace()
+	if o.GetObjectKind().GroupVersionKind().Kind == v1.IntegrationKitKind || o.GetObjectKind().GroupVersionKind().Kind == v1.BuildKind {
+		namespace = v1.GetAnnotation(v1.IntegrationProfileNamespaceAnnotation, o)
+	}
+
+	return namespace + "/" + v1.GetAnnotation(v1.IntegrationProfileAnnotation, o)
+}
+
 func GetCamelCatalog(context context.Context, client ctrl.Reader, name string, namespace string) (*v1.CamelCatalog, error) {
 	catalog := v1.NewCamelCatalog(namespace, name)
-	log.Debugf("Camel Catalog [name: %s], [namespace: %s], [objectkey: %s]", name, namespace, ctrl.ObjectKeyFromObject(&catalog))
 	if err := client.Get(context, ctrl.ObjectKeyFromObject(&catalog), &catalog); err != nil {
-		log.Debugf("Camel catalog Error: %v", err)
-
 		return nil, err
 	}
 
@@ -72,10 +84,7 @@ func GetCamelCatalog(context context.Context, client ctrl.Reader, name string, n
 
 func GetIntegrationKit(context context.Context, client ctrl.Reader, name string, namespace string) (*v1.IntegrationKit, error) {
 	kit := v1.NewIntegrationKit(namespace, name)
-	log.Debugf("Integration Kit [name: %s], [namespace: %s], [objectkey: %s]", name, namespace, ctrl.ObjectKeyFromObject(kit))
 	if err := client.Get(context, ctrl.ObjectKeyFromObject(kit), kit); err != nil {
-		log.Debugf("Integration kit Error: %v", err)
-
 		return nil, err
 	}
 
@@ -84,10 +93,7 @@ func GetIntegrationKit(context context.Context, client ctrl.Reader, name string,
 
 func GetBuild(context context.Context, client client.Client, name string, namespace string) (*v1.Build, error) {
 	build := v1.NewBuild(namespace, name)
-	log.Debugf("Build [name: %s], [namespace: %s], [objectkey: %s]", name, namespace, ctrl.ObjectKeyFromObject(build))
 	if err := client.Get(context, ctrl.ObjectKeyFromObject(build), build); err != nil {
-		log.Debugf("Integration build Error: %v", err)
-
 		return nil, err
 	}
 
