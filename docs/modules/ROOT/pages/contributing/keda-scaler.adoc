@@ -66,6 +66,71 @@ metadata:
 
 Other KEDA Kafka metadata, such as `lagThreshold`, can be supplied through `keda.autoMetadata` when it is not derived from the Camel URI.
 
+== Complete mapping example
+
+The following example uses fictional component and scaler names to show the complete mapping process.
+
+Assume an Integration consumes from this Camel URI:
+
+[source,text]
+----
+my-component:orders?server=broker.example:1234
+----
+
+The Camel component is `my-component`.
+The URI path, `orders`, should map directly to the scaler's `topic` metadata field.
+The Camel `server` parameter should be adapted to the scaler's `address` metadata field.
+
+For example, a mapper in `pkg/trait/keda/scalers/my_component.go` could look like this:
+
+[source,go]
+----
+package scalers
+
+import keda "github.com/apache/camel-k/v2/pkg/trait/keda"
+
+type MyComponentScaler struct{}
+
+func init() {
+	keda.Register(&MyComponentScaler{})
+}
+
+func (m *MyComponentScaler) Component() string {
+	return "my-component"
+}
+
+func (m *MyComponentScaler) Map(pathValue string, params map[string]string) (string, map[string]string) {
+	metadata := make(map[string]string)
+
+	if pathValue != "" {
+		metadata["topic"] = pathValue
+	}
+	if v, ok := params["server"]; ok {
+		metadata["address"] = v
+	}
+
+	return "my-scaler", metadata
+}
+----
+
+With that mapper registered, the source URI produces this KEDA trigger:
+
+[source,yaml]
+----
+type: my-scaler
+metadata:
+  topic: orders
+  address: broker.example:1234
+----
+
+This example shows the two common mapping cases:
+
+* `orders` is copied directly from the Camel URI path into the KEDA `topic` field.
+* `server` is renamed to the KEDA `address` field because the Camel component and KEDA scaler use different names for the same value.
+
+The mapper only translates values needed by the scaler.
+It should not add unrelated Camel endpoint parameters to the KEDA metadata.
+
 == Adding a mapping
 
 . Add `pkg/trait/keda/scalers/<component>.go`.
