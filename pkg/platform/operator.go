@@ -24,6 +24,7 @@ import (
 
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	coordination "k8s.io/api/coordination/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -222,7 +223,7 @@ func (f FilteringFuncs[T]) Update(e event.TypedUpdateEvent[T]) bool {
 		// Always force reconciliation when the object becomes managed by the current operator
 		return true
 	}
-	if camelv1.GetIntegrationProfileAnnotation(e.ObjectOld) != camelv1.GetIntegrationProfileAnnotation(e.ObjectNew) {
+	if kubernetes.GetIntegrationProfileResource(e.ObjectOld) != kubernetes.GetIntegrationProfileResource(e.ObjectNew) {
 		// Always force reconciliation when the object gets attached to a new integration profile
 		return true
 	}

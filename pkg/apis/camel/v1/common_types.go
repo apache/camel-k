@@ -36,6 +36,9 @@ const (
 	PlatformSelectorAnnotation = "camel.apache.org/platform.id"
 	// IntegrationProfileAnnotation integration profile id annotation label.
 	IntegrationProfileAnnotation = "camel.apache.org/integration-profile.id"
+	// IntegrationProfileNamespaceAnnotation integration profile namespace annotation label.
+	// NOTE: this is an internal annotation only valid for IntegrationKits and Builds.
+	IntegrationProfileNamespaceAnnotation = "camel.apache.org/integration-profile.namespace"
 	// IntegrationDontRunAfterBuildAnnotation -- .
 	IntegrationDontRunAfterBuildAnnotation = "camel.apache.org/dont-run-after-build"
 	// IntegrationDontRunAfterBuildAnnotationTrueValue -- .

@@ -301,8 +301,8 @@ func isIntegrationKitResetRequired(integration *v1.Integration, kit *v1.Integrat
 		return true
 	}
 
-	if v1.GetIntegrationProfileAnnotation(integration) != "" &&
-		v1.GetIntegrationProfileAnnotation(integration) != v1.GetIntegrationProfileAnnotation(kit) {
+	if kubernetes.GetIntegrationProfileResource(integration) != "" &&
+		kubernetes.GetIntegrationProfileResource(integration) != kubernetes.GetIntegrationProfileResource(kit) {
 		// Integration profile for the integration has changed. Reset integration kit
 		// so new profile can be applied
 		return true
