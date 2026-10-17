@@ -19,6 +19,7 @@ package source
 
 import (
 	"os"
+
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -43,33 +44,17 @@ func isWindows() bool {
 }
 
 func TestPermissionDenied(t *testing.T) {
+	oldStat := stat
+	defer func() { stat = oldStat }()
 
-	if isWindows() {
-		t.Skip("Test not reliably producing a result on a windows OS")
+	stat = func(name string) (os.FileInfo, error) {
+		return nil, os.ErrPermission
 	}
 
-	dir := t.TempDir()
-
-	fileInfo, err := os.Stat(dir)
-	require.NoError(t, err)
-	originalDirMode := fileInfo.Mode()
-
-	filename := filepath.Join(dir, "file.txt")
-	f, err := os.Create(filename)
-	require.NoError(t, err)
-	defer f.Close()
-
-	err = os.Chmod(dir, 0000)
-	require.NoError(t, err)
-
+	filename := filepath.Join(t.TempDir(), "file.txt")
 	value, err := IsLocalAndFileExists(filename)
-	// must not panic because a permission error
 	require.Error(t, err)
 	assert.False(t, value)
-
-	// restore original directory permissions, so that the Golang test framework can delete it
-	err = os.Chmod(dir, originalDirMode)
-	require.NoError(t, err)
 }
 
 func TestSupportedScheme(t *testing.T) {

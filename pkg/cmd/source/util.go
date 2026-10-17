@@ -18,6 +18,7 @@ limitations under the License.
 package source
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -33,6 +34,7 @@ const (
 	httpsScheme  = "https"
 )
 
+var stat = os.Stat // for testing purposes, we can override this function
 func IsLocalAndFileExists(uri string) (bool, error) {
 	if hasSupportedScheme(uri) {
 		// it's not a local file as it matches one of the supporting schemes
@@ -59,8 +61,12 @@ func isGlobCandidate(uri string) (bool, error) {
 }
 
 func isExistingFile(uri string) (bool, error) {
-	info, err := os.Stat(uri)
+	info, err := stat(uri)
 	if err != nil {
+		if errors.Is(err, fs.ErrPermission) {
+			return false, fmt.Errorf("file system permission error while looking for %s: %w", uri, err)
+		}
+
 		if os.IsNotExist(err) {
 			return false, nil
 		}
@@ -77,7 +83,6 @@ func isExistingFile(uri string) (bool, error) {
 
 	return !info.IsDir(), nil
 }
-
 func hasSupportedScheme(uri string) bool {
 	if strings.HasPrefix(strings.ToLower(uri), gistScheme+":") ||
 		strings.HasPrefix(strings.ToLower(uri), githubScheme+":") ||
