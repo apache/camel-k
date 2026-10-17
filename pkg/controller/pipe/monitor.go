@@ -30,6 +30,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/trait"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
 // NewMonitorAction returns an action that monitors the Pipe after it's fully initialized.
@@ -69,8 +70,8 @@ func (action *monitorAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.Pip
 	operatorIDChanged := v1.GetOperatorIDAnnotation(pipe) != "" &&
 		(v1.GetOperatorIDAnnotation(pipe) != v1.GetOperatorIDAnnotation(&it))
 
-	integrationProfileChanged := v1.GetIntegrationProfileAnnotation(pipe) != "" &&
-		(v1.GetIntegrationProfileAnnotation(pipe) != v1.GetIntegrationProfileAnnotation(&it))
+	integrationProfileChanged := kubernetes.GetIntegrationProfileResource(pipe) != "" &&
+		(kubernetes.GetIntegrationProfileResource(pipe) != kubernetes.GetIntegrationProfileResource(&it))
 
 	sameTraits, err := trait.IntegrationAndPipeSameTraits(action.client, &it, pipe)
 	if err != nil {

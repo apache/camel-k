@@ -289,3 +289,19 @@ func TestFailNewIntegrationKit(t *testing.T) {
 	require.Error(t, err)
 	assert.Equal(t, "cannot create a Kit outside Integration or Catalog namespaces", err.Error())
 }
+
+func TestNewIntegrationKitWithProfile(t *testing.T) {
+	quarkusTrait, environment := createNominalQuarkusTest()
+	environment.Integration.Namespace = "it-ns"
+	environment.Integration.Annotations = map[string]string{
+		v1.IntegrationProfileAnnotation: "my-profile",
+	}
+	environment.Platform.CatalogNamespace = "op-ns"
+
+	kit, err := quarkusTrait.newIntegrationKit(environment, fastJarPackageType)
+	require.NoError(t, err)
+	require.NotNil(t, kit)
+	require.NotEmpty(t, kit.Annotations)
+	assert.Equal(t, "my-profile", kit.Annotations[v1.IntegrationProfileAnnotation])
+	assert.Equal(t, "it-ns", kit.Annotations[v1.IntegrationProfileNamespaceAnnotation])
+}

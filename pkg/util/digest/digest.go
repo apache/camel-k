@@ -34,6 +34,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 
 	"fmt"
 )
@@ -58,7 +59,7 @@ func ComputeForIntegration(integration *v1.Integration, configmapVersions []stri
 	}
 
 	// Integration profile is relevant
-	if _, err := hash.Write([]byte(v1.GetIntegrationProfileAnnotation(integration))); err != nil {
+	if _, err := hash.Write([]byte(kubernetes.GetIntegrationProfileResource(integration))); err != nil {
 		return "", err
 	}
 

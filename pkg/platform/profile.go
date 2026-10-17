@@ -40,8 +40,8 @@ func ApplyIntegrationProfile(ctx context.Context, c k8sclient.Reader, o k8sclien
 // findIntegrationProfile finds profile from given resource annotations
 // and resolves the profile in given resource namespace.
 func findIntegrationProfile(ctx context.Context, c k8sclient.Reader, o k8sclient.Object) (*v1.IntegrationProfile, error) {
-	if profileName := v1.GetIntegrationProfileAnnotation(o); profileName != "" {
-		return kubernetes.GetIntegrationProfile(ctx, c, profileName, o.GetNamespace())
+	if profileResource := kubernetes.GetIntegrationProfileResource(o); profileResource != "" {
+		return kubernetes.GetIntegrationProfile(ctx, c, profileResource)
 	}
 
 	return nil, nil
