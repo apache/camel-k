@@ -46,7 +46,7 @@ func TestArkMQKedaAutoDiscovery(t *testing.T) {
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["queueName"]).To(Equal("my-queue"))
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["brokerAddress"]).To(Equal("my-queue"))
 			// Merged from autoMetadata
-			g.Expect(scaledObj.Spec.Triggers[0].Metadata["managementEndpoint"]).To(Equal("my-broker-hdls-svc.arkmq.svc:8161"))
+			g.Expect(scaledObj.Spec.Triggers[0].Metadata["managementEndpoint"]).To(Equal("my-broker-ss-0.my-broker-hdls-svc.arkmq.svc:8161"))
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["brokerName"]).To(Equal("amq-broker"))
 
 			ExpectExecSucceed(t, g, Kubectl("delete", "pipe", integrationName, "-n", ns))
