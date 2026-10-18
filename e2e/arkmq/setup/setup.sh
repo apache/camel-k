@@ -41,3 +41,8 @@ kubectl wait activemqartemis/my-broker --for=condition=Ready --timeout=300s -n a
 
 #### Setup an ActiveMQ Artemis queue address
 kubectl apply -f $SCRIPT_DIR/queue.yaml -n arkmq
+
+#### Setup Keda operator
+# it creates by default a keda namespace
+kubectl apply --server-side -f https://github.com/kedacore/keda/releases/download/v2.17.2/keda-2.17.2.yaml
+kubectl rollout status deployment keda-operator -n keda --timeout=180s
