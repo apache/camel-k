@@ -39,5 +39,5 @@ spec:
       maxReplicaCount: 1
       autoMetadata:
         artemis-queue:
-          managementEndpoint: my-broker-hdls-svc.arkmq.svc:8161
+          managementEndpoint: my-broker-ss-0.my-broker-hdls-svc.arkmq.svc:8161
           brokerName: amq-broker
