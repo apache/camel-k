@@ -56,6 +56,30 @@ It's important to notice that when running the single or multiple namespace oper
 
 NOTE: RBAC custom configuration may vary depending on the installation methodology.
 
+[[multi-namespace-rbac]]
+=== Configuring RBAC for a multi-namespace operator
+
+The https://github.com/apache/camel-k/tree/main/install/overlays/multi-namespace[multi-namespace Kustomize overlay] provides an example with an operator in the `operators` namespace watching `tenant-a` and `tenant-b`. Create these namespaces before applying the overlay; it does not create namespace resources.
+
+[source,shell]
+----
+kubectl create namespace operators
+kubectl create namespace tenant-a
+kubectl create namespace tenant-b
+kubectl apply -k github.com/apache/camel-k/install/overlays/multi-namespace?ref=v{last-released-version} --server-side
+----
+
+The overlay sets `WATCH_NAMESPACE` to `tenant-a,tenant-b` and creates a `Role` and `RoleBinding` in each tenant namespace. Each `RoleBinding` refers to the `camel-k-operator-tenant-ab` service account in the `operators` namespace. To use a different set of tenant namespaces, update `WATCH_NAMESPACE` in `operator/patch-envvars.yaml`, then add a matching RBAC component for each watched namespace to the root `kustomization.yaml` (for example, copy `tenant-a-ns-rbac` and change its `namespace` and `nameSuffix`). If you change the operator namespace or service account name, update the subject patches in every tenant component as well. These resources scope the operator's namespaced permissions to the configured tenants; apply other cluster-level isolation controls separately.
+
+To verify the installation, inspect the operator and tenant RBAC resources:
+
+[source,shell]
+----
+kubectl get pods -n operators
+kubectl get roles,rolebindings -n tenant-a
+kubectl get roles,rolebindings -n tenant-b
+----
+
 [[bootstrap-configuration]]
 == Setup the operator configuration
 
