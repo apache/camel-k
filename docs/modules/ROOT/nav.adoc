@@ -8,6 +8,7 @@
 ** xref:installation/cert-manager.adoc[Configure Cert-Manager]
 ** xref:installation/keda.adoc[Configure Keda]
 ** xref:installation/knative.adoc[Configure Knative]
+** xref:installation/multi-namespace.adoc[Multi namespace installation]
 ** xref:installation/upgrade.adoc[Upgrade]
 ** xref:installation/uninstalling.adoc[Uninstalling]
 ** xref:installation/advanced/advanced.adoc[Advanced]
