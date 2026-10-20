@@ -56,6 +56,8 @@ It's important to notice that when running the single or multiple namespace oper
 
 NOTE: RBAC custom configuration may vary depending on the installation methodology.
 
+For installation procedures where the operator watches multiple namespaces, see xref:installation/multi-namespace.adoc[Multi namespace installation].
+
 [[bootstrap-configuration]]
 == Setup the operator configuration
 
