@@ -25,7 +25,6 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
-	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
 const (
@@ -104,21 +103,7 @@ func (t *securityContextTrait) getUser(e *Environment) (*int64, error) {
 		return t.RunAsUser, nil
 	}
 
-	// get security context UID from Openshift when non.configured by the user
-	isOpenShift, err := openshift.IsOpenShift(e.Client)
-	if err != nil {
-		return nil, err
-	}
-	if !isOpenShift {
-		return new(defaults.DefaultPodRunAsUser), nil
-	}
-
-	runAsUser, err := openshift.GetOpenshiftUser(e.Ctx, e.Client, e.Integration.Namespace)
-	if err != nil {
-		return nil, err
-	}
-
-	return runAsUser, nil
+	return new(defaults.DefaultPodRunAsUser), nil
 }
 
 func (t *securityContextTrait) getRunAsNonRoot() *bool {

@@ -49,15 +49,11 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/rest"
 	"k8s.io/utils/ptr"
 	gwv1 "sigs.k8s.io/gateway-api/apis/v1"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/apache/camel-k/v2/e2e/support/util"
@@ -70,11 +66,7 @@ import (
 	v2util "github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/log"
-	"github.com/apache/camel-k/v2/pkg/util/openshift"
 	"github.com/apache/camel-k/v2/pkg/util/patch"
-	configv1 "github.com/openshift/api/config/v1"
-	projectv1 "github.com/openshift/api/project/v1"
-	routev1 "github.com/openshift/api/route/v1"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
@@ -718,59 +710,6 @@ func ServicesByType(t *testing.T, ctx context.Context, ns string, svcType corev1
 		}
 
 		return svcs
-	}
-}
-
-func Route(t *testing.T, ctx context.Context, ns string, name string) func() *routev1.Route {
-	return func() *routev1.Route {
-		route := routev1.Route{}
-		key := ctrl.ObjectKey{
-			Namespace: ns,
-			Name:      name,
-		}
-		err := TestClient(t).Get(ctx, key, &route)
-		if err != nil && k8serrors.IsNotFound(err) {
-			return nil
-		} else if err != nil {
-			failTest(t, err)
-		}
-		return &route
-	}
-}
-
-func RouteFull(t *testing.T, ctx context.Context, ns string, name string) func() *routev1.Route {
-	return func() *routev1.Route {
-		answer := routev1.Route{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Route",
-				APIVersion: servingv1.SchemeGroupVersion.String(),
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: ns,
-				Name:      name,
-			},
-		}
-		key := ctrl.ObjectKey{
-			Namespace: ns,
-			Name:      name,
-		}
-		err := TestClient(t).Get(ctx, key, &answer)
-		if err != nil && k8serrors.IsNotFound(err) {
-			return nil
-		} else if err != nil {
-			failTest(t, err)
-		}
-		return &answer
-	}
-}
-
-func RouteStatus(t *testing.T, ctx context.Context, ns string, name string) func() string {
-	return func() string {
-		route := Route(t, ctx, ns, name)()
-		if route == nil || len(route.Status.Ingress) == 0 {
-			return ""
-		}
-		return string(route.Status.Ingress[0].Conditions[0].Status)
 	}
 }
 
@@ -1844,18 +1783,6 @@ func ScaleOperator(t *testing.T, ctx context.Context, ns string, replicas int32)
 	return nil
 }
 
-func ClusterDomainName(t *testing.T, ctx context.Context) (string, error) {
-	dns := configv1.DNS{}
-	key := ctrl.ObjectKey{
-		Name: "cluster",
-	}
-	err := TestClient(t).Get(ctx, key, &dns)
-	if err != nil {
-		return "", err
-	}
-	return dns.Spec.BaseDomain, nil
-}
-
 func CreateKamelet(t *testing.T, ctx context.Context, ns string, name string, template map[string]interface{}, properties map[string]v1.JSONSchemaProp, labels map[string]string) func() error {
 	return CreateKameletWithID(t, platform.DefaultPlatformName, ctx, ns, name, template, properties, labels)
 }
@@ -1976,27 +1903,8 @@ func invokeUserTestCode(t *testing.T, ctx context.Context, ns string, doRun func
 }
 
 func deleteTestNamespace(t *testing.T, ctx context.Context, ns ctrl.Object) {
-	var oc bool
-	var err error
-	if oc, err = openshift.IsOpenShift(TestClient(t)); err != nil {
-		failTest(t, err)
-	} else if oc {
-		prj := &projectv1.Project{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: projectv1.GroupVersion.String(),
-				Kind:       "Project",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name: ns.GetName(),
-			},
-		}
-		if err := TestClient(t).Delete(ctx, prj); err != nil {
-			t.Logf("Warning: cannot delete test project %q", prj.Name)
-		}
-	} else {
-		if err := TestClient(t).Delete(ctx, ns); err != nil {
-			t.Logf("Warning: cannot delete test namespace %q", ns.GetName())
-		}
+	if err := TestClient(t).Delete(ctx, ns); err != nil {
+		t.Logf("Warning: cannot delete test namespace %q", ns.GetName())
 	}
 
 	// Wait for all pods to be deleted
@@ -2057,58 +1965,19 @@ func NewNamedTestNamespace(t *testing.T, ctx context.Context, name string) ctrl.
 
 	var namespaceOrProject ctrl.Object
 
-	if oc, err := openshift.IsOpenShift(TestClient(t)); err != nil {
-		failTest(t, err)
-	} else if oc {
-		httpCli, err := rest.HTTPClientFor(c.GetConfig())
-		if err != nil {
-			failTest(t, err)
-		}
-		rest, err := apiutil.RESTClientForGVK(
-			schema.GroupVersionKind{Group: projectv1.GroupName, Version: projectv1.GroupVersion.Version}, false, false,
-			c.GetConfig(), serializer.NewCodecFactory(c.GetScheme()), httpCli)
-		if err != nil {
-			failTest(t, err)
-		}
-		request := &projectv1.ProjectRequest{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: projectv1.GroupVersion.String(),
-				Kind:       "ProjectRequest",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name: name,
-			},
-		}
-		project := &projectv1.Project{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: projectv1.GroupVersion.String(),
-				Kind:       "Project",
-			},
-		}
-		err = rest.Post().
-			Resource("projectrequests").
-			Body(request).
-			Do(ctx).
-			Into(project)
-		if err != nil {
-			failTest(t, err)
-		}
-		return project
-	} else {
-		namespace := &corev1.Namespace{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: "v1",
-				Kind:       "Namespace",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name: name,
-			},
-		}
-		if err := TestClient(t).Create(ctx, namespace); err != nil {
-			failTest(t, err)
-		}
-		namespaceOrProject = namespace
+	namespace := &corev1.Namespace{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "v1",
+			Kind:       "Namespace",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: name,
+		},
 	}
+	if err := TestClient(t).Create(ctx, namespace); err != nil {
+		failTest(t, err)
+	}
+	namespaceOrProject = namespace
 
 	// Required to copy the registry secret previously set on the camel namespace
 	if os.Getenv("E2E_TEST_REGISTRY_SECRET_COPY") == "true" {

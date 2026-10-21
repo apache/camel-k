@@ -26,9 +26,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
 const (
@@ -81,20 +79,6 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, *TraitCondition, erro
 }
 func (t *pullSecretTrait) autoConfigure(e *Environment) (*TraitCondition, error) {
 	var condition *TraitCondition
-	if t.deprecatedImagePullerDelegation == nil {
-		var isOpenShift bool
-		if t.Client != nil {
-			var err error
-			isOpenShift, err = openshift.IsOpenShift(t.Client)
-			if err != nil {
-				return condition, err
-			}
-		}
-		isOperatorGlobal := platform.IsCurrentOperatorGlobal()
-		isKitExternal := e.Integration.GetIntegrationKitNamespace(e.Platform.CatalogNamespace) != e.Integration.Namespace
-		needsDelegation := isOpenShift && isOperatorGlobal && isKitExternal
-		t.deprecatedImagePullerDelegation = &needsDelegation
-	}
 
 	if t.SecretName == "" && e.Platform.Registry.Secret != "" {
 		// This is deprecated and will be removed in future versions

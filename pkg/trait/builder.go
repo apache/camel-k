@@ -290,7 +290,6 @@ func (t *builderTrait) Apply(e *Environment) error {
 	pipelineTasks = append(pipelineTasks, v1.Task{Package: packageTask})
 
 	// Publishing task
-	tag := getTag(e)
 	switch e.Platform.PublishStrategy {
 	case v1.IntegrationPlatformBuildPublishStrategyJib:
 		jibTask := v1.Task{Jib: &v1.JibTask{
@@ -304,15 +303,6 @@ func (t *builderTrait) Apply(e *Environment) error {
 			jibTask.Jib.Configuration.ImagePlatforms = t.ImagePlatforms
 		}
 		pipelineTasks = append(pipelineTasks, jibTask)
-	//nolint:staticcheck
-	case v1.IntegrationPlatformBuildPublishStrategyS2I:
-		pipelineTasks = append(pipelineTasks, v1.Task{S2i: &v1.S2iTask{
-			Name:          "s2i",
-			Configuration: *taskConfOrDefault(tasksConf, "s2i"),
-			BaseImage:     t.getBaseImage(e),
-			Image:         imageName,
-			Tag:           tag,
-		}})
 	}
 
 	// filter only those tasks required by the user
@@ -689,10 +679,6 @@ func filter(tasks []v1.Task, filterTasks []string) ([]v1.Task, error) {
 				filteredTasks = append(filteredTasks, t)
 				found = true
 			case t.Package != nil && t.Package.Name == f:
-				filteredTasks = append(filteredTasks, t)
-				found = true
-			//nolint:staticcheck
-			case t.S2i != nil && t.S2i.Name == f:
 				filteredTasks = append(filteredTasks, t)
 				found = true
 			case t.Jib != nil && t.Jib.Name == f:

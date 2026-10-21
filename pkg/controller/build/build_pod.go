@@ -30,7 +30,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/openshift"
 	"github.com/apache/camel-k/v2/pkg/util/registry"
 )
 
@@ -45,16 +44,6 @@ func newBuildPod(ctx context.Context, client client.Client, build *v1.Build) *co
 		RunAsUser:  &ugfid,
 		RunAsGroup: &ugfid,
 		FSGroup:    &ugfid,
-	}
-	for _, task := range build.Spec.Tasks {
-		// get pod security context from security context constraint configuration in namespace
-		//nolint:staticcheck
-		if task.S2i != nil {
-			podSecurityContextConstrained, _ := openshift.GetOpenshiftPodSecurityContextRestricted(ctx, client, build.Namespace)
-			if podSecurityContextConstrained != nil {
-				podSecurityContext = podSecurityContextConstrained
-			}
-		}
 	}
 	pod := &corev1.Pod{
 		APIVersion: corev1.SchemeGroupVersion.String(),
@@ -89,9 +78,6 @@ func newBuildPod(ctx context.Context, client client.Client, build *v1.Build) *co
 		// It's a type of builder task, we can reuse the same type
 		case task.Package != nil:
 			addBuildTaskToPod(ctx, client, build, task.Package.Name, "", pod)
-		//nolint:staticcheck
-		case task.S2i != nil:
-			addBuildTaskToPod(ctx, client, build, task.S2i.Name, "", pod)
 		case task.Jib != nil:
 			addBuildTaskToPod(ctx, client, build, task.Jib.Name, task.Jib.Registry.Secret, pod)
 		}
@@ -224,14 +210,6 @@ func addBuildTaskToPod(ctx context.Context, client client.Client, build *v1.Buil
 		},
 		WorkingDir: filepath.Join(builderDir, build.Name),
 		Env:        envVars,
-	}
-
-	// get security context from security context constraint configuration in namespace
-	if taskName == "s2i" {
-		securityContextConstrained, _ := openshift.GetOpenshiftSecurityContextRestricted(ctx, client, build.Namespace)
-		if securityContextConstrained != nil {
-			container.SecurityContext = securityContextConstrained
-		}
 	}
 
 	configureResources(taskName, build, &container)

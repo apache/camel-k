@@ -25,7 +25,6 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	platformutil "github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
-	"github.com/apache/camel-k/v2/pkg/util/openshift"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -84,52 +83,34 @@ func (action *monitorAction) Handle(ctx context.Context, platform *v1.Integratio
 	// So far the ITP is good
 	platform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	platform.Status.Build.RuntimeCoreVersion = catalog.Spec.GetCamelVersion()
-	// Registry condition
-	isOpenshift, err := openshift.IsOpenShift(action.client)
-	if err != nil {
-		return platform, err
-	}
-	//nolint: nestif
-	if isOpenshift && platform.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyS2I { //nolint:staticcheck
+
+	if platform.Status.Build.Registry.Address == "" {
+		// error, we need a registry if we're not on Openshift
+		platform.Status.Phase = v1.IntegrationPlatformPhaseError
 		platform.Status.SetCondition(
 			v1.IntegrationPlatformConditionTypeRegistryAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationPlatformConditionTypeRegistryAvailableReason,
-			"registry not available because provided by Openshift S2I")
-		action.L.Infof("WARN: S2I publishing strategy is deprecated and may be removed in the future, use Jib strategy instead")
-		platform.Status.SetCondition(
-			"S2IPublishingStrategyDeprecated",
-			corev1.ConditionTrue,
-			"PublishingStrategyDeprecationNoticeReason",
-			"S2I publishing strategy is deprecated and may be removed in the future, use Jib strategy instead")
+			"registry address not available, you need to set one")
 	} else {
-		if platform.Status.Build.Registry.Address == "" {
-			// error, we need a registry if we're not on Openshift
-			platform.Status.Phase = v1.IntegrationPlatformPhaseError
+		platform.Status.SetCondition(
+			v1.IntegrationPlatformConditionTypeRegistryAvailable,
+			corev1.ConditionTrue,
+			v1.IntegrationPlatformConditionTypeRegistryAvailableReason,
+			"registry available at "+platform.Status.Build.Registry.Address)
+		// Warn if insecure registry
+		if platform.Status.Build.Registry.Insecure {
 			platform.Status.SetCondition(
-				v1.IntegrationPlatformConditionTypeRegistryAvailable,
-				corev1.ConditionFalse,
-				v1.IntegrationPlatformConditionTypeRegistryAvailableReason,
-				"registry address not available, you need to set one")
-		} else {
-			platform.Status.SetCondition(
-				v1.IntegrationPlatformConditionTypeRegistryAvailable,
+				v1.IntegrationPlatformConditionType("InsecureRegistryWarning"),
 				corev1.ConditionTrue,
-				v1.IntegrationPlatformConditionTypeRegistryAvailableReason,
-				"registry available at "+platform.Status.Build.Registry.Address)
-			// Warn if insecure registry
-			if platform.Status.Build.Registry.Insecure {
-				platform.Status.SetCondition(
-					v1.IntegrationPlatformConditionType("InsecureRegistryWarning"),
-					corev1.ConditionTrue,
-					"InsecureRegistryWarningReason",
-					"Registry is insecure. This setup should not be used in a production environment.")
-				action.L.Infof(
-					"WARN: provided container registry is insecure. This setup should not be used in a production environment.",
-				)
-			}
+				"InsecureRegistryWarningReason",
+				"Registry is insecure. This setup should not be used in a production environment.")
+			action.L.Infof(
+				"WARN: provided container registry is insecure. This setup should not be used in a production environment.",
+			)
 		}
 	}
+
 	action.checkTraitAnnotationsDeprecatedNotice(platform)
 	action.checkMavenSettings(platform)
 	action.checkKameletsCatalogRepoDeprecatedNotice(platform)

@@ -17,7 +17,7 @@ limitations under the License.
 
 package trait
 
-// WARNING: The Route trait is **deprecated** and will removed in future release versions: use Ingress trait istead.
+// WARNING: The Route trait is **deprecated** and will removed in future release versions: use Ingress trait instead.
 //
 // The Route trait can be used to configure the creation of OpenShift routes for the integration.
 //
@@ -30,7 +30,7 @@ package trait
 // See the examples section at the end of this page to see the setup options.
 //
 // +camel-k:trait=route.
-// +camel-k:deprecated=2.6.0.
+// +camel-k:internal.
 //
 //nolint:godoclint
 type RouteTrait struct {

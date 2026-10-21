@@ -108,18 +108,16 @@ type IntegrationPlatformList struct {
 type IntegrationPlatformCluster string
 
 const (
-	// IntegrationPlatformClusterOpenShift is used when targeting an OpenShift cluster.
-	//
 	// Deprecated: no longer in use.
-	IntegrationPlatformClusterOpenShift IntegrationPlatformCluster = "OpenShift"
-	// IntegrationPlatformClusterKubernetes is used when targeting a Kubernetes cluster.
-	//
+	DeprecatedIntegrationPlatformClusterOpenShift IntegrationPlatformCluster = "OpenShift"
 	// Deprecated: no longer in use.
-	IntegrationPlatformClusterKubernetes IntegrationPlatformCluster = "Kubernetes"
+	DeprecatedIntegrationPlatformClusterKubernetes IntegrationPlatformCluster = "Kubernetes"
 )
 
 // AllIntegrationPlatformClusters --.
-var AllIntegrationPlatformClusters = []IntegrationPlatformCluster{IntegrationPlatformClusterOpenShift, IntegrationPlatformClusterKubernetes}
+var DeprecatedAllIntegrationPlatformClusters = []IntegrationPlatformCluster{
+	DeprecatedIntegrationPlatformClusterOpenShift, DeprecatedIntegrationPlatformClusterKubernetes,
+}
 
 // IntegrationPlatformBuildSpec contains platform related build information.
 // This configuration can be used to tune the behavior of the Integration/IntegrationKit image builds.

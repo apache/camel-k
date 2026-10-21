@@ -72,7 +72,6 @@
 ** xref:traits:prometheus.adoc[Prometheus]
 ** xref:traits:pull-secret.adoc[Pull Secret]
 ** xref:traits:quarkus.adoc[Quarkus]
-** xref:traits:route.adoc[Route]
 ** xref:traits:security-context.adoc[Security Context]
 ** xref:traits:service.adoc[Service]
 ** xref:traits:toleration.adoc[Toleration]

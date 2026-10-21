@@ -31,22 +31,14 @@ type TaskApplyConfiguration struct {
 	// Application pre publishing
 	// a PackageTask, used to package the project
 	Package *BuilderTaskApplyConfiguration `json:"package,omitempty"`
-	// a BuildahTask, for Buildah strategy.
-	//
-	// Deprecated: use jib or a custom publishing strategy instead
-	Buildah *BuildahTaskApplyConfiguration `json:"buildah,omitempty"`
-	// a KanikoTask, for Kaniko strategy.
-	//
-	// Deprecated: use jib or a custom publishing strategy instead
-	Kaniko *KanikoTaskApplyConfiguration `json:"kaniko,omitempty"`
-	// a SpectrumTask, for Spectrum strategy.
-	//
-	// Deprecated: use jib or a custom publishing strategy instead
-	Spectrum *SpectrumTaskApplyConfiguration `json:"spectrum,omitempty"`
-	// a S2iTask, for S2I strategy.
-	//
-	// Deprecated: use jib or a custom publishing strategy instead
-	S2i *S2iTaskApplyConfiguration `json:"s2i,omitempty"`
+	// Deprecated: no longer in use
+	DeprecatedBuildah *BuildahTaskApplyConfiguration `json:"buildah,omitempty"`
+	// Deprecated: no longer in use
+	DeprecatedKaniko *KanikoTaskApplyConfiguration `json:"kaniko,omitempty"`
+	// Deprecated: no longer in use
+	DeprecatedSpectrum *SpectrumTaskApplyConfiguration `json:"spectrum,omitempty"`
+	// Deprecated: no longer in use
+	DeprecatedS2i *S2iTaskApplyConfiguration `json:"s2i,omitempty"`
 	// a JibTask, for Jib strategy
 	Jib *JibTaskApplyConfiguration `json:"jib,omitempty"`
 }
@@ -81,35 +73,35 @@ func (b *TaskApplyConfiguration) WithPackage(value *BuilderTaskApplyConfiguratio
 	return b
 }
 
-// WithBuildah sets the Buildah field in the declarative configuration to the given value
+// WithDeprecatedBuildah sets the DeprecatedBuildah field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Buildah field is set to the value of the last call.
-func (b *TaskApplyConfiguration) WithBuildah(value *BuildahTaskApplyConfiguration) *TaskApplyConfiguration {
-	b.Buildah = value
+// If called multiple times, the DeprecatedBuildah field is set to the value of the last call.
+func (b *TaskApplyConfiguration) WithDeprecatedBuildah(value *BuildahTaskApplyConfiguration) *TaskApplyConfiguration {
+	b.DeprecatedBuildah = value
 	return b
 }
 
-// WithKaniko sets the Kaniko field in the declarative configuration to the given value
+// WithDeprecatedKaniko sets the DeprecatedKaniko field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Kaniko field is set to the value of the last call.
-func (b *TaskApplyConfiguration) WithKaniko(value *KanikoTaskApplyConfiguration) *TaskApplyConfiguration {
-	b.Kaniko = value
+// If called multiple times, the DeprecatedKaniko field is set to the value of the last call.
+func (b *TaskApplyConfiguration) WithDeprecatedKaniko(value *KanikoTaskApplyConfiguration) *TaskApplyConfiguration {
+	b.DeprecatedKaniko = value
 	return b
 }
 
-// WithSpectrum sets the Spectrum field in the declarative configuration to the given value
+// WithDeprecatedSpectrum sets the DeprecatedSpectrum field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Spectrum field is set to the value of the last call.
-func (b *TaskApplyConfiguration) WithSpectrum(value *SpectrumTaskApplyConfiguration) *TaskApplyConfiguration {
-	b.Spectrum = value
+// If called multiple times, the DeprecatedSpectrum field is set to the value of the last call.
+func (b *TaskApplyConfiguration) WithDeprecatedSpectrum(value *SpectrumTaskApplyConfiguration) *TaskApplyConfiguration {
+	b.DeprecatedSpectrum = value
 	return b
 }
 
-// WithS2i sets the S2i field in the declarative configuration to the given value
+// WithDeprecatedS2i sets the DeprecatedS2i field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the S2i field is set to the value of the last call.
-func (b *TaskApplyConfiguration) WithS2i(value *S2iTaskApplyConfiguration) *TaskApplyConfiguration {
-	b.S2i = value
+// If called multiple times, the DeprecatedS2i field is set to the value of the last call.
+func (b *TaskApplyConfiguration) WithDeprecatedS2i(value *S2iTaskApplyConfiguration) *TaskApplyConfiguration {
+	b.DeprecatedS2i = value
 	return b
 }
 

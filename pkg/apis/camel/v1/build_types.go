@@ -70,22 +70,14 @@ type Task struct {
 
 	// Application Publishing
 
-	// a BuildahTask, for Buildah strategy.
-	//
-	// Deprecated: use jib or a custom publishing strategy instead
-	Buildah *BuildahTask `json:"buildah,omitempty"`
-	// a KanikoTask, for Kaniko strategy.
-	//
-	// Deprecated: use jib or a custom publishing strategy instead
-	Kaniko *KanikoTask `json:"kaniko,omitempty"`
-	// a SpectrumTask, for Spectrum strategy.
-	//
-	// Deprecated: use jib or a custom publishing strategy instead
-	Spectrum *SpectrumTask `json:"spectrum,omitempty"`
-	// a S2iTask, for S2I strategy.
-	//
-	// Deprecated: use jib or a custom publishing strategy instead
-	S2i *S2iTask `json:"s2i,omitempty"`
+	// Deprecated: no longer in use
+	DeprecatedBuildah *BuildahTask `json:"buildah,omitempty"`
+	// Deprecated: no longer in use
+	DeprecatedKaniko *KanikoTask `json:"kaniko,omitempty"`
+	// Deprecated: no longer in use
+	DeprecatedSpectrum *SpectrumTask `json:"spectrum,omitempty"`
+	// Deprecated: no longer in use
+	DeprecatedS2i *S2iTask `json:"s2i,omitempty"`
 	// a JibTask, for Jib strategy
 	Jib *JibTask `json:"jib,omitempty"`
 }

@@ -210,14 +210,5 @@ func GetTraitProfile(p *v1.IntegrationPlatform) v1.TraitProfile {
 		return p.Spec.Profile
 	}
 
-	switch p.Status.Cluster {
-	//nolint:staticcheck
-	case v1.IntegrationPlatformClusterKubernetes:
-		return v1.TraitProfileKubernetes
-	//nolint:staticcheck
-	case v1.IntegrationPlatformClusterOpenShift:
-		return v1.TraitProfileOpenShift
-	}
-
 	return ""
 }

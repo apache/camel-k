@@ -238,11 +238,6 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	exitOnError(err, "")
 	exitOnError(controller.AddToManager(ctx, mgr, ctrlClient), "")
 
-	log.Info("Installing operator resources")
-	installCtx, installCancel := context.WithTimeout(ctx, 1*time.Minute)
-	defer installCancel()
-	install.OperatorStartupOptionalTools(installCtx, bootstrapClient, log)
-
 	devRegistryEnvVal, devReg := os.LookupEnv("ENABLE_DEV_REGISTRY")
 	if devReg && devRegistryEnvVal == "true" {
 		setupDevContainerRegistry(ctx, bootstrapClient, operatorNamespace)

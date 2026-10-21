@@ -25,13 +25,10 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
-
-	routev1 "github.com/openshift/api/route/v1"
-
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	serving "github.com/apache/camel-k/v2/pkg/apis/duck/knative/serving/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // ReplaceResource allows to completely replace a resource on Kubernetes, taking care of immutable fields and resource versions.
@@ -50,7 +47,6 @@ func ReplaceResource(ctx context.Context, c client.Client, res ctrl.Object) (boo
 		}
 		mapRequiredMeta(existing, res)
 		mapRequiredServiceData(existing, res)
-		mapRequiredRouteData(existing, res)
 		mapRequiredKnativeServiceV1Data(existing, res)
 		err = c.Update(ctx, res)
 	}
@@ -69,14 +65,6 @@ func mapRequiredServiceData(from runtime.Object, to runtime.Object) {
 	if fromC, ok := from.(*corev1.Service); ok {
 		if toC, ok := to.(*corev1.Service); ok {
 			toC.Spec.ClusterIP = fromC.Spec.ClusterIP
-		}
-	}
-}
-
-func mapRequiredRouteData(from runtime.Object, to runtime.Object) {
-	if fromC, ok := from.(*routev1.Route); ok {
-		if toC, ok := to.(*routev1.Route); ok {
-			toC.Spec.Host = fromC.Spec.Host
 		}
 	}
 }

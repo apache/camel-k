@@ -167,10 +167,7 @@ spec:
                     task should be configured to represent the specific task chosen.
                   properties:
                     buildah:
-                      description: |-
-                        a BuildahTask, for Buildah strategy.
-
-                        Deprecated: use jib or a custom publishing strategy instead
+                      description: 'Deprecated: no longer in use'
                       properties:
                         baseImage:
                           description: base image layer
@@ -1097,10 +1094,7 @@ spec:
                           type: object
                       type: object
                     kaniko:
-                      description: |-
-                        a KanikoTask, for Kaniko strategy.
-
-                        Deprecated: use jib or a custom publishing strategy instead
+                      description: 'Deprecated: no longer in use'
                       properties:
                         baseImage:
                           description: base image layer
@@ -1846,10 +1840,7 @@ spec:
                           type: array
                       type: object
                     s2i:
-                      description: |-
-                        a S2iTask, for S2I strategy.
-
-                        Deprecated: use jib or a custom publishing strategy instead
+                      description: 'Deprecated: no longer in use'
                       properties:
                         baseImage:
                           description: base image layer
@@ -1951,10 +1942,7 @@ spec:
                           type: string
                       type: object
                     spectrum:
-                      description: |-
-                        a SpectrumTask, for Spectrum strategy.
-
-                        Deprecated: use jib or a custom publishing strategy instead
+                      description: 'Deprecated: no longer in use'
                       properties:
                         baseImage:
                           description: base image layer
@@ -3033,7 +3021,7 @@ spec:
                       tasksFilter:
                         description: |-
                           A list of tasks sorted by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.
-                          Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`, `s2i`)
+                          Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`)
                           if you need to execute them. Useful only with `pod` strategy. Disabled by default, you need to enable via
                           BUILDER_TASKS_ENABLED=true environment variable on operator Deployment.
 
@@ -3996,7 +3984,7 @@ spec:
                       tasksFilter:
                         description: |-
                           A list of tasks sorted by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.
-                          Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`, `s2i`)
+                          Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`)
                           if you need to execute them. Useful only with `pod` strategy. Disabled by default, you need to enable via
                           BUILDER_TASKS_ENABLED=true environment variable on operator Deployment.
 
@@ -6593,7 +6581,7 @@ spec:
                       tasksFilter:
                         description: |-
                           A list of tasks sorted by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.
-                          Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`, `s2i`)
+                          Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`)
                           if you need to execute them. Useful only with `pod` strategy. Disabled by default, you need to enable via
                           BUILDER_TASKS_ENABLED=true environment variable on operator Deployment.
 
@@ -9151,7 +9139,7 @@ spec:
                       tasksFilter:
                         description: |-
                           A list of tasks sorted by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.
-                          Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`, `s2i`)
+                          Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`)
                           if you need to execute them. Useful only with `pod` strategy. Disabled by default, you need to enable via
                           BUILDER_TASKS_ENABLED=true environment variable on operator Deployment.
 
@@ -11697,7 +11685,7 @@ spec:
                       tasksFilter:
                         description: |-
                           A list of tasks sorted by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.
-                          Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`, `s2i`)
+                          Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`)
                           if you need to execute them. Useful only with `pod` strategy. Disabled by default, you need to enable via
                           BUILDER_TASKS_ENABLED=true environment variable on operator Deployment.
 
@@ -21305,7 +21293,7 @@ spec:
                       tasksFilter:
                         description: |-
                           A list of tasks sorted by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.
-                          Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`, `s2i`)
+                          Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`)
                           if you need to execute them. Useful only with `pod` strategy. Disabled by default, you need to enable via
                           BUILDER_TASKS_ENABLED=true environment variable on operator Deployment.
 
@@ -23739,7 +23727,7 @@ spec:
                       tasksFilter:
                         description: |-
                           A list of tasks sorted by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.
-                          Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`, `s2i`)
+                          Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`)
                           if you need to execute them. Useful only with `pod` strategy. Disabled by default, you need to enable via
                           BUILDER_TASKS_ENABLED=true environment variable on operator Deployment.
 
@@ -34708,7 +34696,7 @@ spec:
                           tasksFilter:
                             description: |-
                               A list of tasks sorted by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.
-                              Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`, `s2i`)
+                              Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`)
                               if you need to execute them. Useful only with `pod` strategy. Disabled by default, you need to enable via
                               BUILDER_TASKS_ENABLED=true environment variable on operator Deployment.
 
@@ -37066,7 +37054,7 @@ spec:
                       tasksFilter:
                         description: |-
                           A list of tasks sorted by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.
-                          Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`, `s2i`)
+                          Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`)
                           if you need to execute them. Useful only with `pod` strategy. Disabled by default, you need to enable via
                           BUILDER_TASKS_ENABLED=true environment variable on operator Deployment.
 
