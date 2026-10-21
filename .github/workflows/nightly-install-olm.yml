@@ -61,7 +61,7 @@ jobs:
     # Building and pushing a bundle to a running container is required due to how
     # Operator-SDK works. Once it allows for local bundle testing, this part may be omitted
     - name: Login to staging container registry
-      uses: docker/login-action@abd2ef45e78c5afb21d64d4ca52ee8550d9572c7
+      uses: docker/login-action@d641810927139985e0a6dd92b3aad29ca5714695
       with:
         username: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
         password: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
