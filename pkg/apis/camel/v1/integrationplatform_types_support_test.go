@@ -29,7 +29,6 @@ func TestIntegrationPlatformBuildPublishStrategy_Validate(t *testing.T) {
 		input     IntegrationPlatformBuildPublishStrategy
 		wantError bool
 	}{
-		{"valid S2I", IntegrationPlatformBuildPublishStrategyS2I, false},
 		{"valid Jib", IntegrationPlatformBuildPublishStrategyJib, false},
 		{"invalid strategy", IntegrationPlatformBuildPublishStrategy("wrong"), true},
 		{"empty strategy", IntegrationPlatformBuildPublishStrategy(""), true},

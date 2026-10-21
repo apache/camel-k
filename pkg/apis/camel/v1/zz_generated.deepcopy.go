@@ -3109,23 +3109,23 @@ func (in *Task) DeepCopyInto(out *Task) {
 		*out = new(BuilderTask)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.Buildah != nil {
-		in, out := &in.Buildah, &out.Buildah
+	if in.DeprecatedBuildah != nil {
+		in, out := &in.DeprecatedBuildah, &out.DeprecatedBuildah
 		*out = new(BuildahTask)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.Kaniko != nil {
-		in, out := &in.Kaniko, &out.Kaniko
+	if in.DeprecatedKaniko != nil {
+		in, out := &in.DeprecatedKaniko, &out.DeprecatedKaniko
 		*out = new(KanikoTask)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.Spectrum != nil {
-		in, out := &in.Spectrum, &out.Spectrum
+	if in.DeprecatedSpectrum != nil {
+		in, out := &in.DeprecatedSpectrum, &out.DeprecatedSpectrum
 		*out = new(SpectrumTask)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.S2i != nil {
-		in, out := &in.S2i, &out.S2i
+	if in.DeprecatedS2i != nil {
+		in, out := &in.DeprecatedS2i, &out.DeprecatedS2i
 		*out = new(S2iTask)
 		(*in).DeepCopyInto(*out)
 	}

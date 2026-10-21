@@ -359,9 +359,6 @@ func publishTaskName(tasks []v1.Task) string {
 		return t.Custom.Name
 	case t.Jib != nil:
 		return t.Jib.Name
-	//nolint:staticcheck
-	case t.S2i != nil:
-		return t.S2i.Name
 	}
 
 	return ""
@@ -391,5 +388,5 @@ func publishTaskImage(tasks []v1.Task) string {
 func operatorSupportedPublishingStrategy(tasks []v1.Task) bool {
 	taskName := publishTaskName(tasks)
 
-	return taskName == "jib" || taskName == "s2i"
+	return taskName == "jib"
 }

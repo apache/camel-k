@@ -30,25 +30,16 @@ import (
 
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-
-	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
-
-	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
 func TestPrometheusTrait(t *testing.T) {
 	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		ocp, err := openshift.IsOpenShift(TestClient(t))
-		require.NoError(t, err)
 		// Do not create PodMonitor for the time being as CI test runs on OCP 3.11
 		createPodMonitor := false
 		g.Expect(KamelRun(t, ctx, ns, "files/Java.java",
@@ -70,28 +61,5 @@ func TestPrometheusTrait(t *testing.T) {
 			assert.Contains(t, string(response), "camel_exchanges_total")
 		})
 
-		if ocp && createPodMonitor {
-			t.Run("PodMonitor is created", func(t *testing.T) {
-				sm := podMonitor(t, ctx, ns, "java")
-				g.Eventually(sm, TestTimeoutShort).ShouldNot(BeNil())
-			})
-		}
 	})
-}
-
-func podMonitor(t *testing.T, ctx context.Context, ns string, name string) func() *monitoringv1.PodMonitor {
-	return func() *monitoringv1.PodMonitor {
-		pm := monitoringv1.PodMonitor{}
-		key := ctrl.ObjectKey{
-			Namespace: ns,
-			Name:      name,
-		}
-		err := TestClient(t).Get(ctx, key, &pm)
-		if err != nil && k8serrors.IsNotFound(err) {
-			return nil
-		} else if err != nil {
-			panic(err)
-		}
-		return &pm
-	}
 }

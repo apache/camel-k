@@ -26,14 +26,11 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
-
-	routev1 "github.com/openshift/api/route/v1"
-
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	eventing "github.com/apache/camel-k/v2/pkg/apis/duck/knative/eventing/v1"
 	messaging "github.com/apache/camel-k/v2/pkg/apis/duck/knative/messaging/v1"
 	serving "github.com/apache/camel-k/v2/pkg/apis/duck/knative/serving/v1"
+	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 )
 
 // A Collection is a container of Kubernetes resources.
@@ -301,27 +298,6 @@ func (c *Collection) GetKnativeTrigger(filter func(*eventing.Trigger) bool) *eve
 func (c *Collection) GetKnativeSubscription(filter func(subscription *messaging.Subscription) bool) *messaging.Subscription {
 	var retValue *messaging.Subscription
 	c.VisitKnativeSubscription(func(re *messaging.Subscription) {
-		if filter(re) {
-			retValue = re
-		}
-	})
-
-	return retValue
-}
-
-// VisitRoute executes the visitor function on all Route resources.
-func (c *Collection) VisitRoute(visitor func(*routev1.Route)) {
-	c.Visit(func(res runtime.Object) {
-		if conv, ok := res.(*routev1.Route); ok {
-			visitor(conv)
-		}
-	})
-}
-
-// GetRoute returns a Route that matches the given function.
-func (c *Collection) GetRoute(filter func(*routev1.Route) bool) *routev1.Route {
-	var retValue *routev1.Route
-	c.VisitRoute(func(re *routev1.Route) {
 		if filter(re) {
 			retValue = re
 		}

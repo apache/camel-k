@@ -55,13 +55,6 @@ func (b *Build) Task(task v1.Task) Task {
 			build: b.build,
 			task:  task.Package,
 		}
-	//nolint:staticcheck
-	case task.S2i != nil:
-		return &s2iTask{
-			c:     b.builder.client,
-			build: b.build,
-			task:  task.S2i,
-		}
 	case task.Jib != nil:
 		return &jibTask{
 			c:     b.builder.client,
@@ -134,13 +127,6 @@ func (b *Build) TaskByName(name string) Task {
 				log:   b.builder.log,
 				build: b.build,
 				task:  task.Package,
-			}
-		//nolint:staticcheck
-		case task.S2i != nil && task.S2i.Name == name:
-			return &s2iTask{
-				c:     b.builder.client,
-				build: b.build,
-				task:  task.S2i,
 			}
 		case task.Jib != nil && task.Jib.Name == name:
 			return &jibTask{

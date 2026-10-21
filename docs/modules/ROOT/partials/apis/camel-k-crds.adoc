@@ -5895,36 +5895,28 @@ a PackageTask, used to package the project
 |
 
 
-a BuildahTask, for Buildah strategy.
-
-Deprecated: use jib or a custom publishing strategy instead
+Deprecated: no longer in use
 
 |`kaniko` +
 *xref:#_camel_apache_org_v1_KanikoTask[KanikoTask]*
 |
 
 
-a KanikoTask, for Kaniko strategy.
-
-Deprecated: use jib or a custom publishing strategy instead
+Deprecated: no longer in use
 
 |`spectrum` +
 *xref:#_camel_apache_org_v1_SpectrumTask[SpectrumTask]*
 |
 
 
-a SpectrumTask, for Spectrum strategy.
-
-Deprecated: use jib or a custom publishing strategy instead
+Deprecated: no longer in use
 
 |`s2i` +
 *xref:#_camel_apache_org_v1_S2iTask[S2iTask]*
 |
 
 
-a S2iTask, for S2I strategy.
-
-Deprecated: use jib or a custom publishing strategy instead
+Deprecated: no longer in use
 
 |`jib` +
 *xref:#_camel_apache_org_v1_JibTask[JibTask]*
@@ -6702,7 +6694,7 @@ string
 
 
 A list of tasks sorted by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.
-Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`, `s2i`)
+Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`)
 if you need to execute them. Useful only with `pod` strategy. Disabled by default, you need to enable via
 BUILDER_TASKS_ENABLED=true environment variable on operator Deployment.
 
@@ -9442,7 +9434,7 @@ as a Maven repository.
 
 * <<#_camel_apache_org_v1_Traits, Traits>>
 
-WARNING: The Route trait is **deprecated** and will removed in future release versions: use Ingress trait istead.
+WARNING: The Route trait is **deprecated** and will removed in future release versions: use Ingress trait instead.
 
 The Route trait can be used to configure the creation of OpenShift routes for the integration.
 

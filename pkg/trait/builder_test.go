@@ -531,9 +531,6 @@ func tasksByName(tasks []v1.Task) []string {
 		if t.Package != nil {
 			pipelineTasks[i] = t.Package.Name
 		}
-		if t.S2i != nil {
-			pipelineTasks[i] = t.S2i.Name
-		}
 		if t.Jib != nil {
 			pipelineTasks[i] = t.Jib.Name
 		}

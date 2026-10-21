@@ -21,21 +21,16 @@ import (
 	"context"
 	"os"
 	"runtime"
-	"strings"
 	"time"
 
-	corev1 "k8s.io/api/core/v1"
-	rbacv1 "k8s.io/api/rbac/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/kamelet/repository"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/log"
-	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
 const (
@@ -83,23 +78,6 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		log.Debugf("Integration Platform %s [%s]: setting default runtime version %s", p.Name, p.Namespace, p.Status.Build.PublishStrategy)
 	}
 
-	// update missing fields in the resource
-	if p.Status.Cluster == "" {
-		log.Debugf("Integration Platform %s [%s]: setting cluster status", p.Name, p.Namespace)
-		// determine the kind of cluster the platform is installed into
-		isOpenShift, err := openshift.IsOpenShift(c)
-		switch {
-		case err != nil:
-			return err
-		case isOpenShift:
-			//nolint:staticcheck
-			p.Status.Cluster = v1.IntegrationPlatformClusterOpenShift
-		default:
-			//nolint:staticcheck
-			p.Status.Cluster = v1.IntegrationPlatformClusterKubernetes
-		}
-	}
-
 	if p.Status.Build.PublishStrategy == "" {
 		p.Status.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategyJib
 		log.Debugf("Integration Platform %s [%s]: setting publishing strategy %s", p.Name, p.Namespace, p.Status.Build.PublishStrategy)
@@ -121,76 +99,8 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		return err
 	}
 
-	err = configureRegistry(ctx, c, p)
-	if err != nil {
-		return err
-	}
-
-	//nolint:staticcheck
-	if verbose && p.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategyS2I && p.Status.Build.Registry.Address == "" {
-		log.Log.Info("No registry specified for publishing images")
-	}
-
 	if verbose && p.Status.Build.GetTimeout().Duration != 0 {
 		log.Log.Infof("Maven Timeout set to %s", p.Status.Build.GetTimeout().Duration)
-	}
-
-	return nil
-}
-
-//nolint:staticcheck
-func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPlatform) error {
-	if p.Status.Cluster == v1.IntegrationPlatformClusterOpenShift &&
-		p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyS2I &&
-		p.Status.Build.Registry.Address == "" {
-		err := configureForOpenShiftS2i(ctx, c, p)
-		if err != nil {
-			return err
-		}
-	}
-
-	log.Debugf("Final Registry Address: %s", p.Status.Build.Registry.Address)
-
-	return nil
-}
-
-//nolint:staticcheck
-func configureForOpenShiftS2i(ctx context.Context, c client.Client, p *v1.IntegrationPlatform) error {
-	log.Debugf("Integration Platform %s [%s]: setting registry address", p.Name, p.Namespace)
-	// Default to using OpenShift internal container images registry when using a strategy other than S2I
-	p.Status.Build.Registry.Address = defaults.OpenShiftRegistryAddress
-
-	// OpenShift automatically injects the service CA certificate into the service-ca.crt key on the ConfigMap
-	cm, err := createServiceCaBundleConfigMap(ctx, c, p)
-	if err != nil {
-		return err
-	}
-
-	log.Debugf("Integration Platform %s [%s]: setting registry certificate authority", p.Name, p.Namespace)
-	p.Status.Build.Registry.CA = cm.Name
-
-	// Default to using the registry secret that's configured for the builder service account
-	if p.Status.Build.Registry.Secret == "" {
-		log.Debugf("Integration Platform %s [%s]: setting registry secret", p.Name, p.Namespace)
-		// Bind the required role to push images to the registry
-		err := createBuilderRegistryRoleBinding(ctx, c, p)
-		if err != nil {
-			return err
-		}
-
-		sa := corev1.ServiceAccount{}
-		err = c.Get(ctx, types.NamespacedName{Namespace: p.Namespace, Name: BuilderServiceAccount}, &sa)
-		if err != nil {
-			return err
-		}
-		// We may want to read the secret keys instead of relying on the secret name scheme
-		for _, secret := range sa.Secrets {
-			if strings.Contains(secret.Name, "camel-k-builder-dockercfg") {
-				p.Status.Build.Registry.Secret = secret.Name
-
-				break
-			}
-		}
 	}
 
 	return nil
@@ -381,53 +291,4 @@ func setStatusAdditionalInfo(platform *v1.IntegrationPlatform) {
 	platform.Status.Info["goVersion"] = runtime.Version()
 	platform.Status.Info["goOS"] = runtime.GOOS
 	platform.Status.Info["gitCommit"] = defaults.GitCommit
-}
-
-//nolint:staticcheck
-func createServiceCaBundleConfigMap(ctx context.Context, client client.Client, p *v1.IntegrationPlatform) (*corev1.ConfigMap, error) {
-	cm := &corev1.ConfigMap{
-		Name:      BuilderServiceAccount + "-ca",
-		Namespace: p.Namespace,
-		Annotations: map[string]string{
-			"service.beta.openshift.io/inject-cabundle": "true",
-		},
-	}
-
-	err := client.Create(ctx, cm)
-	if err != nil && !k8serrors.IsAlreadyExists(err) {
-		return nil, err
-	}
-
-	return cm, nil
-}
-
-//nolint:staticcheck
-func createBuilderRegistryRoleBinding(ctx context.Context, client client.Client, p *v1.IntegrationPlatform) error {
-	rb := &rbacv1.RoleBinding{
-		Name:      BuilderServiceAccount + "-registry",
-		Namespace: p.Namespace,
-		Subjects: []rbacv1.Subject{
-			{
-				Kind: "ServiceAccount",
-				Name: BuilderServiceAccount,
-			},
-		},
-		RoleRef: rbacv1.RoleRef{
-			Kind:     "ClusterRole",
-			APIGroup: "rbac.authorization.k8s.io",
-			Name:     "system:image-builder",
-		},
-	}
-
-	err := client.Create(ctx, rb)
-	if err != nil {
-		if k8serrors.IsForbidden(err) {
-			log.Log.Infof("Cannot grant permission to push images to the registry. "+
-				"Run 'oc policy add-role-to-user system:image-builder system:serviceaccount:%s:%s' as a system admin.", p.Namespace, BuilderServiceAccount)
-		} else if !k8serrors.IsAlreadyExists(err) {
-			return err
-		}
-	}
-
-	return nil
 }

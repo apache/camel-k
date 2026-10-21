@@ -66,7 +66,7 @@ type BuilderTrait struct {
 	// Deprecated: may be removed in future versions.
 	Tasks []string `json:"tasks,omitempty" property:"tasks"`
 	// A list of tasks sorted by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.
-	// Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`, `s2i`)
+	// Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`)
 	// if you need to execute them. Useful only with `pod` strategy. Disabled by default, you need to enable via
 	// BUILDER_TASKS_ENABLED=true environment variable on operator Deployment.
 	//
