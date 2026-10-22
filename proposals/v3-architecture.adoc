@@ -1,0 +1,78 @@
+---
+title: Version 3 redesign
+authors:
+  - "@squakez"
+creation-date: 2026-10-22
+last-updated: 2026-10-22
+status:
+see-also: []
+replaces: []
+superseded-by: []
+---
+
+== V3 redesign
+
+Camel K is a project that have seen a great evolution in the last years. The project was implemented with many features that, along the way, have been deprecated in favour to others or dropped because no longer interesting for the community of its users.
+
+The Apache Camel community has grown a series of alternative projects that can be used to prototype and build Camel applications (ie, Camel JBang) and the new https://camel-tooling.github.io/camel-dashboard/[Camel Monitor Operator] has reached a level of maturity and completeness making the monitoring part of Camel K something we can deprecate in favour of the former.
+
+In the recent months we have also seen a rise in the attempt to exploit potential vulnerabilities, so we may take the opportunity to review the boundaries between the administrative roles and the user roles (which may be confusing now due to the high number of custom resource to manage).
+
+A new redesign that can introduce certain breaking compatibility change would be beneficial for the project at this moment in order to:
+
+- Clean the Kubernetes API and make user/admin operations easy
+- Clean the code and make it easier to maintain in the long term.
+- Harden security
+
+== Goals
+
+The goal of this document is to illustrate the new design at a high level view. When the new design is approved, it will serve as a reference for all different developments required to complete a first version 3 of the project.
+
+== Proposal
+
+The main goal of the project remain the same. The main feature of the Camel K operator is to transform a Camel DSL or project (for example, expressed as a git project) into a running cloud application. What we aim to change are the intermediate steps required to perform that task.
+
+The plan is to remove part of the API in order to make it simpler to manage the tool. We expect the following custom resources:
+
+- `Integration`
+- `IntegrationBuild`
+- `IntegrationProfile`
+- `Pipe`
+- `Kamelet`
+
+All custom resources should be considered as user namespaced resources. That means, a user is able to query them in its own namespace only (or any other authorized namespace). No cross namespaces operations are allowed for security reason. The `IntegrationProfile` can be used as a namespaced admin configuration used to control certain build capabilities that should not be left to the final user (for example, build Pod resources, registry settings, ...).
+
+The typical use case is still for the user to provide either an `Integration` or a `Pipe` and let the operator do the rest.
+
+The new `IntegrationBuild` custom resource is the equivalent of the v2 `Build` custom resource. The difference is that it is created when a new `Integration` is created or a new build for it is required. This is triggering a `Job` whose goal is to do the build and containerization of the Camel workload. A `Pod` will be used to create an opinionated pipeline with the following responsibilities:
+
+- Create the project via `camel export` (likely using `camel-jbang` image)
+- Build and push the project to a given registry (using `jib` profile in `camel export`)
+
+We won't support any custom task as we realize that, any customization requires a more specialized CICD tool such as Jenkins or Tekton (which will be still supported as "Self Managed Build Integration"). Once the build completes successfully, the operator will continue the deployment phase, generating the related `Deployment` and starting the application. This new design will probably allow us to eventually introduce other features such as rollback to previous builds, given that each `IntegrationBuild` will track the container image which should stay in the registry.
+
+Another interesting feature is that with this approach we will be able to build any supported Camel runtime out of the box. When we generate the project (via `camel export`) we just need to provide the runtime to which we want to export.
+
+The rest of operations should be maintained exactly as it is right now (gitops, trait configuration, ...). What we expect to remove entirely from the Camel K operator is the monitoring part, delegating it to the presence of Camel Monitor operator (which has to be installed separately).
+
+The Camel K operator `Pod` will be also much simpler as it won't require it to build the Maven project as it used to do previously (via `routine` build feature).
+
+=== Main features changes
+
+* Track all builds for an `Integration`
+* Possibility to rollback to previous `IntegrationBuild` versions
+* Namespaced only resource access
+* Build will happen in a Pod (namespaced)
+* Any Camel runtime support (Quarkus, Spring Boot or Main with Quarkus as default)
+* Monitoring delegated to **Camel Monitor Operator**
+
+=== Features we'll lose
+
+* Kit reusability
+* Managed custom pipeline (external CICD still available)
+
+== Compatibility
+
+The v3 operator will be still compatible with previous v2 Integrations custom resource. However we should expect that, as soon as a new v3 operator detects an Integration will rebuild it with the new building system. In this sense we should expect to break the compatibility: a v3 operator will rebuild any existing v2 Integration the first time it detects it (unless it runs as Self Managed Build Integration).
+
+Older deprecated custom resource (`Build`, `IntegrationKit`, `IntegrationPlatform`, `CamelCatalog`) will be maintained in order to let a v2 operator work in the same cluster where a v3 operator is installed. However, the new v3 operator will ignore the old resources.

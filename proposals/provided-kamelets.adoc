@@ -3,8 +3,8 @@ title: Provided Kamelets
 authors:
   - "@nicolaferraro"
 creation-date: 2021-01-29
-last-updated: 2021-01-29
-status: implementable
+last-updated: 2026-10-22
+status: obsolete
 see-also: []
 replaces: []
 superseded-by: []
