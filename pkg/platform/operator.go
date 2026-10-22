@@ -61,15 +61,6 @@ func IsCurrentOperatorGlobal() bool {
 	return false
 }
 
-// GetOperatorWatchNamespace returns the namespace the operator watches.
-func GetOperatorWatchNamespace() string {
-	if namespace, envSet := os.LookupEnv(OperatorWatchNamespaceEnvVariable); envSet {
-		return namespace
-	}
-
-	return ""
-}
-
 // GetOperatorNamespace returns the namespace where the current operator is located (if set).
 func GetOperatorNamespace() string {
 	if podNamespace, envSet := os.LookupEnv(operatorNamespaceEnvVariable); envSet {

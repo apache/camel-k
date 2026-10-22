@@ -217,7 +217,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 		t.configureService(e, &container, knative)
 	}
 	t.configureCapabilities(e)
-	err := t.setSecurityContext(e, &container)
+	err := t.setSecurityContext(&container)
 	if err != nil {
 		return err
 	}
@@ -340,7 +340,7 @@ func (t *containerTrait) configureCapabilities(e *Environment) {
 	}
 }
 
-func (t *containerTrait) setSecurityContext(e *Environment, container *corev1.Container) error {
+func (t *containerTrait) setSecurityContext(container *corev1.Container) error {
 	sc := corev1.SecurityContext{
 		RunAsNonRoot: t.getRunAsNonRoot(),
 		SeccompProfile: &corev1.SeccompProfile{
@@ -350,23 +350,18 @@ func (t *containerTrait) setSecurityContext(e *Environment, container *corev1.Co
 		Capabilities:             &corev1.Capabilities{Drop: t.getCapabilitiesDrop(), Add: t.CapabilitiesAdd},
 	}
 
-	runAsUser, err := t.getUser(e)
-	if err != nil {
-		return err
-	}
-
-	sc.RunAsUser = runAsUser
+	sc.RunAsUser = t.getUser()
 	container.SecurityContext = &sc
 
 	return nil
 }
 
-func (t *containerTrait) getUser(e *Environment) (*int64, error) {
+func (t *containerTrait) getUser() *int64 {
 	if t.RunAsUser != nil {
-		return t.RunAsUser, nil
+		return t.RunAsUser
 	}
 
-	return nil, nil
+	return nil
 }
 
 func (t *containerTrait) isExpose() bool {

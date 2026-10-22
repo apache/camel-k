@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"maps"
 	"reflect"
 	"regexp"
 	"strings"
@@ -254,12 +253,12 @@ func Equals(i1 Options, i2 Options) bool {
 }
 
 // IntegrationsHaveSameTraits return if traits are the same.
-func IntegrationsHaveSameTraits(c client.Client, i1 *v1.Integration, i2 *v1.Integration) (bool, error) {
-	c1, err := NewSpecTraitsOptionsForIntegration(c, i1)
+func IntegrationsHaveSameTraits(i1 *v1.Integration, i2 *v1.Integration) (bool, error) {
+	c1, err := NewSpecTraitsOptionsForIntegration(i1)
 	if err != nil {
 		return false, err
 	}
-	c2, err := NewSpecTraitsOptionsForIntegration(c, i2)
+	c2, err := NewSpecTraitsOptionsForIntegration(i2)
 	if err != nil {
 		return false, err
 	}
@@ -268,12 +267,12 @@ func IntegrationsHaveSameTraits(c client.Client, i1 *v1.Integration, i2 *v1.Inte
 }
 
 // PipesHaveSameTraits return if traits are the same.
-func PipesHaveSameTraits(c client.Client, i1 *v1.Pipe, i2 *v1.Pipe) (bool, error) {
-	c1, err := NewTraitsOptionsForPipe(c, i1)
+func PipesHaveSameTraits(i1 *v1.Pipe, i2 *v1.Pipe) (bool, error) {
+	c1, err := NewTraitsOptionsForPipe(i1)
 	if err != nil {
 		return false, err
 	}
-	c2, err := NewTraitsOptionsForPipe(c, i2)
+	c2, err := NewTraitsOptionsForPipe(i2)
 	if err != nil {
 		return false, err
 	}
@@ -284,12 +283,12 @@ func PipesHaveSameTraits(c client.Client, i1 *v1.Pipe, i2 *v1.Pipe) (bool, error
 // IntegrationAndPipeSameTraits return if traits are the same.
 // The comparison is done for the subset of traits defines on the binding as during the trait processing,
 // some traits may be added to the Integration i.e. knative configuration in case of sink binding.
-func IntegrationAndPipeSameTraits(c client.Client, i1 *v1.Integration, i2 *v1.Pipe) (bool, error) {
-	itOpts, err := NewSpecTraitsOptionsForIntegration(c, i1)
+func IntegrationAndPipeSameTraits(i1 *v1.Integration, i2 *v1.Pipe) (bool, error) {
+	itOpts, err := NewSpecTraitsOptionsForIntegration(i1)
 	if err != nil {
 		return false, err
 	}
-	klbOpts, err := NewTraitsOptionsForPipe(c, i2)
+	klbOpts, err := NewTraitsOptionsForPipe(i2)
 	if err != nil {
 		return false, err
 	}
@@ -303,85 +302,10 @@ func IntegrationAndPipeSameTraits(c client.Client, i1 *v1.Integration, i2 *v1.Pi
 	return Equals(klbOpts, toCompare), nil
 }
 
-// newTraitsOptions will merge the traits annotations with the traits spec using the same format.
-func newTraitsOptions(c client.Client, opts Options, annotations map[string]string) (Options, error) {
-	annotationTraits, err := ExtractAndMaybeDeleteTraits(c, annotations, false)
-	if err != nil {
-		return nil, err
-	}
-	if annotationTraits == nil {
-		return opts, nil
-	}
-
-	m2, err := ToTraitMap(*annotationTraits)
-	if err != nil {
-		return nil, err
-	}
-
-	maps.Copy(opts, m2)
-
-	return opts, nil
-}
-
-// ExtractAndMaybeDeleteTraits will extract the annotation traits into v1.Traits struct, removing from the value from the input map.
-func ExtractAndMaybeDeleteTraits(c client.Client, annotations map[string]string, del bool) (*v1.Traits, error) {
-	// structure that will be marshalled into a v1.Traits as it was a kamel run command
-	catalog := NewCatalog(c)
-	traitsPlainParams := []string{}
-	for k, v := range annotations {
-		//nolint:staticcheck
-		if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
-			key := strings.ReplaceAll(k, v1.TraitAnnotationPrefix, "")
-			traitID, _, _ := strings.Cut(key, ".")
-			if err := ValidateTrait(catalog, traitID); err != nil {
-				return nil, err
-			}
-			traitArrayParams := extractAsArray(v)
-			for _, param := range traitArrayParams {
-				traitsPlainParams = append(traitsPlainParams, fmt.Sprintf("%s=%s", key, param))
-			}
-			if del {
-				delete(annotations, k)
-			}
-		}
-	}
-	if len(traitsPlainParams) == 0 {
-		return nil, nil
-	}
-	var traits v1.Traits
-	if err := ConfigureTraits(traitsPlainParams, &traits, catalog); err != nil {
-		return nil, err
-	}
-
-	return &traits, nil
-}
-
-// extractAsArray can detect if the value is an array representation as ["prop1=1", "prop2=2"] and
-// return an array with the values or with the single value passed as a parameter.
-func extractAsArray(value string) []string {
-	if strings.HasPrefix(value, "[") && strings.HasSuffix(value, "]") {
-		var arrayValue []string
-		data := value[1 : len(value)-1]
-		vals := strings.SplitSeq(data, ",")
-		for v := range vals {
-			prop := strings.Trim(v, " ")
-			if strings.HasPrefix(prop, `"`) && strings.HasSuffix(prop, `"`) {
-				prop = prop[1 : len(prop)-1]
-			}
-			arrayValue = append(arrayValue, prop)
-		}
-
-		return arrayValue
-	}
-
-	return []string{value}
-}
-
 // NewSpecTraitsOptionsForIntegrationAndPlatform will merge traits giving priority to Integration, Profile and Platform respectively.
 //
 //nolint:staticcheck
-func NewSpecTraitsOptionsForIntegrationAndPlatform(
-	c client.Client, i *v1.Integration, itp *v1.IntegrationProfile, pl *v1.IntegrationPlatform) (Options, error) {
+func NewSpecTraitsOptionsForIntegrationAndPlatform(i *v1.Integration, itp *v1.IntegrationProfile, pl *v1.IntegrationPlatform) (Options, error) {
 	mergedTraits := v1.Traits{}
 	itpTraits := v1.Traits{}
 	if pl != nil {
@@ -397,52 +321,18 @@ func NewSpecTraitsOptionsForIntegrationAndPlatform(
 		return nil, err
 	}
 
-	options, err := ToTraitMap(mergedTraits)
-	if err != nil {
-		return nil, err
-	}
-
-	// Deprecated: to remove when we remove support for traits annotations.
-	//
-	// IMPORTANT: when we remove this we'll need to remove the client.Client from the func,
-	// which will bring to more cascade removal. It had to be introduced to support the deprecated feature
-	// in a properly manner (ie, comparing the spec.traits with annotations in a proper way).
-	return newTraitsOptions(c, options, i.Annotations)
+	return ToTraitMap(mergedTraits)
 }
 
-func NewSpecTraitsOptionsForIntegration(c client.Client, i *v1.Integration) (Options, error) {
-	m1, err := ToTraitMap(i.Spec.Traits)
-	if err != nil {
-		return nil, err
-	}
-
-	// Deprecated: to remove when we remove support for traits annotations.
-	//
-	// IMPORTANT: when we remove this we'll need to remove the client.Client from the func,
-	// which will bring to more cascade removal. It had to be introduced to support the deprecated feature
-	// in a properly manner (ie, comparing the spec.traits with annotations in a proper way).
-	return newTraitsOptions(c, m1, i.Annotations)
+func NewSpecTraitsOptionsForIntegration(it *v1.Integration) (Options, error) {
+	return ToTraitMap(it.Spec.Traits)
 }
 
-func newTraitsOptionsForIntegrationKit(c client.Client, i *v1.IntegrationKit, traits v1.IntegrationKitTraits) (Options, error) {
-	m1, err := ToTraitMap(traits)
-	if err != nil {
-		return nil, err
-	}
-
-	// Deprecated: to remove when we remove support for traits annotations.
-	//
-	// IMPORTANT: when we remove this we'll need to remove the client.Client from the func,
-	// which will bring to more cascade removal. It had to be introduced to support the deprecated feature
-	// in a properly manner (ie, comparing the spec.traits with annotations in a proper way).
-	return newTraitsOptions(c, m1, i.Annotations)
+func NewSpecTraitsOptionsForIntegrationKit(ik *v1.IntegrationKit) (Options, error) {
+	return ToTraitMap(ik.Spec.Traits)
 }
 
-func NewSpecTraitsOptionsForIntegrationKit(c client.Client, i *v1.IntegrationKit) (Options, error) {
-	return newTraitsOptionsForIntegrationKit(c, i, i.Spec.Traits)
-}
-
-func NewTraitsOptionsForPipe(c client.Client, pipe *v1.Pipe) (Options, error) {
+func NewTraitsOptionsForPipe(pipe *v1.Pipe) (Options, error) {
 	options := Options{}
 
 	if pipe.Spec.Traits != nil {
@@ -453,7 +343,7 @@ func NewTraitsOptionsForPipe(c client.Client, pipe *v1.Pipe) (Options, error) {
 		}
 	}
 
-	return newTraitsOptions(c, options, pipe.Annotations)
+	return options, nil
 }
 
 // HasMatchingTraits verifies if two traits options match.

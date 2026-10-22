@@ -27,7 +27,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/registry"
@@ -38,7 +37,7 @@ const (
 	builderVolume = "camel-k-builder"
 )
 
-func newBuildPod(ctx context.Context, client client.Client, build *v1.Build) *corev1.Pod {
+func newBuildPod(build *v1.Build) *corev1.Pod {
 	var ugfid int64 = 1001
 	podSecurityContext := &corev1.PodSecurityContext{
 		RunAsUser:  &ugfid,
@@ -70,16 +69,16 @@ func newBuildPod(ctx context.Context, client client.Client, build *v1.Build) *co
 		switch {
 		// Builder task
 		case task.Builder != nil:
-			addBuildTaskToPod(ctx, client, build, task.Builder.Name, "", pod)
+			addBuildTaskToPod(build, task.Builder.Name, "", pod)
 		// Custom task
 		case task.Custom != nil:
 			addCustomTaskToPod(build, task.Custom, pod)
 		// Package task
 		// It's a type of builder task, we can reuse the same type
 		case task.Package != nil:
-			addBuildTaskToPod(ctx, client, build, task.Package.Name, "", pod)
+			addBuildTaskToPod(build, task.Package.Name, "", pod)
 		case task.Jib != nil:
-			addBuildTaskToPod(ctx, client, build, task.Jib.Name, task.Jib.Registry.Secret, pod)
+			addBuildTaskToPod(build, task.Jib.Name, task.Jib.Registry.Secret, pod)
 		}
 	}
 
@@ -160,7 +159,7 @@ func buildPodName(build *v1.Build) string {
 	return "camel-k-" + build.Name + "-builder"
 }
 
-func addBuildTaskToPod(ctx context.Context, client client.Client, build *v1.Build, taskName, registrySecretName string, pod *corev1.Pod) {
+func addBuildTaskToPod(build *v1.Build, taskName, registrySecretName string, pod *corev1.Pod) {
 	if !hasVolume(pod, builderVolume) {
 		pod.Spec.Volumes = append(pod.Spec.Volumes,
 			// EmptyDir volume used to share the build state across tasks

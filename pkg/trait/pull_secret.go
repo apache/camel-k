@@ -50,7 +50,6 @@ func newPullSecretTrait() Trait {
 
 func (t *pullSecretTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	var condition *TraitCondition
-	var err error
 	if e.Integration == nil {
 		return false, condition, nil
 	}
@@ -62,10 +61,7 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, *TraitCondition, erro
 	}
 
 	if ptr.Deref(t.Auto, true) {
-		condition, err = t.autoConfigure(e)
-		if err != nil {
-			return false, condition, err
-		}
+		condition = t.autoConfigure(e)
 	}
 
 	if t.SecretName != "" {
@@ -77,7 +73,7 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, *TraitCondition, erro
 
 	return t.secretName != "" || ptr.Deref(t.deprecatedImagePullerDelegation, false), condition, nil
 }
-func (t *pullSecretTrait) autoConfigure(e *Environment) (*TraitCondition, error) {
+func (t *pullSecretTrait) autoConfigure(e *Environment) *TraitCondition {
 	var condition *TraitCondition
 
 	if t.SecretName == "" && e.Platform.Registry.Secret != "" {
@@ -94,7 +90,7 @@ func (t *pullSecretTrait) autoConfigure(e *Environment) (*TraitCondition, error)
 		)
 	}
 
-	return condition, nil
+	return condition
 }
 
 func (t *pullSecretTrait) Apply(e *Environment) error {

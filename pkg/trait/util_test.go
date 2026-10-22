@@ -20,13 +20,11 @@ package trait
 import (
 	"testing"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 
-	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -137,53 +135,6 @@ func TestToTrait(t *testing.T) {
 	assert.Equal(t, expected, trait)
 }
 
-func TestSameTraits(t *testing.T) {
-	c, err := internal.NewFakeClient()
-	require.NoError(t, err)
-
-	t.Run("same traits with annotations only", func(t *testing.T) {
-		oldKlb := &v1.Pipe{
-			ObjectMeta: metav1.ObjectMeta{
-				Annotations: map[string]string{
-					v1.TraitAnnotationPrefix + "container.image": "foo/bar:1",
-				},
-			},
-		}
-		newKlb := &v1.Pipe{
-			ObjectMeta: metav1.ObjectMeta{
-				Annotations: map[string]string{
-					v1.TraitAnnotationPrefix + "container.image": "foo/bar:1",
-				},
-			},
-		}
-
-		ok, err := PipesHaveSameTraits(c, oldKlb, newKlb)
-		require.NoError(t, err)
-		assert.True(t, ok)
-	})
-
-	t.Run("not same traits with annotations only", func(t *testing.T) {
-		oldKlb := &v1.Pipe{
-			ObjectMeta: metav1.ObjectMeta{
-				Annotations: map[string]string{
-					v1.TraitAnnotationPrefix + "container.image": "foo/bar:1",
-				},
-			},
-		}
-		newKlb := &v1.Pipe{
-			ObjectMeta: metav1.ObjectMeta{
-				Annotations: map[string]string{
-					v1.TraitAnnotationPrefix + "container.image": "foo/bar:2",
-				},
-			},
-		}
-
-		ok, err := PipesHaveSameTraits(c, oldKlb, newKlb)
-		require.NoError(t, err)
-		assert.False(t, ok)
-	})
-}
-
 func TestHasMathchingTraitsEmpty(t *testing.T) {
 	opt1 := Options{
 		"builder": {},
@@ -232,9 +183,11 @@ func TestHasMathchingTraitsMissing(t *testing.T) {
 
 func TestIntegrationAndPipeSameTraits(t *testing.T) {
 	pipe := &v1.Pipe{
-		ObjectMeta: metav1.ObjectMeta{
-			Annotations: map[string]string{
-				v1.TraitAnnotationPrefix + "camel.runtime-version": "1.2.3",
+		Spec: v1.PipeSpec{
+			Traits: &v1.Traits{
+				Camel: &traitv1.CamelTrait{
+					RuntimeVersion: "1.2.3",
+				},
 			},
 		},
 	}
@@ -248,10 +201,8 @@ func TestIntegrationAndPipeSameTraits(t *testing.T) {
 			},
 		},
 	}
-	c, err := internal.NewFakeClient(pipe, integration)
-	require.NoError(t, err)
 
-	result, err := IntegrationAndPipeSameTraits(c, integration, pipe)
+	result, err := IntegrationAndPipeSameTraits(integration, pipe)
 	require.NoError(t, err)
 	assert.True(t, result)
 }
@@ -275,9 +226,7 @@ func TestMergePlatformTraitsIntegrationPriority(t *testing.T) {
 		},
 	}
 
-	c, err := internal.NewFakeClient()
-	require.NoError(t, err)
-	mergedOptions, err := NewSpecTraitsOptionsForIntegrationAndPlatform(c, integration, nil, nil)
+	mergedOptions, err := NewSpecTraitsOptionsForIntegrationAndPlatform(integration, nil, nil)
 	require.NoError(t, err)
 	assert.Equal(t, expectedOptions, mergedOptions)
 }
@@ -309,9 +258,7 @@ func TestMergeIntegrationProfileTraits(t *testing.T) {
 		},
 	}
 
-	c, err := internal.NewFakeClient()
-	require.NoError(t, err)
-	mergedOptions, err := NewSpecTraitsOptionsForIntegrationAndPlatform(c, integration, profile, nil)
+	mergedOptions, err := NewSpecTraitsOptionsForIntegrationAndPlatform(integration, profile, nil)
 	require.NoError(t, err)
 	assert.Equal(t, expectedOptions, mergedOptions)
 }

@@ -26,34 +26,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-// CheckSelfPermission can be used to check if the current user/service-account is allowed to execute a given operation
-// in the cluster.
-// E.g. checkPermission(client, olmv1alpha1.GroupName, "clusterserviceversions", namespace, "camel-k", "get").
-func CheckSelfPermission(ctx context.Context, client kubernetes.Interface, group, resource, namespace, name, verb string) (bool, error) {
-	sarReview := &authorizationv1.SelfSubjectAccessReview{
-		Spec: authorizationv1.SelfSubjectAccessReviewSpec{
-			ResourceAttributes: &authorizationv1.ResourceAttributes{
-				Group:     group,
-				Resource:  resource,
-				Namespace: namespace,
-				Name:      name,
-				Verb:      verb,
-			},
-		},
-	}
-
-	sar, err := client.AuthorizationV1().SelfSubjectAccessReviews().Create(ctx, sarReview, metav1.CreateOptions{})
-	if err != nil {
-		if k8serrors.IsForbidden(err) {
-			return false, nil
-		}
-
-		return false, err
-	}
-
-	return sar.Status.Allowed, nil
-}
-
 // CheckServiceAccountPermission verify if a given Service Account can access a given resource.
 // Service Account must be provided as "system:serviceaccount:namespace:name" format.
 func CheckServiceAccountPermission(ctx context.Context, client kubernetes.Interface, sa, group, resource, namespace, name, verb string) (bool, error) {

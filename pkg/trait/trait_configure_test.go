@@ -24,13 +24,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/internal"
-	"github.com/apache/camel-k/v2/pkg/util/boolean"
 )
 
 func TestTraitConfiguration(t *testing.T) {
@@ -66,97 +64,4 @@ func TestTraitConfiguration(t *testing.T) {
 	require.True(t, ok)
 	assert.True(t, *service.Enabled)
 	assert.True(t, *service.Auto)
-}
-
-func TestTraitConfigurationFromAnnotations(t *testing.T) {
-	cl, err := internal.NewFakeClient()
-	require.NoError(t, err)
-	env := Environment{
-		Ctx:    context.Background(),
-		Client: cl,
-		Integration: &v1.Integration{
-			ObjectMeta: metav1.ObjectMeta{
-				Annotations: map[string]string{
-					v1.TraitAnnotationPrefix + "cron.concurrency-policy":    "annotated-policy",
-					v1.TraitAnnotationPrefix + "environment.container-meta": boolean.TrueString,
-				},
-			},
-			Spec: v1.IntegrationSpec{
-				Traits: v1.Traits{
-					Cron: &traitv1.CronTrait{
-						Fallback:          ptr.To(true),
-						ConcurrencyPolicy: "mypolicy",
-					},
-				},
-			},
-		},
-	}
-	c := NewCatalog(nil)
-	require.NoError(t, c.Configure(&env))
-	ct, _ := c.GetTrait("cron").(*cronTrait)
-	assert.True(t, *ct.Fallback)
-	assert.Equal(t, "annotated-policy", ct.ConcurrencyPolicy)
-	et, _ := c.GetTrait("environment").(*environmentTrait)
-	assert.True(t, *et.ContainerMeta)
-}
-
-func TestFailOnWrongTraitAnnotations(t *testing.T) {
-	cl, err := internal.NewFakeClient()
-	require.NoError(t, err)
-	env := Environment{
-		Ctx:    context.Background(),
-		Client: cl,
-		Integration: &v1.Integration{
-			ObjectMeta: metav1.ObjectMeta{
-				Annotations: map[string]string{
-					v1.TraitAnnotationPrefix + "cron.missing-property": "the-value",
-				},
-			},
-		},
-	}
-	c := NewCatalog(nil)
-	assert.Error(t, c.Configure(&env))
-}
-
-func TestTraitListConfigurationFromAnnotations(t *testing.T) {
-	cl, err := internal.NewFakeClient()
-	require.NoError(t, err)
-	env := Environment{
-		Ctx:    context.Background(),
-		Client: cl,
-		Integration: &v1.Integration{
-			ObjectMeta: metav1.ObjectMeta{
-				Annotations: map[string]string{
-					v1.TraitAnnotationPrefix + "environment.vars":      `["V1=a", "V2=b"]`,
-					v1.TraitAnnotationPrefix + "camel.runtime-version": "1.2.3",
-				},
-			},
-		},
-	}
-	c := NewCatalog(nil)
-	require.NoError(t, c.Configure(&env))
-	et, _ := c.GetTrait("environment").(*environmentTrait)
-	assert.Equal(t, []string{"V1=a", "V2=b"}, et.Vars)
-	cml, _ := c.GetTrait("camel").(*camelTrait)
-	assert.Equal(t, "1.2.3", cml.RuntimeVersion)
-}
-
-func TestTraitSplitConfiguration(t *testing.T) {
-	cl, err := internal.NewFakeClient()
-	require.NoError(t, err)
-	env := Environment{
-		Ctx:    context.Background(),
-		Client: cl,
-		Integration: &v1.Integration{
-			ObjectMeta: metav1.ObjectMeta{
-				Annotations: map[string]string{
-					v1.TraitAnnotationPrefix + "owner.target-labels": "[\"opt1\", \"opt2\"]",
-				},
-			},
-		},
-	}
-	c := NewCatalog(nil)
-	require.NoError(t, c.Configure(&env))
-	ot, _ := c.GetTrait("owner").(*ownerTrait)
-	assert.Equal(t, []string{"opt1", "opt2"}, ot.TargetLabels)
 }

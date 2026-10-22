@@ -76,10 +76,10 @@ func (t *securityContextTrait) Apply(e *Environment) error {
 		return fmt.Errorf("could not find any integration deployment for %v", e.Integration.Name)
 	}
 
-	return t.setSecurityContext(e, podSpec)
+	return t.setSecurityContext(podSpec)
 }
 
-func (t *securityContextTrait) setSecurityContext(e *Environment, podSpec *corev1.PodSpec) error {
+func (t *securityContextTrait) setSecurityContext(podSpec *corev1.PodSpec) error {
 	sc := corev1.PodSecurityContext{
 		RunAsNonRoot: t.getRunAsNonRoot(),
 		SeccompProfile: &corev1.SeccompProfile{
@@ -87,23 +87,18 @@ func (t *securityContextTrait) setSecurityContext(e *Environment, podSpec *corev
 		},
 	}
 
-	runAsUser, err := t.getUser(e)
-	if err != nil {
-		return err
-	}
-
-	sc.RunAsUser = runAsUser
+	sc.RunAsUser = t.getUser()
 	podSpec.SecurityContext = &sc
 
 	return nil
 }
 
-func (t *securityContextTrait) getUser(e *Environment) (*int64, error) {
+func (t *securityContextTrait) getUser() *int64 {
 	if t.RunAsUser != nil {
-		return t.RunAsUser, nil
+		return t.RunAsUser
 	}
 
-	return new(defaults.DefaultPodRunAsUser), nil
+	return new(defaults.DefaultPodRunAsUser)
 }
 
 func (t *securityContextTrait) getRunAsNonRoot() *bool {
