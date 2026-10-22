@@ -31,6 +31,112 @@ import (
 	"github.com/apache/camel-k/v2/pkg/internal"
 )
 
+func TestFindOrApplyIntegrationProfile(t *testing.T) {
+	profile := v1.IntegrationProfile{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "custom",
+			Namespace: "ns",
+		},
+	}
+
+	c, err := internal.NewFakeClient(&profile)
+	require.NoError(t, err)
+
+	integration := v1.Integration{
+		TypeMeta: metav1.TypeMeta{
+			Kind: v1.IntegrationKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test",
+			Namespace: "ns",
+			Annotations: map[string]string{
+				v1.IntegrationProfileAnnotation: "custom",
+			},
+		},
+		Status: v1.IntegrationStatus{
+			Phase: v1.IntegrationPhaseRunning,
+		},
+	}
+
+	found, err := findIntegrationProfile(context.TODO(), c, &integration)
+	require.NoError(t, err)
+	assert.NotNil(t, found)
+
+	found, err = ApplyIntegrationProfile(context.TODO(), c, &integration)
+	require.NoError(t, err)
+	assert.NotNil(t, found)
+}
+
+func TestFindOrApplyIntegrationMissing(t *testing.T) {
+	profile := v1.IntegrationProfile{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "custom",
+			Namespace: "ns",
+		},
+	}
+
+	c, err := internal.NewFakeClient(&profile)
+	require.NoError(t, err)
+
+	integration := v1.Integration{
+		TypeMeta: metav1.TypeMeta{
+			Kind: v1.IntegrationKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test",
+			Namespace: "ns",
+			Annotations: map[string]string{
+				v1.IntegrationProfileAnnotation: "missing",
+			},
+		},
+		Status: v1.IntegrationStatus{
+			Phase: v1.IntegrationPhaseRunning,
+		},
+	}
+
+	found, err := findIntegrationProfile(context.TODO(), c, &integration)
+	require.Error(t, err)
+	assert.Nil(t, found)
+	assert.Contains(t, err.Error(), "\"missing\" not found")
+
+	found, err = ApplyIntegrationProfile(context.TODO(), c, &integration)
+	require.NoError(t, err)
+	assert.Nil(t, found)
+}
+
+func TestFindOrApplyIntegrationProfileError(t *testing.T) {
+	profile := v1.IntegrationProfile{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "custom",
+			Namespace: "ns",
+		},
+	}
+
+	c, err := internal.NewFakeClient(&profile)
+	require.NoError(t, err)
+
+	integrationKit := v1.IntegrationKit{
+		TypeMeta: metav1.TypeMeta{
+			Kind: v1.IntegrationKitKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test",
+			Namespace: "ns",
+			Annotations: map[string]string{
+				v1.IntegrationProfileAnnotation: "custom",
+			},
+		},
+	}
+
+	_, err = findIntegrationProfile(context.TODO(), c, &integrationKit)
+	require.Error(t, err)
+	assert.Equal(t, "wrong format for IntegrationProfile, expected profile-namespace/profile-id", err.Error())
+
+	_, err = ApplyIntegrationProfile(context.TODO(), c, &integrationKit)
+	require.Error(t, err)
+	assert.Equal(t, "wrong format for IntegrationProfile, expected profile-namespace/profile-id", err.Error())
+}
+
 func TestFindIntegrationProfile_UserAnnotationTakesPrecedence(t *testing.T) {
 	userProfile := v1.IntegrationProfile{
 		ObjectMeta: metav1.ObjectMeta{

@@ -38,6 +38,9 @@ const (
 	IntegrationProfileAnnotation = "camel.apache.org/integration-profile.id"
 	// DefaultIntegrationProfileName is the default name for an IntegrationProfile in a namespace.
 	DefaultIntegrationProfileName = "default"
+	// IntegrationProfileNamespaceAnnotation integration profile namespace annotation label.
+	// NOTE: this is an internal annotation only valid for IntegrationKits and Builds.
+	IntegrationProfileNamespaceAnnotation = "camel.apache.org/integration-profile.namespace"
 	// IntegrationDontRunAfterBuildAnnotation -- .
 	IntegrationDontRunAfterBuildAnnotation = "camel.apache.org/dont-run-after-build"
 	// IntegrationDontRunAfterBuildAnnotationTrueValue -- .

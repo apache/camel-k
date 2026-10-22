@@ -171,11 +171,6 @@ func GetOperatorIDAnnotation(obj metav1.Object) string {
 	return GetAnnotation(OperatorIDAnnotation, obj)
 }
 
-// GetIntegrationProfileAnnotation to safely get the integration profile annotation value.
-func GetIntegrationProfileAnnotation(obj metav1.Object) string {
-	return GetAnnotation(IntegrationProfileAnnotation, obj)
-}
-
 // GetAnnotation safely get the annotation value.
 func GetAnnotation(name string, obj metav1.Object) string {
 	if obj == nil || obj.GetAnnotations() == nil {

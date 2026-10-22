@@ -8,6 +8,7 @@
 ** xref:installation/cert-manager.adoc[Configure Cert-Manager]
 ** xref:installation/keda.adoc[Configure Keda]
 ** xref:installation/knative.adoc[Configure Knative]
+** xref:installation/multi-namespace.adoc[Multi namespace installation]
 ** xref:installation/upgrade.adoc[Upgrade]
 ** xref:installation/uninstalling.adoc[Uninstalling]
 ** xref:installation/advanced/advanced.adoc[Advanced]
@@ -105,6 +106,7 @@
 * API
 ** xref:apis/camel-k.adoc[Camel K v1]
 * xref:contributing/developers.adoc[Contributing]
+** xref:contributing/keda-scaler.adoc[KEDA scaler mappings]
 ** xref:contributing/local-development.adoc[Local development]
 *** xref:contributing/local-execution.adoc[Operator - local execution]
 *** xref:contributing/remote-debugging.adoc[Operator - remote debug]

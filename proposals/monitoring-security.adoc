@@ -7,8 +7,8 @@ reviewers:
 approvers:
   - TBD
 creation-date: 2020-07-06
-last-updated: 2020-20-07
-status: implementable
+last-updated: 2026-10-22
+status: obsolete
 see-also: []
 replaces: []
 superseded-by: []
