@@ -7,8 +7,8 @@ reviewers:
 approvers:
   - TBD
 creation-date: 2020-15-12
-last-updated: 2020-15-12
-status: implementable
+last-updated: 2026-10-22
+status: obsolete
 see-also: []
 replaces: []
 superseded-by: []
@@ -23,7 +23,7 @@ This proposal aims at leveraging the https://github.com/k8s-service-bindings/spe
 
 === Terminology
 
-* _Provisioned Service_ 
+* _Provisioned Service_
 ** A service e.g. a Database, or a Broker that can be _bound_ to an application by means defined in the https://github.com/k8s-service-bindings/spec#provisioned-service[specification]
 * _Application_
 ** In the context of Camel K is an `Integration`
