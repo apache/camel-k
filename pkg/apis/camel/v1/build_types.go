@@ -126,6 +126,9 @@ type GitConfigSpec struct {
 	URL string `json:"url,omitempty"`
 	// the Kubernetes secret where token is stored
 	Secret string `json:"secret,omitempty"`
+	// the username used to authenticate against the Git server, together with the token stored in `secret` (default `camel-k`).
+	// Some Git servers validate it, for example Bitbucket Cloud access tokens require `x-token-auth`.
+	Username string `json:"username,omitempty"`
 	// the git branch to check out
 	Branch string `json:"branch,omitempty"`
 	// the git tag to check out

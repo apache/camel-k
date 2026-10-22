@@ -377,6 +377,11 @@ spec:
                             url:
                               description: the URL of the project
                               type: string
+                            username:
+                              description: |-
+                                the username used to authenticate against the Git server, together with the token stored in `secret` (default `camel-k`).
+                                Some Git servers validate it, for example Bitbucket Cloud access tokens require `x-token-auth`.
+                              type: string
                           type: object
                         maven:
                           description: the configuration required by Maven for the
@@ -1315,6 +1320,11 @@ spec:
                               type: string
                             url:
                               description: the URL of the project
+                              type: string
+                            username:
+                              description: |-
+                                the username used to authenticate against the Git server, together with the token stored in `secret` (default `camel-k`).
+                                Some Git servers validate it, for example Bitbucket Cloud access tokens require `x-token-auth`.
                               type: string
                           type: object
                         maven:
