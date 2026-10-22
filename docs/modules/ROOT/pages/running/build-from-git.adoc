@@ -21,9 +21,12 @@ spec:
   git:
     url: https://github.com/squakez/sample.git
     secret: my-secret (optional)
+    username: my-username (optional)
 ```
 
 If the project is not public (like it probably happens) you will need to provide the token as expected by the Git technology used. The secret has to be a regular Kubernetes Secret in the same namespace of the Integration.
+
+The token is sent together with a username. By default the operator uses `camel-k`, which is accepted by most Git servers (ie, GitHub) as they only validate the token. Some Git servers, however, require a specific username. For example, Bitbucket Cloud access tokens require `x-token-auth`. In this case, you can set it with the `username` field, which is used together with the token stored in the `secret`.
 
 The operator will start a Build custom resource, whose goal is to build and package the project into a container how it is happening for any other Integration. You can continue to use normally any trait, although certain build traits will be ignored as it also happens in Self Managed Build Integrations.
 
