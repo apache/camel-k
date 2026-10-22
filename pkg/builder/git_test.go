@@ -19,16 +19,22 @@ package builder
 
 import (
 	"context"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path"
+	"sync"
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/jib"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestGitPublicRepo(t *testing.T) {
@@ -193,4 +199,80 @@ func TestGitPublicRepoWithPath(t *testing.T) {
 	f, err := os.Stat(path.Join(tmpGitDir, "maven", "test.yaml"))
 	require.NoError(t, err)
 	assert.Contains(t, f.Name(), "test.yaml")
+}
+
+// gitBasicAuthRecorder is a fake Git HTTP server which records the basic auth credentials it receives
+// and rejects every request.
+type gitBasicAuthRecorder struct {
+	mu       sync.Mutex
+	called   bool
+	ok       bool
+	username string
+	password string
+}
+
+func (r *gitBasicAuthRecorder) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.called = true
+	r.username, r.password, r.ok = req.BasicAuth()
+	w.WriteHeader(http.StatusUnauthorized)
+}
+
+func TestGitCloneUsername(t *testing.T) {
+	tests := []struct {
+		name             string
+		username         string
+		expectedUsername string
+	}{
+		{
+			name:             "default username",
+			expectedUsername: "camel-k",
+		},
+		{
+			name:             "custom username",
+			username:         "x-token-auth",
+			expectedUsername: "x-token-auth",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			recorder := &gitBasicAuthRecorder{}
+			server := httptest.NewServer(recorder)
+			defer server.Close()
+
+			c, err := internal.NewFakeClient(&corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Namespace: "ns",
+					Name:      "git-secret",
+				},
+				Data: map[string][]byte{"token": []byte("my-token")},
+			})
+			require.NoError(t, err)
+
+			ctx := &builderContext{
+				C:         context.TODO(),
+				Client:    c,
+				Namespace: "ns",
+				Path:      t.TempDir(),
+				Build: v1.BuilderTask{
+					Git: &v1.GitConfigSpec{
+						URL:      server.URL + "/repo.git",
+						Secret:   "git-secret",
+						Username: tc.username,
+					},
+				},
+			}
+
+			// the fake Git server rejects any request, we only care about the credentials received
+			require.Error(t, cloneProject(ctx))
+			recorder.mu.Lock()
+			defer recorder.mu.Unlock()
+			assert.True(t, recorder.called)
+			assert.True(t, recorder.ok)
+			assert.Equal(t, tc.expectedUsername, recorder.username)
+			assert.Equal(t, "my-token", recorder.password)
+		})
+	}
 }

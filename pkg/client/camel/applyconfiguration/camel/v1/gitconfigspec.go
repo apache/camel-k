@@ -28,6 +28,9 @@ type GitConfigSpecApplyConfiguration struct {
 	URL *string `json:"url,omitempty"`
 	// the Kubernetes secret where token is stored
 	Secret *string `json:"secret,omitempty"`
+	// the username used to authenticate against the Git server, together with the token stored in `secret` (default `camel-k`).
+	// Some Git servers validate it, for example Bitbucket Cloud access tokens require `x-token-auth`.
+	Username *string `json:"username,omitempty"`
 	// the git branch to check out
 	Branch *string `json:"branch,omitempty"`
 	// the git tag to check out
@@ -57,6 +60,14 @@ func (b *GitConfigSpecApplyConfiguration) WithURL(value string) *GitConfigSpecAp
 // If called multiple times, the Secret field is set to the value of the last call.
 func (b *GitConfigSpecApplyConfiguration) WithSecret(value string) *GitConfigSpecApplyConfiguration {
 	b.Secret = &value
+	return b
+}
+
+// WithUsername sets the Username field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Username field is set to the value of the last call.
+func (b *GitConfigSpecApplyConfiguration) WithUsername(value string) *GitConfigSpecApplyConfiguration {
+	b.Username = &value
 	return b
 }
 
