@@ -34,6 +34,7 @@ import (
 // +kubebuilder:storageversion
 // +kubebuilder:subresource:scale:specpath=.spec.replicas,statuspath=.status.replicas,selectorpath=.status.selector
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The integration phase"
+// +kubebuilder:printcolumn:name="Camel Monitor",type=string,JSONPath=`.status.conditions[?(@.type=="CamelMonitorAvailable")].status`,description="Whether an associated CamelMonitor resource is available"
 // +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`,description="The integration readiness"
 // +kubebuilder:printcolumn:name="Runtime Provider",type=string,JSONPath=`.status.runtimeProvider`,description="The runtime version"
 // +kubebuilder:printcolumn:name="Runtime Version",type=string,JSONPath=`.status.runtimeVersion`,description="The runtime provider"
@@ -190,6 +191,8 @@ const (
 	// Deprecated: no longer in use.
 	IntegrationPhaseUnknown IntegrationPhase = "Unknown"
 
+	// IntegrationConditionCamelMonitorAvailable reports discovery of an associated CamelMonitor.
+	IntegrationConditionCamelMonitorAvailable IntegrationConditionType = "CamelMonitorAvailable"
 	// IntegrationConditionReady --.
 	IntegrationConditionReady IntegrationConditionType = "Ready"
 	// IntegrationConditionKitAvailable --.

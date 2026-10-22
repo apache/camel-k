@@ -26,6 +26,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/equality"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -64,7 +65,7 @@ func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
 		return fmt.Errorf("unable to set up field indexer for status.phase: %w", err)
 	}
 
-	return add(mgr, c, newReconciler(mgr, c))
+	return add(ctx, mgr, c, newReconciler(mgr, c))
 }
 
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
@@ -276,7 +277,7 @@ func integrationPlatformEnqueueRequestsFromMapFunc(ctx context.Context, c client
 	return requests
 }
 
-func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
+func add(ctx context.Context, mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 	b := builder.ControllerManagedBy(mgr).
 		Named("integration-controller").
 		// Watch for changes to primary resource Integration
@@ -299,6 +300,8 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 					return !e.DeleteStateUnknown
 				},
 			}))
+
+	watchCamelMonitorResources(ctx, c, b)
 
 	// Watch for all the resources
 	watchIntegrationResources(c, b)
@@ -398,13 +401,19 @@ func watchIntegrationResources(c client.Client, b *builder.Builder) {
 			})).
 		// Watch for the owned Deployments
 		Owns(&appsv1.Deployment{}, builder.WithPredicates(StatusChangedPredicate{})).
+		// Also observe same-name workload ownership changes, including non-controller
+		// references, which Owns deliberately excludes.
+		Watches(&appsv1.Deployment{}, handler.EnqueueRequestsFromMapFunc(camelMonitorEnqueueRequests),
+			builder.WithPredicates(camelMonitorWorkloadPredicate())).
 		// Watch for the owned Builds
 		Owns(&v1.Build{}, builder.WithPredicates(StatusChangedPredicate{}))
 }
 
 func watchCronJobResources(b *builder.Builder) {
 	// Watch for the owned CronJobs
-	b.Owns(&batchv1.CronJob{}, builder.WithPredicates(StatusChangedPredicate{}))
+	b.Owns(&batchv1.CronJob{}, builder.WithPredicates(StatusChangedPredicate{})).
+		Watches(&batchv1.CronJob{}, handler.EnqueueRequestsFromMapFunc(camelMonitorEnqueueRequests),
+			builder.WithPredicates(camelMonitorWorkloadPredicate()))
 }
 
 func watchKnativeResources(c client.Client, b *builder.Builder) error {
@@ -482,6 +491,14 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 	target := instance.DeepCopy()
 	targetLog := rlog.ForIntegration(target)
 
+	retryMonitor := updateCamelMonitorCondition(ctx, r.client, target)
+	if !equality.Semantic.DeepEqual(instance.Status.Conditions, target.Status.Conditions) {
+		if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(&instance)); err != nil {
+			return reconcile.Result{}, err
+		}
+		instance = *target.DeepCopy()
+	}
+
 	for _, a := range r.baseActions {
 		a.InjectClient(r.client)
 		a.InjectLogger(targetLog)
@@ -516,6 +533,10 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 		camelevent.NotifyIntegrationUpdated(ctx, r.client, r.recorder, &instance, newTarget)
 
 		break
+	}
+
+	if retryMonitor {
+		return reconcile.Result{RequeueAfter: camelMonitorRetryInterval}, nil
 	}
 
 	return reconcile.Result{}, nil

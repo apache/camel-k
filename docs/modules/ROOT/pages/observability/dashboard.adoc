@@ -97,3 +97,23 @@ items:
 NOTE: Camel K won't require the availability of Camel Monitor operator to work, neither Camel Monitor operator would require Camel K. They are independent projects which can cooperate to provide a Build and Monitoring tool respectively.
 
 Learn more by reading the official https://camel-tooling.github.io/camel-dashboard/[Camel Dashboard documentation].
+
+== Discover monitoring from an Integration
+
+`kubectl get integrations` includes a `Camel Monitor` column backed by the
+`CamelMonitorAvailable` status condition. `True` means a same-name
+`CamelMonitor` in the Integration namespace belongs to that Integration,
+either directly or through its Deployment or CronJob. Ownership is checked by
+resource UID; matching names or labels alone do not establish an association.
+This reports resource availability, independently of Integration readiness and
+the monitor's `Healthy` or `Monitored` conditions.
+
+An absent resource or API reports `False`. A failed query (for example, missing
+permissions) reports `Unknown` and is retried after 30 seconds without changing
+Integration readiness. The operator requires only `get`, `list`, and `watch`
+permissions for `camelmonitors` in its installation scope.
+
+Camel Monitor remains optional. If its CRD is installed after the Camel K
+operator starts, grant the required permissions and restart the Camel K
+operator to enable creation and deletion events. Discovery covers same-name
+resources; monitors created with a revision suffix are not included.
