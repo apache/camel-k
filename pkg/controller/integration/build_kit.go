@@ -102,7 +102,7 @@ kits:
 			k := &existingKits[i]
 
 			action.L.Debug("Comparing existing kit with environment", "env kit", kit.Name, "existing kit", k.Name)
-			match, err := kitMatches(action.client, &kit, k)
+			match, err := kitMatches(&kit, k)
 			if err != nil {
 				err = fmt.Errorf("error occurred matches integration kits with environment for integration %s/%s: %w", integration.Namespace, integration.Name, err)
 				integration.Status.Phase = v1.IntegrationPhaseError

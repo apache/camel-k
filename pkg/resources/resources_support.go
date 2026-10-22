@@ -53,13 +53,6 @@ func Resource(name string) ([]byte, error) {
 	return data, file.Close()
 }
 
-// ResourceAsString returns the named resource content as string.
-func ResourceAsString(name string) (string, error) {
-	data, err := Resource(name)
-
-	return string(data), err
-}
-
 // WithPrefix lists all file names that begins with the give path prefix
 // If pathPrefix is a path of directories then be sure to end it with a '/'.
 func WithPrefix(pathPrefix string) ([]string, error) {

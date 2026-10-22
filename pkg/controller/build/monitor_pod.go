@@ -71,7 +71,7 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 	if pod == nil {
 		switch build.Status.Phase {
 		case v1.BuildPhasePending:
-			pod = newBuildPod(ctx, action.client, build)
+			pod = newBuildPod(build)
 			if err = controllerutil.SetControllerReference(build, pod, action.client.GetScheme()); err != nil {
 				return nil, err
 			}

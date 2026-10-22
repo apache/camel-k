@@ -290,8 +290,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 	pipelineTasks = append(pipelineTasks, v1.Task{Package: packageTask})
 
 	// Publishing task
-	switch e.Platform.PublishStrategy {
-	case v1.IntegrationPlatformBuildPublishStrategyJib:
+	if e.Platform.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyJib {
 		jibTask := v1.Task{Jib: &v1.JibTask{
 			Name:          "jib",
 			Configuration: *taskConfOrDefault(tasksConf, "jib"),
@@ -327,17 +326,6 @@ func (t *builderTrait) Apply(e *Environment) error {
 	e.Pipeline = append(e.Pipeline, pipelineTasks...)
 
 	return nil
-}
-
-func getTag(e *Environment) string {
-	if e.IntegrationKit != nil {
-		return e.IntegrationKit.ResourceVersion
-	}
-	if e.Integration != nil {
-		return e.Integration.ResourceVersion
-	}
-
-	return ""
 }
 
 // when this trait fails, we must report the failure into the related IntegrationKit if it affects the success of the Build.

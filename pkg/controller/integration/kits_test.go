@@ -25,7 +25,6 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/v2/pkg/client"
 
 	"github.com/apache/camel-k/v2/pkg/trait"
 
@@ -260,10 +259,7 @@ func TestHasMatchingTraits_KitNoTraitShouldNotBePicked(t *testing.T) {
 		},
 	}
 
-	c, err := internal.NewFakeClient(integration, kit)
-	require.NoError(t, err)
-
-	ok, err := integrationAndKitHaveSameTraits(c, integration, kit)
+	ok, err := integrationAndKitHaveSameTraits(integration, kit)
 	require.NoError(t, err)
 	assert.False(t, ok)
 }
@@ -310,9 +306,8 @@ func TestHasMatchingTraits_KitSameTraitShouldBePicked(t *testing.T) {
 			},
 		},
 	}
-	c, err := internal.NewFakeClient(integration, kit)
-	require.NoError(t, err)
-	ok, err := integrationAndKitHaveSameTraits(c, integration, kit)
+
+	ok, err := integrationAndKitHaveSameTraits(integration, kit)
 	require.NoError(t, err)
 	assert.True(t, ok)
 }
@@ -414,12 +409,12 @@ func TestHasNotMatchingSources(t *testing.T) {
 	assert.False(t, hsm2)
 }
 
-func integrationAndKitHaveSameTraits(c client.Client, i1 *v1.Integration, i2 *v1.IntegrationKit) (bool, error) {
-	itOpts, err := trait.NewSpecTraitsOptionsForIntegration(c, i1)
+func integrationAndKitHaveSameTraits(i1 *v1.Integration, i2 *v1.IntegrationKit) (bool, error) {
+	itOpts, err := trait.NewSpecTraitsOptionsForIntegration(i1)
 	if err != nil {
 		return false, err
 	}
-	ikOpts, err := trait.NewSpecTraitsOptionsForIntegrationKit(c, i2)
+	ikOpts, err := trait.NewSpecTraitsOptionsForIntegrationKit(i2)
 	if err != nil {
 		return false, err
 	}

@@ -83,16 +83,12 @@ func ErrorString(t *testing.T, path string, callable func(path string) (string, 
 func TestGetResource(t *testing.T) {
 	NoErrorAndNotEmptyBytes(t, "config/manager/operator-service-account.yaml", Resource)
 	NoErrorAndNotEmptyBytes(t, "/config/manager/operator-service-account.yaml", Resource)
-	NoErrorAndNotEmptyString(t, "config/manager/operator-service-account.yaml", ResourceAsString)
-	NoErrorAndNotEmptyString(t, "/config/manager/operator-service-account.yaml", ResourceAsString)
 	NoErrorAndContains(t, "/config/manager", "config/manager/operator-service-account.yaml", Resources)
 }
 
 func TestGetNoResource(t *testing.T) {
 	ErrorBytes(t, "config/manager/operator-service-account.json", Resource)
 	ErrorBytes(t, "/config/manager/operator-service-account.json", Resource)
-	ErrorString(t, "config/manager/operator-service-account.json", ResourceAsString)
-	ErrorString(t, "/config/manager/operator-service-account.json", ResourceAsString)
 	NoErrorAndNotContains(t, "/config/", "config/manager/operator-service-account.json", Resources)
 }
 

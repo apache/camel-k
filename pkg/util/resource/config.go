@@ -20,7 +20,6 @@ package resource
 import (
 	"fmt"
 	"regexp"
-	"strings"
 )
 
 // Config represents a config option.
@@ -109,17 +108,6 @@ func newConfig(storageType StorageType, contentType ContentType, value string) *
 		resourceKey:     mk,
 		destinationPath: mp,
 	}
-}
-
-// ParseFileValue will parse a file resource/config option to return the local path and the
-// destination path expected.
-func ParseFileValue(value string) (string, string) {
-	split := strings.SplitN(value, "@", 2)
-	if len(split) == 2 {
-		return split[0], split[1]
-	}
-
-	return value, ""
 }
 
 func parseCMOrSecretValue(value string) (string, string, string) {

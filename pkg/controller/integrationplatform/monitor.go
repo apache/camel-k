@@ -20,7 +20,6 @@ package integrationplatform
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	platformutil "github.com/apache/camel-k/v2/pkg/platform"
@@ -111,7 +110,6 @@ func (action *monitorAction) Handle(ctx context.Context, platform *v1.Integratio
 		}
 	}
 
-	action.checkTraitAnnotationsDeprecatedNotice(platform)
 	action.checkMavenSettings(platform)
 	action.checkKameletsCatalogRepoDeprecatedNotice(platform)
 
@@ -123,28 +121,6 @@ func (action *monitorAction) Handle(ctx context.Context, platform *v1.Integratio
 	)
 
 	return platform, nil
-}
-
-// Deprecated: to be removed in future versions, when we won't support any longer trait annotations into IntegrationPlatforms.
-func (action *monitorAction) checkTraitAnnotationsDeprecatedNotice(platform *v1.IntegrationPlatform) {
-	if platform.Annotations != nil {
-		for k := range platform.Annotations {
-			if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
-				platform.Status.SetCondition(
-					v1.IntegrationPlatformConditionType("AnnotationTraitsDeprecated"),
-					corev1.ConditionTrue,
-					"DeprecationNotice",
-					"Annotation traits configuration is deprecated and will be removed soon. Use .spec.traits configuration instead.",
-				)
-				action.L.Infof(
-					"WARN: annotation traits configuration is deprecated and will be removed soon. Use .spec.traits configuration for %s platform instead.",
-					platform.Name,
-				)
-
-				return
-			}
-		}
-	}
 }
 
 // Deprecated: to be removed in future versions, when we won't support any longer Kamelets catalog into IntegrationPlatforms.

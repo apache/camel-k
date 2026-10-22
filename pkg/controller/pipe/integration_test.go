@@ -22,12 +22,10 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/ptr"
 )
 
 func TestCreateIntegrationForPipe(t *testing.T) {
@@ -265,95 +263,4 @@ func expectedNominalRouteWithDataType(name string) string {
       uri: kamelet:my-source/source
     id: binding
 `
-}
-
-func TestExtractTraitAnnotations(t *testing.T) {
-	client, err := internal.NewFakeClient()
-	require.NoError(t, err)
-	annotations := map[string]string{
-		"my-personal-annotation":                                 "hello",
-		v1.TraitAnnotationPrefix + "service.enabled":             "true",
-		v1.TraitAnnotationPrefix + "container.image-pull-policy": "Never",
-		v1.TraitAnnotationPrefix + "camel.runtime-version":       "1.2.3",
-		v1.TraitAnnotationPrefix + "camel.properties":            `["prop1=1", "prop2=2"]`,
-		v1.TraitAnnotationPrefix + "environment.vars":            `["env1=1"]`,
-	}
-	traits, err := extractAndDeleteTraits(client, annotations)
-	require.NoError(t, err)
-	assert.Equal(t, ptr.To(true), traits.Service.Enabled)
-	assert.Equal(t, corev1.PullNever, traits.Container.ImagePullPolicy)
-	assert.Equal(t, "1.2.3", traits.Camel.RuntimeVersion)
-	assert.Equal(t, []string{"prop1=1", "prop2=2"}, traits.Camel.Properties)
-	assert.Equal(t, []string{"env1=1"}, traits.Environment.Vars)
-	assert.Len(t, annotations, 1)
-	assert.Empty(t, annotations[v1.TraitAnnotationPrefix+"service.enabled"])
-	assert.Empty(t, annotations[v1.TraitAnnotationPrefix+"container.image-pull-policy"])
-	assert.Empty(t, annotations[v1.TraitAnnotationPrefix+"camel.runtime-version"])
-	assert.Empty(t, annotations[v1.TraitAnnotationPrefix+"camel.properties"])
-	assert.Empty(t, annotations[v1.TraitAnnotationPrefix+"environment.vars"])
-	assert.Equal(t, "hello", annotations["my-personal-annotation"])
-}
-
-func TestExtractTraitAnnotationsError(t *testing.T) {
-	client, err := internal.NewFakeClient()
-	require.NoError(t, err)
-	annotations := map[string]string{
-		"my-personal-annotation":                       "hello",
-		v1.TraitAnnotationPrefix + "servicefake.bogus": "true",
-	}
-	traits, err := extractAndDeleteTraits(client, annotations)
-	require.Error(t, err)
-	assert.Equal(t, "trait servicefake does not exist in catalog", err.Error())
-	assert.Nil(t, traits)
-	assert.Len(t, annotations, 2)
-}
-
-func TestExtractTraitAnnotationsEmpty(t *testing.T) {
-	client, err := internal.NewFakeClient()
-	require.NoError(t, err)
-	annotations := map[string]string{
-		"my-personal-annotation": "hello",
-	}
-	traits, err := extractAndDeleteTraits(client, annotations)
-	require.NoError(t, err)
-	assert.Nil(t, traits)
-	assert.Len(t, annotations, 1)
-}
-
-func TestCreateIntegrationTraitsForPipeWithTraitAnnotations(t *testing.T) {
-	client, err := internal.NewFakeClient()
-	require.NoError(t, err)
-
-	pipe := nominalPipe("my-pipe")
-	pipe.Annotations[v1.TraitAnnotationPrefix+"service.enabled"] = "true"
-
-	it, err := CreateIntegrationFor(context.TODO(), client, &pipe)
-	require.NoError(t, err)
-	assert.Equal(t, "my-pipe", it.Name)
-	assert.Equal(t, "default", it.Namespace)
-	assert.Equal(t, map[string]string{
-		"my-annotation": "my-annotation-val",
-	}, it.Annotations)
-	assert.Equal(t, ptr.To(true), it.Spec.Traits.Service.Enabled)
-}
-
-func TestCreateIntegrationTraitsForPipeWithTraitSpec(t *testing.T) {
-	client, err := internal.NewFakeClient()
-	require.NoError(t, err)
-
-	pipe := nominalPipe("my-pipe")
-	pipe.Annotations[v1.TraitAnnotationPrefix+"service.enabled"] = "true"
-	pipe.Spec.Traits = &v1.Traits{
-		Affinity: &trait.AffinityTrait{
-			PodAffinityLabels: []string{"my-test-affinity"},
-		},
-	}
-
-	it, err := CreateIntegrationFor(context.TODO(), client, &pipe)
-	require.NoError(t, err)
-	assert.Equal(t, "my-pipe", it.Name)
-	assert.Equal(t, "default", it.Namespace)
-	// We don't allow both annotations based and spec based traits
-	assert.Nil(t, it.Spec.Traits.Service)
-	assert.Equal(t, []string{"my-test-affinity"}, it.Spec.Traits.Affinity.PodAffinityLabels)
 }

@@ -47,7 +47,7 @@ import (
 // Add creates a new Pipe Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
-	return add(mgr, newReconciler(mgr, c), c)
+	return add(mgr, newReconciler(mgr, c))
 }
 
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
@@ -69,7 +69,7 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	)
 }
 
-func add(mgr manager.Manager, r reconcile.Reconciler, c client.Client) error {
+func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	ctrl, err := controller.New("pipe-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
 		return err
@@ -85,7 +85,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler, c client.Client) error {
 				UpdateFunc: func(e event.TypedUpdateEvent[*v1.Pipe]) bool {
 					// If traits have changed, the reconciliation loop must kick in as
 					// traits may have impact
-					sameTraits, err := trait.PipesHaveSameTraits(c, e.ObjectOld, e.ObjectNew)
+					sameTraits, err := trait.PipesHaveSameTraits(e.ObjectOld, e.ObjectNew)
 					if err != nil {
 						Log.ForPipe(e.ObjectNew).Error(
 							err,

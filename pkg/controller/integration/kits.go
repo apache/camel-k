@@ -126,11 +126,11 @@ func integrationMatches(ctx context.Context, c client.Client, integration *v1.In
 		return false, err
 	}
 
-	itc, err := trait.NewSpecTraitsOptionsForIntegrationAndPlatform(c, integration, itp, pl)
+	itc, err := trait.NewSpecTraitsOptionsForIntegrationAndPlatform(integration, itp, pl)
 	if err != nil {
 		return false, err
 	}
-	ikc, err := trait.NewSpecTraitsOptionsForIntegrationKit(c, kit)
+	ikc, err := trait.NewSpecTraitsOptionsForIntegrationKit(kit)
 	if err != nil {
 		return false, err
 	}
@@ -179,7 +179,7 @@ func statusMatches(integration *v1.Integration, kit *v1.IntegrationKit, ilog *lo
 }
 
 // kitMatches returns whether the kit matches with the existing target kit.
-func kitMatches(c client.Client, kit *v1.IntegrationKit, target *v1.IntegrationKit) (bool, error) {
+func kitMatches(kit *v1.IntegrationKit, target *v1.IntegrationKit) (bool, error) {
 	version := kit.Labels[kubernetes.CamelLabelRuntimeVersion]
 	if version != target.Status.RuntimeVersion {
 		return false, nil
@@ -189,11 +189,11 @@ func kitMatches(c client.Client, kit *v1.IntegrationKit, target *v1.IntegrationK
 	}
 
 	// We cannot have yet the status set
-	c1, err := trait.NewSpecTraitsOptionsForIntegrationKit(c, kit)
+	c1, err := trait.NewSpecTraitsOptionsForIntegrationKit(kit)
 	if err != nil {
 		return false, err
 	}
-	c2, err := trait.NewSpecTraitsOptionsForIntegrationKit(c, target)
+	c2, err := trait.NewSpecTraitsOptionsForIntegrationKit(target)
 	if err != nil {
 		return false, err
 	}

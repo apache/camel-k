@@ -114,7 +114,7 @@ const (
 	DeprecatedIntegrationPlatformClusterKubernetes IntegrationPlatformCluster = "Kubernetes"
 )
 
-// AllIntegrationPlatformClusters --.
+// DeprecatedAllIntegrationPlatformClusters --.
 var DeprecatedAllIntegrationPlatformClusters = []IntegrationPlatformCluster{
 	DeprecatedIntegrationPlatformClusterOpenShift, DeprecatedIntegrationPlatformClusterKubernetes,
 }

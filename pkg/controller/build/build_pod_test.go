@@ -18,21 +18,15 @@ limitations under the License.
 package build
 
 import (
-	"context"
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestNewBuildPodConfiguration(t *testing.T) {
-	ctx := context.TODO()
-	c, err := internal.NewFakeClient()
-	require.NoError(t, err)
-
 	build := v1.Build{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "theBuildName",
@@ -55,7 +49,7 @@ func TestNewBuildPodConfiguration(t *testing.T) {
 		},
 	}
 
-	pod := newBuildPod(ctx, c, &build)
+	pod := newBuildPod(&build)
 
 	assert.Equal(t, "Pod", pod.Kind)
 	assert.Equal(t, "theNamespace", pod.Namespace)

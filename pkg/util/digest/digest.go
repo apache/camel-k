@@ -29,7 +29,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
-	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util"
@@ -131,14 +130,6 @@ func ComputeForIntegration(integration *v1.Integration, configmapVersions []stri
 	// Trait configurations for backward compatibility.
 	if err := computeForTraits(hash, integration.Spec.Traits); err != nil {
 		return "", err
-	}
-
-	// Integration traits as annotations
-	for _, k := range sortedTraitAnnotationsKeys(integration) {
-		v := integration.Annotations[k]
-		if _, err := fmt.Fprintf(hash, "%s=%v,", k, v); err != nil {
-			return "", err
-		}
 	}
 
 	// Configmap versions
@@ -301,19 +292,6 @@ func sortedTraitsMapKeys(m map[string]map[string]any) []string {
 	for k := range m {
 		res[i] = k
 		i++
-	}
-	sort.Strings(res)
-
-	return res
-}
-
-// Deprecated: to be removed in future versions.
-func sortedTraitAnnotationsKeys(it *v1.Integration) []string {
-	res := make([]string, 0, len(it.Annotations))
-	for k := range it.Annotations {
-		if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
-			res = append(res, k)
-		}
 	}
 	sort.Strings(res)
 
