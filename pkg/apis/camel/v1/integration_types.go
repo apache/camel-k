@@ -40,6 +40,7 @@ import (
 // +kubebuilder:printcolumn:name="Catalog Version",type=string,JSONPath=`.status.catalog.version`,description="The catalog version"
 // +kubebuilder:printcolumn:name="Kit",type=string,JSONPath=`.status.integrationKit.name`,description="The integration kit"
 // +kubebuilder:printcolumn:name="Replicas",type=integer,JSONPath=`.status.replicas`,description="The number of pods"
+// +kubebuilder:printcolumn:name="Camel Monitor",type=string,JSONPath=`.status.conditions[?(@.type=="CamelMonitorAvailable")].status`,description="Whether an associated CamelMonitor resource is available"
 
 // Integration is the Schema for the integrations API.
 type Integration struct {
@@ -190,6 +191,8 @@ const (
 	// Deprecated: no longer in use.
 	IntegrationPhaseUnknown IntegrationPhase = "Unknown"
 
+	// IntegrationConditionCamelMonitorAvailable reports discovery of an associated CamelMonitor.
+	IntegrationConditionCamelMonitorAvailable IntegrationConditionType = "CamelMonitorAvailable"
 	// IntegrationConditionReady --.
 	IntegrationConditionReady IntegrationConditionType = "Ready"
 	// IntegrationConditionKitAvailable --.
