@@ -21,11 +21,12 @@ metadata:
   name: keda-it-arkmq-to-log-auto
   namespace: arkmq
 spec:
-  sources:
-    - content: |
-        from("amqp:queue:my-queue")
-          .to("log:info");
-      name: routes.java
+  flows:
+  - route:
+      from:
+        steps:
+        - to: log:info
+        uri: amqp:queue:my-queue
   traits:
     camel:
       properties:
@@ -34,6 +35,8 @@ spec:
       enabled: true
       minReplicaCount: 0
       maxReplicaCount: 1
+      cooldownPeriod: 20
+      pollingInterval: 10
       autoMetadata:
         artemis-queue:
           brokerName: amq-broker
