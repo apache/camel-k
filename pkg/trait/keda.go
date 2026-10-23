@@ -28,6 +28,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/metadata"
 	kedamapper "github.com/apache/camel-k/v2/pkg/trait/keda"
 	_ "github.com/apache/camel-k/v2/pkg/trait/keda/scalers"
+	"github.com/apache/camel-k/v2/pkg/util/property"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/ptr"
 )
@@ -164,8 +165,9 @@ func (t *kedaTrait) autoDiscoverTriggers(e *Environment) error {
 		return err
 	}
 
+	props := integrationProperties(e)
 	for _, fromURI := range meta.FromURIs {
-		trigger, err := kedamapper.MapToKedaTrigger(fromURI)
+		trigger, err := kedamapper.MapToKedaTrigger(fromURI, props)
 		if err != nil {
 			return err
 		}
@@ -182,4 +184,23 @@ func (t *kedaTrait) autoDiscoverTriggers(e *Environment) error {
 	}
 
 	return nil
+}
+
+func integrationProperties(e *Environment) map[string]string {
+	props := make(map[string]string)
+	for _, prop := range e.collectConfigurationPairs("property") {
+		props[prop.Name] = prop.Value
+	}
+	if ct := e.Catalog.GetTrait(camelTraitID); ct != nil {
+		if camel, ok := ct.(*camelTrait); ok {
+			for _, prop := range camel.Properties {
+				k, v := property.SplitPropertyFileEntry(prop)
+				if k != "" {
+					props[k] = v
+				}
+			}
+		}
+	}
+
+	return props
 }

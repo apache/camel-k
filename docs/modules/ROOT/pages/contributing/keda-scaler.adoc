@@ -13,7 +13,7 @@ When the KEDA trait is enabled, `kedaTrait.Configure` runs automatic discovery u
 Discovery follows this flow:
 
 . `metadata.ExtractAll` inspects all Integration sources and extracts their Camel `from` URIs.
-. Each URI is passed to `MapToKedaTrigger`.
+. Each URI is passed to `MapToKedaTrigger`, together with the Integration properties.
 . `ParseComponentURI` separates the URI into its component name, path value, and query parameters.
 . The component name is used to look up a `ScaleMapper` in the registry.
 . If a mapper is registered, it converts the path and parameters into a KEDA scaler type and metadata, which become a `KedaTrigger`.
@@ -31,12 +31,12 @@ The registry and interface are defined in `pkg/trait/keda/mapper.go`:
 ----
 type ScaleMapper interface {
 	Component() string
-	Map(pathValue string, params map[string]string) (kedaType string, metadata map[string]string)
+	Map(pathValue string, params map[string]string, props map[string]string) (kedaType string, metadata map[string]string)
 }
 ----
 
 `Component` returns the Camel component name used as the registry key.
-`Map` receives the path part of the Camel URI and its decoded query parameters, and returns the corresponding KEDA scaler type and metadata.
+`Map` receives the path part of the Camel URI, its decoded query parameters, and the Integration `camel.component.<component>.*` properties with that prefix removed, and returns the corresponding KEDA scaler type and metadata.
 
 Each implementation registers itself by calling `keda.Register` from an `init` function.
 The blank import of `pkg/trait/keda/scalers` in `pkg/trait/keda.go` ensures that these registration functions run when the trait package is loaded.
@@ -99,7 +99,7 @@ func (m *MyComponentScaler) Component() string {
 	return "my-component"
 }
 
-func (m *MyComponentScaler) Map(pathValue string, params map[string]string) (string, map[string]string) {
+func (m *MyComponentScaler) Map(pathValue string, params map[string]string, props map[string]string) (string, map[string]string) {
 	metadata := make(map[string]string)
 
 	if pathValue != "" {

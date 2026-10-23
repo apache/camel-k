@@ -18,13 +18,15 @@ limitations under the License.
 package keda
 
 import (
+	"strings"
+
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 )
 
 // ScaleMapper defines the interface for mapping Camel component URIs to KEDA triggers.
 type ScaleMapper interface {
 	Component() string
-	Map(pathValue string, params map[string]string) (kedaType string, metadata map[string]string)
+	Map(pathValue string, params map[string]string, props map[string]string) (kedaType string, metadata map[string]string)
 }
 
 var registry = map[string]ScaleMapper{}
@@ -39,7 +41,7 @@ func GetMapper(component string) (ScaleMapper, bool) {
 	return m, ok
 }
 
-func MapToKedaTrigger(rawURI string) (*traitv1.KedaTrigger, error) {
+func MapToKedaTrigger(rawURI string, props map[string]string) (*traitv1.KedaTrigger, error) {
 	scheme, pathValue, params, err := ParseComponentURI(rawURI)
 	if err != nil {
 		return nil, err
@@ -51,7 +53,14 @@ func MapToKedaTrigger(rawURI string) (*traitv1.KedaTrigger, error) {
 	if !found {
 		return nil, nil
 	}
-	kedaType, metadata := mapper.Map(pathValue, params)
+	prefix := "camel.component." + scheme + "."
+	componentProps := map[string]string{}
+	for k, v := range props {
+		if strings.HasPrefix(k, prefix) {
+			componentProps[strings.TrimPrefix(k, prefix)] = v
+		}
+	}
+	kedaType, metadata := mapper.Map(pathValue, params, componentProps)
 
 	return &traitv1.KedaTrigger{
 		Type:     kedaType,
