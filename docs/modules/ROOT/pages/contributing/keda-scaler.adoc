@@ -36,7 +36,7 @@ type ScaleMapper interface {
 ----
 
 `Component` returns the Camel component name used as the registry key.
-`Map` receives the path part of the Camel URI, its decoded query parameters, and the Integration `camel.component.<component>.*` properties with that prefix removed, and returns the corresponding KEDA scaler type and metadata.
+`Map` receives the path part of the Camel URI, its decoded query parameters, and the Integration properties, and returns the corresponding KEDA scaler type and metadata.
 
 Each implementation registers itself by calling `keda.Register` from an `init` function.
 The blank import of `pkg/trait/keda/scalers` in `pkg/trait/keda.go` ensures that these registration functions run when the trait package is loaded.

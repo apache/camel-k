@@ -18,8 +18,6 @@ limitations under the License.
 package keda
 
 import (
-	"strings"
-
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 )
 
@@ -53,14 +51,7 @@ func MapToKedaTrigger(rawURI string, props map[string]string) (*traitv1.KedaTrig
 	if !found {
 		return nil, nil
 	}
-	prefix := "camel.component." + scheme + "."
-	componentProps := map[string]string{}
-	for k, v := range props {
-		if strings.HasPrefix(k, prefix) {
-			componentProps[strings.TrimPrefix(k, prefix)] = v
-		}
-	}
-	kedaType, metadata := mapper.Map(pathValue, params, componentProps)
+	kedaType, metadata := mapper.Map(pathValue, params, props)
 
 	return &traitv1.KedaTrigger{
 		Type:     kedaType,
