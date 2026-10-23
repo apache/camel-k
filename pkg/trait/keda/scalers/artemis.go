@@ -44,7 +44,7 @@ func (a *ArtemisScaler) Map(pathValue string, params map[string]string, props ma
 		// For anycast queues created by ArkMQ, the address name matches the queue name.
 		metadata["brokerAddress"] = queueName
 	}
-	if brokerURL, ok := props["broker-url"]; ok {
+	if brokerURL, ok := props["camel.component.amqp.broker-url"]; ok {
 		if u, err := url.Parse(brokerURL); err == nil && u.Hostname() != "" {
 			metadata["managementEndpoint"] = net.JoinHostPort(u.Hostname(), "8161")
 		}
