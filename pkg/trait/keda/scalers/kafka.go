@@ -29,7 +29,7 @@ func init() {
 func (k *KafkaScaler) Component() string {
 	return "kafka"
 }
-func (k *KafkaScaler) Map(pathValue string, params map[string]string) (string, map[string]string) {
+func (k *KafkaScaler) Map(pathValue string, params map[string]string, props map[string]string) (string, map[string]string) {
 	metadata := make(map[string]string)
 	if pathValue != "" {
 		metadata["topic"] = pathValue

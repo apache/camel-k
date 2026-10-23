@@ -39,6 +39,7 @@ func TestArtemisScalerMap(t *testing.T) {
 		name         string
 		pathValue    string
 		params       map[string]string
+		props        map[string]string
 		expectedType string
 		expectedMeta map[string]string
 	}{
@@ -70,6 +71,18 @@ func TestArtemisScalerMap(t *testing.T) {
 			expectedMeta: map[string]string{},
 		},
 		{
+			name:         "broker url sets management endpoint",
+			pathValue:    "queue:orders",
+			params:       map[string]string{},
+			props:        map[string]string{"broker-url": "amqp://my-broker-hdls-svc.arkmq.svc:61616"},
+			expectedType: "artemis-queue",
+			expectedMeta: map[string]string{
+				"queueName":          "orders",
+				"brokerAddress":      "orders",
+				"managementEndpoint": "my-broker-hdls-svc.arkmq.svc:8161",
+			},
+		},
+		{
 			name:         "empty path",
 			pathValue:    "",
 			params:       map[string]string{},
@@ -80,7 +93,7 @@ func TestArtemisScalerMap(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			kedaType, metadata := scaler.Map(tt.pathValue, tt.params)
+			kedaType, metadata := scaler.Map(tt.pathValue, tt.params, tt.props)
 			assert.Equal(t, tt.expectedType, kedaType)
 			assert.Equal(t, tt.expectedMeta, metadata)
 		})
@@ -88,12 +101,27 @@ func TestArtemisScalerMap(t *testing.T) {
 }
 
 func TestMapToKedaTriggerArtemis(t *testing.T) {
-	trigger, err := keda.MapToKedaTrigger("amqp:queue:my-queue")
+	trigger, err := keda.MapToKedaTrigger("amqp:queue:my-queue", nil)
 	require.NoError(t, err)
 	require.NotNil(t, trigger)
 	assert.Equal(t, "artemis-queue", trigger.Type)
 	assert.Equal(t, map[string]string{
 		"queueName":     "my-queue",
 		"brokerAddress": "my-queue",
+	}, trigger.Metadata)
+}
+
+func TestMapToKedaTriggerArtemisWithBrokerURL(t *testing.T) {
+	props := map[string]string{
+		"camel.component.amqp.broker-url": "amqp://my-broker-hdls-svc.arkmq.svc:61616",
+		"camel.component.kafka.brokers":   "broker:9092",
+	}
+	trigger, err := keda.MapToKedaTrigger("amqp:queue:my-queue", props)
+	require.NoError(t, err)
+	require.NotNil(t, trigger)
+	assert.Equal(t, map[string]string{
+		"queueName":          "my-queue",
+		"brokerAddress":      "my-queue",
+		"managementEndpoint": "my-broker-hdls-svc.arkmq.svc:8161",
 	}, trigger.Metadata)
 }

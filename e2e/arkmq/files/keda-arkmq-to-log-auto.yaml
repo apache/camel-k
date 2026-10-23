@@ -17,7 +17,8 @@
 
 # This pipe tests KEDA auto-discovery for an ArkMQ queue:
 # - artemis-queue trigger is auto-discovered from the amqp:queue URI
-# - management endpoint and broker name are merged via autoMetadata
+# - management endpoint is derived from the broker url
+# - broker name is merged via autoMetadata
 
 apiVersion: camel.apache.org/v1
 kind: Pipe
@@ -39,5 +40,4 @@ spec:
       maxReplicaCount: 1
       autoMetadata:
         artemis-queue:
-          managementEndpoint: my-broker-ss-0.my-broker-hdls-svc.arkmq.svc:8161
           brokerName: amq-broker
