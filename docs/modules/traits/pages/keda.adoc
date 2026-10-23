@@ -73,8 +73,9 @@ NOTE: the variable names are "snake case" if you're using in `kamel` CLI, for ex
 
 When `keda.auto` is enabled, Camel K inspects the consumer endpoints in an Integration and creates KEDA triggers for components with a registered scaler mapping. A scaler is the KEDA adapter that reads metrics from an external system and uses them to determine when a workload should scale. See the https://keda.sh/docs/latest/concepts/scaling-deployments/[KEDA scaler concepts] documentation for more information.
 
-Automatic discovery currently supports the following Camel component:
+Automatic discovery currently supports the following Camel components:
 
+* `activemq`: creates an Apache ActiveMQ trigger from destination and broker values in the endpoint URI. See the https://keda.sh/docs/latest/scalers/activemq/[KEDA Apache ActiveMQ scaler] documentation for the available trigger metadata.
 * `kafka`: creates an Apache Kafka trigger from the topic, broker, and consumer-group values in the endpoint URI. See the https://keda.sh/docs/latest/scalers/apache-kafka/[KEDA Apache Kafka scaler] documentation for the available trigger metadata.
 
 Unsupported Camel components do not produce an automatically discovered trigger. You can still configure their KEDA triggers explicitly with `keda.triggers`.
