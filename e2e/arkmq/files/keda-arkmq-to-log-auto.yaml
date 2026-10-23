@@ -38,6 +38,8 @@ spec:
       enabled: true
       minReplicaCount: 0
       maxReplicaCount: 1
+      cooldownPeriod: 20
+      pollingInterval: 10
       autoMetadata:
         artemis-queue:
           brokerName: amq-broker
