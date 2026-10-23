@@ -19,7 +19,6 @@ package integration
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -27,7 +26,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/utils/ptr"
@@ -145,31 +143,6 @@ func (action *monitorAction) monitorPods(ctx context.Context, environment *trait
 	if err != nil {
 		return nil, err
 	}
-
-	// In order to simplify the monitoring and have a minor resource requirement, we will watch only those Pods
-	// which are labeled with `camel.apache.org/integration`. This is a design choice that requires the user to
-	// voluntarily add a label to their Pods (via template, possibly) in order to monitor the non managed Camel applications.
-
-	if !controller.hasTemplateIntegrationLabel() {
-		// This is happening when the Deployment, CronJob, etc resources
-		// miss the Integration label, required to identify sibling Pods.
-		integration.Status.SetConditions(
-			v1.IntegrationCondition{
-				Type:   v1.IntegrationConditionReady,
-				Status: corev1.ConditionFalse,
-				Reason: v1.IntegrationConditionMonitoringPodsAvailableReason,
-				Message: fmt.Sprintf(
-					"Could not find `camel.apache.org/integration: %s` label in the %s template. "+
-						"Make sure to include this label in the template for Pod monitoring purposes.",
-					integration.GetName(),
-					controller.getControllerName(),
-				),
-			},
-		)
-
-		return integration, nil
-	}
-
 	// Enforce the scale sub-resource label selector.
 	// It is used by the HPA that queries the scale sub-resource endpoint,
 	// to list the pods owned by the integration.
@@ -210,11 +183,8 @@ func (action *monitorAction) monitorPods(ctx context.Context, environment *trait
 	if integration.Status.Phase == v1.IntegrationPhaseDeploying {
 		integration.Status.Phase = v1.IntegrationPhaseRunning
 	}
-	if err = action.updateIntegrationPhaseAndReadyCondition(
-		ctx, controller, environment, integration, pendingPods.Items, runningPods.Items,
-	); err != nil {
-		return nil, err
-	}
+
+	controller.setReadyCondition(integration)
 
 	return integration, nil
 }
@@ -322,10 +292,8 @@ func getIntegrationSecretAndConfigmapResourceVersions(ctx context.Context, clien
 }
 
 type controller interface {
-	checkReadyCondition(ctx context.Context) (bool, error)
-	updateReadyCondition(readyPods int32) bool
-	hasTemplateIntegrationLabel() bool
-	getControllerName() string
+	// in charge to set the readiness condition, specific to each controller.
+	setReadyCondition(integration *v1.Integration)
 }
 
 func (action *monitorAction) newController(env *trait.Environment, integration *v1.Integration) (controller, error) {
@@ -339,8 +307,7 @@ func (action *monitorAction) newController(env *trait.Environment, integration *
 			return nil, fmt.Errorf("type assertion failed, not a Deployment: %v", obj)
 		}
 		controller = &deploymentController{
-			obj:         deploy,
-			integration: integration,
+			obj: deploy,
 		}
 	case integration.IsConditionTrue(v1.IntegrationConditionKnativeServiceAvailable):
 		obj = getUpdatedController(env, &servingv1.Service{})
@@ -349,8 +316,7 @@ func (action *monitorAction) newController(env *trait.Environment, integration *
 			return nil, fmt.Errorf("type assertion failed, not a Knative Service: %v", obj)
 		}
 		controller = &knativeServiceController{
-			obj:         svc,
-			integration: integration,
+			obj: svc,
 		}
 	case integration.IsConditionTrue(v1.IntegrationConditionCronJobAvailable):
 		obj = getUpdatedController(env, &batchv1.CronJob{})
@@ -359,9 +325,7 @@ func (action *monitorAction) newController(env *trait.Environment, integration *
 			return nil, fmt.Errorf("type assertion failed, not a CronJob: %v", obj)
 		}
 		controller = &cronJobController{
-			obj:         cj,
-			integration: integration,
-			client:      action.client,
+			obj: cj,
 		}
 	default:
 		return nil, fmt.Errorf("unsupported controller for integration %s", integration.Name)
@@ -379,230 +343,6 @@ func getUpdatedController(env *trait.Environment, obj ctrl.Object) ctrl.Object {
 	return env.Resources.GetController(func(object ctrl.Object) bool {
 		return reflect.TypeOf(obj) == reflect.TypeOf(object)
 	})
-}
-
-func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(
-	ctx context.Context, controller controller, environment *trait.Environment, integration *v1.Integration,
-	pendingPods []corev1.Pod, runningPods []corev1.Pod,
-) error {
-	if done, err := controller.checkReadyCondition(ctx); done || err != nil {
-		// There may be pods that are not ready but still probable for getting error messages.
-		// Ignore returned error from probing as it's expected when the ctrl obj is not ready.
-		_, _, _ = action.probeReadiness(ctx, environment, integration, runningPods)
-
-		return err
-	}
-	if arePodsFailingStatuses(integration, pendingPods, runningPods) {
-		return nil
-	}
-	readyPods, probeOk, err := action.probeReadiness(ctx, environment, integration, runningPods)
-	if err != nil {
-		return err
-	}
-	if !probeOk {
-		integration.Status.Phase = v1.IntegrationPhaseError
-
-		return nil
-	}
-	if done := controller.updateReadyCondition(readyPods); done {
-		integration.Status.Phase = v1.IntegrationPhaseRunning
-
-		return nil
-	}
-
-	return nil
-}
-
-func arePodsFailingStatuses(integration *v1.Integration, pendingPods []corev1.Pod, runningPods []corev1.Pod) bool {
-	// Check Pods statuses
-	for _, pod := range pendingPods {
-		// Check the scheduled condition
-		if scheduled := kubernetes.GetPodCondition(pod, corev1.PodScheduled); scheduled != nil &&
-			scheduled.Status == corev1.ConditionFalse &&
-			scheduled.Reason == "Unschedulable" {
-			integration.Status.Phase = v1.IntegrationPhaseError
-			integration.SetReadyConditionError(scheduled.Message)
-
-			return true
-		}
-	}
-	// Check pending container statuses
-	for _, pod := range pendingPods {
-		containers := make([]corev1.ContainerStatus, 0, len(pod.Status.InitContainerStatuses)+len(pod.Status.ContainerStatuses))
-		containers = append(containers, pod.Status.InitContainerStatuses...)
-		containers = append(containers, pod.Status.ContainerStatuses...)
-		for _, container := range containers {
-			// Check the images are pulled
-			if waiting := container.State.Waiting; waiting != nil && waiting.Reason == "ImagePullBackOff" {
-				integration.Status.Phase = v1.IntegrationPhaseError
-				integration.SetReadyConditionError(waiting.Message)
-
-				return true
-			}
-		}
-	}
-	// Check running container statuses
-	for _, pod := range runningPods {
-		if pod.DeletionTimestamp != nil {
-			continue
-		}
-		containers := make([]corev1.ContainerStatus, 0, len(pod.Status.InitContainerStatuses)+len(pod.Status.ContainerStatuses))
-		containers = append(containers, pod.Status.InitContainerStatuses...)
-		containers = append(containers, pod.Status.ContainerStatuses...)
-		for _, container := range containers {
-			// Check the container state
-			if waiting := container.State.Waiting; waiting != nil && waiting.Reason == "CrashLoopBackOff" {
-				integration.Status.Phase = v1.IntegrationPhaseError
-				integration.SetReadyConditionError(waiting.Message)
-
-				return true
-			}
-			if terminated := container.State.Terminated; terminated != nil && terminated.Reason == "Error" {
-				integration.Status.Phase = v1.IntegrationPhaseError
-				integration.SetReadyConditionError(terminated.Message)
-
-				return true
-			}
-		}
-	}
-
-	return false
-}
-
-// probeReadiness calls the readiness probes of the non-ready Pods directly to retrieve insights from the Camel runtime.
-// The func return the number of readyPods, the success of the probe and any error may have happened during its execution.
-//
-//nolint:staticcheck
-func (action *monitorAction) probeReadiness(ctx context.Context, environment *trait.Environment, integration *v1.Integration, pods []corev1.Pod) (int32, bool, error) {
-	// as a default we assume the Integration is Ready
-	readyCondition := v1.IntegrationCondition{
-		Type:           v1.IntegrationConditionReady,
-		Status:         corev1.ConditionTrue,
-		DeprecatedPods: make([]v1.PodCondition, len(pods)),
-	}
-
-	readyPods := int32(0)
-	unreadyPods := int32(0)
-
-	runtimeReady := true
-	runtimeFailed := false
-	probeReadinessOk := true
-
-	for i := range pods {
-		pod := &pods[i]
-		readyCondition.DeprecatedPods[i].Name = pod.Name
-		for p := range pod.Status.Conditions {
-			if pod.Status.Conditions[p].Type == corev1.PodReady {
-				readyCondition.DeprecatedPods[i].Condition = pod.Status.Conditions[p]
-
-				break
-			}
-		}
-		// If it's in ready status, then we don't care to probe.
-		if ready := kubernetes.GetPodCondition(*pod, corev1.PodReady); ready.Status == corev1.ConditionTrue {
-			readyPods++
-
-			continue
-		}
-		unreadyPods++
-		container := getIntegrationContainer(environment, pod)
-		if container == nil {
-			return readyPods, false, fmt.Errorf("integration container not found in Pod %s/%s", pod.Namespace, pod.Name)
-		}
-
-		// TODO: this code must be moved to a dedicated function
-		//
-		//nolint:nestif
-		if probe := container.ReadinessProbe; probe != nil && probe.HTTPGet != nil {
-			body, err := proxyGetHTTPProbe(ctx, action.client, probe, pod, container)
-			// When invoking the HTTP probe, the kubernetes client exposes a very
-			// specific behavior:
-			//
-			// - if there is no error, that means the pod in not ready just because
-			//   the probe has to be called few time as per configuration, so it means
-			//   it's not ready, but the probe is OK, and the pod could become ready
-			//   at some point
-			// - if the error is Service Unavailable (HTTP 503) then it means the pod
-			//   is not ready and the probe is failing, in this case we can use the
-			//   response to scrape for camel info
-			//
-			// Here an example of a failed probe (from curl):
-			//
-			//   Trying 127.0.0.1:8080...
-			//   TCP_NODELAY set
-			//   Connected to localhost (127.0.0.1) port 8080 (#0)
-			//   GET /q/health/ready HTTP/1.1
-			//   Host: localhost:8080
-			//   User-Agent: curl/7.68.0
-			//   Accept: */*
-			//
-			//   Mark bundle as not supporting multiuse
-			//   HTTP/1.1 503 Service Unavailable
-			//   content-type: application/json; charset=UTF-8
-			//   content-length: 871
-			//
-			//   {
-			//     "status": "DOWN",
-			//     "checks": [ {
-			//       "name": "camel-routes",
-			//       "status": "DOWN",
-			//       "data": {
-			//         "route.id": "route1",
-			//         "route.status": "Stopped",
-			//         "check.kind": "READINESS"
-			//       }
-			//     }]
-			//   }
-			if err == nil {
-				continue
-			}
-
-			if errors.Is(err, context.DeadlineExceeded) {
-				readyCondition.DeprecatedPods[i].Condition.Message = fmt.Sprintf("readiness probe timed out for Pod %s/%s", pod.Namespace, pod.Name)
-				runtimeReady = false
-
-				continue
-			}
-			if !k8serrors.IsServiceUnavailable(err) {
-				readyCondition.DeprecatedPods[i].Condition.Message = fmt.Sprintf("readiness probe failed for Pod %s/%s: %s", pod.Namespace, pod.Name, err.Error())
-				runtimeReady = false
-
-				continue
-			}
-
-			health, err := NewHealthCheck(body)
-			if err != nil {
-				return readyPods, false, err
-			}
-			for _, check := range health.Checks {
-				if check.Status == v1.HealthCheckStatusUp {
-					continue
-				}
-
-				runtimeReady = false
-				runtimeFailed = true
-
-				readyCondition.DeprecatedPods[i].Health = append(readyCondition.DeprecatedPods[i].Health, check)
-			}
-		}
-	}
-
-	if runtimeFailed {
-		probeReadinessOk = false
-		readyCondition.Reason = v1.IntegrationConditionErrorReason
-		readyCondition.Status = corev1.ConditionFalse
-		readyCondition.Message = fmt.Sprintf("%d/%d pods are not ready", unreadyPods, unreadyPods+readyPods)
-		integration.Status.SetConditions(readyCondition)
-	}
-	if !runtimeReady {
-		probeReadinessOk = false
-		readyCondition.Reason = v1.IntegrationConditionRuntimeNotReadyReason
-		readyCondition.Status = corev1.ConditionFalse
-		readyCondition.Message = fmt.Sprintf("%d/%d pods are not ready", unreadyPods, unreadyPods+readyPods)
-		integration.Status.SetConditions(readyCondition)
-	}
-
-	return readyPods, probeReadinessOk, nil
 }
 
 func findHighestPriorityReadyKit(kits []v1.IntegrationKit) (*v1.IntegrationKit, error) {
@@ -626,15 +366,4 @@ func findHighestPriorityReadyKit(kits []v1.IntegrationKit) (*v1.IntegrationKit, 
 	}
 
 	return kit, nil
-}
-
-func getIntegrationContainer(environment *trait.Environment, pod *corev1.Pod) *corev1.Container {
-	name := environment.GetIntegrationContainerName()
-	for i, container := range pod.Spec.Containers {
-		if container.Name == name {
-			return &pod.Spec.Containers[i]
-		}
-	}
-
-	return nil
 }

@@ -28,7 +28,6 @@ import (
 	"time"
 
 	. "github.com/onsi/gomega"
-	"github.com/onsi/gomega/gstruct"
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
@@ -42,19 +41,8 @@ func TestBadRouteIntegration(t *testing.T) {
 			name := RandomizedSuffixName("bad-route")
 			g.Expect(KamelRun(t, ctx, ns, "files/BadRoute.java", "--name", name, "-t", "health.enabled=false").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionFalse))
-
-			// Make sure the Integration can be scaled
-			g.Expect(ScaleIntegration(t, ctx, ns, name, 2)).To(Succeed())
-			// Check the scale cascades into the Deployment scale
-			g.Eventually(IntegrationPods(t, ctx, ns, name), TestTimeoutShort).Should(HaveLen(2))
-			// Check it also cascades into the Integration scale subresource Status field
-			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, name), TestTimeoutShort).
-				Should(gstruct.PointTo(BeNumerically("==", 2)))
-			// Check the Integration stays in error phase
-			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
 
 			// Kit valid
 			kitName := IntegrationKitName(t, ctx, ns, name)()
