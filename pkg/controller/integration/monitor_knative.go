@@ -18,8 +18,6 @@ limitations under the License.
 package integration
 
 import (
-	"context"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -29,48 +27,19 @@ import (
 )
 
 type knativeServiceController struct {
-	obj         *servingv1.Service
-	integration *v1.Integration
+	obj *servingv1.Service
 }
 
-var _ controller = &knativeServiceController{}
-
-func (c *knativeServiceController) checkReadyCondition(ctx context.Context) (bool, error) {
+func (c *knativeServiceController) setReadyCondition(integration *v1.Integration) {
 	// Check the KnativeService conditions
 	if ready := kubernetes.GetKnativeServiceCondition(*c.obj, servingv1.ServiceConditionReady); ready != nil &&
 		ready.Status == metav1.ConditionFalse && ready.Reason == "RevisionFailed" {
-		c.integration.Status.Phase = v1.IntegrationPhaseError
-		c.integration.SetReadyConditionError(ready.Message)
+		integration.Status.Phase = v1.IntegrationPhaseError
+		integration.SetReadyConditionError(ready.Message)
 
-		return true, nil
+		return
 	}
 
-	return false, nil
-}
-
-func (c *knativeServiceController) updateReadyCondition(readyPods int32) bool {
-	ready := kubernetes.GetKnativeServiceCondition(*c.obj, servingv1.ServiceConditionReady)
-	if ready == nil {
-		c.integration.SetReadyCondition(corev1.ConditionFalse, "", "")
-
-		return false
-	}
-	if ready.Status == metav1.ConditionTrue {
-		c.integration.SetReadyCondition(corev1.ConditionTrue,
-			v1.IntegrationConditionKnativeServiceReadyReason, "")
-
-		return true
-	}
-	c.integration.SetReadyCondition(corev1.ConditionFalse,
-		ready.Reason, ready.Message)
-
-	return false
-}
-
-func (c *knativeServiceController) hasTemplateIntegrationLabel() bool {
-	return c.obj.Spec.Template.Labels[v1.IntegrationLabel] != ""
-}
-
-func (c *knativeServiceController) getControllerName() string {
-	return "KnativeService/" + c.obj.Name
+	integration.SetReadyCondition(corev1.ConditionTrue,
+		v1.IntegrationConditionKnativeServiceReadyReason, "Ready")
 }

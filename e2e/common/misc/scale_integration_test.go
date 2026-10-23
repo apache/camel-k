@@ -41,18 +41,18 @@ func TestIntegrationScale(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		name := RandomizedSuffixName("java")
 		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
-		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("Magicstring!"))
 
 		t.Run("Update integration scale spec", func(t *testing.T) {
 			g.Expect(ScaleIntegration(t, ctx, ns, name, 3)).To(Succeed())
 			// Check the readiness condition becomes falsy
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady)).Should(Equal(corev1.ConditionFalse))
 			// Check the scale cascades into the Deployment scale
-			g.Eventually(IntegrationPods(t, ctx, ns, name), TestTimeoutShort).Should(HaveLen(3))
+			g.Eventually(IntegrationPods(t, ctx, ns, name)).Should(HaveLen(3))
 			// Check it also cascades into the Integration scale subresource Status field
-			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, name), TestTimeoutShort).
+			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, name)).
 				Should(gstruct.PointTo(BeNumerically("==", 3)))
 			// Finally check the readiness condition becomes truthy back
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))

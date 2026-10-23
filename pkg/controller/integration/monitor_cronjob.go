@@ -18,108 +18,46 @@ limitations under the License.
 package integration
 
 import (
-	"context"
-	"fmt"
-
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 
-	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
-
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/client"
-	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
 type cronJobController struct {
-	obj              *batchv1.CronJob
-	integration      *v1.Integration
-	client           client.Client
-	lastCompletedJob *batchv1.Job
+	obj *batchv1.CronJob
 }
 
-var _ controller = &cronJobController{}
+func (c *cronJobController) setReadyCondition(integration *v1.Integration) {
+	cronJob := c.obj
 
-func (c *cronJobController) checkReadyCondition(ctx context.Context) (bool, error) {
-	// Check latest job result
-	lastScheduleTime := c.obj.Status.LastScheduleTime
-
-	if lastScheduleTime == nil || len(c.obj.Status.Active) != 0 {
-		return false, nil
+	// No scheduled job yet: leave the Ready condition unchanged.
+	if cronJob.Status.LastScheduleTime == nil {
+		return
 	}
 
-	jobs := batchv1.JobList{}
-	if err := c.client.List(ctx, &jobs,
-		ctrl.InNamespace(c.integration.Namespace),
-		ctrl.MatchingLabels{v1.IntegrationLabel: c.integration.Name},
-	); err != nil {
-		return true, err
-	}
-	t := lastScheduleTime.Time
-	for i, job := range jobs.Items {
-		if job.Status.Active == 0 && job.CreationTimestamp.Time.Before(t) {
-			continue
-		}
-		c.lastCompletedJob = &jobs.Items[i]
-		t = c.lastCompletedJob.CreationTimestamp.Time
-	}
-	if c.lastCompletedJob != nil {
-		if failed := kubernetes.GetJobCondition(*c.lastCompletedJob, batchv1.JobFailed); failed != nil &&
-			failed.Status == corev1.ConditionTrue {
-			c.integration.SetReadyCondition(corev1.ConditionFalse,
-				v1.IntegrationConditionLastJobFailedReason,
-				fmt.Sprintf("last job %s failed: %s", c.lastCompletedJob.Name, failed.Message))
-			c.integration.Status.Phase = v1.IntegrationPhaseError
-
-			return true, nil
-		}
+	// A job is actively running: leave the Ready condition unchanged.
+	if len(cronJob.Status.Active) > 0 {
+		return
 	}
 
-	return false, nil
-}
+	// The last scheduled job has not succeeded.
+	if cronJob.Status.LastSuccessfulTime == nil ||
+		cronJob.Status.LastSuccessfulTime.Before(cronJob.Status.LastScheduleTime) {
+		integration.Status.Phase = v1.IntegrationPhaseError
+		integration.SetReadyCondition(
+			corev1.ConditionFalse,
+			v1.IntegrationConditionLastJobFailedReason,
+			"The last scheduled job has not succeeded",
+		)
 
-func (c *cronJobController) updateReadyCondition(readyPods int32) bool {
-	switch {
-	case c.obj.Status.LastScheduleTime == nil:
-		c.integration.SetReadyCondition(corev1.ConditionTrue,
-			v1.IntegrationConditionCronJobCreatedReason, "cronjob created")
-
-		return true
-
-	case len(c.obj.Status.Active) > 0:
-		c.integration.SetReadyCondition(corev1.ConditionTrue,
-			v1.IntegrationConditionCronJobActiveReason, "cronjob active")
-
-		return true
-
-	case c.obj.Spec.SuccessfulJobsHistoryLimit != nil && *c.obj.Spec.SuccessfulJobsHistoryLimit == 0 &&
-		c.obj.Spec.FailedJobsHistoryLimit != nil && *c.obj.Spec.FailedJobsHistoryLimit == 0:
-		c.integration.SetReadyCondition(corev1.ConditionTrue,
-			v1.IntegrationConditionCronJobCreatedReason, "no jobs history available")
-
-		return true
-
-	case c.lastCompletedJob != nil:
-		if complete := kubernetes.GetJobCondition(*c.lastCompletedJob, batchv1.JobComplete); complete != nil &&
-			complete.Status == corev1.ConditionTrue {
-			c.integration.SetReadyCondition(corev1.ConditionTrue,
-				v1.IntegrationConditionLastJobSucceededReason,
-				fmt.Sprintf("last job %s completed successfully", c.lastCompletedJob.Name))
-
-			return true
-		}
-
-	default:
-		c.integration.SetReadyCondition(corev1.ConditionUnknown, "", "")
+		return
 	}
 
-	return false
-}
-
-func (c *cronJobController) hasTemplateIntegrationLabel() bool {
-	return c.obj.Spec.JobTemplate.Spec.Template.Labels[v1.IntegrationLabel] != ""
-}
-
-func (c *cronJobController) getControllerName() string {
-	return "CronJob/" + c.obj.Name
+	// The last scheduled job succeeded.
+	integration.SetReadyCondition(
+		corev1.ConditionTrue,
+		v1.IntegrationConditionLastJobSucceededReason,
+		"The last scheduled job succeeded",
+	)
 }

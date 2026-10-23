@@ -19,23 +19,10 @@ package kubernetes
 
 import (
 	appsv1 "k8s.io/api/apps/v1"
-	batchv1 "k8s.io/api/batch/v1"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	servingv1 "github.com/apache/camel-k/v2/pkg/apis/duck/knative/serving/v1"
 )
-
-func GetPodCondition(pod corev1.Pod, conditionType corev1.PodConditionType) *corev1.PodCondition {
-	for i := range pod.Status.Conditions {
-		condition := pod.Status.Conditions[i]
-		if condition.Type == conditionType {
-			return &condition
-		}
-	}
-
-	return nil
-}
 
 func GetDeploymentCondition(deployment appsv1.Deployment, conditionType appsv1.DeploymentConditionType) *appsv1.DeploymentCondition {
 	for i := range deployment.Status.Conditions {
@@ -51,17 +38,6 @@ func GetDeploymentCondition(deployment appsv1.Deployment, conditionType appsv1.D
 func GetKnativeServiceCondition(service servingv1.Service, conditionType string) *metav1.Condition {
 	for i := range service.Status.Conditions {
 		condition := service.Status.Conditions[i]
-		if condition.Type == conditionType {
-			return &condition
-		}
-	}
-
-	return nil
-}
-
-func GetJobCondition(job batchv1.Job, conditionType batchv1.JobConditionType) *batchv1.JobCondition {
-	for i := range job.Status.Conditions {
-		condition := job.Status.Conditions[i]
 		if condition.Type == conditionType {
 			return &condition
 		}
