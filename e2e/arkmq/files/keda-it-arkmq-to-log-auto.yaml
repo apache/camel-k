@@ -24,7 +24,7 @@ spec:
   sources:
     - content: |
         from("amqp:queue:my-queue")
-          .log("${body}");
+          .to("log:info");
       name: routes.java
   traits:
     camel:
