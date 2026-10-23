@@ -45,11 +45,34 @@ func TestArkMQKedaAutoDiscovery(t *testing.T) {
 			// Auto-discovered from the amqp:queue URI
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["queueName"]).To(Equal("my-queue"))
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["brokerAddress"]).To(Equal("my-queue"))
+			g.Expect(scaledObj.Spec.Triggers[0].Metadata["managementEndpoint"]).To(Equal("my-broker-hdls-svc.arkmq.svc:8161"))
 			// Merged from autoMetadata
-			g.Expect(scaledObj.Spec.Triggers[0].Metadata["managementEndpoint"]).To(Equal("my-broker-ss-0.my-broker-hdls-svc.arkmq.svc:8161"))
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["brokerName"]).To(Equal("amq-broker"))
 
 			ExpectExecSucceed(t, g, Kubectl("delete", "pipe", integrationName, "-n", ns))
+		})
+	}, "arkmq")
+}
+
+func TestArkMQKedaAutoDiscoveryIntegration(t *testing.T) {
+	WithExistingNamedTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		t.Run("Auto-discovery ArkMQ queue from Integration", func(t *testing.T) {
+			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/keda-it-arkmq-to-log-auto.yaml"))
+			integrationName := "keda-it-arkmq-to-log-auto"
+
+			g.Eventually(ScaledObject(t, ctx, ns, integrationName), TestTimeoutMedium).
+				ShouldNot(BeNil())
+
+			scaledObj := ScaledObject(t, ctx, ns, integrationName)()
+			g.Expect(scaledObj).NotTo(BeNil())
+			g.Expect(scaledObj.Spec.Triggers).To(HaveLen(1))
+			g.Expect(scaledObj.Spec.Triggers[0].Type).To(Equal("artemis-queue"))
+			g.Expect(scaledObj.Spec.Triggers[0].Metadata["queueName"]).To(Equal("my-queue"))
+			g.Expect(scaledObj.Spec.Triggers[0].Metadata["brokerAddress"]).To(Equal("my-queue"))
+			g.Expect(scaledObj.Spec.Triggers[0].Metadata["managementEndpoint"]).To(Equal("my-broker-hdls-svc.arkmq.svc:8161"))
+			g.Expect(scaledObj.Spec.Triggers[0].Metadata["brokerName"]).To(Equal("amq-broker"))
+
+			ExpectExecSucceed(t, g, Kubectl("delete", "it", integrationName, "-n", ns))
 		})
 	}, "arkmq")
 }

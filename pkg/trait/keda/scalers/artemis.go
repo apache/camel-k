@@ -18,6 +18,8 @@ limitations under the License.
 package scalers
 
 import (
+	"net"
+	"net/url"
 	"strings"
 
 	keda "github.com/apache/camel-k/v2/pkg/trait/keda"
@@ -34,13 +36,18 @@ func (a *ArtemisScaler) Component() string {
 	return "amqp"
 }
 
-func (a *ArtemisScaler) Map(pathValue string, params map[string]string) (string, map[string]string) {
+func (a *ArtemisScaler) Map(pathValue string, params map[string]string, props map[string]string) (string, map[string]string) {
 	metadata := make(map[string]string)
 	queueName := strings.TrimPrefix(pathValue, "queue:")
 	if queueName != "" && !strings.HasPrefix(queueName, "topic:") {
 		metadata["queueName"] = queueName
 		// For anycast queues created by ArkMQ, the address name matches the queue name.
 		metadata["brokerAddress"] = queueName
+	}
+	if brokerURL, ok := props["broker-url"]; ok {
+		if u, err := url.Parse(brokerURL); err == nil && u.Hostname() != "" {
+			metadata["managementEndpoint"] = net.JoinHostPort(u.Hostname(), "8161")
+		}
 	}
 
 	return "artemis-queue", metadata
