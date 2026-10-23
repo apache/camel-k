@@ -26,7 +26,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/equality"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -491,14 +490,6 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 	target := instance.DeepCopy()
 	targetLog := rlog.ForIntegration(target)
 
-	retryMonitor := updateCamelMonitorCondition(ctx, r.client, target)
-	if !equality.Semantic.DeepEqual(instance.Status.Conditions, target.Status.Conditions) {
-		if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(&instance)); err != nil {
-			return reconcile.Result{}, err
-		}
-		instance = *target.DeepCopy()
-	}
-
 	for _, a := range r.baseActions {
 		a.InjectClient(r.client)
 		a.InjectLogger(targetLog)
@@ -533,10 +524,6 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 		camelevent.NotifyIntegrationUpdated(ctx, r.client, r.recorder, &instance, newTarget)
 
 		break
-	}
-
-	if retryMonitor {
-		return reconcile.Result{RequeueAfter: camelMonitorRetryInterval}, nil
 	}
 
 	return reconcile.Result{}, nil

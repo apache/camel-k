@@ -25,6 +25,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 	"github.com/stretchr/testify/require"
 	appsv1 "k8s.io/api/apps/v1"
 	authorizationv1 "k8s.io/api/authorization/v1"
@@ -44,7 +45,6 @@ import (
 	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
-	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -140,8 +140,8 @@ func TestCamelMonitorLookupErrors(t *testing.T) {
 		want  corev1.ConditionStatus
 		retry bool
 	}{
-		{"missing", k8serrors.NewNotFound(schema.GroupResource{Group: "camel.apache.org", Resource: "camelmonitors"}, "sample"), corev1.ConditionFalse, false},
-		{"absent CRD", &meta.NoKindMatchError{GroupKind: camelMonitorGVK.GroupKind()}, corev1.ConditionFalse, false},
+		{"missing", k8serrors.NewNotFound(schema.GroupResource{Group: "camel.apache.org", Resource: "camelmonitors"}, "sample"), corev1.ConditionStatus(""), false},
+		{"absent CRD", &meta.NoKindMatchError{GroupKind: camelMonitorGVK.GroupKind()}, corev1.ConditionStatus(""), false},
 		{"forbidden", k8serrors.NewForbidden(schema.GroupResource{Group: "camel.apache.org", Resource: "camelmonitors"}, "sample", errors.New("denied")), corev1.ConditionUnknown, true},
 		{"transient", errors.New("connection reset"), corev1.ConditionUnknown, true},
 	}
@@ -152,42 +152,125 @@ func TestCamelMonitorLookupErrors(t *testing.T) {
 			it.Status.Phase = v1.IntegrationPhaseRunning
 			it.Status.SetCondition(v1.IntegrationConditionReady, corev1.ConditionTrue, "Ready", "ready")
 			ready := *it.Status.GetCondition(v1.IntegrationConditionReady)
-			retry := updateCamelMonitorCondition(context.Background(), monitorErrorReader{err: tc.err}, it)
-			require.Equal(t, tc.retry, retry)
-			require.Equal(t, tc.want, it.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable).Status)
+			err := updateCamelMonitorCondition(context.Background(), monitorErrorReader{err: tc.err}, it)
+			if tc.retry {
+				require.ErrorIs(t, err, tc.err)
+			} else {
+				require.NoError(t, err)
+			}
+			condition := it.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable)
+			if tc.want == "" {
+				require.Nil(t, condition)
+			} else {
+				require.Equal(t, tc.want, condition.Status)
+			}
 			require.Equal(t, ready, *it.Status.GetCondition(v1.IntegrationConditionReady))
 			require.Equal(t, v1.IntegrationPhaseRunning, it.Status.Phase)
 		})
 	}
 }
 
-func TestCamelMonitorLifecycle(t *testing.T) {
+type monitorActionClient struct {
+	client.Client
+	monitorReader ctrl.Reader
+}
+
+func (c monitorActionClient) Get(ctx context.Context, key ctrl.ObjectKey, obj ctrl.Object, opts ...ctrl.GetOption) error {
+	if obj.GetObjectKind().GroupVersionKind() == camelMonitorGVK {
+		return c.monitorReader.Get(ctx, key, obj, opts...)
+	}
+	return c.Client.Get(ctx, key, obj, opts...)
+}
+
+func TestMonitorActionCamelMonitorLifecycle(t *testing.T) {
 	ctx := context.Background()
-	integration := v1.NewIntegration("test", "sample")
-	it := &integration
-	it.UID = "integration-uid"
-	it.Status.SetCondition(v1.IntegrationConditionReady, corev1.ConditionTrue, "Ready", "ready")
+	c, it, err := nominalEnvironment()
+	require.NoError(t, err)
+	it.UID = "integration"
+	backing := fake.NewClientBuilder().WithScheme(runtime.NewScheme()).Build()
+	action := monitorAction{}
+	action.InjectLogger(log.Log)
+	action.InjectClient(monitorActionClient{Client: c, monitorReader: backing})
+	result, err := action.Handle(ctx, it)
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	require.Nil(t, result.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable))
 	ready := *it.Status.GetCondition(v1.IntegrationConditionReady)
+	phase := it.Status.Phase
 	monitor := monitorResource(camelMonitorGVK, it.Name, it.Namespace, "monitor", monitorOwner("camel.apache.org/v1", "Integration", it.Name, string(it.UID)))
-	c := fake.NewClientBuilder().WithScheme(runtime.NewScheme()).WithObjects(monitor).Build()
-	require.False(t, updateCamelMonitorCondition(ctx, c, it))
-	condition := *it.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable)
+	require.NoError(t, backing.Create(ctx, monitor))
+	result, err = action.Handle(ctx, it)
+	require.NoError(t, err)
+	condition := *result.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable)
 	require.Equal(t, corev1.ConditionTrue, condition.Status)
-	require.False(t, updateCamelMonitorCondition(ctx, c, it))
-	require.Equal(t, condition, *it.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable))
+	result, err = action.Handle(ctx, it)
+	require.NoError(t, err)
+	require.Equal(t, condition, *result.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable))
 	monitor.SetOwnerReferences(nil)
-	require.NoError(t, c.Update(ctx, monitor))
-	require.False(t, updateCamelMonitorCondition(ctx, c, it))
-	require.Equal(t, corev1.ConditionFalse, it.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable).Status)
-	require.Len(t, camelMonitorEnqueueRequests(ctx, monitor), 1, "ownership removal must still enqueue")
-	require.NoError(t, c.Delete(ctx, monitor))
-	require.False(t, updateCamelMonitorCondition(ctx, c, it))
-	require.Equal(t, corev1.ConditionFalse, it.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable).Status)
+	require.NoError(t, backing.Update(ctx, monitor))
+	result, err = action.Handle(ctx, it)
+	require.NoError(t, err)
+	require.Nil(t, result.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable))
+	monitor.SetOwnerReferences([]metav1.OwnerReference{monitorOwner("camel.apache.org/v1", "Integration", it.Name, string(it.UID))})
+	require.NoError(t, backing.Update(ctx, monitor))
+	result, err = action.Handle(ctx, it)
+	require.NoError(t, err)
+	require.Equal(t, corev1.ConditionTrue, result.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable).Status)
+	require.NoError(t, backing.Delete(ctx, monitor))
+	result, err = action.Handle(ctx, it)
+	require.NoError(t, err)
+	require.Nil(t, result.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable))
+	require.Equal(t, ready, *result.Status.GetCondition(v1.IntegrationConditionReady))
+	require.Equal(t, phase, result.Status.Phase)
+	for _, lookupErr := range []error{errors.New("connection reset"), k8serrors.NewForbidden(schema.GroupResource{Group: "camel.apache.org", Resource: "camelmonitors"}, it.Name, errors.New("denied"))} {
+		action.InjectClient(monitorActionClient{Client: c, monitorReader: monitorErrorReader{err: lookupErr}})
+		it.Status.Phase = v1.IntegrationPhaseDeploying
+		it.Status.SetCondition(v1.IntegrationConditionReady, corev1.ConditionFalse, "Pending", "waiting")
+		result, err = action.Handle(ctx, it)
+		require.ErrorIs(t, err, lookupErr)
+		require.NotNil(t, result)
+		require.Equal(t, corev1.ConditionUnknown, result.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable).Status)
+		require.Equal(t, ready.Status, result.Status.GetCondition(v1.IntegrationConditionReady).Status)
+		require.Equal(t, ready.Reason, result.Status.GetCondition(v1.IntegrationConditionReady).Reason)
+		require.Equal(t, phase, result.Status.Phase)
+	}
+	action.InjectClient(monitorActionClient{Client: c, monitorReader: backing})
+	result, err = action.Handle(ctx, it)
+	require.NoError(t, err)
+	require.Nil(t, result.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable))
+}
+
+func TestMonitorActionCamelMonitorEarlyExit(t *testing.T) {
+	ctx := context.Background()
+	c, it, err := nominalEnvironment()
+	require.NoError(t, err)
+	it.UID = "integration"
+	it.Status.Phase = v1.IntegrationPhaseError
+	it.Status.SetCondition(v1.IntegrationConditionReady, corev1.ConditionFalse, v1.IntegrationConditionInitializationFailedReason, "failed")
+	ready := *it.Status.GetCondition(v1.IntegrationConditionReady)
+	backing := fake.NewClientBuilder().WithScheme(runtime.NewScheme()).Build()
+	action := monitorAction{}
+	action.InjectLogger(log.Log)
+	action.InjectClient(monitorActionClient{Client: c, monitorReader: backing})
+	result, err := action.Handle(ctx, it)
+	require.NoError(t, err)
+	require.Nil(t, result, "unchanged early exit preserves nil result")
+	monitor := monitorResource(camelMonitorGVK, it.Name, it.Namespace, "monitor", monitorOwner("camel.apache.org/v1", "Integration", it.Name, string(it.UID)))
+	require.NoError(t, backing.Create(ctx, monitor))
+	result, err = action.Handle(ctx, it)
+	require.NoError(t, err)
+	require.Same(t, it, result)
+	require.Equal(t, corev1.ConditionTrue, result.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable).Status)
+	result, err = action.Handle(ctx, it)
+	require.NoError(t, err)
+	require.Nil(t, result)
+	require.NoError(t, backing.Delete(ctx, monitor))
+	result, err = action.Handle(ctx, it)
+	require.NoError(t, err)
+	require.Same(t, it, result)
+	require.Nil(t, result.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable))
 	require.Equal(t, ready, *it.Status.GetCondition(v1.IntegrationConditionReady))
-	// Once permissions recover a successful lookup clears Unknown.
-	require.True(t, updateCamelMonitorCondition(ctx, monitorErrorReader{err: errors.New("denied")}, it))
-	require.False(t, updateCamelMonitorCondition(ctx, c, it))
-	require.Equal(t, corev1.ConditionFalse, it.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable).Status)
+	require.Equal(t, v1.IntegrationPhaseError, it.Status.Phase)
 }
 
 func TestCamelMonitorEvents(t *testing.T) {
@@ -222,81 +305,6 @@ func TestCamelMonitorEvents(t *testing.T) {
 	newWorkload.SetOwnerReferences(nil)
 	require.True(t, camelMonitorWorkloadPredicate().Update(event.UpdateEvent{ObjectOld: oldWorkload, ObjectNew: newWorkload}))
 	require.False(t, camelMonitorWorkloadPredicate().Update(event.UpdateEvent{ObjectOld: oldWorkload, ObjectNew: oldWorkload.DeepCopy()}))
-}
-
-type monitorControllerClient struct {
-	client.Client
-	backing ctrl.Client
-}
-
-func (c monitorControllerClient) Get(ctx context.Context, key ctrl.ObjectKey, obj ctrl.Object, opts ...ctrl.GetOption) error {
-	return c.backing.Get(ctx, key, obj, opts...)
-}
-
-func (c monitorControllerClient) Status() ctrl.SubResourceWriter { return c.backing.Status() }
-
-func TestReconcileCamelMonitorCondition(t *testing.T) {
-	t.Setenv("NAMESPACE", "test")
-	t.Setenv("WATCH_NAMESPACE", "test")
-	for _, phase := range []v1.IntegrationPhase{v1.IntegrationPhaseNone, v1.IntegrationPhaseInitialization, v1.IntegrationPhaseBuildingKit, v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning, v1.IntegrationPhaseError} {
-		t.Run(string(phase), func(t *testing.T) {
-			ctx := context.Background()
-			integration := v1.NewIntegration("test", "sample")
-			it := &integration
-			it.UID = "integration"
-			it.Status.Phase = phase
-			it.Status.SetCondition(v1.IntegrationConditionReady, corev1.ConditionTrue, "Ready", "ready")
-			ready := *it.Status.GetCondition(v1.IntegrationConditionReady)
-			scheme := runtime.NewScheme()
-			require.NoError(t, v1.AddToScheme(scheme))
-			monitor := monitorResource(camelMonitorGVK, it.Name, it.Namespace, "monitor", monitorOwner("camel.apache.org/v1", "Integration", it.Name, string(it.UID)))
-			patches := 0
-			var lookupErr error
-			backing := fake.NewClientBuilder().WithScheme(scheme).WithObjects(it, monitor).WithStatusSubresource(it).WithInterceptorFuncs(interceptor.Funcs{
-				Get: func(ctx context.Context, c ctrl.WithWatch, key ctrl.ObjectKey, obj ctrl.Object, opts ...ctrl.GetOption) error {
-					if obj.GetObjectKind().GroupVersionKind() == camelMonitorGVK && lookupErr != nil {
-						return lookupErr
-					}
-					return c.Get(ctx, key, obj, opts...)
-				},
-				SubResourcePatch: func(ctx context.Context, c ctrl.Client, sub string, obj ctrl.Object, patch ctrl.Patch, opts ...ctrl.SubResourcePatchOption) error {
-					patches++
-					return c.SubResource(sub).Patch(ctx, obj, patch, opts...)
-				},
-			}).Build()
-			reconciler := reconcileIntegration{client: monitorControllerClient{backing: backing}}
-			request := reconcile.Request{NamespacedName: ctrl.ObjectKeyFromObject(it)}
-			result, err := reconciler.Reconcile(ctx, request)
-			require.NoError(t, err)
-			require.Zero(t, result.RequeueAfter)
-			actual := &v1.Integration{}
-			require.NoError(t, backing.Get(ctx, request.NamespacedName, actual))
-			require.Equal(t, corev1.ConditionTrue, actual.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable).Status)
-			require.Equal(t, phase, actual.Status.Phase)
-			require.Equal(t, ready, *actual.Status.GetCondition(v1.IntegrationConditionReady))
-			require.Equal(t, 1, patches)
-			_, err = reconciler.Reconcile(ctx, request)
-			require.NoError(t, err)
-			require.Equal(t, 1, patches, "unchanged status must not be patched")
-			lookupErr = k8serrors.NewForbidden(schema.GroupResource{Group: "camel.apache.org", Resource: "camelmonitors"}, it.Name, errors.New("denied"))
-			result, err = reconciler.Reconcile(ctx, request)
-			require.NoError(t, err)
-			require.Equal(t, camelMonitorRetryInterval, result.RequeueAfter)
-			require.NoError(t, backing.Get(ctx, request.NamespacedName, actual))
-			require.Equal(t, corev1.ConditionUnknown, actual.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable).Status)
-			require.Equal(t, phase, actual.Status.Phase)
-			require.Equal(t, ready, *actual.Status.GetCondition(v1.IntegrationConditionReady))
-			lookupErr = nil
-			require.NoError(t, backing.Delete(ctx, monitor))
-			result, err = reconciler.Reconcile(ctx, request)
-			require.NoError(t, err)
-			require.Zero(t, result.RequeueAfter)
-			require.NoError(t, backing.Get(ctx, request.NamespacedName, actual))
-			require.Equal(t, corev1.ConditionFalse, actual.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable).Status)
-			require.Equal(t, phase, actual.Status.Phase)
-			require.Equal(t, ready, *actual.Status.GetCondition(v1.IntegrationConditionReady))
-		})
-	}
 }
 
 func TestCamelMonitorWatchPermissionsNamespaces(t *testing.T) {

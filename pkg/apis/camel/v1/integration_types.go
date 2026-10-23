@@ -34,13 +34,13 @@ import (
 // +kubebuilder:storageversion
 // +kubebuilder:subresource:scale:specpath=.spec.replicas,statuspath=.status.replicas,selectorpath=.status.selector
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The integration phase"
-// +kubebuilder:printcolumn:name="Camel Monitor",type=string,JSONPath=`.status.conditions[?(@.type=="CamelMonitorAvailable")].status`,description="Whether an associated CamelMonitor resource is available"
 // +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`,description="The integration readiness"
 // +kubebuilder:printcolumn:name="Runtime Provider",type=string,JSONPath=`.status.runtimeProvider`,description="The runtime version"
 // +kubebuilder:printcolumn:name="Runtime Version",type=string,JSONPath=`.status.runtimeVersion`,description="The runtime provider"
 // +kubebuilder:printcolumn:name="Catalog Version",type=string,JSONPath=`.status.catalog.version`,description="The catalog version"
 // +kubebuilder:printcolumn:name="Kit",type=string,JSONPath=`.status.integrationKit.name`,description="The integration kit"
 // +kubebuilder:printcolumn:name="Replicas",type=integer,JSONPath=`.status.replicas`,description="The number of pods"
+// +kubebuilder:printcolumn:name="Camel Monitor",type=string,JSONPath=`.status.conditions[?(@.type=="CamelMonitorAvailable")].status`,description="Whether an associated CamelMonitor resource is available"
 
 // Integration is the Schema for the integrations API.
 type Integration struct {

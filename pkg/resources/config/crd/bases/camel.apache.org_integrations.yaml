@@ -41,10 +41,6 @@ spec:
       jsonPath: .status.phase
       name: Phase
       type: string
-    - description: Whether an associated CamelMonitor resource is available
-      jsonPath: .status.conditions[?(@.type=="CamelMonitorAvailable")].status
-      name: Camel Monitor
-      type: string
     - description: The integration readiness
       jsonPath: .status.conditions[?(@.type=="Ready")].status
       name: Ready
@@ -69,6 +65,10 @@ spec:
       jsonPath: .status.replicas
       name: Replicas
       type: integer
+    - description: Whether an associated CamelMonitor resource is available
+      jsonPath: .status.conditions[?(@.type=="CamelMonitorAvailable")].status
+      name: Camel Monitor
+      type: string
     name: v1
     schema:
       openAPIV3Schema:

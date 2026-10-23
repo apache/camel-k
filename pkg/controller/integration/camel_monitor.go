@@ -48,13 +48,12 @@ import (
 var camelMonitorGVK = schema.GroupVersionKind{Group: "camel.apache.org", Version: "v1alpha1", Kind: "CamelMonitor"}
 
 const (
-	camelMonitorRetryInterval    = 30 * time.Second
 	camelMonitorDiscoveryTimeout = 10 * time.Second
 )
 
 // updateCamelMonitorCondition reports resource discovery, independently of runtime readiness.
-// It returns true when a failed query should be retried after a bounded delay.
-func updateCamelMonitorCondition(ctx context.Context, c ctrl.Reader, integration *v1.Integration) bool {
+// Lookup failures use the existing action error/retry path.
+func updateCamelMonitorCondition(ctx context.Context, c ctrl.Reader, integration *v1.Integration) error {
 	monitor, err := kubernetes.GetUnstructured(ctx, c, camelMonitorGVK, integration.Name, integration.Namespace)
 	available := false
 	if err == nil {
@@ -62,22 +61,20 @@ func updateCamelMonitorCondition(ctx context.Context, c ctrl.Reader, integration
 	}
 	switch {
 	case k8serrors.IsNotFound(err), meta.IsNoMatchError(err):
-		integration.Status.SetCondition(v1.IntegrationConditionCamelMonitorAvailable, corev1.ConditionFalse,
-			"CamelMonitorNotFound", "No associated CamelMonitor resource is available")
+		integration.Status.RemoveCondition(v1.IntegrationConditionCamelMonitorAvailable)
 	case err != nil:
 		integration.Status.SetCondition(v1.IntegrationConditionCamelMonitorAvailable, corev1.ConditionUnknown,
 			"CamelMonitorLookupFailed", err.Error())
 
-		return true
+		return err
 	case available:
 		integration.Status.SetCondition(v1.IntegrationConditionCamelMonitorAvailable, corev1.ConditionTrue,
 			"CamelMonitorAvailable", "An associated CamelMonitor resource is available")
 	default:
-		integration.Status.SetCondition(v1.IntegrationConditionCamelMonitorAvailable, corev1.ConditionFalse,
-			"CamelMonitorNotAssociated", "No associated CamelMonitor resource is available")
+		integration.Status.RemoveCondition(v1.IntegrationConditionCamelMonitorAvailable)
 	}
 
-	return false
+	return nil
 }
 
 // A monitor can belong directly to the Integration or to its Deployment/CronJob.
