@@ -25,8 +25,11 @@ import (
 	"testing"
 
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/gstruct"
+	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 func TestArkMQKedaAutoDiscovery(t *testing.T) {
@@ -48,6 +51,23 @@ func TestArkMQKedaAutoDiscovery(t *testing.T) {
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["managementEndpoint"]).To(Equal("my-broker-hdls-svc.arkmq.svc:8161"))
 			// Merged from autoMetadata
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["brokerName"]).To(Equal("amq-broker"))
+
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, integrationName, v1.IntegrationConditionReady), TestTimeoutMedium).
+				Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, integrationName), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 1)))
+			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, integrationName), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 0)))
+			producerName := "timer-to-arkmq"
+			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/timer-to-arkmq.yaml"))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, producerName, v1.IntegrationConditionReady), TestTimeoutMedium).
+				Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, integrationName), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 1)))
+			g.Eventually(IntegrationLogs(t, ctx, ns, integrationName)).Should(ContainSubstring("Body is null"))
+			ExpectExecSucceed(t, g, Kubectl("delete", "pipe", producerName, "-n", ns))
+			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, integrationName), TestTimeoutMedium).
+				Should(gstruct.PointTo(BeNumerically("==", 0)))
 
 			ExpectExecSucceed(t, g, Kubectl("delete", "pipe", integrationName, "-n", ns))
 		})
@@ -71,6 +91,23 @@ func TestArkMQKedaAutoDiscoveryIntegration(t *testing.T) {
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["brokerAddress"]).To(Equal("my-queue"))
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["managementEndpoint"]).To(Equal("my-broker-hdls-svc.arkmq.svc:8161"))
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["brokerName"]).To(Equal("amq-broker"))
+
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, integrationName, v1.IntegrationConditionReady), TestTimeoutMedium).
+				Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, integrationName), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 1)))
+			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, integrationName), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 0)))
+			producerName := "timer-to-arkmq"
+			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/timer-to-arkmq.yaml"))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, producerName, v1.IntegrationConditionReady), TestTimeoutMedium).
+				Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, integrationName), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 1)))
+			g.Eventually(IntegrationLogs(t, ctx, ns, integrationName)).Should(ContainSubstring("Body is null"))
+			ExpectExecSucceed(t, g, Kubectl("delete", "pipe", producerName, "-n", ns))
+			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, integrationName), TestTimeoutMedium).
+				Should(gstruct.PointTo(BeNumerically("==", 0)))
 
 			ExpectExecSucceed(t, g, Kubectl("delete", "it", integrationName, "-n", ns))
 		})

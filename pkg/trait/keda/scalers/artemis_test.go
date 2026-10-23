@@ -74,7 +74,7 @@ func TestArtemisScalerMap(t *testing.T) {
 			name:         "broker url sets management endpoint",
 			pathValue:    "queue:orders",
 			params:       map[string]string{},
-			props:        map[string]string{"broker-url": "amqp://my-broker-hdls-svc.arkmq.svc:61616"},
+			props:        map[string]string{"camel.component.amqp.broker-url": "amqp://my-broker-hdls-svc.arkmq.svc:61616"},
 			expectedType: "artemis-queue",
 			expectedMeta: map[string]string{
 				"queueName":          "orders",
