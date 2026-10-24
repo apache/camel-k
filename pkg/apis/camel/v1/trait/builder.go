@@ -26,37 +26,25 @@ package trait
 type BuilderTrait struct {
 	PlatformBaseTrait `json:",inline" property:",squash"`
 
-	// Enable verbose logging on build components that support it (e.g. Kaniko build pod).
-	//
 	// Deprecated: no longer in use
 	Verbose *bool `json:"verbose,omitempty" property:"verbose"`
 	// A list of properties to be provided to the build task
 	Properties []string `json:"properties,omitempty" property:"properties"`
-	// The strategy to use, either `pod` or `routine` (default `routine`)
-	// +kubebuilder:validation:Enum=pod;routine
-	Strategy string `json:"strategy,omitempty" property:"strategy"`
+	// Deprecated: no longer in use
+	DeprecatedStrategy string `json:"strategy,omitempty" property:"strategy"`
 	// Specify a base image. In order to have the application working properly it must be a container image which has a Java JDK
 	// installed and ready to use on path (ie `/usr/bin/java`).
 	BaseImage string `json:"baseImage,omitempty" property:"base-image"`
 	// Use the incremental image build option, to reuse existing containers (default `true`)
 	IncrementalImageBuild *bool `json:"incrementalImageBuild,omitempty" property:"incremental-image-build"`
-	// The build order strategy to use, either `dependencies`, `fifo` or `sequential` (default is the platform default)
-	// +kubebuilder:validation:Enum=dependencies;fifo;sequential
-	OrderStrategy string `json:"orderStrategy,omitempty" property:"order-strategy"`
-	// When using `pod` strategy, the minimum amount of CPU required by the pod builder.
-	//
+	// Deprecated: no longer in use
+	DeprecatedOrderStrategy string `json:"orderStrategy,omitempty" property:"order-strategy"`
 	// Deprecated: use TasksRequestCPU instead with task name `builder`.
 	RequestCPU string `json:"requestCPU,omitempty" property:"request-cpu"`
-	// When using `pod` strategy, the minimum amount of memory required by the pod builder.
-	//
 	// Deprecated: use TasksRequestCPU instead with task name `builder`.
 	RequestMemory string `json:"requestMemory,omitempty" property:"request-memory"`
-	// When using `pod` strategy, the maximum amount of CPU required by the pod builder.
-	//
 	// Deprecated: use TasksRequestCPU instead with task name `builder`.
 	LimitCPU string `json:"limitCPU,omitempty" property:"limit-cpu"`
-	// When using `pod` strategy, the maximum amount of memory required by the pod builder.
-	//
 	// Deprecated: use TasksRequestCPU instead with task name `builder`.
 	LimitMemory string `json:"limitMemory,omitempty" property:"limit-memory"`
 	// Deprecated: no longer in use.

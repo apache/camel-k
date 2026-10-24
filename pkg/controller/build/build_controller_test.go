@@ -47,9 +47,6 @@ func TestReconcileBuild(t *testing.T) {
 					Builder: &v1.BuilderTask{
 						BaseTask: v1.BaseTask{
 							Name: "builder",
-							Configuration: v1.BuildConfiguration{
-								Strategy: v1.BuildStrategyRoutine,
-							},
 						},
 					},
 				},
@@ -102,9 +99,6 @@ func TestReconcileBuildDeletedDuringReconcile(t *testing.T) {
 					Builder: &v1.BuilderTask{
 						BaseTask: v1.BaseTask{
 							Name: "builder",
-							Configuration: v1.BuildConfiguration{
-								Strategy: v1.BuildStrategyRoutine,
-							},
 						},
 					},
 				},

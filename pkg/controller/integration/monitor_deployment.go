@@ -59,6 +59,7 @@ func (c *deploymentController) setReadyCondition(integration *v1.Integration) {
 			v1.IntegrationConditionDeploymentReadyReason,
 			message,
 		)
+
 		return
 	}
 

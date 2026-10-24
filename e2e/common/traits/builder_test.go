@@ -38,84 +38,6 @@ import (
 func TestBuilderTrait(t *testing.T) {
 	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		t.Run("Run build strategy routine", func(t *testing.T) {
-			name := RandomizedSuffixName("java")
-			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name,
-				// This is required in order to avoid reusing a Kit already existing (which is the default behavior)
-				"--build-property", "strategy=sequential",
-				"-t", "builder.order-strategy=sequential",
-			).Execute()).To(Succeed())
-
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-
-			integrationKitName := IntegrationKitName(t, ctx, ns, name)()
-			integrationKitNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
-			builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
-			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().Strategy, TestTimeoutShort).Should(Equal(v1.BuildStrategyRoutine))
-			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().OrderStrategy, TestTimeoutShort).Should(Equal(v1.BuildOrderStrategySequential))
-			// Default resource CPU Check
-			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().RequestCPU, TestTimeoutShort).Should(Equal(""))
-			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().LimitCPU, TestTimeoutShort).Should(Equal(""))
-			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().RequestMemory, TestTimeoutShort).Should(Equal(""))
-			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().LimitMemory, TestTimeoutShort).Should(Equal(""))
-
-			g.Eventually(BuilderPod(t, ctx, integrationKitNamespace, builderKitName), TestTimeoutShort).Should(BeNil())
-		})
-
-		t.Run("Run build order strategy dependencies", func(t *testing.T) {
-			name := RandomizedSuffixName("java-dependencies-strategy")
-			g.Expect(KamelRun(t, ctx, ns, "files/Java.java",
-				"--name", name,
-				// This is required in order to avoid reusing a Kit already existing (which is the default behavior)
-				"--build-property", "strategy=dependencies",
-				"-t", "builder.order-strategy=dependencies",
-			).Execute()).To(Succeed())
-
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-
-			integrationKitName := IntegrationKitName(t, ctx, ns, name)()
-			integrationKitNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
-			builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
-			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().Strategy, TestTimeoutShort).Should(Equal(v1.BuildStrategyRoutine))
-			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().OrderStrategy, TestTimeoutShort).Should(Equal(v1.BuildOrderStrategyDependencies))
-			// Default resource CPU Check
-			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().RequestCPU, TestTimeoutShort).Should(Equal(""))
-			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().LimitCPU, TestTimeoutShort).Should(Equal(""))
-			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().RequestMemory, TestTimeoutShort).Should(Equal(""))
-			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().LimitMemory, TestTimeoutShort).Should(Equal(""))
-			g.Eventually(BuilderPod(t, ctx, integrationKitNamespace, builderKitName), TestTimeoutShort).Should(BeNil())
-		})
-
-		t.Run("Run build order strategy fifo", func(t *testing.T) {
-			name := RandomizedSuffixName("java-fifo-strategy")
-			g.Expect(KamelRun(t, ctx, ns, "files/Java.java",
-				"--name", name,
-				// This is required in order to avoid reusing a Kit already existing (which is the default behavior)
-				"--build-property", "strategy=fifo",
-				"-t", "builder.order-strategy=fifo").Execute()).To(Succeed())
-
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-
-			integrationKitName := IntegrationKitName(t, ctx, ns, name)()
-			integrationKitNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
-			builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
-			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().Strategy, TestTimeoutShort).Should(Equal(v1.BuildStrategyRoutine))
-			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().OrderStrategy, TestTimeoutShort).Should(Equal(v1.BuildOrderStrategyFIFO))
-			// Default resource CPU Check
-			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().RequestCPU, TestTimeoutShort).Should(Equal(""))
-			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().LimitCPU, TestTimeoutShort).Should(Equal(""))
-			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().RequestMemory, TestTimeoutShort).Should(Equal(""))
-			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().LimitMemory, TestTimeoutShort).Should(Equal(""))
-
-			g.Eventually(BuilderPod(t, ctx, integrationKitNamespace, builderKitName), TestTimeoutShort).Should(BeNil())
-		})
-
 		t.Run("Run build resources configuration", func(t *testing.T) {
 			name := RandomizedSuffixName("java-resource-config")
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java",
@@ -126,7 +48,6 @@ func TestBuilderTrait(t *testing.T) {
 				"-t", "builder.tasks-limit-cpu=builder:1000m",
 				"-t", "builder.tasks-request-memory=builder:2Gi",
 				"-t", "builder.tasks-limit-memory=builder:3Gi",
-				"-t", "builder.strategy=pod",
 			).Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -137,7 +58,6 @@ func TestBuilderTrait(t *testing.T) {
 			integrationKitNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
 			builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
 
-			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().Strategy, TestTimeoutShort).Should(Equal(v1.BuildStrategyPod))
 			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().RequestCPU, TestTimeoutShort).Should(Equal("500m"))
 			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().LimitCPU, TestTimeoutShort).Should(Equal("1000m"))
 			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().RequestMemory, TestTimeoutShort).Should(Equal("2Gi"))

@@ -37,8 +37,7 @@ const enqueuedMsg = "%s - the build (%s) gets enqueued"
 var runningBuilds sync.Map
 
 type Monitor struct {
-	maxRunningBuilds   int32
-	buildOrderStrategy v1.BuildOrderStrategy
+	maxRunningBuilds int32
 }
 
 func (bm *Monitor) canSchedule(ctx context.Context, c ctrl.Reader, build *v1.Build) (bool, *v1.BuildCondition, error) {
@@ -96,34 +95,15 @@ func (bm *Monitor) canSchedule(ctx context.Context, c ctrl.Reader, build *v1.Bui
 	var reason string
 	allowed := true
 	condition := scheduledReadyBuildcondition(build.Name)
-	switch bm.buildOrderStrategy {
-	case v1.BuildOrderStrategyFIFO:
-		// Check on builds that have been created before the current build and grant precedence if any.
-		if hasScheduledBuildsBefore, otherBuild := builds.HasScheduledBuildsBefore(build); hasScheduledBuildsBefore {
-			reason = fmt.Sprintf("Waiting for build (%s) because it has been created before", otherBuild.Name)
-			allowed = false
-		}
-	case v1.BuildOrderStrategyDependencies:
-		// Check on the Integration dependencies and see if we should queue the build in order to leverage incremental builds
-		// because there is already another build in the making that matches the requirements
-		if hasMatchingBuild, otherBuild := builds.HasMatchingBuild(build); hasMatchingBuild {
-			reason = fmt.Sprintf("Waiting for build (%s) to finish in order to use incremental image builds", otherBuild.Name)
-			allowed = false
-		}
-	case v1.BuildOrderStrategySequential:
-		// Emulate a serialized working queue to only allow one build to run at a given time.
-		// Let's requeue the build in case one is already running
-		if hasRunningBuilds := builds.HasRunningBuilds(); hasRunningBuilds {
-			reason = "Found a running build in this namespace"
-			allowed = false
-		}
-	default:
-		reason = fmt.Sprintf("Unsupported build order strategy (%s)", bm.buildOrderStrategy)
+	// Check on the Integration dependencies and see if we should queue the build in order to leverage incremental builds
+	// because there is already another build in the making that matches the requirements
+	if hasMatchingBuild, otherBuild := builds.HasMatchingBuild(build); hasMatchingBuild {
+		reason = fmt.Sprintf("Waiting for build (%s) to finish in order to use incremental image builds", otherBuild.Name)
 		allowed = false
 	}
 
 	if !allowed {
-		Log.WithValues("request-namespace", requestNamespace, "request-name", requestName, "order-strategy", bm.buildOrderStrategy).
+		Log.WithValues("request-namespace", requestNamespace, "request-name", requestName).
 			ForBuild(build).Infof(enqueuedMsg, reason, build.Name)
 		condition = scheduledWaitingBuildcondition(build.Name, reason)
 	}

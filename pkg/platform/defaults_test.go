@@ -47,11 +47,9 @@ func TestIntegrationPlatformDefaults(t *testing.T) {
 	err = ConfigureDefaults(context.TODO(), c, &ip, false)
 	require.NoError(t, err)
 
-	assert.Equal(t, v1.BuildStrategyRoutine, ip.Status.Build.BuildConfiguration.Strategy)
-	assert.Equal(t, v1.BuildOrderStrategyDependencies, ip.Status.Build.BuildConfiguration.OrderStrategy)
 	assert.Equal(t, defaults.BaseImage(), ip.Status.Build.BaseImage)
 	assert.Equal(t, defaults.LocalRepository, ip.Status.Build.Maven.LocalRepository)
-	assert.Equal(t, int32(3), ip.Status.Build.MaxRunningBuilds) // default for build strategy routine
+	assert.Equal(t, int32(10), ip.Status.Build.MaxRunningBuilds)
 	assert.Len(t, ip.Status.Build.Maven.CLIOptions, 3)
 	assert.NotNil(t, ip.Status.Traits)
 }
@@ -64,10 +62,7 @@ func TestApplyGlobalPlatformSpec(t *testing.T) {
 		},
 		Spec: v1.IntegrationPlatformSpec{
 			Build: v1.IntegrationPlatformBuildSpec{
-				BuildConfiguration: v1.BuildConfiguration{
-					Strategy:      v1.BuildStrategyRoutine,
-					OrderStrategy: v1.BuildOrderStrategyFIFO,
-				},
+				BuildConfiguration: v1.BuildConfiguration{},
 				Maven: v1.MavenSpec{
 					Properties: map[string]string{
 						"global_prop1": "global_value1",
@@ -104,9 +99,7 @@ func TestApplyGlobalPlatformSpec(t *testing.T) {
 
 	applyPlatformSpec(&global, &ip)
 
-	assert.Equal(t, v1.BuildStrategyRoutine, ip.Status.Build.BuildConfiguration.Strategy)
-	assert.Equal(t, v1.BuildOrderStrategyFIFO, ip.Status.Build.BuildConfiguration.OrderStrategy)
-	assert.Equal(t, int32(3), ip.Status.Build.MaxRunningBuilds) // default for build strategy routine
+	assert.Equal(t, int32(10), ip.Status.Build.MaxRunningBuilds)
 	assert.Equal(t, len(global.Status.Build.Maven.CLIOptions), len(ip.Status.Build.Maven.CLIOptions))
 	assert.Equal(t, global.Status.Build.Maven.CLIOptions, ip.Status.Build.Maven.CLIOptions)
 	assert.NotNil(t, ip.Status.Traits)
@@ -128,10 +121,7 @@ func TestRetainLocalPlatformSpec(t *testing.T) {
 		},
 		Spec: v1.IntegrationPlatformSpec{
 			Build: v1.IntegrationPlatformBuildSpec{
-				BuildConfiguration: v1.BuildConfiguration{
-					Strategy:      v1.BuildStrategyRoutine,
-					OrderStrategy: v1.BuildOrderStrategySequential,
-				},
+				BuildConfiguration: v1.BuildConfiguration{},
 				Maven: v1.MavenSpec{
 					Properties: map[string]string{
 						"global_prop1": "global_value1",
@@ -164,11 +154,8 @@ func TestRetainLocalPlatformSpec(t *testing.T) {
 		},
 		Spec: v1.IntegrationPlatformSpec{
 			Build: v1.IntegrationPlatformBuildSpec{
-				BuildConfiguration: v1.BuildConfiguration{
-					Strategy:      v1.BuildStrategyPod,
-					OrderStrategy: v1.BuildOrderStrategyFIFO,
-				},
-				MaxRunningBuilds: 1,
+				BuildConfiguration: v1.BuildConfiguration{},
+				MaxRunningBuilds:   1,
 				Maven: v1.MavenSpec{
 					Properties: map[string]string{
 						"local_prop1":  "local_value1",
@@ -188,8 +175,6 @@ func TestRetainLocalPlatformSpec(t *testing.T) {
 
 	applyPlatformSpec(&global, &ip)
 
-	assert.Equal(t, v1.BuildStrategyPod, ip.Status.Build.BuildConfiguration.Strategy)
-	assert.Equal(t, v1.BuildOrderStrategyFIFO, ip.Status.Build.BuildConfiguration.OrderStrategy)
 	assert.Equal(t, int32(1), ip.Status.Build.MaxRunningBuilds)
 	assert.Equal(t, len(global.Status.Build.Maven.CLIOptions), len(ip.Status.Build.Maven.CLIOptions))
 	assert.Equal(t, global.Status.Build.Maven.CLIOptions, ip.Status.Build.Maven.CLIOptions)

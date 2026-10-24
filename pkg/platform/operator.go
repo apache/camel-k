@@ -37,7 +37,6 @@ import (
 const (
 	OperatorWatchNamespaceEnvVariable = "WATCH_NAMESPACE"
 	operatorNamespaceEnvVariable      = "NAMESPACE"
-	OperatorBuildStrategyEnvVar       = "BUILD_STRATEGY"
 )
 
 const OperatorLockName = "camel-k-lock"

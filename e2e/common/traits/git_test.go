@@ -49,19 +49,3 @@ func TestGitRepository(t *testing.T) {
 		})
 	})
 }
-func TestPodStrategyGitRepository(t *testing.T) {
-	t.Parallel()
-	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		t.Run("Camel Quarkus", func(t *testing.T) {
-			itName := "sample"
-			g.Expect(KamelRun(t, ctx, ns,
-				"--git", "https://github.com/squakez/sample.git",
-				"-t", "builder.strategy=pod",
-			).Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, itName, v1.IntegrationConditionReady), TestTimeoutLong).
-				Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, itName)).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, itName)).Should(ContainSubstring("Hello Camel from route1"))
-		})
-	})
-}
