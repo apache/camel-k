@@ -110,10 +110,6 @@ func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet,
 	}
 
 	var externalRepos []v1.KameletRepositorySpec
-	ip, _ := platform.GetForResource(e.Ctx, e.Client, e.Integration)
-	if ip != nil {
-		externalRepos = ip.Status.Kamelet.Repositories
-	}
 	//nolint:staticcheck
 	repo, err := repository.NewWithURIs(e.Ctx, e.Client, externalRepos, namespaces...)
 	if err != nil {

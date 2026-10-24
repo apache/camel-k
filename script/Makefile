@@ -61,7 +61,7 @@ BASE_IMAGE_NAME := eclipse-temurin
 BASE_IMAGE_VERSION := 17-jdk
 OFFICIAL_IMAGE_VERSION := 17-jdk
 BASE_IMAGE_SHA_VERSION := 17-jdk
-BASE_IMAGE_SHA := sha256:fe947d993c32dd9cf651a4353a6ed723c2370b3a9d034ea4cab4775404ea531a
+BASE_IMAGE_SHA := sha256:91011320978c10ec51d2cde1eb6f616db6d2a739a0e521096c343dd3fed9abe6
 BASE_IMAGE := $(BASE_IMAGE_NAME):$(BASE_IMAGE_VERSION)$(if $(filter $(BASE_IMAGE_VERSION),$(BASE_IMAGE_SHA_VERSION)),@$(BASE_IMAGE_SHA),)
 LOCAL_REPOSITORY := /etc/maven/m2
 OPENSHIFT_REGISTRY := image-registry.openshift-image-registry.svc:5000
@@ -798,8 +798,6 @@ clone-kustomize-dir:
 set-operator-id:
 ifdef OPERATOR_ID
 	@echo "INFO: setting operator ID to $(OPERATOR_ID)"
-	@sed -i 's/name: .*/name: $(OPERATOR_ID)/' $(KUST_TMP)/install/overlays/platform/integration-platform.yaml
-	cd $(KUST_TMP)/install/overlays/platform/ && kustomize edit add annotation camel.apache.org/operator.id:$(OPERATOR_ID)
 	@sed -i 's/value: .*/value: $(OPERATOR_ID)/' $(KUST_TMP)/$(KUSTOMIZE_DIR)/patch-operator-id.yaml
 	@echo "INFO: adding a suffix for ClusterRoleBindings $(OPERATOR_ID)"
 	cd $(KUST_TMP)/install/base/config/rbac/descoped && kustomize edit set namesuffix -- -$(OPERATOR_ID)
@@ -826,7 +824,6 @@ ifndef NAMESPACE
 	$(eval NAMESPACE=$(DEFAULT_NS))
 endif
 	cd $(KUST_TMP)/$(KUSTOMIZE_DIR) && kustomize edit set namespace $(NAMESPACE)
-	cd $(KUST_TMP)/install/overlays/platform && kustomize edit set namespace $(NAMESPACE)
 	kubectl apply -k $(KUST_TMP)/$(KUSTOMIZE_DIR) --server-side --force-conflicts
 
 install-k8s-global: DEFAULT_NS="camel"

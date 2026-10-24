@@ -30,7 +30,7 @@ type deploymentController struct {
 }
 
 func (c *deploymentController) setReadyCondition(integration *v1.Integration) {
-	// Check the Deployment progression and availability
+	// Check the Deployment progression
 	progressing := kubernetes.GetDeploymentCondition(*c.obj, appsv1.DeploymentProgressing)
 	replicaFailure := kubernetes.GetDeploymentCondition(*c.obj, appsv1.DeploymentReplicaFailure)
 	available := kubernetes.GetDeploymentCondition(*c.obj, appsv1.DeploymentAvailable)

@@ -116,27 +116,6 @@ func NotifyIntegrationKitUpdated(ctx context.Context, c client.Client, recorder 
 		"Integration Kit", newResource.Name, ReasonIntegrationKitPhaseUpdated, "")
 }
 
-// NotifyIntegrationPlatformUpdated automatically generates events when an integration platform changes.
-//
-//nolint:staticcheck
-func NotifyIntegrationPlatformUpdated(ctx context.Context, c client.Client, recorder events.EventRecorder, old, newResource *v1.IntegrationPlatform) {
-	if newResource == nil {
-		return
-	}
-	oldPhase := ""
-	var oldConditions []v1.ResourceCondition
-	if old != nil {
-		oldPhase = string(old.Status.Phase)
-		oldConditions = old.Status.GetConditions()
-	}
-	if newResource.Status.Phase != v1.IntegrationPlatformPhaseNone {
-		notifyIfConditionUpdated(recorder, newResource, oldConditions, newResource.Status.GetConditions(),
-			"Integration Platform", newResource.Name, ReasonIntegrationPlatformConditionChanged)
-	}
-	notifyIfPhaseUpdated(ctx, c, recorder, newResource, oldPhase, string(newResource.Status.Phase),
-		"Integration Platform", newResource.Name, ReasonIntegrationPlatformPhaseUpdated, "")
-}
-
 // NotifyCamelCatalogUpdated automatically generates events when a CamelCatalog changes.
 func NotifyCamelCatalogUpdated(ctx context.Context, c client.Client, recorder events.EventRecorder, old, newResource *v1.CamelCatalog) {
 	if newResource == nil {

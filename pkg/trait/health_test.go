@@ -71,7 +71,6 @@ func TestHealthTrait(t *testing.T) {
 			},
 		},
 		Platform: platform.Platform{
-			PublishStrategy:     v1.IntegrationPlatformBuildPublishStrategyJib,
 			Registry:            v1.RegistrySpec{Address: "registry"},
 			BuildRuntimeVersion: catalog.Runtime.Version,
 		},
@@ -148,7 +147,6 @@ func TestHealthTraitOlderRuntime(t *testing.T) {
 			},
 		},
 		Platform: platform.Platform{
-			PublishStrategy:     v1.IntegrationPlatformBuildPublishStrategyJib,
 			Registry:            v1.RegistrySpec{Address: "registry"},
 			BuildRuntimeVersion: catalog.Runtime.Version,
 		},

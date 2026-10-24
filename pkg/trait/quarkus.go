@@ -31,7 +31,6 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/builder"
-	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -327,11 +326,6 @@ func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType quarkusPack
 
 func propagateKitTraits(e *Environment) v1.IntegrationKitTraits {
 	kitTraits := v1.IntegrationKitTraits{}
-
-	ip, err := platform.GetForResource(e.Ctx, e.Client, e.Integration)
-	if ip != nil && err == nil {
-		propagate(fmt.Sprintf("platform %q", ip.Name), ip.Status.Traits, &kitTraits)
-	}
 
 	if e.IntegrationProfile != nil {
 		propagate(fmt.Sprintf("integration profile %q", e.IntegrationProfile.Name), e.IntegrationProfile.Spec.Traits, &kitTraits)

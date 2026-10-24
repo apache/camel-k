@@ -60,6 +60,9 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+            # You can provide a different SA for builder Pods
+            - name: BUILDER_SA
+              value: "camel-k-builder"
             - name: OPERATOR_NAME
               value: "camel-k"
             - name: OPERATOR_ID
@@ -78,9 +81,6 @@ spec:
             # Note: remove the variable to disable the feature.
             - name: CAMEL_MONITOR_OPERATOR_LABEL
               value: "camel.apache.org/monitor"
-            # You can provide a different SA for builder Pods
-            - name: BUILDER_SA
-              value: "camel-k-builder"
             # Demo only: turn it off or remove the variable in a production environment.
             - name: ENABLE_DEV_REGISTRY
               value: "true"

@@ -355,8 +355,7 @@ spec:
                       type: string
                     type: array
                   publishStrategy:
-                    description: the strategy to adopt for publishing an Integration
-                      container image
+                    description: 'Deprecated: no longer in use.'
                     type: string
                   registry:
                     description: the image registry used to push/pull Integration
@@ -2827,8 +2826,7 @@ spec:
                       type: string
                     type: array
                   publishStrategy:
-                    description: the strategy to adopt for publishing an Integration
-                      container image
+                    description: 'Deprecated: no longer in use.'
                     type: string
                   registry:
                     description: the image registry used to push/pull Integration

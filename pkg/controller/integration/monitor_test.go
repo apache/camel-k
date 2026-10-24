@@ -230,7 +230,25 @@ func nominalEnvironment() (client.Client, *v1.Integration, error) {
 			},
 		},
 	}
-	c, err := internal.NewFakeClient(catalog, it, kit, pod)
+	deployment := &appsv1.Deployment{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: appsv1.SchemeGroupVersion.String(),
+			Kind:       "Deployment",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "ns",
+			Name:      "my-it",
+		},
+		Status: appsv1.DeploymentStatus{
+			Conditions: []appsv1.DeploymentCondition{
+				{
+					Type:   appsv1.DeploymentAvailable,
+					Status: corev1.ConditionTrue,
+				},
+			},
+		},
+	}
+	c, err := internal.NewFakeClient(catalog, it, kit, pod, deployment)
 	return c, it, err
 }
 

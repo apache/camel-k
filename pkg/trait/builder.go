@@ -288,19 +288,17 @@ func (t *builderTrait) Apply(e *Environment) error {
 	pipelineTasks = append(pipelineTasks, v1.Task{Package: packageTask})
 
 	// Publishing task
-	if e.Platform.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyJib {
-		jibTask := v1.Task{Jib: &v1.JibTask{
-			Name:          "jib",
-			Configuration: *taskConfOrDefault(tasksConf, "jib"),
-			BaseImage:     t.getBaseImage(e),
-			Image:         imageName,
-			Registry:      e.Platform.Registry,
-		}}
-		if t.ImagePlatforms != nil {
-			jibTask.Jib.Configuration.ImagePlatforms = t.ImagePlatforms
-		}
-		pipelineTasks = append(pipelineTasks, jibTask)
+	jibTask := v1.Task{Jib: &v1.JibTask{
+		Name:          "jib",
+		Configuration: *taskConfOrDefault(tasksConf, "jib"),
+		BaseImage:     t.getBaseImage(e),
+		Image:         imageName,
+		Registry:      e.Platform.Registry,
+	}}
+	if t.ImagePlatforms != nil {
+		jibTask.Jib.Configuration.ImagePlatforms = t.ImagePlatforms
 	}
+	pipelineTasks = append(pipelineTasks, jibTask)
 
 	// filter only those tasks required by the user
 	//nolint:staticcheck

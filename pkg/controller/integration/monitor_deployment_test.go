@@ -75,6 +75,10 @@ func TestDeploymentController_setReadyCondition(t *testing.T) {
 					Reason:  "ReplicaSetUpdated",
 					Message: "ReplicaSet is being updated",
 				},
+				{
+					Type:   appsv1.DeploymentAvailable,
+					Status: corev1.ConditionTrue,
+				},
 			},
 			expectedReady:   corev1.ConditionTrue,
 			expectedReason:  v1.IntegrationConditionDeploymentReadyReason,
@@ -87,6 +91,22 @@ func TestDeploymentController_setReadyCondition(t *testing.T) {
 					Type:   appsv1.DeploymentReplicaFailure,
 					Status: corev1.ConditionFalse,
 				},
+				{
+					Type:   appsv1.DeploymentAvailable,
+					Status: corev1.ConditionTrue,
+				},
+			},
+			expectedReady:   corev1.ConditionTrue,
+			expectedReason:  v1.IntegrationConditionDeploymentReadyReason,
+			expectedMessage: "Ready",
+		},
+		{
+			name: "deployment available",
+			conditions: []appsv1.DeploymentCondition{
+				{
+					Type:   appsv1.DeploymentAvailable,
+					Status: corev1.ConditionTrue,
+				},
 			},
 			expectedReady:   corev1.ConditionTrue,
 			expectedReason:  v1.IntegrationConditionDeploymentReadyReason,
@@ -94,9 +114,22 @@ func TestDeploymentController_setReadyCondition(t *testing.T) {
 		},
 		{
 			name:            "deployment has no conditions",
-			expectedReady:   corev1.ConditionTrue,
+			expectedReady:   corev1.ConditionFalse,
 			expectedReason:  v1.IntegrationConditionDeploymentReadyReason,
-			expectedMessage: "Ready",
+			expectedMessage: "Deployment does not have minimum availability.",
+		},
+		{
+			name: "deployment not available",
+			conditions: []appsv1.DeploymentCondition{
+				{
+					Type:    appsv1.DeploymentAvailable,
+					Status:  corev1.ConditionFalse,
+					Message: "custom message",
+				},
+			},
+			expectedReady:   corev1.ConditionFalse,
+			expectedReason:  v1.IntegrationConditionDeploymentReadyReason,
+			expectedMessage: "custom message",
 		},
 	}
 

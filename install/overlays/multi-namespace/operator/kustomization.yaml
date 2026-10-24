@@ -27,4 +27,5 @@ resources:
 patches:
  - target:
       kind: Deployment
-   path: patch-envvars.yaml
+   path: remove-watch-ns.yaml
+ - path: patch-envvars.yaml

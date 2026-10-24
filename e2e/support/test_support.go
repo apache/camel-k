@@ -1648,7 +1648,6 @@ func CRDs(t *testing.T) func() []metav1.APIResource {
 			reflect.TypeOf(v1.Build{}).Name(),
 			reflect.TypeOf(v1.Integration{}).Name(),
 			reflect.TypeOf(v1.IntegrationKit{}).Name(),
-			reflect.TypeOf(v1.IntegrationPlatform{}).Name(),
 			reflect.TypeOf(v1.IntegrationProfile{}).Name(),
 			reflect.TypeOf(v1.Kamelet{}).Name(),
 			reflect.TypeOf(v1.Pipe{}).Name(),

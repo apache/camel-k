@@ -46,7 +46,7 @@ func TestCreateCatalog(t *testing.T) {
 		maven.DefaultMavenRepositories += ",https://repository.apache.org/content/repositories/snapshots-group@snapshots@id=apache-snapshots"
 	}
 	platform.InitPlatform()
-	pl := platform.GetPlatform(nil, nil)
+	pl := platform.GetPlatform(nil)
 	catalog, err := CreateCatalog(
 		context.TODO(),
 		c,

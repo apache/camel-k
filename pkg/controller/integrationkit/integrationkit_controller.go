@@ -129,54 +129,6 @@ func add(_ context.Context, mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// Watch for IntegrationPlatform phase transitioning to ready and enqueue
-	// requests for any integration kits that are in phase waiting for platform
-	err = c.Watch(
-		source.Kind(
-			mgr.GetCache(),
-			//nolint:staticcheck
-			&v1.IntegrationPlatform{},
-			//nolint:staticcheck
-			handler.TypedEnqueueRequestsFromMapFunc(func(ctx context.Context, itp *v1.IntegrationPlatform) []reconcile.Request {
-				var requests []reconcile.Request
-				if itp.Status.Phase == v1.IntegrationPlatformPhaseReady {
-					list := &v1.IntegrationKitList{}
-					if err := mgr.GetClient().List(ctx, list, ctrl.InNamespace(itp.Namespace)); err != nil {
-						log.Error(err, "Failed to list integration kits")
-
-						return requests
-					}
-					for _, kit := range list.Items {
-						if v, ok := kit.Annotations[v1.PlatformSelectorAnnotation]; ok && v != itp.Name {
-							log.Infof("Integration kit %s is waiting for selected integration platform '%s' - skip it now", kit.Name, v)
-
-							continue
-						}
-						//nolint:staticcheck
-						if v, ok := kit.Annotations[v1.OperatorIDAnnotation]; ok && v != itp.Name {
-							// kit waiting for another platform to become ready - skip here
-							log.Debugf("Integration kit %s is waiting for another integration platform '%s' - skip it now", kit.Name, v)
-
-							continue
-						}
-						if kit.Status.Phase == v1.IntegrationKitPhaseWaitingForPlatform {
-							log.Infof("Platform %s ready, wake-up integration kit: %s", itp.Name, kit.Name)
-							requests = append(requests, reconcile.Request{
-								Namespace: kit.Namespace,
-								Name:      kit.Name,
-							})
-						}
-					}
-				}
-
-				return requests
-			}),
-		),
-	)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -236,7 +188,6 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 	target := instance.DeepCopy()
 	targetLog := rlog.ForIntegrationKit(target)
 
-	//nolint:nestif
 	if target.Status.Phase == v1.IntegrationKitPhaseNone || target.Status.Phase == v1.IntegrationKitPhaseWaitingForPlatform {
 		rlog.Debug("Preparing to shift integration kit phase")
 		if target.IsExternal() {
@@ -245,19 +196,9 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 			return r.update(ctx, &instance, target)
 		}
 
-		// Platform is always local to the kit
-		pl, _ := platform.GetForResource(ctx, r.client, target)
-		if pl != nil && pl.Status.Phase != v1.IntegrationPlatformPhaseReady {
-			target.Status.Phase = v1.IntegrationKitPhaseWaitingForPlatform
-		} else {
-			target.Status.Phase = v1.IntegrationKitPhaseInitialization
-		}
+		target.Status.Phase = v1.IntegrationKitPhaseInitialization
 
 		if instance.Status.Phase != target.Status.Phase {
-			if pl != nil {
-				target.SetIntegrationPlatform(pl)
-			}
-
 			return r.update(ctx, &instance, target)
 		}
 

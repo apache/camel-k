@@ -23,7 +23,6 @@ import (
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
@@ -116,11 +115,6 @@ func newEnvironment(ctx context.Context, c client.Client, integration *v1.Integr
 		obj = kit
 	}
 
-	pl, err := platform.GetForResource(ctx, c, obj)
-	if err != nil && !k8serrors.IsNotFound(err) {
-		return nil, err
-	}
-
 	ipr, err := platform.ApplyIntegrationProfile(ctx, c, obj)
 	if err != nil {
 		return nil, err
@@ -133,7 +127,7 @@ func newEnvironment(ctx context.Context, c client.Client, integration *v1.Integr
 		}
 	}
 
-	envPlatform := platform.GetPlatform(pl, ipr)
+	envPlatform := platform.GetPlatform(ipr)
 
 	//
 	// kit can still be nil if integration kit is yet

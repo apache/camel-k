@@ -224,22 +224,6 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 		t.Logf("could not read Pods: %v\n", err.Error())
 	}
 
-	// IntegrationPlatforms
-	pls, err := camelClient.CamelV1().IntegrationPlatforms(ns).List(ctx, metav1.ListOptions{})
-	if err == nil {
-		t.Logf("Found %d platforms:\n", len(pls.Items))
-		for _, p := range pls.Items {
-			ref := p
-			pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
-			if err != nil {
-				return err
-			}
-			t.Logf("---\n%s\n---\n", string(pdata))
-		}
-	} else {
-		t.Logf("could not read IntegrationPlatforms: %v\n", err.Error())
-	}
-
 	// IntegrationProfiles
 	iprs, err := camelClient.CamelV1().IntegrationProfiles(ns).List(ctx, metav1.ListOptions{})
 	if err == nil {

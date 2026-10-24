@@ -33,7 +33,7 @@ import (
 // When the Camel K operator is installed in `global` mode,
 // you will need to specify an `IntegrationPlatform` in each namespace where you want the Camel K operator to be executed.
 //
-// Deprecated: see documentation to switch to environment variable based configuration.
+// Deprecated: no longer in use.
 type IntegrationPlatformApplyConfiguration struct {
 	metav1.TypeMetaApplyConfiguration    `json:""`
 	*metav1.ObjectMetaApplyConfiguration `json:"metadata,omitempty"`

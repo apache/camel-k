@@ -33,8 +33,8 @@ import (
 type IntegrationPlatformBuildSpecApplyConfiguration struct {
 	// the configuration required to build an Integration container image
 	BuildConfiguration *BuildConfigurationApplyConfiguration `json:"buildConfiguration,omitempty"`
-	// the strategy to adopt for publishing an Integration container image
-	PublishStrategy *camelv1.IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
+	// Deprecated: no longer in use
+	DeprecatedPublishStrategy *string `json:"publishStrategy,omitempty"`
 	// the Camel K Runtime dependency version
 	RuntimeVersion *string `json:"runtimeVersion,omitempty"`
 	// the runtime used. Likely Camel Quarkus (we used to have main runtime which has been discontinued since version 1.5)
@@ -74,11 +74,11 @@ func (b *IntegrationPlatformBuildSpecApplyConfiguration) WithBuildConfiguration(
 	return b
 }
 
-// WithPublishStrategy sets the PublishStrategy field in the declarative configuration to the given value
+// WithDeprecatedPublishStrategy sets the DeprecatedPublishStrategy field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the PublishStrategy field is set to the value of the last call.
-func (b *IntegrationPlatformBuildSpecApplyConfiguration) WithPublishStrategy(value camelv1.IntegrationPlatformBuildPublishStrategy) *IntegrationPlatformBuildSpecApplyConfiguration {
-	b.PublishStrategy = &value
+// If called multiple times, the DeprecatedPublishStrategy field is set to the value of the last call.
+func (b *IntegrationPlatformBuildSpecApplyConfiguration) WithDeprecatedPublishStrategy(value string) *IntegrationPlatformBuildSpecApplyConfiguration {
+	b.DeprecatedPublishStrategy = &value
 	return b
 }
 

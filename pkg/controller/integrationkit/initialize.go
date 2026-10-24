@@ -44,12 +44,17 @@ func (action *initializeAction) Name() string {
 }
 
 func (action *initializeAction) CanHandle(kit *v1.IntegrationKit) bool {
-	return kit.Status.Phase == v1.IntegrationKitPhaseInitialization ||
+	return kit.Status.Phase == v1.IntegrationKitPhaseNone ||
+		kit.Status.Phase == v1.IntegrationKitPhaseInitialization ||
 		kit.Status.Phase == v1.IntegrationKitPhaseWaitingForCatalog
 }
 
 func (action *initializeAction) Handle(ctx context.Context, kit *v1.IntegrationKit) (*v1.IntegrationKit, error) {
 	action.L.Info("Initializing IntegrationKit")
+	if kit.Status.Phase == v1.IntegrationKitPhaseNone {
+		// we move into an init phase
+		kit.Status.Phase = v1.IntegrationKitPhaseInitialization
+	}
 	if kit.Spec.Image != "" {
 		// The user provided the image directly, so there is nothing to build.
 		action.L.Info("Kit with a user provided image, won't be able to build or monitor this one.")

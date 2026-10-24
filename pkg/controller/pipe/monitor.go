@@ -146,14 +146,6 @@ func (action *monitorAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.Pip
 			Message: fmt.Sprintf("Integration %q is in %q phase", it.GetName(), target.Status.Phase),
 		}
 
-		//nolint:staticcheck
-		if condition := it.Status.GetCondition(v1.IntegrationConditionReady); condition != nil {
-			if condition.DeprecatedPods != nil {
-				c.DeprecatedPods = make([]v1.PodCondition, 0, len(condition.DeprecatedPods))
-				c.DeprecatedPods = append(c.DeprecatedPods, condition.DeprecatedPods...)
-			}
-		}
-
 		target.Status.SetConditions(c)
 	}
 
@@ -176,12 +168,6 @@ func setPipeReadyCondition(kb *v1.Pipe, it *v1.Integration) {
 			Status:  condition.Status,
 			Reason:  condition.Reason,
 			Message: message,
-		}
-
-		//nolint:staticcheck
-		if condition.DeprecatedPods != nil {
-			c.DeprecatedPods = make([]v1.PodCondition, 0, len(condition.DeprecatedPods))
-			c.DeprecatedPods = append(c.DeprecatedPods, condition.DeprecatedPods...)
 		}
 
 		kb.Status.SetConditions(c)
