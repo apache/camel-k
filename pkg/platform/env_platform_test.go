@@ -33,8 +33,6 @@ func TestGetEnvPlatform_Defaults(t *testing.T) {
 	pl := getDefaultPlatform()
 
 	assert.NotNil(t, pl)
-	assert.Equal(t, DefaultBuildStrategy, pl.BuildConfiguration.Strategy)
-	assert.Equal(t, DefaultBuildOrderStrategy, pl.BuildConfiguration.OrderStrategy)
 	assert.Equal(t, DefaultBuildTimeout, pl.BuildTimeout)
 	assert.Empty(t, pl.Registry.Address)
 	assert.Equal(t, strings.Split(DefaultMavenCLIOptions, ","), pl.Maven.CLIOptions)
@@ -43,8 +41,6 @@ func TestGetEnvPlatform_Defaults(t *testing.T) {
 func TestGetEnvPlatform_WithEnv(t *testing.T) {
 	t.Setenv("BUILD_RUNTIME_VERSION", "1.2.3")
 	t.Setenv("BUILD_TIMEOUT_SECONDS", "10")
-	t.Setenv("BUILD_STRATEGY", "pod")
-	t.Setenv("BUILD_ORDER_STRATEGY", "fifo")
 	t.Setenv("REGISTRY_ADDRESS", "registry.io")
 	t.Setenv("REGISTRY_SECRET", "secret")
 	t.Setenv("REGISTRY_INSECURE", "true")
@@ -59,8 +55,6 @@ func TestGetEnvPlatform_WithEnv(t *testing.T) {
 
 	assert.Equal(t, "1.2.3", p.BuildRuntimeVersion)
 	assert.Equal(t, time.Duration(10)*time.Second, p.BuildTimeout)
-	assert.Equal(t, v1.BuildStrategy("pod"), p.BuildConfiguration.Strategy)
-	assert.Equal(t, v1.BuildOrderStrategy("fifo"), p.BuildConfiguration.OrderStrategy)
 	assert.Equal(t, "registry.io", p.Registry.Address)
 	assert.Equal(t, "secret", p.Registry.Secret)
 	assert.True(t, p.Registry.Insecure)
@@ -270,12 +264,8 @@ func TestFromIntegrationProfile_Overrides(t *testing.T) {
 	singletonPlatform = Platform{
 		BuildRuntimeVersion: "1.20",
 		BuildTimeout:        5 * time.Minute,
-		BuildConfiguration: v1.BuildConfiguration{
-			Strategy:      "default-strategy",
-			OrderStrategy: "default-order",
-		},
-		BuildBaseImage:  "default-image",
-		PublishStrategy: "default-publish",
+		BuildBaseImage:      "default-image",
+		PublishStrategy:     "default-publish",
 		Registry: v1.RegistrySpec{
 			Address: "default.registry",
 		},

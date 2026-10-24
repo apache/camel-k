@@ -111,17 +111,10 @@ spec:
                       for `pod` strategy
                     type: object
                   operatorNamespace:
-                    description: |-
-                      The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-
-                      Deprecated: no longer in use.
+                    description: 'Deprecated: no longer in use.'
                     type: string
                   orderStrategy:
-                    description: the build order strategy to adopt
-                    enum:
-                    - dependencies
-                    - fifo
-                    - sequential
+                    description: 'Deprecated: no longer in use.'
                     type: string
                   platforms:
                     description: The list of platforms used in order to build a container
@@ -138,10 +131,7 @@ spec:
                       for `pod` strategy
                     type: string
                   strategy:
-                    description: the strategy to adopt
-                    enum:
-                    - routine
-                    - pod
+                    description: 'Deprecated: no longer in use.'
                     type: string
                   toolImage:
                     description: The container image to be used to run the build.
@@ -197,17 +187,10 @@ spec:
                                 Only used for `pod` strategy
                               type: object
                             operatorNamespace:
-                              description: |-
-                                The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-
-                                Deprecated: no longer in use.
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             orderStrategy:
-                              description: the build order strategy to adopt
-                              enum:
-                              - dependencies
-                              - fifo
-                              - sequential
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             platforms:
                               description: The list of platforms used in order to
@@ -224,10 +207,7 @@ spec:
                                 Only used for `pod` strategy
                               type: string
                             strategy:
-                              description: the strategy to adopt
-                              enum:
-                              - routine
-                              - pod
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             toolImage:
                               description: The container image to be used to run the
@@ -308,17 +288,10 @@ spec:
                                 Only used for `pod` strategy
                               type: object
                             operatorNamespace:
-                              description: |-
-                                The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-
-                                Deprecated: no longer in use.
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             orderStrategy:
-                              description: the build order strategy to adopt
-                              enum:
-                              - dependencies
-                              - fifo
-                              - sequential
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             platforms:
                               description: The list of platforms used in order to
@@ -335,10 +308,7 @@ spec:
                                 Only used for `pod` strategy
                               type: string
                             strategy:
-                              description: the strategy to adopt
-                              enum:
-                              - routine
-                              - pod
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             toolImage:
                               description: The container image to be used to run the
@@ -943,17 +913,10 @@ spec:
                                 Only used for `pod` strategy
                               type: object
                             operatorNamespace:
-                              description: |-
-                                The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-
-                                Deprecated: no longer in use.
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             orderStrategy:
-                              description: the build order strategy to adopt
-                              enum:
-                              - dependencies
-                              - fifo
-                              - sequential
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             platforms:
                               description: The list of platforms used in order to
@@ -970,10 +933,7 @@ spec:
                                 Only used for `pod` strategy
                               type: string
                             strategy:
-                              description: the strategy to adopt
-                              enum:
-                              - routine
-                              - pod
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             toolImage:
                               description: The container image to be used to run the
@@ -1025,17 +985,10 @@ spec:
                                 Only used for `pod` strategy
                               type: object
                             operatorNamespace:
-                              description: |-
-                                The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-
-                                Deprecated: no longer in use.
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             orderStrategy:
-                              description: the build order strategy to adopt
-                              enum:
-                              - dependencies
-                              - fifo
-                              - sequential
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             platforms:
                               description: The list of platforms used in order to
@@ -1052,10 +1005,7 @@ spec:
                                 Only used for `pod` strategy
                               type: string
                             strategy:
-                              description: the strategy to adopt
-                              enum:
-                              - routine
-                              - pod
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             toolImage:
                               description: The container image to be used to run the
@@ -1134,17 +1084,10 @@ spec:
                                 Only used for `pod` strategy
                               type: object
                             operatorNamespace:
-                              description: |-
-                                The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-
-                                Deprecated: no longer in use.
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             orderStrategy:
-                              description: the build order strategy to adopt
-                              enum:
-                              - dependencies
-                              - fifo
-                              - sequential
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             platforms:
                               description: The list of platforms used in order to
@@ -1161,10 +1104,7 @@ spec:
                                 Only used for `pod` strategy
                               type: string
                             strategy:
-                              description: the strategy to adopt
-                              enum:
-                              - routine
-                              - pod
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             toolImage:
                               description: The container image to be used to run the
@@ -1244,17 +1184,10 @@ spec:
                                 Only used for `pod` strategy
                               type: object
                             operatorNamespace:
-                              description: |-
-                                The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-
-                                Deprecated: no longer in use.
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             orderStrategy:
-                              description: the build order strategy to adopt
-                              enum:
-                              - dependencies
-                              - fifo
-                              - sequential
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             platforms:
                               description: The list of platforms used in order to
@@ -1271,10 +1204,7 @@ spec:
                                 Only used for `pod` strategy
                               type: string
                             strategy:
-                              description: the strategy to adopt
-                              enum:
-                              - routine
-                              - pod
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             toolImage:
                               description: The container image to be used to run the
@@ -1870,17 +1800,10 @@ spec:
                                 Only used for `pod` strategy
                               type: object
                             operatorNamespace:
-                              description: |-
-                                The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-
-                                Deprecated: no longer in use.
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             orderStrategy:
-                              description: the build order strategy to adopt
-                              enum:
-                              - dependencies
-                              - fifo
-                              - sequential
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             platforms:
                               description: The list of platforms used in order to
@@ -1897,10 +1820,7 @@ spec:
                                 Only used for `pod` strategy
                               type: string
                             strategy:
-                              description: the strategy to adopt
-                              enum:
-                              - routine
-                              - pod
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             toolImage:
                               description: The container image to be used to run the
@@ -1972,17 +1892,10 @@ spec:
                                 Only used for `pod` strategy
                               type: object
                             operatorNamespace:
-                              description: |-
-                                The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-
-                                Deprecated: no longer in use.
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             orderStrategy:
-                              description: the build order strategy to adopt
-                              enum:
-                              - dependencies
-                              - fifo
-                              - sequential
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             platforms:
                               description: The list of platforms used in order to
@@ -1999,10 +1912,7 @@ spec:
                                 Only used for `pod` strategy
                               type: string
                             strategy:
-                              description: the strategy to adopt
-                              enum:
-                              - routine
-                              - pod
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             toolImage:
                               description: The container image to be used to run the
@@ -2949,16 +2859,12 @@ spec:
                           existing containers (default `true`)
                         type: boolean
                       limitCPU:
-                        description: |-
-                          When using `pod` strategy, the maximum amount of CPU required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       limitMemory:
-                        description: |-
-                          When using `pod` strategy, the maximum amount of memory required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       mavenProfiles:
                         description: 'Deprecated: no longer in use.'
@@ -2972,12 +2878,7 @@ spec:
                           to be scheduled on, based on labels on the node.
                         type: object
                       orderStrategy:
-                        description: The build order strategy to use, either `dependencies`,
-                          `fifo` or `sequential` (default is the platform default)
-                        enum:
-                        - dependencies
-                        - fifo
-                        - sequential
+                        description: 'Deprecated: no longer in use'
                         type: string
                       platforms:
                         description: The list of manifest platforms to use to build
@@ -2992,23 +2893,15 @@ spec:
                           type: string
                         type: array
                       requestCPU:
-                        description: |-
-                          When using `pod` strategy, the minimum amount of CPU required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       requestMemory:
-                        description: |-
-                          When using `pod` strategy, the minimum amount of memory required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       strategy:
-                        description: The strategy to use, either `pod` or `routine`
-                          (default `routine`)
-                        enum:
-                        - pod
-                        - routine
+                        description: 'Deprecated: no longer in use'
                         type: string
                       tasks:
                         description: |-
@@ -3052,10 +2945,7 @@ spec:
                           type: string
                         type: array
                       verbose:
-                        description: |-
-                          Enable verbose logging on build components that support it (e.g. Kaniko build pod).
-
-                          Deprecated: no longer in use
+                        description: 'Deprecated: no longer in use'
                         type: boolean
                     type: object
                   camel:
@@ -3436,17 +3326,10 @@ spec:
                           for `pod` strategy
                         type: object
                       operatorNamespace:
-                        description: |-
-                          The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-
-                          Deprecated: no longer in use.
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       orderStrategy:
-                        description: the build order strategy to adopt
-                        enum:
-                        - dependencies
-                        - fifo
-                        - sequential
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       platforms:
                         description: The list of platforms used in order to build
@@ -3463,10 +3346,7 @@ spec:
                           for `pod` strategy
                         type: string
                       strategy:
-                        description: the strategy to adopt
-                        enum:
-                        - routine
-                        - pod
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       toolImage:
                         description: The container image to be used to run the build.
@@ -3912,16 +3792,12 @@ spec:
                           existing containers (default `true`)
                         type: boolean
                       limitCPU:
-                        description: |-
-                          When using `pod` strategy, the maximum amount of CPU required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       limitMemory:
-                        description: |-
-                          When using `pod` strategy, the maximum amount of memory required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       mavenProfiles:
                         description: 'Deprecated: no longer in use.'
@@ -3935,12 +3811,7 @@ spec:
                           to be scheduled on, based on labels on the node.
                         type: object
                       orderStrategy:
-                        description: The build order strategy to use, either `dependencies`,
-                          `fifo` or `sequential` (default is the platform default)
-                        enum:
-                        - dependencies
-                        - fifo
-                        - sequential
+                        description: 'Deprecated: no longer in use'
                         type: string
                       platforms:
                         description: The list of manifest platforms to use to build
@@ -3955,23 +3826,15 @@ spec:
                           type: string
                         type: array
                       requestCPU:
-                        description: |-
-                          When using `pod` strategy, the minimum amount of CPU required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       requestMemory:
-                        description: |-
-                          When using `pod` strategy, the minimum amount of memory required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       strategy:
-                        description: The strategy to use, either `pod` or `routine`
-                          (default `routine`)
-                        enum:
-                        - pod
-                        - routine
+                        description: 'Deprecated: no longer in use'
                         type: string
                       tasks:
                         description: |-
@@ -4015,10 +3878,7 @@ spec:
                           type: string
                         type: array
                       verbose:
-                        description: |-
-                          Enable verbose logging on build components that support it (e.g. Kaniko build pod).
-
-                          Deprecated: no longer in use
+                        description: 'Deprecated: no longer in use'
                         type: boolean
                     type: object
                   camel:
@@ -5985,17 +5845,10 @@ spec:
                           for `pod` strategy
                         type: object
                       operatorNamespace:
-                        description: |-
-                          The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-
-                          Deprecated: no longer in use.
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       orderStrategy:
-                        description: the build order strategy to adopt
-                        enum:
-                        - dependencies
-                        - fifo
-                        - sequential
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       platforms:
                         description: The list of platforms used in order to build
@@ -6012,10 +5865,7 @@ spec:
                           for `pod` strategy
                         type: string
                       strategy:
-                        description: the strategy to adopt
-                        enum:
-                        - routine
-                        - pod
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       toolImage:
                         description: The container image to be used to run the build.
@@ -6509,16 +6359,12 @@ spec:
                           existing containers (default `true`)
                         type: boolean
                       limitCPU:
-                        description: |-
-                          When using `pod` strategy, the maximum amount of CPU required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       limitMemory:
-                        description: |-
-                          When using `pod` strategy, the maximum amount of memory required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       mavenProfiles:
                         description: 'Deprecated: no longer in use.'
@@ -6532,12 +6378,7 @@ spec:
                           to be scheduled on, based on labels on the node.
                         type: object
                       orderStrategy:
-                        description: The build order strategy to use, either `dependencies`,
-                          `fifo` or `sequential` (default is the platform default)
-                        enum:
-                        - dependencies
-                        - fifo
-                        - sequential
+                        description: 'Deprecated: no longer in use'
                         type: string
                       platforms:
                         description: The list of manifest platforms to use to build
@@ -6552,23 +6393,15 @@ spec:
                           type: string
                         type: array
                       requestCPU:
-                        description: |-
-                          When using `pod` strategy, the minimum amount of CPU required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       requestMemory:
-                        description: |-
-                          When using `pod` strategy, the minimum amount of memory required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       strategy:
-                        description: The strategy to use, either `pod` or `routine`
-                          (default `routine`)
-                        enum:
-                        - pod
-                        - routine
+                        description: 'Deprecated: no longer in use'
                         type: string
                       tasks:
                         description: |-
@@ -6612,10 +6445,7 @@ spec:
                           type: string
                         type: array
                       verbose:
-                        description: |-
-                          Enable verbose logging on build components that support it (e.g. Kaniko build pod).
-
-                          Deprecated: no longer in use
+                        description: 'Deprecated: no longer in use'
                         type: boolean
                     type: object
                   camel:
@@ -8873,17 +8703,10 @@ spec:
                       for `pod` strategy
                     type: object
                   operatorNamespace:
-                    description: |-
-                      The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-
-                      Deprecated: no longer in use.
+                    description: 'Deprecated: no longer in use.'
                     type: string
                   orderStrategy:
-                    description: the build order strategy to adopt
-                    enum:
-                    - dependencies
-                    - fifo
-                    - sequential
+                    description: 'Deprecated: no longer in use.'
                     type: string
                   platforms:
                     description: The list of platforms used in order to build a container
@@ -8936,10 +8759,7 @@ spec:
                     description: the runtime dependency version to use.
                     type: string
                   strategy:
-                    description: the strategy to adopt
-                    enum:
-                    - routine
-                    - pod
+                    description: 'Deprecated: no longer in use.'
                     type: string
                   timeout:
                     description: how much time to wait before time out the pipeline
@@ -9067,16 +8887,12 @@ spec:
                           existing containers (default `true`)
                         type: boolean
                       limitCPU:
-                        description: |-
-                          When using `pod` strategy, the maximum amount of CPU required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       limitMemory:
-                        description: |-
-                          When using `pod` strategy, the maximum amount of memory required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       mavenProfiles:
                         description: 'Deprecated: no longer in use.'
@@ -9090,12 +8906,7 @@ spec:
                           to be scheduled on, based on labels on the node.
                         type: object
                       orderStrategy:
-                        description: The build order strategy to use, either `dependencies`,
-                          `fifo` or `sequential` (default is the platform default)
-                        enum:
-                        - dependencies
-                        - fifo
-                        - sequential
+                        description: 'Deprecated: no longer in use'
                         type: string
                       platforms:
                         description: The list of manifest platforms to use to build
@@ -9110,23 +8921,15 @@ spec:
                           type: string
                         type: array
                       requestCPU:
-                        description: |-
-                          When using `pod` strategy, the minimum amount of CPU required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       requestMemory:
-                        description: |-
-                          When using `pod` strategy, the minimum amount of memory required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       strategy:
-                        description: The strategy to use, either `pod` or `routine`
-                          (default `routine`)
-                        enum:
-                        - pod
-                        - routine
+                        description: 'Deprecated: no longer in use'
                         type: string
                       tasks:
                         description: |-
@@ -9170,10 +8973,7 @@ spec:
                           type: string
                         type: array
                       verbose:
-                        description: |-
-                          Enable verbose logging on build components that support it (e.g. Kaniko build pod).
-
-                          Deprecated: no longer in use
+                        description: 'Deprecated: no longer in use'
                         type: boolean
                     type: object
                   camel:
@@ -11375,17 +11175,10 @@ spec:
                       for `pod` strategy
                     type: object
                   operatorNamespace:
-                    description: |-
-                      The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-
-                      Deprecated: no longer in use.
+                    description: 'Deprecated: no longer in use.'
                     type: string
                   orderStrategy:
-                    description: the build order strategy to adopt
-                    enum:
-                    - dependencies
-                    - fifo
-                    - sequential
+                    description: 'Deprecated: no longer in use.'
                     type: string
                   platforms:
                     description: The list of platforms used in order to build a container
@@ -11438,10 +11231,7 @@ spec:
                     description: the runtime dependency version to use.
                     type: string
                   strategy:
-                    description: the strategy to adopt
-                    enum:
-                    - routine
-                    - pod
+                    description: 'Deprecated: no longer in use.'
                     type: string
                   timeout:
                     description: how much time to wait before time out the pipeline
@@ -11613,16 +11403,12 @@ spec:
                           existing containers (default `true`)
                         type: boolean
                       limitCPU:
-                        description: |-
-                          When using `pod` strategy, the maximum amount of CPU required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       limitMemory:
-                        description: |-
-                          When using `pod` strategy, the maximum amount of memory required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       mavenProfiles:
                         description: 'Deprecated: no longer in use.'
@@ -11636,12 +11422,7 @@ spec:
                           to be scheduled on, based on labels on the node.
                         type: object
                       orderStrategy:
-                        description: The build order strategy to use, either `dependencies`,
-                          `fifo` or `sequential` (default is the platform default)
-                        enum:
-                        - dependencies
-                        - fifo
-                        - sequential
+                        description: 'Deprecated: no longer in use'
                         type: string
                       platforms:
                         description: The list of manifest platforms to use to build
@@ -11656,23 +11437,15 @@ spec:
                           type: string
                         type: array
                       requestCPU:
-                        description: |-
-                          When using `pod` strategy, the minimum amount of CPU required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       requestMemory:
-                        description: |-
-                          When using `pod` strategy, the minimum amount of memory required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       strategy:
-                        description: The strategy to use, either `pod` or `routine`
-                          (default `routine`)
-                        enum:
-                        - pod
-                        - routine
+                        description: 'Deprecated: no longer in use'
                         type: string
                       tasks:
                         description: |-
@@ -11716,10 +11489,7 @@ spec:
                           type: string
                         type: array
                       verbose:
-                        description: |-
-                          Enable verbose logging on build components that support it (e.g. Kaniko build pod).
-
-                          Deprecated: no longer in use
+                        description: 'Deprecated: no longer in use'
                         type: boolean
                     type: object
                   camel:
@@ -21221,16 +20991,12 @@ spec:
                           existing containers (default `true`)
                         type: boolean
                       limitCPU:
-                        description: |-
-                          When using `pod` strategy, the maximum amount of CPU required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       limitMemory:
-                        description: |-
-                          When using `pod` strategy, the maximum amount of memory required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       mavenProfiles:
                         description: 'Deprecated: no longer in use.'
@@ -21244,12 +21010,7 @@ spec:
                           to be scheduled on, based on labels on the node.
                         type: object
                       orderStrategy:
-                        description: The build order strategy to use, either `dependencies`,
-                          `fifo` or `sequential` (default is the platform default)
-                        enum:
-                        - dependencies
-                        - fifo
-                        - sequential
+                        description: 'Deprecated: no longer in use'
                         type: string
                       platforms:
                         description: The list of manifest platforms to use to build
@@ -21264,23 +21025,15 @@ spec:
                           type: string
                         type: array
                       requestCPU:
-                        description: |-
-                          When using `pod` strategy, the minimum amount of CPU required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       requestMemory:
-                        description: |-
-                          When using `pod` strategy, the minimum amount of memory required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       strategy:
-                        description: The strategy to use, either `pod` or `routine`
-                          (default `routine`)
-                        enum:
-                        - pod
-                        - routine
+                        description: 'Deprecated: no longer in use'
                         type: string
                       tasks:
                         description: |-
@@ -21324,10 +21077,7 @@ spec:
                           type: string
                         type: array
                       verbose:
-                        description: |-
-                          Enable verbose logging on build components that support it (e.g. Kaniko build pod).
-
-                          Deprecated: no longer in use
+                        description: 'Deprecated: no longer in use'
                         type: boolean
                     type: object
                   camel:
@@ -23655,16 +23405,12 @@ spec:
                           existing containers (default `true`)
                         type: boolean
                       limitCPU:
-                        description: |-
-                          When using `pod` strategy, the maximum amount of CPU required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       limitMemory:
-                        description: |-
-                          When using `pod` strategy, the maximum amount of memory required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       mavenProfiles:
                         description: 'Deprecated: no longer in use.'
@@ -23678,12 +23424,7 @@ spec:
                           to be scheduled on, based on labels on the node.
                         type: object
                       orderStrategy:
-                        description: The build order strategy to use, either `dependencies`,
-                          `fifo` or `sequential` (default is the platform default)
-                        enum:
-                        - dependencies
-                        - fifo
-                        - sequential
+                        description: 'Deprecated: no longer in use'
                         type: string
                       platforms:
                         description: The list of manifest platforms to use to build
@@ -23698,23 +23439,15 @@ spec:
                           type: string
                         type: array
                       requestCPU:
-                        description: |-
-                          When using `pod` strategy, the minimum amount of CPU required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       requestMemory:
-                        description: |-
-                          When using `pod` strategy, the minimum amount of memory required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       strategy:
-                        description: The strategy to use, either `pod` or `routine`
-                          (default `routine`)
-                        enum:
-                        - pod
-                        - routine
+                        description: 'Deprecated: no longer in use'
                         type: string
                       tasks:
                         description: |-
@@ -23758,10 +23491,7 @@ spec:
                           type: string
                         type: array
                       verbose:
-                        description: |-
-                          Enable verbose logging on build components that support it (e.g. Kaniko build pod).
-
-                          Deprecated: no longer in use
+                        description: 'Deprecated: no longer in use'
                         type: boolean
                     type: object
                   camel:
@@ -34623,16 +34353,12 @@ spec:
                               reuse existing containers (default `true`)
                             type: boolean
                           limitCPU:
-                            description: |-
-                              When using `pod` strategy, the maximum amount of CPU required by the pod builder.
-
-                              Deprecated: use TasksRequestCPU instead with task name `builder`.
+                            description: 'Deprecated: use TasksRequestCPU instead
+                              with task name `builder`.'
                             type: string
                           limitMemory:
-                            description: |-
-                              When using `pod` strategy, the maximum amount of memory required by the pod builder.
-
-                              Deprecated: use TasksRequestCPU instead with task name `builder`.
+                            description: 'Deprecated: use TasksRequestCPU instead
+                              with task name `builder`.'
                             type: string
                           mavenProfiles:
                             description: 'Deprecated: no longer in use.'
@@ -34647,12 +34373,7 @@ spec:
                               node.
                             type: object
                           orderStrategy:
-                            description: The build order strategy to use, either `dependencies`,
-                              `fifo` or `sequential` (default is the platform default)
-                            enum:
-                            - dependencies
-                            - fifo
-                            - sequential
+                            description: 'Deprecated: no longer in use'
                             type: string
                           platforms:
                             description: The list of manifest platforms to use to
@@ -34667,23 +34388,15 @@ spec:
                               type: string
                             type: array
                           requestCPU:
-                            description: |-
-                              When using `pod` strategy, the minimum amount of CPU required by the pod builder.
-
-                              Deprecated: use TasksRequestCPU instead with task name `builder`.
+                            description: 'Deprecated: use TasksRequestCPU instead
+                              with task name `builder`.'
                             type: string
                           requestMemory:
-                            description: |-
-                              When using `pod` strategy, the minimum amount of memory required by the pod builder.
-
-                              Deprecated: use TasksRequestCPU instead with task name `builder`.
+                            description: 'Deprecated: use TasksRequestCPU instead
+                              with task name `builder`.'
                             type: string
                           strategy:
-                            description: The strategy to use, either `pod` or `routine`
-                              (default `routine`)
-                            enum:
-                            - pod
-                            - routine
+                            description: 'Deprecated: no longer in use'
                             type: string
                           tasks:
                             description: |-
@@ -34727,10 +34440,7 @@ spec:
                               type: string
                             type: array
                           verbose:
-                            description: |-
-                              Enable verbose logging on build components that support it (e.g. Kaniko build pod).
-
-                              Deprecated: no longer in use
+                            description: 'Deprecated: no longer in use'
                             type: boolean
                         type: object
                       camel:
@@ -36982,16 +36692,12 @@ spec:
                           existing containers (default `true`)
                         type: boolean
                       limitCPU:
-                        description: |-
-                          When using `pod` strategy, the maximum amount of CPU required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       limitMemory:
-                        description: |-
-                          When using `pod` strategy, the maximum amount of memory required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       mavenProfiles:
                         description: 'Deprecated: no longer in use.'
@@ -37005,12 +36711,7 @@ spec:
                           to be scheduled on, based on labels on the node.
                         type: object
                       orderStrategy:
-                        description: The build order strategy to use, either `dependencies`,
-                          `fifo` or `sequential` (default is the platform default)
-                        enum:
-                        - dependencies
-                        - fifo
-                        - sequential
+                        description: 'Deprecated: no longer in use'
                         type: string
                       platforms:
                         description: The list of manifest platforms to use to build
@@ -37025,23 +36726,15 @@ spec:
                           type: string
                         type: array
                       requestCPU:
-                        description: |-
-                          When using `pod` strategy, the minimum amount of CPU required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       requestMemory:
-                        description: |-
-                          When using `pod` strategy, the minimum amount of memory required by the pod builder.
-
-                          Deprecated: use TasksRequestCPU instead with task name `builder`.
+                        description: 'Deprecated: use TasksRequestCPU instead with
+                          task name `builder`.'
                         type: string
                       strategy:
-                        description: The strategy to use, either `pod` or `routine`
-                          (default `routine`)
-                        enum:
-                        - pod
-                        - routine
+                        description: 'Deprecated: no longer in use'
                         type: string
                       tasks:
                         description: |-
@@ -37085,10 +36778,7 @@ spec:
                           type: string
                         type: array
                       verbose:
-                        description: |-
-                          Enable verbose logging on build components that support it (e.g. Kaniko build pod).
-
-                          Deprecated: no longer in use
+                        description: 'Deprecated: no longer in use'
                         type: boolean
                     type: object
                   camel:

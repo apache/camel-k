@@ -45,14 +45,12 @@ const (
 type BuildConfiguration struct {
 	// The container image to be used to run the build.
 	ToolImage string `json:"toolImage,omitempty"`
-	// The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-	//
 	// Deprecated: no longer in use.
 	DeprecatedBuilderPodNamespace string `json:"operatorNamespace,omitempty"`
-	// the strategy to adopt
-	Strategy BuildStrategy `json:"strategy,omitempty" property:"strategy"`
-	// the build order strategy to adopt
-	OrderStrategy BuildOrderStrategy `json:"orderStrategy,omitempty" property:"order-strategy"`
+	// Deprecated: no longer in use.
+	DeprecatedStrategy string `json:"strategy,omitempty" property:"strategy"`
+	// Deprecated: no longer in use.
+	DeprecatedOrderStrategy string `json:"orderStrategy,omitempty" property:"order-strategy"`
 	// The minimum amount of CPU required. Only used for `pod` strategy
 	RequestCPU string `json:"requestCPU,omitempty" property:"request-cpu"`
 	// The minimum amount of memory required. Only used for `pod` strategy
@@ -67,52 +65,6 @@ type BuildConfiguration struct {
 	Annotations map[string]string `json:"annotations,omitempty" property:"annotations"`
 	// The list of platforms used in order to build a container image.
 	ImagePlatforms []string `json:"platforms,omitempty" property:"platforms"`
-}
-
-// BuildStrategy specifies how the Build should be executed.
-// It will trigger a Maven process (either as an Operator routine or Kubernetes Pod execution) that
-// will take care of producing the expected Camel/Camel-Quarkus runtime.
-// +kubebuilder:validation:Enum=routine;pod
-type BuildStrategy string
-
-const (
-	// BuildStrategyRoutine performs the build in a routine (will be executed as a process inside the same Camel K operator `Pod`).
-	// A routine may be preferred to a `pod` strategy since it is in general quicker to execute. It is executed as
-	// a parallel process, so you may need to consider the quantity of concurrent build process running simultaneously.
-	// Only available for Quarkus JVM mode.
-	BuildStrategyRoutine BuildStrategy = "routine"
-	// BuildStrategyPod performs the build in a `Pod` (will schedule a new builder `Pod` which will take care of the build action).
-	// This strategy has the limitation that every build will have to download all the dependencies required by the Maven build which should be
-	// mitigated by the presence of a Maven proxy.
-	// Available for both Quarkus JVM and Native mode.
-	BuildStrategyPod BuildStrategy = "pod"
-
-	// BuildOrderStrategyFIFO performs the builds with first in first out strategy based on the creation timestamp.
-	// The strategy allows builds to run in parallel to each other but oldest builds will be run first.
-	BuildOrderStrategyFIFO BuildOrderStrategy = "fifo"
-	// BuildOrderStrategyDependencies runs builds ordered by its required dependencies.
-	// Strategy looks at the list of dependencies required by an Integration and queues builds that may reuse base images produced by other
-	// scheduled builds in order to leverage the incremental build option. The strategy allows non-matching builds to run in parallel to each other.
-	BuildOrderStrategyDependencies BuildOrderStrategy = "dependencies"
-	// BuildOrderStrategySequential runs builds strictly sequential so that only one single build per operator namespace is running at a time.
-	BuildOrderStrategySequential BuildOrderStrategy = "sequential"
-)
-
-// BuildStrategies is a list of strategies allowed for the build.
-var BuildStrategies = []BuildStrategy{
-	BuildStrategyRoutine,
-	BuildStrategyPod,
-}
-
-// BuildOrderStrategy specifies how builds are reconciled and queued.
-// +kubebuilder:validation:Enum=dependencies;fifo;sequential
-type BuildOrderStrategy string
-
-// BuildOrderStrategies is a list of order strategies allowed for the build.
-var BuildOrderStrategies = []BuildOrderStrategy{
-	BuildOrderStrategyFIFO,
-	BuildOrderStrategyDependencies,
-	BuildOrderStrategySequential,
 }
 
 // KameletRepositorySpec defines the location of the Kamelet catalog to use.

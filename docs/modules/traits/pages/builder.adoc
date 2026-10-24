@@ -32,9 +32,7 @@ The following configuration options are available:
 
 | builder.verbose
 | bool
-| Enable verbose logging on build components that support it (e.g. Kaniko build pod).
-
-Deprecated: no longer in use
+| Deprecated: no longer in use
 
 | builder.properties
 | []string
@@ -42,7 +40,7 @@ Deprecated: no longer in use
 
 | builder.strategy
 | string
-| The strategy to use, either `pod` or `routine` (default `routine`)
+| Deprecated: no longer in use
 
 | builder.baseImage
 | string
@@ -55,31 +53,23 @@ installed and ready to use on path (ie `/usr/bin/java`).
 
 | builder.orderStrategy
 | string
-| The build order strategy to use, either `dependencies`, `fifo` or `sequential` (default is the platform default)
+| Deprecated: no longer in use
 
 | builder.requestCPU
 | string
-| When using `pod` strategy, the minimum amount of CPU required by the pod builder.
-
-Deprecated: use TasksRequestCPU instead with task name `builder`.
+| Deprecated: use TasksRequestCPU instead with task name `builder`.
 
 | builder.requestMemory
 | string
-| When using `pod` strategy, the minimum amount of memory required by the pod builder.
-
-Deprecated: use TasksRequestCPU instead with task name `builder`.
+| Deprecated: use TasksRequestCPU instead with task name `builder`.
 
 | builder.limitCPU
 | string
-| When using `pod` strategy, the maximum amount of CPU required by the pod builder.
-
-Deprecated: use TasksRequestCPU instead with task name `builder`.
+| Deprecated: use TasksRequestCPU instead with task name `builder`.
 
 | builder.limitMemory
 | string
-| When using `pod` strategy, the maximum amount of memory required by the pod builder.
-
-Deprecated: use TasksRequestCPU instead with task name `builder`.
+| Deprecated: use TasksRequestCPU instead with task name `builder`.
 
 | builder.mavenProfiles
 | []string

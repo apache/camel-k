@@ -134,16 +134,6 @@ func (action *buildAction) createBuild(ctx context.Context, kit *v1.IntegrationK
 	if buildConfig.IsEmpty() {
 		// default to IntegrationPlatform configuration
 		buildConfig = &env.Platform.BuildConfiguration
-	} else {
-		if buildConfig.Strategy == "" {
-			// we always need to define a strategy, so we default to platform if none
-			buildConfig.Strategy = env.Platform.BuildConfiguration.Strategy
-		}
-
-		if buildConfig.OrderStrategy == "" {
-			// we always need to define an order strategy, so we default to platform if none
-			buildConfig.OrderStrategy = env.Platform.BuildConfiguration.OrderStrategy
-		}
 	}
 
 	// The build operation, when executed as a Pod, should be executed by a container image containing the

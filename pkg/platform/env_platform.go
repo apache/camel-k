@@ -81,8 +81,6 @@ func InitPlatform() {
 		BuildRuntimeProvider: v1.RuntimeProvider(GetEnvOrDefault("BUILD_RUNTIME_PROVIDER", defaults.DefaultRuntimeProvider)),
 		BuildTimeout:         buildTimeout(),
 		BuildConfiguration: v1.BuildConfiguration{
-			Strategy:       buildStrategy(),
-			OrderStrategy:  orderStrategy(),
 			ImagePlatforms: imagePlatforms(),
 		},
 		BuildBaseImage:  GetEnvOrDefault("BUILD_BASE_IMAGE", defaults.BaseImage()),
@@ -128,19 +126,6 @@ func buildTimeout() time.Duration {
 	return DefaultBuildTimeout
 }
 
-func buildStrategy() v1.BuildStrategy {
-	buildStrategy := GetEnvOrDefault("BUILD_STRATEGY", "")
-	if buildStrategy != "" {
-		bs := v1.BuildStrategy(buildStrategy)
-		if err := bs.Validate(); err == nil {
-			return bs
-		}
-		log.Info("BUILD_STRATEGY env var value is unsupported: " + buildStrategy + ", fallback to default")
-	}
-
-	return DefaultBuildStrategy
-}
-
 func maxRunningBuilds() int32 {
 	maxRunningBuildsString := GetEnvOrDefault("MAX_RUNNING_BUILDS", "")
 	if maxRunningBuildsString != "" {
@@ -152,24 +137,7 @@ func maxRunningBuilds() int32 {
 		log.Error(err, "could not parse MAX_RUNNING_BUILDS environment variable, fallback to default value")
 	}
 
-	if buildStrategy() == v1.BuildStrategyRoutine {
-		return DefaultMaxRunningBuildsRoutineStrategy
-	}
-
 	return DefaultMaxRunningBuildsPodStrategy
-}
-
-func orderStrategy() v1.BuildOrderStrategy {
-	buildOrderStrategy := GetEnvOrDefault("BUILD_ORDER_STRATEGY", "")
-	if buildOrderStrategy != "" {
-		bs := v1.BuildOrderStrategy(buildOrderStrategy)
-		if err := bs.Validate(); err == nil {
-			return bs
-		}
-		log.Info("BUILD_ORDER_STRATEGY env var value is unsupported: " + buildOrderStrategy + ", fallback to default")
-	}
-
-	return DefaultBuildOrderStrategy
 }
 
 func publishStrategy() v1.IntegrationPlatformBuildPublishStrategy {
@@ -459,12 +427,6 @@ func fromIntegrationProfile(itpr *v1.IntegrationProfile) Platform {
 	}
 	if itpr.Spec.Build.Timeout != nil {
 		basePlatform.BuildTimeout = itpr.Spec.Build.GetTimeout().Duration
-	}
-	if itpr.Spec.Build.BuildConfiguration.Strategy != "" {
-		basePlatform.BuildConfiguration.Strategy = itpr.Spec.Build.BuildConfiguration.Strategy
-	}
-	if itpr.Spec.Build.BuildConfiguration.OrderStrategy != "" {
-		basePlatform.BuildConfiguration.OrderStrategy = itpr.Spec.Build.BuildConfiguration.OrderStrategy
 	}
 	if itpr.Spec.Build.BuildConfiguration.ImagePlatforms != nil {
 		basePlatform.BuildConfiguration.ImagePlatforms = itpr.Spec.Build.BuildConfiguration.ImagePlatforms
