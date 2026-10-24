@@ -43,3 +43,5 @@ spec:
       autoMetadata:
         artemis-queue:
           brokerName: amq-broker
+          username: admin
+          password: admin
