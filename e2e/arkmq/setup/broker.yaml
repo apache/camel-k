@@ -20,6 +20,8 @@ kind: ActiveMQArtemis
 metadata:
   name: my-broker
 spec:
+  adminUser: admin
+  adminPassword: admin
   deploymentPlan:
     size: 1
   acceptors:
