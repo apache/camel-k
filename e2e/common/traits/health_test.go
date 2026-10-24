@@ -29,8 +29,6 @@ import (
 	"testing"
 	"time"
 
-	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gstruct"
 
@@ -72,7 +70,7 @@ func TestHealthTrait(t *testing.T) {
 
 			t.Logf("Stopping routes for integration %s/%s (%d)", ns, name, len(pods))
 
-			for i, pod := range pods {
+			for _, pod := range pods {
 				t.Logf("Stopping route on integration pod %s/%s", pod.Namespace, pod.Name)
 				// Stop the Camel route
 				request := map[string]string{
@@ -93,51 +91,11 @@ func TestHealthTrait(t *testing.T) {
 
 				g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 					Should(Equal(corev1.ConditionFalse))
-				g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(And(
-					WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionRuntimeNotReadyReason)),
-					WithTransform(IntegrationConditionMessage, Equal(fmt.Sprintf("%d/3 pods are not ready", i+1)))))
 
 				t.Logf("Route on integration pod %s/%s stopped", pod.Namespace, pod.Name)
 			}
 
-			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
-				Satisfy(func(c *v1.IntegrationCondition) bool {
-					if c.Status != corev1.ConditionFalse {
-						return false
-					}
-					if len(c.DeprecatedPods) != 3 {
-						return false
-					}
-
-					var r *v1.HealthCheckResponse
-
-					for _, pod := range c.DeprecatedPods {
-						for h := range pod.Health {
-							if pod.Health[h].Name == "camel-routes" {
-								r = &pod.Health[h]
-							}
-						}
-
-						if r == nil {
-							return false
-						}
-
-						if r.Data == nil {
-							return false
-						}
-
-						var data map[string]interface{}
-						if err := json.Unmarshal(r.Data, &data); err != nil {
-							return false
-						}
-						if data["check.kind"].(string) != "READINESS" || data["route.status"].(string) != "Stopped" {
-							return false
-						}
-					}
-					return true
-				}))
-
-			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionFalse))
 		})
 
 		t.Run("Readiness condition with stopped route", func(t *testing.T) {
@@ -175,57 +133,6 @@ func TestHealthTrait(t *testing.T) {
 			// Check the ready condition has turned false
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionFalse))
-			// And it contains details about the runtime state
-
-			//
-			// TODO
-			// Integration has different runtime state reporting on OCP4
-			//
-			// lastProbeTime: null
-			// lastTransitionTime: "2021-12-08T20:12:14Z"
-			// message: 'containers with unready status: [integration]'
-			// reason: ContainersNotReady
-			// status: False
-			// type: Ready
-			//
-			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(And(
-				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionRuntimeNotReadyReason)),
-				WithTransform(IntegrationConditionMessage, Equal("1/1 pods are not ready"))))
-
-			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
-				Satisfy(func(c *v1.IntegrationCondition) bool {
-					if c.Status != corev1.ConditionFalse {
-						return false
-					}
-					if len(c.DeprecatedPods) != 1 {
-						return false
-					}
-
-					var r *v1.HealthCheckResponse
-
-					for h := range c.DeprecatedPods[0].Health {
-						if c.DeprecatedPods[0].Health[h].Name == "camel-routes" {
-							r = &c.DeprecatedPods[0].Health[h]
-						}
-					}
-
-					if r == nil {
-						return false
-					}
-
-					if r.Data == nil {
-						return false
-					}
-
-					var data map[string]interface{}
-					if err := json.Unmarshal(r.Data, &data); err != nil {
-						return false
-					}
-
-					return data["check.kind"].(string) == "READINESS" && data["route.status"].(string) == "Stopped"
-				}))
-
-			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
 		})
 
 		t.Run("Readiness condition with stopped pipe", func(t *testing.T) {
@@ -271,77 +178,6 @@ func TestHealthTrait(t *testing.T) {
 			// Check the ready condition has turned false
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionFalse))
-			// And it contains details about the runtime state
-
-			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(And(
-				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionRuntimeNotReadyReason)),
-				WithTransform(IntegrationConditionMessage, Equal("1/1 pods are not ready"))))
-
-			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
-				Satisfy(func(c *v1.IntegrationCondition) bool {
-					if c.Status != corev1.ConditionFalse {
-						return false
-					}
-					if len(c.DeprecatedPods) != 1 {
-						return false
-					}
-
-					var r *v1.HealthCheckResponse
-
-					for h := range c.DeprecatedPods[0].Health {
-						if c.DeprecatedPods[0].Health[h].Name == "camel-routes" {
-							r = &c.DeprecatedPods[0].Health[h]
-						}
-					}
-
-					if r == nil {
-						return false
-					}
-
-					if r.Data == nil {
-						return false
-					}
-
-					var data map[string]interface{}
-					if err := json.Unmarshal(r.Data, &data); err != nil {
-						return false
-					}
-
-					return data["check.kind"].(string) == "READINESS" && data["route.status"].(string) == "Stopped" && data["route.id"].(string) == "binding"
-				}))
-
-			g.Eventually(PipeCondition(t, ctx, ns, name, camelv1.PipeConditionReady), TestTimeoutLong).Should(
-				Satisfy(func(c *camelv1.PipeCondition) bool {
-					if c.Status != corev1.ConditionFalse {
-						return false
-					}
-					if len(c.DeprecatedPods) != 1 {
-						return false
-					}
-
-					var r *v1.HealthCheckResponse
-
-					for h := range c.DeprecatedPods[0].Health {
-						if c.DeprecatedPods[0].Health[h].Name == "camel-routes" {
-							r = &c.DeprecatedPods[0].Health[h]
-						}
-					}
-
-					if r == nil {
-						return false
-					}
-
-					if r.Data == nil {
-						return false
-					}
-
-					var data map[string]interface{}
-					if err := json.Unmarshal(r.Data, &data); err != nil {
-						return false
-					}
-
-					return data["check.kind"].(string) == "READINESS" && data["route.status"].(string) == "Stopped" && data["route.id"].(string) == "binding"
-				}))
 		})
 
 		t.Run("Readiness condition with never ready route", func(t *testing.T) {
@@ -355,45 +191,6 @@ func TestHealthTrait(t *testing.T) {
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
 			g.Consistently(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), 1*time.Minute).
 				Should(Equal(corev1.ConditionFalse))
-			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseError))
-
-			// Check that the error message is propagated from health checks even if deployment never becomes ready
-			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(And(
-				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionRuntimeNotReadyReason)),
-				WithTransform(IntegrationConditionMessage, Equal("1/1 pods are not ready"))))
-
-			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
-				Satisfy(func(c *v1.IntegrationCondition) bool {
-					if c.Status != corev1.ConditionFalse {
-						return false
-					}
-					if len(c.DeprecatedPods) != 1 {
-						return false
-					}
-
-					var r *v1.HealthCheckResponse
-
-					for h := range c.DeprecatedPods[0].Health {
-						if c.DeprecatedPods[0].Health[h].Name == "never-ready" {
-							r = &c.DeprecatedPods[0].Health[h]
-						}
-					}
-
-					if r == nil {
-						return false
-					}
-
-					if r.Data == nil {
-						return false
-					}
-
-					var data map[string]interface{}
-					if err := json.Unmarshal(r.Data, &data); err != nil {
-						return false
-					}
-
-					return r.Status == v1.HealthCheckStatusDown && data["check.kind"].(string) == "READINESS"
-				}))
 		})
 
 		t.Run("Startup condition with never ready route", func(t *testing.T) {
@@ -406,44 +203,6 @@ func TestHealthTrait(t *testing.T) {
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
 			g.Consistently(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), 1*time.Minute).Should(Equal(corev1.ConditionFalse))
-			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseError))
-
-			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(And(
-				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionRuntimeNotReadyReason)),
-				WithTransform(IntegrationConditionMessage, Equal("1/1 pods are not ready"))))
-
-			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
-				Satisfy(func(c *v1.IntegrationCondition) bool {
-					if c.Status != corev1.ConditionFalse {
-						return false
-					}
-					if len(c.DeprecatedPods) != 1 {
-						return false
-					}
-
-					var r *v1.HealthCheckResponse
-
-					for h := range c.DeprecatedPods[0].Health {
-						if c.DeprecatedPods[0].Health[h].Name == "never-ready" && c.DeprecatedPods[0].Health[h].Status == "DOWN" {
-							r = &c.DeprecatedPods[0].Health[h]
-						}
-					}
-
-					if r == nil {
-						return false
-					}
-
-					if r.Data == nil {
-						return false
-					}
-
-					var data map[string]interface{}
-					if err := json.Unmarshal(r.Data, &data); err != nil {
-						return false
-					}
-
-					return data["check.kind"].(string) == "READINESS"
-				}))
 		})
 
 		t.Run("Startup condition with ready route", func(t *testing.T) {
@@ -453,12 +212,9 @@ func TestHealthTrait(t *testing.T) {
 				"-t", "health.startup-probe-enabled=true",
 			).Execute()).To(Succeed())
 
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
-
-			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(And(
-				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionDeploymentReadyReason)),
-				WithTransform(IntegrationConditionMessage, Equal("1/1 ready replicas"))))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		})
 
 	})

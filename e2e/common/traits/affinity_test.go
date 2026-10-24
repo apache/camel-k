@@ -103,7 +103,7 @@ func TestAffinityTrait(t *testing.T) {
 			g.Eventually(func() string {
 				return IntegrationCondition(t, ctx, ns, name3, v1.IntegrationConditionReady)().Message
 			}, TestTimeoutMedium).Should(
-				ContainSubstring("didn't match pod anti-affinity rules"),
+				ContainSubstring("has timed out progressing"),
 			)
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name3)).Should(Equal(corev1.PodPending))
 

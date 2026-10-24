@@ -31,7 +31,6 @@ import (
 
 func TestActions(t *testing.T) {
 	base := []Action{
-		NewPlatformSetupAction(),
 		NewInitializeAction(),
 		NewBuildAction(),
 		newBuildKitAction(),
@@ -42,14 +41,13 @@ func TestActions(t *testing.T) {
 	}
 
 	actions := reconciler.baseActions
-	require.Len(t, actions, 6)
+	require.Len(t, actions, 5)
 
-	assert.IsType(t, &platformSetupAction{}, actions[0])
-	assert.IsType(t, &initializeAction{}, actions[1])
-	assert.IsType(t, &buildAction{}, actions[2])
-	assert.IsType(t, &buildKitAction{}, actions[3])
-	assert.IsType(t, &buildCompleteAction{}, actions[4])
-	assert.IsType(t, &monitorAction{}, actions[5])
+	assert.IsType(t, &initializeAction{}, actions[0])
+	assert.IsType(t, &buildAction{}, actions[1])
+	assert.IsType(t, &buildKitAction{}, actions[2])
+	assert.IsType(t, &buildCompleteAction{}, actions[3])
+	assert.IsType(t, &monitorAction{}, actions[4])
 }
 
 func TestIsIntegrationUpdated(t *testing.T) {

@@ -100,8 +100,8 @@ type IntegrationProfileBuildSpec struct {
 	Repositories []string `json:"repositories,omitempty"`
 	// the configuration required to build an Integration container image
 	BuildConfiguration BuildConfiguration `json:",inline"`
-	// the strategy to adopt for publishing an Integration container image
-	PublishStrategy IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
+	// Deprecated: no longer in use.
+	DeprecatedPublishStrategy string `json:"publishStrategy,omitempty"`
 	// the maximum amount of parallel running pipelines started by this operator instance
 	MaxRunningBuilds int32 `json:"maxRunningBuilds,omitempty"`
 }

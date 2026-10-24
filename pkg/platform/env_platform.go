@@ -24,7 +24,6 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -41,8 +40,6 @@ var operatorArch = runtime.GOARCH
 // The operator process should be in charge to initialize.
 var singletonPlatform Platform
 
-var logOnce sync.Map // map[string]*sync.Once
-
 // Platform contains a series of configuration required during build and packaging.
 type Platform struct {
 	CatalogNamespace     string
@@ -51,7 +48,6 @@ type Platform struct {
 	BuildTimeout         time.Duration
 	BuildConfiguration   v1.BuildConfiguration
 	BuildBaseImage       string
-	PublishStrategy      v1.IntegrationPlatformBuildPublishStrategy
 	Registry             v1.RegistrySpec
 	Maven                v1.MavenBuildSpec
 	MaxRunningBuilds     int32
@@ -83,9 +79,8 @@ func InitPlatform() {
 		BuildConfiguration: v1.BuildConfiguration{
 			ImagePlatforms: imagePlatforms(),
 		},
-		BuildBaseImage:  GetEnvOrDefault("BUILD_BASE_IMAGE", defaults.BaseImage()),
-		PublishStrategy: publishStrategy(),
-		Registry:        registry,
+		BuildBaseImage: GetEnvOrDefault("BUILD_BASE_IMAGE", defaults.BaseImage()),
+		Registry:       registry,
 		Maven: v1.MavenBuildSpec{
 			MavenSpec:    mavenSpec(),
 			Repositories: repositories(),
@@ -138,19 +133,6 @@ func maxRunningBuilds() int32 {
 	}
 
 	return DefaultMaxRunningBuildsPodStrategy
-}
-
-func publishStrategy() v1.IntegrationPlatformBuildPublishStrategy {
-	publishStrategy := GetEnvOrDefault("PUBLISH_STRATEGY", "")
-	if publishStrategy != "" {
-		ps := v1.IntegrationPlatformBuildPublishStrategy(publishStrategy)
-		if err := ps.Validate(); err == nil {
-			return ps
-		}
-		log.Info("PUBLISH_STRATEGY env var value is unsupported: " + publishStrategy + ", fallback to default")
-	}
-
-	return DefaultPublishStrategy
 }
 
 // TolerationTaintsAllowList returns the list of taint keys that are allowed to be used in
@@ -362,48 +344,14 @@ func caSecrets() []corev1.SecretKeySelector {
 }
 
 // GetPlatform is in charge to return a Platform based on priority:
-// 1. From IntegrationPlatform
-// 2. From IntegrationProfile
-// 3. From default environment variable setting
-//
-//nolint:staticcheck
-func GetPlatform(itp *v1.IntegrationPlatform, itpr *v1.IntegrationProfile) Platform {
-	if itp != nil {
-		return fromIntegrationPlatform(itp)
-	}
-
+// 1. From IntegrationProfile
+// 2. From default environment variable setting.
+func GetPlatform(itpr *v1.IntegrationProfile) Platform {
 	if itpr != nil {
 		return fromIntegrationProfile(itpr)
 	}
 
 	return getDefaultPlatform()
-}
-
-//nolint:staticcheck
-func fromIntegrationPlatform(itp *v1.IntegrationPlatform) Platform {
-	key := itp.Namespace + "/" + itp.Name
-	once, _ := logOnce.LoadOrStore(key, &sync.Once{})
-	o, ok := once.(*sync.Once)
-	if ok {
-		o.Do(func() {
-			log.Info("The operator detected the presence of a DEPRECATED IntegrationPlatform resource (" +
-				itp.Namespace + "/" + itp.Name + "). You need to remove it and replace any configuration with environment variables instead")
-		})
-	}
-
-	return Platform{
-		CatalogNamespace:    itp.GetNamespace(),
-		BuildRuntimeVersion: itp.Status.Build.RuntimeVersion,
-		BuildTimeout:        itp.Status.Build.GetTimeout().Duration,
-		BuildConfiguration:  itp.Status.Build.BuildConfiguration,
-		BuildBaseImage:      itp.Status.Build.BaseImage,
-		PublishStrategy:     itp.Status.Build.PublishStrategy,
-		Registry:            itp.Status.Build.Registry,
-		Maven: v1.MavenBuildSpec{
-			MavenSpec: itp.Status.Build.Maven,
-		},
-		MaxRunningBuilds: itp.Status.Build.MaxRunningBuilds,
-	}
 }
 
 // IsMavenRepoAllowed is used to verify if a given maven repository can be used or not.
@@ -433,9 +381,6 @@ func fromIntegrationProfile(itpr *v1.IntegrationProfile) Platform {
 	}
 	if itpr.Spec.Build.BaseImage != "" {
 		basePlatform.BuildBaseImage = itpr.Spec.Build.BaseImage
-	}
-	if itpr.Spec.Build.PublishStrategy != "" {
-		basePlatform.PublishStrategy = itpr.Spec.Build.PublishStrategy
 	}
 	if itpr.Spec.Build.Registry != nil {
 		basePlatform.Registry = *itpr.Spec.Build.Registry

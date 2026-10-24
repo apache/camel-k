@@ -61,6 +61,9 @@ spec:
       jsonPath: .status.build.runtimeCoreVersion
       name: Camel version
       type: string
+    deprecated: true
+    deprecationWarning: IntegrationPlatform resource is deprecated; it is not used
+      in v3 operators.
     name: v1
     schema:
       openAPIV3Schema:
@@ -70,7 +73,7 @@ spec:
           When the Camel K operator is installed in `global` mode,
           you will need to specify an `IntegrationPlatform` in each namespace where you want the Camel K operator to be executed.
 
-          Deprecated: see documentation to switch to environment variable based configuration.
+          Deprecated: no longer in use.
         properties:
           apiVersion:
             description: |-
@@ -414,8 +417,7 @@ spec:
                     format: int32
                     type: integer
                   publishStrategy:
-                    description: the strategy to adopt for publishing an Integration
-                      container image
+                    description: 'Deprecated: no longer in use'
                     type: string
                   registry:
                     description: the image registry used to push/pull Integration
@@ -2933,8 +2935,7 @@ spec:
                     format: int32
                     type: integer
                   publishStrategy:
-                    description: the strategy to adopt for publishing an Integration
-                      container image
+                    description: 'Deprecated: no longer in use'
                     type: string
                   registry:
                     description: the image registry used to push/pull Integration

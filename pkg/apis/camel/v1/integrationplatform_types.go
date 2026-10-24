@@ -77,13 +77,14 @@ type IntegrationPlatformStatus struct {
 // +kubebuilder:printcolumn:name="Registry address",type=string,JSONPath=`.status.build.registry.address`,description="The container registry address"
 // +kubebuilder:printcolumn:name="Default runtime",type=string,JSONPath=`.status.build.runtimeVersion`,description="The default runtime version"
 // +kubebuilder:printcolumn:name="Camel version",type=string,JSONPath=`.status.build.runtimeCoreVersion`,description="The default Camel core version"
+// +kubebuilder:deprecatedversion:warning="IntegrationPlatform resource is deprecated; it is not used in v3 operators."
 
 // IntegrationPlatform is the resource used to drive the Camel K operator behavior.
 // It defines the behavior of all Custom Resources (`IntegrationKit`, `Integration`, `Kamelet`) in the given namespace.
 // When the Camel K operator is installed in `global` mode,
 // you will need to specify an `IntegrationPlatform` in each namespace where you want the Camel K operator to be executed.
 //
-// Deprecated: see documentation to switch to environment variable based configuration.
+// Deprecated: no longer in use.
 type IntegrationPlatform struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -95,6 +96,8 @@ type IntegrationPlatform struct {
 // +kubebuilder:object:root=true
 
 // IntegrationPlatformList contains a list of IntegrationPlatform.
+//
+// Deprecated: no longer in use.
 type IntegrationPlatformList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
@@ -125,8 +128,8 @@ var DeprecatedAllIntegrationPlatformClusters = []IntegrationPlatformCluster{
 type IntegrationPlatformBuildSpec struct {
 	// the configuration required to build an Integration container image
 	BuildConfiguration BuildConfiguration `json:"buildConfiguration,omitempty"`
-	// the strategy to adopt for publishing an Integration container image
-	PublishStrategy IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
+	// Deprecated: no longer in use
+	DeprecatedPublishStrategy string `json:"publishStrategy,omitempty"`
 	// the Camel K Runtime dependency version
 	RuntimeVersion string `json:"runtimeVersion,omitempty"`
 	// the runtime used. Likely Camel Quarkus (we used to have main runtime which has been discontinued since version 1.5)
@@ -158,27 +161,6 @@ type IntegrationPlatformBuildSpec struct {
 type IntegrationPlatformKameletSpec struct {
 	// remote repository used to retrieve Kamelet catalog
 	Repositories []KameletRepositorySpec `json:"repositories,omitempty"`
-}
-
-// IntegrationPlatformBuildPublishStrategy defines the strategy used to package and publish an Integration base image.
-type IntegrationPlatformBuildPublishStrategy string
-
-const (
-	// IntegrationPlatformBuildPublishStrategyS2I uses the Source to Images (S2I) feature
-	// (https://docs.openshift.com/container-platform/4.9/openshift_images/create-images.html#images-create-s2i_create-images)
-	// provided by an OpenShift cluster in order to create and push the images to the registry. It is the default choice on OpenShift cluster.
-	//
-	// Deprecated: use jib or a custom publishing strategy instead.
-	IntegrationPlatformBuildPublishStrategyS2I IntegrationPlatformBuildPublishStrategy = "S2I"
-	// IntegrationPlatformBuildPublishStrategyJib uses Jib maven plugin (https://github.com/GoogleContainerTools/jib)
-	// in order to push the incremental images to the image repository.
-	IntegrationPlatformBuildPublishStrategyJib IntegrationPlatformBuildPublishStrategy = "Jib"
-)
-
-// IntegrationPlatformBuildPublishStrategies the list of all available publish strategies.
-var IntegrationPlatformBuildPublishStrategies = []IntegrationPlatformBuildPublishStrategy{
-	IntegrationPlatformBuildPublishStrategyS2I,
-	IntegrationPlatformBuildPublishStrategyJib,
 }
 
 // IntegrationPlatformPhase is the phase of an IntegrationPlatform.

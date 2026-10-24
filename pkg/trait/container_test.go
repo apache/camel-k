@@ -42,7 +42,6 @@ import (
 )
 
 var defaultPlatform = platform.Platform{
-	PublishStrategy:     v1.IntegrationPlatformBuildPublishStrategyJib,
 	Registry:            v1.RegistrySpec{Address: "registry"},
 	BuildRuntimeVersion: defaults.DefaultRuntimeVersion,
 }

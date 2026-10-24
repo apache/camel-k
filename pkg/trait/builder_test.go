@@ -110,7 +110,6 @@ func createBuilderTestEnv() *Environment {
 		IntegrationKit: itk,
 		Platform: platform.Platform{
 			Registry:            v1.RegistrySpec{Address: "registry"},
-			PublishStrategy:     platform.DefaultPublishStrategy,
 			BuildRuntimeVersion: defaults.DefaultRuntimeVersion,
 			BuildBaseImage:      "root-jdk-image",
 		},

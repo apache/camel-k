@@ -69,7 +69,6 @@ func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
 
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	base := []Action{
-		NewPlatformSetupAction(),
 		NewInitializeAction(),
 		NewBuildAction(),
 		newBuildKitAction(),
@@ -243,39 +242,6 @@ func enqueueRequestsFromConfigFunc(ctx context.Context, c client.Client, res ctr
 	return requests
 }
 
-//nolint:staticcheck
-func integrationPlatformEnqueueRequestsFromMapFunc(ctx context.Context, c client.Client, p *v1.IntegrationPlatform) []reconcile.Request {
-	var requests []reconcile.Request
-
-	if p.Status.Phase == v1.IntegrationPlatformPhaseReady {
-		list := &v1.IntegrationList{}
-
-		// Do global search in case of global operator (it may be using a global platform)
-		var opts []ctrl.ListOption
-		if !platform.IsCurrentOperatorGlobal() {
-			opts = append(opts, ctrl.InNamespace(p.Namespace))
-		}
-
-		if err := c.List(ctx, list, opts...); err != nil {
-			log.Error(err, "Failed to list integrations")
-
-			return requests
-		}
-
-		for _, integration := range list.Items {
-			if integration.Status.Phase == v1.IntegrationPhaseWaitingForPlatform {
-				log.Infof("Platform %s ready, wake-up integration: %s", p.Name, integration.Name)
-				requests = append(requests, reconcile.Request{
-					Namespace: integration.Namespace,
-					Name:      integration.Name,
-				})
-			}
-		}
-	}
-
-	return requests
-}
-
 func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 	b := builder.ControllerManagedBy(mgr).
 		Named("integration-controller").
@@ -330,21 +296,6 @@ func watchIntegrationResources(c client.Client, b *builder.Builder) {
 
 			return integrationKitEnqueueRequestsFromMapFunc(ctx, c, kit)
 		})).
-		// Watch for IntegrationPlatform phase transitioning to ready and enqueue
-		// requests for any integrations that are in phase waiting for platform
-		//nolint:staticcheck
-		Watches(&v1.IntegrationPlatform{},
-			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
-				//nolint:staticcheck
-				p, ok := a.(*v1.IntegrationPlatform)
-				if !ok {
-					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve IntegrationPlatform")
-
-					return []reconcile.Request{}
-				}
-
-				return integrationPlatformEnqueueRequestsFromMapFunc(ctx, c, p)
-			})).
 		// Watch for Configmaps or Secret used in the Integrations for updates
 		Watches(&corev1.ConfigMap{},
 			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {

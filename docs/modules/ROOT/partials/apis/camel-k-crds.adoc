@@ -184,7 +184,7 @@ It defines the behavior of all Custom Resources (`IntegrationKit`, `Integration`
 When the Camel K operator is installed in `global` mode,
 you will need to specify an `IntegrationPlatform` in each namespace where you want the Camel K operator to be executed.
 
-Deprecated: see documentation to switch to environment variable based configuration.
+Deprecated: no longer in use.
 
 [cols="2,2a",options="header"]
 |===
@@ -2943,17 +2943,6 @@ Deprecated: no longer in use.
 IntegrationPhase --.
 
 
-[#_camel_apache_org_v1_IntegrationPlatformBuildPublishStrategy]
-=== IntegrationPlatformBuildPublishStrategy(`string` alias)
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_IntegrationPlatformBuildSpec, IntegrationPlatformBuildSpec>>
-* <<#_camel_apache_org_v1_IntegrationProfileBuildSpec, IntegrationProfileBuildSpec>>
-
-IntegrationPlatformBuildPublishStrategy defines the strategy used to package and publish an Integration base image.
-
-
 [#_camel_apache_org_v1_IntegrationPlatformBuildSpec]
 === IntegrationPlatformBuildSpec
 
@@ -2978,11 +2967,11 @@ You can define the build strategy, the image registry to use and the Maven confi
 the configuration required to build an Integration container image
 
 |`publishStrategy` +
-*xref:#_camel_apache_org_v1_IntegrationPlatformBuildPublishStrategy[IntegrationPlatformBuildPublishStrategy]*
+string
 |
 
 
-the strategy to adopt for publishing an Integration container image
+Deprecated: no longer in use
 
 |`runtimeVersion` +
 string
@@ -3378,11 +3367,11 @@ Maven repositories used to build the Camel applications
 the configuration required to build an Integration container image
 
 |`publishStrategy` +
-*xref:#_camel_apache_org_v1_IntegrationPlatformBuildPublishStrategy[IntegrationPlatformBuildPublishStrategy]*
+string
 |
 
 
-the strategy to adopt for publishing an Integration container image
+Deprecated: no longer in use.
 
 |`maxRunningBuilds` +
 int32

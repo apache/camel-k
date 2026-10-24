@@ -149,16 +149,12 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 	target := instance.DeepCopy()
 	targetLog := rlog.ForBuild(target)
 
-	var actions []Action
-
-	ip, _ := platform.GetForResource(ctx, r.client, &instance)
-	envPlatform := platform.GetPlatform(ip, nil)
-
+	envPlatform := platform.GetPlatform(nil)
 	buildMonitor := Monitor{
 		maxRunningBuilds: envPlatform.MaxRunningBuilds,
 	}
 
-	actions = []Action{
+	actions := []Action{
 		newInitializePodAction(r.reader),
 		newScheduleAction(r.reader, buildMonitor),
 		newMonitorPodAction(r.reader),

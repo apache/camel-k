@@ -19,8 +19,6 @@ package trait
 
 import (
 	"encoding/json"
-
-	"github.com/apache/camel-k/v2/pkg/platform"
 )
 
 // Configure reads trait configurations from environment and applies them to catalog.
@@ -37,13 +35,6 @@ func (c *Catalog) Configure(env *Environment) error {
 	}
 
 	if env.Integration != nil {
-		ip, err := platform.GetForResource(env.Ctx, env.Client, env.Integration)
-		if ip != nil && err == nil {
-			if err := c.configureTraits(ip.Status.Traits); err != nil {
-				return err
-			}
-		}
-
 		if err := c.configureTraits(env.Integration.Spec.Traits); err != nil {
 			return err
 		}

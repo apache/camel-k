@@ -265,7 +265,6 @@ func TestFromIntegrationProfile_Overrides(t *testing.T) {
 		BuildRuntimeVersion: "1.20",
 		BuildTimeout:        5 * time.Minute,
 		BuildBaseImage:      "default-image",
-		PublishStrategy:     "default-publish",
 		Registry: v1.RegistrySpec{
 			Address: "default.registry",
 		},
@@ -282,7 +281,6 @@ func TestFromIntegrationProfile_Overrides(t *testing.T) {
 				RuntimeProvider: v1.RuntimeProviderPlainQuarkus,
 				RuntimeVersion:  "1.21",
 				BaseImage:       "custom-image",
-				PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
 				Registry: &v1.RegistrySpec{
 					Address:      "custom.registry",
 					Secret:       "custom-secret",
@@ -302,7 +300,6 @@ func TestFromIntegrationProfile_Overrides(t *testing.T) {
 	assert.Equal(t, v1.RuntimeProviderPlainQuarkus, got.BuildRuntimeProvider)
 	assert.Equal(t, "1.21", got.BuildRuntimeVersion)
 	assert.Equal(t, "custom-image", got.BuildBaseImage)
-	assert.Equal(t, v1.IntegrationPlatformBuildPublishStrategyJib, got.PublishStrategy)
 	assert.Equal(t, "custom.registry", got.Registry.Address)
 	assert.Equal(t, "custom-secret", got.Registry.Secret)
 	assert.Equal(t, "custom-org", got.Registry.Organization)

@@ -16,5 +16,5 @@
 # ---------------------------------------------------------------------------
 
 - op: add
-  path: /spec/template/spec/containers/0/env/2/value
+  path: /spec/template/spec/containers/0/env/3/value
   value: camel-k

@@ -47,8 +47,8 @@ type IntegrationProfileBuildSpecApplyConfiguration struct {
 	Repositories []string `json:"repositories,omitempty"`
 	// the configuration required to build an Integration container image
 	BuildConfiguration *BuildConfigurationApplyConfiguration `json:"BuildConfiguration,omitempty"`
-	// the strategy to adopt for publishing an Integration container image
-	PublishStrategy *camelv1.IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
+	// Deprecated: no longer in use.
+	DeprecatedPublishStrategy *string `json:"publishStrategy,omitempty"`
 	// the maximum amount of parallel running pipelines started by this operator instance
 	MaxRunningBuilds *int32 `json:"maxRunningBuilds,omitempty"`
 }
@@ -125,11 +125,11 @@ func (b *IntegrationProfileBuildSpecApplyConfiguration) WithBuildConfiguration(v
 	return b
 }
 
-// WithPublishStrategy sets the PublishStrategy field in the declarative configuration to the given value
+// WithDeprecatedPublishStrategy sets the DeprecatedPublishStrategy field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the PublishStrategy field is set to the value of the last call.
-func (b *IntegrationProfileBuildSpecApplyConfiguration) WithPublishStrategy(value camelv1.IntegrationPlatformBuildPublishStrategy) *IntegrationProfileBuildSpecApplyConfiguration {
-	b.PublishStrategy = &value
+// If called multiple times, the DeprecatedPublishStrategy field is set to the value of the last call.
+func (b *IntegrationProfileBuildSpecApplyConfiguration) WithDeprecatedPublishStrategy(value string) *IntegrationProfileBuildSpecApplyConfiguration {
+	b.DeprecatedPublishStrategy = &value
 	return b
 }
 

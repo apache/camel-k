@@ -366,7 +366,6 @@ func TestKnativeServiceNotApplicable(t *testing.T) {
 			},
 		},
 		Platform: platform.Platform{
-			PublishStrategy:     v1.IntegrationPlatformBuildPublishStrategyJib,
 			BuildRuntimeVersion: catalog.GetRuntimeVersion(),
 			Registry:            v1.RegistrySpec{Address: "registry"},
 		},

@@ -72,22 +72,6 @@ func (in *IntegrationKit) Configurations() []ConfigurationSpec {
 	return in.Spec.Configuration
 }
 
-func (in *IntegrationKit) SetIntegrationPlatform(platform *IntegrationPlatform) {
-	cs := corev1.ConditionTrue
-
-	if platform.Status.Phase != IntegrationPlatformPhaseReady {
-		cs = corev1.ConditionFalse
-	}
-
-	var message string
-	if platform.Name != "" {
-		message = "IntegrationPlatform (" + platform.Name + ")"
-	}
-
-	in.Status.SetCondition(IntegrationKitConditionPlatformAvailable, cs, IntegrationKitConditionPlatformAvailableReason, message)
-	in.Status.Platform = platform.Name
-}
-
 func (in *IntegrationKit) HasHigherPriorityThan(kit *IntegrationKit) bool {
 	p1 := 0
 	p2 := 0

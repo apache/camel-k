@@ -24,13 +24,11 @@ import (
 	"fmt"
 	"sort"
 
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 
 	"github.com/apache/camel-k/v2/pkg/client"
-	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/bindings"
 	"github.com/apache/camel-k/v2/pkg/util/knative"
@@ -90,7 +88,7 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, pipe *v1.Pipe) (
 		it.Spec.Replicas = &replicas
 	}
 
-	profile, err := determineTraitProfile(ctx, c, pipe)
+	profile, err := determineTraitProfile(c)
 	if err != nil {
 		return nil, err
 	}
@@ -248,30 +246,11 @@ func configureBinding(integration *v1.Integration, bindings ...*bindings.Binding
 }
 
 //nolint:staticcheck
-func determineTraitProfile(ctx context.Context, c client.Client, binding *v1.Pipe) (v1.TraitProfile, error) {
-	pl, err := platform.GetForResource(ctx, c, binding)
-	if err != nil && !k8serrors.IsNotFound(err) {
-		return "", fmt.Errorf("error while retrieving the integration platform: %w", err)
-	}
-	if pl != nil {
-		if pl.Status.Profile != "" {
-			return pl.Status.Profile, nil
-		}
-		if pl.Spec.Profile != "" {
-			return pl.Spec.Profile, nil
-		}
-	}
+func determineTraitProfile(c client.Client) (v1.TraitProfile, error) {
 	if ok, err := knative.IsInstalled(c); err != nil {
 		return "", err
 	} else if ok {
 		return v1.TraitProfileKnative, nil
-	}
-	if pl != nil {
-		// Determine profile from cluster type
-		plProfile := platform.GetTraitProfile(pl)
-		if plProfile != "" {
-			return plProfile, nil
-		}
 	}
 
 	return v1.DefaultTraitProfile, nil

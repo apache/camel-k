@@ -40,14 +40,13 @@ func TestBadRouteIntegration(t *testing.T) {
 		t.Run("run bad java route", func(t *testing.T) {
 			name := RandomizedSuffixName("bad-route")
 			g.Expect(KamelRun(t, ctx, ns, "files/BadRoute.java", "--name", name, "-t", "health.enabled=false").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
 				Should(Equal(corev1.ConditionFalse))
 
 			// Kit valid
 			kitName := IntegrationKitName(t, ctx, ns, name)()
 			integrationKitNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
-			g.Eventually(KitPhase(t, ctx, integrationKitNamespace, kitName), TestTimeoutShort).Should(Equal(v1.IntegrationKitPhaseReady))
+			g.Eventually(KitPhase(t, ctx, integrationKitNamespace, kitName)).Should(Equal(v1.IntegrationKitPhaseReady))
 		})
 
 		t.Run("run missing dependency java route", func(t *testing.T) {
@@ -56,29 +55,30 @@ func TestBadRouteIntegration(t *testing.T) {
 				"-d", "mvn:com.example:nonexistent:1.0", "-t", "health.enabled=false").Execute()).To(Succeed())
 			// NOTE: we need a very long timeout as there may be up to 5 attempts to build the Integration
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutVeryLong).Should(Equal(v1.IntegrationPhaseError))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionKitAvailable), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
-			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionKitAvailable), TestTimeoutShort).Should(
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionKitAvailable)).Should(Equal(corev1.ConditionFalse))
+			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionKitAvailable)).Should(
 				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionKitAvailableReason)))
-			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionKitAvailable), TestTimeoutShort).Should(
+			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionKitAvailable)).Should(
 				WithTransform(IntegrationConditionMessage, ContainSubstring("is in state \"Error\"")))
 			// Kit in error
 			kitName := IntegrationKitName(t, ctx, ns, name)()
 			integrationKitNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
-			g.Eventually(KitPhase(t, ctx, integrationKitNamespace, kitName), TestTimeoutShort).Should(Equal(v1.IntegrationKitPhaseError))
+			g.Eventually(KitPhase(t, ctx, integrationKitNamespace, kitName)).Should(Equal(v1.IntegrationKitPhaseError))
 			//Build in error with 5 attempts
-			g.Eventually(BuildPhase(t, ctx, integrationKitNamespace, kitName), TestTimeoutShort).Should(Equal(v1.BuildPhaseError))
-			g.Eventually(BuildFailureRecoveryAttempt(t, ctx, integrationKitNamespace, kitName), TestTimeoutShort).Should(Equal(5))
+			g.Eventually(BuildPhase(t, ctx, integrationKitNamespace, kitName)).Should(Equal(v1.BuildPhaseError))
+			g.Eventually(BuildFailureRecoveryAttempt(t, ctx, integrationKitNamespace, kitName)).Should(Equal(5))
 
 			// Fixing the route should reconcile the Integration
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
-			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseRunning))
+			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionKitAvailable)).Should(Equal(corev1.ConditionTrue))
 			// New Kit success
 			kitRecoveryName := IntegrationKitName(t, ctx, ns, name)()
 			integrationKitRecoveryNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
-			g.Eventually(KitPhase(t, ctx, integrationKitRecoveryNamespace, kitRecoveryName), TestTimeoutShort).Should(Equal(v1.IntegrationKitPhaseReady))
+			g.Eventually(KitPhase(t, ctx, integrationKitRecoveryNamespace, kitRecoveryName)).Should(Equal(v1.IntegrationKitPhaseReady))
 			g.Expect(kitRecoveryName).NotTo(Equal(kitName))
 			// New Build success
-			g.Eventually(BuildPhase(t, ctx, integrationKitRecoveryNamespace, kitRecoveryName), TestTimeoutShort).Should(Equal(v1.BuildPhaseSucceeded))
+			g.Eventually(BuildPhase(t, ctx, integrationKitRecoveryNamespace, kitRecoveryName)).Should(Equal(v1.BuildPhaseSucceeded))
 
 		})
 
@@ -86,10 +86,10 @@ func TestBadRouteIntegration(t *testing.T) {
 			name := RandomizedSuffixName("invalid-dependency")
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-d", "camel:non-existent", "-t", "health.enabled=false").Execute()).To(Succeed())
 			// Integration in error with Initialization Failed condition
-			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseError))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseError))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady)).
 				Should(Equal(corev1.ConditionFalse))
-			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(And(
+			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady)).Should(And(
 				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionInitializationFailedReason)),
 				WithTransform(IntegrationConditionMessage, HavePrefix("error during trait customization")),
 			))
@@ -98,44 +98,44 @@ func TestBadRouteIntegration(t *testing.T) {
 
 			// Fixing the route should reconcile the Integration in Initialization Failed condition to Running
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
 				Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Eventually(IntegrationPhase(t, ctx, ns, name)).Should(Equal(v1.IntegrationPhaseRunning))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("Magicstring!"))
 			// New Kit success
 			kitRecoveryName := IntegrationKitName(t, ctx, ns, name)()
 			integrationKitRecoveryNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
-			g.Eventually(KitPhase(t, ctx, integrationKitRecoveryNamespace, kitRecoveryName), TestTimeoutShort).Should(Equal(v1.IntegrationKitPhaseReady))
+			g.Eventually(KitPhase(t, ctx, integrationKitRecoveryNamespace, kitRecoveryName)).Should(Equal(v1.IntegrationKitPhaseReady))
 			// New Build success
-			g.Eventually(BuildPhase(t, ctx, integrationKitRecoveryNamespace, kitRecoveryName), TestTimeoutShort).Should(Equal(v1.BuildPhaseSucceeded))
+			g.Eventually(BuildPhase(t, ctx, integrationKitRecoveryNamespace, kitRecoveryName)).Should(Equal(v1.BuildPhaseSucceeded))
 		})
 
 		t.Run("run invalid java route", func(t *testing.T) {
 			name := RandomizedSuffixName("invalid-java-route")
 			// Skip the health check so we can quickly read from log
 			g.Expect(KamelRun(t, ctx, ns, "files/InvalidJava.java", "--name", name, "-t", "health.enabled=false").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
 				Should(Equal(corev1.ConditionFalse))
-			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Compilation error"))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("Compilation error"))
 
 			// Kit valid
 			kitName := IntegrationKitName(t, ctx, ns, name)()
 			integrationKitNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
-			g.Eventually(KitPhase(t, ctx, integrationKitNamespace, kitName), TestTimeoutShort).Should(Equal(v1.IntegrationKitPhaseReady))
+			g.Eventually(KitPhase(t, ctx, integrationKitNamespace, kitName)).Should(Equal(v1.IntegrationKitPhaseReady))
 
 			// Fixing the route should reconcile the Integration in Initialization Failed condition to Running
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "health.enabled=false").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
 				Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Eventually(IntegrationPhase(t, ctx, ns, name)).Should(Equal(v1.IntegrationPhaseRunning))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("Magicstring!"))
 
 			// Kit should not have changed
 			kitRecoveryName := IntegrationKitName(t, ctx, ns, name)()
 			g.Expect(kitRecoveryName).To(Equal(kitName))
-
 		})
 	})
 }

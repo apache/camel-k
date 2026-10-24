@@ -15,8 +15,21 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-- op: remove
-  path: /spec/template/spec/containers/0/env/0/valueFrom
-- op: add
-  path: /spec/template/spec/containers/0/env/0/value
-  value: "tenant-a,tenant-b"
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: camel-k-operator
+spec:
+  template:
+    spec:
+      containers:
+        - name: camel-k-operator
+          env:
+            - name: BUILDER_SA
+              value: camel-k-builder-tenant-ab
+
+            - name: WATCH_NAMESPACE
+              value: tenant-a,tenant-b
+
+            - name: OPERATOR_ID
+              value: camel-k-tenant-ab

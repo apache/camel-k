@@ -44,13 +44,18 @@ func (action *initializeAction) Name() string {
 
 // CanHandle tells whether this action can handle the integration.
 func (action *initializeAction) CanHandle(integration *v1.Integration) bool {
-	return integration.Status.Phase == v1.IntegrationPhaseInitialization ||
+	return integration.Status.Phase == v1.IntegrationPhaseNone ||
+		integration.Status.Phase == v1.IntegrationPhaseInitialization ||
 		integration.Status.Phase == v1.IntegrationPhaseUnDeploying
 }
 
 // Handle handles the integrations.
 func (action *initializeAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
 	action.L.Info("Initializing Integration")
+	if integration.Status.Phase == v1.IntegrationPhaseNone {
+		// we move into an init phase
+		integration.Status.Phase = v1.IntegrationPhaseInitialization
+	}
 
 	// Only move to the build submitted when we're initializing, never on undeploying
 	if integration.Status.Phase == v1.IntegrationPhaseInitialization && integration.Spec.Git != nil {

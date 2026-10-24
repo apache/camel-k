@@ -226,7 +226,7 @@ func TestMergePlatformTraitsIntegrationPriority(t *testing.T) {
 		},
 	}
 
-	mergedOptions, err := NewSpecTraitsOptionsForIntegrationAndPlatform(integration, nil, nil)
+	mergedOptions, err := NewSpecTraitsOptionsForIntegrationAndPlatform(integration, nil)
 	require.NoError(t, err)
 	assert.Equal(t, expectedOptions, mergedOptions)
 }
@@ -258,7 +258,7 @@ func TestMergeIntegrationProfileTraits(t *testing.T) {
 		},
 	}
 
-	mergedOptions, err := NewSpecTraitsOptionsForIntegrationAndPlatform(integration, profile, nil)
+	mergedOptions, err := NewSpecTraitsOptionsForIntegrationAndPlatform(integration, profile)
 	require.NoError(t, err)
 	assert.Equal(t, expectedOptions, mergedOptions)
 }

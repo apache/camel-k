@@ -20,7 +20,6 @@ package integration
 import (
 	"context"
 
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 
@@ -37,10 +36,6 @@ import (
 
 func lookupKitsForIntegration(ctx context.Context, c client.Client, integration *v1.Integration, options ...ctrl.ListOption) ([]v1.IntegrationKit, error) {
 	platformKitNamespace := platform.GetOperatorNamespace()
-	pl, _ := platform.GetForResource(ctx, c, integration)
-	if pl != nil {
-		platformKitNamespace = pl.Namespace
-	}
 
 	kitTypes, err := labels.NewRequirement(v1.IntegrationKitTypeLabel, selection.In, []string{
 		v1.IntegrationKitTypePlatform,
@@ -116,17 +111,12 @@ func integrationMatches(ctx context.Context, c client.Client, integration *v1.In
 	// A kit can be used only if it contains a subset of the traits and related configurations
 	// declared on integration.
 
-	pl, err := platform.GetForResource(ctx, c, integration)
-	if err != nil && !k8serrors.IsNotFound(err) {
-		return false, err
-	}
-
 	itp, err := platform.ApplyIntegrationProfile(ctx, c, integration)
 	if err != nil {
 		return false, err
 	}
 
-	itc, err := trait.NewSpecTraitsOptionsForIntegrationAndPlatform(integration, itp, pl)
+	itc, err := trait.NewSpecTraitsOptionsForIntegrationAndPlatform(integration, itp)
 	if err != nil {
 		return false, err
 	}

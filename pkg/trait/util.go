@@ -302,15 +302,10 @@ func IntegrationAndPipeSameTraits(i1 *v1.Integration, i2 *v1.Pipe) (bool, error)
 	return Equals(klbOpts, toCompare), nil
 }
 
-// NewSpecTraitsOptionsForIntegrationAndPlatform will merge traits giving priority to Integration, Profile and Platform respectively.
-//
-//nolint:staticcheck
-func NewSpecTraitsOptionsForIntegrationAndPlatform(i *v1.Integration, itp *v1.IntegrationProfile, pl *v1.IntegrationPlatform) (Options, error) {
+// NewSpecTraitsOptionsForIntegrationAndPlatform will merge traits giving priority to Integration and Profile respectively.
+func NewSpecTraitsOptionsForIntegrationAndPlatform(i *v1.Integration, itp *v1.IntegrationProfile) (Options, error) {
 	mergedTraits := v1.Traits{}
 	itpTraits := v1.Traits{}
-	if pl != nil {
-		mergedTraits = pl.Status.Traits
-	}
 	if itp != nil {
 		itpTraits = itp.Spec.Traits
 	}

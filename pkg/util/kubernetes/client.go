@@ -33,16 +33,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/client"
 )
 
-//nolint:staticcheck
-func GetIntegrationPlatform(context context.Context, client ctrl.Reader, name string, namespace string) (*v1.IntegrationPlatform, error) {
-	platform := v1.NewIntegrationPlatform(namespace, name)
-	if err := client.Get(context, ctrl.ObjectKeyFromObject(&platform), &platform); err != nil {
-		return nil, err
-	}
-
-	return &platform, nil
-}
-
 // GetIntegrationProfile return an integration profile provided as the resource parameter (ie, profile-namespace/profile-id).
 func GetIntegrationProfile(context context.Context, client ctrl.Reader, resource string) (*v1.IntegrationProfile, error) {
 	resourceSplit := strings.Split(resource, "/")

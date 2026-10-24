@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"slices"
 	"sort"
@@ -302,6 +303,15 @@ func (e *Environment) DetermineProfile() v1.TraitProfile {
 
 	if e.IntegrationKit != nil && e.IntegrationKit.Spec.Profile != "" {
 		return e.IntegrationKit.Spec.Profile
+	}
+
+	// Watch for the owned Knative Services conditionally
+	ok, err := kubernetes.IsAPIResourceInstalled(e.Client, serving.SchemeGroupVersion.String(), reflect.TypeFor[serving.Service]().Name())
+	if err != nil {
+		return v1.DefaultTraitProfile
+	}
+	if ok {
+		return v1.TraitProfileKnative
 	}
 
 	return v1.DefaultTraitProfile
