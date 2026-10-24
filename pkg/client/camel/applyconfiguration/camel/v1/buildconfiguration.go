@@ -19,10 +19,6 @@ limitations under the License.
 
 package v1
 
-import (
-	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-)
-
 // BuildConfigurationApplyConfiguration represents a declarative configuration of the BuildConfiguration type for use
 // with apply.
 //
@@ -30,14 +26,12 @@ import (
 type BuildConfigurationApplyConfiguration struct {
 	// The container image to be used to run the build.
 	ToolImage *string `json:"toolImage,omitempty"`
-	// The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-	//
 	// Deprecated: no longer in use.
 	DeprecatedBuilderPodNamespace *string `json:"operatorNamespace,omitempty"`
-	// the strategy to adopt
-	Strategy *camelv1.BuildStrategy `json:"strategy,omitempty"`
-	// the build order strategy to adopt
-	OrderStrategy *camelv1.BuildOrderStrategy `json:"orderStrategy,omitempty"`
+	// Deprecated: no longer in use.
+	DeprecatedStrategy *string `json:"strategy,omitempty"`
+	// Deprecated: no longer in use.
+	DeprecatedOrderStrategy *string `json:"orderStrategy,omitempty"`
 	// The minimum amount of CPU required. Only used for `pod` strategy
 	RequestCPU *string `json:"requestCPU,omitempty"`
 	// The minimum amount of memory required. Only used for `pod` strategy
@@ -76,19 +70,19 @@ func (b *BuildConfigurationApplyConfiguration) WithDeprecatedBuilderPodNamespace
 	return b
 }
 
-// WithStrategy sets the Strategy field in the declarative configuration to the given value
+// WithDeprecatedStrategy sets the DeprecatedStrategy field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Strategy field is set to the value of the last call.
-func (b *BuildConfigurationApplyConfiguration) WithStrategy(value camelv1.BuildStrategy) *BuildConfigurationApplyConfiguration {
-	b.Strategy = &value
+// If called multiple times, the DeprecatedStrategy field is set to the value of the last call.
+func (b *BuildConfigurationApplyConfiguration) WithDeprecatedStrategy(value string) *BuildConfigurationApplyConfiguration {
+	b.DeprecatedStrategy = &value
 	return b
 }
 
-// WithOrderStrategy sets the OrderStrategy field in the declarative configuration to the given value
+// WithDeprecatedOrderStrategy sets the DeprecatedOrderStrategy field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the OrderStrategy field is set to the value of the last call.
-func (b *BuildConfigurationApplyConfiguration) WithOrderStrategy(value camelv1.BuildOrderStrategy) *BuildConfigurationApplyConfiguration {
-	b.OrderStrategy = &value
+// If called multiple times, the DeprecatedOrderStrategy field is set to the value of the last call.
+func (b *BuildConfigurationApplyConfiguration) WithDeprecatedOrderStrategy(value string) *BuildConfigurationApplyConfiguration {
+	b.DeprecatedOrderStrategy = &value
 	return b
 }
 

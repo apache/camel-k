@@ -37,7 +37,7 @@ import (
 )
 
 func TestBuilderTraitNotAppliedBecauseOfNilKit(t *testing.T) {
-	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
+	env := createBuilderTestEnv()
 	env.IntegrationKit = nil
 	trait, _ := newBuilderTrait().(*builderTrait)
 	configure, conditions, err := trait.Configure(env)
@@ -49,7 +49,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilKit(t *testing.T) {
 }
 
 func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
-	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
+	env := createBuilderTestEnv()
 	env.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseInitialization
 	conditions, traits, err := NewBuilderTestCatalog().apply(env)
 	require.NoError(t, err)
@@ -61,7 +61,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
 }
 
 func TestJibBuilderTrait(t *testing.T) {
-	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
+	env := createBuilderTestEnv()
 	conditions, traits, err := NewBuilderTestCatalog().apply(env)
 
 	require.NoError(t, err)
@@ -78,7 +78,7 @@ func TestJibBuilderTrait(t *testing.T) {
 	assert.NotEmpty(t, env.Pipeline[2].Jib.Registry)
 }
 
-func createBuilderTestEnv(buildStrategy v1.BuildStrategy) *Environment {
+func createBuilderTestEnv() *Environment {
 	c, err := camel.DefaultCatalog()
 	if err != nil {
 		panic(err)
@@ -112,10 +112,7 @@ func createBuilderTestEnv(buildStrategy v1.BuildStrategy) *Environment {
 			Registry:            v1.RegistrySpec{Address: "registry"},
 			PublishStrategy:     platform.DefaultPublishStrategy,
 			BuildRuntimeVersion: defaults.DefaultRuntimeVersion,
-			BuildConfiguration: v1.BuildConfiguration{
-				Strategy: buildStrategy,
-			},
-			BuildBaseImage: "root-jdk-image",
+			BuildBaseImage:      "root-jdk-image",
 		},
 		EnvVars:        make([]corev1.EnvVar, 0),
 		ExecutedTraits: make([]Trait, 0),
@@ -130,7 +127,7 @@ func NewBuilderTestCatalog() *Catalog {
 }
 
 func TestMavenPropertyBuilderTrait(t *testing.T) {
-	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
+	env := createBuilderTestEnv()
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Properties = append(builderTrait.Properties, "build-time-prop1=build-time-value1")
 
@@ -147,7 +144,7 @@ func createNominalBuilderTraitTest() *builderTrait {
 
 func TestCustomTaskBuilderTrait(t *testing.T) {
 	t.Setenv("BUILDER_TASKS_ENABLED", "true")
-	env := createBuilderTestEnv(v1.BuildStrategyPod)
+	env := createBuilderTestEnv()
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
 
@@ -171,10 +168,9 @@ func TestCustomTaskBuilderTrait(t *testing.T) {
 
 func TestCustomTaskBuilderTraitValidStrategyOverride(t *testing.T) {
 	t.Setenv("BUILDER_TASKS_ENABLED", "true")
-	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
+	env := createBuilderTestEnv()
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
-	builderTrait.Strategy = "pod"
 
 	err := builderTrait.Apply(env)
 
@@ -186,41 +182,6 @@ func TestCustomTaskBuilderTraitValidStrategyOverride(t *testing.T) {
 	assert.Equal(t, "test", customTask.Custom.Name)
 	assert.Equal(t, "alpine", customTask.Custom.ContainerImage)
 	assert.Equal(t, "ls", customTask.Custom.ContainerCommands[0])
-}
-
-func TestCustomTaskBuilderTraitInvalidStrategy(t *testing.T) {
-	t.Setenv("BUILDER_TASKS_ENABLED", "true")
-	env := createBuilderTestEnv(v1.BuildStrategyRoutine)
-	builderTrait := createNominalBuilderTraitTest()
-	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
-
-	err := builderTrait.Apply(env)
-
-	// The error will be reported to IntegrationKits
-	require.NoError(t, err)
-	assert.Equal(t, v1.IntegrationKitPhaseError, env.IntegrationKit.Status.Phase)
-	assert.Equal(t, corev1.ConditionFalse, env.IntegrationKit.Status.Conditions[0].Status)
-	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Type, v1.IntegrationKitConditionType("IntegrationKitTasksValid"))
-	require.NotNil(t, env.IntegrationKit.Status.Failure)
-	assert.Equal(t, "Pipeline tasks unavailable when using `routine` platform build strategy: use `pod` instead.", env.IntegrationKit.Status.Failure.Reason)
-}
-
-func TestCustomTaskBuilderTraitInvalidStrategyOverride(t *testing.T) {
-	t.Setenv("BUILDER_TASKS_ENABLED", "true")
-	env := createBuilderTestEnv(v1.BuildStrategyPod)
-	builderTrait := createNominalBuilderTraitTest()
-	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
-	builderTrait.Strategy = "routine"
-
-	err := builderTrait.Apply(env)
-
-	// The error will be reported to IntegrationKits
-	require.NoError(t, err)
-	assert.Equal(t, v1.IntegrationKitPhaseError, env.IntegrationKit.Status.Phase)
-	assert.Equal(t, corev1.ConditionFalse, env.IntegrationKit.Status.Conditions[0].Status)
-	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Type, v1.IntegrationKitConditionType("IntegrationKitTasksValid"))
-	require.NotNil(t, env.IntegrationKit.Status.Failure)
-	assert.Equal(t, "Pipeline tasks unavailable when using `routine` platform build strategy: use `pod` instead.", env.IntegrationKit.Status.Failure.Reason)
 }
 
 func TestBuilderCustomTasks(t *testing.T) {
@@ -339,7 +300,7 @@ func TestUserTaskMultiCommands(t *testing.T) {
 }
 
 func TestBuilderDeprecatedParams(t *testing.T) {
-	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
+	env := createBuilderTestEnv()
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.LimitCPU = "100m"
 	builderTrait.RequestCPU = "100m"
@@ -373,7 +334,7 @@ func TestExistsTaskRequest(t *testing.T) {
 }
 
 func TestBuilderWithNoNodeSelector(t *testing.T) {
-	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
+	env := createBuilderTestEnv()
 	builderTrait := createNominalBuilderTraitTest()
 
 	active, condition, err := builderTrait.Configure(env)
@@ -390,7 +351,7 @@ func TestBuilderWithNoNodeSelector(t *testing.T) {
 }
 
 func TestBuilderWithNodeSelector(t *testing.T) {
-	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
+	env := createBuilderTestEnv()
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.NodeSelector = map[string]string{
 		"size": "large",
@@ -410,7 +371,7 @@ func TestBuilderWithNodeSelector(t *testing.T) {
 }
 
 func TestBuilderWithAnnotations(t *testing.T) {
-	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
+	env := createBuilderTestEnv()
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Annotations = map[string]string{
 		"annotation": "value",
@@ -430,7 +391,7 @@ func TestBuilderWithAnnotations(t *testing.T) {
 }
 
 func TestBuilderNoTasksFilter(t *testing.T) {
-	env := createBuilderTestEnv(v1.BuildStrategyPod)
+	env := createBuilderTestEnv()
 	builderTrait := createNominalBuilderTraitTest()
 
 	err := builderTrait.Apply(env)
@@ -441,7 +402,7 @@ func TestBuilderNoTasksFilter(t *testing.T) {
 }
 
 func TestBuilderTasksFilterNotExistingTasks(t *testing.T) {
-	env := createBuilderTestEnv(v1.BuildStrategyPod)
+	env := createBuilderTestEnv()
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.TasksFilter = "builder,missing-task"
 
@@ -451,7 +412,7 @@ func TestBuilderTasksFilterNotExistingTasks(t *testing.T) {
 }
 
 func TestBuilderTasksFilterMissingPublishTasks(t *testing.T) {
-	env := createBuilderTestEnv(v1.BuildStrategyPod)
+	env := createBuilderTestEnv()
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.TasksFilter = "builder,package"
 
@@ -461,7 +422,7 @@ func TestBuilderTasksFilterMissingPublishTasks(t *testing.T) {
 }
 
 func TestBuilderTasksFilterOperatorTasks(t *testing.T) {
-	env := createBuilderTestEnv(v1.BuildStrategyPod)
+	env := createBuilderTestEnv()
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.TasksFilter = "builder,package,jib"
 
@@ -472,7 +433,7 @@ func TestBuilderTasksFilterOperatorTasks(t *testing.T) {
 }
 
 func TestBuilderTasksFilterAndReorderOperatorTasks(t *testing.T) {
-	env := createBuilderTestEnv(v1.BuildStrategyPod)
+	env := createBuilderTestEnv()
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.TasksFilter = "package,builder,jib"
 
@@ -484,7 +445,7 @@ func TestBuilderTasksFilterAndReorderOperatorTasks(t *testing.T) {
 
 func TestBuilderTasksFilterAndReorderCustomTasks(t *testing.T) {
 	t.Setenv("BUILDER_TASKS_ENABLED", "true")
-	env := createBuilderTestEnv(v1.BuildStrategyPod)
+	env := createBuilderTestEnv()
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Tasks = append(builderTrait.Tasks, `my-custom-publish;alpine;mvn test`)
 	builderTrait.Tasks = append(builderTrait.Tasks, "my-custom-task;alpine;ls")
@@ -497,7 +458,7 @@ func TestBuilderTasksFilterAndReorderCustomTasks(t *testing.T) {
 }
 
 func TestBuilderTasksNodeSelectorPlatformBuildStrategyPod(t *testing.T) {
-	env := createBuilderTestEnv(v1.BuildStrategyPod)
+	env := createBuilderTestEnv()
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.NodeSelector = map[string]string{
 		"kubernetes.io/arch": "amd64",
@@ -541,19 +502,11 @@ func tasksByName(tasks []v1.Task) []string {
 func TestBuilderMatches(t *testing.T) {
 	t1 := builderTrait{
 		BasePlatformTrait: NewBasePlatformTrait("builder", 600),
-		BuilderTrait: traitv1.BuilderTrait{
-			OrderStrategy: "dependencies",
-		},
 	}
 	t2 := builderTrait{
 		BasePlatformTrait: NewBasePlatformTrait("builder", 600),
-		BuilderTrait: traitv1.BuilderTrait{
-			OrderStrategy: "dependencies",
-		},
 	}
 	assert.True(t, t1.Matches(&t2))
-	// This is a property that does not influence the build
-	t2.OrderStrategy = "fifo"
 	assert.True(t, t1.Matches(&t2))
 	// Changing properties which influences build
 	t1.Properties = []string{"hello=world"}
@@ -589,23 +542,13 @@ func TestBuilderMatchesTasks(t *testing.T) {
 }
 
 func TestBuilderTraitPlatforms(t *testing.T) {
-	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
+	env := createBuilderTestEnv()
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.ImagePlatforms = []string{"linux/amd64", "linux/arm64"}
 	err := builderTrait.Apply(env)
 	require.NoError(t, err)
 
 	assert.Equal(t, []string{"linux/amd64", "linux/arm64"}, env.Pipeline[2].Jib.Configuration.ImagePlatforms)
-}
-
-func TestBuilderTraitOrderStrategy(t *testing.T) {
-	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
-	builderTrait := createNominalBuilderTraitTest()
-	builderTrait.OrderStrategy = "fifo"
-	err := builderTrait.Apply(env)
-	require.NoError(t, err)
-
-	assert.Equal(t, v1.BuildOrderStrategyFIFO, env.Pipeline[0].Builder.Configuration.OrderStrategy)
 }
 
 // TestFilterNodeSelector_NoAllowList verifies that when BUILDER_NODE_SELECTOR_ALLOWED_LABELS is
@@ -697,7 +640,7 @@ func TestFilterNodeSelector_AllKeysDropped(t *testing.T) {
 func TestBuilderTraitNodeSelectorAppliedWithAllowList(t *testing.T) {
 	t.Setenv("BUILDER_NODE_SELECTOR_ALLOWED_LABELS", "kubernetes.io/hostname")
 
-	env := createBuilderTestEnv(platform.DefaultBuildStrategy)
+	env := createBuilderTestEnv()
 	bt := createNominalBuilderTraitTest()
 	bt.NodeSelector = map[string]string{
 		"kubernetes.io/hostname":         "node-42",
@@ -719,7 +662,7 @@ func TestBuilderTraitNodeSelectorAppliedWithAllowList(t *testing.T) {
 func TestBuilderTraitTasksDisabledByOperator(t *testing.T) {
 	t.Setenv("BUILDER_TASKS_ENABLED", "false")
 
-	env := createBuilderTestEnv(v1.BuildStrategyPod)
+	env := createBuilderTestEnv()
 	bt := createNominalBuilderTraitTest()
 	bt.Tasks = []string{"custom;alpine;echo hello"}
 
@@ -737,7 +680,7 @@ func TestBuilderTraitTasksDisabledByOperator(t *testing.T) {
 func TestBuilderTraitTasksDisabledKeepsQuarkusNative(t *testing.T) {
 	t.Setenv("BUILDER_TASKS_ENABLED", "false")
 
-	env := createBuilderTestEnv(v1.BuildStrategyPod)
+	env := createBuilderTestEnv()
 	bt := createNominalBuilderTraitTest()
 	bt.quarkusNativeTask = "quarkus-native;quarkus-image;/bin/bash -c \"build native\""
 	bt.Tasks = []string{
@@ -759,7 +702,7 @@ func TestBuilderTraitTasksDisabledKeepsQuarkusNative(t *testing.T) {
 
 // TestBuilderTraitTasksEnabledByDefault verifies that when BUILDER_TASKS_ENABLED is unset.
 func TestBuilderTraitTasksEnabledByDefault(t *testing.T) {
-	env := createBuilderTestEnv(v1.BuildStrategyPod)
+	env := createBuilderTestEnv()
 	bt := createNominalBuilderTraitTest()
 	bt.Tasks = []string{"custom;alpine;echo hello"}
 

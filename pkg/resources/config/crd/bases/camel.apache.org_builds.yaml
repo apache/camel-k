@@ -111,17 +111,10 @@ spec:
                       for `pod` strategy
                     type: object
                   operatorNamespace:
-                    description: |-
-                      The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-
-                      Deprecated: no longer in use.
+                    description: 'Deprecated: no longer in use.'
                     type: string
                   orderStrategy:
-                    description: the build order strategy to adopt
-                    enum:
-                    - dependencies
-                    - fifo
-                    - sequential
+                    description: 'Deprecated: no longer in use.'
                     type: string
                   platforms:
                     description: The list of platforms used in order to build a container
@@ -138,10 +131,7 @@ spec:
                       for `pod` strategy
                     type: string
                   strategy:
-                    description: the strategy to adopt
-                    enum:
-                    - routine
-                    - pod
+                    description: 'Deprecated: no longer in use.'
                     type: string
                   toolImage:
                     description: The container image to be used to run the build.
@@ -197,17 +187,10 @@ spec:
                                 Only used for `pod` strategy
                               type: object
                             operatorNamespace:
-                              description: |-
-                                The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-
-                                Deprecated: no longer in use.
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             orderStrategy:
-                              description: the build order strategy to adopt
-                              enum:
-                              - dependencies
-                              - fifo
-                              - sequential
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             platforms:
                               description: The list of platforms used in order to
@@ -224,10 +207,7 @@ spec:
                                 Only used for `pod` strategy
                               type: string
                             strategy:
-                              description: the strategy to adopt
-                              enum:
-                              - routine
-                              - pod
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             toolImage:
                               description: The container image to be used to run the
@@ -308,17 +288,10 @@ spec:
                                 Only used for `pod` strategy
                               type: object
                             operatorNamespace:
-                              description: |-
-                                The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-
-                                Deprecated: no longer in use.
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             orderStrategy:
-                              description: the build order strategy to adopt
-                              enum:
-                              - dependencies
-                              - fifo
-                              - sequential
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             platforms:
                               description: The list of platforms used in order to
@@ -335,10 +308,7 @@ spec:
                                 Only used for `pod` strategy
                               type: string
                             strategy:
-                              description: the strategy to adopt
-                              enum:
-                              - routine
-                              - pod
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             toolImage:
                               description: The container image to be used to run the
@@ -943,17 +913,10 @@ spec:
                                 Only used for `pod` strategy
                               type: object
                             operatorNamespace:
-                              description: |-
-                                The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-
-                                Deprecated: no longer in use.
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             orderStrategy:
-                              description: the build order strategy to adopt
-                              enum:
-                              - dependencies
-                              - fifo
-                              - sequential
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             platforms:
                               description: The list of platforms used in order to
@@ -970,10 +933,7 @@ spec:
                                 Only used for `pod` strategy
                               type: string
                             strategy:
-                              description: the strategy to adopt
-                              enum:
-                              - routine
-                              - pod
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             toolImage:
                               description: The container image to be used to run the
@@ -1025,17 +985,10 @@ spec:
                                 Only used for `pod` strategy
                               type: object
                             operatorNamespace:
-                              description: |-
-                                The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-
-                                Deprecated: no longer in use.
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             orderStrategy:
-                              description: the build order strategy to adopt
-                              enum:
-                              - dependencies
-                              - fifo
-                              - sequential
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             platforms:
                               description: The list of platforms used in order to
@@ -1052,10 +1005,7 @@ spec:
                                 Only used for `pod` strategy
                               type: string
                             strategy:
-                              description: the strategy to adopt
-                              enum:
-                              - routine
-                              - pod
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             toolImage:
                               description: The container image to be used to run the
@@ -1134,17 +1084,10 @@ spec:
                                 Only used for `pod` strategy
                               type: object
                             operatorNamespace:
-                              description: |-
-                                The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-
-                                Deprecated: no longer in use.
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             orderStrategy:
-                              description: the build order strategy to adopt
-                              enum:
-                              - dependencies
-                              - fifo
-                              - sequential
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             platforms:
                               description: The list of platforms used in order to
@@ -1161,10 +1104,7 @@ spec:
                                 Only used for `pod` strategy
                               type: string
                             strategy:
-                              description: the strategy to adopt
-                              enum:
-                              - routine
-                              - pod
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             toolImage:
                               description: The container image to be used to run the
@@ -1244,17 +1184,10 @@ spec:
                                 Only used for `pod` strategy
                               type: object
                             operatorNamespace:
-                              description: |-
-                                The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-
-                                Deprecated: no longer in use.
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             orderStrategy:
-                              description: the build order strategy to adopt
-                              enum:
-                              - dependencies
-                              - fifo
-                              - sequential
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             platforms:
                               description: The list of platforms used in order to
@@ -1271,10 +1204,7 @@ spec:
                                 Only used for `pod` strategy
                               type: string
                             strategy:
-                              description: the strategy to adopt
-                              enum:
-                              - routine
-                              - pod
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             toolImage:
                               description: The container image to be used to run the
@@ -1870,17 +1800,10 @@ spec:
                                 Only used for `pod` strategy
                               type: object
                             operatorNamespace:
-                              description: |-
-                                The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-
-                                Deprecated: no longer in use.
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             orderStrategy:
-                              description: the build order strategy to adopt
-                              enum:
-                              - dependencies
-                              - fifo
-                              - sequential
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             platforms:
                               description: The list of platforms used in order to
@@ -1897,10 +1820,7 @@ spec:
                                 Only used for `pod` strategy
                               type: string
                             strategy:
-                              description: the strategy to adopt
-                              enum:
-                              - routine
-                              - pod
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             toolImage:
                               description: The container image to be used to run the
@@ -1972,17 +1892,10 @@ spec:
                                 Only used for `pod` strategy
                               type: object
                             operatorNamespace:
-                              description: |-
-                                The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-
-                                Deprecated: no longer in use.
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             orderStrategy:
-                              description: the build order strategy to adopt
-                              enum:
-                              - dependencies
-                              - fifo
-                              - sequential
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             platforms:
                               description: The list of platforms used in order to
@@ -1999,10 +1912,7 @@ spec:
                                 Only used for `pod` strategy
                               type: string
                             strategy:
-                              description: the strategy to adopt
-                              enum:
-                              - routine
-                              - pod
+                              description: 'Deprecated: no longer in use.'
                               type: string
                             toolImage:
                               description: The container image to be used to run the

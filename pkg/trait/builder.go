@@ -146,8 +146,6 @@ func (t *builderTrait) configureForQuarkus(trait Trait, e *Environment, conditio
 			"(if not specified by the user). Make sure your cluster can handle it."
 		t.L.Info(m)
 		condition = newOrAppend(condition, m)
-		t.Strategy = string(v1.BuildStrategyPod)
-		t.OrderStrategy = string(v1.BuildOrderStrategySequential)
 
 		if !existsTaskRequest(t.TasksRequestCPU, quarkusNativeTaskName) {
 			t.TasksRequestCPU = append(t.TasksRequestCPU, quarkusNativeTaskName+":1000m")
@@ -257,7 +255,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 	//nolint:staticcheck,nestif
 	if platform.BuilderTasksEnabled() {
 		if len(t.Tasks) > 0 {
-			ct, err := t.determineCustomTasks(e, builderTask, tasksConf)
+			ct, err := t.determineCustomTasks(e, tasksConf)
 			if err != nil {
 				return err
 			}
@@ -366,46 +364,6 @@ func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfigurati
 		}
 	}
 
-	if t.Strategy != "" {
-		found := false
-		for _, s := range v1.BuildStrategies {
-			if string(s) == t.Strategy {
-				found = true
-				taskConf.Strategy = s
-
-				break
-			}
-		}
-		if !found {
-			strategies := make([]string, 0, len(v1.BuildStrategies))
-			for _, s := range v1.BuildStrategies {
-				strategies = append(strategies, string(s))
-			}
-
-			return nil, fmt.Errorf("unknown build strategy: %s. One of [%s] is expected", t.Strategy, strings.Join(strategies, ", "))
-		}
-	}
-
-	if t.OrderStrategy != "" {
-		found := false
-		for _, s := range v1.BuildOrderStrategies {
-			if string(s) == t.OrderStrategy {
-				found = true
-				taskConf.OrderStrategy = s
-
-				break
-			}
-		}
-		if !found {
-			var strategies []string
-			for _, s := range v1.BuildOrderStrategies {
-				strategies = append(strategies, string(s))
-			}
-
-			return nil, fmt.Errorf("unknown build order strategy: %s. One of [%s] is expected", t.OrderStrategy, strings.Join(strategies, ", "))
-		}
-	}
-
 	dependencies := getDependencies(e)
 
 	task := &v1.BuilderTask{
@@ -494,34 +452,10 @@ func (t *builderTrait) getBaseImage(e *Environment) string {
 	return baseImage
 }
 
-func (t *builderTrait) determineCustomTasks(e *Environment, builderTask *v1.BuilderTask, tasksConf map[string]*v1.BuildConfiguration) ([]v1.Task, error) {
+func (t *builderTrait) determineCustomTasks(e *Environment, tasksConf map[string]*v1.BuildConfiguration) ([]v1.Task, error) {
 	imageName, err := getImageName(e)
 	if err != nil {
 		return nil, err
-	}
-
-	realBuildStrategy := builderTask.Configuration.Strategy
-	if realBuildStrategy == "" {
-		realBuildStrategy = e.Platform.BuildConfiguration.Strategy
-	}
-
-	//nolint:staticcheck
-	if len(t.Tasks) > 0 && realBuildStrategy != v1.BuildStrategyPod {
-		err := failIntegrationKit(
-			e,
-			"IntegrationKitTasksValid",
-			corev1.ConditionFalse,
-			"IntegrationKitTasksValid",
-			fmt.Sprintf("Pipeline tasks unavailable when using `%s` platform build strategy: use `%s` instead.",
-				realBuildStrategy,
-				v1.BuildStrategyPod),
-		)
-
-		if err != nil {
-			return nil, err
-		}
-
-		return nil, nil
 	}
 
 	return t.customTasks(tasksConf, imageName)

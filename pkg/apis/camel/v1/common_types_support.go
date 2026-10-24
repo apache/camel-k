@@ -198,9 +198,7 @@ var _ json.Unmarshaler = (*RawMessage)(nil)
 
 // IsEmpty -- .
 func (bc *BuildConfiguration) IsEmpty() bool {
-	return bc.Strategy == "" &&
-		bc.OrderStrategy == "" &&
-		bc.RequestCPU == "" &&
+	return bc.RequestCPU == "" &&
 		bc.RequestMemory == "" &&
 		bc.LimitCPU == "" &&
 		bc.LimitMemory == ""
@@ -261,24 +259,4 @@ func (s *SourceSpec) InferLanguage() Language {
 	}
 
 	return ""
-}
-
-// Validate checks if the strategy is supported.
-func (b BuildStrategy) Validate() error {
-	switch b {
-	case BuildStrategyRoutine, BuildStrategyPod:
-		return nil
-	default:
-		return fmt.Errorf("invalid BuildStrategy: %q", b)
-	}
-}
-
-// Validate checks if the strategy is supported.
-func (b BuildOrderStrategy) Validate() error {
-	switch b {
-	case BuildOrderStrategyDependencies, BuildOrderStrategyFIFO, BuildOrderStrategySequential:
-		return nil
-	default:
-		return fmt.Errorf("invalid BuildStrategy: %q", b)
-	}
 }

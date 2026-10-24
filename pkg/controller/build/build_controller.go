@@ -155,27 +155,15 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 	envPlatform := platform.GetPlatform(ip, nil)
 
 	buildMonitor := Monitor{
-		maxRunningBuilds:   envPlatform.MaxRunningBuilds,
-		buildOrderStrategy: envPlatform.BuildConfiguration.OrderStrategy,
+		maxRunningBuilds: envPlatform.MaxRunningBuilds,
 	}
 
-	switch instance.BuilderConfiguration().Strategy {
-	case v1.BuildStrategyPod:
-		actions = []Action{
-			newInitializePodAction(r.reader),
-			newScheduleAction(r.reader, buildMonitor),
-			newMonitorPodAction(r.reader),
-			newErrorRecoveryAction(),
-			newErrorAction(),
-		}
-	case v1.BuildStrategyRoutine:
-		actions = []Action{
-			newInitializeRoutineAction(),
-			newScheduleAction(r.reader, buildMonitor),
-			newMonitorRoutineAction(),
-			newErrorRecoveryAction(),
-			newErrorAction(),
-		}
+	actions = []Action{
+		newInitializePodAction(r.reader),
+		newScheduleAction(r.reader, buildMonitor),
+		newMonitorPodAction(r.reader),
+		newErrorRecoveryAction(),
+		newErrorAction(),
 	}
 
 	for _, a := range actions {
@@ -226,8 +214,7 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 		return reconcile.Result{RequeueAfter: requeueAfterDuration}, nil
 	}
 
-	if target.BuilderConfiguration().Strategy == v1.BuildStrategyPod &&
-		(target.Status.Phase == v1.BuildPhasePending || target.Status.Phase == v1.BuildPhaseRunning) {
+	if target.Status.Phase == v1.BuildPhasePending || target.Status.Phase == v1.BuildPhaseRunning {
 		// Requeue running Build to poll Pod and signal timeout
 		return reconcile.Result{RequeueAfter: podRequeueAfterDuration}, nil
 	}

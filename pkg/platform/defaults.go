@@ -36,8 +36,6 @@ import (
 const (
 	DefaultPlatformName                    = "camel-k"
 	DefaultBuildTimeout                    = 5 * time.Minute
-	DefaultBuildStrategy                   = v1.BuildStrategyRoutine
-	DefaultBuildOrderStrategy              = v1.BuildOrderStrategyDependencies
 	DefaultPublishStrategy                 = v1.IntegrationPlatformBuildPublishStrategyJib
 	DefaultMavenCLIOptions                 = "-V,--no-transfer-progress,-Dstyle.color=never"
 	DefaultMaxRunningBuildsPodStrategy     = 10
@@ -83,17 +81,6 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		log.Debugf("Integration Platform %s [%s]: setting publishing strategy %s", p.Name, p.Namespace, p.Status.Build.PublishStrategy)
 	}
 
-	if p.Status.Build.BuildConfiguration.Strategy == "" {
-		defaultStrategy := v1.BuildStrategyRoutine
-		p.Status.Build.BuildConfiguration.Strategy = defaultStrategy
-		log.Debugf("Integration Platform %s [%s]: setting build strategy %s", p.Name, p.Namespace, p.Status.Build.BuildConfiguration.Strategy)
-	}
-
-	if p.Status.Build.BuildConfiguration.OrderStrategy == "" {
-		p.Status.Build.BuildConfiguration.OrderStrategy = v1.BuildOrderStrategyDependencies
-		log.Debugf("Integration Platform %s [%s]: setting build order strategy %s", p.Name, p.Namespace, p.Status.Build.BuildConfiguration.OrderStrategy)
-	}
-
 	err := setPlatformDefaults(p, verbose)
 	if err != nil {
 		return err
@@ -135,14 +122,6 @@ func applyPlatformSpec(source *v1.IntegrationPlatform, target *v1.IntegrationPla
 
 	if target.Status.Build.PublishStrategy == "" {
 		target.Status.Build.PublishStrategy = source.Status.Build.PublishStrategy
-	}
-
-	if target.Status.Build.BuildConfiguration.Strategy == "" {
-		target.Status.Build.BuildConfiguration.Strategy = source.Status.Build.BuildConfiguration.Strategy
-	}
-
-	if target.Status.Build.BuildConfiguration.OrderStrategy == "" {
-		target.Status.Build.BuildConfiguration.OrderStrategy = source.Status.Build.BuildConfiguration.OrderStrategy
 	}
 
 	if target.Status.Build.RuntimeVersion == "" {
@@ -250,12 +229,7 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 
 	if p.Status.Build.MaxRunningBuilds <= 0 {
 		log.Debugf("Integration Platform %s [%s]: setting max running builds", p.Name, p.Namespace)
-		switch p.Status.Build.BuildConfiguration.Strategy {
-		case v1.BuildStrategyRoutine:
-			p.Status.Build.MaxRunningBuilds = 3
-		case v1.BuildStrategyPod:
-			p.Status.Build.MaxRunningBuilds = 10
-		}
+		p.Status.Build.MaxRunningBuilds = 10
 	}
 
 	if len(p.Status.Kamelet.Repositories) == 0 {

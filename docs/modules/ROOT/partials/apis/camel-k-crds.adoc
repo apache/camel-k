@@ -603,23 +603,21 @@ string
 |
 
 
-The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
-
 Deprecated: no longer in use.
 
 |`strategy` +
-*xref:#_camel_apache_org_v1_BuildStrategy[BuildStrategy]*
+string
 |
 
 
-the strategy to adopt
+Deprecated: no longer in use.
 
 |`orderStrategy` +
-*xref:#_camel_apache_org_v1_BuildOrderStrategy[BuildOrderStrategy]*
+string
 |
 
 
-the build order strategy to adopt
+Deprecated: no longer in use.
 
 |`requestCPU` +
 string
@@ -672,16 +670,6 @@ The list of platforms used in order to build a container image.
 
 
 |===
-
-[#_camel_apache_org_v1_BuildOrderStrategy]
-=== BuildOrderStrategy(`string` alias)
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_BuildConfiguration, BuildConfiguration>>
-
-BuildOrderStrategy specifies how builds are reconciled and queued.
-
 
 [#_camel_apache_org_v1_BuildPhase]
 === BuildPhase(`string` alias)
@@ -866,18 +854,6 @@ https://github.com/OAI/OpenAPI-Specification/issues/845
 
 
 |===
-
-[#_camel_apache_org_v1_BuildStrategy]
-=== BuildStrategy(`string` alias)
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_BuildConfiguration, BuildConfiguration>>
-
-BuildStrategy specifies how the Build should be executed.
-It will trigger a Maven process (either as an Operator routine or Kubernetes Pod execution) that
-will take care of producing the expected Camel/Camel-Quarkus runtime.
-
 
 [#_camel_apache_org_v1_BuildahTask]
 === BuildahTask
@@ -6596,8 +6572,6 @@ bool
 |
 
 
-Enable verbose logging on build components that support it (e.g. Kaniko build pod).
-
 Deprecated: no longer in use
 
 |`properties` +
@@ -6612,7 +6586,7 @@ string
 |
 
 
-The strategy to use, either `pod` or `routine` (default `routine`)
+Deprecated: no longer in use
 
 |`baseImage` +
 string
@@ -6634,14 +6608,12 @@ string
 |
 
 
-The build order strategy to use, either `dependencies`, `fifo` or `sequential` (default is the platform default)
+Deprecated: no longer in use
 
 |`requestCPU` +
 string
 |
 
-
-When using `pod` strategy, the minimum amount of CPU required by the pod builder.
 
 Deprecated: use TasksRequestCPU instead with task name `builder`.
 
@@ -6650,8 +6622,6 @@ string
 |
 
 
-When using `pod` strategy, the minimum amount of memory required by the pod builder.
-
 Deprecated: use TasksRequestCPU instead with task name `builder`.
 
 |`limitCPU` +
@@ -6659,16 +6629,12 @@ string
 |
 
 
-When using `pod` strategy, the maximum amount of CPU required by the pod builder.
-
 Deprecated: use TasksRequestCPU instead with task name `builder`.
 
 |`limitMemory` +
 string
 |
 
-
-When using `pod` strategy, the maximum amount of memory required by the pod builder.
 
 Deprecated: use TasksRequestCPU instead with task name `builder`.
 
