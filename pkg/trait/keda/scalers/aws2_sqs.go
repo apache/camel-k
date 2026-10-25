@@ -38,7 +38,8 @@ func (s *AWS2SQSScaler) Component() string {
 // Map derives the KEDA queueURL and awsRegion from the endpoint URI.
 // An explicit queueUrl parameter wins. Otherwise the URL is built from an
 // SQS queue ARN, or from a queue name together with the region and
-// queueOwnerAWSAccountId parameters.
+// queueOwnerAWSAccountId parameters. When no full URL can be built, the
+// plain queue name is used, which KEDA accepts when it is unambiguous.
 func (s *AWS2SQSScaler) Map(pathValue string, params map[string]string) (string, map[string]string) {
 	metadata := make(map[string]string)
 
@@ -65,6 +66,8 @@ func (s *AWS2SQSScaler) Map(pathValue string, params map[string]string) (string,
 		metadata["queueURL"] = params["queueUrl"]
 	case queueName != "" && account != "" && region != "":
 		metadata["queueURL"] = fmt.Sprintf("https://sqs.%s.amazonaws.com/%s/%s", region, account, queueName)
+	case queueName != "":
+		metadata["queueURL"] = queueName
 	}
 
 	if params["overrideEndpoint"] == "true" && params["uriEndpointOverride"] != "" {

@@ -84,7 +84,7 @@ func TestAWS2SQSScalerMap(t *testing.T) {
 			name:         "queue name and region only",
 			pathValue:    "orders",
 			params:       map[string]string{"region": "us-east-1"},
-			expectedMeta: map[string]string{"awsRegion": "us-east-1"},
+			expectedMeta: map[string]string{"awsRegion": "us-east-1", "queueURL": "orders"},
 		},
 		{
 			name:      "endpoint override",
@@ -108,7 +108,7 @@ func TestAWS2SQSScalerMap(t *testing.T) {
 				"region":              "us-east-1",
 				"uriEndpointOverride": "http://localstack:4566",
 			},
-			expectedMeta: map[string]string{"awsRegion": "us-east-1"},
+			expectedMeta: map[string]string{"awsRegion": "us-east-1", "queueURL": "orders"},
 		},
 	}
 
@@ -117,6 +117,66 @@ func TestAWS2SQSScalerMap(t *testing.T) {
 			kedaType, metadata := scaler.Map(tt.pathValue, tt.params)
 			assert.Equal(t, "aws-sqs-queue", kedaType)
 			assert.Equal(t, tt.expectedMeta, metadata)
+		})
+	}
+}
+
+func TestMapToKedaTriggerAWS2SQS(t *testing.T) {
+	tests := []struct {
+		name         string
+		uri          string
+		expectedMeta map[string]string
+	}{
+		{
+			name: "queue name with static credentials",
+			uri:  "aws2-sqs:my-queue?region=us-east-1&accessKey=test&secretKey=test",
+			expectedMeta: map[string]string{
+				"awsRegion": "us-east-1",
+				"queueURL":  "my-queue",
+			},
+		},
+		{
+			name: "endpoint override",
+			uri:  "aws2-sqs:my-queue?region=us-east-1&accessKey=test&secretKey=test&overrideEndpoint=true&uriEndpointOverride=http://elasticmq:9324",
+			expectedMeta: map[string]string{
+				"awsRegion":   "us-east-1",
+				"queueURL":    "my-queue",
+				"awsEndpoint": "http://elasticmq:9324",
+			},
+		},
+		{
+			name: "queue owner account",
+			uri:  "aws2-sqs:my-queue?region=eu-west-1&queueOwnerAWSAccountId=123456789012",
+			expectedMeta: map[string]string{
+				"awsRegion": "eu-west-1",
+				"queueURL":  "https://sqs.eu-west-1.amazonaws.com/123456789012/my-queue",
+			},
+		},
+		{
+			name: "queue ARN",
+			uri:  "aws2-sqs:arn:aws:sqs:us-east-1:123456789012:my-queue?accessKey=test&secretKey=test",
+			expectedMeta: map[string]string{
+				"awsRegion": "us-east-1",
+				"queueURL":  "https://sqs.us-east-1.amazonaws.com/123456789012/my-queue",
+			},
+		},
+		{
+			name: "double-slash form",
+			uri:  "aws2-sqs://my-queue?region=us-east-1",
+			expectedMeta: map[string]string{
+				"awsRegion": "us-east-1",
+				"queueURL":  "my-queue",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			trigger, err := keda.MapToKedaTrigger(tt.uri)
+			require.NoError(t, err)
+			require.NotNil(t, trigger)
+			assert.Equal(t, "aws-sqs-queue", trigger.Type)
+			assert.Equal(t, tt.expectedMeta, trigger.Metadata)
 		})
 	}
 }
