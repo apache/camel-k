@@ -149,3 +149,32 @@ func TestDigestMatchingTraitsUpdated(t *testing.T) {
 
 	assert.NotEqual(t, itSpecOnlyTraitUpdatedDigest, itDigest, "Digests must not be equal")
 }
+
+func TestDigestUsesGitUsername(t *testing.T) {
+	it := v1.Integration{
+		Spec: v1.IntegrationSpec{
+			Git: &v1.GitConfigSpec{
+				URL:    "https://github.com/squakez/sample.git",
+				Secret: "my-secret",
+			},
+		},
+	}
+	digestNoUsername, err := ComputeForIntegration(&it, nil, nil)
+	require.NoError(t, err)
+
+	// an empty username must not alter the digest, so that existing Integrations are not rebuilt
+	it.Spec.Git.Username = ""
+	digestEmptyUsername, err := ComputeForIntegration(&it, nil, nil)
+	require.NoError(t, err)
+	assert.Equal(t, digestNoUsername, digestEmptyUsername)
+
+	it.Spec.Git.Username = "x-token-auth"
+	digestUsername, err := ComputeForIntegration(&it, nil, nil)
+	require.NoError(t, err)
+	assert.NotEqual(t, digestNoUsername, digestUsername)
+
+	it.Spec.Git.Username = "another-user"
+	digestAnotherUsername, err := ComputeForIntegration(&it, nil, nil)
+	require.NoError(t, err)
+	assert.NotEqual(t, digestUsername, digestAnotherUsername)
+}
