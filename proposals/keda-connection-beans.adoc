@@ -3,7 +3,7 @@ title: Discovering connection configuration for KEDA scalers
 authors:
   - "@knockknock10"
 creation-date: 2026-10-25
-last-updated: 2026-10-25
+last-updated: 2026-10-26
 status: draft
 see-also:
   - https://github.com/apache/camel-k/issues/6910
@@ -20,7 +20,7 @@ superseded-by: []
 
 Camel K can automatically create KEDA triggers from supported consumer endpoint URIs, but a scaler may need connection details configured outside the URI. Those details can live in Camel component properties or in a named bean (for example, a connection factory referenced by a component). The current scaler-mapping contract does not expose a resolved Camel registry or bean configuration to the mapper.
 
-This proposal recommends keeping automatic discovery static and deterministic. As an initial step, scaler mappings may consume explicit, statically available Integration properties in addition to the endpoint URI. For connection beans, Camel K should first assess a narrowly scoped resolver for declarative property-based bean definitions and references. It should not instantiate arbitrary application beans in the operator. If the required configuration cannot be derived consistently from Camel K's declarative model, the Camel community should assess a Camel Core metadata contract that exposes relevant configuration without requiring Camel K to execute the integration.
+This proposal recommends a staged approach: preserve the existing endpoint-URI mapping, make directly declared Integration/component properties available to scaler mappings, and assess a focused path for properties declared on Pipe endpoints that reference known Kamelets. Generic discovery of which bean is used as a connection factory—and how it is wired through arbitrary source code or multiple levels of indirection—is not feasible as a first iteration. If future use cases require a reusable description beyond the static configuration Camel K can see, the Camel community can assess a generic Camel Core metadata contract.
 
 This is a design proposal only; it does not introduce a runtime resolver or change the scaler interface.
 
@@ -28,33 +28,58 @@ This is a design proposal only; it does not introduce a runtime resolver or chan
 
 A KEDA scaler reads metadata to poll an external system and decide when to scale an Integration. Automatic discovery currently starts with a Camel consumer URI, but not every scaler's required metadata is present in that URI.
 
-Connection information can be configured in several ways, including:
+== Feasibility assessment
 
-* endpoint parameters, such as the broker or server option on an endpoint URI;
-* component properties, such as `camel.component.<component>.*`;
-* named beans configured through Camel properties (for example, `camel.beans.<name>.*`) and referenced from component configuration with `#bean:<name>`;
-* bean definitions in a supported DSL, including definitions that refer to other beans or use factories; and
-* property placeholders, environment variables, mounted configuration, or Kubernetes Secrets.
+The configuration sources below are not equally discoverable. The first iteration should target values the operator already has in structured form, rather than attempting to reconstruct the running Camel registry from source code.
 
-These forms are not equivalent from the operator's perspective. A literal component property may be available while the Integration is being reconciled. A bean reference may point to a property-configured bean, a factory-created object, or a bean supplied by a runtime registry. Some values may be unavailable until the Integration starts, and some cannot safely or reliably be derived from source text alone.
+* **Endpoint URI parameters — implementable; already supported.** The current mapper parses an endpoint URI and maps selected path and query parameters to KEDA metadata. This remains the baseline and requires no bean discovery.
+* **Integration and component properties — implementable; partly covered by [PR #6893](https://github.com/apache/camel-k/pull/6893).** Camel K can collect properties explicitly configured on an Integration and its Camel trait and pass a property map to each scaler mapper. This lets a component-specific mapper translate a known property such as `camel.component.amqp.broker-url`. It does not resolve a bean reference or a runtime placeholder. The related PR is open and this extension is not yet part of upstream `main`.
+* **Properties configured on a Pipe endpoint that references a Kamelet — partially implementable.** The Pipe-to-Integration binding already preserves explicitly supplied Kamelet properties as Integration application properties. For known Kamelets, a mapping can translate declared parameters (for example, `broker-url`) to the corresponding scaler metadata. This requires an explicit mapping between a known Kamelet and its parameters; it does not automatically reveal the inner endpoint of every arbitrary Kamelet.
+* **Named beans configured through `camel.beans.*` and references such as `#bean:<name>` — not generically implementable in the first iteration.** Individual bean properties may appear in static configuration, but the operator cannot safely infer which bean is actually used as the connection factory, or how it is used, in the general case. Bean names and property values alone do not establish that relationship.
+* **Bean definitions in DSL source, factory methods, nested bean references, or external registries — not implementable in the first iteration.** Scanning source code to detect connection-factory use is complex across supported DSLs, and there may be several levels of indirection. Executing factories or instantiating beans to discover their values is out of scope.
+* **Placeholders, environment variables, mounted configuration, and Kubernetes Secrets — only statically visible, non-sensitive configuration is eligible.** The first iteration should not attempt generic runtime resolution. Secret-backed credentials must remain references and be configured through the appropriate KEDA authentication settings, not copied into plain scaler metadata.
 
-The goal is to reuse the connection information already declared by a user when it is statically available, without making automatic discovery depend on running application code or guessing at opaque runtime objects.
+The objective is therefore not universal connection-bean introspection. It is to increase automatic discovery where the configuration and its relationship to a known endpoint or Kamelet are explicit, while leaving unsupported or dynamic cases to explicit user configuration.
 
 == Current implementation and related work
 
 The current flow is implemented in `pkg/trait/keda.go`, `pkg/metadata/metadata.go`, and `pkg/trait/keda/mapper.go`:
 
 . The KEDA trait calls `metadata.ExtractAll` on the Integration's sources.
-. Source inspectors extract endpoint URIs from the DSL; the KEDA trait iterates the discovered `from` URIs.
-. `MapToKedaTrigger` parses each URI into a component name, path value, and query parameters.
+. Source inspectors extract the endpoint URIs from the Integration DSL, and the KEDA trait iterates the discovered `from` URIs.
+. `MapToKedaTrigger` parses each URI into the component name, path value, and query parameters.
 . The registered `ScaleMapper` maps the path and parameters to a KEDA scaler type and metadata.
 . The trait merges `keda.autoMetadata` for the discovered scaler type and later creates a `ScaledObject`.
 
-The existing `ScaleMapper.Map` contract receives only the endpoint path and URI parameters. It has no access to a resolved Camel registry, bean instances, or a generic description of how a bean was constructed. The metadata extraction code is a source-inspection path, not a running `CamelContext`.
+=== Endpoint URI mapping: already implementable
 
-PR https://github.com/apache/camel-k/pull/6893[apache/camel-k#6893] is useful related work: its proposed ArtemisQueue mapping passes Integration component properties to the mapper so it can derive a management endpoint from a configured broker URL. As of this proposal, that PR is open and its changes are not part of the current `main` implementation. Passing properties can cover directly declared scalar settings; it does not, by itself, resolve a connection-factory bean or its transitive references.
+This is the existing behavior, not a new design requirement. For example, the Kafka scaler takes the topic from the URI path and maps the `brokers` and `groupId` query parameters to the Kafka scaler's `bootstrapServers` and `consumerGroup` metadata. Each mapper intentionally selects the URI fields relevant to its scaler. Values that are not present in the URI cannot be obtained through this path alone.
 
-The current precedence rules should be preserved unless separately agreed: a manually configured trigger of a given type prevents automatic discovery of another trigger of that type, and `keda.autoMetadata` is merged into the discovered trigger metadata. The latter currently overlays keys produced by the mapper.
+The existing `ScaleMapper.Map` contract receives the endpoint path and URI parameters only. It does not receive a resolved Camel registry, bean instances, or a generic description of how a bean was constructed.
+
+=== Integration/component property mapping: implementable extension
+
+[PR #6893](https://github.com/apache/camel-k/pull/6893) demonstrates the next, narrower step for the ArtemisQueue mapping. The proposed `integrationProperties(e)` helper collects Integration configuration entries and properties configured through the Camel trait, then passes that map to `MapToKedaTrigger` and the scaler mapper. The Artemis mapper can use a directly declared property such as `camel.component.amqp.broker-url` to derive the scaler's management endpoint.
+
+This approach uses configuration already available to Camel K and avoids querying the broker or constructing a connection factory. It should be generalized only with documented input/precedence rules and tests. The related PR remains open, so the property-map extension must not be described as already merged into upstream `main`.
+
+=== Pipe-derived Integrations and Kamelet properties: partially implementable
+
+A Pipe is converted into an Integration by `pkg/controller/pipe/integration.go`, which calls the binding converters for its source and sink. When a Pipe endpoint references a Kamelet, `pkg/util/bindings/kamelet.go` reads the endpoint's declared properties, stores them as Integration application properties using keys of the form `camel.kamelet.<kamelet-name>.<id>.<property>`, and emits a `kamelet:<name>/<id>` endpoint URI.
+
+This creates two useful facts for discovery: the generated Integration contains the explicitly configured Kamelet invocation properties, but its endpoint URI identifies the Kamelet rather than necessarily exposing the underlying consumer component URI. Consequently, the current URI-only mapper cannot infer an inner AMQP or other component endpoint solely from a `kamelet:` URI.
+
+A bounded implementation can use the Pipe owner reference (or the propagated Kamelet application properties) to identify a Kamelet source/sink and its configured parameters. A scaler mapping can then map a known Kamelet and known parameter names—for example, a declared `broker-url` parameter—to its scaler metadata. The mapping must account for the Kamelet identity and the parameter names actually declared by that Kamelet.
+
+This should be treated as an explicit Kamelet mapping, not a promise to infer the implementation of arbitrary Kamelets. Discovering the actual inner endpoint of every Kamelet would require inspecting its template/source and handling arbitrary DSLs, transformations, and indirection, which is outside the first iteration. The design should also decide whether to use the properties already propagated into the Integration or retrieve the parent Pipe; the latter requires reliably identifying and fetching the owning Pipe.
+
+=== Connection beans: not a first-iteration capability
+
+The current source-inspection path does not construct a running `CamelContext`, and the current mapper registry has no generic bean-resolution API. Even when bean properties are declared in text, automatically determining that a bean is a connection factory, locating every place it is referenced, and understanding how it configures a component can require semantic source analysis across different DSLs and multiple levels of indirection.
+
+For this reason, generic connection-bean discovery should not be in the first implementation. This does not preclude a future, explicitly modelled metadata contract, nor does it prevent a scaler from using directly declared Integration/component properties or an explicitly configured Kamelet mapping today.
+
+The existing precedence rules should be preserved unless separately agreed: a manually configured trigger of a given type prevents automatic discovery of another trigger of that type, and `keda.autoMetadata` overlays the metadata produced by the mapper.
 
 == Requirements and constraints
 
@@ -91,42 +116,42 @@ Limitations:
 
 This remains the fallback for configuration that cannot be resolved safely.
 
-=== Option 2: Resolve statically declared configuration in Camel K
+=== Option 2: Map static Integration, component, and known Kamelet properties in Camel K
 
-Camel K could construct a read-only mapping context from the declarative Integration model. The context could contain the endpoint URI, directly declared Camel properties, and—if supported by a source/configuration inventory—a restricted representation of property-based bean definitions and references.
+Camel K could extend the mapper input so that the mapper receives the endpoint URI information plus a read-only map of statically available Integration/component properties. For a Pipe-derived Integration, the same context could expose the explicitly declared parameters for a recognized Kamelet source or sink. This is a configuration map, not a resolved Camel registry.
 
 A future mapping API could accept a context rather than accumulating more positional parameters, conceptually:
 
 [source,go]
 ----
 type ScalerMappingContext struct {
-    EndpointURI        string
-    Component          string
-    Path               string
-    Parameters         map[string]string
-    ComponentProperties map[string]string
-    // Optional, statically parsed bean definitions/references.
+    EndpointURI         string
+    Component           string
+    Path                string
+    Parameters          map[string]string
+    IntegrationProperties map[string]string
+    KameletName         string
+    KameletProperties   map[string]string
 }
 ----
 
-This is illustrative only; it is not a proposed committed API. Each scaler would still decide which resolved values correspond to the metadata expected by its KEDA scaler. Generic resolution can follow a declared reference, but it cannot infer the semantic mapping from every arbitrary Java object's fields to a scaler's metadata.
-
-A safe initial scope would be limited to literal, declaratively configured scalar values and a documented subset of Camel property-based bean definitions. The implementation should explicitly report unsupported forms rather than emulate Camel's complete runtime property binding. Java DSL construction, factory methods with side effects, external registries, dynamic expressions, unresolved placeholders, and arbitrary object graphs should not be evaluated in the operator.
+This is illustrative only; it is not a proposed committed API. The context should expose only the data actually available to the operator, and each scaler should select the values it understands. For Kamelets, property-to-scaler conversion should initially be explicitly defined for known Kamelet types and parameter names.
 
 Advantages:
 
-* keeps the first implementation in the layer that generates the `ScaledObject`;
-* can cover common declarative configuration without starting the application; and
-* allows a gradual, testable expansion from component properties to known bean-reference patterns.
+* builds on the current URI mapper and a small, understandable mapper-input extension;
+* can use Integration properties that Camel K already collects, including component properties;
+* can support some Pipe/Kamelet cases without starting the Integration; and
+* keeps component-specific translation in the registered scaler mapper.
 
 Limitations and risks:
 
-* Camel K supports multiple source languages and configuration mechanisms, so a resolver based on individual syntax parsers can become incomplete and difficult to maintain;
-* a property string is not necessarily the final runtime value after placeholder resolution, type conversion, factory execution, or registry lookup;
-* a bean may be created outside the Integration source or supplied by the selected runtime; and
-* bean property names alone do not guarantee that their values are semantically equivalent to KEDA metadata.
+* a property string is not necessarily the final runtime value after placeholder resolution or runtime configuration;
+* a Kamelet invocation URI does not necessarily expose the internal consumer endpoint; its name and declared property values need to be mapped explicitly;
+* Kamelet parameters do not prove how every Kamelet uses those values internally; and
+* this option does not generically resolve bean references, factories, external registries, arbitrary source-code wiring, or multiple levels of indirection.
 
-This option needs a concrete inventory of supported configuration forms before implementation. It must not be presented as universal connection-bean discovery.
+This is the preferred first implementation boundary: map known, statically available values and leave opaque or dynamic configurations to explicit user settings.
 
 === Option 3: Define a Camel Core metadata contract
 
@@ -156,24 +181,25 @@ This is not recommended as the initial approach. Constructing arbitrary user bea
 
 == Recommendation
 
-Use a staged approach.
+Use a staged approach that explicitly separates the existing capability, feasible extensions, and unsupported first-iteration work.
 
-. **Preserve the current URI mapper and explicit fallback.** Keep manual trigger configuration and `keda.autoMetadata` available for all scalers.
-. **Evaluate direct Integration properties as the first increment.** PR #6893 is an experiment for this path. Before generalizing it, agree on the mapper input, property sources, precedence, and safe handling of sensitive values.
-. **Inventory common connection-bean forms.** Use real Camel K examples to determine which forms are declaratively available to the operator—for example, a component property referring to a named bean whose properties are literal Camel properties—and which forms depend on runtime construction. Implement only a narrow subset with tests if this produces useful coverage without duplicating a large part of Camel's configuration machinery.
-. **Escalate to Camel Core only for a demonstrated gap.** If useful connection data cannot be derived from the supported declarative model, discuss a generic metadata/configuration-description contract with Camel Core maintainers. Do not add a KEDA-specific dependency to Camel Core.
-. **Keep the fallback deterministic.** If a value is dynamic, unresolved, ambiguous, or unsupported, do not guess and do not execute the integration. Leave that metadata to explicit configuration; surface actionable diagnostics when required scaler metadata is missing.
+. **Keep the existing URI mapping.** This is already implemented and should remain compatible with current mappers. URI-only configurations continue to work as before.
+. **Add statically declared Integration/component properties to the mapper context.** PR #6893 is exploring this extension for ArtemisQueue. Collect the applicable Integration configuration and Camel trait properties, pass them as a map, and let each scaler choose only the properties it needs. Document precedence and test the behavior before treating it as a shared capability.
+. **Investigate Pipe/Kamelet parameters as a separate, bounded path.** When an Integration is owned by a Pipe, identify whether its source or sink is a Kamelet. Reuse the Kamelet invocation properties propagated by the Pipe binding—or read the parent Pipe when necessary—and map declared parameters only for known Kamelet types. For example, map a known Kamelet's `broker-url` parameter if the Kamelet actually declares and uses it for the relevant connection. Do not assume every `kamelet:` URI reveals its internal component.
+. **Exclude generic connection-bean discovery from the first iteration.** Do not scan all DSL source code to infer connection-factory usage, follow arbitrary reference graphs, instantiate beans, execute factory methods, or contact external systems. Mark these forms as unsupported and retain explicit configuration as the fallback.
+. **Keep credentials explicit and secret-safe.** Do not resolve Kubernetes Secrets into plaintext scaler metadata. Credentials required by a scaler should remain configured through the appropriate explicit KEDA trigger/authentication settings; support for secret references on automatically discovered triggers is not assumed by this proposal.
+. **Revisit Camel Core only if a reusable gap remains.** If known, statically modelled configuration is insufficient, discuss a generic configuration-description contract with Camel Core maintainers. It should describe relevant configuration without exposing live connection objects or introducing a KEDA-specific dependency into Camel Core.
 
-For fields supplied from more than one supported source, the implementation should document a stable precedence. Endpoint-specific URI values should not be silently replaced by a component-wide default. The existing behavior in which `keda.autoMetadata` overlays mapper-generated values should remain unchanged unless intentionally revised in a separate proposal.
+For metadata available from more than one source, document stable precedence. Endpoint-specific URI values should not be silently replaced by component-wide defaults. Preserve the existing behavior in which `keda.autoMetadata` overlays mapper-generated values unless that behavior is intentionally changed in a separate proposal.
 
 == Open questions
 
-* Which Camel K property sources are available at the point `kedaTrait.Configure` runs, and which may contain placeholders rather than final values?
-* Which bean declaration/reference forms are supported consistently across the DSLs and runtimes Camel K currently supports?
-* Can the source inspectors or another existing Camel model API expose declarative bean definitions without creating runtime objects?
-* Which metadata keys are required for the relevant scalers, and how should discovery report missing required values without generating misleading triggers?
-* How should secrets be represented when the connection settings used by the Integration and KEDA's scaler are logically the same but require different runtime references?
-* Does Camel Core already have, or should it introduce, a non-executable configuration description that can be consumed by deployment tools?
+* Which Integration configuration entries and Camel trait properties should be exposed to the mapper, and what should their precedence be relative to URI parameters?
+* How should the KEDA trait reliably identify an owning Pipe and read its source/sink when a Kamelet-specific mapping needs the declared parameters?
+* Which Kamelet names and parameter names can be supported explicitly, starting with a concrete `broker-url` example?
+* What diagnostics should be produced when a recognized Kamelet omits a parameter required by its scaler?
+* How should credentials remain represented as Kubernetes Secret references in explicit KEDA authentication settings, without appearing in plain metadata?
+* If later use cases demonstrate that declarative Integration/Pipe properties are insufficient, could Camel Core provide a stable, non-executable configuration description?
 
 == Validation plan
 
@@ -181,12 +207,14 @@ The design should be validated against representative configurations before sele
 
 * URI-only configuration, to verify no regression in existing mappings such as Kafka;
 * literal component properties supplied through the Integration's Camel configuration;
-* a property-configured connection bean referenced by a component;
-* nested bean references and unsupported factory-created beans;
-* unresolved property placeholders or values available only at runtime;
+* Integration properties and Camel trait component properties, including absent values and precedence against URI parameters;
+* a Pipe whose source or sink references a known Kamelet and supplies a supported connection parameter such as `broker-url`;
+* a Kamelet endpoint for which the mapping is unknown or a required property is absent, ensuring the implementation does not guess at the hidden internal endpoint;
+* an Integration not derived from a Pipe, to preserve the standalone Integration path;
+* nested bean references, factory-created beans, and unresolved placeholders, verifying that they are explicitly unsupported rather than evaluated;
 * multiple endpoints that share a component but use different endpoint-specific settings;
 * explicit `keda.autoMetadata` overriding inferred metadata and manually configured triggers taking precedence; and
-* username/password or token configuration, verifying that sensitive values are never emitted as plaintext scaler metadata or logs.
+* username/password or token configuration, verifying that credentials remain explicit secret references and are never emitted as plaintext scaler metadata or logs.
 
 Unit tests should cover property/reference resolution and precedence separately from scaler-specific mapping tests. Integration tests should verify the resulting `ScaledObject` and authentication references, but running a live broker should not be required to test static discovery.
 
