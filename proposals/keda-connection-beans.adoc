@@ -33,7 +33,7 @@ A KEDA scaler reads metadata to poll an external system and decide when to scale
 The configuration sources below are not equally discoverable. The first iteration should target values the operator already has in structured form, rather than attempting to reconstruct the running Camel registry from source code.
 
 * **Endpoint URI parameters — implementable; already supported.** The current mapper parses an endpoint URI and maps selected path and query parameters to KEDA metadata. This remains the baseline and requires no bean discovery.
-* **Integration and component properties — implementable; partly covered by [PR #6893](https://github.com/apache/camel-k/pull/6893).** Camel K can collect properties explicitly configured on an Integration and its Camel trait and pass a property map to each scaler mapper. This lets a component-specific mapper translate a known property such as `camel.component.amqp.broker-url`. It does not resolve a bean reference or a runtime placeholder. The related PR is open and this extension is not yet part of upstream `main`.
+* **Integration and component properties — implementable; partly covered by https://github.com/apache/camel-k/pull/6893[PR #6893].** Camel K can collect properties explicitly configured on an Integration and its Camel trait and pass a property map to each scaler mapper. This lets a component-specific mapper translate a known property such as `camel.component.amqp.broker-url`. It does not resolve a bean reference or a runtime placeholder. The related PR is open and this extension is not yet part of upstream `main`.
 * **Properties configured on a Pipe endpoint that references a Kamelet — partially implementable.** The Pipe-to-Integration binding already preserves explicitly supplied Kamelet properties as Integration application properties. For known Kamelets, a mapping can translate declared parameters (for example, `broker-url`) to the corresponding scaler metadata. This requires an explicit mapping between a known Kamelet and its parameters; it does not automatically reveal the inner endpoint of every arbitrary Kamelet.
 * **Named beans configured through `camel.beans.*` and references such as `#bean:<name>` — not generically implementable in the first iteration.** Individual bean properties may appear in static configuration, but the operator cannot safely infer which bean is actually used as the connection factory, or how it is used, in the general case. Bean names and property values alone do not establish that relationship.
 * **Bean definitions in DSL source, factory methods, nested bean references, or external registries — not implementable in the first iteration.** Scanning source code to detect connection-factory use is complex across supported DSLs, and there may be several levels of indirection. Executing factories or instantiating beans to discover their values is out of scope.
@@ -59,7 +59,7 @@ The existing `ScaleMapper.Map` contract receives the endpoint path and URI param
 
 === Integration/component property mapping: implementable extension
 
-[PR #6893](https://github.com/apache/camel-k/pull/6893) demonstrates the next, narrower step for the ArtemisQueue mapping. The proposed `integrationProperties(e)` helper collects Integration configuration entries and properties configured through the Camel trait, then passes that map to `MapToKedaTrigger` and the scaler mapper. The Artemis mapper can use a directly declared property such as `camel.component.amqp.broker-url` to derive the scaler's management endpoint.
+https://github.com/apache/camel-k/pull/6893[PR #6893] demonstrates the next, narrower step for the ArtemisQueue mapping. The proposed `integrationProperties(e)` helper collects Integration configuration entries and properties configured through the Camel trait, then passes that map to `MapToKedaTrigger` and the scaler mapper. The Artemis mapper can use a directly declared property such as `camel.component.amqp.broker-url` to derive the scaler's management endpoint.
 
 This approach uses configuration already available to Camel K and avoids querying the broker or constructing a connection factory. It should be generalized only with documented input/precedence rules and tests. The related PR remains open, so the property-map extension must not be described as already merged into upstream `main`.
 
@@ -216,7 +216,7 @@ The design should be validated against representative configurations before sele
 * explicit `keda.autoMetadata` overriding inferred metadata and manually configured triggers taking precedence; and
 * username/password or token configuration, verifying that credentials remain explicit secret references and are never emitted as plaintext scaler metadata or logs.
 
-Unit tests should cover property/reference resolution and precedence separately from scaler-specific mapping tests. Integration tests should verify the resulting `ScaledObject` and authentication references, but running a live broker should not be required to test static discovery.
+Unit tests should cover static property extraction, precedence, known Kamelet-parameter mapping, and unsupported/dynamic inputs separately from scaler-specific mapping tests. Integration tests should verify the resulting `ScaledObject` and authentication references, but running a live broker should not be required to test static discovery.
 
 == Expected outcome
 
