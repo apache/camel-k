@@ -17,13 +17,7 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-#### 1. Setup KEDA Operator
+#### Setup KEDA Operator
 # Installs KEDA operator into 'keda' namespace
 kubectl apply --server-side -f https://github.com/kedacore/keda/releases/download/v2.17.2/keda-2.17.2.yaml
 kubectl rollout status deployment keda-operator -n keda --timeout=180s
-
-#### 2. Setup Plain Ephemeral Kafka (No Operator required)
-kubectl apply -f $SCRIPT_DIR/kafka-ephemeral.yaml -n keda
-kubectl rollout status deployment my-cluster-kafka -n keda --timeout=180s

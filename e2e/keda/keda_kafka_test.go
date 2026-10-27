@@ -25,7 +25,7 @@ import (
 	"testing"
 
 	. "github.com/onsi/gomega"
-	"github.com/onsi/gomega/gstruct"
+	. "github.com/onsi/gomega/gstruct"
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
@@ -34,36 +34,33 @@ import (
 
 func TestKafkaKedaAutoscale(t *testing.T) {
 	WithExistingNamedTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/kafka-ephemeral.yaml", "-n", ns))
+		ExpectExecSucceed(t, g, Kubectl("rollout", "status", "deployment", "my-cluster-kafka", "-n", ns, "--timeout=180s"))
+
 		t.Run("Serverless Kafka Autoscale", func(t *testing.T) {
 			consumerName := "keda-kafka-auto-discovery"
 			producerName := "timer-to-kafka"
 
-			// Ensure cleanup on failure
-			defer func() {
-				_ = Kubectl("delete", "pipe", producerName, "-n", ns).Run()
-				_ = Kubectl("delete", "it", consumerName, "-n", ns).Run()
-			}()
-
-			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/keda-it-kafkatopic-to-log-auto.yaml"))
+			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/keda-it-kafkatopic-to-log-auto.yaml", "-n", ns))
 
 			// Start consumer
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, consumerName, v1.IntegrationConditionReady), TestTimeoutMedium).
 				Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), TestTimeoutShort).
-				Should(gstruct.PointTo(BeNumerically("==", 1)))
+				Should(PointTo(BeNumerically("==", 1)))
 
 			// Scale down to 0 when idle
 			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), TestTimeoutMedium).
-				Should(gstruct.PointTo(BeNumerically("==", 0)))
+				Should(PointTo(BeNumerically("==", 0)))
 
 			// Start producer to generate traffic
-			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/timer-to-kafka.yaml"))
+			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/timer-to-kafka.yaml", "-n", ns))
 			g.Eventually(PipeConditionStatus(t, ctx, ns, producerName, v1.PipeConditionReady), TestTimeoutMedium).
 				Should(Equal(corev1.ConditionTrue))
 
 			// Consumer scales up to 1
 			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), TestTimeoutShort).
-				Should(gstruct.PointTo(BeNumerically("==", 1)))
+				Should(PointTo(BeNumerically("==", 1)))
 
 			// Verify messages are being received and processed
 			g.Eventually(IntegrationLogs(t, ctx, ns, consumerName), TestTimeoutShort).
@@ -74,8 +71,13 @@ func TestKafkaKedaAutoscale(t *testing.T) {
 
 			// Scale back to 0
 			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), TestTimeoutMedium).
-				Should(gstruct.PointTo(BeNumerically("==", 0)))
+				Should(PointTo(BeNumerically("==", 0)))
+
+			ExpectExecSucceed(t, g, Kubectl("delete", "pipe", "--all", "-n", ns))
+			ExpectExecSucceed(t, g, Kubectl("delete", "it", "--all", "-n", ns))
 		})
+
+		ExpectExecSucceed(t, g, Kubectl("delete", "-f", "files/kafka-ephemeral.yaml", "-n", ns))
 	}, "keda")
 }
 
@@ -84,11 +86,7 @@ func TestKafkaKedaAutoDiscovery(t *testing.T) {
 		t.Run("Auto-discovery Kafka", func(t *testing.T) {
 			integrationName := "keda-kafka-auto-discovery"
 
-			defer func() {
-				_ = Kubectl("delete", "it", integrationName, "-n", ns).Run()
-			}()
-
-			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/keda-it-kafkatopic-to-log-auto.yaml"))
+			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/keda-it-kafkatopic-to-log-auto.yaml", "-n", ns))
 
 			// Wait for ScaledObject
 			g.Eventually(ScaledObject(t, ctx, ns, integrationName), TestTimeoutMedium).
@@ -102,6 +100,8 @@ func TestKafkaKedaAutoDiscovery(t *testing.T) {
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["topic"]).To(Equal("my-topic"))
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["bootstrapServers"]).To(Equal("my-cluster-kafka-bootstrap.keda.svc:9092"))
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["consumerGroup"]).To(Equal("auto-group"))
+
+			ExpectExecSucceed(t, g, Kubectl("delete", "it", integrationName, "-n", ns))
 		})
 	}, "keda")
 }
@@ -111,11 +111,7 @@ func TestKafkaKedaAutoDiscoveryWithManualTrigger(t *testing.T) {
 		t.Run("Auto-discovery with manual trigger", func(t *testing.T) {
 			integrationName := "keda-kafka-auto-discovery-with-manual"
 
-			defer func() {
-				_ = Kubectl("delete", "it", integrationName, "-n", ns).Run()
-			}()
-
-			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/keda-kafka-auto-discovery-with-manual.yaml"))
+			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/keda-kafka-auto-discovery-with-manual.yaml", "-n", ns))
 
 			g.Eventually(ScaledObject(t, ctx, ns, integrationName), TestTimeoutMedium).
 				ShouldNot(BeNil())
@@ -135,6 +131,8 @@ func TestKafkaKedaAutoDiscoveryWithManualTrigger(t *testing.T) {
 			}
 			g.Expect(kafkaTrigger).NotTo(BeNil(), "kafka trigger should be auto-discovered")
 			g.Expect(cronTrigger).NotTo(BeNil(), "cron trigger should exist from manual config")
+
+			ExpectExecSucceed(t, g, Kubectl("delete", "it", integrationName, "-n", ns))
 		})
 	}, "keda")
 }
@@ -144,11 +142,7 @@ func TestKafkaKedaAutoMetadata(t *testing.T) {
 		t.Run("Auto-discovery with autoMetadata merge", func(t *testing.T) {
 			integrationName := "keda-kafka-auto-metadata"
 
-			defer func() {
-				_ = Kubectl("delete", "it", integrationName, "-n", ns).Run()
-			}()
-
-			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/keda-kafka-auto-metadata.yaml"))
+			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/keda-kafka-auto-metadata.yaml", "-n", ns))
 
 			g.Eventually(ScaledObject(t, ctx, ns, integrationName), TestTimeoutMedium).
 				ShouldNot(BeNil())
@@ -162,6 +156,8 @@ func TestKafkaKedaAutoMetadata(t *testing.T) {
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["consumerGroup"]).To(Equal("metadata-group"))
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["lagThreshold"]).To(Equal("100"))
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["activationLagThreshold"]).To(Equal("10"))
+
+			ExpectExecSucceed(t, g, Kubectl("delete", "it", integrationName, "-n", ns))
 		})
 	}, "keda")
 }
