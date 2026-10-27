@@ -347,6 +347,14 @@ test-kafka: gotestfmt-install
 	exit $${FAILED}
 
 #
+# KEDA tests for automatic scaler discovery and autoscaling
+#
+test-keda: gotestfmt-install
+	FAILED=0; \
+	go test -timeout 20m -v ./e2e/keda -tags=integration $(GOTESTFMT) || ((FAILED++)); \
+	exit $${FAILED}
+
+#
 # ArkMQ tests that require the presence of ArkMQ operator configuration
 #
 test-arkmq: gotestfmt-install

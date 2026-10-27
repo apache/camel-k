@@ -1,0 +1,10 @@
+apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  name: timer-to-kafka
+  namespace: keda
+spec:
+  source:
+    uri: timer:foo
+  sink:
+    uri: kafka:my-topic?brokers=my-cluster-kafka-bootstrap.keda.svc:9092
