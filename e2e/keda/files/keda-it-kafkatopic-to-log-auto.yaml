@@ -1,0 +1,18 @@
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: keda-kafka-auto-discovery
+  namespace: keda
+spec:
+  sources:
+    - content: |
+        from("kafka:my-topic?brokers=my-cluster-kafka-bootstrap.keda.svc:9092&groupId=auto-group")
+          .log("${body}");
+      name: routes.java
+  traits:
+    keda:
+      enabled: true
+      minReplicaCount: 0
+      maxReplicaCount: 1
+      cooldownPeriod: 20
+      pollingInterval: 10
