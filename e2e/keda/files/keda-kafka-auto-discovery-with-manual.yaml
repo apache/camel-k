@@ -1,0 +1,23 @@
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: keda-kafka-auto-discovery-with-manual
+  namespace: keda
+spec:
+  sources:
+    - content: |
+        from("kafka:my-topic?brokers=my-cluster-kafka-bootstrap.keda.svc:9092&groupId=manual-group")
+          .log("${body}");
+      name: routes.java
+  traits:
+    keda:
+      enabled: true
+      minReplicaCount: 0
+      maxReplicaCount: 2
+      triggers:
+        - type: cron
+          metadata:
+            timezone: "UTC"
+            start: "0 * * * *"
+            end: "30 * * * *"
+            desiredReplicas: "1"
