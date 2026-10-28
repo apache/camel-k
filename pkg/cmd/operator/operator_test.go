@@ -19,16 +19,26 @@ package operator
 
 import (
 	"context"
+	"io"
+	"net/http"
+	"strings"
 	"testing"
 
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/platform"
+	monitorv1alpha1 "github.com/camel-tooling/camel-monitor-operator/pkg/apis/camel/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
 func TestGetNamespacesSelector(t *testing.T) {
@@ -220,4 +230,49 @@ func TestGetOperatorImage(t *testing.T) {
 		require.Error(t, err)
 		assert.Empty(t, image)
 	})
+}
+
+type managerRoundTripper func(*http.Request) (*http.Response, error)
+
+func (f managerRoundTripper) RoundTrip(request *http.Request) (*http.Response, error) {
+	return f(request)
+}
+
+func TestManagerClientReadsCamelMonitorsWithoutStartingAnInformer(t *testing.T) {
+	scheme := runtime.NewScheme()
+	require.NoError(t, monitorv1alpha1.AddToScheme(scheme))
+	require.NoError(t, v1.AddToScheme(scheme))
+	require.NoError(t, corev1.AddToScheme(scheme))
+	mapper := meta.NewDefaultRESTMapper([]schema.GroupVersion{monitorv1alpha1.SchemeGroupVersion, v1.SchemeGroupVersion})
+	mapper.Add(monitorv1alpha1.SchemeGroupVersion.WithKind(monitorv1alpha1.AppKind), meta.RESTScopeNamespace)
+	mapper.Add(v1.SchemeGroupVersion.WithKind(v1.IntegrationKind), meta.RESTScopeNamespace)
+	integration := v1.NewIntegration("test", "sample")
+	cached := fake.NewClientBuilder().WithScheme(scheme).WithObjects(&integration).Build()
+	requests := 0
+	options := ctrl.Options{
+		Scheme: scheme,
+		Mapper: mapper,
+		Cache:  &ctrl.CacheOptions{Reader: cached, DisableFor: []ctrl.Object{&corev1.Secret{}}},
+		HTTPClient: &http.Client{Transport: managerRoundTripper(func(request *http.Request) (*http.Response, error) {
+			requests++
+			require.Equal(t, http.MethodGet, request.Method)
+			require.Equal(t, "/apis/camel.apache.org/v1alpha1/namespaces/test/camelmonitors/sample", request.URL.Path)
+			return &http.Response{
+				StatusCode: http.StatusOK,
+				Header:     http.Header{"Content-Type": {"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"apiVersion":"camel.apache.org/v1alpha1","kind":"CamelMonitor","metadata":{"name":"sample","namespace":"test"}}`)),
+			}, nil
+		})},
+	}
+	c, err := newManagerClient(&rest.Config{Host: "http://api.invalid"}, options)
+	require.NoError(t, err)
+	monitor := monitorv1alpha1.NewCamelMonitor("test", "sample")
+	require.NoError(t, c.Get(context.Background(), ctrl.ObjectKeyFromObject(&monitor), &monitor))
+	require.Equal(t, 1, requests, "optional monitors must use a direct GET rather than the cache's list/watch")
+	require.Contains(t, options.Cache.DisableFor, &corev1.Secret{}, "retain caller cache exclusions")
+	// Other types still use the manager cache, without another API request.
+	var fromCache v1.Integration
+	require.NoError(t, c.Get(context.Background(), ctrl.ObjectKeyFromObject(&integration), &fromCache))
+	require.Equal(t, integration.Name, fromCache.Name)
+	require.Equal(t, 1, requests)
 }

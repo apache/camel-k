@@ -1,10 +1,11 @@
 module github.com/apache/camel-k/v2
 
-go 1.27.2
+go 1.27.3
 
 require (
 	dario.cat/mergo v1.0.2
 	github.com/Masterminds/semver v1.5.0
+	github.com/camel-tooling/camel-monitor-operator v0.2.1
 	github.com/evanphx/json-patch v5.9.11+incompatible
 	github.com/gertd/go-pluralize v0.2.1
 	github.com/go-git/go-git/v5 v5.19.3
@@ -19,7 +20,7 @@ require (
 	// go get github.com/openshift/api@release-4.21
 	github.com/openshift/api v0.0.0-20250820105013-6282350d0c39
 	github.com/operator-framework/api v0.45.0
-	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.94.1
+	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.94.2
 	github.com/prometheus/client_golang v1.25.0
 	github.com/prometheus/client_model v0.6.3
 	github.com/prometheus/common v0.72.1

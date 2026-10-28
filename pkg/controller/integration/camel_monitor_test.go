@@ -20,20 +20,24 @@ package integration
 import (
 	"context"
 	"errors"
+	"io"
+	"net/http"
 	"strconv"
+	"strings"
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/util/log"
+	monitorv1alpha1 "github.com/camel-tooling/camel-monitor-operator/pkg/apis/camel/v1alpha1"
 	"github.com/stretchr/testify/require"
 	appsv1 "k8s.io/api/apps/v1"
 	authorizationv1 "k8s.io/api/authorization/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
@@ -41,6 +45,7 @@ import (
 	fakediscovery "k8s.io/client-go/discovery/fake"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 	authclient "k8s.io/client-go/kubernetes/typed/authorization/v1"
+	"k8s.io/client-go/rest"
 	k8stesting "k8s.io/client-go/testing"
 	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -54,14 +59,28 @@ func monitorOwner(apiVersion, kind, name, uid string) metav1.OwnerReference {
 	return metav1.OwnerReference{APIVersion: apiVersion, Kind: kind, Name: name, UID: types.UID(uid)}
 }
 
-func monitorResource(gvk schema.GroupVersionKind, name, namespace, uid string, owners ...metav1.OwnerReference) *unstructured.Unstructured {
-	resource := &unstructured.Unstructured{}
-	resource.SetGroupVersionKind(gvk)
-	resource.SetName(name)
-	resource.SetNamespace(namespace)
-	resource.SetUID(types.UID(uid))
-	resource.SetOwnerReferences(owners)
-	return resource
+func monitorResource(name, namespace, uid string, owners ...metav1.OwnerReference) *monitorv1alpha1.CamelMonitor {
+	resource := monitorv1alpha1.NewCamelMonitor(namespace, name)
+	resource.UID = types.UID(uid)
+	resource.OwnerReferences = owners
+	return &resource
+}
+
+func monitorWorkload(gvk schema.GroupVersionKind, name, namespace, uid string, owners ...metav1.OwnerReference) ctrl.Object {
+	metadata := metav1.ObjectMeta{Name: name, Namespace: namespace, UID: types.UID(uid), OwnerReferences: owners}
+	if gvk.Kind == "CronJob" {
+		return &batchv1.CronJob{ObjectMeta: metadata}
+	}
+	return &appsv1.Deployment{ObjectMeta: metadata}
+}
+
+func monitorScheme(t *testing.T) *runtime.Scheme {
+	t.Helper()
+	scheme := runtime.NewScheme()
+	require.NoError(t, monitorv1alpha1.AddToScheme(scheme))
+	require.NoError(t, appsv1.AddToScheme(scheme))
+	require.NoError(t, batchv1.AddToScheme(scheme))
+	return scheme
 }
 
 func TestCamelMonitorAssociation(t *testing.T) {
@@ -71,49 +90,49 @@ func TestCamelMonitorAssociation(t *testing.T) {
 	integrationOwner := monitorOwner("camel.apache.org/v1", "Integration", it.Name, string(it.UID))
 	cases := []struct {
 		name     string
-		monitor  *unstructured.Unstructured
-		workload *unstructured.Unstructured
+		monitor  *monitorv1alpha1.CamelMonitor
+		workload ctrl.Object
 		want     bool
 	}{
-		{name: "direct", monitor: monitorResource(camelMonitorGVK, it.Name, it.Namespace, "monitor", integrationOwner), want: true},
-		{name: "direct after missing workload", monitor: monitorResource(camelMonitorGVK, it.Name, it.Namespace, "monitor", monitorOwner("apps/v1", "Deployment", it.Name, "missing"), integrationOwner), want: true},
-		{name: "no owner", monitor: monitorResource(camelMonitorGVK, it.Name, it.Namespace, "monitor")},
-		{name: "different namespace", monitor: monitorResource(camelMonitorGVK, it.Name, "other", "monitor", integrationOwner)},
-		{name: "different name", monitor: monitorResource(camelMonitorGVK, "other", it.Namespace, "monitor", integrationOwner)},
-		{name: "stale Integration UID", monitor: monitorResource(camelMonitorGVK, it.Name, it.Namespace, "monitor", monitorOwner("camel.apache.org/v1", "Integration", it.Name, "old"))},
-		{name: "foreign group", monitor: monitorResource(camelMonitorGVK, it.Name, it.Namespace, "monitor", monitorOwner("other/v1", "Integration", it.Name, string(it.UID)))},
-		{name: "foreign kind", monitor: monitorResource(camelMonitorGVK, it.Name, it.Namespace, "monitor", monitorOwner("camel.apache.org/v1", "Pipe", it.Name, string(it.UID)))},
-		{name: "foreign owner name", monitor: monitorResource(camelMonitorGVK, it.Name, it.Namespace, "monitor", monitorOwner("camel.apache.org/v1", "Integration", "other", string(it.UID)))},
+		{name: "direct", monitor: monitorResource(it.Name, it.Namespace, "monitor", integrationOwner), want: true},
+		{name: "direct after missing workload", monitor: monitorResource(it.Name, it.Namespace, "monitor", monitorOwner("apps/v1", "Deployment", it.Name, "missing"), integrationOwner), want: true},
+		{name: "no owner", monitor: monitorResource(it.Name, it.Namespace, "monitor")},
+		{name: "different namespace", monitor: monitorResource(it.Name, "other", "monitor", integrationOwner)},
+		{name: "different name", monitor: monitorResource("other", it.Namespace, "monitor", integrationOwner)},
+		{name: "stale Integration UID", monitor: monitorResource(it.Name, it.Namespace, "monitor", monitorOwner("camel.apache.org/v1", "Integration", it.Name, "old"))},
+		{name: "foreign group", monitor: monitorResource(it.Name, it.Namespace, "monitor", monitorOwner("other/v1", "Integration", it.Name, string(it.UID)))},
+		{name: "foreign kind", monitor: monitorResource(it.Name, it.Namespace, "monitor", monitorOwner("camel.apache.org/v1", "Pipe", it.Name, string(it.UID)))},
+		{name: "foreign owner name", monitor: monitorResource(it.Name, it.Namespace, "monitor", monitorOwner("camel.apache.org/v1", "Integration", "other", string(it.UID)))},
 	}
 	for _, workloadGVK := range []schema.GroupVersionKind{{Group: "apps", Version: "v1", Kind: "Deployment"}, {Group: "batch", Version: "v1", Kind: "CronJob"}} {
-		workload := monitorResource(workloadGVK, it.Name, it.Namespace, "workload", integrationOwner)
-		monitor := monitorResource(camelMonitorGVK, it.Name, it.Namespace, "monitor", monitorOwner(workloadGVK.GroupVersion().String(), workloadGVK.Kind, it.Name, "workload"))
+		workload := monitorWorkload(workloadGVK, it.Name, it.Namespace, "workload", integrationOwner)
+		monitor := monitorResource(it.Name, it.Namespace, "monitor", monitorOwner(workloadGVK.GroupVersion().String(), workloadGVK.Kind, it.Name, "workload"))
 		cases = append(cases, struct {
 			name     string
-			monitor  *unstructured.Unstructured
-			workload *unstructured.Unstructured
+			monitor  *monitorv1alpha1.CamelMonitor
+			workload ctrl.Object
 			want     bool
 		}{workloadGVK.Kind, monitor, workload, true})
 		stale := monitor.DeepCopy()
 		stale.SetOwnerReferences([]metav1.OwnerReference{monitorOwner(workloadGVK.GroupVersion().String(), workloadGVK.Kind, it.Name, "stale")})
 		cases = append(cases, struct {
 			name     string
-			monitor  *unstructured.Unstructured
-			workload *unstructured.Unstructured
+			monitor  *monitorv1alpha1.CamelMonitor
+			workload ctrl.Object
 			want     bool
 		}{workloadGVK.Kind + " stale UID", stale, workload, false})
-		foreign := workload.DeepCopy()
+		foreign := monitorWorkload(workloadGVK, it.Name, it.Namespace, "workload")
 		foreign.SetOwnerReferences(nil)
 		cases = append(cases, struct {
 			name     string
-			monitor  *unstructured.Unstructured
-			workload *unstructured.Unstructured
+			monitor  *monitorv1alpha1.CamelMonitor
+			workload ctrl.Object
 			want     bool
 		}{workloadGVK.Kind + " foreign workload", monitor, foreign, false})
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			builder := fake.NewClientBuilder().WithScheme(runtime.NewScheme())
+			builder := fake.NewClientBuilder().WithScheme(monitorScheme(t))
 			if tc.workload != nil {
 				builder.WithObjects(tc.workload)
 			}
@@ -176,7 +195,7 @@ type monitorActionClient struct {
 }
 
 func (c monitorActionClient) Get(ctx context.Context, key ctrl.ObjectKey, obj ctrl.Object, opts ...ctrl.GetOption) error {
-	if obj.GetObjectKind().GroupVersionKind() == camelMonitorGVK {
+	if _, ok := obj.(*monitorv1alpha1.CamelMonitor); ok {
 		return c.monitorReader.Get(ctx, key, obj, opts...)
 	}
 	return c.Client.Get(ctx, key, obj, opts...)
@@ -187,7 +206,7 @@ func TestMonitorActionCamelMonitorLifecycle(t *testing.T) {
 	c, it, err := nominalEnvironment()
 	require.NoError(t, err)
 	it.UID = "integration"
-	backing := fake.NewClientBuilder().WithScheme(runtime.NewScheme()).Build()
+	backing := fake.NewClientBuilder().WithScheme(monitorScheme(t)).Build()
 	action := monitorAction{}
 	action.InjectLogger(log.Log)
 	action.InjectClient(monitorActionClient{Client: c, monitorReader: backing})
@@ -197,7 +216,7 @@ func TestMonitorActionCamelMonitorLifecycle(t *testing.T) {
 	require.Nil(t, result.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable))
 	ready := *it.Status.GetCondition(v1.IntegrationConditionReady)
 	phase := it.Status.Phase
-	monitor := monitorResource(camelMonitorGVK, it.Name, it.Namespace, "monitor", monitorOwner("camel.apache.org/v1", "Integration", it.Name, string(it.UID)))
+	monitor := monitorResource(it.Name, it.Namespace, "monitor", monitorOwner("camel.apache.org/v1", "Integration", it.Name, string(it.UID)))
 	require.NoError(t, backing.Create(ctx, monitor))
 	result, err = action.Handle(ctx, it)
 	require.NoError(t, err)
@@ -248,14 +267,14 @@ func TestMonitorActionCamelMonitorEarlyExit(t *testing.T) {
 	it.Status.Phase = v1.IntegrationPhaseError
 	it.Status.SetCondition(v1.IntegrationConditionReady, corev1.ConditionFalse, v1.IntegrationConditionInitializationFailedReason, "failed")
 	ready := *it.Status.GetCondition(v1.IntegrationConditionReady)
-	backing := fake.NewClientBuilder().WithScheme(runtime.NewScheme()).Build()
+	backing := fake.NewClientBuilder().WithScheme(monitorScheme(t)).Build()
 	action := monitorAction{}
 	action.InjectLogger(log.Log)
 	action.InjectClient(monitorActionClient{Client: c, monitorReader: backing})
 	result, err := action.Handle(ctx, it)
 	require.NoError(t, err)
 	require.Nil(t, result, "unchanged early exit preserves nil result")
-	monitor := monitorResource(camelMonitorGVK, it.Name, it.Namespace, "monitor", monitorOwner("camel.apache.org/v1", "Integration", it.Name, string(it.UID)))
+	monitor := monitorResource(it.Name, it.Namespace, "monitor", monitorOwner("camel.apache.org/v1", "Integration", it.Name, string(it.UID)))
 	require.NoError(t, backing.Create(ctx, monitor))
 	result, err = action.Handle(ctx, it)
 	require.NoError(t, err)
@@ -275,9 +294,16 @@ func TestMonitorActionCamelMonitorEarlyExit(t *testing.T) {
 
 func TestCamelMonitorEvents(t *testing.T) {
 	ctx := context.Background()
-	monitor := monitorResource(camelMonitorGVK, "sample", "test", "uid", monitorOwner("apps/v1", "Deployment", "sample", "workload"))
+	monitor := monitorResource("sample", "test", "uid", monitorOwner("apps/v1", "Deployment", "sample", "workload"))
 	changed := monitor.DeepCopy()
 	changed.SetOwnerReferences(nil)
+	predicate := camelMonitorOwnerChangedPredicate()
+	require.True(t, predicate.Create(event.CreateEvent{Object: monitor}))
+	require.True(t, predicate.Delete(event.DeleteEvent{Object: monitor}))
+	require.True(t, predicate.Update(event.UpdateEvent{ObjectOld: monitor, ObjectNew: changed}))
+	statusChanged := monitor.DeepCopy()
+	statusChanged.Status.Phase = monitorv1alpha1.CamelMonitorPhaseRunning
+	require.False(t, predicate.Update(event.UpdateEvent{ObjectOld: monitor, ObjectNew: statusChanged}))
 	h := handler.EnqueueRequestsFromMapFunc(camelMonitorEnqueueRequests)
 	for _, action := range []string{"create", "delete", "owner change"} {
 		t.Run(action, func(t *testing.T) {
@@ -303,8 +329,8 @@ func TestCamelMonitorEvents(t *testing.T) {
 	oldWorkload := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{Name: "sample", Namespace: "test", OwnerReferences: []metav1.OwnerReference{monitorOwner("camel.apache.org/v1", "Integration", "sample", "integration")}}}
 	newWorkload := oldWorkload.DeepCopy()
 	newWorkload.SetOwnerReferences(nil)
-	require.True(t, camelMonitorWorkloadPredicate().Update(event.UpdateEvent{ObjectOld: oldWorkload, ObjectNew: newWorkload}))
-	require.False(t, camelMonitorWorkloadPredicate().Update(event.UpdateEvent{ObjectOld: oldWorkload, ObjectNew: oldWorkload.DeepCopy()}))
+	require.True(t, camelMonitorOwnerChangedPredicate().Update(event.UpdateEvent{ObjectOld: oldWorkload, ObjectNew: newWorkload}))
+	require.False(t, camelMonitorOwnerChangedPredicate().Update(event.UpdateEvent{ObjectOld: oldWorkload, ObjectNew: oldWorkload.DeepCopy()}))
 }
 
 func TestCamelMonitorWatchPermissionsNamespaces(t *testing.T) {
@@ -351,8 +377,8 @@ func TestCamelMonitorWorkloadOwnerEvents(t *testing.T) {
 				}
 				owner := monitorOwner("camel.apache.org/v1", "Integration", "sample", "integration")
 				owner.Controller = &controller
-				old := monitorResource(schema.GroupVersionKind{Group: group, Version: "v1", Kind: kind}, "sample", "test", "workload", owner)
-				changed := old.DeepCopy()
+				old := monitorWorkload(schema.GroupVersionKind{Group: group, Version: "v1", Kind: kind}, "sample", "test", "workload", owner)
+				changed := monitorWorkload(schema.GroupVersionKind{Group: group, Version: "v1", Kind: kind}, "sample", "test", "workload", owner)
 				changed.SetOwnerReferences(nil)
 				for _, deleted := range []bool{false, true} {
 					queue := workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[reconcile.Request]())
@@ -389,12 +415,12 @@ func TestCamelMonitorMultipleWorkloadOwners(t *testing.T) {
 	integration := v1.NewIntegration("test", "sample")
 	it := &integration
 	it.UID = "integration"
-	monitor := monitorResource(camelMonitorGVK, it.Name, it.Namespace, "monitor",
+	monitor := monitorResource(it.Name, it.Namespace, "monitor",
 		monitorOwner("apps/v1", "Deployment", it.Name, "deployment"),
 		monitorOwner("batch/v1", "CronJob", it.Name, "cron"))
-	cron := monitorResource(schema.GroupVersionKind{Group: "batch", Version: "v1", Kind: "CronJob"}, it.Name, it.Namespace, "cron",
+	cron := monitorWorkload(schema.GroupVersionKind{Group: "batch", Version: "v1", Kind: "CronJob"}, it.Name, it.Namespace, "cron",
 		monitorOwner("camel.apache.org/v1", "Integration", it.Name, string(it.UID)))
-	backing := fake.NewClientBuilder().WithScheme(runtime.NewScheme()).WithObjects(cron).Build()
+	backing := fake.NewClientBuilder().WithScheme(monitorScheme(t)).WithObjects(cron).Build()
 	lookupErr := errors.New("temporary Deployment lookup failure")
 	reader := monitorWorkloadErrorReader{Reader: backing, err: lookupErr}
 	available, err := camelMonitorOwnedByIntegration(context.Background(), reader, monitor, it)
@@ -444,4 +470,42 @@ func TestCamelMonitorOptionalWatch(t *testing.T) {
 			require.False(t, allowed)
 		})
 	}
+}
+
+type monitorRoundTripper func(*http.Request) (*http.Response, error)
+
+func (f monitorRoundTripper) RoundTrip(request *http.Request) (*http.Response, error) {
+	return f(request)
+}
+
+func TestCamelMonitorAssociationIncludesWorkloadsOutsideTheLabelFilteredCache(t *testing.T) {
+	integration := v1.NewIntegration("test", "sample")
+	integration.UID = "integration"
+	monitor := monitorResource("sample", "test", "monitor", monitorOwner("apps/v1", "Deployment", "sample", "deployment"))
+	scheme := monitorScheme(t)
+	mapper := meta.NewDefaultRESTMapper([]schema.GroupVersion{appsv1.SchemeGroupVersion})
+	mapper.Add(appsv1.SchemeGroupVersion.WithKind("Deployment"), meta.RESTScopeNamespace)
+	// An empty cache represents a Deployment excluded by the operator's Integration-label selector.
+	cached := fake.NewClientBuilder().WithScheme(scheme).Build()
+	requests := 0
+	c, err := ctrl.New(&rest.Config{Host: "http://api.invalid"}, ctrl.Options{
+		Scheme: scheme,
+		Mapper: mapper,
+		Cache:  &ctrl.CacheOptions{Reader: cached},
+		HTTPClient: &http.Client{Transport: monitorRoundTripper(func(request *http.Request) (*http.Response, error) {
+			requests++
+			require.Equal(t, http.MethodGet, request.Method)
+			require.Equal(t, "/apis/apps/v1/namespaces/test/deployments/sample", request.URL.Path)
+			return &http.Response{
+				StatusCode: http.StatusOK,
+				Header:     http.Header{"Content-Type": {"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"apiVersion":"apps/v1","kind":"Deployment","metadata":{"name":"sample","namespace":"test","uid":"deployment","ownerReferences":[{"apiVersion":"camel.apache.org/v1","kind":"Integration","name":"sample","uid":"integration"}]}}`)),
+			}, nil
+		})},
+	})
+	require.NoError(t, err)
+	associated, err := camelMonitorOwnedByIntegration(context.Background(), c, monitor, &integration)
+	require.NoError(t, err)
+	require.True(t, associated)
+	require.Equal(t, 1, requests, "ownership lookup must read metadata even when the workload is outside the cache")
 }

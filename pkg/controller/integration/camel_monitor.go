@@ -29,7 +29,6 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8sclient "k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -39,13 +38,15 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	monitorv1alpha1 "github.com/camel-tooling/camel-monitor-operator/pkg/apis/camel/v1alpha1"
+
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
-var camelMonitorGVK = schema.GroupVersionKind{Group: "camel.apache.org", Version: "v1alpha1", Kind: "CamelMonitor"}
+var camelMonitorGVK = monitorv1alpha1.SchemeGroupVersion.WithKind(monitorv1alpha1.AppKind)
 
 const (
 	camelMonitorDiscoveryTimeout = 10 * time.Second
@@ -54,10 +55,11 @@ const (
 // updateCamelMonitorCondition reports resource discovery, independently of runtime readiness.
 // Lookup failures use the existing action error/retry path.
 func updateCamelMonitorCondition(ctx context.Context, c ctrl.Reader, integration *v1.Integration) error {
-	monitor, err := kubernetes.GetUnstructured(ctx, c, camelMonitorGVK, integration.Name, integration.Namespace)
+	monitor := monitorv1alpha1.NewCamelMonitor(integration.Namespace, integration.Name)
+	err := c.Get(ctx, ctrl.ObjectKeyFromObject(&monitor), &monitor)
 	available := false
 	if err == nil {
-		available, err = camelMonitorOwnedByIntegration(ctx, c, monitor, integration)
+		available, err = camelMonitorOwnedByIntegration(ctx, c, &monitor, integration)
 	}
 	switch {
 	case k8serrors.IsNotFound(err), meta.IsNoMatchError(err):
@@ -80,17 +82,17 @@ func updateCamelMonitorCondition(ctx context.Context, c ctrl.Reader, integration
 // A monitor can belong directly to the Integration or to its Deployment/CronJob.
 // Only these two hops are followed, in the Integration namespace, with UID checks
 // at both edges. Names and labels alone do not establish ownership.
-func camelMonitorOwnedByIntegration(ctx context.Context, c ctrl.Reader, monitor *unstructured.Unstructured, integration *v1.Integration) (bool, error) {
+func camelMonitorOwnedByIntegration(ctx context.Context, c ctrl.Reader, monitor *monitorv1alpha1.CamelMonitor, integration *v1.Integration) (bool, error) {
 	if monitor.GetNamespace() != integration.Namespace || monitor.GetName() != integration.Name {
 		return false, nil
 	}
-	for _, owner := range monitor.GetOwnerReferences() {
+	for _, owner := range monitor.ObjectMeta.GetOwnerReferences() {
 		if ownerMatchesIntegration(owner, integration) {
 			return true, nil
 		}
 	}
 	var lookupErr error
-	for _, owner := range monitor.GetOwnerReferences() {
+	for _, owner := range monitor.ObjectMeta.GetOwnerReferences() {
 		gv, err := schema.ParseGroupVersion(owner.APIVersion)
 		if err != nil || owner.UID == "" || owner.Name != integration.Name {
 			continue
@@ -138,9 +140,8 @@ func watchCamelMonitorResources(ctx context.Context, c client.Client, b *builder
 	if !camelMonitorWatchAvailable(ctx, c) {
 		return
 	}
-	monitor := &unstructured.Unstructured{}
-	monitor.SetGroupVersionKind(camelMonitorGVK)
-	b.Watches(monitor, handler.EnqueueRequestsFromMapFunc(camelMonitorEnqueueRequests))
+	b.Watches(&monitorv1alpha1.CamelMonitor{}, handler.EnqueueRequestsFromMapFunc(camelMonitorEnqueueRequests),
+		builder.WithPredicates(camelMonitorOwnerChangedPredicate()))
 }
 
 func camelMonitorWatchAvailable(ctx context.Context, c client.Client) bool {
@@ -162,15 +163,24 @@ func camelMonitorWatchAvailable(ctx context.Context, c client.Client) bool {
 	return true
 }
 
-// Workload ownership changes can invalidate a transitive association without a
-// status change. A same-name mapper also handles non-controller references.
-func camelMonitorWorkloadPredicate() predicate.Predicate {
+// Ownership changes can invalidate an association without a status change.
+// Runtime status changes on the monitor do not affect its availability.
+func camelMonitorOwnerChangedPredicate() predicate.Predicate {
 	return predicate.Funcs{
 		UpdateFunc: func(e event.UpdateEvent) bool {
 			return e.ObjectOld != nil && e.ObjectNew != nil &&
-				!equality.Semantic.DeepEqual(e.ObjectOld.GetOwnerReferences(), e.ObjectNew.GetOwnerReferences())
+				!equality.Semantic.DeepEqual(camelMonitorStoredOwnerReferences(e.ObjectOld), camelMonitorStoredOwnerReferences(e.ObjectNew))
 		},
 	}
+}
+
+// CamelMonitor.GetOwnerReferences builds references to itself for its child resources.
+func camelMonitorStoredOwnerReferences(object ctrl.Object) []metav1.OwnerReference {
+	if monitor, ok := object.(*monitorv1alpha1.CamelMonitor); ok {
+		return monitor.ObjectMeta.GetOwnerReferences()
+	}
+
+	return object.GetOwnerReferences()
 }
 
 // Match the cache scope configured by operator.getNamespacesSelector: a local

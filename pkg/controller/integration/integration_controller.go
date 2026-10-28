@@ -403,7 +403,7 @@ func watchIntegrationResources(c client.Client, b *builder.Builder) {
 		// Also observe same-name workload ownership changes, including non-controller
 		// references, which Owns deliberately excludes.
 		Watches(&appsv1.Deployment{}, handler.EnqueueRequestsFromMapFunc(camelMonitorEnqueueRequests),
-			builder.WithPredicates(camelMonitorWorkloadPredicate())).
+			builder.WithPredicates(camelMonitorOwnerChangedPredicate())).
 		// Watch for the owned Builds
 		Owns(&v1.Build{}, builder.WithPredicates(StatusChangedPredicate{}))
 }
@@ -412,7 +412,7 @@ func watchCronJobResources(b *builder.Builder) {
 	// Watch for the owned CronJobs
 	b.Owns(&batchv1.CronJob{}, builder.WithPredicates(StatusChangedPredicate{})).
 		Watches(&batchv1.CronJob{}, handler.EnqueueRequestsFromMapFunc(camelMonitorEnqueueRequests),
-			builder.WithPredicates(camelMonitorWorkloadPredicate()))
+			builder.WithPredicates(camelMonitorOwnerChangedPredicate()))
 }
 
 func watchKnativeResources(c client.Client, b *builder.Builder) error {
