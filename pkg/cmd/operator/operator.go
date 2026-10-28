@@ -41,7 +41,6 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -52,8 +51,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
-
-	monitorv1alpha1 "github.com/camel-tooling/camel-monitor-operator/pkg/apis/camel/v1alpha1"
 
 	"github.com/apache/camel-k/v2/pkg/apis"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -229,7 +226,6 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 		HealthProbeBindAddress:        ":" + strconv.Itoa(int(healthPort)),
 		Metrics:                       metricsserver.Options{BindAddress: ":" + strconv.Itoa(int(monitoringPort))},
 		Cache:                         options,
-		NewClient:                     newManagerClient,
 	})
 	exitOnError(err, "")
 
@@ -361,13 +357,4 @@ func exitOnError(err error, msg string) {
 		log.Error(err, msg)
 		os.Exit(1)
 	}
-}
-
-// Read optional CamelMonitor resources directly even when their watch is disabled.
-func newManagerClient(config *rest.Config, options ctrl.Options) (ctrl.Client, error) {
-	if options.Cache != nil {
-		options.Cache.DisableFor = append(options.Cache.DisableFor, &monitorv1alpha1.CamelMonitor{})
-	}
-
-	return ctrl.New(config, options)
 }

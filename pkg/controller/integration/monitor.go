@@ -53,6 +53,8 @@ func NewMonitorAction() Action {
 
 type monitorAction struct {
 	baseAction
+
+	camelMonitorEnabled bool
 }
 
 func (action *monitorAction) Name() string {
@@ -72,7 +74,12 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		target = integration
 	}
 	previous := target.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable).DeepCopy()
-	monitorErr := updateCamelMonitorCondition(ctx, action.client, target)
+	var monitorErr error
+	if action.camelMonitorEnabled {
+		monitorErr = updateCamelMonitorCondition(ctx, action.client, target)
+	} else {
+		target.Status.RemoveCondition(v1.IntegrationConditionCamelMonitorAvailable)
+	}
 	// Preserve nil results from early exits unless discovery actually changed status.
 	if result == nil && !equality.Semantic.DeepEqual(previous, target.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable)) {
 		result = target

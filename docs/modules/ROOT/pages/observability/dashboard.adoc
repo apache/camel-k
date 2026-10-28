@@ -101,21 +101,33 @@ Learn more by reading the official https://camel-tooling.github.io/camel-dashboa
 == Discover monitoring from an Integration
 
 `kubectl get integrations` includes a `Camel Monitor` column backed by the
-`CamelMonitorAvailable` status condition. `True` means a same-name
-`CamelMonitor` in the Integration namespace belongs to that Integration,
-either directly or through its Deployment or CronJob. Ownership is checked by
-resource UID; matching names or labels alone do not establish an association.
+`CamelMonitorAvailable` status condition. `True` means at least one associated
+`CamelMonitor` exists in the Integration namespace. The association uses the
+label configured by `CAMEL_MONITOR_OPERATOR_LABEL`. A monitor carrying that label
+with the Integration name as its value is associated directly.
+
+Synthetic monitors created by the Camel Monitor operator do not copy the
+workload's labels. Their `imported-from-kind` and `imported-from-name` annotations
+identify a Deployment or CronJob in the same namespace. Its
+`camel.apache.org/integration` label identifies the Integration, and its configured
+monitor label must be nonempty. The monitor and workload names may differ from
+the Integration name, including monitors created for separate workload revisions.
+Changing the monitor label's value does not remove an existing monitor's
+association with that source; removing the label or changing the source's
+Integration label updates the association.
+
 This reports resource availability, independently of Integration readiness and
 the monitor's `Healthy` or `Monitored` conditions. The existing monitor action
 updates this condition while the Integration is deploying, running, or in error.
+An absent or unassociated resource, a disabled discovery label, or an absent API
+removes the condition and leaves the column blank. A failed query reports
+`Unknown` and uses the normal reconciliation retry without preventing runtime
+monitoring from running. Deleting one associated monitor keeps the condition
+`True` while another remains.
 
-An absent or unassociated resource, or an absent API, removes the condition and
-leaves the column blank. A failed query (for example, missing permissions) reports
-`Unknown` and uses the normal reconciliation retry without changing Integration
-readiness. The operator requires only `get`, `list`, and `watch`
-permissions for `camelmonitors` in its installation scope.
-
-Camel Monitor remains optional. If its CRD is installed after the Camel K
-operator starts, grant the required permissions and restart the Camel K
-operator to enable creation and deletion events. Discovery covers same-name
-resources; monitors created with a revision suffix are not included.
+Camel Monitor remains optional. The operator registers its watch only when the
+CRD is installed at startup. Assign `list` and `watch` permissions for
+`camelmonitors` in the operator's installation scope before enabling the watch.
+If the CRD or permissions are installed later, restart the Camel K operator.
+Creation, deletion and association changes trigger reconciliation; monitor
+runtime status changes do not.

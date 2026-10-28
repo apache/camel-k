@@ -19,18 +19,13 @@ package integration
 
 import (
 	"context"
-	"fmt"
-	"slices"
-	"strings"
-	"time"
+	"os"
 
+	appsv1 "k8s.io/api/apps/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/equality"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	k8sclient "k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -44,24 +39,32 @@ import (
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-)
-
-var camelMonitorGVK = monitorv1alpha1.SchemeGroupVersion.WithKind(monitorv1alpha1.AppKind)
-
-const (
-	camelMonitorDiscoveryTimeout = 10 * time.Second
+	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
 // updateCamelMonitorCondition reports resource discovery, independently of runtime readiness.
-// Lookup failures use the existing action error/retry path.
+// It is called only when the optional monitor watch is enabled.
 func updateCamelMonitorCondition(ctx context.Context, c ctrl.Reader, integration *v1.Integration) error {
-	monitor := monitorv1alpha1.NewCamelMonitor(integration.Namespace, integration.Name)
-	err := c.Get(ctx, ctrl.ObjectKeyFromObject(&monitor), &monitor)
+	monitors := &monitorv1alpha1.CamelMonitorList{}
+	err := c.List(ctx, monitors, ctrl.InNamespace(integration.Namespace))
 	available := false
 	if err == nil {
-		available, err = camelMonitorOwnedByIntegration(ctx, c, &monitor, integration)
+		for i := range monitors.Items {
+			name, lookupErr := camelMonitorIntegrationName(ctx, c, &monitors.Items[i])
+			if lookupErr != nil {
+				err = lookupErr
+			}
+			if name == integration.Name {
+				available = true
+
+				break
+			}
+		}
 	}
 	switch {
+	case available:
+		integration.Status.SetCondition(v1.IntegrationConditionCamelMonitorAvailable, corev1.ConditionTrue,
+			"CamelMonitorAvailable", "An associated CamelMonitor resource is available")
 	case k8serrors.IsNotFound(err), meta.IsNoMatchError(err):
 		integration.Status.RemoveCondition(v1.IntegrationConditionCamelMonitorAvailable)
 	case err != nil:
@@ -69,9 +72,6 @@ func updateCamelMonitorCondition(ctx context.Context, c ctrl.Reader, integration
 			"CamelMonitorLookupFailed", err.Error())
 
 		return err
-	case available:
-		integration.Status.SetCondition(v1.IntegrationConditionCamelMonitorAvailable, corev1.ConditionTrue,
-			"CamelMonitorAvailable", "An associated CamelMonitor resource is available")
 	default:
 		integration.Status.RemoveCondition(v1.IntegrationConditionCamelMonitorAvailable)
 	}
@@ -79,131 +79,121 @@ func updateCamelMonitorCondition(ctx context.Context, c ctrl.Reader, integration
 	return nil
 }
 
-// A monitor can belong directly to the Integration or to its Deployment/CronJob.
-// Only these two hops are followed, in the Integration namespace, with UID checks
-// at both edges. Names and labels alone do not establish ownership.
-func camelMonitorOwnedByIntegration(ctx context.Context, c ctrl.Reader, monitor *monitorv1alpha1.CamelMonitor, integration *v1.Integration) (bool, error) {
-	if monitor.GetNamespace() != integration.Namespace || monitor.GetName() != integration.Name {
-		return false, nil
+// Synthetic monitors in the official API retain their source as annotations rather
+// than copying its discovery label. Resolve that source in the same namespace and
+// use its existing Integration label; monitor names need not equal Integration names.
+func camelMonitorIntegrationName(ctx context.Context, c ctrl.Reader, object ctrl.Object) (string, error) {
+	label := os.Getenv(kubernetes.CamelMonitorOperatorLabelEnvVar)
+	if label == "" {
+		return "", nil
 	}
-	for _, owner := range monitor.ObjectMeta.GetOwnerReferences() {
-		if ownerMatchesIntegration(owner, integration) {
-			return true, nil
+	if monitor, ok := object.(*monitorv1alpha1.CamelMonitor); ok {
+		if name := monitor.Labels[label]; name != "" {
+			return name, nil
+		}
+		var err error
+		object, err = camelMonitorWorkload(ctx, c, monitor)
+		if err != nil || object == nil {
+			return "", err
 		}
 	}
-	var lookupErr error
-	for _, owner := range monitor.ObjectMeta.GetOwnerReferences() {
-		gv, err := schema.ParseGroupVersion(owner.APIVersion)
-		if err != nil || owner.UID == "" || owner.Name != integration.Name {
-			continue
-		}
-		supportedWorkload := (gv.Group == "apps" && owner.Kind == "Deployment") || (gv.Group == "batch" && owner.Kind == "CronJob")
-		if !supportedWorkload {
-			continue
-		}
-		workload, err := kubernetes.GetUnstructured(ctx, c, gv.WithKind(owner.Kind), owner.Name, integration.Namespace)
-		if err != nil {
-			if !k8serrors.IsNotFound(err) && !meta.IsNoMatchError(err) {
-				lookupErr = err
-			}
-
-			continue
-		}
-		if workload.GetUID() != owner.UID {
-			continue
-		}
-		for _, reference := range workload.GetOwnerReferences() {
-			if ownerMatchesIntegration(reference, integration) {
-				return true, nil
-			}
-		}
+	if object.GetLabels()[label] == "" {
+		return "", nil
 	}
 
-	return false, lookupErr
+	return object.GetLabels()[v1.IntegrationLabel], nil
 }
 
-func ownerMatchesIntegration(owner metav1.OwnerReference, integration *v1.Integration) bool {
-	gv, err := schema.ParseGroupVersion(owner.APIVersion)
-
-	return err == nil && gv.Group == v1.SchemeGroupVersion.Group && owner.Kind == v1.IntegrationKind &&
-		owner.Name == integration.Name && owner.UID != "" && owner.UID == integration.UID
-}
-
-// Enqueue the same-name Integration even if the new owner no longer matches:
-// deletes and ownership changes must also clear a previously true condition.
-// Association is checked when reconciling, never inferred from the name alone.
-func camelMonitorEnqueueRequests(_ context.Context, object ctrl.Object) []reconcile.Request {
-	return []reconcile.Request{{NamespacedName: ctrl.ObjectKeyFromObject(object)}}
-}
-
-func watchCamelMonitorResources(ctx context.Context, c client.Client, b *builder.Builder) {
-	if !camelMonitorWatchAvailable(ctx, c) {
-		return
+func camelMonitorWorkload(ctx context.Context, c ctrl.Reader, monitor *monitorv1alpha1.CamelMonitor) (ctrl.Object, error) {
+	name := monitor.Annotations[monitorv1alpha1.MonitorImportedNameLabel]
+	if name == "" {
+		return nil, nil
 	}
-	b.Watches(&monitorv1alpha1.CamelMonitor{}, handler.EnqueueRequestsFromMapFunc(camelMonitorEnqueueRequests),
-		builder.WithPredicates(camelMonitorOwnerChangedPredicate()))
-}
-
-func camelMonitorWatchAvailable(ctx context.Context, c client.Client) bool {
-	installed, err := kubernetes.IsAPIResourceInstalled(c, camelMonitorGVK.GroupVersion().String(), camelMonitorGVK.Kind)
-	if err != nil || !installed {
-		Log.Info(fmt.Sprintf("CamelMonitor resources are unavailable (%v). Install the CRD and grant get/list/watch permissions, then restart the operator to enable discovery events.", err))
-
-		return false
+	var workload ctrl.Object
+	switch monitor.Annotations[monitorv1alpha1.MonitorImportedKindLabel] {
+	case "Deployment":
+		workload = &appsv1.Deployment{}
+	case "CronJob":
+		workload = &batchv1.CronJob{}
+	default:
+		return nil, nil
 	}
-	ctx, cancel := context.WithTimeout(ctx, camelMonitorDiscoveryTimeout)
-	defer cancel()
-	allowed, permissionErr := camelMonitorWatchPermissions(ctx, c)
-	if permissionErr != nil || !allowed {
-		Log.Info("CamelMonitor watch permissions are unavailable. Grant list/watch permissions and restart the operator to enable discovery events.")
+	if err := c.Get(ctx, ctrl.ObjectKey{Namespace: monitor.Namespace, Name: name}, workload); err != nil {
+		if k8serrors.IsNotFound(err) || meta.IsNoMatchError(err) {
+			return nil, nil
+		}
 
-		return false
+		return nil, err
 	}
 
-	return true
+	return workload, nil
 }
 
-// Ownership changes can invalidate an association without a status change.
-// Runtime status changes on the monitor do not affect its availability.
-func camelMonitorOwnerChangedPredicate() predicate.Predicate {
+func camelMonitorEnqueueRequests(ctx context.Context, c client.Client, object ctrl.Object) []reconcile.Request {
+	name, err := camelMonitorIntegrationName(ctx, c, object)
+	if err != nil {
+		log.Error(err, "Failed to retrieve the monitored workload")
+
+		return nil
+	}
+	if name == "" {
+		return nil
+	}
+	integrations := &v1.IntegrationList{}
+	if err := c.List(ctx, integrations, ctrl.InNamespace(object.GetNamespace())); err != nil {
+		log.Error(err, "Failed to list integrations")
+
+		return nil
+	}
+	for i := range integrations.Items {
+		integration := &integrations.Items[i]
+		if integration.Name == name && (&monitorAction{}).CanHandle(integration) &&
+			platform.IsOperatorHandlerConsideringLock(ctx, c, integration.Namespace, integration) {
+			return []reconcile.Request{{NamespacedName: ctrl.ObjectKeyFromObject(integration)}}
+		}
+	}
+
+	return nil
+}
+
+func camelMonitorEventHandler(c client.Client) handler.EventHandler {
+	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, object ctrl.Object) []reconcile.Request {
+		return camelMonitorEnqueueRequests(ctx, c, object)
+	})
+}
+
+// Creation, deletion and association changes affect availability, unlike runtime status updates.
+// The map handler processes both the old and new objects on updates.
+func camelMonitorAssociationChangedPredicate() predicate.Predicate {
 	return predicate.Funcs{
 		UpdateFunc: func(e event.UpdateEvent) bool {
-			return e.ObjectOld != nil && e.ObjectNew != nil &&
-				!equality.Semantic.DeepEqual(camelMonitorStoredOwnerReferences(e.ObjectOld), camelMonitorStoredOwnerReferences(e.ObjectNew))
+			if e.ObjectOld == nil || e.ObjectNew == nil {
+				return false
+			}
+			label := os.Getenv(kubernetes.CamelMonitorOperatorLabelEnvVar)
+
+			return e.ObjectOld.GetLabels()[label] != e.ObjectNew.GetLabels()[label] ||
+				e.ObjectOld.GetLabels()[v1.IntegrationLabel] != e.ObjectNew.GetLabels()[v1.IntegrationLabel] ||
+				e.ObjectOld.GetAnnotations()[monitorv1alpha1.MonitorImportedNameLabel] != e.ObjectNew.GetAnnotations()[monitorv1alpha1.MonitorImportedNameLabel] ||
+				e.ObjectOld.GetAnnotations()[monitorv1alpha1.MonitorImportedKindLabel] != e.ObjectNew.GetAnnotations()[monitorv1alpha1.MonitorImportedKindLabel]
 		},
 	}
 }
 
-// CamelMonitor.GetOwnerReferences builds references to itself for its child resources.
-func camelMonitorStoredOwnerReferences(object ctrl.Object) []metav1.OwnerReference {
-	if monitor, ok := object.(*monitorv1alpha1.CamelMonitor); ok {
-		return monitor.ObjectMeta.GetOwnerReferences()
+func watchCamelMonitorResources(c client.Client, b *builder.Builder) (bool, error) {
+	installed, err := kubernetes.IsAPIResourceInstalled(c, monitorv1alpha1.SchemeGroupVersion.String(), monitorv1alpha1.AppKind)
+	if err != nil {
+		return false, err
 	}
+	if !installed {
+		log.Info("CamelMonitor resources are not installed in the cluster. To enable monitoring discovery after installing the CRD, " +
+			"assign the required RBAC privileges and restart the Camel K operator.")
 
-	return object.GetOwnerReferences()
-}
-
-// Match the cache scope configured by operator.getNamespacesSelector: a local
-// cache includes the operator namespace as well as every watched namespace.
-func camelMonitorWatchPermissions(ctx context.Context, c k8sclient.Interface) (bool, error) {
-	namespaces := []string{""}
-	if !platform.IsCurrentOperatorGlobal() {
-		namespaces = []string{platform.GetOperatorNamespace()}
-		for namespace := range strings.SplitSeq(platform.GetOperatorWatchNamespace(), ",") {
-			namespace = strings.TrimSpace(namespace)
-			if namespace != "" && !slices.Contains(namespaces, namespace) {
-				namespaces = append(namespaces, namespace)
-			}
-		}
+		return false, nil
 	}
-	for _, namespace := range namespaces {
-		for _, verb := range []string{"list", "watch"} {
-			allowed, err := kubernetes.CheckSelfPermission(ctx, c, camelMonitorGVK.Group, "camelmonitors", namespace, "", verb)
-			if err != nil || !allowed {
-				return false, err
-			}
-		}
-	}
+	log.Info("CamelMonitor resources installed in the cluster: make sure to assign CamelMonitor RBAC privileges")
+	b.Watches(&monitorv1alpha1.CamelMonitor{}, camelMonitorEventHandler(c),
+		builder.WithPredicates(camelMonitorAssociationChangedPredicate()))
 
 	return true, nil
 }

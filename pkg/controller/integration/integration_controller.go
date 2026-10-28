@@ -64,10 +64,10 @@ func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
 		return fmt.Errorf("unable to set up field indexer for status.phase: %w", err)
 	}
 
-	return add(ctx, mgr, c, newReconciler(mgr, c))
+	return add(mgr, c)
 }
 
-func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
+func newReconciler(mgr manager.Manager, c client.Client, camelMonitorEnabled bool) reconcile.Reconciler {
 	base := []Action{
 		NewPlatformSetupAction(),
 		NewInitializeAction(),
@@ -81,7 +81,7 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 			client:      c,
 			scheme:      mgr.GetScheme(),
 			recorder:    mgr.GetEventRecorder("camel-k-integration-controller"),
-			baseActions: append(append([]Action{}, base...), NewMonitorAction()),
+			baseActions: append(append([]Action{}, base...), &monitorAction{camelMonitorEnabled: camelMonitorEnabled}),
 		},
 		schema.GroupVersionKind{
 			Group:   v1.SchemeGroupVersion.Group,
@@ -276,7 +276,7 @@ func integrationPlatformEnqueueRequestsFromMapFunc(ctx context.Context, c client
 	return requests
 }
 
-func add(ctx context.Context, mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
+func add(mgr manager.Manager, c client.Client) error {
 	b := builder.ControllerManagedBy(mgr).
 		Named("integration-controller").
 		// Watch for changes to primary resource Integration
@@ -300,24 +300,27 @@ func add(ctx context.Context, mgr manager.Manager, c client.Client, r reconcile.
 				},
 			}))
 
-	watchCamelMonitorResources(ctx, c, b)
-
-	// Watch for all the resources
-	watchIntegrationResources(c, b)
-	// Watch for the CronJob conditionally
-	if ok, err := kubernetes.IsAPIResourceInstalled(c, batchv1.SchemeGroupVersion.String(), reflect.TypeFor[batchv1.CronJob]().Name()); ok && err == nil {
-		watchCronJobResources(b)
-	}
-	// Watch for the Knative Services conditionally
-	err := watchKnativeResources(c, b)
+	camelMonitorEnabled, err := watchCamelMonitorResources(c, b)
 	if err != nil {
 		return err
 	}
 
-	return b.Complete(r)
+	// Watch for all the resources
+	watchIntegrationResources(c, b, camelMonitorEnabled)
+	// Watch for the CronJob conditionally
+	if ok, err := kubernetes.IsAPIResourceInstalled(c, batchv1.SchemeGroupVersion.String(), reflect.TypeFor[batchv1.CronJob]().Name()); ok && err == nil {
+		watchCronJobResources(c, b, camelMonitorEnabled)
+	}
+	// Watch for the Knative Services conditionally
+	err = watchKnativeResources(c, b)
+	if err != nil {
+		return err
+	}
+
+	return b.Complete(newReconciler(mgr, c, camelMonitorEnabled))
 }
 
-func watchIntegrationResources(c client.Client, b *builder.Builder) {
+func watchIntegrationResources(c client.Client, b *builder.Builder, camelMonitorEnabled bool) {
 	// Watch for IntegrationKit phase transitioning to ready or error, and
 	// enqueue requests for any integration that matches the kit, in building
 	// or running phase.
@@ -400,19 +403,21 @@ func watchIntegrationResources(c client.Client, b *builder.Builder) {
 			})).
 		// Watch for the owned Deployments
 		Owns(&appsv1.Deployment{}, builder.WithPredicates(StatusChangedPredicate{})).
-		// Also observe same-name workload ownership changes, including non-controller
-		// references, which Owns deliberately excludes.
-		Watches(&appsv1.Deployment{}, handler.EnqueueRequestsFromMapFunc(camelMonitorEnqueueRequests),
-			builder.WithPredicates(camelMonitorOwnerChangedPredicate())).
 		// Watch for the owned Builds
 		Owns(&v1.Build{}, builder.WithPredicates(StatusChangedPredicate{}))
+	if camelMonitorEnabled {
+		b.Watches(&appsv1.Deployment{}, camelMonitorEventHandler(c),
+			builder.WithPredicates(camelMonitorAssociationChangedPredicate()))
+	}
 }
 
-func watchCronJobResources(b *builder.Builder) {
+func watchCronJobResources(c client.Client, b *builder.Builder, camelMonitorEnabled bool) {
 	// Watch for the owned CronJobs
-	b.Owns(&batchv1.CronJob{}, builder.WithPredicates(StatusChangedPredicate{})).
-		Watches(&batchv1.CronJob{}, handler.EnqueueRequestsFromMapFunc(camelMonitorEnqueueRequests),
-			builder.WithPredicates(camelMonitorOwnerChangedPredicate()))
+	b.Owns(&batchv1.CronJob{}, builder.WithPredicates(StatusChangedPredicate{}))
+	if camelMonitorEnabled {
+		b.Watches(&batchv1.CronJob{}, camelMonitorEventHandler(c),
+			builder.WithPredicates(camelMonitorAssociationChangedPredicate()))
+	}
 }
 
 func watchKnativeResources(c client.Client, b *builder.Builder) error {
