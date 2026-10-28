@@ -70,7 +70,7 @@ jobs:
     - name: Setup KEDA and Services
       shell: bash
       run: |
-        ./e2e/keda/setup/setup.sh
+        bash ./e2e/keda/setup/setup.sh
 
     - name: Install operator
       shell: bash
