@@ -13,7 +13,7 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/google/go-github/v72 v72.0.0
 	github.com/google/uuid v1.6.0
-	github.com/jpillora/backoff v1.0.0
+	github.com/jpillora/backoff v1.1.0
 	github.com/magiconair/properties v1.18.12
 	github.com/mattn/go-shellwords v1.0.16
 	github.com/onsi/gomega v1.44.0
