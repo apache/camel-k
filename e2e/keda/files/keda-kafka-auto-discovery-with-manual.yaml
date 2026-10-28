@@ -23,7 +23,6 @@ apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:
   name: keda-kafka-auto-discovery-with-manual
-  namespace: keda
 spec:
   sources:
     - content: |
