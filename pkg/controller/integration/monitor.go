@@ -34,6 +34,8 @@ import (
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/utils/ptr"
 
+	monitorv1alpha1 "github.com/camel-tooling/camel-monitor-operator/pkg/apis/camel/v1alpha1"
+
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -53,8 +55,6 @@ func NewMonitorAction() Action {
 
 type monitorAction struct {
 	baseAction
-
-	camelMonitorEnabled bool
 }
 
 func (action *monitorAction) Name() string {
@@ -74,10 +74,14 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		target = integration
 	}
 	previous := target.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable).DeepCopy()
-	var monitorErr error
-	if action.camelMonitorEnabled {
+	installed, monitorErr := kubernetes.IsAPIResourceInstalled(action.client, monitorv1alpha1.SchemeGroupVersion.String(), monitorv1alpha1.AppKind)
+	switch {
+	case monitorErr != nil:
+		target.Status.SetCondition(v1.IntegrationConditionCamelMonitorAvailable, corev1.ConditionUnknown,
+			"CamelMonitorLookupFailed", monitorErr.Error())
+	case installed:
 		monitorErr = updateCamelMonitorCondition(ctx, action.client, target)
-	} else {
+	default:
 		target.Status.RemoveCondition(v1.IntegrationConditionCamelMonitorAvailable)
 	}
 	// Preserve nil results from early exits unless discovery actually changed status.

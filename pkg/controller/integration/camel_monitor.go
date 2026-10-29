@@ -26,7 +26,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
-	"sigs.k8s.io/controller-runtime/pkg/builder"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -36,6 +35,7 @@ import (
 	monitorv1alpha1 "github.com/camel-tooling/camel-monitor-operator/pkg/apis/camel/v1alpha1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	servingv1 "github.com/apache/camel-k/v2/pkg/apis/duck/knative/serving/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -43,7 +43,7 @@ import (
 )
 
 // updateCamelMonitorCondition reports resource discovery, independently of runtime readiness.
-// It is called only when the optional monitor watch is enabled.
+// The monitor action checks that the optional API is installed before calling it.
 func updateCamelMonitorCondition(ctx context.Context, c ctrl.Reader, integration *v1.Integration) error {
 	monitors := &monitorv1alpha1.CamelMonitorList{}
 	err := c.List(ctx, monitors, ctrl.InNamespace(integration.Namespace))
@@ -82,26 +82,23 @@ func updateCamelMonitorCondition(ctx context.Context, c ctrl.Reader, integration
 // Synthetic monitors in the official API retain their source as annotations rather
 // than copying its discovery label. Resolve that source in the same namespace and
 // use its existing Integration label; monitor names need not equal Integration names.
-func camelMonitorIntegrationName(ctx context.Context, c ctrl.Reader, object ctrl.Object) (string, error) {
+func camelMonitorIntegrationName(ctx context.Context, c ctrl.Reader, monitor *monitorv1alpha1.CamelMonitor) (string, error) {
 	label := os.Getenv(kubernetes.CamelMonitorOperatorLabelEnvVar)
 	if label == "" {
 		return "", nil
 	}
-	if monitor, ok := object.(*monitorv1alpha1.CamelMonitor); ok {
-		if name := monitor.Labels[label]; name != "" {
-			return name, nil
-		}
-		var err error
-		object, err = camelMonitorWorkload(ctx, c, monitor)
-		if err != nil || object == nil {
-			return "", err
-		}
+	if name := monitor.Labels[label]; name != "" {
+		return name, nil
 	}
-	if object.GetLabels()[label] == "" {
+	workload, err := camelMonitorWorkload(ctx, c, monitor)
+	if err != nil || workload == nil {
+		return "", err
+	}
+	if workload.GetLabels()[label] == "" {
 		return "", nil
 	}
 
-	return object.GetLabels()[v1.IntegrationLabel], nil
+	return workload.GetLabels()[v1.IntegrationLabel], nil
 }
 
 func camelMonitorWorkload(ctx context.Context, c ctrl.Reader, monitor *monitorv1alpha1.CamelMonitor) (ctrl.Object, error) {
@@ -115,6 +112,8 @@ func camelMonitorWorkload(ctx context.Context, c ctrl.Reader, monitor *monitorv1
 		workload = &appsv1.Deployment{}
 	case "CronJob":
 		workload = &batchv1.CronJob{}
+	case "Service":
+		workload = &servingv1.Service{}
 	default:
 		return nil, nil
 	}
@@ -130,7 +129,11 @@ func camelMonitorWorkload(ctx context.Context, c ctrl.Reader, monitor *monitorv1
 }
 
 func camelMonitorEnqueueRequests(ctx context.Context, c client.Client, object ctrl.Object) []reconcile.Request {
-	name, err := camelMonitorIntegrationName(ctx, c, object)
+	monitor, ok := object.(*monitorv1alpha1.CamelMonitor)
+	if !ok {
+		return nil
+	}
+	name, err := camelMonitorIntegrationName(ctx, c, monitor)
 	if err != nil {
 		log.Error(err, "Failed to retrieve the monitored workload")
 
@@ -173,27 +176,8 @@ func camelMonitorAssociationChangedPredicate() predicate.Predicate {
 			label := os.Getenv(kubernetes.CamelMonitorOperatorLabelEnvVar)
 
 			return e.ObjectOld.GetLabels()[label] != e.ObjectNew.GetLabels()[label] ||
-				e.ObjectOld.GetLabels()[v1.IntegrationLabel] != e.ObjectNew.GetLabels()[v1.IntegrationLabel] ||
 				e.ObjectOld.GetAnnotations()[monitorv1alpha1.MonitorImportedNameLabel] != e.ObjectNew.GetAnnotations()[monitorv1alpha1.MonitorImportedNameLabel] ||
 				e.ObjectOld.GetAnnotations()[monitorv1alpha1.MonitorImportedKindLabel] != e.ObjectNew.GetAnnotations()[monitorv1alpha1.MonitorImportedKindLabel]
 		},
 	}
-}
-
-func watchCamelMonitorResources(c client.Client, b *builder.Builder) (bool, error) {
-	installed, err := kubernetes.IsAPIResourceInstalled(c, monitorv1alpha1.SchemeGroupVersion.String(), monitorv1alpha1.AppKind)
-	if err != nil {
-		return false, err
-	}
-	if !installed {
-		log.Info("CamelMonitor resources are not installed in the cluster. To enable monitoring discovery after installing the CRD, " +
-			"assign the required RBAC privileges and restart the Camel K operator.")
-
-		return false, nil
-	}
-	log.Info("CamelMonitor resources installed in the cluster: make sure to assign CamelMonitor RBAC privileges")
-	b.Watches(&monitorv1alpha1.CamelMonitor{}, camelMonitorEventHandler(c),
-		builder.WithPredicates(camelMonitorAssociationChangedPredicate()))
-
-	return true, nil
 }

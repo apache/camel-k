@@ -106,15 +106,16 @@ Learn more by reading the official https://camel-tooling.github.io/camel-dashboa
 label configured by `CAMEL_MONITOR_OPERATOR_LABEL`. A monitor carrying that label
 with the Integration name as its value is associated directly.
 
-Synthetic monitors created by the Camel Monitor operator do not copy the
-workload's labels. Their `imported-from-kind` and `imported-from-name` annotations
-identify a Deployment or CronJob in the same namespace. Its
-`camel.apache.org/integration` label identifies the Integration, and its configured
+A monitor can also identify its source through the `imported-from-kind` and
+`imported-from-name` annotations. Synthetic monitors created by the Camel Monitor
+operator use these annotations without copying the workload's labels. Camel K
+resolves Deployment, CronJob and Knative Service sources in the same namespace. The
+source's `camel.apache.org/integration` label identifies the Integration, and its configured
 monitor label must be nonempty. The monitor and workload names may differ from
 the Integration name, including monitors created for separate workload revisions.
 Changing the monitor label's value does not remove an existing monitor's
 association with that source; removing the label or changing the source's
-Integration label updates the association.
+Integration label updates the association on the next reconciliation.
 
 This reports resource availability, independently of Integration readiness and
 the monitor's `Healthy` or `Monitored` conditions. The existing monitor action
@@ -125,9 +126,14 @@ removes the condition and leaves the column blank. A failed query reports
 monitoring from running. Deleting one associated monitor keeps the condition
 `True` while another remains.
 
-Camel Monitor remains optional. The operator registers its watch only when the
-CRD is installed at startup. Assign `list` and `watch` permissions for
-`camelmonitors` in the operator's installation scope before enabling the watch.
-If the CRD or permissions are installed later, restart the Camel K operator.
-Creation, deletion and association changes trigger reconciliation; monitor
-runtime status changes do not.
+Camel Monitor remains optional. Assign `list` and `watch` permissions for
+`camelmonitors` in the operator's installation scope. At startup, the operator
+registers its watch when the CRD is installed. Creation, deletion and association
+changes on CamelMonitor resources trigger reconciliation; monitor runtime status
+changes do not.
+
+The monitor action checks API availability during each normal reconciliation
+and reads existing monitors when their API is installed. Source label changes
+are also observed during normal reconciliation. If the CRD or permissions are
+installed after startup, restart the Camel K operator to register the monitor
+event watch.

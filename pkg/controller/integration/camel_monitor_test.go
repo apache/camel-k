@@ -23,18 +23,22 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	servingv1 "github.com/apache/camel-k/v2/pkg/apis/duck/knative/serving/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 	monitorv1alpha1 "github.com/camel-tooling/camel-monitor-operator/pkg/apis/camel/v1alpha1"
 	"github.com/stretchr/testify/require"
+	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/discovery/fake"
+	k8stesting "k8s.io/client-go/testing"
 	"k8s.io/client-go/util/workqueue"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -48,7 +52,8 @@ func TestMonitorActionCamelMonitorLifecycle(t *testing.T) {
 	ctx := context.Background()
 	c, it, err := nominalEnvironment()
 	require.NoError(t, err)
-	action := monitorAction{camelMonitorEnabled: true}
+	enableCamelMonitorDiscovery(t, c)
+	action := monitorAction{}
 	action.InjectLogger(log.Log)
 	action.InjectClient(c)
 	result, err := action.Handle(ctx, it)
@@ -133,7 +138,9 @@ func interceptMonitorLists(t *testing.T, c client.Client, lookupErr error) *int 
 		if _, ok := list.(*monitorv1alpha1.CamelMonitorList); ok {
 			*calls++
 
-			return lookupErr
+			if lookupErr != nil {
+				return lookupErr
+			}
 		}
 
 		return c.List(ctx, list, opts...)
@@ -151,7 +158,8 @@ func TestMonitorActionCamelMonitorLookupFailure(t *testing.T) {
 			interceptMonitorLists(t, c, lookupErr)
 			it.Status.Phase = v1.IntegrationPhaseDeploying
 			it.Status.SetCondition(v1.IntegrationConditionReady, corev1.ConditionFalse, "Pending", "waiting")
-			action := monitorAction{camelMonitorEnabled: true}
+			enableCamelMonitorDiscovery(t, c)
+			action := monitorAction{}
 			action.InjectClient(c)
 			action.InjectLogger(log.Log)
 			result, err := action.Handle(context.Background(), it)
@@ -208,7 +216,8 @@ func TestMonitorActionCamelMonitorDisabledAndEarlyExit(t *testing.T) {
 	it.Status.Phase = v1.IntegrationPhaseError
 	it.Status.SetCondition(v1.IntegrationConditionReady, corev1.ConditionFalse, v1.IntegrationConditionInitializationFailedReason, "failed")
 	ready := *it.Status.GetCondition(v1.IntegrationConditionReady)
-	action = monitorAction{camelMonitorEnabled: true}
+	enableCamelMonitorDiscovery(t, c)
+	action = monitorAction{}
 	action.InjectClient(c)
 	action.InjectLogger(log.Log)
 	result, err := action.Handle(context.Background(), it)
@@ -280,17 +289,9 @@ func TestCamelMonitorEvents(t *testing.T) {
 	require.True(t, predicate.Update(update))
 	handler.Update(ctx, update, queue)
 	assertRequests(first.Name, second.Name)
-	workload := &batchv1.CronJob{ObjectMeta: metav1.ObjectMeta{Name: "source", Namespace: "test",
-		Labels: map[string]string{v1.IntegrationLabel: first.Name, "example.org/monitor": "custom-app"}}}
-	moved := workload.DeepCopy()
-	moved.Labels[v1.IntegrationLabel] = second.Name
-	update = event.UpdateEvent{ObjectOld: workload, ObjectNew: moved}
-	require.True(t, predicate.Update(update))
-	handler.Update(ctx, update, queue)
-	assertRequests(first.Name, second.Name)
-	removed := workload.DeepCopy()
+	removed := monitor.DeepCopy()
 	delete(removed.Labels, "example.org/monitor")
-	update = event.UpdateEvent{ObjectOld: workload, ObjectNew: removed}
+	update = event.UpdateEvent{ObjectOld: &monitor, ObjectNew: removed}
 	require.True(t, predicate.Update(update))
 	handler.Update(ctx, update, queue)
 	assertRequests(first.Name)
@@ -299,22 +300,123 @@ func TestCamelMonitorEvents(t *testing.T) {
 	require.False(t, predicate.Update(event.UpdateEvent{ObjectOld: &monitor, ObjectNew: status}))
 }
 
+func enableCamelMonitorDiscovery(t *testing.T, c client.Client) *fake.FakeDiscovery {
+	t.Helper()
+	fakeClient, ok := c.(*internal.FakeClient)
+	require.True(t, ok)
+	discovery, ok := fakeClient.Interface.Discovery().(*fake.FakeDiscovery)
+	require.True(t, ok)
+	discovery.Resources = []*metav1.APIResourceList{{GroupVersion: monitorv1alpha1.SchemeGroupVersion.String(),
+		APIResources: []metav1.APIResource{{Kind: monitorv1alpha1.AppKind, Name: "camelmonitors", Namespaced: true}}}}
+
+	return discovery
+}
+
 func TestCamelMonitorOptionalWatch(t *testing.T) {
-	for _, installed := range []bool{false, true} {
-		t.Run(map[bool]string{false: "absent", true: "installed"}[installed], func(t *testing.T) {
-			c, err := internal.NewFakeClient()
-			require.NoError(t, err)
-			fakeClient, ok := c.(*internal.FakeClient)
-			require.True(t, ok)
-			discovery, ok := fakeClient.Interface.Discovery().(*fake.FakeDiscovery)
-			require.True(t, ok)
-			if installed {
-				discovery.Resources = []*metav1.APIResourceList{{GroupVersion: monitorv1alpha1.SchemeGroupVersion.String(),
-					APIResources: []metav1.APIResource{{Kind: monitorv1alpha1.AppKind, Name: "camelmonitors", Namespaced: true}}}}
-			}
-			enabled, err := watchCamelMonitorResources(c, &builder.Builder{})
-			require.NoError(t, err)
-			require.Equal(t, installed, enabled)
-		})
+	c, err := internal.NewFakeClient()
+	require.NoError(t, err)
+	// Without the API no source should be registered on the builder.
+	require.NoError(t, watchCamelMonitorResources(c, nil))
+	discovery := enableCamelMonitorDiscovery(t, c)
+	require.NoError(t, watchCamelMonitorResources(c, &builder.Builder{}))
+	lookupErr := errors.New("discovery unavailable")
+	discovery.PrependReactor("get", "resource", func(k8stesting.Action) (bool, runtime.Object, error) {
+		return true, nil, lookupErr
+	})
+	require.ErrorIs(t, watchCamelMonitorResources(c, &builder.Builder{}), lookupErr)
+}
+
+func TestMonitorActionCamelMonitorDiscoversAPIOnEachReconcile(t *testing.T) {
+	t.Setenv(kubernetes.CamelMonitorOperatorLabelEnvVar, "camel.apache.org/monitor")
+	ctx := context.Background()
+	c, it, err := nominalEnvironment()
+	require.NoError(t, err)
+	calls := interceptMonitorLists(t, c, nil)
+	monitor := monitorv1alpha1.NewCamelMonitor(it.Namespace, "sample")
+	monitor.Labels = kubernetes.DeploymentLabels(it.Name)
+	require.NoError(t, c.Create(ctx, &monitor))
+	action := NewMonitorAction()
+	action.InjectClient(c)
+	action.InjectLogger(log.Log)
+	_, err = action.Handle(ctx, it)
+	require.NoError(t, err)
+	require.Zero(t, *calls)
+	require.Nil(t, it.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable))
+	discovery := enableCamelMonitorDiscovery(t, c)
+	_, err = action.Handle(ctx, it)
+	require.NoError(t, err)
+	require.Equal(t, 1, *calls)
+	require.Equal(t, corev1.ConditionTrue, it.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable).Status)
+	lookupErr := errors.New("discovery unavailable")
+	discovery.PrependReactor("get", "resource", func(k8stesting.Action) (bool, runtime.Object, error) {
+		return true, nil, lookupErr
+	})
+	_, err = action.Handle(ctx, it)
+	require.ErrorIs(t, err, lookupErr)
+	require.Equal(t, 1, *calls)
+	require.Equal(t, corev1.ConditionUnknown, it.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable).Status)
+	require.Equal(t, corev1.ConditionTrue, it.Status.GetCondition(v1.IntegrationConditionReady).Status)
+}
+
+func TestCamelMonitorKnativeService(t *testing.T) {
+	t.Setenv(kubernetes.CamelMonitorOperatorLabelEnvVar, "example.org/monitor")
+	t.Setenv("WATCH_NAMESPACE", "test")
+	t.Setenv("NAMESPACE", "test")
+	ctx := context.Background()
+	integration := v1.NewIntegration("test", "sample")
+	integration.Status.Phase = v1.IntegrationPhaseRunning
+	service := &servingv1.Service{
+		TypeMeta: metav1.TypeMeta{APIVersion: servingv1.SchemeGroupVersion.String(), Kind: "Service"},
+		ObjectMeta: metav1.ObjectMeta{Namespace: "test", Name: "sample-service",
+			Labels: map[string]string{v1.IntegrationLabel: integration.Name, "example.org/monitor": "custom-app"}},
 	}
+	c, err := internal.NewFakeClient(&integration, service)
+	require.NoError(t, err)
+	monitor := monitorv1alpha1.NewCamelMonitor("test", "custom-app-revision")
+	monitor.Annotations = map[string]string{monitorv1alpha1.MonitorImportedKindLabel: "Service", monitorv1alpha1.MonitorImportedNameLabel: service.Name}
+	require.NoError(t, c.Create(ctx, &monitor))
+	require.NoError(t, updateCamelMonitorCondition(ctx, c, &integration))
+	require.Equal(t, corev1.ConditionTrue, integration.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable).Status)
+	require.Equal(t, []reconcile.Request{{NamespacedName: ctrl.ObjectKeyFromObject(&integration)}}, camelMonitorEnqueueRequests(ctx, c, &monitor))
+	require.NoError(t, c.Delete(ctx, service))
+	require.NoError(t, updateCamelMonitorCondition(ctx, c, &integration))
+	require.Nil(t, integration.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable))
+}
+
+func TestCamelMonitorLabeledResourceWithDifferentName(t *testing.T) {
+	t.Setenv(kubernetes.CamelMonitorOperatorLabelEnvVar, "example.org/monitor")
+	integration := v1.NewIntegration("test", "sample")
+	monitor := monitorv1alpha1.NewCamelMonitor("test", "custom-monitor")
+	monitor.Labels = map[string]string{"example.org/monitor": integration.Name}
+	c, err := internal.NewFakeClient()
+	require.NoError(t, err)
+	require.NoError(t, c.Create(context.Background(), &monitor))
+
+	require.NoError(t, updateCamelMonitorCondition(context.Background(), c, &integration))
+	condition := integration.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable)
+	require.NotNil(t, condition)
+	require.Equal(t, corev1.ConditionTrue, condition.Status)
+}
+
+func TestCamelMonitorSyntheticResourceUsesDiscoveryLabel(t *testing.T) {
+	t.Setenv(kubernetes.CamelMonitorOperatorLabelEnvVar, "example.org/monitor")
+	integration := v1.NewIntegration("test", "sample")
+	deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{
+		Namespace: integration.Namespace, Name: "sample-revision",
+		Labels: map[string]string{v1.IntegrationLabel: integration.Name, "example.org/monitor": "custom-app"},
+	}}
+	// The official monitor operator keeps source annotations, without copying labels.
+	monitor := monitorv1alpha1.NewCamelMonitor("test", "custom-app-sample-revision")
+	monitor.Annotations = map[string]string{
+		monitorv1alpha1.MonitorImportedKindLabel: "Deployment",
+		monitorv1alpha1.MonitorImportedNameLabel: deployment.Name,
+	}
+	c, err := internal.NewFakeClient(deployment)
+	require.NoError(t, err)
+	require.NoError(t, c.Create(context.Background(), &monitor))
+
+	require.NoError(t, updateCamelMonitorCondition(context.Background(), c, &integration))
+	condition := integration.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable)
+	require.NotNil(t, condition)
+	require.Equal(t, corev1.ConditionTrue, condition.Status)
 }
