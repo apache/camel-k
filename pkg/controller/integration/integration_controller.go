@@ -39,6 +39,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	monitorv1alpha1 "github.com/camel-tooling/camel-monitor-operator/pkg/apis/camel/v1alpha1"
+
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	servingv1 "github.com/apache/camel-k/v2/pkg/apis/duck/knative/serving/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
@@ -64,7 +66,7 @@ func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
 		return fmt.Errorf("unable to set up field indexer for status.phase: %w", err)
 	}
 
-	return add(mgr, c, newReconciler(mgr, c))
+	return add(mgr, c)
 }
 
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
@@ -276,7 +278,7 @@ func integrationPlatformEnqueueRequestsFromMapFunc(ctx context.Context, c client
 	return requests
 }
 
-func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
+func add(mgr manager.Manager, c client.Client) error {
 	b := builder.ControllerManagedBy(mgr).
 		Named("integration-controller").
 		// Watch for changes to primary resource Integration
@@ -312,7 +314,13 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 		return err
 	}
 
-	return b.Complete(r)
+	// Watch for the Camel Monitors conditionally
+	err = watchCamelMonitorResources(c, b)
+	if err != nil {
+		return err
+	}
+
+	return b.Complete(newReconciler(mgr, c))
 }
 
 func watchIntegrationResources(c client.Client, b *builder.Builder) {
@@ -424,6 +432,24 @@ func watchKnativeResources(c client.Client, b *builder.Builder) error {
 	log.Info("KnativeService resources installed in the cluster. You can use Knative serving features: " +
 		"make sure to assign Knative Services RBAC privileges")
 	b.Owns(&servingv1.Service{}, builder.WithPredicates(StatusChangedPredicate{}))
+
+	return nil
+}
+
+func watchCamelMonitorResources(c client.Client, b *builder.Builder) error {
+	installed, err := kubernetes.IsAPIResourceInstalled(c, monitorv1alpha1.SchemeGroupVersion.String(), monitorv1alpha1.AppKind)
+	if err != nil {
+		return err
+	}
+	if !installed {
+		log.Info("CamelMonitor resources are not installed in the cluster. To enable monitoring discovery after installing the CRD, " +
+			"assign the required RBAC privileges and restart the Camel K operator.")
+
+		return nil
+	}
+	log.Info("CamelMonitor resources installed in the cluster: make sure to assign CamelMonitor RBAC privileges")
+	b.Watches(&monitorv1alpha1.CamelMonitor{}, camelMonitorEventHandler(c),
+		builder.WithPredicates(camelMonitorAssociationChangedPredicate()))
 
 	return nil
 }

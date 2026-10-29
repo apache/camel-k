@@ -28,10 +28,13 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/equality"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/utils/ptr"
+
+	monitorv1alpha1 "github.com/camel-tooling/camel-monitor-operator/pkg/apis/camel/v1alpha1"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -64,8 +67,36 @@ func (action *monitorAction) CanHandle(integration *v1.Integration) bool {
 		integration.Status.Phase == v1.IntegrationPhaseError
 }
 
-//nolint:nestif
 func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
+	result, err := action.monitorIntegration(ctx, integration)
+	target := result
+	if target == nil {
+		target = integration
+	}
+	previous := target.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable).DeepCopy()
+	installed, monitorErr := kubernetes.IsAPIResourceInstalled(action.client, monitorv1alpha1.SchemeGroupVersion.String(), monitorv1alpha1.AppKind)
+	switch {
+	case monitorErr != nil:
+		target.Status.SetCondition(v1.IntegrationConditionCamelMonitorAvailable, corev1.ConditionUnknown,
+			"CamelMonitorLookupFailed", monitorErr.Error())
+	case installed:
+		monitorErr = updateCamelMonitorCondition(ctx, action.client, target)
+	default:
+		target.Status.RemoveCondition(v1.IntegrationConditionCamelMonitorAvailable)
+	}
+	// Preserve nil results from early exits unless discovery actually changed status.
+	if result == nil && !equality.Semantic.DeepEqual(previous, target.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable)) {
+		result = target
+	}
+	if err != nil {
+		return result, err
+	}
+
+	return result, monitorErr
+}
+
+//nolint:nestif
+func (action *monitorAction) monitorIntegration(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
 	// When in InitializationFailed condition a kit is not available for the integration
 	// so handle it differently from the rest
 	if isInInitializationFailed(integration.Status) {

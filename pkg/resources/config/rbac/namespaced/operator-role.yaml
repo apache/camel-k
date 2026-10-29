@@ -25,6 +25,13 @@ rules:
 - apiGroups:
   - camel.apache.org
   resources:
+  - camelmonitors
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - camel.apache.org
+  resources:
   - builds
   - camelcatalogs
   - integrationkits
