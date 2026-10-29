@@ -44,7 +44,7 @@ It's important to know that a subset of `common` named `test-smoke` is used as s
 
 === CamelMonitor discovery
 
-The `camelmonitor` suite installs a namespaced Camel K operator and runs an Integration in a new test namespace. It creates and deletes CamelMonitor resources directly to check discovery through a direct label and through Deployment, CronJob, and Knative Service source annotations. The auxiliary sources have different names from the Integration and do not replace its running workload. The Service case checks Camel K's association logic; it does not require the Camel Monitor operator to generate a synthetic monitor for a Knative Service.
+The `camelmonitor` suite installs a namespaced Camel K operator and runs an Integration in a new test namespace. It creates and deletes CamelMonitor resources directly to check discovery through a direct label and through Deployment, CronJob, and Knative Service source annotations. The auxiliary sources have different names from the Integration and do not replace its running workload. Additional cases delete a monitor after its discovery label is removed, its Integration label changes, or its source is deleted. The Service case checks Camel K's association logic; it does not require the Camel Monitor operator to generate a synthetic monitor for a Knative Service.
 
 Use a disposable cluster with the current Camel K operator image available, working Integration builds, and Knative installed using `e2e/knative/files/setup.sh`. Install the CamelMonitor CRD from the dependency version pinned in `go.mod` before running the suite, so the Camel K operator registers its watch at startup:
 

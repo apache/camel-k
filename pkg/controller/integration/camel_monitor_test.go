@@ -174,11 +174,14 @@ func TestMonitorActionCamelMonitorLookupFailure(t *testing.T) {
 
 func TestCamelMonitorSourceLookupFailure(t *testing.T) {
 	t.Setenv(kubernetes.CamelMonitorOperatorLabelEnvVar, "example.org/monitor")
+	t.Setenv("WATCH_NAMESPACE", "test")
+	t.Setenv("NAMESPACE", "test")
 	ctx := context.Background()
 	integration := v1.NewIntegration("test", "sample")
+	integration.Status.Phase = v1.IntegrationPhaseRunning
 	monitor := monitorv1alpha1.NewCamelMonitor("test", "custom-app")
 	monitor.Annotations = map[string]string{monitorv1alpha1.MonitorImportedKindLabel: "Deployment", monitorv1alpha1.MonitorImportedNameLabel: "source"}
-	c, err := internal.NewFakeClient()
+	c, err := internal.NewFakeClient(&integration)
 	require.NoError(t, err)
 	require.NoError(t, c.Create(ctx, &monitor))
 	fakeClient, ok := c.(*internal.FakeClient)
@@ -189,6 +192,7 @@ func TestCamelMonitorSourceLookupFailure(t *testing.T) {
 	}})
 	require.ErrorIs(t, updateCamelMonitorCondition(ctx, c, &integration), lookupErr)
 	require.Equal(t, corev1.ConditionUnknown, integration.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable).Status)
+	require.Equal(t, []reconcile.Request{{NamespacedName: ctrl.ObjectKeyFromObject(&integration)}}, camelMonitorEnqueueRequests(ctx, c, &monitor))
 	// A positively identified monitor is enough even when another source cannot be read.
 	other := monitorv1alpha1.NewCamelMonitor("test", "second")
 	other.Labels = map[string]string{"example.org/monitor": integration.Name}
@@ -281,7 +285,7 @@ func TestCamelMonitorEvents(t *testing.T) {
 	handler.Create(ctx, event.CreateEvent{Object: &monitor}, queue)
 	assertRequests(first.Name)
 	handler.Delete(ctx, event.DeleteEvent{Object: &monitor}, queue)
-	assertRequests(first.Name)
+	assertRequests(first.Name, second.Name)
 	changed := monitor.DeepCopy()
 	changed.Labels["example.org/monitor"] = second.Name
 	update := event.UpdateEvent{ObjectOld: &monitor, ObjectNew: changed}
@@ -294,7 +298,7 @@ func TestCamelMonitorEvents(t *testing.T) {
 	update = event.UpdateEvent{ObjectOld: &monitor, ObjectNew: removed}
 	require.True(t, predicate.Update(update))
 	handler.Update(ctx, update, queue)
-	assertRequests(first.Name)
+	assertRequests(first.Name, second.Name)
 	status := monitor.DeepCopy()
 	status.Status.Phase = monitorv1alpha1.CamelMonitorPhaseRunning
 	require.False(t, predicate.Update(event.UpdateEvent{ObjectOld: &monitor, ObjectNew: status}))
@@ -419,4 +423,115 @@ func TestCamelMonitorSyntheticResourceUsesDiscoveryLabel(t *testing.T) {
 	condition := integration.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable)
 	require.NotNil(t, condition)
 	require.Equal(t, corev1.ConditionTrue, condition.Status)
+}
+
+func TestCamelMonitorDeleteAfterLosingSourceAssociation(t *testing.T) {
+	t.Setenv(kubernetes.CamelMonitorOperatorLabelEnvVar, "camel.apache.org/monitor")
+	t.Setenv("WATCH_NAMESPACE", "ns")
+	t.Setenv("NAMESPACE", "ns")
+	for _, tc := range []struct {
+		name            string
+		deleteSource    bool
+		cachedCondition bool
+	}{
+		{name: "removed label with cached condition", cachedCondition: true},
+		{name: "removed label before status write"},
+		{name: "deleted source with cached condition", deleteSource: true, cachedCondition: true},
+		{name: "deleted source before status write", deleteSource: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := context.Background()
+			c, it, err := nominalEnvironment()
+			require.NoError(t, err)
+			enableCamelMonitorDiscovery(t, c)
+			if tc.cachedCondition {
+				it.Status.SetCondition(v1.IntegrationConditionCamelMonitorAvailable, corev1.ConditionTrue, "CamelMonitorAvailable", "")
+				require.NoError(t, c.Update(ctx, it))
+			}
+			source := &batchv1.CronJob{ObjectMeta: metav1.ObjectMeta{Namespace: it.Namespace, Name: "external-source",
+				Labels: map[string]string{v1.IntegrationLabel: it.Name, "camel.apache.org/monitor": "external-app"}}}
+			require.NoError(t, c.Create(ctx, source))
+			monitor := monitorv1alpha1.NewCamelMonitor(it.Namespace, "external-app")
+			monitor.Annotations = map[string]string{
+				monitorv1alpha1.MonitorImportedKindLabel: "CronJob",
+				monitorv1alpha1.MonitorImportedNameLabel: source.Name,
+			}
+			require.NoError(t, c.Create(ctx, &monitor))
+			action := NewMonitorAction()
+			action.InjectClient(c)
+			action.InjectLogger(log.Log)
+			_, err = action.Handle(ctx, it)
+			require.NoError(t, err)
+			require.Equal(t, corev1.ConditionTrue, it.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable).Status)
+			// The cache may still have no condition while this result is being persisted.
+			var cached v1.Integration
+			require.NoError(t, c.Get(ctx, ctrl.ObjectKeyFromObject(it), &cached))
+			require.Equal(t, tc.cachedCondition, cached.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable) != nil)
+			if tc.deleteSource {
+				require.NoError(t, c.Delete(ctx, source))
+			} else {
+				delete(source.Labels, "camel.apache.org/monitor")
+				require.NoError(t, c.Update(ctx, source))
+			}
+			require.NoError(t, c.Delete(ctx, &monitor))
+			queue := workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[reconcile.Request]())
+			defer queue.ShutDown()
+			// This is the CamelMonitor delete event emitted after its source stops being discovered.
+			camelMonitorEventHandler(c).Delete(ctx, event.DeleteEvent{Object: &monitor}, queue)
+			require.Equal(t, 1, queue.Len())
+			request, shutdown := queue.Get()
+			require.False(t, shutdown)
+			require.Equal(t, ctrl.ObjectKeyFromObject(it), request.NamespacedName)
+			queue.Done(request)
+			_, err = action.Handle(ctx, it)
+			require.NoError(t, err)
+			require.Nil(t, it.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable))
+			require.Equal(t, v1.IntegrationPhaseRunning, it.Status.Phase)
+			require.Equal(t, corev1.ConditionTrue, it.Status.GetCondition(v1.IntegrationConditionReady).Status)
+		})
+	}
+}
+
+func TestCamelMonitorDeleteAfterSourceChangesIntegration(t *testing.T) {
+	t.Setenv(kubernetes.CamelMonitorOperatorLabelEnvVar, "camel.apache.org/monitor")
+	t.Setenv("WATCH_NAMESPACE", "ns")
+	t.Setenv("NAMESPACE", "ns")
+	ctx := context.Background()
+	c, it, err := nominalEnvironment()
+	require.NoError(t, err)
+	enableCamelMonitorDiscovery(t, c)
+	other := v1.NewIntegration(it.Namespace, "new-owner")
+	other.Status.Phase = v1.IntegrationPhaseRunning
+	require.NoError(t, c.Create(ctx, &other))
+	source := &batchv1.CronJob{ObjectMeta: metav1.ObjectMeta{Namespace: it.Namespace, Name: "external-source",
+		Labels: map[string]string{v1.IntegrationLabel: it.Name, "camel.apache.org/monitor": "external-app"}}}
+	require.NoError(t, c.Create(ctx, source))
+	monitor := monitorv1alpha1.NewCamelMonitor(it.Namespace, "external-app")
+	monitor.Annotations = map[string]string{monitorv1alpha1.MonitorImportedKindLabel: "CronJob", monitorv1alpha1.MonitorImportedNameLabel: source.Name}
+	require.NoError(t, c.Create(ctx, &monitor))
+	action := NewMonitorAction()
+	action.InjectClient(c)
+	action.InjectLogger(log.Log)
+	_, err = action.Handle(ctx, it)
+	require.NoError(t, err)
+	require.Equal(t, corev1.ConditionTrue, it.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable).Status)
+	source.Labels[v1.IntegrationLabel] = other.Name
+	require.NoError(t, c.Update(ctx, source))
+	require.NoError(t, c.Delete(ctx, &monitor))
+	queue := workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[reconcile.Request]())
+	defer queue.ShutDown()
+	camelMonitorEventHandler(c).Delete(ctx, event.DeleteEvent{Object: &monitor}, queue)
+	var names []string
+	for queue.Len() > 0 {
+		request, shutdown := queue.Get()
+		require.False(t, shutdown)
+		require.Equal(t, it.Namespace, request.Namespace)
+		names = append(names, request.Name)
+		queue.Done(request)
+	}
+	require.ElementsMatch(t, []string{it.Name, other.Name}, names)
+	_, err = action.Handle(ctx, it)
+	require.NoError(t, err)
+	require.Nil(t, it.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable))
+	require.Equal(t, corev1.ConditionTrue, it.Status.GetCondition(v1.IntegrationConditionReady).Status)
 }

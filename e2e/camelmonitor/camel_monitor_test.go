@@ -54,7 +54,7 @@ func TestCamelMonitorDiscovery(t *testing.T) {
 		t.Run("direct label", func(t *testing.T) {
 			monitor := monitorv1alpha1.NewCamelMonitor(ns, "direct-monitor")
 			monitor.Labels = map[string]string{discoveryLabel: name}
-			assertMonitorLifecycle(t, ctx, ns, name, &monitor)
+			assertMonitorLifecycle(t, ctx, ns, name, &monitor, nil)
 		})
 
 		// Auxiliary sources have different names from the Integration. They do not
@@ -70,13 +70,47 @@ func TestCamelMonitorDiscovery(t *testing.T) {
 					monitorv1alpha1.MonitorImportedKindLabel: source.kind,
 					monitorv1alpha1.MonitorImportedNameLabel: source.object.GetName(),
 				}
-				assertMonitorLifecycle(t, ctx, ns, name, &monitor)
+				assertMonitorLifecycle(t, ctx, ns, name, &monitor, nil)
+			})
+		}
+		for _, sourceChange := range []string{"remove-label", "delete-source", "change-integration"} {
+			t.Run(sourceChange, func(t *testing.T) {
+				g := NewWithT(t)
+				c := TestClient(t)
+				source := monitorSources(ns, name, discoveryLabel, image)[1].object
+				sourceName := sourceChange + "-source"
+				source.SetName(sourceName)
+				g.Expect(c.Create(ctx, source)).To(Succeed())
+				monitor := monitorv1alpha1.NewCamelMonitor(ns, "monitor-"+sourceName)
+				monitor.Annotations = map[string]string{
+					monitorv1alpha1.MonitorImportedKindLabel: "CronJob",
+					monitorv1alpha1.MonitorImportedNameLabel: source.GetName(),
+				}
+				assertMonitorLifecycle(t, ctx, ns, name, &monitor, func() {
+					switch sourceChange {
+					case "delete-source":
+						g.Expect(c.Delete(ctx, source)).To(Succeed())
+					case "remove-label":
+						labels := source.GetLabels()
+						delete(labels, discoveryLabel)
+						source.SetLabels(labels)
+						g.Expect(c.Update(ctx, source)).To(Succeed())
+					case "change-integration":
+						labels := source.GetLabels()
+						labels[v1.IntegrationLabel] = "other-integration"
+						source.SetLabels(labels)
+						g.Expect(c.Update(ctx, source)).To(Succeed())
+					}
+				})
+				if sourceChange != "delete-source" {
+					g.Expect(c.Delete(ctx, source)).To(Succeed())
+				}
 			})
 		}
 	})
 }
 
-func assertMonitorLifecycle(t *testing.T, ctx context.Context, ns, integration string, monitor *monitorv1alpha1.CamelMonitor) {
+func assertMonitorLifecycle(t *testing.T, ctx context.Context, ns, integration string, monitor *monitorv1alpha1.CamelMonitor, beforeDelete func()) {
 	t.Helper()
 	g := NewWithT(t)
 	c := TestClient(t)
@@ -89,7 +123,10 @@ func assertMonitorLifecycle(t *testing.T, ctx context.Context, ns, integration s
 	g.Eventually(IntegrationConditionStatus(t, ctx, ns, integration, v1.IntegrationConditionCamelMonitorAvailable), TestTimeoutShort).
 		Should(Equal(corev1.ConditionTrue))
 
-	// Only the monitor changes here, exercising its create and delete watches.
+	if beforeDelete != nil {
+		beforeDelete()
+	}
+	// The monitor's deletion must clear availability even if its source lost discovery.
 	g.Expect(c.Delete(ctx, monitor)).To(Succeed())
 	g.Eventually(IntegrationCondition(t, ctx, ns, integration, v1.IntegrationConditionCamelMonitorAvailable), TestTimeoutShort).
 		Should(BeNil())

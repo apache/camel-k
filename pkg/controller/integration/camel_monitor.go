@@ -136,33 +136,49 @@ func camelMonitorEnqueueRequests(ctx context.Context, c client.Client, object ct
 	name, err := camelMonitorIntegrationName(ctx, c, monitor)
 	if err != nil {
 		log.Error(err, "Failed to retrieve the monitored workload")
+	}
 
-		return nil
-	}
-	if name == "" {
-		return nil
-	}
+	return camelMonitorEnqueueIntegrationRequests(ctx, c, object.GetNamespace(), name)
+}
+
+func camelMonitorEnqueueIntegrationRequests(ctx context.Context, c client.Client, namespace, name string) []reconcile.Request {
 	integrations := &v1.IntegrationList{}
-	if err := c.List(ctx, integrations, ctrl.InNamespace(object.GetNamespace())); err != nil {
+	if err := c.List(ctx, integrations, ctrl.InNamespace(namespace)); err != nil {
 		log.Error(err, "Failed to list integrations")
 
 		return nil
 	}
+	var requests []reconcile.Request
 	for i := range integrations.Items {
 		integration := &integrations.Items[i]
-		if integration.Name == name && (&monitorAction{}).CanHandle(integration) &&
+		// A deleted monitor may outlive its source or its discovery label. In
+		// that case reconcile the namespace's managed Integrations to clear any
+		// previous association, including one whose status write is still pending.
+		if (name == "" || integration.Name == name) && (&monitorAction{}).CanHandle(integration) &&
 			platform.IsOperatorHandlerConsideringLock(ctx, c, integration.Namespace, integration) {
-			return []reconcile.Request{{NamespacedName: ctrl.ObjectKeyFromObject(integration)}}
+			requests = append(requests, reconcile.Request{NamespacedName: ctrl.ObjectKeyFromObject(integration)})
 		}
 	}
 
-	return nil
+	return requests
 }
 
 func camelMonitorEventHandler(c client.Client) handler.EventHandler {
-	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, object ctrl.Object) []reconcile.Request {
+	mapped := handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, object ctrl.Object) []reconcile.Request {
 		return camelMonitorEnqueueRequests(ctx, c, object)
 	})
+	deleted := handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, object ctrl.Object) []reconcile.Request {
+		// The source may have changed its Integration label since the monitor
+		// was associated. Its current labels cannot identify the previous Integration.
+		return camelMonitorEnqueueIntegrationRequests(ctx, c, object.GetNamespace(), "")
+	})
+
+	return handler.Funcs{
+		CreateFunc:  mapped.Create,
+		UpdateFunc:  mapped.Update,
+		DeleteFunc:  deleted.Delete,
+		GenericFunc: mapped.Generic,
+	}
 }
 
 // Creation, deletion and association changes affect availability, unlike runtime status updates.
