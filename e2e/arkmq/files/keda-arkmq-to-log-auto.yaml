@@ -1,0 +1,53 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+# This pipe tests a manual KEDA artemis-queue trigger for an ArkMQ queue:
+# - trigger metadata is provided manually
+# - credentials come from my-broker-credentials-secret via TriggerAuthentication
+
+apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  name: keda-arkmq-to-log-auto
+  namespace: arkmq
+spec:
+  source:
+    ref:
+      kind: ActiveMQArtemisAddress
+      apiVersion: broker.amq.io/v1beta1
+      name: my-queue
+  sink:
+    uri: log:info
+  traits:
+    keda:
+      enabled: true
+      minReplicaCount: 0
+      maxReplicaCount: 1
+      cooldownPeriod: 20
+      pollingInterval: 10
+      triggers:
+        - type: artemis-queue
+          metadata:
+            managementEndpoint: my-broker-hdls-svc.arkmq.svc:8161
+            queueName: my-queue
+            brokerAddress: my-queue
+            brokerName: amq-broker
+          secrets:
+            - name: my-broker-credentials-secret
+              mapping:
+                AMQ_USER: username
+                AMQ_PASSWORD: password

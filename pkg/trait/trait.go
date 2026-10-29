@@ -30,6 +30,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
+	"github.com/apache/camel-k/v2/pkg/util/property"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -153,4 +154,23 @@ func newEnvironment(ctx context.Context, c client.Client, integration *v1.Integr
 	}
 
 	return &env, nil
+}
+
+func integrationProperties(e *Environment) map[string]string {
+	props := make(map[string]string)
+	for _, prop := range e.collectConfigurationPairs("property") {
+		props[prop.Name] = prop.Value
+	}
+	if ct := e.Catalog.GetTrait(camelTraitID); ct != nil {
+		if camel, ok := ct.(*camelTrait); ok {
+			for _, prop := range camel.Properties {
+				k, v := property.SplitPropertyFileEntry(prop)
+				if k != "" {
+					props[k] = v
+				}
+			}
+		}
+	}
+
+	return props
 }
