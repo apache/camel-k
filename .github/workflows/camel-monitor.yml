@@ -1,0 +1,88 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+name: camel-monitor
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  CAMEL_K_TEST_TIMEOUT_SHORT: 2m
+  CAMEL_K_TEST_TIMEOUT_MEDIUM: 5m
+  CAMEL_K_TEST_TIMEOUT_LONG: 10m
+
+on:
+  pull_request:
+    branches:
+      - main
+      - "release-*"
+    paths-ignore:
+      - 'docs/**'
+      - 'java/**'
+      - 'proposals/**'
+      - '**.adoc'
+      - '**.md'
+      - 'KEYS'
+      - 'LICENSE'
+      - 'NOTICE'
+  push:
+    branches:
+      - main
+      - "release-*"
+    paths-ignore:
+      - 'docs/**'
+      - 'java/**'
+      - 'proposals/**'
+      - '**.adoc'
+      - '**.md'
+      - 'KEYS'
+      - 'LICENSE'
+      - 'NOTICE'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  camel-monitor:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+        submodules: recursive
+
+    - name: Infra setting
+      uses: ./.github/actions/infra-setting
+
+    - name: Install Knative
+      shell: bash
+      run: |
+        ./e2e/knative/files/setup.sh
+
+    - name: Install CRDs
+      shell: bash
+      run: |
+        make install-crds
+        monitor_module_dir=$(go list -m -f '{{.Dir}}' github.com/camel-tooling/camel-monitor-operator)
+        kubectl apply --server-side -f "$monitor_module_dir/pkg/resources/config/crd/bases/camel.apache.org_camelmonitors.yaml"
+        kubectl wait --for=condition=Established crd/camelmonitors.camel.apache.org --timeout=60s
+
+    - name: Run test
+      shell: bash
+      run: |
+        DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-camel-monitor

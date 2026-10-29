@@ -34,12 +34,30 @@ This is the list of the groups we are using (please, notice that they can slight
     * advanced (`make test-advanced`)
     * install (`make test-install`)
     * knative (`make test-knative`)
+    * camelmonitor (`make test-camel-monitor`)
     * native (`make test-quarkus-native`)
     * telemetry (`make test-telemetry`)
 
 Each group tests a specific feature of Camel K. Typically any new test should be falling under the `common` group, unless it belongs to any other category or it requires some particular customization. As an example, `telemetry` requires the configuration of an OTLP Collector, reason why it requires its own group. If the test still is a common one but needs to perform customization on the Camel K Operator, then, it should be developed under `advanced`: as an example, we have there tests which requires the configuration of a Maven proxy.
 
 It's important to know that a subset of `common` named `test-smoke` is used as smoke test in the nightly release process. We want to keep this group of test as fast as possible.
+
+=== CamelMonitor discovery
+
+The `camelmonitor` suite installs a namespaced Camel K operator and runs an Integration in a new test namespace. It creates and deletes CamelMonitor resources directly to check discovery through a direct label and through Deployment, CronJob, and Knative Service source annotations. The auxiliary sources have different names from the Integration and do not replace its running workload. The Service case checks Camel K's association logic; it does not require the Camel Monitor operator to generate a synthetic monitor for a Knative Service.
+
+Use a disposable cluster with the current Camel K operator image available, working Integration builds, and Knative installed using `e2e/knative/files/setup.sh`. Install the CamelMonitor CRD from the dependency version pinned in `go.mod` before running the suite, so the Camel K operator registers its watch at startup:
+
+[source,bash]
+----
+make install-crds
+monitor_module_dir=$(go list -m -f '{{.Dir}}' github.com/camel-tooling/camel-monitor-operator)
+kubectl apply --server-side -f "$monitor_module_dir/pkg/resources/config/crd/bases/camel.apache.org_camelmonitors.yaml"
+kubectl wait --for=condition=Established crd/camelmonitors.camel.apache.org --timeout=60s
+make test-camel-monitor
+----
+
+Do not run the Camel Monitor operator in the test namespace: it could recreate a deleted monitor and interfere with the lifecycle assertions. The suite removes its namespace, while the cluster-wide CRDs and Knative installation remain available for another run. The `camel-monitor` workflow prepares these prerequisites in an isolated cluster.
 
 [[testing-operator]]
 == Testing Operator under development
