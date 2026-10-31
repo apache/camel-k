@@ -80,8 +80,8 @@ func TestIBMMQScalerMapWithAutoMetadata(t *testing.T) {
 			autoMetadata: validMetadata,
 		},
 		{
-			name:         "IBM MQ scaler is not selected",
-			pathValue:    "queue:ORDERS",
+			name:      "IBM MQ scaler is not selected",
+			pathValue: "queue:ORDERS",
 			autoMetadata: map[string]map[string]string{
 				"activemq": {"host": "tcp://mq.example.com:1414"},
 			},
@@ -101,8 +101,8 @@ func TestIBMMQScalerMapWithAutoMetadata(t *testing.T) {
 			},
 		},
 		{
-			name:         "missing admin REST host is not mapped",
-			pathValue:    "queue:ORDERS",
+			name:      "missing admin REST host is not mapped",
+			pathValue: "queue:ORDERS",
 			autoMetadata: map[string]map[string]string{
 				"ibmmq": {"queueDepth": "25"},
 			},
