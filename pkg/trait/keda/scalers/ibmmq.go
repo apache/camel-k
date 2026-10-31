@@ -24,10 +24,8 @@ import (
 )
 
 const (
-	ibmmqScalerType       = "ibmmq"
-	ibmmqQueueTypeKey     = "queueType"
-	ibmmqQueueTypeValue   = "ibm"
-	ibmmqAdminHostKey     = "host"
+	ibmmqScalerType   = "ibmmq"
+	ibmmqAdminHostKey = "host"
 )
 
 // IBMMQScaler maps explicitly selected JMS queue endpoints to the KEDA IBM MQ scaler.
@@ -52,12 +50,13 @@ func (i *IBMMQScaler) Map(pathValue string, params map[string]string, props map[
 // explicitly opts in to IBM MQ and provides KEDA's required admin REST host.
 func (i *IBMMQScaler) MapWithAutoMetadata(pathValue string, params map[string]string, props map[string]string, autoMetadata map[string]map[string]string) (string, map[string]string) {
 	ibmmqMetadata, ok := autoMetadata[ibmmqScalerType]
-	if !ok || !strings.EqualFold(strings.TrimSpace(ibmmqMetadata[ibmmqQueueTypeKey]), ibmmqQueueTypeValue) {
+	if !ok {
 		return "", nil
 	}
 	if strings.TrimSpace(ibmmqMetadata[ibmmqAdminHostKey]) == "" {
-		// The KEDA IBM MQ scaler requires its Queue Manager Admin REST endpoint.
-		// It cannot be derived reliably from a generic JMS endpoint URI.
+		// The KEDA IBM MQ scaler requires the Queue Manager Admin REST endpoint.
+		// Generic JMS ConnectionFactory properties describe the messaging
+		// connection; they do not reliably identify the separate mqweb REST URL.
 		return "", nil
 	}
 
