@@ -23,7 +23,7 @@ package defaults
 
 const (
 	// Version --
-	Version = "2.12.0-SNAPSHOT"
+	Version = "2.12.0-nightly"
 
 	// DefaultRuntimeProvider --
 	DefaultRuntimeProvider = "plain-quarkus"
@@ -35,13 +35,13 @@ const (
 	CamelKRuntimeCatalogVersion = "3.15.3"
 
 	// baseImage --
-	baseImage = "eclipse-temurin:17-jdk@sha256:91011320978c10ec51d2cde1eb6f616db6d2a739a0e521096c343dd3fed9abe6"
+	baseImage = "eclipse-temurin:21-jdk"
 
 	// LocalRepository --
 	LocalRepository = "/etc/maven/m2"
 
 	// ImageName --
-	ImageName = "docker.io/apache/camel-k"
+	ImageName = "docker.io/testcamelk/camel-k"
 
 	// OpenShiftRegistryAddress --
 	OpenShiftRegistryAddress = "image-registry.openshift-image-registry.svc:5000"
