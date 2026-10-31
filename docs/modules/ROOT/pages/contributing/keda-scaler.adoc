@@ -13,7 +13,7 @@ When the KEDA trait is enabled, `kedaTrait.Configure` runs automatic discovery u
 Discovery follows this flow:
 
 . `metadata.ExtractAll` inspects all Integration sources and extracts their Camel `from` URIs.
-. Each URI is passed to `MapToKedaTrigger`, together with the Integration properties.
+. Each URI is passed to `MapToKedaTriggerWithAutoMetadata`, together with the Integration properties and the `keda.autoMetadata` map. The existing `MapToKedaTrigger` entry point remains available for callers that do not need to supply auto-metadata.
 . `ParseComponentURI` separates the URI into its component name, path value, and query parameters.
 . The component name is used to look up a `ScaleMapper` in the registry.
 . If a mapper is registered, it converts the path and parameters into a KEDA scaler type and metadata, which become a `KedaTrigger`.
@@ -37,6 +37,11 @@ type ScaleMapper interface {
 
 `Component` returns the Camel component name used as the registry key.
 `Map` receives the path part of the Camel URI, its decoded query parameters, and the Integration properties, and returns the corresponding KEDA scaler type and metadata.
+
+A mapper that needs an explicit opt-in from KEDA configuration can additionally implement the optional `AutoMetadataScaleMapper` interface.
+The dispatcher then calls `MapWithAutoMetadata` with the same URI inputs, Integration properties, and the `keda.autoMetadata` map.
+Mappers that implement only `ScaleMapper` continue to use `Map` unchanged.
+The JMS/IBM MQ mapping uses this extension because the generic `jms` scheme is shared by different providers and the presence of the `ibmmq` metadata entry is the explicit scaler selection.
 
 Each implementation registers itself by calling `keda.Register` from an `init` function.
 The blank import of `pkg/trait/keda/scalers` in `pkg/trait/keda.go` ensures that these registration functions run when the trait package is loaded.
@@ -65,6 +70,44 @@ metadata:
 ----
 
 Other KEDA Kafka metadata, such as `lagThreshold`, can be supplied through `keda.autoMetadata` when it is not derived from the Camel URI.
+
+== IBM MQ over JMS
+
+IBM MQ commonly uses Camel's generic `jms` component, so the endpoint scheme alone cannot distinguish it from ActiveMQ or another JMS provider.
+The IBM MQ mapper is selected when `keda.autoMetadata` contains an `ibmmq` entry.
+That entry already identifies the IBM MQ scaler, so a separate queue-type discriminator is unnecessary.
+It only maps JMS queue destinations; topics and temporary destinations are ignored.
+
+For example, this source endpoint:
+
+[source,text]
+----
+jms:queue:ORDERS
+----
+
+can be opted into IBM MQ discovery with:
+
+[source,yaml]
+----
+traits:
+  keda:
+    enabled: true
+    autoMetadata:
+      ibmmq:
+        host: https://mq.example.com/ibmmq/rest/v2/admin/action/qmgr/QM1/mqsc
+        queueDepth: "25"
+----
+
+The mapper creates an `ibmmq` trigger and derives `queueName` from the JMS destination.
+The `host` value is the IBM MQ Queue Manager Admin REST endpoint required by KEDA.
+It is not the JMS broker's host/port: Camel JMS is configured through a provider-specific `ConnectionFactory`, whose `hostName`, `port`, `channel`, and `queueManager` describe the messaging connection rather than the mqweb Admin REST URL.
+That REST endpoint can use a different host, port, and path, so it cannot be inferred safely from generic JMS properties or an opaque bean reference.
+Supply it explicitly through `keda.autoMetadata.ibmmq.host`.
+Other entries under `keda.autoMetadata.ibmmq` are passed through as KEDA scaler metadata.
+
+This mapping does not inspect the JMS `ConnectionFactory` bean or copy its credentials.
+Configure authentication using KEDA's supported IBM MQ options, such as `usernameFromEnv` and `passwordFromEnv`, with the corresponding environment variables available to the KEDA operator.
+See the https://keda.sh/docs/latest/scalers/ibm-mq/[KEDA IBM MQ scaler] documentation for the complete trigger and authentication options.
 
 == Complete mapping example
 
