@@ -13,7 +13,7 @@ When the KEDA trait is enabled, `kedaTrait.Configure` runs automatic discovery u
 Discovery follows this flow:
 
 . `metadata.ExtractAll` inspects all Integration sources and extracts their Camel `from` URIs.
-. Each URI is passed to `MapToKedaTrigger`, together with the Integration properties.
+. Each URI is passed to `MapToKedaTriggerWithAutoMetadata`, together with the Integration properties and the `keda.autoMetadata` map. The existing `MapToKedaTrigger` entry point remains available for callers that do not need to supply auto-metadata.
 . `ParseComponentURI` separates the URI into its component name, path value, and query parameters.
 . The component name is used to look up a `ScaleMapper` in the registry.
 . If a mapper is registered, it converts the path and parameters into a KEDA scaler type and metadata, which become a `KedaTrigger`.
