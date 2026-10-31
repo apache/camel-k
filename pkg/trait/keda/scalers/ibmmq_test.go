@@ -90,11 +90,11 @@ func TestIBMMQScalerMapWithAutoMetadata(t *testing.T) {
 			name:      "JMS connection properties do not identify the Admin REST host",
 			pathValue: "queue:ORDERS",
 			props: map[string]string{
-				"camel.component.jms.connection-factory":         "#bean:ibmMqConnectionFactory",
-				"camel.beans.ibmMqConnectionFactory.hostName":    "mq.example.com",
-				"camel.beans.ibmMqConnectionFactory.port":        "1414",
+				"camel.component.jms.connection-factory":          "#bean:ibmMqConnectionFactory",
+				"camel.beans.ibmMqConnectionFactory.hostName":     "mq.example.com",
+				"camel.beans.ibmMqConnectionFactory.port":         "1414",
 				"camel.beans.ibmMqConnectionFactory.queueManager": "QM1",
-				"camel.beans.ibmMqConnectionFactory.channel":     "DEV.APP.SVRCONN",
+				"camel.beans.ibmMqConnectionFactory.channel":      "DEV.APP.SVRCONN",
 			},
 			autoMetadata: map[string]map[string]string{
 				"ibmmq": {"queueDepth": "25"},
