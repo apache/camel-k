@@ -144,6 +144,24 @@ func TestKedaAutoDiscovery(t *testing.T) {
 			},
 			expectedCount: 1,
 		},
+		{
+			name:         "ibmmq over jms queue",
+			source:       `from("jms:queue:ORDERS").log("${body}");`,
+			expectedType: "ibmmq",
+			expectedParams: map[string]string{
+				"queueName":  "ORDERS",
+				"host":       "https://mq.example.com/ibmmq/rest/v2/admin/action/qmgr/QM1/mqsc",
+				"queueDepth": "25",
+			},
+			autoMetadata: map[string]map[string]string{
+				"ibmmq": {
+					"queueType":  "ibm",
+					"host":       "https://mq.example.com/ibmmq/rest/v2/admin/action/qmgr/QM1/mqsc",
+					"queueDepth": "25",
+				},
+			},
+			expectedCount: 1,
+		},
 	}
 
 	for _, tt := range tests {
@@ -172,6 +190,49 @@ func TestKedaAutoDiscovery(t *testing.T) {
 			for k, v := range tt.expectedParams {
 				assert.Equal(t, v, foundTrigger.Metadata[k], "metadata key %s mismatch", k)
 			}
+			if tt.expectedType == "ibmmq" {
+				assert.NotContains(t, foundTrigger.Metadata, "queueType", "the discovery discriminator must not be sent to KEDA")
+			}
+		})
+	}
+}
+
+func TestKedaAutoDiscoveryJMSRequiresIBMQueueTypeAndAdminHost(t *testing.T) {
+	tests := []struct {
+		name         string
+		autoMetadata map[string]map[string]string
+	}{
+		{
+			name: "missing provider discriminator",
+			autoMetadata: map[string]map[string]string{
+				"ibmmq": {"host": "https://mq.example.com/ibmmq/rest/v2/admin/action/qmgr/QM1/mqsc"},
+			},
+		},
+		{
+			name: "non IBM provider",
+			autoMetadata: map[string]map[string]string{
+				"ibmmq": {"queueType": "activemq", "host": "https://mq.example.com/mqsc"},
+			},
+		},
+		{
+			name: "missing required admin REST host",
+			autoMetadata: map[string]map[string]string{
+				"ibmmq": {"queueType": "ibm"},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			environment := autoDiscoveryEnvWithSource(
+				t,
+				`from("jms:queue:ORDERS").log("${body}");`,
+				nil,
+				t.autoMetadata,
+			)
+			_, _, err := environment.Catalog.apply(&environment)
+			require.NoError(t, err)
+			assert.Nil(t, getKedaScaledObject(environment.Resources), "JMS must not be auto-mapped without an explicit IBM MQ selection and admin REST host")
 		})
 	}
 }
