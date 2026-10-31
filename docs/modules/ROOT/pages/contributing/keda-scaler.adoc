@@ -69,7 +69,8 @@ Other KEDA Kafka metadata, such as `lagThreshold`, can be supplied through `keda
 == IBM MQ over JMS
 
 IBM MQ commonly uses Camel's generic `jms` component, so the endpoint scheme alone cannot distinguish it from ActiveMQ or another JMS provider.
-The IBM MQ mapper therefore requires an explicit provider discriminator in `keda.autoMetadata`.
+The IBM MQ mapper is selected when `keda.autoMetadata` contains an `ibmmq` entry.
+That entry already identifies the IBM MQ scaler, so a separate queue-type discriminator is unnecessary.
 It only maps JMS queue destinations; topics and temporary destinations are ignored.
 
 For example, this source endpoint:
@@ -88,14 +89,15 @@ traits:
     enabled: true
     autoMetadata:
       ibmmq:
-        queueType: ibm
         host: https://mq.example.com/ibmmq/rest/v2/admin/action/qmgr/QM1/mqsc
         queueDepth: "25"
 ----
 
 The mapper creates an `ibmmq` trigger and derives `queueName` from the JMS destination.
-The `host` value is the IBM MQ Queue Manager Admin REST endpoint required by KEDA; it is not the JMS broker's host/port and cannot be inferred from the endpoint URI.
-The `queueType` entry is only a Camel K discovery hint and is removed before the trigger metadata is emitted to KEDA.
+The `host` value is the IBM MQ Queue Manager Admin REST endpoint required by KEDA.
+It is not the JMS broker's host/port: Camel JMS is configured through a provider-specific `ConnectionFactory`, whose `hostName`, `port`, `channel`, and `queueManager` describe the messaging connection rather than the mqweb Admin REST URL.
+That REST endpoint can use a different host, port, and path, so it cannot be inferred safely from generic JMS properties or an opaque bean reference.
+Supply it explicitly through `keda.autoMetadata.ibmmq.host`.
 Other entries under `keda.autoMetadata.ibmmq` are passed through as KEDA scaler metadata.
 
 This mapping does not inspect the JMS `ConnectionFactory` bean or copy its credentials.
