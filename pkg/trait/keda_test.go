@@ -155,7 +155,6 @@ func TestKedaAutoDiscovery(t *testing.T) {
 			},
 			autoMetadata: map[string]map[string]string{
 				"ibmmq": {
-					"queueType":  "ibm",
 					"host":       "https://mq.example.com/ibmmq/rest/v2/admin/action/qmgr/QM1/mqsc",
 					"queueDepth": "25",
 				},
@@ -197,27 +196,21 @@ func TestKedaAutoDiscovery(t *testing.T) {
 	}
 }
 
-func TestKedaAutoDiscoveryJMSRequiresIBMQueueTypeAndAdminHost(t *testing.T) {
+func TestKedaAutoDiscoveryJMSRequiresIBMMetadataAndAdminHost(t *testing.T) {
 	tests := []struct {
 		name         string
 		autoMetadata map[string]map[string]string
 	}{
 		{
-			name: "missing provider discriminator",
+			name: "IBM MQ scaler is not selected",
 			autoMetadata: map[string]map[string]string{
-				"ibmmq": {"host": "https://mq.example.com/ibmmq/rest/v2/admin/action/qmgr/QM1/mqsc"},
-			},
-		},
-		{
-			name: "non IBM provider",
-			autoMetadata: map[string]map[string]string{
-				"ibmmq": {"queueType": "activemq", "host": "https://mq.example.com/mqsc"},
+				"activemq": {"host": "tcp://mq.example.com:1414"},
 			},
 		},
 		{
 			name: "missing required admin REST host",
 			autoMetadata: map[string]map[string]string{
-				"ibmmq": {"queueType": "ibm"},
+				"ibmmq": {"queueDepth": "25"},
 			},
 		},
 	}
@@ -232,7 +225,7 @@ func TestKedaAutoDiscoveryJMSRequiresIBMQueueTypeAndAdminHost(t *testing.T) {
 			)
 			_, _, err := environment.Catalog.apply(&environment)
 			require.NoError(t, err)
-			assert.Nil(t, getKedaScaledObject(environment.Resources), "JMS must not be auto-mapped without an explicit IBM MQ selection and admin REST host")
+			assert.Nil(t, getKedaScaledObject(environment.Resources), "JMS must not be auto-mapped without an ibmmq autoMetadata entry and admin REST host")
 		})
 	}
 }
