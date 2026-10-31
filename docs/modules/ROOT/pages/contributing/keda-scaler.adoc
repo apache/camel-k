@@ -66,6 +66,42 @@ metadata:
 
 Other KEDA Kafka metadata, such as `lagThreshold`, can be supplied through `keda.autoMetadata` when it is not derived from the Camel URI.
 
+== IBM MQ over JMS
+
+IBM MQ commonly uses Camel's generic `jms` component, so the endpoint scheme alone cannot distinguish it from ActiveMQ or another JMS provider.
+The IBM MQ mapper therefore requires an explicit provider discriminator in `keda.autoMetadata`.
+It only maps JMS queue destinations; topics and temporary destinations are ignored.
+
+For example, this source endpoint:
+
+[source,text]
+----
+jms:queue:ORDERS
+----
+
+can be opted into IBM MQ discovery with:
+
+[source,yaml]
+----
+traits:
+  keda:
+    enabled: true
+    autoMetadata:
+      ibmmq:
+        queueType: ibm
+        host: https://mq.example.com/ibmmq/rest/v2/admin/action/qmgr/QM1/mqsc
+        queueDepth: "25"
+----
+
+The mapper creates an `ibmmq` trigger and derives `queueName` from the JMS destination.
+The `host` value is the IBM MQ Queue Manager Admin REST endpoint required by KEDA; it is not the JMS broker's host/port and cannot be inferred from the endpoint URI.
+The `queueType` entry is only a Camel K discovery hint and is removed before the trigger metadata is emitted to KEDA.
+Other entries under `keda.autoMetadata.ibmmq` are passed through as KEDA scaler metadata.
+
+This mapping does not inspect the JMS `ConnectionFactory` bean or copy its credentials.
+Configure authentication using KEDA's supported IBM MQ options, such as `usernameFromEnv` and `passwordFromEnv`, with the corresponding environment variables available to the KEDA operator.
+See the https://keda.sh/docs/latest/scalers/ibm-mq/[KEDA IBM MQ scaler] documentation for the complete trigger and authentication options.
+
 == Complete mapping example
 
 The following example uses fictional component and scaler names to show the complete mapping process.

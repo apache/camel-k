@@ -166,7 +166,7 @@ func (t *kedaTrait) autoDiscoverTriggers(e *Environment) error {
 
 	props := integrationProperties(e)
 	for _, fromURI := range meta.FromURIs {
-		trigger, err := kedamapper.MapToKedaTrigger(fromURI, props)
+		trigger, err := kedamapper.MapToKedaTriggerWithAutoMetadata(fromURI, props, t.AutoMetadata)
 		if err != nil {
 			return err
 		}
@@ -175,6 +175,11 @@ func (t *kedaTrait) autoDiscoverTriggers(e *Environment) error {
 			// Merge additional metadata if configured
 			if t.AutoMetadata != nil {
 				if extra, ok := t.AutoMetadata[trigger.Type]; ok {
+					if trigger.Type == "ibmmq" {
+						// queueType is a Camel K discovery hint, not KEDA scaler metadata.
+						extra = maps.Clone(extra)
+						delete(extra, "queueType")
+					}
 					maps.Copy(trigger.Metadata, extra)
 				}
 			}
