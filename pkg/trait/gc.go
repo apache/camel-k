@@ -255,6 +255,56 @@ func canBeDeleted(it *v1.Integration, u unstructured.Unstructured) bool {
 	return false
 }
 
+// deletableTypesFromDiscovery builds the in-memory map of deletable types by
+// intersecting the cluster API resources with the rules granted to the operator
+// service account. It is a pure function over its inputs, so the mapping from
+// discovery and RBAC rules to deletable types can be tested without a cluster.
+//
+// The discovery lists are expected to already be filtered to resources that
+// support the "delete" verb, as getDeletableTypes does with discovery.FilteredBy.
+// A resource is deletable when some rule allows the "delete" verb (or "*") for
+// its API group (or "*") and its resource name (or "*"). An empty resource group
+// falls back to the group of the containing resource list, which is how core
+// resources (group "") are represented.
+func deletableTypesFromDiscovery(
+	apiResourceLists []*metav1.APIResourceList,
+	rules []authorization.ResourceRule,
+) (map[schema.GroupVersionKind]struct{}, error) {
+	GVKs := make(map[schema.GroupVersionKind]struct{})
+
+	for _, APIResourceList := range apiResourceLists {
+		for _, resource := range APIResourceList.APIResources {
+			resourceGroup := resource.Group
+			if resourceGroup == "" {
+				// Empty implies the group of the containing resource list should be used
+				gv, err := schema.ParseGroupVersion(APIResourceList.GroupVersion)
+				if err != nil {
+					return nil, err
+				}
+				resourceGroup = gv.Group
+			}
+		rule:
+			for _, rule := range rules {
+				if !util.StringSliceContainsAnyOf(rule.Verbs, "delete", "*") {
+					continue
+				}
+				for _, ruleGroup := range rule.APIGroups {
+					for _, ruleResource := range rule.Resources {
+						if (resourceGroup == ruleGroup || ruleGroup == "*") && (resource.Name == ruleResource || ruleResource == "*") {
+							GVK := schema.FromAPIVersionAndKind(APIResourceList.GroupVersion, resource.Kind)
+							GVKs[GVK] = struct{}{}
+
+							break rule
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return GVKs, nil
+}
+
 // getDeletableTypes returns the list of deletable types resources, inspecting the rules for which the operator SA is allowed in the
 // Integration namespace.
 func (t *gcTrait) getDeletableTypes(e *Environment) (map[schema.GroupVersionKind]struct{}, error) {
@@ -298,34 +348,14 @@ func (t *gcTrait) getDeletableTypes(e *Environment) (map[schema.GroupVersionKind
 		return nil, err
 	}
 
-	for _, APIResourceList := range APIResourceLists {
-		for _, resource := range APIResourceList.APIResources {
-			resourceGroup := resource.Group
-			if resourceGroup == "" {
-				// Empty implies the group of the containing resource list should be used
-				gv, err := schema.ParseGroupVersion(APIResourceList.GroupVersion)
-				if err != nil {
-					return nil, err
-				}
-				resourceGroup = gv.Group
-			}
-		rule:
-			for _, rule := range ssrr.Status.ResourceRules {
-				if !util.StringSliceContainsAnyOf(rule.Verbs, "delete", "*") {
-					continue
-				}
-				for _, ruleGroup := range rule.APIGroups {
-					for _, ruleResource := range rule.Resources {
-						if (resourceGroup == ruleGroup || ruleGroup == "*") && (resource.Name == ruleResource || ruleResource == "*") {
-							GVK := schema.FromAPIVersionAndKind(APIResourceList.GroupVersion, resource.Kind)
-							GVKs[GVK] = struct{}{}
-
-							break rule
-						}
-					}
-				}
-			}
-		}
+	// Build the in-memory map of deletable types from discovery and the
+	// operator service account rules. Discovery is kept as the source here:
+	// replacing it with a fixed list would silently drop types created by
+	// other traits (for example Knative or KEDA resources), which the
+	// discovery result still covers.
+	GVKs, err = deletableTypesFromDiscovery(APIResourceLists, ssrr.Status.ResourceRules)
+	if err != nil {
+		return nil, err
 	}
 
 	if len(GVKs) == 0 {
