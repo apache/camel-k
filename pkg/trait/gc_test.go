@@ -30,9 +30,11 @@ import (
 	servingv1 "github.com/apache/camel-k/v2/pkg/apis/duck/knative/serving/v1"
 	"github.com/apache/camel-k/v2/pkg/internal"
 	appsv1 "k8s.io/api/apps/v1"
+	authorization "k8s.io/api/authorization/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
@@ -418,4 +420,94 @@ func TestGarbageCollectDryBuildSkipsGC(t *testing.T) {
 	require.NoError(t, err)
 	assert.Len(t, environment.PostActions, 0)
 	assert.False(t, resourceDeleted)
+}
+
+func TestDeletableTypesFromDiscovery(t *testing.T) {
+	deploymentResource := metav1.APIResourceList{
+		GroupVersion: "apps/v1",
+		APIResources: []metav1.APIResource{
+			{Name: "deployments", Namespaced: true, Kind: "Deployment", Verbs: []string{"get", "delete"}},
+			{Name: "statefulsets", Namespaced: true, Kind: "StatefulSet", Verbs: []string{"get", "list"}},
+		},
+	}
+	coreResource := metav1.APIResourceList{
+		GroupVersion: "v1",
+		APIResources: []metav1.APIResource{
+			{Name: "configmaps", Namespaced: true, Kind: "ConfigMap", Verbs: []string{"get", "delete"}},
+		},
+	}
+
+	t.Run("exact match keeps only resources with delete verb and matching rule", func(t *testing.T) {
+		types, err := deletableTypesFromDiscovery(
+			[]*metav1.APIResourceList{&deploymentResource, &coreResource},
+			[]authorization.ResourceRule{
+				{APIGroups: []string{"apps"}, Resources: []string{"deployments"}, Verbs: []string{"delete"}},
+				{APIGroups: []string{""}, Resources: []string{"configmaps"}, Verbs: []string{"delete"}},
+			},
+		)
+		require.NoError(t, err)
+		assert.Equal(t,
+			map[schema.GroupVersionKind]struct{}{
+				{Group: "apps", Version: "v1", Kind: "Deployment"}: {},
+				{Group: "", Version: "v1", Kind: "ConfigMap"}:      {},
+			},
+			types,
+		)
+	})
+
+	t.Run("wildcard rule matches everything deletable", func(t *testing.T) {
+		types, err := deletableTypesFromDiscovery(
+			[]*metav1.APIResourceList{&deploymentResource},
+			[]authorization.ResourceRule{
+				{APIGroups: []string{"*"}, Resources: []string{"*"}, Verbs: []string{"*"}},
+			},
+		)
+		require.NoError(t, err)
+		assert.Equal(t,
+			map[schema.GroupVersionKind]struct{}{
+				{Group: "apps", Version: "v1", Kind: "Deployment"}:  {},
+				{Group: "apps", Version: "v1", Kind: "StatefulSet"}: {},
+			},
+			types,
+		)
+	})
+
+	t.Run("rule without delete verb is excluded", func(t *testing.T) {
+		types, err := deletableTypesFromDiscovery(
+			[]*metav1.APIResourceList{&deploymentResource},
+			[]authorization.ResourceRule{
+				{APIGroups: []string{"apps"}, Resources: []string{"deployments"}, Verbs: []string{"get", "list"}},
+			},
+		)
+		require.NoError(t, err)
+		assert.Empty(t, types)
+	})
+
+	t.Run("group or resource mismatch is excluded", func(t *testing.T) {
+		types, err := deletableTypesFromDiscovery(
+			[]*metav1.APIResourceList{&deploymentResource},
+			[]authorization.ResourceRule{
+				{APIGroups: []string{"apps"}, Resources: []string{"services"}, Verbs: []string{"delete"}},
+				{APIGroups: []string{"networking.k8s.io"}, Resources: []string{"deployments"}, Verbs: []string{"delete"}},
+			},
+		)
+		require.NoError(t, err)
+		assert.Empty(t, types)
+	})
+
+	t.Run("invalid GroupVersion returns an error", func(t *testing.T) {
+		bad := metav1.APIResourceList{
+			GroupVersion: "apps/v1/extra",
+			APIResources: []metav1.APIResource{
+				{Name: "deployments", Namespaced: true, Kind: "Deployment", Verbs: []string{"delete"}},
+			},
+		}
+		_, err := deletableTypesFromDiscovery(
+			[]*metav1.APIResourceList{&bad},
+			[]authorization.ResourceRule{
+				{APIGroups: []string{"*"}, Resources: []string{"*"}, Verbs: []string{"*"}},
+			},
+		)
+		require.Error(t, err)
+	})
 }

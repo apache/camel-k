@@ -1,0 +1,48 @@
+= Garbage Collection
+
+When an `Integration` is updated, the operator creates a new set of Kubernetes resources for the new generation. The resources of the previous generations would otherwise pile up in the namespace, so the operator's `gc` trait removes them. This page describes how that garbage collection works.
+
+== Generations
+
+Every resource the operator creates for an `Integration` carries two labels:
+
+* `camel.apache.org/integration` — the name of the `Integration` it belongs to.
+* `camel.apache.org/generation` — the `Integration` generation it was created for.
+
+The generation is a monotonically increasing, strictly positive integer, bumped on every change to the `Integration`. Because of that, the first generation never needs garbage collection: there is nothing older to remove.
+
+== When garbage collection runs
+
+The `gc` trait is enabled by default and can be disabled with `gc.enabled=false`. When enabled, it runs in two cases:
+
+* **Generation upgrade** — when the `Integration` generation is greater than 1, a post action deletes the resources labelled with older generations.
+* **Undeploy** — when the `Integration` is in the `UnDeploying` phase, all of its resources are deleted regardless of generation.
+
+The deletion happens as a post action, after the new generation's resources have been created.
+
+== What can be deleted
+
+A resource is only deleted when all of the following hold:
+
+* It is labelled with the `Integration` name, and, on generation upgrades, with an older generation.
+* It is owner-referenced to that `Integration`. This is the safety check that prevents the operator from deleting resources that merely share a label.
+* Its type is in the set of deletable types for the namespace.
+
+The set of deletable types is computed from the cluster, not from a fixed list:
+
+1. The operator lists the namespaced resources the cluster API exposes, filtered to those that support the `delete` verb.
+2. It intersects that list with the permissions granted to the operator service account in the `Integration` namespace, obtained via a `SelfSubjectRulesReview`.
+3. On Knative profiles, Knative `Service` and `Trigger` types are added when the corresponding Knative components are installed.
+
+This discovery-based approach matters because traits create more resource types than any fixed list would cover — for example Knative `Service` and `Trigger` resources, or KEDA `ScaledObject` resources. Replacing discovery with a hardcoded list would silently leave those resources behind on every upgrade.
+
+To avoid a discovery and rules-review request on every reconciliation, the computed set is cached in memory and refreshed at most once per minute. If discovery returns no deletable types at all, a minimal default set is used instead: `ConfigMap`, `Deployment`, `Secret`, `Service`, `CronJob` and `Job`.
+
+== Disabling
+
+To keep old-generation resources (for example while debugging a failed upgrade), disable the trait:
+
+[source]
+----
+kamel run --trait gc.enabled=false ...
+----
