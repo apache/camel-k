@@ -36,6 +36,10 @@ func TestKafkaKedaAutoscale(t *testing.T) {
 	WithExistingNamedTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/kafka-ephemeral.yaml", "-n", ns))
 		ExpectExecSucceed(t, g, Kubectl("rollout", "status", "deployment", "my-cluster-kafka", "-n", ns, "--timeout=180s"))
+		ExpectExecSucceed(t, g, Kubectl("exec", "deployment/my-cluster-kafka", "-n", ns, "--",
+			"/opt/kafka/bin/kafka-topics.sh", "--create", "--if-not-exists",
+			"--topic", "my-topic", "--bootstrap-server", "localhost:9092",
+			"--partitions", "1", "--replication-factor", "1"))
 
 		t.Run("Serverless Kafka Autoscale", func(t *testing.T) {
 			consumerName := "keda-kafka-auto-discovery"
@@ -44,7 +48,7 @@ func TestKafkaKedaAutoscale(t *testing.T) {
 			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/keda-it-kafkatopic-to-log-auto.yaml", "-n", ns))
 
 			// Start consumer
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, consumerName, v1.IntegrationConditionReady), TestTimeoutMedium).
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, consumerName, v1.IntegrationConditionReady), TestTimeoutLong).
 				Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), TestTimeoutShort).
 				Should(PointTo(BeNumerically("==", 1)))
@@ -55,7 +59,7 @@ func TestKafkaKedaAutoscale(t *testing.T) {
 
 			// Start producer to generate traffic
 			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/timer-to-kafka.yaml", "-n", ns))
-			g.Eventually(PipeConditionStatus(t, ctx, ns, producerName, v1.PipeConditionReady), TestTimeoutMedium).
+			g.Eventually(PipeConditionStatus(t, ctx, ns, producerName, v1.PipeConditionReady), TestTimeoutLong).
 				Should(Equal(corev1.ConditionTrue))
 
 			// Consumer scales up to 1

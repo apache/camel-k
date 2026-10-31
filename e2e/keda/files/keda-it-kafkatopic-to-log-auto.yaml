@@ -20,11 +20,12 @@ kind: Integration
 metadata:
   name: keda-kafka-auto-discovery
 spec:
-  sources:
-    - content: |
-        from("kafka:my-topic?brokers=my-cluster-kafka-bootstrap.keda.svc:9092&groupId=auto-group")
-          .to("log:info");
-      name: routes.java
+  flows:
+  - route:
+      from:
+        steps:
+        - to: log:info
+        uri: kafka:my-topic?brokers=my-cluster-kafka-bootstrap.keda.svc:9092&groupId=auto-group
   traits:
     keda:
       enabled: true
