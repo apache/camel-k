@@ -175,11 +175,6 @@ func (t *kedaTrait) autoDiscoverTriggers(e *Environment) error {
 			// Merge additional metadata if configured
 			if t.AutoMetadata != nil {
 				if extra, ok := t.AutoMetadata[trigger.Type]; ok {
-					if trigger.Type == "ibmmq" {
-						// queueType is a Camel K discovery hint, not KEDA scaler metadata.
-						extra = maps.Clone(extra)
-						delete(extra, "queueType")
-					}
 					maps.Copy(trigger.Metadata, extra)
 				}
 			}
