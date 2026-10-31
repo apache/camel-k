@@ -218,7 +218,7 @@ func TestKedaAutoDiscoveryJMSRequiresIBMMetadataAndAdminHost(t *testing.T) {
 				t,
 				`from("jms:queue:ORDERS").log("${body}");`,
 				nil,
-				t.autoMetadata,
+				tt.autoMetadata,
 			)
 			_, _, err := environment.Catalog.apply(&environment)
 			require.NoError(t, err)
