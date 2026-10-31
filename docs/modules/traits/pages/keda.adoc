@@ -76,6 +76,6 @@ When `keda.auto` is enabled, Camel K inspects the consumer endpoints in an Integ
 Automatic discovery currently supports the following Camel components:
 
 * `kafka`: creates an Apache Kafka trigger from the topic, broker, and consumer-group values in the endpoint URI. See the https://keda.sh/docs/latest/scalers/apache-kafka/[KEDA Apache Kafka scaler] documentation for the available trigger metadata.
-* `jms` with an explicit IBM MQ selection: creates an IBM MQ trigger for queue destinations when the `ibmmq` entry is present in `keda.autoMetadata` and the required IBM MQ Admin REST `host` is supplied. Other JMS providers and topic destinations are not mapped. See the https://keda.sh/docs/latest/scalers/ibm-mq/[KEDA IBM MQ scaler] documentation for the required metadata and authentication options.
+* `jms` with an explicit IBM MQ selection: creates an IBM MQ trigger for queue destinations only when `keda.autoMetadata` contains an `ibmmq` entry with the required IBM MQ Admin REST `host`. This is an explicit opt-in, not provider detection; use it only when the configured JMS `ConnectionFactory` connects to IBM MQ. A generic JMS endpoint without this opt-in does not create an IBM MQ trigger, and topic or temporary destinations are not mapped. See the https://keda.sh/docs/latest/scalers/ibm-mq/[KEDA IBM MQ scaler] documentation for the required metadata and authentication options.
 
 Unsupported Camel components do not produce an automatically discovered trigger. You can still configure their KEDA triggers explicitly with `keda.triggers`.
