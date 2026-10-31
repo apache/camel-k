@@ -36,8 +36,7 @@ func TestIBMMQScalerMapWithAutoMetadata(t *testing.T) {
 	scaler := &IBMMQScaler{}
 	validMetadata := map[string]map[string]string{
 		"ibmmq": {
-			"queueType": "ibm",
-			"host":      "https://mq.example.com/ibmmq/rest/v2/admin/action/qmgr/QM1/mqsc",
+			"host": "https://mq.example.com/ibmmq/rest/v2/admin/action/qmgr/QM1/mqsc",
 		},
 	}
 
@@ -45,6 +44,7 @@ func TestIBMMQScalerMapWithAutoMetadata(t *testing.T) {
 		name         string
 		pathValue    string
 		params       map[string]string
+		props        map[string]string
 		autoMetadata map[string]map[string]string
 		expectedType string
 		expectedMeta map[string]string
@@ -80,24 +80,31 @@ func TestIBMMQScalerMapWithAutoMetadata(t *testing.T) {
 			autoMetadata: validMetadata,
 		},
 		{
-			name:         "missing queue type discriminator",
+			name:         "IBM MQ scaler is not selected",
 			pathValue:    "queue:ORDERS",
 			autoMetadata: map[string]map[string]string{
-				"ibmmq": {"host": "https://mq.example.com/ibmmq/rest/v2/admin/action/qmgr/QM1/mqsc"},
+				"activemq": {"host": "tcp://mq.example.com:1414"},
 			},
 		},
 		{
-			name:         "non IBM JMS provider is not mapped",
-			pathValue:    "queue:ORDERS",
+			name:      "JMS connection properties do not identify the Admin REST host",
+			pathValue: "queue:ORDERS",
+			props: map[string]string{
+				"camel.component.jms.connection-factory":         "#bean:ibmMqConnectionFactory",
+				"camel.beans.ibmMqConnectionFactory.hostName":    "mq.example.com",
+				"camel.beans.ibmMqConnectionFactory.port":        "1414",
+				"camel.beans.ibmMqConnectionFactory.queueManager": "QM1",
+				"camel.beans.ibmMqConnectionFactory.channel":     "DEV.APP.SVRCONN",
+			},
 			autoMetadata: map[string]map[string]string{
-				"ibmmq": {"queueType": "activemq", "host": "https://mq.example.com/mqsc"},
+				"ibmmq": {"queueDepth": "25"},
 			},
 		},
 		{
 			name:         "missing admin REST host is not mapped",
 			pathValue:    "queue:ORDERS",
 			autoMetadata: map[string]map[string]string{
-				"ibmmq": {"queueType": "ibm"},
+				"ibmmq": {"queueDepth": "25"},
 			},
 		},
 		{
@@ -109,7 +116,7 @@ func TestIBMMQScalerMapWithAutoMetadata(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			kedaType, metadata := scaler.MapWithAutoMetadata(tt.pathValue, tt.params, nil, tt.autoMetadata)
+			kedaType, metadata := scaler.MapWithAutoMetadata(tt.pathValue, tt.params, tt.props, tt.autoMetadata)
 			assert.Equal(t, tt.expectedType, kedaType)
 			assert.Equal(t, tt.expectedMeta, metadata)
 		})
@@ -119,8 +126,7 @@ func TestIBMMQScalerMapWithAutoMetadata(t *testing.T) {
 func TestMapToKedaTriggerIBMMQ(t *testing.T) {
 	autoMetadata := map[string]map[string]string{
 		"ibmmq": {
-			"queueType": "ibm",
-			"host":      "https://mq.example.com/ibmmq/rest/v2/admin/action/qmgr/QM1/mqsc",
+			"host": "https://mq.example.com/ibmmq/rest/v2/admin/action/qmgr/QM1/mqsc",
 		},
 	}
 
@@ -131,7 +137,7 @@ func TestMapToKedaTriggerIBMMQ(t *testing.T) {
 	assert.Equal(t, map[string]string{"queueName": "ORDERS"}, trigger.Metadata)
 }
 
-func TestMapToKedaTriggerIBMMQRequiresExplicitProvider(t *testing.T) {
+func TestMapToKedaTriggerIBMMQRequiresScalerSelection(t *testing.T) {
 	trigger, err := keda.MapToKedaTrigger("jms:queue:ORDERS", nil)
 	require.NoError(t, err)
 	assert.Nil(t, trigger)
