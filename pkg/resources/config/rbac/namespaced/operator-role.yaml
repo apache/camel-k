@@ -27,6 +27,7 @@ rules:
   resources:
   - camelmonitors
   verbs:
+  - get
   - list
   - watch
 - apiGroups:

@@ -339,7 +339,7 @@ test-knative: gotestfmt-install
 	exit $${FAILED}
 
 #
-# CamelMonitor discovery tests require its CRD and Knative Serving before starting the operator.
+# CamelMonitor discovery tests require Camel Monitor and Camel K operators.
 #
 .PHONY: test-camel-monitor
 test-camel-monitor: gotestfmt-install
