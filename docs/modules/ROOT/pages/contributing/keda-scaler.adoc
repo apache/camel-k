@@ -38,6 +38,11 @@ type ScaleMapper interface {
 `Component` returns the Camel component name used as the registry key.
 `Map` receives the path part of the Camel URI, its decoded query parameters, and the Integration properties, and returns the corresponding KEDA scaler type and metadata.
 
+A mapper that needs an explicit opt-in from KEDA configuration can additionally implement the optional `AutoMetadataScaleMapper` interface.
+The dispatcher then calls `MapWithAutoMetadata` with the same URI inputs, Integration properties, and the `keda.autoMetadata` map.
+Mappers that implement only `ScaleMapper` continue to use `Map` unchanged.
+The JMS/IBM MQ mapping uses this extension because the generic `jms` scheme is shared by different providers and the presence of the `ibmmq` metadata entry is the explicit scaler selection.
+
 Each implementation registers itself by calling `keda.Register` from an `init` function.
 The blank import of `pkg/trait/keda/scalers` in `pkg/trait/keda.go` ensures that these registration functions run when the trait package is loaded.
 
