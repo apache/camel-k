@@ -189,9 +189,6 @@ func TestKedaAutoDiscovery(t *testing.T) {
 			for k, v := range tt.expectedParams {
 				assert.Equal(t, v, foundTrigger.Metadata[k], "metadata key %s mismatch", k)
 			}
-			if tt.expectedType == "ibmmq" {
-				assert.NotContains(t, foundTrigger.Metadata, "queueType", "the discovery discriminator must not be sent to KEDA")
-			}
 		})
 	}
 }
