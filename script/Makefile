@@ -533,7 +533,7 @@ images-push-staging-all:
 
 images-push:
 	for i in $(ARCH_VERSIONS); do \
-		docker push $(IMAGE_PUSH)-$i; \
+		docker push $(IMAGE_PUSH)-$$i; \
 	done
 	docker buildx imagetools create \
 		$(foreach i,$(ARCH_VERSIONS),--platform linux/$(i)) \
