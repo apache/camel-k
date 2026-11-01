@@ -532,13 +532,13 @@ images-push-staging-all:
 	done
 
 images-push:
-	docker push $(IMAGE_PUSH)
-	docker manifest create $(IMAGE_PUSH) $(IMAGE_PUSH)
 	for i in $(ARCH_VERSIONS); do \
-		docker push $(IMAGE_PUSH)-$$i ; \
-		docker manifest create $(IMAGE_PUSH) -a $(IMAGE_PUSH)-$$i; \
+		docker push $(IMAGE_PUSH)-$i; \
 	done
-	docker manifest push $(IMAGE_PUSH) --purge
+	docker buildx imagetools create \
+		$(foreach i,$(ARCH_VERSIONS),--platform linux/$(i)) \
+		--tag $(IMAGE_PUSH) \
+		$(foreach i,$(ARCH_VERSIONS),$(IMAGE_PUSH)-$(i))
 
 images-tag-staging-all:
 	docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION) $(STAGING_IMAGE):$(CUSTOM_VERSION)
@@ -556,15 +556,14 @@ images-push-staging:
 	docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-amd64 $(STAGING_IMAGE):$(CUSTOM_VERSION)-amd64
 	docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-amd64 $(STAGING_IMAGE):$(CUSTOM_VERSION)
 	docker push $(STAGING_IMAGE):$(CUSTOM_VERSION)-amd64
-	docker push $(STAGING_IMAGE):$(CUSTOM_VERSION)
 	@if docker inspect $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 &> /dev/null; then \
 		echo "Image $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 exists, building the multiarch manifest"; \
 		docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 $(STAGING_IMAGE):$(CUSTOM_VERSION)-arm64; \
 		docker push $(STAGING_IMAGE):$(CUSTOM_VERSION)-arm64; \
-		docker manifest create $(STAGING_IMAGE):$(CUSTOM_VERSION) --amend $(STAGING_IMAGE):$(CUSTOM_VERSION)-amd64 --amend $(STAGING_IMAGE):$(CUSTOM_VERSION)-arm64; \
-		docker manifest push --purge $(STAGING_IMAGE):$(CUSTOM_VERSION); \
+		docker buildx imagetools create --platform linux/amd64 --platform linux/arm64 --tag $(STAGING_IMAGE):$(CUSTOM_VERSION) $(STAGING_IMAGE):$(CUSTOM_VERSION)-amd64 $(STAGING_IMAGE):$(CUSTOM_VERSION)-arm64; \
 	else \
 		echo "Image $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 does not exist"; \
+		docker push $(STAGING_IMAGE):$(CUSTOM_VERSION); \
 	fi
 
 get-image:
