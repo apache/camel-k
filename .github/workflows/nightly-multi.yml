@@ -57,13 +57,27 @@ jobs:
       run: |
         THIS_VERSION="$(make get-version)"
         VERSION="$(make get-version | sed s/-SNAPSHOT//)-nightly"
+        IMAGE="testcamelk/camel-k:$VERSION"
+        echo "Checking that $IMAGE includes a linux/arm64 image..."
+        if ! docker buildx imagetools inspect --raw "$IMAGE" |
+          jq -e '.manifests[] | select(.platform.os == "linux" and .platform.architecture == "arm64")' >/dev/null; then
+          echo "::error::Operator image $IMAGE does not contain a linux/arm64 manifest."
+          exit 1
+        fi
         sed -i "s#apache/camel-k:$THIS_VERSION#testcamelk/camel-k:$VERSION#g" install/base/config/manager/operator-deployment.yaml
         kubectl create ns camel
         kubectl create configmap camel-k-operator-configmap-configuration \
           --from-literal=MAVEN_REPOSITORIES_ALLOWED="https://maven.repository.redhat.com/ga@id=redhat" \
           -n camel
         kubectl apply -k install/overlays/all-namespaces/ --server-side --force-conflicts
-        kubectl wait --for=condition=available deployment/camel-k-operator -n camel --timeout=60s
+        if ! kubectl wait --for=condition=available deployment/camel-k-operator -n camel --timeout=60s; then
+          echo "::group::Operator deployment diagnostics"
+          kubectl get pods -n camel -o wide || true
+          kubectl describe deployment/camel-k-operator -n camel || true
+          kubectl get events -n camel --sort-by=.lastTimestamp || true
+          echo "::endgroup::"
+          exit 1
+        fi
         # Install Apache Kamelets catalog
         mvn -q dependency:copy -Dartifact=org.apache.camel.kamelets:camel-kamelets:4.18.1:jar -Dmdep.useBaseVersion=true -DoutputDirectory=/tmp
         unzip /tmp/camel-kamelets-4.18.1.jar -d /tmp && kubectl apply -f /tmp/kamelets -n camel
