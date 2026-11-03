@@ -33,6 +33,8 @@ import (
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/utils/ptr"
 
+	monitorv1alpha1 "github.com/camel-tooling/camel-monitor-operator/pkg/apis/camel/v1alpha1"
+
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -46,12 +48,19 @@ import (
 )
 
 // NewMonitorAction is an action used to monitor manager Integrations.
-func NewMonitorAction() Action {
-	return &monitorAction{}
+func NewMonitorAction(c client.Client) (Action, error) {
+	installed, err := kubernetes.IsAPIResourceInstalled(c, monitorv1alpha1.SchemeGroupVersion.String(), monitorv1alpha1.AppKind)
+	if err != nil {
+		return nil, err
+	}
+
+	return &monitorAction{camelMonitorAvailable: installed}, nil
 }
 
 type monitorAction struct {
 	baseAction
+
+	camelMonitorAvailable bool
 }
 
 func (action *monitorAction) Name() string {
@@ -138,6 +147,12 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		return integration, err
 	}
 	action.checkTraitAnnotationsDeprecatedNotice(integration)
+
+	if action.camelMonitorAvailable {
+		if err := addCamelMonitorCondition(ctx, action.client, integration); err != nil {
+			return integration, err
+		}
+	}
 
 	return action.monitorPods(ctx, environment, integration)
 }

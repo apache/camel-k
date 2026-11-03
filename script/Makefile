@@ -339,6 +339,13 @@ test-knative: gotestfmt-install
 	exit $${FAILED}
 
 #
+# CamelMonitor discovery tests require Camel Monitor and Camel K operators.
+#
+.PHONY: test-camel-monitor
+test-camel-monitor: gotestfmt-install
+	set -o pipefail; go test -p 1 -timeout 20m -v ./e2e/camelmonitor --parallel 1 -tags=integration $(GOTESTFMT)
+
+#
 # Kafka tests that require the presence of Strimzi operator configuration
 #
 test-kafka: gotestfmt-install
