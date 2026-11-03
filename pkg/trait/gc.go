@@ -21,40 +21,35 @@ import (
 	"context"
 	"fmt"
 	"maps"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
-	"time"
-
-	"golang.org/x/time/rate"
 
 	appsv1 "k8s.io/api/apps/v1"
-	authorization "k8s.io/api/authorization/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/utils/ptr"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/selection"
-	"k8s.io/client-go/discovery"
+	"sigs.k8s.io/yaml"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/v2/pkg/util"
-	"github.com/apache/camel-k/v2/pkg/util/knative"
+	"github.com/apache/camel-k/v2/pkg/resources"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
 var (
-	lock                  sync.Mutex
-	rateLimiter           = rate.NewLimiter(rate.Every(time.Minute), 1)
-	collectableGVKs       = make(map[schema.GroupVersionKind]struct{})
 	defaultDeletableTypes = map[schema.GroupVersionKind]struct{}{
 		{
 			Kind:    "ConfigMap",
@@ -87,6 +82,109 @@ var (
 			Version: batchv1.SchemeGroupVersion.Version,
 		}: {},
 	}
+
+	// deletableResourceTypes maps an API group and resource name, as they appear
+	// in the operator role rules, to the corresponding type. Role rules carry
+	// neither version nor kind information, so the mapping has to be provided
+	// explicitly for every type the operator may be allowed to delete. Rules
+	// referencing a resource that is not in this mapping (including any
+	// subresource, such as "pods/exec") are skipped when the set of deletable
+	// types is computed.
+	deletableResourceTypes = map[schema.GroupResource]schema.GroupVersionKind{
+		{Group: "", Resource: "configmaps"}:             corev1.SchemeGroupVersion.WithKind("ConfigMap"),
+		{Group: "", Resource: "secrets"}:                corev1.SchemeGroupVersion.WithKind("Secret"),
+		{Group: "", Resource: "pods"}:                   corev1.SchemeGroupVersion.WithKind("Pod"),
+		{Group: "", Resource: "services"}:               corev1.SchemeGroupVersion.WithKind("Service"),
+		{Group: "", Resource: "serviceaccounts"}:        corev1.SchemeGroupVersion.WithKind("ServiceAccount"),
+		{Group: "", Resource: "persistentvolumeclaims"}: corev1.SchemeGroupVersion.WithKind("PersistentVolumeClaim"),
+		{Group: "", Resource: "events"}:                 corev1.SchemeGroupVersion.WithKind("Event"),
+		{Group: "apps", Resource: "deployments"}:        appsv1.SchemeGroupVersion.WithKind("Deployment"),
+		{Group: "batch", Resource: "cronjobs"}:          batchv1.SchemeGroupVersion.WithKind("CronJob"),
+		{Group: "batch", Resource: "jobs"}:              batchv1.SchemeGroupVersion.WithKind("Job"),
+		{Group: "policy", Resource: "poddisruptionbudgets"}: {
+			Group: "policy", Version: "v1", Kind: "PodDisruptionBudget",
+		},
+		{Group: "networking.k8s.io", Resource: "ingresses"}: {
+			Group: "networking.k8s.io", Version: "v1", Kind: "Ingress",
+		},
+		{Group: "networking.k8s.io", Resource: "networkpolicies"}: {
+			Group: "networking.k8s.io", Version: "v1", Kind: "NetworkPolicy",
+		},
+		{Group: "gateway.networking.k8s.io", Resource: "gateways"}: {
+			Group: "gateway.networking.k8s.io", Version: "v1", Kind: "Gateway",
+		},
+		{Group: "gateway.networking.k8s.io", Resource: "httproutes"}: {
+			Group: "gateway.networking.k8s.io", Version: "v1", Kind: "HTTPRoute",
+		},
+		{Group: "rbac.authorization.k8s.io", Resource: "roles"}:        rbacv1.SchemeGroupVersion.WithKind("Role"),
+		{Group: "rbac.authorization.k8s.io", Resource: "rolebindings"}: rbacv1.SchemeGroupVersion.WithKind("RoleBinding"),
+		{Group: "coordination.k8s.io", Resource: "leases"}: {
+			Group: "coordination.k8s.io", Version: "v1", Kind: "Lease",
+		},
+		{Group: "events.k8s.io", Resource: "events"}: {
+			Group: "events.k8s.io", Version: "v1", Kind: "Event",
+		},
+		{Group: v1.SchemeGroupVersion.Group, Resource: "builds"}:               v1.SchemeGroupVersion.WithKind("Build"),
+		{Group: v1.SchemeGroupVersion.Group, Resource: "camelcatalogs"}:        v1.SchemeGroupVersion.WithKind("CamelCatalog"),
+		{Group: v1.SchemeGroupVersion.Group, Resource: "integrationkits"}:      v1.SchemeGroupVersion.WithKind("IntegrationKit"),
+		{Group: v1.SchemeGroupVersion.Group, Resource: "integrationplatforms"}: v1.SchemeGroupVersion.WithKind("IntegrationPlatform"),
+		{Group: v1.SchemeGroupVersion.Group, Resource: "integrationprofiles"}:  v1.SchemeGroupVersion.WithKind("IntegrationProfile"),
+		{Group: v1.SchemeGroupVersion.Group, Resource: "integrations"}:         v1.SchemeGroupVersion.WithKind("Integration"),
+		{Group: v1.SchemeGroupVersion.Group, Resource: "pipes"}:                v1.SchemeGroupVersion.WithKind("Pipe"),
+		{Group: v1.SchemeGroupVersion.Group, Resource: "kamelets"}:             v1.SchemeGroupVersion.WithKind("Kamelet"),
+		{Group: "serving.knative.dev", Resource: "services"}: {
+			Group: "serving.knative.dev", Version: "v1", Kind: "Service",
+		},
+		{Group: "serving.knative.dev", Resource: "routes"}: {
+			Group: "serving.knative.dev", Version: "v1", Kind: "Route",
+		},
+		{Group: "eventing.knative.dev", Resource: "triggers"}: {
+			Group: "eventing.knative.dev", Version: "v1", Kind: "Trigger",
+		},
+		{Group: "eventing.knative.dev", Resource: "brokers"}: {
+			Group: "eventing.knative.dev", Version: "v1", Kind: "Broker",
+		},
+		{Group: "messaging.knative.dev", Resource: "subscriptions"}: {
+			Group: "messaging.knative.dev", Version: "v1", Kind: "Subscription",
+		},
+		{Group: "messaging.knative.dev", Resource: "channels"}: {
+			Group: "messaging.knative.dev", Version: "v1", Kind: "Channel",
+		},
+		{Group: "messaging.knative.dev", Resource: "inmemorychannels"}: {
+			Group: "messaging.knative.dev", Version: "v1", Kind: "InMemoryChannel",
+		},
+		{Group: "sources.knative.dev", Resource: "sinkbindings"}: {
+			Group: "sources.knative.dev", Version: "v1", Kind: "SinkBinding",
+		},
+		{Group: "keda.sh", Resource: "scaledobjects"}: {
+			Group: "keda.sh", Version: "v1alpha1", Kind: "ScaledObject",
+		},
+		{Group: "keda.sh", Resource: "triggerauthentications"}: {
+			Group: "keda.sh", Version: "v1alpha1", Kind: "TriggerAuthentication",
+		},
+		{Group: "monitoring.coreos.com", Resource: "podmonitors"}: {
+			Group: "monitoring.coreos.com", Version: "v1", Kind: "PodMonitor",
+		},
+		{Group: "build.openshift.io", Resource: "buildconfigs"}: {
+			Group: "build.openshift.io", Version: "v1", Kind: "BuildConfig",
+		},
+		{Group: "build.openshift.io", Resource: "builds"}: {
+			Group: "build.openshift.io", Version: "v1", Kind: "Build",
+		},
+		{Group: "image.openshift.io", Resource: "imagestreams"}: {
+			Group: "image.openshift.io", Version: "v1", Kind: "ImageStream",
+		},
+		{Group: "image.openshift.io", Resource: "imagestreamtags"}: {
+			Group: "image.openshift.io", Version: "v1", Kind: "ImageStreamTag",
+		},
+		{Group: "route.openshift.io", Resource: "routes"}: {
+			Group: "route.openshift.io", Version: "v1", Kind: "Route",
+		},
+	}
+
+	deletableTypesOnce   sync.Once
+	cachedDeletableTypes map[schema.GroupVersionKind]struct{}
+	errCachedDeletable   error
 )
 
 const (
@@ -152,37 +250,9 @@ func (t *gcTrait) Apply(e *Environment) error {
 }
 
 func (t *gcTrait) garbageCollectResources(e *Environment) error {
-	deletableGVKs, err := t.getDeletableTypes(e)
+	deletableGVKs, err := t.getDeletableTypes()
 	if err != nil {
-		return fmt.Errorf("cannot discover GVK types: %w", err)
-	}
-
-	profile := e.DetermineProfile()
-	deletableTypesByProfile := map[schema.GroupVersionKind]struct{}{}
-
-	if profile == v1.TraitProfileKnative {
-		if ok, _ := knative.IsServingInstalled(e.Client); ok {
-			deletableTypesByProfile[schema.GroupVersionKind{
-				Kind:    "Service",
-				Group:   "serving.knative.dev",
-				Version: "v1",
-			}] = struct{}{}
-		}
-
-		if ok, _ := knative.IsEventingInstalled(e.Client); ok {
-			deletableTypesByProfile[schema.GroupVersionKind{
-				Kind:    "Trigger",
-				Group:   "eventing.knative.dev",
-				Version: "v1",
-			}] = struct{}{}
-		}
-	}
-
-	// copy profile related deletable types if not already present
-	for key, value := range deletableTypesByProfile {
-		if _, found := deletableGVKs[key]; !found {
-			deletableGVKs[key] = value
-		}
+		return fmt.Errorf("cannot determine deletable types: %w", err)
 	}
 
 	integration, _ := labels.NewRequirement(v1.IntegrationLabel, selection.Equals, []string{e.Integration.Name})
@@ -217,11 +287,17 @@ func (t *gcTrait) deleteEachOf(ctx context.Context, deletableGVKs map[schema.Gro
 			ctrl.MatchingLabelsSelector{Selector: selector},
 		}
 		if err := t.Client.List(ctx, &resources, options...); err != nil {
-			if !k8serrors.IsNotFound(err) {
-				return fmt.Errorf("cannot list child resources: %w", err)
+			// The type may not exist in the cluster at all, for example when
+			// the CRD of an optional component (such as Knative or KEDA) is
+			// not installed: skip it instead of failing the garbage
+			// collection of the remaining types.
+			if k8serrors.IsNotFound(err) || meta.IsNoMatchError(err) {
+				t.L.ForIntegration(e.Integration).Debugf("skipping deletable type %s: %s", GVK.String(), err.Error())
+
+				continue
 			}
 
-			continue
+			return fmt.Errorf("cannot list child resources: %w", err)
 		}
 
 		for _, resource := range resources.Items {
@@ -255,119 +331,106 @@ func canBeDeleted(it *v1.Integration, u unstructured.Unstructured) bool {
 	return false
 }
 
-// deletableTypesFromDiscovery builds the in-memory map of deletable types by
-// intersecting the cluster API resources with the rules granted to the operator
-// service account. It is a pure function over its inputs, so the mapping from
-// discovery and RBAC rules to deletable types can be tested without a cluster.
+// deletableTypesFromRules builds the in-memory map of deletable types from the
+// rules granted to the operator service account. It is a pure function over its
+// inputs, so the mapping from RBAC rules to deletable types can be tested
+// without a cluster.
 //
-// The discovery lists are expected to already be filtered to resources that
-// support the "delete" verb, as getDeletableTypes does with discovery.FilteredBy.
 // A resource is deletable when some rule allows the "delete" verb (or "*") for
-// its API group (or "*") and its resource name (or "*"). An empty resource group
-// falls back to the group of the containing resource list, which is how core
-// resources (group "") are represented.
-func deletableTypesFromDiscovery(
-	apiResourceLists []*metav1.APIResourceList,
-	rules []authorization.ResourceRule,
-) (map[schema.GroupVersionKind]struct{}, error) {
+// its API group (or "*") and its resource name (or "*"). Only resources listed
+// in the deletableResourceTypes mapping are considered: role rules carry no
+// version or kind information, and subresources cannot be deleted as a whole.
+func deletableTypesFromRules(rules []rbacv1.PolicyRule) map[schema.GroupVersionKind]struct{} {
 	GVKs := make(map[schema.GroupVersionKind]struct{})
 
-	for _, APIResourceList := range apiResourceLists {
-		for _, resource := range APIResourceList.APIResources {
-			resourceGroup := resource.Group
-			if resourceGroup == "" {
-				// Empty implies the group of the containing resource list should be used
-				gv, err := schema.ParseGroupVersion(APIResourceList.GroupVersion)
-				if err != nil {
-					return nil, err
-				}
-				resourceGroup = gv.Group
+	for groupResource, GVK := range deletableResourceTypes {
+		for _, rule := range rules {
+			if !slices.Contains(rule.Verbs, "delete") && !slices.Contains(rule.Verbs, "*") {
+				continue
 			}
-		rule:
-			for _, rule := range rules {
-				if !util.StringSliceContainsAnyOf(rule.Verbs, "delete", "*") {
-					continue
-				}
-				for _, ruleGroup := range rule.APIGroups {
-					for _, ruleResource := range rule.Resources {
-						if (resourceGroup == ruleGroup || ruleGroup == "*") && (resource.Name == ruleResource || ruleResource == "*") {
-							GVK := schema.FromAPIVersionAndKind(APIResourceList.GroupVersion, resource.Kind)
-							GVKs[GVK] = struct{}{}
+			if !slices.Contains(rule.APIGroups, groupResource.Group) && !slices.Contains(rule.APIGroups, "*") {
+				continue
+			}
+			if !slices.Contains(rule.Resources, groupResource.Resource) && !slices.Contains(rule.Resources, "*") {
+				continue
+			}
+			GVKs[GVK] = struct{}{}
 
-							break rule
-						}
-					}
-				}
-			}
+			break
 		}
 	}
 
-	return GVKs, nil
+	return GVKs
 }
 
-// getDeletableTypes returns the list of deletable types resources, inspecting the rules for which the operator SA is allowed in the
-// Integration namespace.
-func (t *gcTrait) getDeletableTypes(e *Environment) (map[schema.GroupVersionKind]struct{}, error) {
-	lock.Lock()
-	defer lock.Unlock()
-
-	// Return a fresh map even when returning cached collectables
-	GVKs := make(map[schema.GroupVersionKind]struct{})
-
-	// Rate limit to avoid Discovery and SelfSubjectRulesReview requests at every reconciliation.
-	if !rateLimiter.Allow() {
-		// Return the cached set of garbage collectable GVKs.
-		maps.Copy(GVKs, collectableGVKs)
-
-		return GVKs, nil
-	}
-
-	// We rely on the discovery API to retrieve all the resources GVK,
-	// that results in an unbounded set that can impact garbage collection latency when scaling up.
-	resources, err := t.Client.Discovery().ServerPreferredNamespacedResources()
-	// Swallow group discovery errors, e.g., Knative serving exposes
-	// an aggregated API for custom.metrics.k8s.io that requires special
-	// authentication scheme while discovering preferred resources.
-	if err != nil && !discovery.IsGroupDiscoveryFailedError(err) {
-		return nil, err
-	}
-
-	// We only take types that support the "delete" verb,
-	// to prevents from performing queries that we know are going to return "MethodNotAllowed".
-	APIResourceLists := discovery.FilteredBy(discovery.SupportsAllVerbs{Verbs: []string{"delete"}}, resources)
-
-	// Retrieve the permissions granted to the operator service account.
-	// We assume the operator has only to garbage collect the resources it has created.
-	ssrr := &authorization.SelfSubjectRulesReview{
-		Spec: authorization.SelfSubjectRulesReviewSpec{
-			Namespace: e.Integration.Namespace,
-		},
-	}
-	ssrr, err = e.Client.AuthorizationV1().SelfSubjectRulesReviews().Create(e.Ctx, ssrr, metav1.CreateOptions{})
+// operatorRoleRules returns the rules of all the operator roles for namespaced
+// installations, as shipped in the embedded resource files. Those roles are
+// the static source of truth for the types the operator is allowed to delete:
+// no discovery or SelfSubjectRulesReview query against the cluster is needed.
+func operatorRoleRules() ([]rbacv1.PolicyRule, error) {
+	files, err := resources.WithPrefix("config/rbac/namespaced/operator-role")
 	if err != nil {
 		return nil, err
 	}
 
-	// Build the in-memory map of deletable types from discovery and the
-	// operator service account rules. Discovery is kept as the source here:
-	// replacing it with a fixed list would silently drop types created by
-	// other traits (for example Knative or KEDA resources), which the
-	// discovery result still covers.
-	GVKs, err = deletableTypesFromDiscovery(APIResourceLists, ssrr.Status.ResourceRules)
+	rules := make([]rbacv1.PolicyRule, 0)
+	for _, file := range files {
+		// Role bindings grant the roles but carry no rule themselves.
+		if strings.Contains(file, "binding") {
+			continue
+		}
+		content, err := resources.Resource(file)
+		if err != nil {
+			return nil, err
+		}
+		role := rbacv1.Role{}
+		if err := yaml.Unmarshal(content, &role); err != nil {
+			return nil, fmt.Errorf("cannot parse operator role %s: %w", file, err)
+		}
+		rules = append(rules, role.Rules...)
+	}
+
+	return rules, nil
+}
+
+// loadDeletableTypes computes the set of deletable types from the operator
+// roles shipped with the operator. The set only depends on the roles bundled
+// in the binary, so it is computed once and cached for the operator lifetime.
+func loadDeletableTypes() (map[schema.GroupVersionKind]struct{}, error) {
+	deletableTypesOnce.Do(func() {
+		var rules []rbacv1.PolicyRule
+		rules, errCachedDeletable = operatorRoleRules()
+		if errCachedDeletable != nil {
+			return
+		}
+		cachedDeletableTypes = deletableTypesFromRules(rules)
+	})
+
+	return cachedDeletableTypes, errCachedDeletable
+}
+
+// getDeletableTypes returns the set of deletable types for garbage collection:
+// the types the operator is allowed to delete according to the operator roles
+// shipped with the operator, plus the default minimal set of types the
+// operator always creates for an Integration.
+func (t *gcTrait) getDeletableTypes() (map[schema.GroupVersionKind]struct{}, error) {
+	staticTypes, err := loadDeletableTypes()
 	if err != nil {
 		return nil, err
 	}
 
-	if len(GVKs) == 0 {
-		// Auto discovery of deletable types has no results (probably an error)
-		// Make sure to at least use a minimal set of deletable types for garbage collection
-		t.L.ForIntegration(e.Integration).Debugf("Auto discovery of deletable types returned no results. " +
+	if len(staticTypes) == 0 {
+		// The static computation returned no results (probably an error).
+		// Make sure to at least use a minimal set of deletable types for
+		// garbage collection.
+		log.Debugf("Static computation of deletable types returned no results. " +
 			"Using default minimal set of deletable types for garbage collection")
-		maps.Copy(GVKs, defaultDeletableTypes)
 	}
 
-	collectableGVKs = make(map[schema.GroupVersionKind]struct{})
-	maps.Copy(collectableGVKs, GVKs)
+	// Return a fresh map, as it is local to the garbage collection run.
+	GVKs := make(map[schema.GroupVersionKind]struct{}, len(staticTypes)+len(defaultDeletableTypes))
+	maps.Copy(GVKs, staticTypes)
+	maps.Copy(GVKs, defaultDeletableTypes)
 
 	for gvk := range GVKs {
 		log.Debugf("Found deletable type: %s", gvk.String())

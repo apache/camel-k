@@ -30,8 +30,9 @@ import (
 	servingv1 "github.com/apache/camel-k/v2/pkg/apis/duck/knative/serving/v1"
 	"github.com/apache/camel-k/v2/pkg/internal"
 	appsv1 "k8s.io/api/apps/v1"
-	authorization "k8s.io/api/authorization/v1"
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -100,17 +101,26 @@ func TestApplyGCTraitDuringInitializationPhaseSkipPostActions(t *testing.T) {
 	assert.Len(t, environment.PostActions, 0)
 }
 
-func TestGetDefaultMinimalGarbageCollectableTypes(t *testing.T) {
-	gcTrait, environment := createNominalGCTest()
-	environment.Integration.Generation = 2
+func TestGetDeletableTypes(t *testing.T) {
+	gcTrait, _ := createNominalGCTest()
 
-	gcTrait.Client, _ = internal.NewFakeClient()
-	environment.Client = gcTrait.Client
-
-	deletableTypes, err := gcTrait.getDeletableTypes(environment)
+	deletableTypes, err := gcTrait.getDeletableTypes()
 
 	require.NoError(t, err)
-	assert.Len(t, deletableTypes, 6)
+	// The default minimal set is always included.
+	for gvk := range defaultDeletableTypes {
+		assert.Contains(t, deletableTypes, gvk)
+	}
+	// Types the operator is allowed to delete according to the operator roles
+	// shipped with the operator are included, including the ones created by
+	// other traits.
+	assert.Contains(t, deletableTypes, schema.GroupVersionKind{Group: "serving.knative.dev", Version: "v1", Kind: "Service"})
+	assert.Contains(t, deletableTypes, schema.GroupVersionKind{Group: "eventing.knative.dev", Version: "v1", Kind: "Trigger"})
+	assert.Contains(t, deletableTypes, schema.GroupVersionKind{Group: "keda.sh", Version: "v1alpha1", Kind: "ScaledObject"})
+	assert.Contains(t, deletableTypes, schema.GroupVersionKind{Group: "keda.sh", Version: "v1alpha1", Kind: "TriggerAuthentication"})
+	assert.Contains(t, deletableTypes, schema.GroupVersionKind{Group: "monitoring.coreos.com", Version: "v1", Kind: "PodMonitor"})
+	// A type the operator is not allowed to delete is not included.
+	assert.NotContains(t, deletableTypes, schema.GroupVersionKind{Group: "camel.apache.org", Version: "v1", Kind: "CamelCatalog"})
 }
 
 func TestGarbageCollectResources(t *testing.T) {
@@ -129,6 +139,41 @@ func TestGarbageCollectResources(t *testing.T) {
 		Delete: func(ctx context.Context, client ctrl.WithWatch, obj ctrl.Object, opts ...ctrl.DeleteOption) error {
 			assert.Equal(t, environment.Integration.Name, obj.GetName())
 			assert.Equal(t, "Deployment", obj.GetObjectKind().GroupVersionKind().Kind)
+			resourceDeleted = true
+			return nil
+		},
+	})
+	err := gcTrait.garbageCollectResources(environment)
+
+	require.NoError(t, err)
+	assert.True(t, resourceDeleted)
+}
+
+func TestGarbageCollectSkipsTypesNotInstalledInCluster(t *testing.T) {
+	gcTrait, environment := createNominalGCTest()
+	environment.Integration.Generation = 2
+
+	deployment := getIntegrationDeployment(environment.Integration)
+	deployment.Labels[v1.IntegrationGenerationLabel] = "1"
+	gcTrait.Client, _ = internal.NewFakeClient(deployment)
+
+	environment.Client = gcTrait.Client
+
+	resourceDeleted := false
+	fakeClient := gcTrait.Client.(*internal.FakeClient) //nolint
+	fakeClient.Intercept(&interceptor.Funcs{
+		List: func(ctx context.Context, client ctrl.WithWatch, list ctrl.ObjectList, opts ...ctrl.ListOption) error {
+			// Simulate the types whose API is not installed in the cluster:
+			// only the Deployment type can be listed successfully.
+			if u, ok := list.(*unstructured.UnstructuredList); ok && u.GetAPIVersion() != "apps/v1" {
+				return &meta.NoKindMatchError{
+					GroupKind:        schema.GroupKind{Group: u.GroupVersionKind().Group, Kind: u.GetKind()},
+					SearchedVersions: []string{u.GroupVersionKind().Version},
+				}
+			}
+			return client.List(ctx, list, opts...)
+		},
+		Delete: func(ctx context.Context, client ctrl.WithWatch, obj ctrl.Object, opts ...ctrl.DeleteOption) error {
 			resourceDeleted = true
 			return nil
 		},
@@ -422,30 +467,14 @@ func TestGarbageCollectDryBuildSkipsGC(t *testing.T) {
 	assert.False(t, resourceDeleted)
 }
 
-func TestDeletableTypesFromDiscovery(t *testing.T) {
-	deploymentResource := metav1.APIResourceList{
-		GroupVersion: "apps/v1",
-		APIResources: []metav1.APIResource{
-			{Name: "deployments", Namespaced: true, Kind: "Deployment", Verbs: []string{"get", "delete"}},
-			{Name: "statefulsets", Namespaced: true, Kind: "StatefulSet", Verbs: []string{"get", "list"}},
-		},
-	}
-	coreResource := metav1.APIResourceList{
-		GroupVersion: "v1",
-		APIResources: []metav1.APIResource{
-			{Name: "configmaps", Namespaced: true, Kind: "ConfigMap", Verbs: []string{"get", "delete"}},
-		},
-	}
-
+func TestDeletableTypesFromRules(t *testing.T) {
 	t.Run("exact match keeps only resources with delete verb and matching rule", func(t *testing.T) {
-		types, err := deletableTypesFromDiscovery(
-			[]*metav1.APIResourceList{&deploymentResource, &coreResource},
-			[]authorization.ResourceRule{
-				{APIGroups: []string{"apps"}, Resources: []string{"deployments"}, Verbs: []string{"delete"}},
+		types := deletableTypesFromRules(
+			[]rbacv1.PolicyRule{
+				{APIGroups: []string{"apps"}, Resources: []string{"deployments"}, Verbs: []string{"create", "delete"}},
 				{APIGroups: []string{""}, Resources: []string{"configmaps"}, Verbs: []string{"delete"}},
 			},
 		)
-		require.NoError(t, err)
 		assert.Equal(t,
 			map[schema.GroupVersionKind]struct{}{
 				{Group: "apps", Version: "v1", Kind: "Deployment"}: {},
@@ -455,59 +484,51 @@ func TestDeletableTypesFromDiscovery(t *testing.T) {
 		)
 	})
 
-	t.Run("wildcard rule matches everything deletable", func(t *testing.T) {
-		types, err := deletableTypesFromDiscovery(
-			[]*metav1.APIResourceList{&deploymentResource},
-			[]authorization.ResourceRule{
+	t.Run("wildcard rule matches every mapped resource", func(t *testing.T) {
+		types := deletableTypesFromRules(
+			[]rbacv1.PolicyRule{
 				{APIGroups: []string{"*"}, Resources: []string{"*"}, Verbs: []string{"*"}},
 			},
 		)
-		require.NoError(t, err)
-		assert.Equal(t,
-			map[schema.GroupVersionKind]struct{}{
-				{Group: "apps", Version: "v1", Kind: "Deployment"}:  {},
-				{Group: "apps", Version: "v1", Kind: "StatefulSet"}: {},
-			},
-			types,
-		)
+		assert.Len(t, types, len(deletableResourceTypes))
+		assert.Contains(t, types, schema.GroupVersionKind{Group: "apps", Version: "v1", Kind: "Deployment"})
+		assert.Contains(t, types, schema.GroupVersionKind{Group: "keda.sh", Version: "v1alpha1", Kind: "ScaledObject"})
 	})
 
 	t.Run("rule without delete verb is excluded", func(t *testing.T) {
-		types, err := deletableTypesFromDiscovery(
-			[]*metav1.APIResourceList{&deploymentResource},
-			[]authorization.ResourceRule{
+		types := deletableTypesFromRules(
+			[]rbacv1.PolicyRule{
 				{APIGroups: []string{"apps"}, Resources: []string{"deployments"}, Verbs: []string{"get", "list"}},
 			},
 		)
-		require.NoError(t, err)
 		assert.Empty(t, types)
 	})
 
 	t.Run("group or resource mismatch is excluded", func(t *testing.T) {
-		types, err := deletableTypesFromDiscovery(
-			[]*metav1.APIResourceList{&deploymentResource},
-			[]authorization.ResourceRule{
+		types := deletableTypesFromRules(
+			[]rbacv1.PolicyRule{
 				{APIGroups: []string{"apps"}, Resources: []string{"services"}, Verbs: []string{"delete"}},
 				{APIGroups: []string{"networking.k8s.io"}, Resources: []string{"deployments"}, Verbs: []string{"delete"}},
 			},
 		)
-		require.NoError(t, err)
 		assert.Empty(t, types)
 	})
 
-	t.Run("invalid GroupVersion returns an error", func(t *testing.T) {
-		bad := metav1.APIResourceList{
-			GroupVersion: "apps/v1/extra",
-			APIResources: []metav1.APIResource{
-				{Name: "deployments", Namespaced: true, Kind: "Deployment", Verbs: []string{"delete"}},
-			},
-		}
-		_, err := deletableTypesFromDiscovery(
-			[]*metav1.APIResourceList{&bad},
-			[]authorization.ResourceRule{
-				{APIGroups: []string{"*"}, Resources: []string{"*"}, Verbs: []string{"*"}},
+	t.Run("subresource rule does not match the resource itself", func(t *testing.T) {
+		types := deletableTypesFromRules(
+			[]rbacv1.PolicyRule{
+				{APIGroups: []string{""}, Resources: []string{"pods/exec"}, Verbs: []string{"delete"}},
 			},
 		)
-		require.Error(t, err)
+		assert.Empty(t, types)
+	})
+
+	t.Run("rule for a resource missing from the mapping is skipped", func(t *testing.T) {
+		types := deletableTypesFromRules(
+			[]rbacv1.PolicyRule{
+				{APIGroups: []string{"apps"}, Resources: []string{"statefulsets"}, Verbs: []string{"delete"}},
+			},
+		)
+		assert.Empty(t, types)
 	})
 }
