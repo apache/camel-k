@@ -31,12 +31,23 @@ spec:
       properties:
         - camel.component.amqp.broker-url=amqp://my-broker-hdls-svc.keda.svc:61616
         - quarkus.qpid-jms.url=amqp://my-broker-hdls-svc.keda.svc:61616
+        - quarkus.qpid-jms.username=admin
+        - quarkus.qpid-jms.password=admin
     keda:
       enabled: true
       minReplicaCount: 0
       maxReplicaCount: 1
       cooldownPeriod: 20
       pollingInterval: 10
-      autoMetadata:
-        artemis-queue:
-          brokerName: amq-broker
+      triggers:
+        - type: artemis-queue
+          metadata:
+            managementEndpoint: my-broker-hdls-svc.keda.svc:8161
+            queueName: my-queue
+            brokerAddress: my-queue
+            brokerName: amq-broker
+          secrets:
+            - name: my-broker-credentials-secret
+              mapping:
+                AMQ_USER: username
+                AMQ_PASSWORD: password

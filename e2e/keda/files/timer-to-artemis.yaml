@@ -33,3 +33,5 @@ spec:
       properties:
         - camel.component.amqp.broker-url=amqp://my-broker-hdls-svc.keda.svc:61616
         - quarkus.qpid-jms.url=amqp://my-broker-hdls-svc.keda.svc:61616
+        - quarkus.qpid-jms.username=admin
+        - quarkus.qpid-jms.password=admin
