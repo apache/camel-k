@@ -32,11 +32,6 @@ kubectl wait --for=condition=established crd/kafkas.kafka.strimzi.io --timeout=6
 kubectl wait --for=condition=established crd/kafkanodepools.kafka.strimzi.io --timeout=60s
 kubectl wait --for=condition=established crd/kafkatopics.kafka.strimzi.io --timeout=60s
 
-#### Setup Keda operator
-# it creates by default a keda namespace
-kubectl apply --server-side -f https://github.com/kedacore/keda/releases/download/v2.17.2/keda-2.17.2.yaml
-kubectl rollout status deployment keda-operator -n keda --timeout=180s
-
 #### Setup a Kafka cluster which we'll use for testing
 kubectl apply -f ./e2e/kafka/setup/kafka-ephemeral.yaml
 kubectl wait kafka/my-cluster --for=condition=Ready --timeout=300s -n kafka
