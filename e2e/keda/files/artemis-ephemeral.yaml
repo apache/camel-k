@@ -15,6 +15,15 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-broker-credentials-secret
+type: Opaque
+stringData:
+  AMQ_USER: admin
+  AMQ_PASSWORD: admin
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -33,10 +42,12 @@ spec:
         - name: artemis
           image: apache/artemis:latest-alpine
           env:
-            - name: ANONYMOUS_LOGIN
-              value: "true"
+            - name: ARTEMIS_USER
+              value: "admin"
+            - name: ARTEMIS_PASSWORD
+              value: "admin"
             - name: EXTRA_ARGS
-              value: "--http-host 0.0.0.0 --relax-jolokia --name amq-broker --queues my-queue --allow-anonymous"
+              value: "--http-host 0.0.0.0 --relax-jolokia --name amq-broker --queues my-queue"
           ports:
             - containerPort: 61616
               name: amqp
