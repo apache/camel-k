@@ -37,7 +37,7 @@ func (s *SpringRabbitMQScaler) Component() string {
 // Map takes the queue from the `queues` parameter. The URI path is the exchange name, which the
 // scaler does not use. The broker address is set on the Spring connection factory rather than in
 // the URI, so `host` has to be supplied through keda.autoMetadata or a TriggerAuthentication.
-func (s *SpringRabbitMQScaler) Map(pathValue string, params map[string]string) (string, map[string]string) {
+func (s *SpringRabbitMQScaler) Map(pathValue string, params map[string]string, _ map[string]string) (string, map[string]string) {
 	metadata := make(map[string]string)
 	// A KEDA rabbitmq trigger watches a single queue, so a list of queues is left for the user to choose.
 	if v, ok := params["queues"]; ok && v != "" && !strings.Contains(v, ",") {

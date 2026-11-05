@@ -76,7 +76,7 @@ func TestSpringRabbitMQScalerMap(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			kedaType, metadata := scaler.Map(tt.pathValue, tt.params)
+			kedaType, metadata := scaler.Map(tt.pathValue, tt.params, nil)
 			assert.Equal(t, tt.expectedType, kedaType)
 			assert.Equal(t, tt.expectedMeta, metadata)
 		})
@@ -84,7 +84,7 @@ func TestSpringRabbitMQScalerMap(t *testing.T) {
 }
 
 func TestMapToKedaTriggerSpringRabbitMQ(t *testing.T) {
-	trigger, err := keda.MapToKedaTrigger("spring-rabbitmq:orders-exchange?queues=orders&routingKey=new")
+	trigger, err := keda.MapToKedaTrigger("spring-rabbitmq:orders-exchange?queues=orders&routingKey=new", nil)
 	require.NoError(t, err)
 	require.NotNil(t, trigger)
 	assert.Equal(t, "rabbitmq", trigger.Type)
