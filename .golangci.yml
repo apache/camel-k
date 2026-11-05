@@ -21,7 +21,6 @@ run:
 linters:
   default: all
   disable:
-    - cyclop
     - depguard
     - err113
     - exhaustive
@@ -31,8 +30,6 @@ linters:
     - funlen
     - gochecknoglobals
     - gochecknoinits
-    - gocognit
-    - gocyclo
     - godox
     - ireturn
     - lll
@@ -47,11 +44,20 @@ linters:
     - wsl_v5
     - gomodguard
   settings:
+    cyclop:
+      # Current maximum in non-generated code; lower it as the outliers get refactored.
+      max-complexity: 47
+    gocognit:
+      # Current maximum: source (YAMLInspector).parseStep.
+      min-complexity: 132
     goconst:
       min-len: 4
       min-occurrences: 10
       ignore-calls: true
       numbers: false
+    gocyclo:
+      # Current maximum: source (YAMLInspector).parseStep.
+      min-complexity: 46
     lll:
       line-length: 170
     mnd:
