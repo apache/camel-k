@@ -29,7 +29,7 @@ spec:
     - name: rabbitConnectionFactory
       type: org.springframework.amqp.rabbit.connection.CachingConnectionFactory
       properties:
-        host: my-rabbitmq.keda.svc
+        host: my-rabbitmq.%%%.svc
         port: 5672
         username: admin
         password: admin
@@ -50,6 +50,6 @@ spec:
       pollingInterval: 10
       autoMetadata:
         rabbitmq:
-          host: amqp://admin:admin@my-rabbitmq.keda.svc:5672/
+          host: amqp://admin:admin@my-rabbitmq.%%%.svc:5672/
           mode: QueueLength
           value: "5"
