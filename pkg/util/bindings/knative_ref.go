@@ -42,6 +42,8 @@ func (k KnativeRefBindingProvider) ID() string {
 }
 
 // Translate --.
+//
+//nolint:gocognit
 func (k KnativeRefBindingProvider) Translate(ctx BindingContext, endpointCtx EndpointContext, e v1.Endpoint) (*Binding, error) {
 	if e.Ref == nil {
 		// works only on refs

@@ -45,19 +45,16 @@ linters:
     - gomodguard
   settings:
     cyclop:
-      # Current maximum in non-generated code; lower it as the outliers get refactored.
-      max-complexity: 47
+      max-complexity: 30
     gocognit:
-      # Current maximum: source (YAMLInspector).parseStep.
-      min-complexity: 132
+      min-complexity: 30
     goconst:
       min-len: 4
       min-occurrences: 10
       ignore-calls: true
       numbers: false
     gocyclo:
-      # Current maximum: source (YAMLInspector).parseStep.
-      min-complexity: 46
+      min-complexity: 30
     lll:
       line-length: 170
     mnd:
