@@ -304,6 +304,8 @@ func extractExistingClasspathItems(container *corev1.Container) []string {
 
 // Translate HTTP proxy environment variables, that are set by the environment trait,
 // into corresponding JVM system properties.
+//
+//nolint:gocognit
 func (t *jvmTrait) prepareHTTPProxy(container *corev1.Container) ([]string, error) {
 	var args []string
 

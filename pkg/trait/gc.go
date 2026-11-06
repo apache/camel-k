@@ -246,6 +246,8 @@ func canBeDeleted(it *v1.Integration, u unstructured.Unstructured) bool {
 
 // getDeletableTypes returns the list of deletable types resources, inspecting the rules for which the operator SA is allowed in the
 // Integration namespace.
+//
+//nolint:gocognit
 func (t *gcTrait) getDeletableTypes(e *Environment) (map[schema.GroupVersionKind]struct{}, error) {
 	lock.Lock()
 	defer lock.Unlock()

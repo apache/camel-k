@@ -62,6 +62,8 @@ func (action *monitorPodAction) CanHandle(build *v1.Build) bool {
 }
 
 // Handle handles the builds.
+//
+//nolint:gocognit
 func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v1.Build, error) {
 	pod, err := getBuilderPod(ctx, action.reader, build)
 	if err != nil {

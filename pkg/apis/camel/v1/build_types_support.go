@@ -267,6 +267,8 @@ func (bl *BuildList) HasScheduledBuildsBefore(build *Build) (bool, *Build) {
 
 // HasMatchingBuild visit all items in the list of builds and search for a scheduled build that matches the given build's dependencies.
 // It returns the first matching build found regardless it may have any one more appropriate.
+//
+//nolint:gocognit
 func (bl *BuildList) HasMatchingBuild(build *Build) (bool, *Build) {
 	required := build.BuilderDependencies()
 	if len(required) == 0 {

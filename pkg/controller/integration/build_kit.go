@@ -43,6 +43,7 @@ func (action *buildKitAction) CanHandle(integration *v1.Integration) bool {
 	return integration.Status.Phase == v1.IntegrationPhaseBuildingKit
 }
 
+//nolint:gocognit
 func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
 	// TODO: we may need to add a timeout strategy, i.e give up after some time in case of an unrecoverable error.
 	secrets, configmaps := getIntegrationSecretAndConfigmapResourceVersions(ctx, action.client, integration)
