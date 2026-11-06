@@ -37,12 +37,15 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/selection"
+	clientscheme "k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/yaml"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/apache/camel-k/v2/pkg/apis"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/resources"
@@ -81,105 +84,6 @@ var (
 			Group:   batchv1.SchemeGroupVersion.Group,
 			Version: batchv1.SchemeGroupVersion.Version,
 		}: {},
-	}
-
-	// deletableResourceTypes maps an API group and resource name, as they appear
-	// in the operator role rules, to the corresponding type. Role rules carry
-	// neither version nor kind information, so the mapping has to be provided
-	// explicitly for every type the operator may be allowed to delete. Rules
-	// referencing a resource that is not in this mapping (including any
-	// subresource, such as "pods/exec") are skipped when the set of deletable
-	// types is computed.
-	deletableResourceTypes = map[schema.GroupResource]schema.GroupVersionKind{
-		{Group: "", Resource: "configmaps"}:             corev1.SchemeGroupVersion.WithKind("ConfigMap"),
-		{Group: "", Resource: "secrets"}:                corev1.SchemeGroupVersion.WithKind("Secret"),
-		{Group: "", Resource: "pods"}:                   corev1.SchemeGroupVersion.WithKind("Pod"),
-		{Group: "", Resource: "services"}:               corev1.SchemeGroupVersion.WithKind("Service"),
-		{Group: "", Resource: "serviceaccounts"}:        corev1.SchemeGroupVersion.WithKind("ServiceAccount"),
-		{Group: "", Resource: "persistentvolumeclaims"}: corev1.SchemeGroupVersion.WithKind("PersistentVolumeClaim"),
-		{Group: "", Resource: "events"}:                 corev1.SchemeGroupVersion.WithKind("Event"),
-		{Group: "apps", Resource: "deployments"}:        appsv1.SchemeGroupVersion.WithKind("Deployment"),
-		{Group: "batch", Resource: "cronjobs"}:          batchv1.SchemeGroupVersion.WithKind("CronJob"),
-		{Group: "batch", Resource: "jobs"}:              batchv1.SchemeGroupVersion.WithKind("Job"),
-		{Group: "policy", Resource: "poddisruptionbudgets"}: {
-			Group: "policy", Version: "v1", Kind: "PodDisruptionBudget",
-		},
-		{Group: "networking.k8s.io", Resource: "ingresses"}: {
-			Group: "networking.k8s.io", Version: "v1", Kind: "Ingress",
-		},
-		{Group: "networking.k8s.io", Resource: "networkpolicies"}: {
-			Group: "networking.k8s.io", Version: "v1", Kind: "NetworkPolicy",
-		},
-		{Group: "gateway.networking.k8s.io", Resource: "gateways"}: {
-			Group: "gateway.networking.k8s.io", Version: "v1", Kind: "Gateway",
-		},
-		{Group: "gateway.networking.k8s.io", Resource: "httproutes"}: {
-			Group: "gateway.networking.k8s.io", Version: "v1", Kind: "HTTPRoute",
-		},
-		{Group: "rbac.authorization.k8s.io", Resource: "roles"}:        rbacv1.SchemeGroupVersion.WithKind("Role"),
-		{Group: "rbac.authorization.k8s.io", Resource: "rolebindings"}: rbacv1.SchemeGroupVersion.WithKind("RoleBinding"),
-		{Group: "coordination.k8s.io", Resource: "leases"}: {
-			Group: "coordination.k8s.io", Version: "v1", Kind: "Lease",
-		},
-		{Group: "events.k8s.io", Resource: "events"}: {
-			Group: "events.k8s.io", Version: "v1", Kind: "Event",
-		},
-		{Group: v1.SchemeGroupVersion.Group, Resource: "builds"}:               v1.SchemeGroupVersion.WithKind("Build"),
-		{Group: v1.SchemeGroupVersion.Group, Resource: "camelcatalogs"}:        v1.SchemeGroupVersion.WithKind("CamelCatalog"),
-		{Group: v1.SchemeGroupVersion.Group, Resource: "integrationkits"}:      v1.SchemeGroupVersion.WithKind("IntegrationKit"),
-		{Group: v1.SchemeGroupVersion.Group, Resource: "integrationplatforms"}: v1.SchemeGroupVersion.WithKind("IntegrationPlatform"),
-		{Group: v1.SchemeGroupVersion.Group, Resource: "integrationprofiles"}:  v1.SchemeGroupVersion.WithKind("IntegrationProfile"),
-		{Group: v1.SchemeGroupVersion.Group, Resource: "integrations"}:         v1.SchemeGroupVersion.WithKind("Integration"),
-		{Group: v1.SchemeGroupVersion.Group, Resource: "pipes"}:                v1.SchemeGroupVersion.WithKind("Pipe"),
-		{Group: v1.SchemeGroupVersion.Group, Resource: "kamelets"}:             v1.SchemeGroupVersion.WithKind("Kamelet"),
-		{Group: "serving.knative.dev", Resource: "services"}: {
-			Group: "serving.knative.dev", Version: "v1", Kind: "Service",
-		},
-		{Group: "serving.knative.dev", Resource: "routes"}: {
-			Group: "serving.knative.dev", Version: "v1", Kind: "Route",
-		},
-		{Group: "eventing.knative.dev", Resource: "triggers"}: {
-			Group: "eventing.knative.dev", Version: "v1", Kind: "Trigger",
-		},
-		{Group: "eventing.knative.dev", Resource: "brokers"}: {
-			Group: "eventing.knative.dev", Version: "v1", Kind: "Broker",
-		},
-		{Group: "messaging.knative.dev", Resource: "subscriptions"}: {
-			Group: "messaging.knative.dev", Version: "v1", Kind: "Subscription",
-		},
-		{Group: "messaging.knative.dev", Resource: "channels"}: {
-			Group: "messaging.knative.dev", Version: "v1", Kind: "Channel",
-		},
-		{Group: "messaging.knative.dev", Resource: "inmemorychannels"}: {
-			Group: "messaging.knative.dev", Version: "v1", Kind: "InMemoryChannel",
-		},
-		{Group: "sources.knative.dev", Resource: "sinkbindings"}: {
-			Group: "sources.knative.dev", Version: "v1", Kind: "SinkBinding",
-		},
-		{Group: "keda.sh", Resource: "scaledobjects"}: {
-			Group: "keda.sh", Version: "v1alpha1", Kind: "ScaledObject",
-		},
-		{Group: "keda.sh", Resource: "triggerauthentications"}: {
-			Group: "keda.sh", Version: "v1alpha1", Kind: "TriggerAuthentication",
-		},
-		{Group: "monitoring.coreos.com", Resource: "podmonitors"}: {
-			Group: "monitoring.coreos.com", Version: "v1", Kind: "PodMonitor",
-		},
-		{Group: "build.openshift.io", Resource: "buildconfigs"}: {
-			Group: "build.openshift.io", Version: "v1", Kind: "BuildConfig",
-		},
-		{Group: "build.openshift.io", Resource: "builds"}: {
-			Group: "build.openshift.io", Version: "v1", Kind: "Build",
-		},
-		{Group: "image.openshift.io", Resource: "imagestreams"}: {
-			Group: "image.openshift.io", Version: "v1", Kind: "ImageStream",
-		},
-		{Group: "image.openshift.io", Resource: "imagestreamtags"}: {
-			Group: "image.openshift.io", Version: "v1", Kind: "ImageStreamTag",
-		},
-		{Group: "route.openshift.io", Resource: "routes"}: {
-			Group: "route.openshift.io", Version: "v1", Kind: "Route",
-		},
 	}
 
 	deletableTypesOnce   sync.Once
@@ -337,13 +241,13 @@ func canBeDeleted(it *v1.Integration, u unstructured.Unstructured) bool {
 // without a cluster.
 //
 // A resource is deletable when some rule allows the "delete" verb (or "*") for
-// its API group (or "*") and its resource name (or "*"). Only resources listed
-// in the deletableResourceTypes mapping are considered: role rules carry no
-// version or kind information, and subresources cannot be deleted as a whole.
-func deletableTypesFromRules(rules []rbacv1.PolicyRule) map[schema.GroupVersionKind]struct{} {
+// its API group (or "*") and its resource name (or "*"). Only resources present
+// in resourceTypes are considered: role rules carry no version or kind
+// information, and subresources cannot be deleted as a whole.
+func deletableTypesFromRules(rules []rbacv1.PolicyRule, resourceTypes map[schema.GroupResource]schema.GroupVersionKind) map[schema.GroupVersionKind]struct{} {
 	GVKs := make(map[schema.GroupVersionKind]struct{})
 
-	for groupResource, GVK := range deletableResourceTypes {
+	for groupResource, GVK := range resourceTypes {
 		for _, rule := range rules {
 			if !slices.Contains(rule.Verbs, "delete") && !slices.Contains(rule.Verbs, "*") {
 				continue
@@ -361,6 +265,133 @@ func deletableTypesFromRules(rules []rbacv1.PolicyRule) map[schema.GroupVersionK
 	}
 
 	return GVKs
+}
+
+// schemeResourceTypes indexes the types registered in a scheme by the API
+// group and resource name they are served under, as those names appear in
+// role rules. List types and the internal option types registered for every
+// group version are skipped, as they cannot be deleted. When a scheme
+// registers several versions of the same resource, the most stable and
+// recent one wins, so the result does not depend on registration order.
+func schemeResourceTypes(s *runtime.Scheme) map[schema.GroupResource]schema.GroupVersionKind {
+	known := s.AllKnownTypes()
+	GVKs := make([]schema.GroupVersionKind, 0, len(known))
+	for GVK := range known {
+		if strings.HasSuffix(GVK.Kind, "List") || isInternalKind(GVK.Kind) {
+			continue
+		}
+		GVKs = append(GVKs, GVK)
+	}
+	// Sort for a deterministic result when two versions rank equally.
+	slices.SortFunc(GVKs, func(a, b schema.GroupVersionKind) int {
+		return strings.Compare(a.String(), b.String())
+	})
+
+	resourceTypes := make(map[schema.GroupResource]schema.GroupVersionKind, len(GVKs))
+	for _, GVK := range GVKs {
+		groupResource := schema.GroupResource{Group: GVK.Group, Resource: kindToResource(GVK.Kind)}
+		if current, ok := resourceTypes[groupResource]; !ok || preferredVersion(GVK, current) {
+			resourceTypes[groupResource] = GVK
+		}
+	}
+
+	return resourceTypes
+}
+
+// isInternalKind reports whether a kind is one of the internal types that
+// metav1.AddToGroupVersion registers for every group version in a scheme.
+// They are API machinery, not resources an operator can delete.
+func isInternalKind(kind string) bool {
+	switch kind {
+	case "CreateOptions", "DeleteOptions", "GetOptions", "ListOptions",
+		"PatchOptions", "UpdateOptions", "WatchEvent", "Status":
+		return true
+	}
+
+	return false
+}
+
+// kindToResource converts a kind to the resource name it is served under,
+// applying the usual Kubernetes pluralization rules: "Gateway" becomes
+// "gateways", "NetworkPolicy" becomes "networkpolicies" and "Ingress"
+// becomes "ingresses". "Endpoints" is the one irregular case among the
+// registered types: its resource is the kind itself, unmodified.
+func kindToResource(kind string) string {
+	if kind == "Endpoints" {
+		return "endpoints"
+	}
+	lower := strings.ToLower(kind)
+	switch {
+	case strings.HasSuffix(lower, "s"), strings.HasSuffix(lower, "x"),
+		strings.HasSuffix(lower, "z"), strings.HasSuffix(lower, "ch"),
+		strings.HasSuffix(lower, "sh"):
+		return lower + "es"
+	case strings.HasSuffix(lower, "y"):
+		if len(lower) > 1 && strings.ContainsRune("aeiou", rune(lower[len(lower)-2])) {
+			return lower + "s"
+		}
+
+		return lower[:len(lower)-1] + "ies"
+	default:
+		return lower + "s"
+	}
+}
+
+// preferredVersion reports whether candidate should replace current as the
+// version of a type: a stable version beats a beta, which beats an alpha,
+// and within the same stability level the higher version number wins.
+func preferredVersion(candidate, current schema.GroupVersionKind) bool {
+	candidateStability, candidateNumber := versionRank(candidate.Version)
+	currentStability, currentNumber := versionRank(current.Version)
+	if candidateStability != currentStability {
+		return candidateStability > currentStability
+	}
+
+	return candidateNumber > currentNumber
+}
+
+// versionRank ranks an API version by stability (stable, then beta, then
+// alpha) and by its numeric part, e.g. "v2beta1" ranks below "v1".
+func versionRank(version string) (int, int) {
+	stability := 2
+	if strings.Contains(version, "alpha") {
+		stability = 0
+	} else if strings.Contains(version, "beta") {
+		stability = 1
+	}
+	// Only the leading number (the version proper) is compared; the
+	// alpha/beta suffix number does not outweigh a stability change.
+	number := 0
+	leading := strings.TrimPrefix(version, "v")
+	end := 0
+	for end < len(leading) && leading[end] >= '0' && leading[end] <= '9' {
+		end++
+	}
+	if end > 0 {
+		number, _ = strconv.Atoi(leading[:end])
+	}
+
+	return stability, number
+}
+
+// operatorResourceTypes resolves the group and resource names used in role
+// rules to the types the operator manages. The versions and kinds come from
+// the operator's own scheme -- the Kubernetes built-in types plus every type
+// registered through apis.AddToScheme, including the Knative, KEDA and other
+// duck types -- instead of a hand-written table, so they always track the
+// types the operator is actually built with. Types with no Go type
+// registered in the scheme are not resolved: the operator does not create
+// them, so it does not garbage collect them either.
+func operatorResourceTypes() (map[schema.GroupResource]schema.GroupVersionKind, error) {
+	s := runtime.NewScheme()
+	if err := clientscheme.AddToScheme(s); err != nil {
+		return nil, fmt.Errorf("cannot register Kubernetes types in scheme: %w", err)
+	}
+	if err := apis.AddToScheme(s); err != nil {
+		return nil, fmt.Errorf("cannot register operator types in scheme: %w", err)
+	}
+
+	return schemeResourceTypes(s), nil
 }
 
 // operatorRoleRules returns the rules of all the operator roles for namespaced
@@ -403,7 +434,12 @@ func loadDeletableTypes() (map[schema.GroupVersionKind]struct{}, error) {
 		if errCachedDeletable != nil {
 			return
 		}
-		cachedDeletableTypes = deletableTypesFromRules(rules)
+		var resourceTypes map[schema.GroupResource]schema.GroupVersionKind
+		resourceTypes, errCachedDeletable = operatorResourceTypes()
+		if errCachedDeletable != nil {
+			return
+		}
+		cachedDeletableTypes = deletableTypesFromRules(rules, resourceTypes)
 	})
 
 	return cachedDeletableTypes, errCachedDeletable

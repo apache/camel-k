@@ -26,7 +26,6 @@ rules:
   - serving.knative.dev
   resources:
   - services
-  - routes
   verbs:
   - create
   - delete
@@ -35,10 +34,38 @@ rules:
   - patch
   - watch
 - apiGroups:
+  - serving.knative.dev
+  resources:
+  - routes
+  verbs:
+  - create
+  - get
+  - list
+  - patch
+  - watch
+- apiGroups:
   - eventing.knative.dev
   resources:
   - triggers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+- apiGroups:
+  - eventing.knative.dev
+  resources:
   - brokers
+  verbs:
+  - create
+  - get
+  - list
+  - patch
+- apiGroups:
+  - messaging.knative.dev
+  resources:
+  - subscriptions
   verbs:
   - create
   - delete
@@ -48,12 +75,10 @@ rules:
 - apiGroups:
   - messaging.knative.dev
   resources:
-  - subscriptions
   - channels
   - inmemorychannels
   verbs:
   - create
-  - delete
   - get
   - list
   - patch

@@ -31,7 +31,7 @@ A resource is only deleted when all of the following hold:
 The set of deletable types is computed statically, without querying the cluster API:
 
 1. The operator reads the operator role definitions shipped with the operator itself — the same roles that are granted to the operator service account when the operator is installed.
-2. Every resource those roles allow the operator to delete becomes a deletable type, mapped to its version and kind.
+2. Every resource those roles allow the operator to delete becomes a deletable type. The roles carry neither version nor kind, so both are resolved from the operator's own scheme — the types the operator is built to manage, registered under their real group, version and kind — rather than from a fixed table. A type with no registered type in the scheme is not resolved and never enters the set: the operator does not create such types, so it does not garbage collect them either.
 3. If a type in the set has no API in the cluster — for example, the CRD of an optional component such as Knative or KEDA is not installed — it is simply skipped during garbage collection.
 
 Because the set is derived from the operator roles, it covers the resource types created by the other traits as well — for example Knative `Service` and `Trigger` resources, or KEDA `ScaledObject` resources, whose roles ship with the operator. No discovery or `SelfSubjectRulesReview` request is performed, and the set is computed once when the operator starts.
