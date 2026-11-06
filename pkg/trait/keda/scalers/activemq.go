@@ -18,6 +18,8 @@ limitations under the License.
 package scalers
 
 import (
+	"net"
+	"net/url"
 	"strings"
 
 	keda "github.com/apache/camel-k/v2/pkg/trait/keda"
@@ -33,7 +35,7 @@ func (a *ActiveMQScaler) Component() string {
 	return "activemq"
 }
 
-func (a *ActiveMQScaler) Map(pathValue string, params map[string]string) (string, map[string]string) {
+func (a *ActiveMQScaler) Map(pathValue string, params map[string]string, props map[string]string) (string, map[string]string) {
 	metadata := make(map[string]string)
 
 	destination := pathValue
@@ -45,6 +47,11 @@ func (a *ActiveMQScaler) Map(pathValue string, params map[string]string) (string
 
 	if destination != "" {
 		metadata["destinationName"] = destination
+	}
+	if brokerURL, ok := props["camel.component.activemq.broker-url"]; ok {
+		if u, err := url.Parse(brokerURL); err == nil && u.Hostname() != "" {
+			metadata["managementEndpoint"] = net.JoinHostPort(u.Hostname(), "8161")
+		}
 	}
 	if v, ok := params["destinationName"]; ok {
 		metadata["destinationName"] = v
