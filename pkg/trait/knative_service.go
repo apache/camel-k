@@ -173,6 +173,7 @@ func (t *knativeServiceTrait) ControllerStrategySelectorOrder() int {
 	return knativeServiceStrategySelectorOrder
 }
 
+//nolint:gocognit
 func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, error) {
 	serviceAnnotations := make(map[string]string)
 	if e.Integration.Annotations != nil {
