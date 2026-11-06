@@ -29,7 +29,7 @@ spec:
   traits:
     camel:
       properties:
-        - camel.component.pulsar.service-url=pulsar://pulsar.keda.svc:6650
+        - camel.component.pulsar.service-url=pulsar://pulsar.%%%.svc:6650
     keda:
       enabled: true
       minReplicaCount: 0
