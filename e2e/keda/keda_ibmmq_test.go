@@ -28,6 +28,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 func TestIBMMQKedaAutoDiscovery(t *testing.T) {
@@ -48,7 +49,7 @@ func TestIBMMQKedaAutoDiscovery(t *testing.T) {
 
 		// Wait until Camel K has reconciled the Integration and created the
 		// ScaledObject from the jms:queue endpoint.
-		g.Eventually(IntegrationConditionStatus(t, ctx, ns, integrationName, corev1.ConditionType("Ready")), TestTimeoutLong).
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, integrationName, v1.IntegrationConditionReady), TestTimeoutLong).
 			Should(Equal(corev1.ConditionTrue))
 		g.Eventually(ScaledObject(t, ctx, ns, integrationName), TestTimeoutLong).
 			ShouldNot(BeNil())
