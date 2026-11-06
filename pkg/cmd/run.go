@@ -372,7 +372,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 		// Let's add a Wait point, otherwise the script terminates
-		<-o.RootContext.Done()
+		<-o.Context.Done()
 	}
 
 	return nil

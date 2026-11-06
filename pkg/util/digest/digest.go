@@ -112,6 +112,10 @@ func ComputeForIntegration(integration *v1.Integration, configmapVersions []stri
 	// Git spec
 	if integration.Spec.Git != nil {
 		gitSpec := integration.Spec.Git.URL + "/" + integration.Spec.Git.Secret
+		// appended only when set, in order to keep the digest of the Integrations that do not configure it
+		if integration.Spec.Git.Username != "" {
+			gitSpec = gitSpec + "/username:" + integration.Spec.Git.Username
+		}
 		switch {
 		case integration.Spec.Git.Tag != "":
 			gitSpec = gitSpec + "/" + integration.Spec.Git.Tag

@@ -76,7 +76,7 @@ func TestKafkaScalerMap(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			kedaType, metadata := scaler.Map(tt.pathValue, tt.params)
+			kedaType, metadata := scaler.Map(tt.pathValue, tt.params, nil)
 			assert.Equal(t, tt.expectedType, kedaType)
 			assert.Equal(t, tt.expectedMeta, metadata)
 		})
@@ -84,7 +84,7 @@ func TestKafkaScalerMap(t *testing.T) {
 }
 
 func TestMapToKedaTriggerKafka(t *testing.T) {
-	trigger, err := keda.MapToKedaTrigger("kafka:orders?brokers=broker:9092&groupId=grp")
+	trigger, err := keda.MapToKedaTrigger("kafka:orders?brokers=broker:9092&groupId=grp", nil)
 	require.NoError(t, err)
 	require.NotNil(t, trigger)
 	assert.Equal(t, "kafka", trigger.Type)
@@ -96,13 +96,13 @@ func TestMapToKedaTriggerKafka(t *testing.T) {
 }
 
 func TestMapToKedaTriggerUnsupported(t *testing.T) {
-	trigger, err := keda.MapToKedaTrigger("timer:tick")
+	trigger, err := keda.MapToKedaTrigger("timer:tick", nil)
 	require.NoError(t, err)
 	assert.Nil(t, trigger, "unsupported component should return nil trigger")
 }
 
 func TestMapToKedaTriggerEmpty(t *testing.T) {
-	trigger, err := keda.MapToKedaTrigger("")
+	trigger, err := keda.MapToKedaTrigger("", nil)
 	require.NoError(t, err)
 	assert.Nil(t, trigger)
 }
