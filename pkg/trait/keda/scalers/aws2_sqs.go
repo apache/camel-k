@@ -40,7 +40,7 @@ func (s *AWS2SQSScaler) Component() string {
 // SQS queue ARN, or from a queue name together with the region and
 // queueOwnerAWSAccountId parameters. When no full URL can be built, the
 // plain queue name is used, which KEDA accepts when it is unambiguous.
-func (s *AWS2SQSScaler) Map(pathValue string, params map[string]string) (string, map[string]string) {
+func (s *AWS2SQSScaler) Map(pathValue string, params map[string]string, props map[string]string) (string, map[string]string) {
 	metadata := make(map[string]string)
 
 	region := params["region"]

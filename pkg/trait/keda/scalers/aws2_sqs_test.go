@@ -114,7 +114,7 @@ func TestAWS2SQSScalerMap(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			kedaType, metadata := scaler.Map(tt.pathValue, tt.params)
+			kedaType, metadata := scaler.Map(tt.pathValue, tt.params, nil)
 			assert.Equal(t, "aws-sqs-queue", kedaType)
 			assert.Equal(t, tt.expectedMeta, metadata)
 		})
@@ -172,7 +172,7 @@ func TestMapToKedaTriggerAWS2SQS(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			trigger, err := keda.MapToKedaTrigger(tt.uri)
+			trigger, err := keda.MapToKedaTrigger(tt.uri, nil)
 			require.NoError(t, err)
 			require.NotNil(t, trigger)
 			assert.Equal(t, "aws-sqs-queue", trigger.Type)
