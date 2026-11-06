@@ -41,12 +41,18 @@ spec:
                 secretKeyRef:
                   name: ibmmq-auth
                   key: mqAdminPassword
+            - name: MQ_APP_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: ibmmq-auth
+                  key: mqAppUsername
+            - name: MQ_APP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ibmmq-auth
+                  key: mqAppPassword
   flows:
     - route:
-        # The E2E test validates KEDA's IBM MQ scaler and REST connection.
-        # Keep the consumer stopped so the test does not also test message
-        # processing or require a producer.
-        autoStartup: false
         from:
           uri: jms:queue:DEV.QUEUE.1
           steps:
@@ -61,6 +67,8 @@ spec:
         - camel.beans.mqCF.queueManager=QM1
         - camel.beans.mqCF.transportType=1
         - camel.component.jms.connection-factory=#bean:mqCF
+        - camel.component.jms.username={{env:MQ_APP_USERNAME}}
+        - camel.component.jms.password={{env:MQ_APP_PASSWORD}}
     keda:
       enabled: true
       auto: true
