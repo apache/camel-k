@@ -30,7 +30,7 @@ spec:
   traits:
     camel:
       properties:
-        - camel.component.activemq.broker-url=tcp://my-activemq-hdls-svc.keda.svc:61616
+        - camel.component.activemq.broker-url=tcp://my-activemq-hdls-svc.%%%.svc:61616
         - camel.component.activemq.username=admin
         - camel.component.activemq.password=admin
     keda:
@@ -42,7 +42,7 @@ spec:
       triggers:
         - type: activemq
           metadata:
-            managementEndpoint: my-activemq-hdls-svc.keda.svc:8161
+            managementEndpoint: my-activemq-hdls-svc.%%%.svc:8161
             destinationName: my-queue
             brokerName: localhost
           secrets:
