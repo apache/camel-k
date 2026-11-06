@@ -96,6 +96,8 @@ traits:
       ibmmq:
         host: https://mq.example.com/ibmmq/rest/v2/admin/action/qmgr/QM1/mqsc
         queueDepth: "25"
+        usernameFromEnv: MQ_ADMIN_USERNAME
+        passwordFromEnv: MQ_ADMIN_PASSWORD
 ----
 
 The mapper creates an `ibmmq` trigger and derives `queueName` from the JMS destination.
@@ -103,7 +105,7 @@ The `host` value is the IBM MQ Queue Manager Admin REST endpoint required by KED
 It is not the JMS broker's host/port: Camel JMS is configured through a provider-specific `ConnectionFactory`, whose `hostName`, `port`, `channel`, and `queueManager` describe the messaging connection rather than the mqweb Admin REST URL.
 That REST endpoint can use a different host, port, and path, so it cannot be inferred safely from generic JMS properties or an opaque bean reference.
 Supply it explicitly through `keda.autoMetadata.ibmmq.host`.
-Other entries under `keda.autoMetadata.ibmmq` are passed through as KEDA scaler metadata.
+Other entries under `keda.autoMetadata.ibmmq` are passed through as KEDA scaler metadata. For `usernameFromEnv` and `passwordFromEnv`, provide the names of environment variables on the scaled Integration pod, and populate those variables from Kubernetes Secrets.
 
 This mapping does not inspect the JMS `ConnectionFactory` bean or copy its credentials.
 Configure authentication using KEDA's supported IBM MQ options, such as `usernameFromEnv` and `passwordFromEnv`. These metadata values name environment variables that must be present in the scaled Integration's pod template; expose the credentials to the Integration container through Kubernetes Secret references rather than placing their values in ScaledObject metadata.
