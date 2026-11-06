@@ -39,6 +39,7 @@ func TestActiveMQScalerMap(t *testing.T) {
 		name         string
 		pathValue    string
 		params       map[string]string
+		props        map[string]string
 		expectedType string
 		expectedMeta map[string]string
 	}{
@@ -53,6 +54,7 @@ func TestActiveMQScalerMap(t *testing.T) {
 				"corsHeader":                "*",
 				"restAPITemplate":           "http://{endpoint}/api/jolokia",
 			},
+			props:        map[string]string{},
 			expectedType: "activemq",
 			expectedMeta: map[string]string{
 				"destinationName":           "orders",
@@ -68,6 +70,7 @@ func TestActiveMQScalerMap(t *testing.T) {
 			name:         "only destination name without prefix",
 			pathValue:    "my-queue",
 			params:       map[string]string{},
+			props:        map[string]string{},
 			expectedType: "activemq",
 			expectedMeta: map[string]string{
 				"destinationName": "my-queue",
@@ -77,6 +80,7 @@ func TestActiveMQScalerMap(t *testing.T) {
 			name:         "destination with topic prefix",
 			pathValue:    "topic:notifications",
 			params:       map[string]string{"managementEndpoint": "activemq.default:8161"},
+			props:        map[string]string{},
 			expectedType: "activemq",
 			expectedMeta: map[string]string{
 				"destinationName":    "notifications",
@@ -89,16 +93,30 @@ func TestActiveMQScalerMap(t *testing.T) {
 			params: map[string]string{
 				"destinationName": "actual-queue",
 			},
+			props:        map[string]string{},
 			expectedType: "activemq",
 			expectedMeta: map[string]string{
 				"destinationName": "actual-queue",
+			},
+		},
+		{
+			name:      "broker-url sets management endpoint",
+			pathValue: "queue:orders",
+			params:    map[string]string{},
+			props: map[string]string{
+				"camel.component.activemq.broker-url": "tcp://activemq-broker.default.svc:61616",
+			},
+			expectedType: "activemq",
+			expectedMeta: map[string]string{
+				"destinationName":    "orders",
+				"managementEndpoint": "activemq-broker.default.svc:8161",
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			kedaType, metadata := scaler.Map(tt.pathValue, tt.params)
+			kedaType, metadata := scaler.Map(tt.pathValue, tt.params, tt.props)
 			assert.Equal(t, tt.expectedType, kedaType)
 			assert.Equal(t, tt.expectedMeta, metadata)
 		})
@@ -106,7 +124,7 @@ func TestActiveMQScalerMap(t *testing.T) {
 }
 
 func TestMapToKedaTriggerActiveMQ(t *testing.T) {
-	trigger, err := keda.MapToKedaTrigger("activemq:queue:orders?managementEndpoint=activemq:8161&brokerName=my-broker")
+	trigger, err := keda.MapToKedaTrigger("activemq:queue:orders?managementEndpoint=activemq:8161&brokerName=my-broker", nil)
 	require.NoError(t, err)
 	require.NotNil(t, trigger)
 	assert.Equal(t, "activemq", trigger.Type)
@@ -114,5 +132,19 @@ func TestMapToKedaTriggerActiveMQ(t *testing.T) {
 		"destinationName":    "orders",
 		"managementEndpoint": "activemq:8161",
 		"brokerName":         "my-broker",
+	}, trigger.Metadata)
+}
+
+func TestMapToKedaTriggerActiveMQWithBrokerURL(t *testing.T) {
+	props := map[string]string{
+		"camel.component.activemq.broker-url": "tcp://my-activemq-hdls-svc.activemq.svc:61616",
+	}
+	trigger, err := keda.MapToKedaTrigger("activemq:queue:my-queue", props)
+	require.NoError(t, err)
+	require.NotNil(t, trigger)
+	assert.Equal(t, "activemq", trigger.Type)
+	assert.Equal(t, map[string]string{
+		"destinationName":    "my-queue",
+		"managementEndpoint": "my-activemq-hdls-svc.activemq.svc:8161",
 	}, trigger.Metadata)
 }
