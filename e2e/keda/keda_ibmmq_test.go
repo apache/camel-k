@@ -64,8 +64,8 @@ func TestIBMMQKedaAutoDiscoveryAndAutoscale(t *testing.T) {
 		g.Expect(scaledObject.Spec.Triggers[0].Metadata).To(HaveKeyWithValue("queueName", "DEV.QUEUE.1"))
 		g.Expect(scaledObject.Spec.Triggers[0].Metadata).To(HaveKeyWithValue("host", "https://ibmmq.keda.svc:9443/ibmmq/rest/v2/admin/action/qmgr/QM1/mqsc"))
 		g.Expect(scaledObject.Spec.Triggers[0].Metadata).To(HaveKeyWithValue("queueDepth", "1"))
-		g.Expect(scaledObject.Spec.Triggers[0].Metadata).To(HaveKeyWithValue("usernameFromEnv", "username"))
-		g.Expect(scaledObject.Spec.Triggers[0].Metadata).To(HaveKeyWithValue("passwordFromEnv", "password"))
+		g.Expect(scaledObject.Spec.Triggers[0].Metadata).To(HaveKeyWithValue("usernameFromEnv", "MQ_ADMIN_USERNAME"))
+		g.Expect(scaledObject.Spec.Triggers[0].Metadata).To(HaveKeyWithValue("passwordFromEnv", "MQ_ADMIN_PASSWORD"))
 		g.Expect(scaledObject.Spec.Triggers[0].Metadata).To(HaveKeyWithValue("unsafeSsl", "true"))
 		// Credentials are resolved from the Integration pod environment and must
 		// not be copied into the ScaledObject as plaintext trigger metadata.
