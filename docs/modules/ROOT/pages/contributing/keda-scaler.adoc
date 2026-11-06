@@ -106,7 +106,7 @@ Supply it explicitly through `keda.autoMetadata.ibmmq.host`.
 Other entries under `keda.autoMetadata.ibmmq` are passed through as KEDA scaler metadata.
 
 This mapping does not inspect the JMS `ConnectionFactory` bean or copy its credentials.
-Configure authentication using KEDA's supported IBM MQ options, such as `usernameFromEnv` and `passwordFromEnv`, with the corresponding environment variables available to the KEDA operator.
+Configure authentication using KEDA's supported IBM MQ options, such as `usernameFromEnv` and `passwordFromEnv`. These metadata values name environment variables that must be present in the scaled Integration's pod template; expose the credentials to the Integration container through Kubernetes Secret references rather than placing their values in ScaledObject metadata.
 See the https://keda.sh/docs/latest/scalers/ibm-mq/[KEDA IBM MQ scaler] documentation for the complete trigger and authentication options.
 
 == Complete mapping example
