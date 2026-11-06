@@ -24,6 +24,9 @@ package keda
 
 import (
 	"context"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -35,7 +38,7 @@ import (
 )
 
 func TestPulsarKedaAutoscale(t *testing.T) {
-	WithExistingNamedTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/pulsar-ephemeral.yaml", "-n", ns))
 		ExpectExecSucceed(t, g, Kubectl("rollout", "status", "deployment", "pulsar", "-n", ns, "--timeout=300s"))
 
@@ -43,7 +46,7 @@ func TestPulsarKedaAutoscale(t *testing.T) {
 			consumerName := "keda-it-pulsar-to-log-auto"
 			producerName := "timer-to-pulsar"
 
-			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/keda-it-pulsar-to-log-auto.yaml", "-n", ns))
+			ExpectExecSucceed(t, g, Kubectl("apply", "-f", cloneAndReplaceNamespace(t, "files/keda-it-pulsar-to-log-auto.yaml", ns), "-n", ns))
 
 			// The ScaledObject uses the trigger discovered from the Pulsar endpoint URI
 			g.Eventually(ScaledObject(t, ctx, ns, consumerName), TestTimeoutMedium).ShouldNot(BeNil())
@@ -52,7 +55,7 @@ func TestPulsarKedaAutoscale(t *testing.T) {
 			g.Expect(scaledObj.Spec.Triggers[0].Type).To(Equal("pulsar"))
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["topic"]).To(Equal("persistent://public/default/my-topic"))
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["subscription"]).To(Equal("my-subscription"))
-			g.Expect(scaledObj.Spec.Triggers[0].Metadata["adminURL"]).To(Equal("http://pulsar.keda.svc:8080"))
+			g.Expect(scaledObj.Spec.Triggers[0].Metadata["adminURL"]).To(Equal("http://pulsar." + ns + ".svc:8080"))
 
 			// Start consumer; it creates the subscription
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, consumerName, v1.IntegrationConditionReady), TestTimeoutLong).
@@ -63,7 +66,7 @@ func TestPulsarKedaAutoscale(t *testing.T) {
 				Should(PointTo(BeNumerically("==", 0)))
 
 			// Start producer to build a backlog
-			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/timer-to-pulsar.yaml", "-n", ns))
+			ExpectExecSucceed(t, g, Kubectl("apply", "-f", cloneAndReplaceNamespace(t, "files/timer-to-pulsar.yaml", ns), "-n", ns))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, producerName, v1.IntegrationConditionReady), TestTimeoutLong).
 				Should(Equal(corev1.ConditionTrue))
 
@@ -77,10 +80,24 @@ func TestPulsarKedaAutoscale(t *testing.T) {
 			ExpectExecSucceed(t, g, Kubectl("delete", "it", producerName, "-n", ns))
 			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), TestTimeoutMedium).
 				Should(PointTo(BeNumerically("==", 0)))
-
-			ExpectExecSucceed(t, g, Kubectl("delete", "it", "--all", "-n", ns))
 		})
+	})
+}
 
-		ExpectExecSucceed(t, g, Kubectl("delete", "-f", "files/pulsar-ephemeral.yaml", "-n", ns))
-	}, "keda")
+// cloneAndReplaceNamespace clones and replace the content marked as %%% with the namespace passed as parameter.
+func cloneAndReplaceNamespace(t *testing.T, srcPath, namespace string) string {
+	t.Helper()
+
+	tempPath := filepath.Join(t.TempDir(), filepath.Base(srcPath))
+
+	content, err := os.ReadFile(srcPath)
+	if err != nil {
+		t.Fatalf("failed to read src file: %v", err)
+	}
+	updated := strings.ReplaceAll(string(content), "%%%", namespace)
+	if err := os.WriteFile(tempPath, []byte(updated), 0o644); err != nil {
+		t.Fatalf("failed to write dst file: %v", err)
+	}
+
+	return tempPath
 }
