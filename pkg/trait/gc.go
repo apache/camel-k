@@ -24,7 +24,6 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"sync"
 
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -85,10 +84,6 @@ var (
 			Version: batchv1.SchemeGroupVersion.Version,
 		}: {},
 	}
-
-	deletableTypesOnce   sync.Once
-	cachedDeletableTypes map[schema.GroupVersionKind]struct{}
-	errCachedDeletable   error
 )
 
 const (
@@ -243,11 +238,12 @@ func canBeDeleted(it *v1.Integration, u unstructured.Unstructured) bool {
 // A resource is deletable when some rule allows the "delete" verb (or "*") for
 // its API group (or "*") and its resource name (or "*"). Only resources present
 // in resourceTypes are considered: role rules carry no version or kind
-// information, and subresources cannot be deleted as a whole.
-func deletableTypesFromRules(rules []rbacv1.PolicyRule, resourceTypes map[schema.GroupResource]schema.GroupVersionKind) map[schema.GroupVersionKind]struct{} {
+// information, and subresources cannot be deleted as a whole. Every registered
+// version of a deletable resource is included in the result.
+func deletableTypesFromRules(rules []rbacv1.PolicyRule, resourceTypes map[schema.GroupResource][]schema.GroupVersionKind) map[schema.GroupVersionKind]struct{} {
 	GVKs := make(map[schema.GroupVersionKind]struct{})
 
-	for groupResource, GVK := range resourceTypes {
+	for groupResource, resourceGVKs := range resourceTypes {
 		for _, rule := range rules {
 			if !slices.Contains(rule.Verbs, "delete") && !slices.Contains(rule.Verbs, "*") {
 				continue
@@ -258,7 +254,9 @@ func deletableTypesFromRules(rules []rbacv1.PolicyRule, resourceTypes map[schema
 			if !slices.Contains(rule.Resources, groupResource.Resource) && !slices.Contains(rule.Resources, "*") {
 				continue
 			}
-			GVKs[GVK] = struct{}{}
+			for _, GVK := range resourceGVKs {
+				GVKs[GVK] = struct{}{}
+			}
 
 			break
 		}
@@ -270,29 +268,26 @@ func deletableTypesFromRules(rules []rbacv1.PolicyRule, resourceTypes map[schema
 // schemeResourceTypes indexes the types registered in a scheme by the API
 // group and resource name they are served under, as those names appear in
 // role rules. List types and the internal option types registered for every
-// group version are skipped, as they cannot be deleted. When a scheme
-// registers several versions of the same resource, the most stable and
-// recent one wins, so the result does not depend on registration order.
-func schemeResourceTypes(s *runtime.Scheme) map[schema.GroupResource]schema.GroupVersionKind {
-	known := s.AllKnownTypes()
-	GVKs := make([]schema.GroupVersionKind, 0, len(known))
-	for GVK := range known {
+// group version are skipped, as they cannot be deleted. Every registered
+// version of a resource is returned: which versions are actually served is
+// a property of the cluster, not of the operator binary, so garbage
+// collection attempts them all and skips the ones the cluster does not
+// serve.
+func schemeResourceTypes(s *runtime.Scheme) map[schema.GroupResource][]schema.GroupVersionKind {
+	resourceTypes := make(map[schema.GroupResource][]schema.GroupVersionKind)
+	for GVK := range s.AllKnownTypes() {
 		if strings.HasSuffix(GVK.Kind, "List") || isInternalKind(GVK.Kind) {
 			continue
 		}
-		GVKs = append(GVKs, GVK)
-	}
-	// Sort for a deterministic result when two versions rank equally.
-	slices.SortFunc(GVKs, func(a, b schema.GroupVersionKind) int {
-		return strings.Compare(a.String(), b.String())
-	})
-
-	resourceTypes := make(map[schema.GroupResource]schema.GroupVersionKind, len(GVKs))
-	for _, GVK := range GVKs {
 		groupResource := schema.GroupResource{Group: GVK.Group, Resource: kindToResource(GVK.Kind)}
-		if current, ok := resourceTypes[groupResource]; !ok || preferredVersion(GVK, current) {
-			resourceTypes[groupResource] = GVK
-		}
+		resourceTypes[groupResource] = append(resourceTypes[groupResource], GVK)
+	}
+	// Sort every version list, so the result does not depend on the map
+	// iteration or registration order.
+	for _, GVKs := range resourceTypes {
+		slices.SortFunc(GVKs, func(a, b schema.GroupVersionKind) int {
+			return strings.Compare(a.String(), b.String())
+		})
 	}
 
 	return resourceTypes
@@ -315,7 +310,11 @@ func isInternalKind(kind string) bool {
 // applying the usual Kubernetes pluralization rules: "Gateway" becomes
 // "gateways", "NetworkPolicy" becomes "networkpolicies" and "Ingress"
 // becomes "ingresses". "Endpoints" is the one irregular case among the
-// registered types: its resource is the kind itself, unmodified.
+// registered types: its resource is the kind itself, unmodified. The
+// conversion is verified exhaustively against the shipped operator roles
+// by TestOperatorRolesDeletableCoverage: a resource whose name is computed
+// wrongly here would silently stop being garbage collected, so the test
+// fails the build instead, naming the resource.
 func kindToResource(kind string) string {
 	if kind == "Endpoints" {
 		return "endpoints"
@@ -337,43 +336,6 @@ func kindToResource(kind string) string {
 	}
 }
 
-// preferredVersion reports whether candidate should replace current as the
-// version of a type: a stable version beats a beta, which beats an alpha,
-// and within the same stability level the higher version number wins.
-func preferredVersion(candidate, current schema.GroupVersionKind) bool {
-	candidateStability, candidateNumber := versionRank(candidate.Version)
-	currentStability, currentNumber := versionRank(current.Version)
-	if candidateStability != currentStability {
-		return candidateStability > currentStability
-	}
-
-	return candidateNumber > currentNumber
-}
-
-// versionRank ranks an API version by stability (stable, then beta, then
-// alpha) and by its numeric part, e.g. "v2beta1" ranks below "v1".
-func versionRank(version string) (int, int) {
-	stability := 2
-	if strings.Contains(version, "alpha") {
-		stability = 0
-	} else if strings.Contains(version, "beta") {
-		stability = 1
-	}
-	// Only the leading number (the version proper) is compared; the
-	// alpha/beta suffix number does not outweigh a stability change.
-	number := 0
-	leading := strings.TrimPrefix(version, "v")
-	end := 0
-	for end < len(leading) && leading[end] >= '0' && leading[end] <= '9' {
-		end++
-	}
-	if end > 0 {
-		number, _ = strconv.Atoi(leading[:end])
-	}
-
-	return stability, number
-}
-
 // operatorResourceTypes resolves the group and resource names used in role
 // rules to the types the operator manages. The versions and kinds come from
 // the operator's own scheme -- the Kubernetes built-in types plus every type
@@ -382,7 +344,7 @@ func versionRank(version string) (int, int) {
 // types the operator is actually built with. Types with no Go type
 // registered in the scheme are not resolved: the operator does not create
 // them, so it does not garbage collect them either.
-func operatorResourceTypes() (map[schema.GroupResource]schema.GroupVersionKind, error) {
+func operatorResourceTypes() (map[schema.GroupResource][]schema.GroupVersionKind, error) {
 	s := runtime.NewScheme()
 	if err := clientscheme.AddToScheme(s); err != nil {
 		return nil, fmt.Errorf("cannot register Kubernetes types in scheme: %w", err)
@@ -425,35 +387,37 @@ func operatorRoleRules() ([]rbacv1.PolicyRule, error) {
 }
 
 // loadDeletableTypes computes the set of deletable types from the operator
-// roles shipped with the operator. The set only depends on the roles bundled
-// in the binary, so it is computed once and cached for the operator lifetime.
+// roles shipped with the operator.
 func loadDeletableTypes() (map[schema.GroupVersionKind]struct{}, error) {
-	deletableTypesOnce.Do(func() {
-		var rules []rbacv1.PolicyRule
-		rules, errCachedDeletable = operatorRoleRules()
-		if errCachedDeletable != nil {
-			return
-		}
-		var resourceTypes map[schema.GroupResource]schema.GroupVersionKind
-		resourceTypes, errCachedDeletable = operatorResourceTypes()
-		if errCachedDeletable != nil {
-			return
-		}
-		cachedDeletableTypes = deletableTypesFromRules(rules, resourceTypes)
-	})
+	rules, err := operatorRoleRules()
+	if err != nil {
+		return nil, err
+	}
+	resourceTypes, err := operatorResourceTypes()
+	if err != nil {
+		return nil, err
+	}
 
-	return cachedDeletableTypes, errCachedDeletable
+	return deletableTypesFromRules(rules, resourceTypes), nil
 }
+
+// staticDeletableTypes is the set of deletable types derived from the
+// operator roles, computed once when the package is initialized: the roles
+// are bundled in the binary, so the set can only change when the operator
+// is restarted with a different binary. A computation error does not fail
+// the initialization: it is kept here and reported to every garbage
+// collection run, as it was when the set was computed lazily.
+var staticDeletableTypes, staticDeletableTypesErr = loadDeletableTypes()
 
 // getDeletableTypes returns the set of deletable types for garbage collection:
 // the types the operator is allowed to delete according to the operator roles
 // shipped with the operator, plus the default minimal set of types the
 // operator always creates for an Integration.
 func (t *gcTrait) getDeletableTypes() (map[schema.GroupVersionKind]struct{}, error) {
-	staticTypes, err := loadDeletableTypes()
-	if err != nil {
-		return nil, err
+	if staticDeletableTypesErr != nil {
+		return nil, staticDeletableTypesErr
 	}
+	staticTypes := staticDeletableTypes
 
 	if len(staticTypes) == 0 {
 		// The static computation returned no results (probably an error).

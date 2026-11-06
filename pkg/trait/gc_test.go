@@ -32,7 +32,8 @@ import (
 	servingv1 "github.com/apache/camel-k/v2/pkg/apis/duck/knative/serving/v1"
 	"github.com/apache/camel-k/v2/pkg/internal"
 	appsv1 "k8s.io/api/apps/v1"
-	appsv1beta1 "k8s.io/api/apps/v1beta1"
+	autoscalingv1 "k8s.io/api/autoscaling/v1"
+	autoscalingv2 "k8s.io/api/autoscaling/v2"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -473,11 +474,17 @@ func TestGarbageCollectDryBuildSkipsGC(t *testing.T) {
 
 func TestDeletableTypesFromRules(t *testing.T) {
 	// A small stand-in for the types resolved from the operator scheme.
-	testResourceTypes := map[schema.GroupResource]schema.GroupVersionKind{
-		{Group: "apps", Resource: "deployments"}:      {Group: "apps", Version: "v1", Kind: "Deployment"},
-		{Group: "", Resource: "configmaps"}:           {Group: "", Version: "v1", Kind: "ConfigMap"},
-		{Group: "", Resource: "pods"}:                 {Group: "", Version: "v1", Kind: "Pod"},
-		{Group: "keda.sh", Resource: "scaledobjects"}: {Group: "keda.sh", Version: "v1alpha1", Kind: "ScaledObject"},
+	// Deployments stand in for a resource registered at several versions,
+	// as happens in the real scheme: every registered version of a
+	// deletable resource must be included.
+	testResourceTypes := map[schema.GroupResource][]schema.GroupVersionKind{
+		{Group: "apps", Resource: "deployments"}: {
+			{Group: "apps", Version: "v1beta1", Kind: "Deployment"},
+			{Group: "apps", Version: "v1", Kind: "Deployment"},
+		},
+		{Group: "", Resource: "configmaps"}:           {{Group: "", Version: "v1", Kind: "ConfigMap"}},
+		{Group: "", Resource: "pods"}:                 {{Group: "", Version: "v1", Kind: "Pod"}},
+		{Group: "keda.sh", Resource: "scaledobjects"}: {{Group: "keda.sh", Version: "v1alpha1", Kind: "ScaledObject"}},
 	}
 
 	t.Run("exact match keeps only resources with delete verb and matching rule", func(t *testing.T) {
@@ -490,8 +497,9 @@ func TestDeletableTypesFromRules(t *testing.T) {
 		)
 		assert.Equal(t,
 			map[schema.GroupVersionKind]struct{}{
-				{Group: "apps", Version: "v1", Kind: "Deployment"}: {},
-				{Group: "", Version: "v1", Kind: "ConfigMap"}:      {},
+				{Group: "apps", Version: "v1beta1", Kind: "Deployment"}: {},
+				{Group: "apps", Version: "v1", Kind: "Deployment"}:      {},
+				{Group: "", Version: "v1", Kind: "ConfigMap"}:           {},
 			},
 			types,
 		)
@@ -504,8 +512,9 @@ func TestDeletableTypesFromRules(t *testing.T) {
 			},
 			testResourceTypes,
 		)
-		assert.Len(t, types, len(testResourceTypes))
+		assert.Len(t, types, 5)
 		assert.Contains(t, types, schema.GroupVersionKind{Group: "apps", Version: "v1", Kind: "Deployment"})
+		assert.Contains(t, types, schema.GroupVersionKind{Group: "apps", Version: "v1beta1", Kind: "Deployment"})
 		assert.Contains(t, types, schema.GroupVersionKind{Group: "keda.sh", Version: "v1alpha1", Kind: "ScaledObject"})
 	})
 
@@ -555,46 +564,52 @@ func TestOperatorResourceTypes(t *testing.T) {
 	resourceTypes, err := operatorResourceTypes()
 	require.NoError(t, err)
 
-	// Built-in types resolve to their served version.
-	assert.Equal(t,
-		schema.GroupVersionKind{Group: "apps", Version: "v1", Kind: "Deployment"},
+	// Built-in types resolve: every version registered in the scheme is
+	// returned, including the served one.
+	assert.Contains(t,
 		resourceTypes[schema.GroupResource{Group: "apps", Resource: "deployments"}],
+		schema.GroupVersionKind{Group: "apps", Version: "v1", Kind: "Deployment"},
 	)
 	// Types registered through the operator scheme resolve with the version
 	// they are compiled with, including the duck types: no fixed value is
 	// provided by the garbage collection code itself.
-	assert.Equal(t,
-		schema.GroupVersionKind{Group: "keda.sh", Version: "v1alpha1", Kind: "ScaledObject"},
+	assert.Contains(t,
 		resourceTypes[schema.GroupResource{Group: "keda.sh", Resource: "scaledobjects"}],
+		schema.GroupVersionKind{Group: "keda.sh", Version: "v1alpha1", Kind: "ScaledObject"},
 	)
-	assert.Equal(t,
-		schema.GroupVersionKind{Group: "eventing.knative.dev", Version: "v1", Kind: "Trigger"},
+	assert.Contains(t,
 		resourceTypes[schema.GroupResource{Group: "eventing.knative.dev", Resource: "triggers"}],
+		schema.GroupVersionKind{Group: "eventing.knative.dev", Version: "v1", Kind: "Trigger"},
 	)
-	assert.Equal(t,
-		schema.GroupVersionKind{Group: "camel.apache.org", Version: "v1", Kind: "Integration"},
+	assert.Contains(t,
 		resourceTypes[schema.GroupResource{Group: "camel.apache.org", Resource: "integrations"}],
+		schema.GroupVersionKind{Group: "camel.apache.org", Version: "v1", Kind: "Integration"},
 	)
 	// The Gateway kind pluralizes regularly ("gateways"), which the
 	// apimachinery name guesser gets wrong.
-	assert.Equal(t,
-		schema.GroupVersionKind{Group: "gateway.networking.k8s.io", Version: "v1", Kind: "Gateway"},
+	assert.Contains(t,
 		resourceTypes[schema.GroupResource{Group: "gateway.networking.k8s.io", Resource: "gateways"}],
+		schema.GroupVersionKind{Group: "gateway.networking.k8s.io", Version: "v1", Kind: "Gateway"},
 	)
 	// List types are not deletable resources.
 	_, hasList := resourceTypes[schema.GroupResource{Group: "", Resource: "configmaplists"}]
 	assert.False(t, hasList)
-	// When the scheme registers several versions of a type, the most stable
-	// and recent one is resolved: HorizontalPodAutoscaler is registered at
-	// both v1 and v2, and v2 is the served version.
-	assert.Equal(t,
-		schema.GroupVersionKind{Group: "autoscaling", Version: "v2", Kind: "HorizontalPodAutoscaler"},
+	// When the scheme registers several versions of a type, all of them
+	// are resolved: HorizontalPodAutoscaler is registered at both v1 and
+	// v2, and garbage collection attempts both, skipping the ones the
+	// cluster does not serve.
+	assert.Contains(t,
 		resourceTypes[schema.GroupResource{Group: "autoscaling", Resource: "horizontalpodautoscalers"}],
+		schema.GroupVersionKind{Group: "autoscaling", Version: "v1", Kind: "HorizontalPodAutoscaler"},
+	)
+	assert.Contains(t,
+		resourceTypes[schema.GroupResource{Group: "autoscaling", Resource: "horizontalpodautoscalers"}],
+		schema.GroupVersionKind{Group: "autoscaling", Version: "v2", Kind: "HorizontalPodAutoscaler"},
 	)
 	// Kinds whose plural is not just a trailing "s" resolve as well.
-	assert.Equal(t,
-		schema.GroupVersionKind{Group: "networking.k8s.io", Version: "v1", Kind: "NetworkPolicy"},
+	assert.Contains(t,
 		resourceTypes[schema.GroupResource{Group: "networking.k8s.io", Resource: "networkpolicies"}],
+		schema.GroupVersionKind{Group: "networking.k8s.io", Version: "v1", Kind: "NetworkPolicy"},
 	)
 	// The Knative Broker, Channel and InMemoryChannel and the serving Route
 	// have no Go type registered in the operator scheme, and nothing else
@@ -611,17 +626,23 @@ func TestOperatorResourceTypes(t *testing.T) {
 	}
 }
 
-func TestSchemeResourceTypesPrefersStableVersion(t *testing.T) {
+func TestSchemeResourceTypesAllVersions(t *testing.T) {
 	s := runtime.NewScheme()
-	// Register the beta version first: the result must not depend on
-	// registration order.
-	require.NoError(t, appsv1beta1.AddToScheme(s))
-	require.NoError(t, appsv1.AddToScheme(s))
+	// Register the most recent version first: every registered version
+	// must be resolved, whatever the registration order.
+	require.NoError(t, autoscalingv2.AddToScheme(s))
+	require.NoError(t, autoscalingv1.AddToScheme(s))
 
 	resourceTypes := schemeResourceTypes(s)
-	assert.Equal(t,
-		schema.GroupVersionKind{Group: "apps", Version: "v1", Kind: "Deployment"},
-		resourceTypes[schema.GroupResource{Group: "apps", Resource: "deployments"}],
+	// HorizontalPodAutoscaler is registered at both v1 and v2, and both
+	// versions are resolved: the cluster, not the operator, decides which
+	// of them are served.
+	assert.ElementsMatch(t,
+		[]schema.GroupVersionKind{
+			{Group: "autoscaling", Version: "v1", Kind: "HorizontalPodAutoscaler"},
+			{Group: "autoscaling", Version: "v2", Kind: "HorizontalPodAutoscaler"},
+		},
+		resourceTypes[schema.GroupResource{Group: "autoscaling", Resource: "horizontalpodautoscalers"}],
 	)
 }
 
@@ -644,11 +665,12 @@ func TestKindToResource(t *testing.T) {
 
 // TestOperatorRolesDeletableCoverage is an exhaustive audit of the shipped
 // operator roles: every resource the roles grant the delete verb on must
-// resolve, through the same code path loadDeletableTypes uses, to exactly
-// one deletable type. Resolution can silently narrow -- a kind whose plural
-// is computed wrongly, or a type dropped from the scheme, simply stops being
-// garbage collected -- so this test turns any such loss into a build
-// failure that names the resources involved.
+// resolve, through the same code path loadDeletableTypes uses, to one or
+// more deletable types, and every resolved version must be deletable.
+// Resolution can silently narrow -- a kind whose plural is computed
+// wrongly, or a type dropped from the scheme, simply stops being garbage
+// collected -- so this test turns any such loss into a build failure that
+// names the resources involved.
 func TestOperatorRolesDeletableCoverage(t *testing.T) {
 	rules, err := operatorRoleRules()
 	require.NoError(t, err)
@@ -716,13 +738,15 @@ func TestOperatorRolesDeletableCoverage(t *testing.T) {
 		case slices.Contains(legacyCoreGroup, groupResource):
 			foundLegacy = append(foundLegacy, groupResource)
 		default:
-			GVK, ok := resourceTypes[groupResource]
+			GVKs, ok := resourceTypes[groupResource]
 			if !ok {
 				unresolved = append(unresolved, groupResource)
 				continue
 			}
-			assert.Contains(t, deletable, GVK,
-				"delete-granted %s resolves to %s but is not deletable", formatGroupResource(groupResource), GVK)
+			for _, GVK := range GVKs {
+				assert.Contains(t, deletable, GVK,
+					"delete-granted %s resolves to %s but is not deletable", formatGroupResource(groupResource), GVK)
+			}
 		}
 	}
 	assert.Equal(t, subresources, sortedGroupResources(foundSubresources),
