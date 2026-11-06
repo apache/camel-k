@@ -45,7 +45,7 @@ spec:
       terminationGracePeriodSeconds: 60
       containers:
         - name: ibmmq
-          image: icr.io/ibm-messaging/mq:9.4.5.1-r1
+          image: icr.io/ibm-messaging/mq:9.4.0.26-r2
           imagePullPolicy: IfNotPresent
           env:
             - name: LICENSE
