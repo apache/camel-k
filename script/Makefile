@@ -61,7 +61,7 @@ BASE_IMAGE_NAME := eclipse-temurin
 BASE_IMAGE_VERSION := 17-jdk
 OFFICIAL_IMAGE_VERSION := 17-jdk
 BASE_IMAGE_SHA_VERSION := 17-jdk
-BASE_IMAGE_SHA := sha256:91011320978c10ec51d2cde1eb6f616db6d2a739a0e521096c343dd3fed9abe6
+BASE_IMAGE_SHA := sha256:43338b737d0f75d6883d3c4563bc66974113ca8ac296e82f39d161fb3d398f0d
 BASE_IMAGE := $(BASE_IMAGE_NAME):$(BASE_IMAGE_VERSION)$(if $(filter $(BASE_IMAGE_VERSION),$(BASE_IMAGE_SHA_VERSION)),@$(BASE_IMAGE_SHA),)
 LOCAL_REPOSITORY := /etc/maven/m2
 OPENSHIFT_REGISTRY := image-registry.openshift-image-registry.svc:5000
@@ -347,6 +347,14 @@ test-kafka: gotestfmt-install
 	exit $${FAILED}
 
 #
+# KEDA tests for automatic scaler discovery and autoscaling
+#
+test-keda: gotestfmt-install
+	FAILED=0; \
+	go test -timeout 20m -v ./e2e/keda -tags=integration $(GOTESTFMT) || ((FAILED++)); \
+	exit $${FAILED}
+
+#
 # ArkMQ tests that require the presence of ArkMQ operator configuration
 #
 test-arkmq: gotestfmt-install
@@ -532,13 +540,13 @@ images-push-staging-all:
 	done
 
 images-push:
-	docker push $(IMAGE_PUSH)
-	docker manifest create $(IMAGE_PUSH) $(IMAGE_PUSH)
 	for i in $(ARCH_VERSIONS); do \
-		docker push $(IMAGE_PUSH)-$$i ; \
-		docker manifest create $(IMAGE_PUSH) -a $(IMAGE_PUSH)-$$i; \
+		docker push $(IMAGE_PUSH)-$$i; \
 	done
-	docker manifest push $(IMAGE_PUSH) --purge
+	docker buildx imagetools create \
+		$(foreach i,$(ARCH_VERSIONS),--platform linux/$(i)) \
+		--tag $(IMAGE_PUSH) \
+		$(foreach i,$(ARCH_VERSIONS),$(IMAGE_PUSH)-$(i))
 
 images-tag-staging-all:
 	docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION) $(STAGING_IMAGE):$(CUSTOM_VERSION)
@@ -556,15 +564,14 @@ images-push-staging:
 	docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-amd64 $(STAGING_IMAGE):$(CUSTOM_VERSION)-amd64
 	docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-amd64 $(STAGING_IMAGE):$(CUSTOM_VERSION)
 	docker push $(STAGING_IMAGE):$(CUSTOM_VERSION)-amd64
-	docker push $(STAGING_IMAGE):$(CUSTOM_VERSION)
 	@if docker inspect $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 &> /dev/null; then \
 		echo "Image $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 exists, building the multiarch manifest"; \
 		docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 $(STAGING_IMAGE):$(CUSTOM_VERSION)-arm64; \
 		docker push $(STAGING_IMAGE):$(CUSTOM_VERSION)-arm64; \
-		docker manifest create $(STAGING_IMAGE):$(CUSTOM_VERSION) --amend $(STAGING_IMAGE):$(CUSTOM_VERSION)-amd64 --amend $(STAGING_IMAGE):$(CUSTOM_VERSION)-arm64; \
-		docker manifest push --purge $(STAGING_IMAGE):$(CUSTOM_VERSION); \
+		docker buildx imagetools create --platform linux/amd64 --platform linux/arm64 --tag $(STAGING_IMAGE):$(CUSTOM_VERSION) $(STAGING_IMAGE):$(CUSTOM_VERSION)-amd64 $(STAGING_IMAGE):$(CUSTOM_VERSION)-arm64; \
 	else \
 		echo "Image $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 does not exist"; \
+		docker push $(STAGING_IMAGE):$(CUSTOM_VERSION); \
 	fi
 
 get-image:

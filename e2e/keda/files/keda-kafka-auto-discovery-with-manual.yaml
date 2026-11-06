@@ -14,39 +14,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ---------------------------------------------------------------------------
+# This integration tests KEDA auto-discovery with manual trigger (Case 2):
+# - Manual cron trigger is specified
+# - Kafka trigger should still be auto-discovered (different type)
+# - Result: 2 triggers (cron + kafka)
 
 apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:
-  name: keda-it-arkmq-to-log-auto
-  namespace: arkmq
+  name: keda-kafka-auto-discovery-with-manual
 spec:
-  flows:
-  - route:
-      from:
-        steps:
-        - to: log:info
-        uri: amqp:queue:my-queue
+  sources:
+    - content: |
+        from("kafka:my-topic?brokers=my-cluster-kafka-bootstrap.keda.svc:9092&groupId=manual-group")
+          .log("${body}");
+      name: routes.java
   traits:
-    camel:
-      properties:
-        - camel.component.amqp.broker-url=amqp://my-broker-hdls-svc.arkmq.svc:61616
-        - quarkus.qpid-jms.url=amqp://my-broker-hdls-svc.arkmq.svc:61616
     keda:
       enabled: true
       minReplicaCount: 0
-      maxReplicaCount: 1
-      cooldownPeriod: 20
-      pollingInterval: 10
+      maxReplicaCount: 2
+      # Manual cron trigger - kafka should still be auto-discovered
       triggers:
-        - type: artemis-queue
+        - type: cron
           metadata:
-            managementEndpoint: my-broker-hdls-svc.arkmq.svc:8161
-            queueName: my-queue
-            brokerAddress: my-queue
-            brokerName: amq-broker
-          secrets:
-            - name: my-broker-credentials-secret
-              mapping:
-                AMQ_USER: username
-                AMQ_PASSWORD: password
+            timezone: "UTC"
+            start: "0 * * * *"
+            end: "30 * * * *"
+            desiredReplicas: "1"
