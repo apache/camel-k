@@ -22,7 +22,7 @@ metadata:
 spec:
   dependencies:
     - camel:jms
-    - mvn:com.ibm.mq:com.ibm.mq.jakarta.client:9.4.5.1
+    - mvn:com.ibm.mq:com.ibm.mq.jakarta.client:9.4.0.26
   # KEDA reads the scale target's pod template to resolve scaler credentials.
   # The Pod trait merges these Secret-backed variables into the Integration
   # Deployment's "integration" container as well.
