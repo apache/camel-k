@@ -249,6 +249,7 @@ func failIntegrationKit(e *Environment, conditionType v1.IntegrationKitCondition
 	return nil
 }
 
+//nolint:gocognit
 func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfiguration) (*v1.BuilderTask, error) {
 	maven := e.Platform.Maven
 

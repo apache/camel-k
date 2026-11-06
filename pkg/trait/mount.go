@@ -142,6 +142,8 @@ func (t *mountTrait) Apply(e *Environment) error {
 
 // configureVolumesAndMounts is in charge to mount volumes and mounts coming from the trait configuration.
 // icnts holds the InitContainers which also require to be mounted with the shared volumes.
+//
+//nolint:gocognit
 func (t *mountTrait) configureVolumesAndMounts(
 	e *Environment,
 	vols *[]corev1.Volume,
