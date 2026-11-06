@@ -80,4 +80,6 @@ spec:
         ibmmq:
           host: https://ibmmq.keda.svc:9443/ibmmq/rest/v2/admin/action/qmgr/QM1/mqsc
           queueDepth: "1"
+          usernameFromEnv: username
+          passwordFromEnv: password
           unsafeSsl: "true"
