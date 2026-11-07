@@ -90,6 +90,7 @@ func NewKamelWithModelineCommand(ctx context.Context, osArgs []string) (*cobra.C
 	return rootCmd, flags, nil
 }
 
+//nolint:gocognit
 func createKamelWithModelineCommand(ctx context.Context, args []string) (*cobra.Command, []string, error) {
 	rootCmd, err := NewKamelCommand(ctx)
 	if err != nil {

@@ -285,6 +285,8 @@ func (i *baseInspector) discoverCapabilities(source v1.SourceSpec, meta *Metadat
 }
 
 // discoverDependencies returns a list of dependencies required by the given source code.
+//
+//nolint:gocognit
 func (i *baseInspector) discoverDependencies(source v1.SourceSpec, meta *Metadata) error {
 	for _, uri := range meta.FromURIs {
 		// consumer
