@@ -68,11 +68,6 @@ func ComputeForIntegration(integration *v1.Integration, configmapVersions []stri
 			return "", err
 		}
 	}
-	// Profile is relevant
-	//nolint:staticcheck
-	if _, err := hash.Write([]byte(integration.Spec.Profile)); err != nil {
-		return "", err
-	}
 
 	// Integration code
 	for _, s := range integration.Spec.Sources {

@@ -121,13 +121,12 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 	})
 
 	return &FakeClient{
-		Client:                 c,
-		Interface:              clientset,
-		camel:                  camelClientset,
-		scales:                 &fakescaleclient,
-		enabledKnativeServing:  true,
-		enabledKnativeEventing: true,
-		enabledCertManager:     true,
+		Client:                c,
+		Interface:             clientset,
+		camel:                 camelClientset,
+		scales:                &fakescaleclient,
+		enabledKnativeServing: true,
+		enabledCertManager:    true,
 	}, nil
 }
 
@@ -148,13 +147,12 @@ type FakeClient struct {
 	controller.Client
 	kubernetes.Interface
 
-	camel                  *fakecamelclientset.Clientset
-	scales                 *fakescale.FakeScaleClient
-	disabledGroups         []string
-	enabledOpenshift       bool
-	enabledKnativeServing  bool
-	enabledKnativeEventing bool
-	enabledCertManager     bool
+	camel                 *fakecamelclientset.Clientset
+	scales                *fakescale.FakeScaleClient
+	disabledGroups        []string
+	enabledOpenshift      bool
+	enabledKnativeServing bool
+	enabledCertManager    bool
 }
 
 func (c *FakeClient) Intercept(intercept *interceptor.Funcs) {
@@ -210,10 +208,6 @@ func (c *FakeClient) DisableKnativeServing() {
 	c.enabledKnativeServing = false
 }
 
-func (c *FakeClient) DisableKnativeEventing() {
-	c.enabledKnativeEventing = false
-}
-
 func (c *FakeClient) DisableCertManagerDiscovery() {
 	c.enabledCertManager = false
 }
@@ -228,12 +222,11 @@ func (c *FakeClient) AuthorizationV1() authorizationv1.AuthorizationV1Interface 
 
 func (c *FakeClient) Discovery() discovery.DiscoveryInterfaces {
 	return &FakeDiscovery{
-		DiscoveryInterfaces:    c.Interface.Discovery(),
-		disabledGroups:         c.disabledGroups,
-		enabledOpenshift:       c.enabledOpenshift,
-		enabledKnativeServing:  c.enabledKnativeServing,
-		enabledKnativeEventing: c.enabledKnativeEventing,
-		enabledCertManager:     c.enabledCertManager,
+		DiscoveryInterfaces:   c.Interface.Discovery(),
+		disabledGroups:        c.disabledGroups,
+		enabledOpenshift:      c.enabledOpenshift,
+		enabledKnativeServing: c.enabledKnativeServing,
+		enabledCertManager:    c.enabledCertManager,
 	}
 }
 
@@ -282,11 +275,10 @@ func (f *FakeSAR) Create(ctx context.Context, sar *authv1.SubjectAccessReview, o
 type FakeDiscovery struct {
 	discovery.DiscoveryInterfaces
 
-	disabledGroups         []string
-	enabledOpenshift       bool
-	enabledKnativeServing  bool
-	enabledKnativeEventing bool
-	enabledCertManager     bool
+	disabledGroups        []string
+	enabledOpenshift      bool
+	enabledKnativeServing bool
+	enabledCertManager    bool
 }
 
 func (f *FakeDiscovery) ServerResourcesForGroupVersion(groupVersion string) (*metav1.APIResourceList, error) {
@@ -321,25 +313,6 @@ func (f *FakeDiscovery) ServerResourcesForGroupVersion(groupVersion string) (*me
 		if groupVersion == "serving.knative.dev/v1" && !util.StringSliceExists(f.disabledGroups, groupVersion) {
 			return &metav1.APIResourceList{
 				GroupVersion: "serving.knative.dev/v1",
-			}, nil
-		}
-	}
-
-	// used to verify if Knative Eventing is installed
-	if f.enabledKnativeEventing {
-		if groupVersion == "eventing.knative.dev/v1" && !util.StringSliceExists(f.disabledGroups, groupVersion) {
-			return &metav1.APIResourceList{
-				GroupVersion: "eventing.knative.dev/v1",
-			}, nil
-		}
-		if groupVersion == "messaging.knative.dev/v1" && !util.StringSliceExists(f.disabledGroups, groupVersion) {
-			return &metav1.APIResourceList{
-				GroupVersion: "messaging.knative.dev/v1",
-			}, nil
-		}
-		if groupVersion == "messaging.knative.dev/v1beta1" && !util.StringSliceExists(f.disabledGroups, groupVersion) {
-			return &metav1.APIResourceList{
-				GroupVersion: "messaging.knative.dev/v1beta1",
 			}, nil
 		}
 	}

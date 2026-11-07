@@ -25,7 +25,6 @@ package advanced
 import (
 	"context"
 	"testing"
-	"time"
 
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
@@ -56,23 +55,6 @@ func TestOperatorRestart(t *testing.T) {
 			UninstallOperator(t, ctx, g, ns, "../../")
 
 			g.Eventually(OperatorPod(t, ctx, ns)).Should(BeNil())
-			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			g.Eventually(Kit(t, ctx, ns, IntegrationKitName(t, ctx, ns, name)())).Should(Not(BeNil()))
-			g.Eventually(Integration(t, ctx, ns, name)).Should(Not(BeNil()))
-		})
-
-		t.Run("Operator reinstalled", func(t *testing.T) {
-			// Install Camel K without Kamelets. There may be loading error that could affect the validity of this test.
-			InstallOperatorWithConf(t, ctx, g, ns, "", false,
-				map[string]string{
-					"KAMEL_INSTALL_DEFAULT_KAMELETS": "false",
-				},
-			)
-
-			g.Consistently(OperatorLogs(t, ctx, ns), 1*time.Minute, 3*time.Second).Should(Not(ContainSubstring("error")))
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))

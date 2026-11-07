@@ -137,8 +137,6 @@ func init() {
 	client.FastMapperAllowedAPIGroups["coordination.k8s.io"] = true
 	client.FastMapperAllowedAPIGroups["project.openshift.io"] = true
 	client.FastMapperAllowedAPIGroups["route.openshift.io"] = true
-	client.FastMapperAllowedAPIGroups["eventing.knative.dev"] = true
-	client.FastMapperAllowedAPIGroups["messaging.knative.dev"] = true
 	client.FastMapperAllowedAPIGroups["serving.knative.dev"] = true
 	client.FastMapperAllowedAPIGroups["operators.coreos.com"] = true
 	client.FastMapperAllowedAPIGroups["config.openshift.io"] = true
@@ -776,16 +774,6 @@ func IntegrationVersion(t *testing.T, ctx context.Context, ns string, name strin
 			return ""
 		}
 		return it.Status.Version
-	}
-}
-
-func IntegrationTraitProfile(t *testing.T, ctx context.Context, ns string, name string) func() v1.TraitProfile {
-	return func() v1.TraitProfile {
-		it := Integration(t, ctx, ns, name)()
-		if it == nil {
-			return ""
-		}
-		return it.Status.Profile
 	}
 }
 

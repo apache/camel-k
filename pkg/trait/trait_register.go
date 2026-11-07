@@ -41,7 +41,6 @@ func init() {
 	AddToTraits(newJvmTrait)
 	AddToTraits(newKameletsTrait)
 	AddToTraits(newKedaTrait)
-	AddToTraits(newKnativeTrait)
 	AddToTraits(newKnativeServiceTrait)
 	AddToTraits(newMountTrait)
 	AddToTraits(newOwnerTrait)

@@ -38,10 +38,6 @@ type Binding struct {
 	URI string
 	// Step is to support complex mapping such as Camel's EIPs
 	Step map[string]any
-	// Traits is a partial trait specification that should be merged into the integration.
-	//
-	// Deprecated: will be removed in future releases
-	Traits v1.Traits
 	// ApplicationProperties contain properties that should be set on the integration for the binding to work
 	ApplicationProperties map[string]string
 }
@@ -58,11 +54,9 @@ type BindingProvider interface {
 
 //nolint:containedctx
 type BindingContext struct {
-	Ctx       context.Context
-	Client    client.Client
-	Namespace string
-	//nolint:staticcheck
-	Profile            v1.TraitProfile
+	Ctx                context.Context
+	Client             client.Client
+	Namespace          string
 	Metadata           map[string]string
 	ServiceAccountName string
 }

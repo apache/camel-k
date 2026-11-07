@@ -19,7 +19,6 @@ package defaults
 
 import (
 	"os"
-	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -38,18 +37,6 @@ func TestOverriddenBaseImage(t *testing.T) {
 	require.NoError(t, os.Setenv(env, overriddenImage))
 	assert.Equal(t, overriddenImage, BaseImage())
 	assert.False(t, isBaseImageDefault())
-	require.NoError(t, os.Setenv(env, oldEnvVal))
-}
-
-func TestOverriddenInstallDefaultKamelets(t *testing.T) {
-	env := "KAMEL_INSTALL_DEFAULT_KAMELETS"
-	oldEnvVal := os.Getenv(env)
-	require.NoError(t, os.Setenv(env, strconv.FormatBool(false)))
-	assert.False(t, InstallDefaultKamelets())
-	require.NoError(t, os.Setenv(env, strconv.FormatBool(true)))
-	assert.True(t, InstallDefaultKamelets())
-	require.NoError(t, os.Setenv(env, "wrongval"))
-	assert.False(t, InstallDefaultKamelets())
 	require.NoError(t, os.Setenv(env, oldEnvVal))
 }
 

@@ -503,11 +503,7 @@ spec:
                     type: array
                 type: object
               profile:
-                description: |-
-                  the profile you wish to use. It will apply certain traits which are required by the specific profile chosen.
-                  It usually relates the Cluster with the optional definition of special profiles (ie, Knative)
-
-                  Deprecated: may be removed in future releases.
+                description: 'Deprecated: no longer in use.'
                 type: string
               traits:
                 description: list of traits to be executed for all the Integration/IntegrationKits
@@ -1043,10 +1039,7 @@ spec:
                         type: array
                     type: object
                   error-handler:
-                    description: |-
-                      The configuration of Error Handler trait.
-
-                      Deprecated: no longer in use.
+                    description: 'Deprecated: no longer in use.'
                     properties:
                       configuration:
                         description: |-
@@ -1451,10 +1444,7 @@ spec:
                         type: boolean
                     type: object
                   jolokia:
-                    description: |-
-                      The configuration of Jolokia trait.
-
-                      Deprecated: no longer in use.
+                    description: 'Deprecated: no longer in use.'
                     properties:
                       CACert:
                         description: |-
@@ -1738,7 +1728,7 @@ spec:
                         type: array
                     type: object
                   knative:
-                    description: The configuration of Knative trait
+                    description: 'Deprecated: no longer in use.'
                     properties:
                       auto:
                         description: Enable automatic discovery of all trait properties.
@@ -1921,10 +1911,7 @@ spec:
                         type: string
                     type: object
                   logging:
-                    description: |-
-                      The configuration of Logging trait.
-
-                      Deprecated: no longer in use.
+                    description: 'Deprecated: no longer in use.'
                     properties:
                       color:
                         description: Colorize the log output
@@ -1960,10 +1947,7 @@ spec:
                         type: string
                     type: object
                   master:
-                    description: |-
-                      The configuration of Master trait.
-
-                      Deprecated: no longer in use.
+                    description: 'Deprecated: no longer in use.'
                     properties:
                       auto:
                         description: Enables automatic configuration of the trait.
@@ -2061,10 +2045,7 @@ spec:
                         type: array
                     type: object
                   openapi:
-                    description: |-
-                      The configuration of OpenAPI trait.
-
-                      Deprecated: no longer in use.
+                    description: 'Deprecated: no longer in use.'
                     properties:
                       configmaps:
                         description: The configmaps holding the spec of the OpenAPI
@@ -2284,10 +2265,7 @@ spec:
                         type: array
                     type: object
                   registry:
-                    description: |-
-                      The configuration of Registry trait (support removed since version 2.5.0).
-
-                      Deprecated: no longer in use.
+                    description: 'Deprecated: no longer in use.'
                     properties:
                       configuration:
                         description: |-
@@ -2302,10 +2280,7 @@ spec:
                         type: boolean
                     type: object
                   route:
-                    description: |-
-                      The configuration of Route trait.
-
-                      Deprecated: use ingress instead.
+                    description: 'Deprecated: use ingress instead.'
                     properties:
                       annotations:
                         additionalProperties:
@@ -2505,10 +2480,7 @@ spec:
                         type: string
                     type: object
                   service-binding:
-                    description: |-
-                      The configuration of Service Binding trait.
-
-                      Deprecated: no longer in use.
+                    description: 'Deprecated: no longer in use.'
                     properties:
                       configuration:
                         description: |-
@@ -2538,10 +2510,7 @@ spec:
                     - configuration
                     type: object
                   telemetry:
-                    description: |-
-                      The configuration of Telemetry trait.
-
-                      Deprecated: no longer in use.
+                    description: 'Deprecated: no longer in use.'
                     properties:
                       auto:
                         description: Enables automatic configuration of the trait,
@@ -3069,11 +3038,7 @@ spec:
                 description: defines in what phase the IntegrationPlatform is found
                 type: string
               profile:
-                description: |-
-                  the profile you wish to use. It will apply certain traits which are required by the specific profile chosen.
-                  It usually relates the Cluster with the optional definition of special profiles (ie, Knative)
-
-                  Deprecated: may be removed in future releases.
+                description: 'Deprecated: no longer in use.'
                 type: string
               traits:
                 description: list of traits to be executed for all the Integration/IntegrationKits
@@ -3609,10 +3574,7 @@ spec:
                         type: array
                     type: object
                   error-handler:
-                    description: |-
-                      The configuration of Error Handler trait.
-
-                      Deprecated: no longer in use.
+                    description: 'Deprecated: no longer in use.'
                     properties:
                       configuration:
                         description: |-
@@ -4017,10 +3979,7 @@ spec:
                         type: boolean
                     type: object
                   jolokia:
-                    description: |-
-                      The configuration of Jolokia trait.
-
-                      Deprecated: no longer in use.
+                    description: 'Deprecated: no longer in use.'
                     properties:
                       CACert:
                         description: |-
@@ -4304,7 +4263,7 @@ spec:
                         type: array
                     type: object
                   knative:
-                    description: The configuration of Knative trait
+                    description: 'Deprecated: no longer in use.'
                     properties:
                       auto:
                         description: Enable automatic discovery of all trait properties.
@@ -4487,10 +4446,7 @@ spec:
                         type: string
                     type: object
                   logging:
-                    description: |-
-                      The configuration of Logging trait.
-
-                      Deprecated: no longer in use.
+                    description: 'Deprecated: no longer in use.'
                     properties:
                       color:
                         description: Colorize the log output
@@ -4526,10 +4482,7 @@ spec:
                         type: string
                     type: object
                   master:
-                    description: |-
-                      The configuration of Master trait.
-
-                      Deprecated: no longer in use.
+                    description: 'Deprecated: no longer in use.'
                     properties:
                       auto:
                         description: Enables automatic configuration of the trait.
@@ -4627,10 +4580,7 @@ spec:
                         type: array
                     type: object
                   openapi:
-                    description: |-
-                      The configuration of OpenAPI trait.
-
-                      Deprecated: no longer in use.
+                    description: 'Deprecated: no longer in use.'
                     properties:
                       configmaps:
                         description: The configmaps holding the spec of the OpenAPI
@@ -4850,10 +4800,7 @@ spec:
                         type: array
                     type: object
                   registry:
-                    description: |-
-                      The configuration of Registry trait (support removed since version 2.5.0).
-
-                      Deprecated: no longer in use.
+                    description: 'Deprecated: no longer in use.'
                     properties:
                       configuration:
                         description: |-
@@ -4868,10 +4815,7 @@ spec:
                         type: boolean
                     type: object
                   route:
-                    description: |-
-                      The configuration of Route trait.
-
-                      Deprecated: use ingress instead.
+                    description: 'Deprecated: use ingress instead.'
                     properties:
                       annotations:
                         additionalProperties:
@@ -5071,10 +5015,7 @@ spec:
                         type: string
                     type: object
                   service-binding:
-                    description: |-
-                      The configuration of Service Binding trait.
-
-                      Deprecated: no longer in use.
+                    description: 'Deprecated: no longer in use.'
                     properties:
                       configuration:
                         description: |-
@@ -5104,10 +5045,7 @@ spec:
                     - configuration
                     type: object
                   telemetry:
-                    description: |-
-                      The configuration of Telemetry trait.
-
-                      Deprecated: no longer in use.
+                    description: 'Deprecated: no longer in use.'
                     properties:
                       auto:
                         description: Enables automatic configuration of the trait,

@@ -72,7 +72,6 @@ func TestKnativeService(t *testing.T) {
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKnative,
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
@@ -212,7 +211,6 @@ func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 			},
 
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKnative,
 				Traits: v1.Traits{
 					Deployer: &traitv1.DeployerTrait{
 						Kind: "knative-service",
@@ -284,7 +282,6 @@ func TestKnativeServiceWithRest(t *testing.T) {
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKnative,
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
@@ -299,6 +296,11 @@ func TestKnativeServiceWithRest(t *testing.T) {
 							Content: `<rest path="/test"></rest>`,
 						},
 						Language: v1.LanguageXML,
+					},
+				},
+				Traits: v1.Traits{
+					KnativeService: &traitv1.KnativeServiceTrait{
+						Enabled: ptr.To(true),
 					},
 				},
 			},
@@ -348,7 +350,6 @@ func TestKnativeServiceNotApplicable(t *testing.T) {
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKnative,
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
@@ -413,7 +414,6 @@ func TestKnativeServiceNoServingAvailable(t *testing.T) {
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKnative,
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
@@ -455,7 +455,9 @@ func TestKnativeServiceNoServingAvailable(t *testing.T) {
 }
 
 func TestKnativeServiceWithRollout(t *testing.T) {
-	environment := createKnativeServiceTestEnvironment(t, &traitv1.KnativeServiceTrait{RolloutDuration: "60s"})
+	environment := createKnativeServiceTestEnvironment(t,
+		&traitv1.KnativeServiceTrait{Enabled: ptr.To(true), RolloutDuration: "60s"},
+	)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("knative-service"))
 
@@ -469,6 +471,7 @@ func TestKnativeServiceWithRollout(t *testing.T) {
 
 func TestKnativeServiceWithVisibility(t *testing.T) {
 	environment := createKnativeServiceTestEnvironment(t, &traitv1.KnativeServiceTrait{
+		Enabled:    ptr.To(true),
 		Visibility: "cluster-local",
 	})
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -485,6 +488,7 @@ func TestKnativeServiceWithVisibility(t *testing.T) {
 func TestKnativeServiceWithTimeoutSeconds(t *testing.T) {
 	timeoutSeconds := int64(44)
 	environment := createKnativeServiceTestEnvironment(t, &traitv1.KnativeServiceTrait{
+		Enabled:        ptr.To(true),
 		TimeoutSeconds: &timeoutSeconds,
 	})
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -520,7 +524,6 @@ func createKnativeServiceTestEnvironment(t *testing.T, trait *traitv1.KnativeSer
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKnative,
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
@@ -560,10 +563,12 @@ func createKnativeServiceTestEnvironment(t *testing.T, trait *traitv1.KnativeSer
 
 	return environment
 }
+
 func TestServiceAnnotation(t *testing.T) {
 	annotationsTest := map[string]string{"haproxy.router.openshift.io/balance": boolean.TrueString}
 
 	environment := createKnativeServiceTestEnvironment(t, &traitv1.KnativeServiceTrait{
+		Enabled:     ptr.To(true),
 		Annotations: map[string]string{"haproxy.router.openshift.io/balance": boolean.TrueString},
 	})
 
@@ -603,7 +608,6 @@ func TestKnativeServiceAuto(t *testing.T) {
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKnative,
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
@@ -612,6 +616,11 @@ func TestKnativeServiceAuto(t *testing.T) {
 							Compression: true,
 						},
 						Language: v1.LanguageJavaSource,
+					},
+				},
+				Traits: v1.Traits{
+					KnativeService: &traitv1.KnativeServiceTrait{
+						Enabled: ptr.To(true),
 					},
 				},
 			},

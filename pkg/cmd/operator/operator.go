@@ -23,7 +23,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"reflect"
 	"runtime"
 	"strconv"
 	"strings"
@@ -195,13 +194,15 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 		&batchv1.Job{}:       selector,
 	}
 
-	if ok, err := kubernetes.IsAPIResourceInstalled(bootstrapClient, servingv1.SchemeGroupVersion.String(),
-		reflect.TypeFor[servingv1.Service]().Name()); ok && err == nil {
+	if ok, err := kubernetes.IsAPIResourceInstalled(
+		bootstrapClient, servingv1.SchemeGroupVersion.String(), "Service",
+	); ok && err == nil {
 		selectors[&servingv1.Service{}] = selector
 	}
 
-	if ok, err := kubernetes.IsAPIResourceInstalled(bootstrapClient, batchv1.SchemeGroupVersion.String(),
-		reflect.TypeFor[batchv1.CronJob]().Name()); ok && err == nil {
+	if ok, err := kubernetes.IsAPIResourceInstalled(
+		bootstrapClient, batchv1.SchemeGroupVersion.String(), "CronJob",
+	); ok && err == nil {
 		selectors[&batchv1.CronJob{}] = selector
 	}
 

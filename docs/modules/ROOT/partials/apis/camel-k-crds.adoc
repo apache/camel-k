@@ -1890,6 +1890,19 @@ which are the conditions met (particularly useful when in ERROR phase)
 
 |===
 
+[#_camel_apache_org_v1_DeprecatedTraitProfile]
+=== DeprecatedTraitProfile(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKitSpec, IntegrationKitSpec>>
+* <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
+* <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
+* <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
+
+Deprecated: no longer in use.
+
+
 [#_camel_apache_org_v1_Endpoint]
 === Endpoint
 
@@ -2710,13 +2723,11 @@ the container image as identified in the container registry
 a list of Camel dependencies used by this kit
 
 |`profile` +
-*xref:#_camel_apache_org_v1_TraitProfile[TraitProfile]*
+*xref:#_camel_apache_org_v1_DeprecatedTraitProfile[DeprecatedTraitProfile]*
 |
 
 
-the profile which is expected by this kit
-
-Deprecated: may be removed in future releases.
+Deprecated: no longer in use.
 
 |`traits` +
 *xref:#_camel_apache_org_v1_IntegrationKitTraits[IntegrationKitTraits]*
@@ -3189,14 +3200,11 @@ IntegrationPlatformSpec defines the desired state of IntegrationPlatform.
 what kind of cluster you're running (ie, plain Kubernetes or OpenShift)
 
 |`profile` +
-*xref:#_camel_apache_org_v1_TraitProfile[TraitProfile]*
+*xref:#_camel_apache_org_v1_DeprecatedTraitProfile[DeprecatedTraitProfile]*
 |
 
 
-the profile you wish to use. It will apply certain traits which are required by the specific profile chosen.
-It usually relates the Cluster with the optional definition of special profiles (ie, Knative)
-
-Deprecated: may be removed in future releases.
+Deprecated: no longer in use.
 
 |`build` +
 *xref:#_camel_apache_org_v1_IntegrationPlatformBuildSpec[IntegrationPlatformBuildSpec]*
@@ -3540,13 +3548,11 @@ the reference of the `IntegrationKit` which is used for this Integration
 the list of Camel or Maven dependencies required by the Integration
 
 |`profile` +
-*xref:#_camel_apache_org_v1_TraitProfile[TraitProfile]*
+*xref:#_camel_apache_org_v1_DeprecatedTraitProfile[DeprecatedTraitProfile]*
 |
 
 
-the profile needed to run this Integration
-
-Deprecated: may be removed in future releases.
+Deprecated: no longer in use.
 
 |`traits` +
 *xref:#_camel_apache_org_v1_Traits[Traits]*
@@ -3648,13 +3654,11 @@ the Java jar dependency to execute (if available)
 a list of dependencies needed by the application
 
 |`profile` +
-*xref:#_camel_apache_org_v1_TraitProfile[TraitProfile]*
+*xref:#_camel_apache_org_v1_DeprecatedTraitProfile[DeprecatedTraitProfile]*
 |
 
 
-the profile needed to run this Integration
-
-Deprecated: may be removed in future releases.
+Deprecated: no longer in use.
 
 |`traits` +
 *xref:#_camel_apache_org_v1_Traits[Traits]*
@@ -5943,21 +5947,6 @@ generic raw message, typically a map containing the keys (trait parameters) and 
 
 |===
 
-[#_camel_apache_org_v1_TraitProfile]
-=== TraitProfile(`string` alias)
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_IntegrationKitSpec, IntegrationKitSpec>>
-* <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
-* <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
-* <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
-
-TraitProfile represents lists of traits that are enabled for the specific installation/integration.
-
-Deprecated: may be removed in future releases.
-
-
 [#_camel_apache_org_v1_TraitSpec]
 === TraitSpec
 
@@ -6070,8 +6059,6 @@ The configuration of Environment trait
 |
 
 
-The configuration of Error Handler trait.
-
 Deprecated: no longer in use.
 
 |`gateway` +
@@ -6128,8 +6115,6 @@ The configuration of Istio trait
 |
 
 
-The configuration of Jolokia trait.
-
 Deprecated: no longer in use.
 
 |`jvm` +
@@ -6158,7 +6143,7 @@ The configuration of Keda trait
 |
 
 
-The configuration of Knative trait
+Deprecated: no longer in use.
 
 |`knative-service` +
 *xref:#_camel_apache_org_v1_trait_KnativeServiceTrait[KnativeServiceTrait]*
@@ -6172,16 +6157,12 @@ The configuration of Knative Service trait
 |
 
 
-The configuration of Logging trait.
-
 Deprecated: no longer in use.
 
 |`master` +
 *xref:#_camel_apache_org_v1_trait_MasterTrait[MasterTrait]*
 |
 
-
-The configuration of Master trait.
 
 Deprecated: no longer in use.
 
@@ -6196,8 +6177,6 @@ The configuration of Mount trait
 *xref:#_camel_apache_org_v1_trait_OpenAPITrait[OpenAPITrait]*
 |
 
-
-The configuration of OpenAPI trait.
 
 Deprecated: no longer in use.
 
@@ -6255,16 +6234,12 @@ The configuration of Quarkus trait
 |
 
 
-The configuration of Registry trait (support removed since version 2.5.0).
-
 Deprecated: no longer in use.
 
 |`route` +
 *xref:#_camel_apache_org_v1_trait_RouteTrait[RouteTrait]*
 |
 
-
-The configuration of Route trait.
 
 Deprecated: use ingress instead.
 
@@ -6287,16 +6262,12 @@ The configuration of Service trait
 |
 
 
-The configuration of Service Binding trait.
-
 Deprecated: no longer in use.
 
 |`telemetry` +
 *xref:#_camel_apache_org_v1_trait_TelemetryTrait[TelemetryTrait]*
 |
 
-
-The configuration of Telemetry trait.
 
 Deprecated: no longer in use.
 
@@ -8538,6 +8509,8 @@ Refer to the Knative documentation for more information.
 
 * <<#_camel_apache_org_v1_Traits, Traits>>
 
+WARNING: This trait is no longer in use.
+
 The Knative trait automatically discovers addresses of Knative resources and inject them into the
 running integration.
 
@@ -8547,7 +8520,6 @@ WARNING: The Knative trait is **deprecated** and will be removed in future relea
 use Camel (Quarkus) Knative component instead.
 
 The trait is enabled by default when the Knative profile is active.
-
 
 
 [cols="2,2a",options="header"]

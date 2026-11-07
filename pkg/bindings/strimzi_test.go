@@ -47,7 +47,6 @@ func TestStrimziDirect(t *testing.T) {
 		Ctx:       ctx,
 		Client:    client,
 		Namespace: "test",
-		Profile:   camelv1.TraitProfileKubernetes,
 	}
 
 	endpoint := camelv1.Endpoint{
@@ -67,7 +66,6 @@ func TestStrimziDirect(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotNil(t, binding)
 	assert.Equal(t, "kafka:mytopic?brokers=my-cluster-kafka-bootstrap%3A9092", binding.URI)
-	assert.Equal(t, camelv1.Traits{}, binding.Traits)
 }
 
 func TestStrimziLookup(t *testing.T) {
@@ -110,7 +108,6 @@ func TestStrimziLookup(t *testing.T) {
 	bindingContext := BindingContext{
 		Ctx:       ctx,
 		Namespace: "test",
-		Profile:   camelv1.TraitProfileKubernetes,
 	}
 
 	endpoint := camelv1.Endpoint{
@@ -127,7 +124,6 @@ func TestStrimziLookup(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotNil(t, binding)
 	assert.Equal(t, "kafka:mytopicy?brokers=my-clusterx-kafka-bootstrap%3A9092", binding.URI)
-	assert.Equal(t, camelv1.Traits{}, binding.Traits)
 }
 
 func TestStrimziLookupByTopicName(t *testing.T) {
@@ -173,7 +169,6 @@ func TestStrimziLookupByTopicName(t *testing.T) {
 	bindingContext := BindingContext{
 		Ctx:       ctx,
 		Namespace: "test",
-		Profile:   camelv1.TraitProfileKubernetes,
 	}
 
 	endpoint := camelv1.Endpoint{
@@ -190,7 +185,6 @@ func TestStrimziLookupByTopicName(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotNil(t, binding)
 	assert.Equal(t, "kafka:my-topic-name?brokers=my-clusterx-kafka-bootstrap%3A9092", binding.URI)
-	assert.Equal(t, camelv1.Traits{}, binding.Traits)
 }
 
 func TestStrimziKafkaCR(t *testing.T) {
@@ -223,7 +217,6 @@ func TestStrimziKafkaCR(t *testing.T) {
 	bindingContext := BindingContext{
 		Ctx:       ctx,
 		Namespace: "test",
-		Profile:   camelv1.TraitProfileKubernetes,
 	}
 
 	endpoint := camelv1.Endpoint{
@@ -243,7 +236,6 @@ func TestStrimziKafkaCR(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotNil(t, binding)
 	assert.Equal(t, "kafka:my-topic?brokers=my-clusterx-kafka-bootstrap%3A9092", binding.URI)
-	assert.Equal(t, camelv1.Traits{}, binding.Traits)
 }
 
 func TestStrimziPassThrough(t *testing.T) {
@@ -276,7 +268,6 @@ func TestStrimziPassThrough(t *testing.T) {
 	bindingContext := BindingContext{
 		Ctx:       ctx,
 		Namespace: "test",
-		Profile:   camelv1.TraitProfileKubernetes,
 	}
 
 	endpoint := camelv1.Endpoint{

@@ -23,7 +23,6 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	eventing "github.com/apache/camel-k/v2/pkg/apis/duck/knative/eventing/v1"
 	"github.com/apache/camel-k/v2/pkg/internal"
 	corev1 "k8s.io/api/core/v1"
 
@@ -74,29 +73,6 @@ func TestValidateEndpoint(t *testing.T) {
 			},
 		},
 		{
-			name:      "knative-broker-ref",
-			namespace: "test",
-			endpoint: v1.Endpoint{
-				Ref: &corev1.ObjectReference{
-					Kind:       "Broker",
-					APIVersion: eventing.SchemeGroupVersion.String(),
-					Name:       "foo-broker",
-				},
-			},
-		},
-		{
-			name:      "knative-broker-ref-in-namespace",
-			namespace: "test",
-			endpoint: v1.Endpoint{
-				Ref: &corev1.ObjectReference{
-					Kind:       "Broker",
-					Namespace:  "test",
-					APIVersion: eventing.SchemeGroupVersion.String(),
-					Name:       "foo-broker",
-				},
-			},
-		},
-		{
 			name:      "it-ref",
 			namespace: "test",
 			endpoint: v1.Endpoint{
@@ -133,7 +109,6 @@ func TestValidateEndpoint(t *testing.T) {
 				Ctx:       ctx,
 				Client:    client,
 				Namespace: tc.namespace,
-				Profile:   v1.DefaultTraitProfile,
 			}
 			if tc.operatorNamespace != "" {
 				// special privileges required for cross namespace
@@ -267,23 +242,4 @@ func TestValidateEndpointKameletCrossNSDenied(t *testing.T) {
 	require.Error(t, err)
 	require.Equal(t, "cross-namespace Pipe reference authorization denied for the ServiceAccount my-sa"+
 		" and resources kamelets", err.Error())
-}
-
-func TestValidateEndpointErrorKnativeCrossNS(t *testing.T) {
-	endpoint := v1.Endpoint{
-		Ref: &corev1.ObjectReference{
-			Kind:       "Broker",
-			Namespace:  "knative-ns",
-			APIVersion: eventing.SchemeGroupVersion.String(),
-			Name:       "foo-broker",
-		},
-	}
-
-	bindingContext := BindingContext{
-		Namespace: "default",
-	}
-
-	err := validateEndpoint(bindingContext, endpoint)
-	require.Error(t, err)
-	require.Equal(t, "cross-namespace Pipe references are not allowed for Knative", err.Error())
 }

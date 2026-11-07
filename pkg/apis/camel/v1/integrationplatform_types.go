@@ -29,11 +29,8 @@ import (
 type IntegrationPlatformSpec struct {
 	// what kind of cluster you're running (ie, plain Kubernetes or OpenShift)
 	Cluster IntegrationPlatformCluster `json:"cluster,omitempty"`
-	// the profile you wish to use. It will apply certain traits which are required by the specific profile chosen.
-	// It usually relates the Cluster with the optional definition of special profiles (ie, Knative)
-	//
-	// Deprecated: may be removed in future releases.
-	Profile TraitProfile `json:"profile,omitempty"`
+	// Deprecated: no longer in use.
+	Profile DeprecatedTraitProfile `json:"profile,omitempty"`
 	// specify how to build the Integration/IntegrationKits
 	Build IntegrationPlatformBuildSpec `json:"build,omitempty"`
 	// list of traits to be executed for all the Integration/IntegrationKits built from this IntegrationPlatform

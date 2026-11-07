@@ -327,6 +327,7 @@ func TestDeploymentContainerPorts(t *testing.T) {
 	_, _, err = traitCatalog.apply(&environment)
 	require.NoError(t, err)
 	container := environment.GetIntegrationContainer()
+	require.NotNil(t, container)
 	assert.Len(t, container.Ports, 1)
 	assert.Equal(t, int32(8081), container.Ports[0].ContainerPort)
 	assert.Equal(t, "http", container.Ports[0].Name)
@@ -350,12 +351,13 @@ func TestKnativeServiceContainerPorts(t *testing.T) {
 		IntegrationKit: &v1.IntegrationKit{},
 		Integration: &v1.Integration{
 			Spec: v1.IntegrationSpec{
-				//nolint:staticcheck
-				Profile: v1.TraitProfileKnative,
 				Traits: v1.Traits{
 					Container: &traitv1.ContainerTrait{
 						Port:        8081,
 						ServicePort: 8081,
+					},
+					KnativeService: &traitv1.KnativeServiceTrait{
+						Enabled: ptr.To(true),
 					},
 				},
 				Sources: []v1.SourceSpec{
@@ -390,7 +392,7 @@ func TestKnativeServiceContainerPorts(t *testing.T) {
 }
 
 func TestDefaultKubernetesSecurityContext(t *testing.T) {
-	environment := createSettingContextEnvironment(t, v1.TraitProfileKubernetes)
+	environment := createSettingContextEnvironment(t)
 	traitCatalog := NewCatalog(nil)
 
 	conditions, traits, err := traitCatalog.apply(environment)
@@ -416,7 +418,7 @@ func TestDefaultKubernetesSecurityContext(t *testing.T) {
 }
 
 func TestDefaultKnativeSecurityContext(t *testing.T) {
-	environment := createSettingContextEnvironment(t, v1.TraitProfileKnative)
+	environment := createSettingContextEnvironment(t)
 	environment.Integration.Spec.Traits.KnativeService = &traitv1.KnativeServiceTrait{
 		Trait: traitv1.Trait{
 			Enabled: ptr.To(true),
@@ -450,7 +452,7 @@ func TestDefaultKnativeSecurityContext(t *testing.T) {
 }
 
 func TestUserSecurityContext(t *testing.T) {
-	environment := createSettingContextEnvironment(t, v1.TraitProfileKubernetes)
+	environment := createSettingContextEnvironment(t)
 	environment.Integration.Spec.Traits = v1.Traits{
 		Container: &traitv1.ContainerTrait{
 			RunAsNonRoot:             ptr.To(false),
@@ -485,7 +487,7 @@ func TestUserSecurityContext(t *testing.T) {
 }
 
 func TestUserDefaultResources(t *testing.T) {
-	environment := createSettingContextEnvironment(t, v1.TraitProfileKubernetes)
+	environment := createSettingContextEnvironment(t)
 	traitCatalog := NewCatalog(nil)
 	conditions, traits, err := traitCatalog.apply(environment)
 
@@ -507,7 +509,7 @@ func TestUserDefaultResources(t *testing.T) {
 }
 
 func TestContainerPorts(t *testing.T) {
-	environment := createSettingContextEnvironment(t, v1.TraitProfileKubernetes)
+	environment := createSettingContextEnvironment(t)
 	environment.Integration.Spec.Traits = v1.Traits{
 		Container: &traitv1.ContainerTrait{
 			Ports: []string{"aPort;1234", "anotherPort;12345;UDP"},
@@ -542,7 +544,7 @@ func TestContainerPorts(t *testing.T) {
 }
 
 func TestContainerPortsSyntaxError(t *testing.T) {
-	environment := createSettingContextEnvironment(t, v1.TraitProfileKubernetes)
+	environment := createSettingContextEnvironment(t)
 	environment.Integration.Spec.Traits = v1.Traits{
 		Container: &traitv1.ContainerTrait{
 			Ports: []string{"aPort;notAnInt"},
@@ -571,7 +573,7 @@ func TestContainerPortsSyntaxError(t *testing.T) {
 		err.Error())
 }
 
-func createSettingContextEnvironment(t *testing.T, profile v1.TraitProfile) *Environment {
+func createSettingContextEnvironment(t *testing.T) *Environment {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 	client, _ := internal.NewFakeClient()
@@ -588,10 +590,7 @@ func createSettingContextEnvironment(t *testing.T, profile v1.TraitProfile) *Env
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseDeploying,
 			},
-			Spec: v1.IntegrationSpec{
-				//nolint:staticcheck
-				Profile: profile,
-			},
+			Spec: v1.IntegrationSpec{},
 		},
 		IntegrationKit: &v1.IntegrationKit{
 			Status: v1.IntegrationKitStatus{

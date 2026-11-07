@@ -112,28 +112,37 @@ func TestCapabilityPropertyKey(t *testing.T) {
 }
 
 func TestDetermineControllerStrategyDefault(t *testing.T) {
-	e := createTestEnvironment(t, v1.DefaultTraitProfile)
+	tc, e := createTestEnvironment(t)
+	_, _, err := tc.apply(e)
+	require.NoError(t, err)
 	strategy, err := e.DetermineControllerStrategy()
 	require.NoError(t, err)
 	assert.Equal(t, DefaultControllerStrategy, strategy)
 }
 
-func TestDetermineControllerStrategyAutoKnative(t *testing.T) {
-	e := createTestEnvironment(t, v1.TraitProfileKnative)
+func TestDetermineControllerStrategyKnative(t *testing.T) {
+	tc, e := createTestEnvironment(t)
+	e.Integration.Spec.Traits = v1.Traits{
+		KnativeService: &trait.KnativeServiceTrait{
+			Enabled: ptr.To(true),
+		},
+	}
+	_, _, err := tc.apply(e)
+	require.NoError(t, err)
 	strategy, err := e.DetermineControllerStrategy()
 	require.NoError(t, err)
 	assert.Equal(t, ControllerStrategyKnativeService, strategy)
 }
 
 func TestDetermineControllerStrategyNonManagedBuildDefault(t *testing.T) {
-	e := createNonManagedBuildTestEnvironment(t, v1.TraitProfileKnative)
+	e := createNonManagedBuildTestEnvironment(t)
 	strategy, err := e.DetermineControllerStrategy()
 	require.NoError(t, err)
 	assert.Equal(t, DefaultControllerStrategy, strategy)
 }
 
 func TestDetermineControllerStrategyNonManagedBuildForceKnative(t *testing.T) {
-	e := createNonManagedBuildTestEnvironment(t, v1.TraitProfileKnative)
+	e := createNonManagedBuildTestEnvironment(t)
 	e.Integration.Spec.Traits.KnativeService = &trait.KnativeServiceTrait{
 		Trait: trait.Trait{
 			Enabled: ptr.To(true),
@@ -148,7 +157,7 @@ func TestDetermineControllerStrategyNonManagedBuildForceKnative(t *testing.T) {
 	assert.Equal(t, ControllerStrategyKnativeService, strategy)
 }
 
-func createTestEnvironment(t *testing.T, profile v1.TraitProfile) *Environment {
+func createTestEnvironment(t *testing.T) (*Catalog, *Environment) {
 	t.Helper()
 
 	catalog, err := camel.DefaultCatalog()
@@ -170,8 +179,6 @@ func createTestEnvironment(t *testing.T, profile v1.TraitProfile) *Environment {
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
-				//nolint:staticcheck
-				Profile: profile,
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
@@ -201,13 +208,10 @@ func createTestEnvironment(t *testing.T, profile v1.TraitProfile) *Environment {
 		Resources:      kubernetes.NewCollection(),
 	}
 
-	_, _, err = traitCatalog.apply(environment)
-	require.NoError(t, err)
-
-	return environment
+	return traitCatalog, environment
 }
 
-func createNonManagedBuildTestEnvironment(t *testing.T, profile v1.TraitProfile) *Environment {
+func createNonManagedBuildTestEnvironment(t *testing.T) *Environment {
 	t.Helper()
 	client, _ := internal.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
@@ -229,8 +233,6 @@ func createNonManagedBuildTestEnvironment(t *testing.T, profile v1.TraitProfile)
 				Phase:           v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
-				//nolint:staticcheck
-				Profile: profile,
 				Traits: v1.Traits{
 					Container: &trait.ContainerTrait{
 						Image: "my-container-image",

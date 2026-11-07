@@ -42,10 +42,8 @@ type IntegrationStatusApplyConfiguration struct {
 	Jar *string `json:"jar,omitempty"`
 	// a list of dependencies needed by the application
 	Dependencies []string `json:"dependencies,omitempty"`
-	// the profile needed to run this Integration
-	//
-	// Deprecated: may be removed in future releases.
-	Profile *camelv1.TraitProfile `json:"profile,omitempty"`
+	// Deprecated: no longer in use.
+	DeprecatedProfile *camelv1.DeprecatedTraitProfile `json:"profile,omitempty"`
 	// the traits executed for the Integration
 	Traits *TraitsApplyConfiguration `json:"traits,omitempty"`
 	// the reference of the `IntegrationKit` which is used for this Integration
@@ -138,11 +136,11 @@ func (b *IntegrationStatusApplyConfiguration) WithDependencies(values ...string)
 	return b
 }
 
-// WithProfile sets the Profile field in the declarative configuration to the given value
+// WithDeprecatedProfile sets the DeprecatedProfile field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Profile field is set to the value of the last call.
-func (b *IntegrationStatusApplyConfiguration) WithProfile(value camelv1.TraitProfile) *IntegrationStatusApplyConfiguration {
-	b.Profile = &value
+// If called multiple times, the DeprecatedProfile field is set to the value of the last call.
+func (b *IntegrationStatusApplyConfiguration) WithDeprecatedProfile(value camelv1.DeprecatedTraitProfile) *IntegrationStatusApplyConfiguration {
+	b.DeprecatedProfile = &value
 	return b
 }
 

@@ -21,8 +21,6 @@ import (
 	"context"
 	"fmt"
 
-	"reflect"
-
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -269,7 +267,7 @@ func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 	// Watch for all the resources
 	watchIntegrationResources(c, b)
 	// Watch for the CronJob conditionally
-	if ok, err := kubernetes.IsAPIResourceInstalled(c, batchv1.SchemeGroupVersion.String(), reflect.TypeFor[batchv1.CronJob]().Name()); ok && err == nil {
+	if ok, err := kubernetes.IsAPIResourceInstalled(c, batchv1.SchemeGroupVersion.String(), "CronJob"); ok && err == nil {
 		watchCronJobResources(b)
 	}
 	// Watch for the Knative Services conditionally
@@ -360,7 +358,7 @@ func watchCronJobResources(b *builder.Builder) {
 
 func watchKnativeResources(c client.Client, b *builder.Builder) error {
 	// Watch for the owned Knative Services conditionally
-	ok, err := kubernetes.IsAPIResourceInstalled(c, servingv1.SchemeGroupVersion.String(), reflect.TypeFor[servingv1.Service]().Name())
+	ok, err := kubernetes.IsAPIResourceInstalled(c, servingv1.SchemeGroupVersion.String(), "Service")
 	if err != nil {
 		return err
 	}

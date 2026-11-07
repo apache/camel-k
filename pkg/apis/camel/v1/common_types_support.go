@@ -50,11 +50,6 @@ func (in *RuntimeSpec) CapabilityDependencies(capability string) []MavenArtifact
 	return deps
 }
 
-// Equal checks if the profile is equal to the given profile (case insensitive).
-func (p TraitProfile) Equal(other TraitProfile) bool {
-	return strings.EqualFold(string(p), string(other))
-}
-
 // Merge merges the given Traits into the receiver.
 func (t *Traits) Merge(other Traits) error {
 	// marshal both

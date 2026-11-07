@@ -157,25 +157,14 @@ func (t *gcTrait) garbageCollectResources(e *Environment) error {
 		return fmt.Errorf("cannot discover GVK types: %w", err)
 	}
 
-	profile := e.DetermineProfile()
 	deletableTypesByProfile := map[schema.GroupVersionKind]struct{}{}
 
-	if profile == v1.TraitProfileKnative {
-		if ok, _ := knative.IsServingInstalled(e.Client); ok {
-			deletableTypesByProfile[schema.GroupVersionKind{
-				Kind:    "Service",
-				Group:   "serving.knative.dev",
-				Version: "v1",
-			}] = struct{}{}
-		}
-
-		if ok, _ := knative.IsEventingInstalled(e.Client); ok {
-			deletableTypesByProfile[schema.GroupVersionKind{
-				Kind:    "Trigger",
-				Group:   "eventing.knative.dev",
-				Version: "v1",
-			}] = struct{}{}
-		}
+	if ok, _ := knative.IsServingInstalled(e.Client); ok {
+		deletableTypesByProfile[schema.GroupVersionKind{
+			Kind:    "Service",
+			Group:   "serving.knative.dev",
+			Version: "v1",
+		}] = struct{}{}
 	}
 
 	// copy profile related deletable types if not already present

@@ -54,7 +54,8 @@ func (t *securityContextTrait) Configure(e *Environment) (bool, *TraitCondition,
 		return false, nil, nil
 	}
 
-	// We better disable because "PodSecurityContext properties can affect non-user sidecar containers that come from Knative or your service mesh".
+	// We better disable because "PodSecurityContext properties can affect non-user sidecar containers that come from Knative
+	// or your service mesh".
 	// https://knative.dev/docs/serving/configuration/feature-flags/#kubernetes-security-context
 	// The user should instead use container security context.
 	condition := e.Integration.Status.GetCondition(v1.IntegrationConditionKnativeServiceAvailable)
@@ -67,7 +68,8 @@ func (t *securityContextTrait) Configure(e *Environment) (bool, *TraitCondition,
 		), nil
 	}
 
-	return true, nil, nil
+	// only apply if it exists any deployment associated to the integration
+	return e.GetIntegrationPodSpec() != nil, nil, nil
 }
 
 func (t *securityContextTrait) Apply(e *Environment) error {

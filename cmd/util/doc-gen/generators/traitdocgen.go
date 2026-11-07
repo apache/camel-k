@@ -34,7 +34,6 @@ import (
 	"k8s.io/gengo/generator"
 	"k8s.io/gengo/types"
 
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
 )
@@ -202,8 +201,6 @@ func writeDescription(t *types.Type, traitID string, content *[]string) {
 	res := append([]string(nil), pre...)
 	res = append(res, adocDescriptionMarkerStart)
 	res = append(res, filterOutTagsAndComments(t.CommentLines)...)
-	profiles := strings.Join(determineProfiles(traitID), ", ")
-	res = append(res, "", fmt.Sprintf("This trait is available in the following profiles: **%s**.", profiles))
 	if isPlatformTrait(traitID) {
 		res = append(res, "", fmt.Sprintf("NOTE: The %s trait is a *platform trait* and cannot be disabled by the user.", traitID))
 	}
@@ -374,19 +371,4 @@ func isPlatformTrait(traitID string) bool {
 	t := catalog.GetTrait(traitID)
 
 	return t.IsPlatformTrait()
-}
-
-func determineProfiles(traitID string) []string {
-	var profiles []string
-	catalog := trait.NewCatalog(nil)
-	for _, p := range v1.AllTraitProfiles {
-		traits := catalog.TraitsForProfile(p)
-		for _, t := range traits {
-			if string(t.ID()) == traitID {
-				profiles = append(profiles, string(p))
-			}
-		}
-	}
-
-	return profiles
 }

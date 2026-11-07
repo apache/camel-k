@@ -274,7 +274,7 @@ func TestCronDeps(t *testing.T) {
 		Resources:      kubernetes.NewCollection(),
 	}
 
-	c, err := newFakeClient("ns")
+	c, err := internal.NewFakeClient()
 	require.NoError(t, err)
 
 	tc := NewCatalog(c)
@@ -341,7 +341,7 @@ func TestCronMultipleScheduleFallback(t *testing.T) {
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
-	c, err := newFakeClient("ns")
+	c, err := internal.NewFakeClient()
 	assert.Nil(t, err)
 
 	tc := NewCatalog(c)
@@ -404,7 +404,7 @@ func TestCronDepsFallback(t *testing.T) {
 		Resources:      kubernetes.NewCollection(),
 	}
 
-	c, err := newFakeClient("ns")
+	c, err := internal.NewFakeClient()
 	require.NoError(t, err)
 
 	tc := NewCatalog(c)
@@ -470,7 +470,7 @@ func TestCronWithActiveDeadline(t *testing.T) {
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
-	c, err := newFakeClient("ns")
+	c, err := internal.NewFakeClient()
 	require.NoError(t, err)
 
 	tc := NewCatalog(c)
@@ -548,7 +548,7 @@ func TestCronWithBackoffLimit(t *testing.T) {
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
-	c, err := newFakeClient("ns")
+	c, err := internal.NewFakeClient()
 	require.NoError(t, err)
 
 	tc := NewCatalog(c)
@@ -630,7 +630,7 @@ func TestCronWithTimeZone(t *testing.T) {
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
-	c, err := newFakeClient("ns")
+	c, err := internal.NewFakeClient()
 	require.NoError(t, err)
 
 	tc := NewCatalog(c)
@@ -700,7 +700,7 @@ func TestCronAuto(t *testing.T) {
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
-	c, err := newFakeClient("ns")
+	c, err := internal.NewFakeClient()
 	require.NoError(t, err)
 
 	tc := NewCatalog(c)
@@ -762,7 +762,7 @@ func TestCronRuntimeTriggerReplacement(t *testing.T) {
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
-	c, err := newFakeClient("ns")
+	c, err := internal.NewFakeClient()
 	assert.Nil(t, err)
 
 	tc := NewCatalog(c)

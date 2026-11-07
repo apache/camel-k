@@ -28,10 +28,9 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 
+	"github.com/apache/camel-k/v2/pkg/bindings"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/util"
-	"github.com/apache/camel-k/v2/pkg/util/bindings"
-	"github.com/apache/camel-k/v2/pkg/util/knative"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/property"
 )
@@ -88,13 +87,6 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, pipe *v1.Pipe) (
 		it.Spec.Replicas = &replicas
 	}
 
-	profile, err := determineTraitProfile(c)
-	if err != nil {
-		return nil, err
-	}
-	//nolint:staticcheck
-	it.Spec.Profile = profile
-
 	if pipe.Spec.ServiceAccountName != "" {
 		it.Spec.ServiceAccountName = pipe.Spec.ServiceAccountName
 	}
@@ -103,7 +95,6 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, pipe *v1.Pipe) (
 		Ctx:                ctx,
 		Client:             c,
 		Namespace:          it.Namespace,
-		Profile:            profile,
 		Metadata:           it.Annotations,
 		ServiceAccountName: it.Spec.ServiceAccountName,
 	}
@@ -228,10 +219,6 @@ func configureBinding(integration *v1.Integration, bindings ...*bindings.Binding
 		if b == nil {
 			continue
 		}
-		//nolint:staticcheck
-		if err := integration.Spec.Traits.Merge(b.Traits); err != nil {
-			return err
-		}
 		for k, v := range b.ApplicationProperties {
 			entry, err := property.EncodePropertyFileEntry(k, v)
 			if err != nil {
@@ -243,15 +230,4 @@ func configureBinding(integration *v1.Integration, bindings ...*bindings.Binding
 	}
 
 	return nil
-}
-
-//nolint:staticcheck
-func determineTraitProfile(c client.Client) (v1.TraitProfile, error) {
-	if ok, err := knative.IsInstalled(c); err != nil {
-		return "", err
-	} else if ok {
-		return v1.TraitProfileKnative, nil
-	}
-
-	return v1.DefaultTraitProfile, nil
 }

@@ -32,10 +32,8 @@ type IntegrationKitSpecApplyConfiguration struct {
 	Image *string `json:"image,omitempty"`
 	// a list of Camel dependencies used by this kit
 	Dependencies []string `json:"dependencies,omitempty"`
-	// the profile which is expected by this kit
-	//
-	// Deprecated: may be removed in future releases.
-	Profile *camelv1.TraitProfile `json:"profile,omitempty"`
+	// Deprecated: no longer in use.
+	Profile *camelv1.DeprecatedTraitProfile `json:"profile,omitempty"`
 	// traits that the kit will execute
 	Traits *IntegrationKitTraitsApplyConfiguration `json:"traits,omitempty"`
 	// Deprecated:
@@ -81,7 +79,7 @@ func (b *IntegrationKitSpecApplyConfiguration) WithDependencies(values ...string
 // WithProfile sets the Profile field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Profile field is set to the value of the last call.
-func (b *IntegrationKitSpecApplyConfiguration) WithProfile(value camelv1.TraitProfile) *IntegrationKitSpecApplyConfiguration {
+func (b *IntegrationKitSpecApplyConfiguration) WithProfile(value camelv1.DeprecatedTraitProfile) *IntegrationKitSpecApplyConfiguration {
 	b.Profile = &value
 	return b
 }

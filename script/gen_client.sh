@@ -51,7 +51,6 @@ $(go env GOPATH)/bin/client-gen \
   --output-dir=./strimzi/clientset/ \
   --output-pkg=github.com/apache/camel-k/v2/pkg/client/strimzi/clientset
 
-
 $(go env GOPATH)/bin/client-gen \
   --input keda/v1alpha1 \
   --go-header-file=../../script/headers/default.txt \
@@ -65,8 +64,6 @@ $(go env GOPATH)/bin/client-gen \
   --input-base=github.com/apache/camel-k/v2/pkg/apis/duck \
   --output-dir=./arkmq/clientset/ \
   --output-pkg=github.com/apache/camel-k/v2/pkg/client/arkmq/clientset
-
-
 
 $(go env GOPATH)/bin/lister-gen \
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1" \

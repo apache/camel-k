@@ -26,7 +26,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	eventingv1 "github.com/apache/camel-k/v2/pkg/apis/duck/knative/eventing/v1"
 	servingv1 "github.com/apache/camel-k/v2/pkg/apis/duck/knative/serving/v1"
 	"github.com/apache/camel-k/v2/pkg/internal"
 	appsv1 "k8s.io/api/apps/v1"
@@ -221,7 +220,6 @@ func TestGarbageCollectPreserveResourcesOwnerReferenceMismatch(t *testing.T) {
 func TestGarbageCollectKnativeServiceResources(t *testing.T) {
 	gcTrait, environment := createNominalGCTest()
 	environment.Integration.Generation = 2
-	environment.Integration.Spec.Profile = v1.TraitProfileKnative
 
 	gcTrait.Client, _ = internal.NewFakeClient(&servingv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -250,48 +248,6 @@ func TestGarbageCollectKnativeServiceResources(t *testing.T) {
 			assert.Equal(t, environment.Integration.Name, obj.GetName())
 			assert.Equal(t, "Service", obj.GetObjectKind().GroupVersionKind().Kind)
 			assert.Equal(t, servingv1.SchemeGroupVersion, obj.GetObjectKind().GroupVersionKind().GroupVersion())
-			resourceDeleted = true
-			return nil
-		},
-	})
-	err := gcTrait.garbageCollectResources(environment)
-
-	require.NoError(t, err)
-	assert.True(t, resourceDeleted)
-}
-
-func TestGarbageCollectKnativeTriggerResources(t *testing.T) {
-	gcTrait, environment := createNominalGCTest()
-	environment.Integration.Generation = 2
-	environment.Integration.Spec.Profile = v1.TraitProfileKnative
-
-	gcTrait.Client, _ = internal.NewFakeClient(&eventingv1.Trigger{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      environment.Integration.Name,
-			Namespace: environment.Integration.Namespace,
-			Labels: map[string]string{
-				v1.IntegrationLabel:           environment.Integration.Name,
-				v1.IntegrationGenerationLabel: "1",
-			},
-			OwnerReferences: []metav1.OwnerReference{
-				{
-					APIVersion: v1.SchemeGroupVersion.String(),
-					Kind:       "Integration",
-					Name:       environment.Integration.Name,
-				},
-			},
-		},
-	})
-
-	environment.Client = gcTrait.Client
-
-	resourceDeleted := false
-	fakeClient := gcTrait.Client.(*internal.FakeClient) //nolint
-	fakeClient.Intercept(&interceptor.Funcs{
-		Delete: func(ctx context.Context, client ctrl.WithWatch, obj ctrl.Object, opts ...ctrl.DeleteOption) error {
-			assert.Equal(t, environment.Integration.Name, obj.GetName())
-			assert.Equal(t, "Trigger", obj.GetObjectKind().GroupVersionKind().Kind)
-			assert.Equal(t, eventingv1.SchemeGroupVersion, obj.GetObjectKind().GroupVersionKind().GroupVersion())
 			resourceDeleted = true
 			return nil
 		},

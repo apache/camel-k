@@ -40,7 +40,6 @@ func TestCamelURI(t *testing.T) {
 		Ctx:       ctx,
 		Client:    client,
 		Namespace: "test",
-		Profile:   camelv1.TraitProfileKubernetes,
 	}
 
 	endpoint := camelv1.Endpoint{
@@ -70,7 +69,6 @@ func TestCamelURISkip(t *testing.T) {
 		Ctx:       ctx,
 		Client:    client,
 		Namespace: "test",
-		Profile:   camelv1.TraitProfileKubernetes,
 	}
 
 	endpoint := camelv1.Endpoint{

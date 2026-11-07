@@ -65,28 +65,8 @@ func newKnativeServiceTrait() Trait {
 	}
 }
 
-// IsAllowedInProfile overrides default.
-//
-//nolint:staticcheck
-func (t *knativeServiceTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
-	return profile.Equal(v1.TraitProfileKnative)
-}
-
 func (t *knativeServiceTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
-	if e.Integration == nil {
-		return false, nil, nil
-	}
-	if !ptr.Deref(t.Enabled, true) {
-		return false, NewIntegrationCondition(
-			"KnativeService",
-			v1.IntegrationConditionKnativeServiceAvailable,
-			corev1.ConditionFalse,
-			v1.IntegrationConditionKnativeServiceNotAvailableReason,
-			"explicitly disabled",
-		), nil
-	}
-
-	if !e.IntegrationInRunningPhases() {
+	if e.Integration == nil || !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
 
@@ -134,10 +114,6 @@ func (t *knativeServiceTrait) Apply(e *Environment) error {
 }
 
 func (t *knativeServiceTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
-	if !ptr.Deref(t.Enabled, true) {
-		// explicitly disabled by the user
-		return nil, nil
-	}
 	// Knative serving is required
 	if ok, _ := knative.IsServingInstalled(e.Client); !ok {
 		if ptr.Deref(t.Enabled, false) {
@@ -154,13 +130,13 @@ func (t *knativeServiceTrait) SelectControllerStrategy(e *Environment) (*Control
 		return &controllerStrategy, nil
 	}
 
-	enabled, err := e.ConsumeMeta(false, func(meta metadata.IntegrationMetadata) bool {
+	hasKnativeEndpoints, err := e.ConsumeMeta(false, func(meta metadata.IntegrationMetadata) bool {
 		return meta.ExposesHTTPServices || meta.PassiveEndpoints
 	})
 	if err != nil {
 		return nil, err
 	}
-	if enabled {
+	if hasKnativeEndpoints && ptr.Deref(t.Enabled, false) {
 		controllerStrategy := ControllerStrategyKnativeService
 
 		return &controllerStrategy, nil

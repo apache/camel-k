@@ -88,25 +88,6 @@ func TestExpressions(t *testing.T) {
 			stringRef: "serving.knative.dev/v1:Service:service",
 		},
 		{
-			name: "channel:ns3/ch2",
-			ref: corev1.ObjectReference{
-				Kind:       "Channel",
-				APIVersion: "messaging.knative.dev/v1",
-				Namespace:  "ns3",
-				Name:       "ch2",
-			},
-			stringRef: "messaging.knative.dev/v1:Channel:ns3/ch2",
-		},
-		{
-			name: "broker:default",
-			ref: corev1.ObjectReference{
-				Kind:       "Broker",
-				APIVersion: "eventing.knative.dev/v1",
-				Name:       "default",
-			},
-			stringRef: "eventing.knative.dev/v1:Broker:default",
-		},
-		{
 			name: "PostgreSQL:ns1/db",
 			ref: corev1.ObjectReference{
 				Kind:      "PostgreSQL",

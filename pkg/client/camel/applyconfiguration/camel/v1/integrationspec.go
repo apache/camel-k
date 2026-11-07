@@ -42,10 +42,8 @@ type IntegrationSpecApplyConfiguration struct {
 	IntegrationKit *corev1.ObjectReference `json:"integrationKit,omitempty"`
 	// the list of Camel or Maven dependencies required by the Integration
 	Dependencies []string `json:"dependencies,omitempty"`
-	// the profile needed to run this Integration
-	//
-	// Deprecated: may be removed in future releases.
-	Profile *camelv1.TraitProfile `json:"profile,omitempty"`
+	// Deprecated: no longer in use.
+	DeprecatedProfile *camelv1.DeprecatedTraitProfile `json:"profile,omitempty"`
 	// the traits needed to run this Integration
 	Traits *TraitsApplyConfiguration `json:"traits,omitempty"`
 	// Pod template customization.
@@ -129,11 +127,11 @@ func (b *IntegrationSpecApplyConfiguration) WithDependencies(values ...string) *
 	return b
 }
 
-// WithProfile sets the Profile field in the declarative configuration to the given value
+// WithDeprecatedProfile sets the DeprecatedProfile field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Profile field is set to the value of the last call.
-func (b *IntegrationSpecApplyConfiguration) WithProfile(value camelv1.TraitProfile) *IntegrationSpecApplyConfiguration {
-	b.Profile = &value
+// If called multiple times, the DeprecatedProfile field is set to the value of the last call.
+func (b *IntegrationSpecApplyConfiguration) WithDeprecatedProfile(value camelv1.DeprecatedTraitProfile) *IntegrationSpecApplyConfiguration {
+	b.DeprecatedProfile = &value
 	return b
 }
 
