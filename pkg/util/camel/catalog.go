@@ -21,8 +21,6 @@ import (
 	"context"
 	"path/filepath"
 
-	yaml2 "gopkg.in/yaml.v2"
-
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -32,6 +30,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/jvm"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/maven"
+	yaml "sigs.k8s.io/yaml/goyaml.v2"
 )
 
 func DefaultCatalog() (*RuntimeCatalog, error) {
@@ -57,7 +56,7 @@ func catalogForRuntimeProvider(provider v1.RuntimeProvider) (*RuntimeCatalog, er
 		}
 
 		var c v1.CamelCatalog
-		if err := yaml2.Unmarshal(content, &c); err != nil {
+		if err := yaml.Unmarshal(content, &c); err != nil {
 			return nil, err
 		}
 
@@ -156,7 +155,7 @@ func GenerateCatalogCommon(
 			return err
 		}
 
-		return yaml2.Unmarshal(content, &catalog)
+		return yaml.Unmarshal(content, &catalog)
 	})
 
 	return NewRuntimeCatalog(catalog), err

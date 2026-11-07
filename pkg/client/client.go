@@ -24,7 +24,6 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/scale"
 
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -47,6 +46,7 @@ import (
 	camel "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
 	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
 const (
@@ -202,7 +202,7 @@ func initialize(kubeconfig string) {
 		if kc, err := shouldUseContainerMode(); kc && err == nil {
 			return
 		} else if err != nil {
-			logrus.Errorf("could not determine if running in a container: %v", err)
+			log.Error(err, "could not determine if running in a container")
 		}
 		var err error
 		kubeconfig, err = getDefaultKubeConfigFile()
@@ -240,7 +240,7 @@ func GetCurrentNamespace(kubeconfig string) (string, error) {
 		var err error
 		kubeconfig, err = getDefaultKubeConfigFile()
 		if err != nil {
-			logrus.Errorf("Cannot get information about current user: %v", err)
+			log.Error(err, "Cannot get information about current user")
 		}
 	}
 	if kubeconfig == "" {

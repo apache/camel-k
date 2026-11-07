@@ -21,10 +21,9 @@ import (
 	"fmt"
 	"strings"
 
-	yaml2 "gopkg.in/yaml.v2"
-
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/uri"
+	yaml "sigs.k8s.io/yaml/goyaml.v2"
 )
 
 // YAMLInspector inspects YAML DSL spec.
@@ -36,7 +35,7 @@ type YAMLInspector struct {
 func (i YAMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 	definitions := make([]map[string]any, 0)
 
-	if err := yaml2.Unmarshal([]byte(source.Content), &definitions); err != nil {
+	if err := yaml.Unmarshal([]byte(source.Content), &definitions); err != nil {
 		return err
 	}
 
@@ -242,7 +241,7 @@ func (i YAMLInspector) parseStepsParam(steps []any, meta *Metadata) error {
 func (i YAMLInspector) ReplaceFromURI(source *v1.SourceSpec, newFromURI string) (bool, error) {
 	definitions := make([]map[string]any, 0)
 
-	if err := yaml2.Unmarshal([]byte(source.Content), &definitions); err != nil {
+	if err := yaml.Unmarshal([]byte(source.Content), &definitions); err != nil {
 		return false, err
 	}
 
@@ -271,7 +270,7 @@ func (i YAMLInspector) ReplaceFromURI(source *v1.SourceSpec, newFromURI string) 
 		}
 	}
 
-	newContentRaw, err := yaml2.Marshal(definitions)
+	newContentRaw, err := yaml.Marshal(definitions)
 	if err != nil {
 		return false, err
 	}

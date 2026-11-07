@@ -31,8 +31,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-
-	yaml "gopkg.in/yaml.v2"
+	yaml "sigs.k8s.io/yaml/goyaml.v2"
 )
 
 const (
