@@ -40,9 +40,7 @@ import (
 	io2 "github.com/apache/camel-k/v2/pkg/util/io"
 
 	"github.com/apache/camel-k/v2/pkg/util/sets"
-	"go.uber.org/multierr"
-
-	yaml2 "gopkg.in/yaml.v2"
+	yaml "sigs.k8s.io/yaml/goyaml.v2"
 )
 
 // ListOfLazyEvaluatedEnvVars -- List of unevaluated environment variables.
@@ -341,7 +339,7 @@ func JSONToMap(src []byte) (map[string]any, error) {
 }
 
 func MapToYAML(src map[string]any) ([]byte, error) {
-	yamldata, err := yaml2.Marshal(&src)
+	yamldata, err := yaml.Marshal(&src)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling to yaml: %w", err)
 	}
@@ -379,7 +377,7 @@ func ReadFile(filename string) ([]byte, error) {
 }
 
 func Close(err error, closer io.Closer) error {
-	return multierr.Append(err, closer.Close())
+	return errors.Join(err, closer.Close())
 }
 
 // CloseQuietly unconditionally close an io.Closer
@@ -456,7 +454,7 @@ func WithTempDir(pattern string, consumer func(string) error) error {
 	consumerErr := consumer(tmpDir)
 	removeErr := os.RemoveAll(tmpDir)
 
-	return multierr.Append(consumerErr, removeErr)
+	return errors.Join(consumerErr, removeErr)
 }
 
 var propertyRegex = regexp.MustCompile("'.+'|\".+\"|[^.]+")

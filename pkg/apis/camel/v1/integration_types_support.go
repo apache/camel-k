@@ -26,10 +26,10 @@ import (
 	"slices"
 	"strings"
 
-	yaml2 "gopkg.in/yaml.v2"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/yaml"
+	k8syaml "sigs.k8s.io/yaml/goyaml.v2"
 )
 
 const (
@@ -513,7 +513,7 @@ func ToYamlDSL(flows []Flow) ([]byte, error) {
 	if err := d.Decode(&jsondata); err != nil {
 		return nil, fmt.Errorf("error unmarshalling json: %w", err)
 	}
-	yamldata, err := yaml2.Marshal(&jsondata)
+	yamldata, err := k8syaml.Marshal(&jsondata)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling to yaml: %w", err)
 	}

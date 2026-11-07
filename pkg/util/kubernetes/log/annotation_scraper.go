@@ -20,13 +20,12 @@ package log
 import (
 	"bufio"
 	"context"
+	"errors"
 	"io"
 	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
-
-	"go.uber.org/multierr"
 
 	klog "github.com/apache/camel-k/v2/pkg/util/log"
 	corev1 "k8s.io/api/core/v1"
@@ -71,9 +70,7 @@ func (s *SelectorScraper) Start(ctx context.Context) *bufio.Reader {
 	bufPipeIn := bufio.NewReader(pipeIn)
 	bufPipeOut := bufio.NewWriter(pipeOut)
 	closeFun := func() error {
-		return multierr.Append(
-			bufPipeOut.Flush(),
-			pipeOut.Close())
+		return errors.Join(bufPipeOut.Flush(), pipeOut.Close())
 	}
 	go s.periodicSynchronize(ctx, bufPipeOut, closeFun)
 

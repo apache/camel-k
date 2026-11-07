@@ -19,13 +19,13 @@ package registry
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 
 	"github.com/apache/camel-k/v2/pkg/util/io"
 
 	"github.com/apache/camel-k/v2/pkg/client"
-	"go.uber.org/multierr"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -50,7 +50,7 @@ func MountSecretRegistryConfig(ctx context.Context, c client.Client, namespace, 
 	secret, err := c.CoreV1().Secrets(namespace).Get(ctx, name, metav1.GetOptions{})
 	if err != nil {
 		if removeErr := os.RemoveAll(dir); removeErr != nil {
-			err = multierr.Append(err, removeErr)
+			err = errors.Join(err, removeErr)
 		}
 
 		return "", err
@@ -59,7 +59,7 @@ func MountSecretRegistryConfig(ctx context.Context, c client.Client, namespace, 
 	for file, content := range secret.Data {
 		if err := os.WriteFile(filepath.Join(dir, remap(file)), content, io.FilePerm600); err != nil {
 			if removeErr := os.RemoveAll(dir); removeErr != nil {
-				err = multierr.Append(err, removeErr)
+				err = errors.Join(err, removeErr)
 			}
 
 			return "", err
@@ -75,7 +75,7 @@ func mountSecretRegistryConfigFromEnvVar(dir string) (string, error) {
 	// #nosec G703 -- jibConfigExtension is a fixed filename; dir is a trusted directory.
 	if err := os.WriteFile(filepath.Join(dir, jibConfigExtension), []byte(registrySecretValue), io.FilePerm600); err != nil {
 		if removeErr := os.RemoveAll(dir); removeErr != nil {
-			err = multierr.Append(err, removeErr)
+			err = errors.Join(err, removeErr)
 		}
 
 		return "", err
