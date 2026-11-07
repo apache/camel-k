@@ -60,7 +60,7 @@ changes in metadata.
 
 | mount.scanKameletsImplicitLabelSecrets
 | bool
-| Deprecated: no longer available since version 2.5.
+| Deprecated: no longer in use.
 
 |===
 

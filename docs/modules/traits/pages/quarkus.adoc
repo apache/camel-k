@@ -35,14 +35,7 @@ The following configuration options are available:
 
 | quarkus.packageTypes
 | []github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait.QuarkusPackageType
-| The Quarkus package types, `fast-jar` or `native` (default `fast-jar`).
-In case both `fast-jar` and `native` are specified, two `IntegrationKit` resources are created,
-with the native kit having precedence over the `fast-jar` one once ready.
-The order influences the resolution of the current kit for the integration.
-The kit corresponding to the first package type will be assigned to the
-integration in case no existing kit that matches the integration exists.
-
-Deprecated: use `build-mode` instead.
+| Deprecated: use `build-mode` instead.
 
 | quarkus.buildMode
 | []github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait.QuarkusMode

@@ -46,6 +46,6 @@ type MountTrait struct {
 	// marked with `camel.apache.org/integration` label to be taken in account. The resource will be watched for any kind change, also for
 	// changes in metadata.
 	HotReload *bool `json:"hotReload,omitempty" property:"hot-reload"`
-	// Deprecated: no longer available since version 2.5.
-	ScanKameletsImplicitLabelSecrets *bool `json:"scanKameletsImplicitLabelSecrets,omitempty" property:"scan-kamelets-implicit-label-secrets"`
+	// Deprecated: no longer in use.
+	DeprecatedScanKameletsImplicitLabelSecrets *bool `json:"scanKameletsImplicitLabelSecrets,omitempty" property:"scan-kamelets-implicit-label-secrets"`
 }

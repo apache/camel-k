@@ -526,12 +526,10 @@ spec:
                           existing containers (default `true`)
                         type: boolean
                       limitCPU:
-                        description: 'Deprecated: use TasksRequestCPU instead with
-                          task name `builder`.'
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       limitMemory:
-                        description: 'Deprecated: use TasksRequestCPU instead with
-                          task name `builder`.'
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       mavenProfiles:
                         description: 'Deprecated: no longer in use.'
@@ -560,32 +558,21 @@ spec:
                           type: string
                         type: array
                       requestCPU:
-                        description: 'Deprecated: use TasksRequestCPU instead with
-                          task name `builder`.'
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       requestMemory:
-                        description: 'Deprecated: use TasksRequestCPU instead with
-                          task name `builder`.'
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       strategy:
                         description: 'Deprecated: no longer in use'
                         type: string
                       tasks:
-                        description: |-
-                          A list of tasks to be executed (available only when using `pod` strategy) with format `<name>;<container-image>;<container-command>`.
-
-                          Deprecated: may be removed in future versions.
+                        description: 'Deprecated: no longer in use.'
                         items:
                           type: string
                         type: array
                       tasksFilter:
-                        description: |-
-                          A list of tasks sorted by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.
-                          Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`)
-                          if you need to execute them. Useful only with `pod` strategy. Disabled by default, you need to enable via
-                          BUILDER_TASKS_ENABLED=true environment variable on operator Deployment.
-
-                          Deprecated: may be removed in future versions.
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       tasksLimitCPU:
                         description: A list of limit cpu configuration for the specific
@@ -869,15 +856,7 @@ spec:
                         description: 'Deprecated: no longer in use.'
                         type: boolean
                       kind:
-                        description: |-
-                          Allows to explicitly select the desired deployment kind between `deployment`, `cron-job` or `knative-service`
-                          when creating the resources for running the integration.
-
-                          Deprecated: this feature will be removed in future releases.
-                        enum:
-                        - deployment
-                        - cron-job
-                        - knative-service
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       useSSA:
                         description: 'Deprecated: no longer in use.'
@@ -1017,10 +996,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       discoveryCache:
-                        description: |-
-                          Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`).
-
-                          Deprecated: no longer in use.
+                        description: 'Deprecated: no longer in use.'
                         enum:
                         - disabled
                         - disk
@@ -1265,10 +1241,8 @@ spec:
                           See https://kubernetes.io/docs/concepts/services-networking/ingress/
                         type: string
                       path:
-                        description: |-
-                          To configure the path exposed by the ingress (default `/`).
-
-                          Deprecated: In favor of `paths` - left for backward compatibility.
+                        description: 'Deprecated: In favor of `paths` - left for backward
+                          compatibility.'
                         type: string
                       pathType:
                         description: |-
@@ -1460,16 +1434,14 @@ spec:
                             type: string
                         type: object
                       caCert:
-                        description: 'Deprecated: Use CACertificates instead. Path
-                          to a PEM-encoded CA certificate file.'
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       caCertMountPath:
                         description: The path where the generated truststore will
                           be mounted (default `/etc/camel/conf.d/_truststore`).
                         type: string
                       caCertPassword:
-                        description: 'Deprecated: Use CACertificates instead. Path
-                          to a file containing the truststore password.'
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       caCertificates:
                         description: A list of CA certificates to import into the
@@ -1521,10 +1493,7 @@ spec:
                           type: string
                         type: array
                       printCommand:
-                        description: |-
-                          Prints the command used the start the JVM in the container logs (default `true`).
-
-                          Deprecated: no longer in use.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       truststorePasswordPath:
                         description: Path to a file containing the password for the
@@ -1958,8 +1927,7 @@ spec:
                           type: string
                         type: array
                       scanKameletsImplicitLabelSecrets:
-                        description: 'Deprecated: no longer available since version
-                          2.5.'
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       volumes:
                         description: |-
@@ -2110,8 +2078,7 @@ spec:
                     description: The configuration of Pull Secret trait
                     properties:
                       auto:
-                        description: Automatically configures the platform registry
-                          secret on the pod if it is of type `kubernetes.io/dockerconfigjson`.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       configuration:
                         description: |-
@@ -2125,11 +2092,7 @@ spec:
                           traits share this common property.
                         type: boolean
                       imagePullerDelegation:
-                        description: |-
-                          When using a global operator with a shared platform, this enables delegation of the `system:image-puller`
-                          cluster role on the operator namespace to the integration service account.
-
-                          Deprecated: may be removed in future releases.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       secretName:
                         description: The pull secret name to set on the Pod.
@@ -2170,15 +2133,7 @@ spec:
                           in the runtime catalog)
                         type: string
                       packageTypes:
-                        description: |-
-                          The Quarkus package types, `fast-jar` or `native` (default `fast-jar`).
-                          In case both `fast-jar` and `native` are specified, two `IntegrationKit` resources are created,
-                          with the native kit having precedence over the `fast-jar` one once ready.
-                          The order influences the resolution of the current kit for the integration.
-                          The kit corresponding to the first package type will be assigned to the
-                          integration in case no existing kit that matches the integration exists.
-
-                          Deprecated: use `build-mode` instead.
+                        description: 'Deprecated: use `build-mode` instead.'
                         items:
                           description: |-
                             QuarkusPackageType is the type of Quarkus build packaging.
@@ -2381,10 +2336,7 @@ spec:
                           by the NetworkPolicy.
                         type: object
                       nodePort:
-                        description: |-
-                          Enable Service to be exposed as NodePort (default `false`).
-
-                          Deprecated: Use service type instead.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       ports:
                         description: |-
@@ -3014,12 +2966,10 @@ spec:
                           existing containers (default `true`)
                         type: boolean
                       limitCPU:
-                        description: 'Deprecated: use TasksRequestCPU instead with
-                          task name `builder`.'
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       limitMemory:
-                        description: 'Deprecated: use TasksRequestCPU instead with
-                          task name `builder`.'
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       mavenProfiles:
                         description: 'Deprecated: no longer in use.'
@@ -3048,32 +2998,21 @@ spec:
                           type: string
                         type: array
                       requestCPU:
-                        description: 'Deprecated: use TasksRequestCPU instead with
-                          task name `builder`.'
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       requestMemory:
-                        description: 'Deprecated: use TasksRequestCPU instead with
-                          task name `builder`.'
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       strategy:
                         description: 'Deprecated: no longer in use'
                         type: string
                       tasks:
-                        description: |-
-                          A list of tasks to be executed (available only when using `pod` strategy) with format `<name>;<container-image>;<container-command>`.
-
-                          Deprecated: may be removed in future versions.
+                        description: 'Deprecated: no longer in use.'
                         items:
                           type: string
                         type: array
                       tasksFilter:
-                        description: |-
-                          A list of tasks sorted by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.
-                          Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`)
-                          if you need to execute them. Useful only with `pod` strategy. Disabled by default, you need to enable via
-                          BUILDER_TASKS_ENABLED=true environment variable on operator Deployment.
-
-                          Deprecated: may be removed in future versions.
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       tasksLimitCPU:
                         description: A list of limit cpu configuration for the specific
@@ -3357,15 +3296,7 @@ spec:
                         description: 'Deprecated: no longer in use.'
                         type: boolean
                       kind:
-                        description: |-
-                          Allows to explicitly select the desired deployment kind between `deployment`, `cron-job` or `knative-service`
-                          when creating the resources for running the integration.
-
-                          Deprecated: this feature will be removed in future releases.
-                        enum:
-                        - deployment
-                        - cron-job
-                        - knative-service
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       useSSA:
                         description: 'Deprecated: no longer in use.'
@@ -3505,10 +3436,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       discoveryCache:
-                        description: |-
-                          Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`).
-
-                          Deprecated: no longer in use.
+                        description: 'Deprecated: no longer in use.'
                         enum:
                         - disabled
                         - disk
@@ -3753,10 +3681,8 @@ spec:
                           See https://kubernetes.io/docs/concepts/services-networking/ingress/
                         type: string
                       path:
-                        description: |-
-                          To configure the path exposed by the ingress (default `/`).
-
-                          Deprecated: In favor of `paths` - left for backward compatibility.
+                        description: 'Deprecated: In favor of `paths` - left for backward
+                          compatibility.'
                         type: string
                       pathType:
                         description: |-
@@ -3948,16 +3874,14 @@ spec:
                             type: string
                         type: object
                       caCert:
-                        description: 'Deprecated: Use CACertificates instead. Path
-                          to a PEM-encoded CA certificate file.'
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       caCertMountPath:
                         description: The path where the generated truststore will
                           be mounted (default `/etc/camel/conf.d/_truststore`).
                         type: string
                       caCertPassword:
-                        description: 'Deprecated: Use CACertificates instead. Path
-                          to a file containing the truststore password.'
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       caCertificates:
                         description: A list of CA certificates to import into the
@@ -4009,10 +3933,7 @@ spec:
                           type: string
                         type: array
                       printCommand:
-                        description: |-
-                          Prints the command used the start the JVM in the container logs (default `true`).
-
-                          Deprecated: no longer in use.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       truststorePasswordPath:
                         description: Path to a file containing the password for the
@@ -4446,8 +4367,7 @@ spec:
                           type: string
                         type: array
                       scanKameletsImplicitLabelSecrets:
-                        description: 'Deprecated: no longer available since version
-                          2.5.'
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       volumes:
                         description: |-
@@ -4598,8 +4518,7 @@ spec:
                     description: The configuration of Pull Secret trait
                     properties:
                       auto:
-                        description: Automatically configures the platform registry
-                          secret on the pod if it is of type `kubernetes.io/dockerconfigjson`.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       configuration:
                         description: |-
@@ -4613,11 +4532,7 @@ spec:
                           traits share this common property.
                         type: boolean
                       imagePullerDelegation:
-                        description: |-
-                          When using a global operator with a shared platform, this enables delegation of the `system:image-puller`
-                          cluster role on the operator namespace to the integration service account.
-
-                          Deprecated: may be removed in future releases.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       secretName:
                         description: The pull secret name to set on the Pod.
@@ -4658,15 +4573,7 @@ spec:
                           in the runtime catalog)
                         type: string
                       packageTypes:
-                        description: |-
-                          The Quarkus package types, `fast-jar` or `native` (default `fast-jar`).
-                          In case both `fast-jar` and `native` are specified, two `IntegrationKit` resources are created,
-                          with the native kit having precedence over the `fast-jar` one once ready.
-                          The order influences the resolution of the current kit for the integration.
-                          The kit corresponding to the first package type will be assigned to the
-                          integration in case no existing kit that matches the integration exists.
-
-                          Deprecated: use `build-mode` instead.
+                        description: 'Deprecated: use `build-mode` instead.'
                         items:
                           description: |-
                             QuarkusPackageType is the type of Quarkus build packaging.
@@ -4869,10 +4776,7 @@ spec:
                           by the NetworkPolicy.
                         type: object
                       nodePort:
-                        description: |-
-                          Enable Service to be exposed as NodePort (default `false`).
-
-                          Deprecated: Use service type instead.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       ports:
                         description: |-

@@ -36,8 +36,7 @@ type CACertEntry struct {
 
 // hasCACerts returns true if any CA certificates are configured.
 func (t *jvmTrait) hasCACerts() bool {
-	//nolint:staticcheck
-	return len(t.CACertificates) > 0 || t.CACert != ""
+	return len(t.CACertificates) > 0
 }
 
 func (t *jvmTrait) getCACertMountPath() string {
@@ -64,10 +63,6 @@ func (t *jvmTrait) getTruststorePasswordPath() string {
 	if t.hasBaseTruststore() {
 		return t.BaseTruststore.PasswordPath
 	}
-	//nolint:staticcheck
-	if t.CACert != "" && t.CACertPassword != "" {
-		return t.CACertPassword
-	}
 
 	return ""
 }
@@ -86,23 +81,6 @@ func (t *jvmTrait) getAllCACertEntries() []CACertEntry {
 		}
 	}
 
-	//nolint:staticcheck
-	if t.CACert != "" && t.CACertPassword != "" {
-		found := false
-		for _, e := range entries {
-			//nolint:staticcheck
-			if e.CertPath == t.CACert {
-				found = true
-
-				break
-			}
-		}
-		if !found {
-			//nolint:staticcheck
-			entries = append(entries, CACertEntry{CertPath: t.CACert})
-		}
-	}
-
 	return entries
 }
 
@@ -111,11 +89,6 @@ func (t *jvmTrait) validateCACertConfig() error {
 		if cert.CertPath == "" {
 			return fmt.Errorf("CACertificates[%d]: cert-path is required", i)
 		}
-	}
-
-	//nolint:staticcheck
-	if t.CACert != "" && t.CACertPassword == "" {
-		return errors.New("ca-cert-password is required when ca-cert is specified")
 	}
 
 	if t.BaseTruststore != nil {

@@ -39,10 +39,8 @@ type IngressTrait struct {
 	Annotations map[string]string `json:"annotations,omitempty" property:"annotations"`
 	// To configure the host exposed by the ingress.
 	Host string `json:"host,omitempty" property:"host"`
-	// To configure the path exposed by the ingress (default `/`).
-	//
 	// Deprecated: In favor of `paths` - left for backward compatibility.
-	Path string `json:"path,omitempty" property:"path"`
+	DeprecatedPath string `json:"path,omitempty" property:"path"`
 	// To configure the paths exposed by the ingress (default `['/']`).
 	Paths []string `json:"paths,omitempty" property:"paths"`
 	// To configure the path type exposed by the ingress.

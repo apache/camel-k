@@ -26,10 +26,8 @@ package trait
 type GCTrait struct {
 	Trait `json:",inline" property:",squash"`
 
-	// Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`).
-	//
 	// Deprecated: no longer in use.
-	DiscoveryCache *DiscoveryCacheType `json:"discoveryCache,omitempty" property:"discovery-cache"`
+	DeprecatedDiscoveryCache *DiscoveryCacheType `json:"discoveryCache,omitempty" property:"discovery-cache"`
 }
 
 // DiscoveryCacheType --.

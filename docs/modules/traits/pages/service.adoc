@@ -36,9 +36,7 @@ The following configuration options are available:
 
 | service.nodePort
 | bool
-| Enable Service to be exposed as NodePort (default `false`).
-
-Deprecated: Use service type instead.
+| Deprecated: no longer in use.
 
 | service.type
 | github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait.ServiceType

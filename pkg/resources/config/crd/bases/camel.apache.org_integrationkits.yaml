@@ -242,12 +242,10 @@ spec:
                           existing containers (default `true`)
                         type: boolean
                       limitCPU:
-                        description: 'Deprecated: use TasksRequestCPU instead with
-                          task name `builder`.'
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       limitMemory:
-                        description: 'Deprecated: use TasksRequestCPU instead with
-                          task name `builder`.'
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       mavenProfiles:
                         description: 'Deprecated: no longer in use.'
@@ -276,32 +274,21 @@ spec:
                           type: string
                         type: array
                       requestCPU:
-                        description: 'Deprecated: use TasksRequestCPU instead with
-                          task name `builder`.'
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       requestMemory:
-                        description: 'Deprecated: use TasksRequestCPU instead with
-                          task name `builder`.'
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       strategy:
                         description: 'Deprecated: no longer in use'
                         type: string
                       tasks:
-                        description: |-
-                          A list of tasks to be executed (available only when using `pod` strategy) with format `<name>;<container-image>;<container-command>`.
-
-                          Deprecated: may be removed in future versions.
+                        description: 'Deprecated: no longer in use.'
                         items:
                           type: string
                         type: array
                       tasksFilter:
-                        description: |-
-                          A list of tasks sorted by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.
-                          Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`)
-                          if you need to execute them. Useful only with `pod` strategy. Disabled by default, you need to enable via
-                          BUILDER_TASKS_ENABLED=true environment variable on operator Deployment.
-
-                          Deprecated: may be removed in future versions.
+                        description: 'Deprecated: no longer in use.'
                         type: string
                       tasksLimitCPU:
                         description: A list of limit cpu configuration for the specific
@@ -406,15 +393,7 @@ spec:
                           in the runtime catalog)
                         type: string
                       packageTypes:
-                        description: |-
-                          The Quarkus package types, `fast-jar` or `native` (default `fast-jar`).
-                          In case both `fast-jar` and `native` are specified, two `IntegrationKit` resources are created,
-                          with the native kit having precedence over the `fast-jar` one once ready.
-                          The order influences the resolution of the current kit for the integration.
-                          The kit corresponding to the first package type will be assigned to the
-                          integration in case no existing kit that matches the integration exists.
-
-                          Deprecated: use `build-mode` instead.
+                        description: 'Deprecated: use `build-mode` instead.'
                         items:
                           description: |-
                             QuarkusPackageType is the type of Quarkus build packaging.

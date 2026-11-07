@@ -468,34 +468,6 @@ func (e *Environment) GetIntegrationContainer() *corev1.Container {
 	return e.Resources.GetContainerByName(containerName)
 }
 
-func (e *Environment) getIntegrationContainerPort() *corev1.ContainerPort {
-	container := e.GetIntegrationContainer()
-	if container == nil {
-		return nil
-	}
-
-	// User specified port name
-	portName := ""
-	if t := e.Catalog.GetTrait(containerTraitID); t != nil {
-		if ct, ok := t.(*containerTrait); ok {
-			portName = ct.PortName
-		}
-	}
-
-	// default port name (may change according the controller strategy, ie Knative)
-	if portName == "" {
-		portName = e.determineDefaultContainerPortName()
-	}
-
-	for i, port := range container.Ports {
-		if port.Name == portName {
-			return &container.Ports[i]
-		}
-	}
-
-	return nil
-}
-
 // CapabilityPropertyKey returns the key or expand any variable provided in it. vars variable contain the
 // possible dynamic values to use.
 func CapabilityPropertyKey(camelPropertyKey string, vars map[string]string) string {

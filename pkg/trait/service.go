@@ -136,9 +136,6 @@ func (t *serviceTrait) Apply(e *Environment) error {
 			default:
 				return fmt.Errorf("unsupported service type: %s", *t.Type)
 			}
-		} else if ptr.Deref(t.NodePort, false) { //nolint:staticcheck
-			t.L.ForIntegration(e.Integration).Infof("Integration %s/%s should no more use the flag node-port as it is deprecated, use type instead", e.Integration.Namespace, e.Integration.Name)
-			serviceType = corev1.ServiceTypeNodePort
 		}
 		svc.Spec.Type = serviceType
 	}

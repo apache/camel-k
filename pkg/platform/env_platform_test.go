@@ -217,32 +217,6 @@ func TestAffinityNodeLabelsAllowList_MultipleKeys(t *testing.T) {
 	assert.Equal(t, []string{"kubernetes.io/hostname", "topology.kubernetes.io/zone"}, allowList)
 }
 
-func TestBuilderTasksEnabled_NotSet(t *testing.T) {
-	// env var not set – default is disabled
-	assert.False(t, BuilderTasksEnabled())
-}
-
-func TestBuilderTasksEnabled_True(t *testing.T) {
-	t.Setenv("BUILDER_TASKS_ENABLED", "true")
-	assert.True(t, BuilderTasksEnabled())
-}
-
-func TestBuilderTasksEnabled_False(t *testing.T) {
-	t.Setenv("BUILDER_TASKS_ENABLED", "false")
-	assert.False(t, BuilderTasksEnabled())
-}
-
-func TestBuilderTasksEnabled_FalseUpperCase(t *testing.T) {
-	t.Setenv("BUILDER_TASKS_ENABLED", "FALSE")
-	assert.False(t, BuilderTasksEnabled())
-}
-
-func TestBuilderTasksEnabled_Empty(t *testing.T) {
-	t.Setenv("BUILDER_TASKS_ENABLED", "")
-	// empty string is not "false" – treat as enabled
-	assert.False(t, BuilderTasksEnabled())
-}
-
 func TestMavenRepoAllowed(t *testing.T) {
 	t.Setenv("MAVEN_REPOSITORIES_ALLOWED", "repo1,repo2")
 	assert.True(t, IsMavenRepoAllowed("repo1"))

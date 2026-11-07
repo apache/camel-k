@@ -55,10 +55,6 @@ Here a quick resume of the parameters you can configure as environment variables
 | Comma-separated list of label keys that CR authors are permitted to use in `affinity.nodeAffinityLabels`. When unset or empty all keys are accepted. Expressions whose key is not in the list are dropped and an info message is logged. Example: `kubernetes.io/hostname,topology.kubernetes.io/zone`.
 |
 
-| BUILDER_TASKS_ENABLED
-| Controls whether CR authors are permitted to inject custom pipeline tasks via the `builder.tasks` trait. Set to `true` to enable custom task injection for all integrations managed by this operator.
-| `false`
-
 | BUILDER_NODE_SELECTOR_ALLOWED_LABELS
 | Comma-separated list of node-selector label keys that CR authors are permitted to set via the `builder.nodeSelector` trait. When unset or empty all keys are accepted. Unlisted keys are dropped and an info message is logged. Example: `kubernetes.io/hostname,topology.kubernetes.io/zone`.
 |

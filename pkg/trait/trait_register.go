@@ -46,7 +46,6 @@ func init() {
 	AddToTraits(newOwnerTrait)
 	AddToTraits(newPdbTrait)
 	AddToTraits(newPodTrait)
-	AddToTraits(newPrometheusTrait)
 	AddToTraits(newPullSecretTrait)
 	AddToTraits(newQuarkusTrait)
 	AddToTraits(newSecurityContextTrait)

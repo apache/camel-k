@@ -45,10 +45,8 @@ type JVMTrait struct {
 	Debug *bool `json:"debug,omitempty" property:"debug"`
 	// Suspends the target JVM immediately before the main class is loaded
 	DebugSuspend *bool `json:"debugSuspend,omitempty" property:"debug-suspend"`
-	// Prints the command used the start the JVM in the container logs (default `true`).
-	//
 	// Deprecated: no longer in use.
-	PrintCommand *bool `json:"printCommand,omitempty" property:"print-command"`
+	DeprecatedPrintCommand *bool `json:"printCommand,omitempty" property:"print-command"`
 	// Transport address at which to listen for the newly launched JVM (default `*:5005`)
 	DebugAddress string `json:"debugAddress,omitempty" property:"debug-address"`
 	// A list of JVM options
@@ -67,8 +65,8 @@ type JVMTrait struct {
 	TruststorePasswordPath string `json:"truststorePasswordPath,omitempty" property:"truststore-password-path"`
 	// The path where the generated truststore will be mounted (default `/etc/camel/conf.d/_truststore`).
 	CACertMountPath string `json:"caCertMountPath,omitempty" property:"ca-cert-mount-path"`
-	// Deprecated: Use CACertificates instead. Path to a PEM-encoded CA certificate file.
-	CACert string `json:"caCert,omitempty" property:"ca-cert"`
-	// Deprecated: Use CACertificates instead. Path to a file containing the truststore password.
-	CACertPassword string `json:"caCertPassword,omitempty" property:"ca-cert-password"`
+	// Deprecated: no longer in use.
+	DeprecatedCACert string `json:"caCert,omitempty" property:"ca-cert"`
+	// Deprecated: no longer in use.
+	DeprecatedCACertPassword string `json:"caCertPassword,omitempty" property:"ca-cert-password"`
 }

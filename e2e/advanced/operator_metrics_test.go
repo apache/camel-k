@@ -57,11 +57,11 @@ func TestMetrics(t *testing.T) {
 		)
 
 		name := RandomizedSuffixName("java")
-		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "prometheus.enabled=true", "-t", "prometheus.pod-monitor=false").Execute()).To(Succeed())
-		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
 			Should(Equal(corev1.ConditionTrue))
-		g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("Magicstring!"))
 
 		pod := OperatorPod(t, ctx, ns)()
 		g.Expect(pod).NotTo(BeNil())

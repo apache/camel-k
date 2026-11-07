@@ -149,16 +149,11 @@ func (t *quarkusTrait) Matches(trait Trait) bool {
 }
 
 func (t *quarkusTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
-	condition := t.adaptDeprecatedFields()
-
+	var condition *TraitCondition
 	if t.languageSettingDeprecated(e) {
 		message := "The sources contains some language marked as deprecated. This Integration may not be supported in future release."
-		if condition == nil {
-			condition = NewIntegrationCondition(
-				"Quarkus", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, TraitConfigurationReason, message)
-		} else {
-			condition.message += message
-		}
+		condition = NewIntegrationCondition(
+			"Quarkus", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, TraitConfigurationReason, message)
 	}
 
 	if t.containsMode(traitv1.NativeQuarkusMode) && e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit) {
@@ -174,28 +169,6 @@ func (t *quarkusTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 			e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) ||
 			e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady) && e.IntegrationInRunningPhases(),
 		condition, nil
-}
-
-//nolint:staticcheck
-func (t *quarkusTrait) adaptDeprecatedFields() *TraitCondition {
-	if t.PackageTypes != nil {
-		message := "The package-type parameter is deprecated and may be removed in future releases. Make sure to use mode parameter instead."
-		t.L.Info(message)
-		for _, pt := range t.PackageTypes {
-			if pt == traitv1.NativePackageType {
-				t.Modes = append(t.Modes, traitv1.NativeQuarkusMode)
-
-				continue
-			}
-			if pt == traitv1.FastJarPackageType {
-				t.Modes = append(t.Modes, traitv1.JvmQuarkusMode)
-			}
-		}
-
-		return NewIntegrationCondition("Quarkus", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, TraitConfigurationReason, message)
-	}
-
-	return nil
 }
 
 func (t *quarkusTrait) languageSettingDeprecated(e *Environment) bool {

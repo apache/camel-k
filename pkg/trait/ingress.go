@@ -87,21 +87,6 @@ func (t *ingressTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 		t.certManagerIssuerName = issuerName
 	}
 
-	//nolint:staticcheck
-	if t.Path != "" {
-		m := "The path parameter is deprecated and may be removed in a future release. Use the paths parameter instead."
-		t.L.Info(m)
-		condition := NewIntegrationCondition(
-			"Ingress",
-			v1.IntegrationConditionTraitInfo,
-			corev1.ConditionTrue,
-			TraitConfigurationReason,
-			m,
-		)
-
-		return true, condition, nil
-	}
-
 	return true, nil, nil
 }
 
@@ -269,13 +254,9 @@ func (t *ingressTrait) getPaths(service *corev1.Service) []networkingv1.HTTPIngr
 	}
 
 	paths := []networkingv1.HTTPIngressPath{}
-	//nolint:staticcheck
-	if t.Path == "" && len(t.Paths) == 0 {
+	if len(t.Paths) == 0 {
 		paths = append(paths, createIngressPath(defaultPath))
 	} else {
-		if t.Path != "" {
-			paths = append(paths, createIngressPath(t.Path))
-		}
 		for _, p := range t.Paths {
 			paths = append(paths, createIngressPath(p))
 		}

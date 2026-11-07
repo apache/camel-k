@@ -18,15 +18,9 @@ limitations under the License.
 package trait
 
 import (
-	"fmt"
-
 	corev1 "k8s.io/api/core/v1"
-	rbacv1 "k8s.io/api/rbac/v1"
-	"k8s.io/utils/ptr"
 
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
 const (
@@ -37,9 +31,6 @@ const (
 type pullSecretTrait struct {
 	BaseTrait
 	traitv1.PullSecretTrait `property:",squash"`
-
-	deprecatedImagePullerDelegation *bool
-	secretName                      string
 }
 
 func newPullSecretTrait() Trait {
@@ -50,101 +41,21 @@ func newPullSecretTrait() Trait {
 
 func (t *pullSecretTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	var condition *TraitCondition
-	if e.Integration == nil {
-		return false, condition, nil
-	}
-	if !ptr.Deref(t.Enabled, true) {
-		return false, NewIntegrationConditionUserDisabled("PullSecret"), nil
-	}
-	if !e.IntegrationInRunningPhases() {
-		return false, condition, nil
+	if e.Integration == nil || !e.IntegrationInRunningPhases() {
+		return false, nil, nil
 	}
 
-	if ptr.Deref(t.Auto, true) {
-		condition = t.autoConfigure(e)
-	}
-
-	if t.SecretName != "" {
-		t.secretName = t.SecretName
-	}
-
-	//nolint:staticcheck
-	t.deprecatedImagePullerDelegation = t.ImagePullerDelegation
-
-	return t.secretName != "" || ptr.Deref(t.deprecatedImagePullerDelegation, false), condition, nil
-}
-func (t *pullSecretTrait) autoConfigure(e *Environment) *TraitCondition {
-	var condition *TraitCondition
-
-	if t.SecretName == "" && e.Platform.Registry.Secret != "" {
-		// This is deprecated and will be removed in future versions
-		t.secretName = e.Platform.Registry.Secret
-
-		condition = NewIntegrationCondition(
-			"PullSecret",
-			v1.IntegrationConditionTraitInfo,
-			corev1.ConditionTrue,
-			TraitConfigurationReason,
-			"Setting the configured operator pull secret: this feature is deprecated and will be removed in the future. "+
-				"Use pull-secret trait explicitly instead.",
-		)
-	}
-
-	return condition
+	return t.SecretName != "", condition, nil
 }
 
 func (t *pullSecretTrait) Apply(e *Environment) error {
-	if t.secretName != "" {
+	if t.SecretName != "" {
 		e.Resources.VisitPodSpec(func(p *corev1.PodSpec) {
 			p.ImagePullSecrets = append(p.ImagePullSecrets, corev1.LocalObjectReference{
-				Name: t.secretName,
+				Name: t.SecretName,
 			})
 		})
 	}
 
-	if ptr.Deref(t.deprecatedImagePullerDelegation, false) {
-		if err := t.delegateImagePuller(e); err != nil {
-			return err
-		}
-	}
-
 	return nil
-}
-
-func (t *pullSecretTrait) delegateImagePuller(e *Environment) error {
-	// Applying the RoleBinding directly because it's a resource in the operator namespace
-	// (different from the integration namespace when delegation is enabled).
-	rb := t.newImagePullerRoleBinding(e)
-	if _, err := kubernetes.ReplaceResource(e.Ctx, e.Client, rb); err != nil {
-		return fmt.Errorf("error during the creation of the system:image-puller delegating role binding: %w", err)
-	}
-
-	return nil
-}
-
-func (t *pullSecretTrait) newImagePullerRoleBinding(e *Environment) *rbacv1.RoleBinding {
-	targetNamespace := e.Integration.GetIntegrationKitNamespace(e.Platform.CatalogNamespace)
-
-	serviceAccount := e.Integration.Spec.ServiceAccountName
-	if serviceAccount == "" {
-		serviceAccount = "default"
-	}
-
-	return &rbacv1.RoleBinding{
-		Kind:       "RoleBinding",
-		APIVersion: rbacv1.SchemeGroupVersion.String(),
-		Namespace:  targetNamespace,
-		Name:       fmt.Sprintf("camel-k-puller-%s-%s", e.Integration.Namespace, serviceAccount),
-		RoleRef: rbacv1.RoleRef{
-			Kind: "ClusterRole",
-			Name: "system:image-puller",
-		},
-		Subjects: []rbacv1.Subject{
-			{
-				Kind:      "ServiceAccount",
-				Namespace: e.Integration.Namespace,
-				Name:      serviceAccount,
-			},
-		},
-	}
 }

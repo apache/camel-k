@@ -709,8 +709,12 @@ func TestCACertVolume(t *testing.T) {
 
 	environment.Integration.Spec.Traits.Mount = &traitv1.MountTrait{}
 	environment.Integration.Spec.Traits.JVM = &traitv1.JVMTrait{
-		CACert:         "/etc/camel/conf.d/_secrets/my-ca/ca.crt",
-		CACertPassword: "/etc/camel/conf.d/_secrets/truststore-pass/password",
+		CACertificates: []traitv1.CACertConfig{
+			traitv1.CACertConfig{
+				CertPath: "/etc/camel/conf.d/_secrets/my-ca/ca.crt",
+			},
+		},
+		TruststorePasswordPath: "/etc/camel/conf.d/_secrets/truststore-pass/password",
 	}
 	conditions, traits, err := traitCatalog.apply(environment)
 

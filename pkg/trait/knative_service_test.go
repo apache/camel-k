@@ -212,9 +212,6 @@ func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 
 			Spec: v1.IntegrationSpec{
 				Traits: v1.Traits{
-					Deployer: &traitv1.DeployerTrait{
-						Kind: "knative-service",
-					},
 					KnativeService: &traitv1.KnativeServiceTrait{
 						Trait: traitv1.Trait{
 							Enabled: ptr.To(true),

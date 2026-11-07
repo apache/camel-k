@@ -95,22 +95,6 @@ func collectConfigurationPairs(configurationType string, configurable ...v1.Conf
 	return result
 }
 
-var keyValuePairRegexp = regexp.MustCompile(`^(\w+)=(.+)$`)
-
-func keyValuePairArrayAsStringMap(pairs []string) (map[string]string, error) {
-	m := make(map[string]string)
-
-	for _, pair := range pairs {
-		if match := keyValuePairRegexp.FindStringSubmatch(pair); match != nil {
-			m[match[1]] = match[2]
-		} else {
-			return nil, fmt.Errorf("unable to parse key/value pair: %s", pair)
-		}
-	}
-
-	return m, nil
-}
-
 // filterTransferableAnnotations returns a map containing annotations that are meaningful for being transferred to child resources.
 func filterTransferableAnnotations(annotations map[string]string) map[string]string {
 	res := make(map[string]string)

@@ -516,8 +516,6 @@ func TestApplyInitContainerWithCACertsBackwardCompatibility(t *testing.T) {
 							{CertPath: "/etc/camel/conf.d/_secrets/ca1/ca.crt"},
 						},
 						TruststorePasswordPath: "/etc/camel/conf.d/_secrets/truststore/password",
-						CACert:                 "/etc/camel/conf.d/_secrets/ca2/ca.crt",
-						CACertPassword:         "/etc/camel/conf.d/_secrets/pass2/password",
 					},
 				},
 			},
@@ -540,7 +538,6 @@ func TestApplyInitContainerWithCACertsBackwardCompatibility(t *testing.T) {
 
 	commandStr := strings.Join(initContainer.Command, " ")
 	assert.Contains(t, commandStr, "/etc/camel/conf.d/_secrets/ca1/ca.crt")
-	assert.Contains(t, commandStr, "/etc/camel/conf.d/_secrets/ca2/ca.crt")
 }
 
 func TestApplyInitContainerWithBaseTruststore(t *testing.T) {

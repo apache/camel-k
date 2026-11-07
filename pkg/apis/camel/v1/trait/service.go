@@ -32,10 +32,8 @@ type ServiceTrait struct {
 
 	// To automatically detect from the code if a Service needs to be created.
 	Auto *bool `json:"auto,omitempty" property:"auto"`
-	// Enable Service to be exposed as NodePort (default `false`).
-	//
-	// Deprecated: Use service type instead.
-	NodePort *bool `json:"nodePort,omitempty" property:"node-port"`
+	// Deprecated: no longer in use.
+	DeprecatedNodePort *bool `json:"nodePort,omitempty" property:"node-port"`
 	// The type of service to be used, either 'ClusterIP', 'NodePort' or 'LoadBalancer'.
 	// +kubebuilder:validation:Enum=ClusterIP;NodePort;LoadBalancer
 	Type *ServiceType `json:"type,omitempty" property:"type"`
