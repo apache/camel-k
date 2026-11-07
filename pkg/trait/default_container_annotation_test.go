@@ -326,7 +326,7 @@ func createCronJobTestEnvironmentWithAnnotations(t *testing.T, annotations map[s
 		Resources:      kubernetes.NewCollection(),
 	}
 
-	c, err := newFakeClient(testNamespace)
+	c, err := internal.NewFakeClient()
 	require.NoError(t, err)
 
 	tc := NewCatalog(c)

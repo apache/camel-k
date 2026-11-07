@@ -43,7 +43,6 @@ type traitMetaDataRoot struct {
 type traitMetaData struct {
 	Name        string                  `yaml:"name"`
 	Platform    bool                    `yaml:"platform"`
-	Profiles    []string                `yaml:"profiles"`
 	Description string                  `yaml:"description"`
 	Properties  []traitPropertyMetaData `yaml:"properties"`
 }
@@ -122,7 +121,6 @@ func (g *traitMetaDataGen) buildDescription(t *types.Type, traitID string, td *t
 		}
 		td.Description += text
 	}
-	td.Profiles = determineProfiles(traitID)
 	td.Platform = isPlatformTrait(traitID)
 }
 

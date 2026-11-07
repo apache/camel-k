@@ -46,8 +46,6 @@ type TraitsApplyConfiguration struct {
 	Deployment *trait.DeploymentTrait `json:"deployment,omitempty"`
 	// The configuration of Environment trait
 	Environment *trait.EnvironmentTrait `json:"environment,omitempty"`
-	// The configuration of Error Handler trait.
-	//
 	// Deprecated: no longer in use.
 	DeprecatedErrorHandler *trait.ErrorHandlerTrait `json:"error-handler,omitempty"`
 	// The configuration of Istio trait
@@ -64,8 +62,6 @@ type TraitsApplyConfiguration struct {
 	InitContainers *trait.InitContainersTrait `json:"init-containers,omitempty"`
 	// The configuration of Istio trait
 	Istio *trait.IstioTrait `json:"istio,omitempty"`
-	// The configuration of Jolokia trait.
-	//
 	// Deprecated: no longer in use.
 	DeprecatedJolokia *trait.JolokiaTrait `json:"jolokia,omitempty"`
 	// The configuration of JVM trait
@@ -74,22 +70,16 @@ type TraitsApplyConfiguration struct {
 	Kamelets *trait.KameletsTrait `json:"kamelets,omitempty"`
 	// The configuration of Keda trait
 	Keda *trait.KedaTrait `json:"keda,omitempty"`
-	// The configuration of Knative trait
-	Knative *trait.KnativeTrait `json:"knative,omitempty"`
+	// Deprecated: no longer in use.
+	DeprecatedKnative *trait.KnativeTrait `json:"knative,omitempty"`
 	// The configuration of Knative Service trait
 	KnativeService *trait.KnativeServiceTrait `json:"knative-service,omitempty"`
-	// The configuration of Logging trait.
-	//
 	// Deprecated: no longer in use.
 	DeprecatedLogging *trait.LoggingTrait `json:"logging,omitempty"`
-	// The configuration of Master trait.
-	//
 	// Deprecated: no longer in use.
 	DeprecatedMaster *trait.MasterTrait `json:"master,omitempty"`
 	// The configuration of Mount trait
 	Mount *trait.MountTrait `json:"mount,omitempty"`
-	// The configuration of OpenAPI trait.
-	//
 	// Deprecated: no longer in use.
 	DeprecatedOpenAPI *trait.OpenAPITrait `json:"openapi,omitempty"`
 	// The configuration of Owner trait
@@ -106,24 +96,16 @@ type TraitsApplyConfiguration struct {
 	PullSecret *trait.PullSecretTrait `json:"pull-secret,omitempty"`
 	// The configuration of Quarkus trait
 	Quarkus *trait.QuarkusTrait `json:"quarkus,omitempty"`
-	// The configuration of Registry trait (support removed since version 2.5.0).
-	//
 	// Deprecated: no longer in use.
 	DeprecatedRegistry *trait.RegistryTrait `json:"registry,omitempty"`
-	// The configuration of Route trait.
-	//
 	// Deprecated: use ingress instead.
 	Route *trait.RouteTrait `json:"route,omitempty"`
 	// The configuration of Security Context trait
 	SecurityContext *trait.SecurityContextTrait `json:"security-context,omitempty"`
 	// The configuration of Service trait
 	Service *trait.ServiceTrait `json:"service,omitempty"`
-	// The configuration of Service Binding trait.
-	//
 	// Deprecated: no longer in use.
 	DeprecatedServiceBinding *trait.ServiceBindingTrait `json:"service-binding,omitempty"`
-	// The configuration of Telemetry trait.
-	//
 	// Deprecated: no longer in use.
 	DeprecatedTelemetry *trait.TelemetryTrait `json:"telemetry,omitempty"`
 	// The configuration of Toleration trait
@@ -312,11 +294,11 @@ func (b *TraitsApplyConfiguration) WithKeda(value trait.KedaTrait) *TraitsApplyC
 	return b
 }
 
-// WithKnative sets the Knative field in the declarative configuration to the given value
+// WithDeprecatedKnative sets the DeprecatedKnative field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Knative field is set to the value of the last call.
-func (b *TraitsApplyConfiguration) WithKnative(value trait.KnativeTrait) *TraitsApplyConfiguration {
-	b.Knative = &value
+// If called multiple times, the DeprecatedKnative field is set to the value of the last call.
+func (b *TraitsApplyConfiguration) WithDeprecatedKnative(value trait.KnativeTrait) *TraitsApplyConfiguration {
+	b.DeprecatedKnative = &value
 	return b
 }
 

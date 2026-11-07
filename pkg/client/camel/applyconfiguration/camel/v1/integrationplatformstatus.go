@@ -58,7 +58,7 @@ func (b *IntegrationPlatformStatusApplyConfiguration) WithCluster(value camelv1.
 // WithProfile sets the Profile field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Profile field is set to the value of the last call.
-func (b *IntegrationPlatformStatusApplyConfiguration) WithProfile(value camelv1.TraitProfile) *IntegrationPlatformStatusApplyConfiguration {
+func (b *IntegrationPlatformStatusApplyConfiguration) WithProfile(value camelv1.DeprecatedTraitProfile) *IntegrationPlatformStatusApplyConfiguration {
 	b.IntegrationPlatformSpecApplyConfiguration.Profile = &value
 	return b
 }

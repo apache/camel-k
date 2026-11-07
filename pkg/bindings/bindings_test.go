@@ -19,6 +19,7 @@ package bindings
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -26,7 +27,6 @@ import (
 	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/internal"
 
 	"github.com/stretchr/testify/assert"
@@ -37,100 +37,10 @@ func TestBindings(t *testing.T) {
 	testcases := []struct {
 		endpointType v1.EndpointType
 		endpoint     v1.Endpoint
-		profile      v1.TraitProfile
 		uri          string
 		traits       v1.Traits
 		props        map[string]string
 	}{
-		{
-			endpointType: v1.EndpointTypeSink,
-			endpoint: v1.Endpoint{
-				Ref: &corev1.ObjectReference{
-					Kind:       "Service",
-					APIVersion: "serving.knative.dev/v1",
-					Name:       "myservice",
-				},
-			},
-			uri: "knative:endpoint/myservice?apiVersion=serving.knative.dev%2Fv1&kind=Service",
-		},
-		{
-			endpointType: v1.EndpointTypeAction,
-			endpoint: v1.Endpoint{
-				Ref: &corev1.ObjectReference{
-					Kind:       "Service",
-					APIVersion: "serving.knative.dev/v1",
-					Name:       "myservice",
-				},
-			},
-			uri: "knative:endpoint/myservice?apiVersion=serving.knative.dev%2Fv1&kind=Service",
-		},
-		{
-			endpointType: v1.EndpointTypeSink,
-			endpoint: v1.Endpoint{
-				Ref: &corev1.ObjectReference{
-					Kind:       "Service",
-					APIVersion: "serving.knative.dev/v1",
-					Name:       "myservice",
-				},
-				Properties: asEndpointProperties(map[string]string{
-					"ce.override.ce-type": "mytype",
-				}),
-			},
-			uri: "knative:endpoint/myservice?apiVersion=serving.knative.dev%2Fv1&ce.override.ce-type=mytype&kind=Service",
-		},
-		{
-			endpointType: v1.EndpointTypeSink,
-			endpoint: v1.Endpoint{
-				Ref: &corev1.ObjectReference{
-					Kind:       "Channel",
-					APIVersion: "messaging.knative.dev/v1",
-					Name:       "mychannel",
-				},
-			},
-			uri: "knative:channel/mychannel?apiVersion=messaging.knative.dev%2Fv1&kind=Channel",
-		},
-		{
-			endpointType: v1.EndpointTypeSource,
-			endpoint: v1.Endpoint{
-				Ref: &corev1.ObjectReference{
-					Kind:       "Channel",
-					APIVersion: "messaging.knative.dev/v1",
-					Name:       "mychannel",
-				},
-			},
-			uri: "knative:channel/mychannel?apiVersion=messaging.knative.dev%2Fv1&kind=Channel",
-		},
-		{
-			endpointType: v1.EndpointTypeSource,
-			endpoint: v1.Endpoint{
-				Ref: &corev1.ObjectReference{
-					Kind:       "KafkaChannel",
-					APIVersion: "messaging.knative.dev/v1beta1",
-					Name:       "mychannel",
-				},
-			},
-			uri: "knative:channel/mychannel?apiVersion=messaging.knative.dev%2Fv1beta1&kind=KafkaChannel",
-		},
-		{
-			endpointType: v1.EndpointTypeSource,
-			endpoint: v1.Endpoint{
-				Ref: &corev1.ObjectReference{
-					Kind:       "Broker",
-					APIVersion: "eventing.knative.dev/v1",
-					Name:       "default",
-				},
-				Properties: asEndpointProperties(map[string]string{
-					"type": "myeventtype",
-				}),
-			},
-			uri: "knative:event/myeventtype?apiVersion=eventing.knative.dev%2Fv1&kind=Broker&name=default",
-			traits: v1.Traits{
-				Knative: &traitv1.KnativeTrait{
-					Filters:         []string{"type=myeventtype"},
-					FilterEventType: ptr.To(true),
-				},
-			},
-		},
 		{
 			endpointType: v1.EndpointTypeSource,
 			endpoint: v1.Endpoint{
@@ -201,25 +111,8 @@ func TestBindings(t *testing.T) {
 			endpointType: v1.EndpointTypeSink,
 			endpoint: v1.Endpoint{
 				URI: ptr.To("https://myurl/hey"),
-				Properties: asEndpointProperties(map[string]string{
-					"ce.override.ce-type": "mytype",
-				}),
 			},
-			uri: "knative:endpoint/sink?ce.override.ce-type=mytype",
-			traits: v1.Traits{
-				Knative: &traitv1.KnativeTrait{
-					SinkBinding:   ptr.To(false),
-					Configuration: asKnativeConfig("https://myurl/hey"),
-				},
-			},
-		},
-		{
-			endpointType: v1.EndpointTypeSink,
-			endpoint: v1.Endpoint{
-				URI: ptr.To("https://myurl/hey"),
-			},
-			profile: v1.TraitProfileKubernetes,
-			uri:     "https://myurl/hey",
+			uri: "https://myurl/hey",
 		},
 		{
 			endpointType: v1.EndpointTypeSink,
@@ -238,16 +131,10 @@ func TestBindings(t *testing.T) {
 			client, err := internal.NewFakeClient()
 			require.NoError(t, err)
 
-			profile := tc.profile
-			if profile == "" {
-				profile = v1.TraitProfileKnative
-			}
-
 			bindingContext := BindingContext{
 				Ctx:       ctx,
 				Client:    client,
 				Namespace: "test",
-				Profile:   profile,
 			}
 
 			binding, err := Translate(bindingContext, EndpointContext{
@@ -256,8 +143,17 @@ func TestBindings(t *testing.T) {
 			require.NoError(t, err)
 			assert.NotNil(t, binding)
 			assert.Equal(t, tc.uri, binding.URI)
-			assert.Equal(t, tc.traits, binding.Traits)
 			assert.Equal(t, tc.props, binding.ApplicationProperties)
 		})
+	}
+}
+
+func asEndpointProperties(props map[string]string) *v1.EndpointProperties {
+	serialized, err := json.Marshal(props)
+	if err != nil {
+		panic(err)
+	}
+	return &v1.EndpointProperties{
+		RawMessage: serialized,
 	}
 }

@@ -42,7 +42,6 @@ func TestArkMQDirect(t *testing.T) {
 		Ctx:       ctx,
 		Client:    client,
 		Namespace: "test",
-		Profile:   camelv1.TraitProfileKubernetes,
 	}
 
 	endpoint := camelv1.Endpoint{
@@ -120,7 +119,6 @@ func TestArkMQLookupAddress(t *testing.T) {
 		Ctx:       ctx,
 		Client:    client,
 		Namespace: "test",
-		Profile:   camelv1.TraitProfileKubernetes,
 	}
 
 	endpoint := camelv1.Endpoint{
@@ -198,7 +196,6 @@ func TestArkMQMulticastSupported(t *testing.T) {
 		Ctx:       ctx,
 		Client:    client,
 		Namespace: "test",
-		Profile:   camelv1.TraitProfileKubernetes,
 	}
 
 	endpoint := camelv1.Endpoint{
@@ -269,7 +266,6 @@ func TestArkMQLookupAddressByName(t *testing.T) {
 		Ctx:       ctx,
 		Client:    client,
 		Namespace: "test",
-		Profile:   camelv1.TraitProfileKubernetes,
 	}
 
 	endpoint := camelv1.Endpoint{
@@ -335,7 +331,6 @@ func TestArkMQBrokerDirect(t *testing.T) {
 		Ctx:       ctx,
 		Client:    client,
 		Namespace: "test",
-		Profile:   camelv1.TraitProfileKubernetes,
 	}
 
 	// 1. With "destination" property
@@ -418,7 +413,6 @@ func TestArkMQMissingService(t *testing.T) {
 		Ctx:       ctx,
 		Client:    client,
 		Namespace: "test",
-		Profile:   camelv1.TraitProfileKubernetes,
 	}
 
 	endpoint := camelv1.Endpoint{
@@ -452,7 +446,6 @@ func TestArkMQUnsupportedKind(t *testing.T) {
 		Ctx:       ctx,
 		Client:    client,
 		Namespace: "test",
-		Profile:   camelv1.TraitProfileKubernetes,
 	}
 
 	for _, kind := range []string{"ActiveMQArtemisQueue", "UnknownKind"} {
@@ -490,7 +483,6 @@ func TestArkMQMissingBrokerLabel(t *testing.T) {
 		Ctx:       ctx,
 		Client:    client,
 		Namespace: "test",
-		Profile:   camelv1.TraitProfileKubernetes,
 	}
 
 	endpoint := camelv1.Endpoint{
@@ -562,7 +554,6 @@ func TestArkMQBrokerFallback(t *testing.T) {
 		Ctx:       ctx,
 		Client:    client,
 		Namespace: "test",
-		Profile:   camelv1.TraitProfileKubernetes,
 	}
 
 	endpoint := camelv1.Endpoint{
@@ -618,7 +609,6 @@ func TestArkMQMultipleBrokersFallback(t *testing.T) {
 		Ctx:       ctx,
 		Client:    client,
 		Namespace: "test",
-		Profile:   camelv1.TraitProfileKubernetes,
 	}
 
 	endpoint := camelv1.Endpoint{
@@ -649,7 +639,6 @@ func TestArkMQPassThrough(t *testing.T) {
 		Ctx:       ctx,
 		Client:    client,
 		Namespace: "test",
-		Profile:   camelv1.TraitProfileKubernetes,
 	}
 
 	// Nil Ref
@@ -722,7 +711,6 @@ func TestArkMQApplyToCrNamesWildcardFallback(t *testing.T) {
 		Ctx:       ctx,
 		Client:    client,
 		Namespace: "test",
-		Profile:   camelv1.TraitProfileKubernetes,
 	}
 
 	endpoint := camelv1.Endpoint{

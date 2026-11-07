@@ -120,24 +120,8 @@ type FailureRecovery struct {
 	AttemptTime metav1.Time `json:"attemptTime"`
 }
 
-// TraitProfile represents lists of traits that are enabled for the specific installation/integration.
-//
-// Deprecated: may be removed in future releases.
-type TraitProfile string
-
-const (
-	// TraitProfileOpenShift is used by default on OpenShift clusters.
-	TraitProfileOpenShift TraitProfile = "OpenShift"
-	// TraitProfileKubernetes is used by default on Kubernetes clusters.
-	TraitProfileKubernetes TraitProfile = "Kubernetes"
-	// TraitProfileKnative is used by default on OpenShift/Kubernetes clusters powered by Knative.
-	TraitProfileKnative TraitProfile = "Knative"
-	// DefaultTraitProfile is the trait profile used as default when no other profile is set.
-	DefaultTraitProfile = TraitProfileKubernetes
-)
-
-// AllTraitProfiles contains all allowed profiles.
-var AllTraitProfiles = []TraitProfile{TraitProfileKubernetes, TraitProfileKnative, TraitProfileOpenShift}
+// Deprecated: no longer in use.
+type DeprecatedTraitProfile string
 
 // Traits represents the collection of trait configurations.
 type Traits struct {
@@ -159,8 +143,6 @@ type Traits struct {
 	Deployment *trait.DeploymentTrait `json:"deployment,omitempty" property:"deployment"`
 	// The configuration of Environment trait
 	Environment *trait.EnvironmentTrait `json:"environment,omitempty" property:"environment"`
-	// The configuration of Error Handler trait.
-	//
 	// Deprecated: no longer in use.
 	DeprecatedErrorHandler *trait.ErrorHandlerTrait `json:"error-handler,omitempty" property:"error-handler"`
 	// The configuration of Istio trait
@@ -177,8 +159,6 @@ type Traits struct {
 	InitContainers *trait.InitContainersTrait `json:"init-containers,omitempty" property:"init-containers"`
 	// The configuration of Istio trait
 	Istio *trait.IstioTrait `json:"istio,omitempty" property:"istio"`
-	// The configuration of Jolokia trait.
-	//
 	// Deprecated: no longer in use.
 	DeprecatedJolokia *trait.JolokiaTrait `json:"jolokia,omitempty" property:"jolokia"`
 	// The configuration of JVM trait
@@ -187,22 +167,16 @@ type Traits struct {
 	Kamelets *trait.KameletsTrait `json:"kamelets,omitempty" property:"kamelets"`
 	// The configuration of Keda trait
 	Keda *trait.KedaTrait `json:"keda,omitempty" property:"keda"`
-	// The configuration of Knative trait
-	Knative *trait.KnativeTrait `json:"knative,omitempty" property:"knative"`
+	// Deprecated: no longer in use.
+	DeprecatedKnative *trait.KnativeTrait `json:"knative,omitempty" property:"knative"`
 	// The configuration of Knative Service trait
 	KnativeService *trait.KnativeServiceTrait `json:"knative-service,omitempty" property:"knative-service"`
-	// The configuration of Logging trait.
-	//
 	// Deprecated: no longer in use.
 	DeprecatedLogging *trait.LoggingTrait `json:"logging,omitempty" property:"logging"`
-	// The configuration of Master trait.
-	//
 	// Deprecated: no longer in use.
 	DeprecatedMaster *trait.MasterTrait `json:"master,omitempty" property:"master"`
 	// The configuration of Mount trait
 	Mount *trait.MountTrait `json:"mount,omitempty" property:"mount"`
-	// The configuration of OpenAPI trait.
-	//
 	// Deprecated: no longer in use.
 	DeprecatedOpenAPI *trait.OpenAPITrait `json:"openapi,omitempty" property:"openapi"`
 	// The configuration of Owner trait
@@ -219,24 +193,16 @@ type Traits struct {
 	PullSecret *trait.PullSecretTrait `json:"pull-secret,omitempty" property:"pull-secret"`
 	// The configuration of Quarkus trait
 	Quarkus *trait.QuarkusTrait `json:"quarkus,omitempty" property:"quarkus"`
-	// The configuration of Registry trait (support removed since version 2.5.0).
-	//
 	// Deprecated: no longer in use.
 	DeprecatedRegistry *trait.RegistryTrait `json:"registry,omitempty" property:"registry"`
-	// The configuration of Route trait.
-	//
 	// Deprecated: use ingress instead.
 	Route *trait.RouteTrait `json:"route,omitempty" property:"route"`
 	// The configuration of Security Context trait
 	SecurityContext *trait.SecurityContextTrait `json:"security-context,omitempty" property:"security-context"`
 	// The configuration of Service trait
 	Service *trait.ServiceTrait `json:"service,omitempty" property:"service"`
-	// The configuration of Service Binding trait.
-	//
 	// Deprecated: no longer in use.
 	DeprecatedServiceBinding *trait.ServiceBindingTrait `json:"service-binding,omitempty" property:"service-binding"`
-	// The configuration of Telemetry trait.
-	//
 	// Deprecated: no longer in use.
 	DeprecatedTelemetry *trait.TelemetryTrait `json:"telemetry,omitempty" property:"telemetry"`
 	// The configuration of Toleration trait

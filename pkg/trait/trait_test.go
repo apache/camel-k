@@ -165,19 +165,6 @@ func TestOnlySomeTraitsArePlatform(t *testing.T) {
 	}
 }
 
-func TestOnlySomeTraitsDoNotRequireIntegrationPlatform(t *testing.T) {
-	c := NewTraitTestCatalog()
-	doNotRequirePlatformTraits := []string{"deployer", "platform"}
-
-	for _, trait := range c.AllTraits() {
-		if !trait.RequiresIntegrationPlatform() {
-			assert.Contains(t, doNotRequirePlatformTraits, string(trait.ID()))
-		} else {
-			assert.NotContains(t, doNotRequirePlatformTraits, trait.ID())
-		}
-	}
-}
-
 func findVolume(vols []corev1.Volume, condition func(corev1.Volume) bool) *corev1.Volume {
 	for _, v := range vols {
 		v := v

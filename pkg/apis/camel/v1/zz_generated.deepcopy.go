@@ -3310,8 +3310,8 @@ func (in *Traits) DeepCopyInto(out *Traits) {
 		*out = new(trait.KedaTrait)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.Knative != nil {
-		in, out := &in.Knative, &out.Knative
+	if in.DeprecatedKnative != nil {
+		in, out := &in.DeprecatedKnative, &out.DeprecatedKnative
 		*out = new(trait.KnativeTrait)
 		(*in).DeepCopyInto(*out)
 	}

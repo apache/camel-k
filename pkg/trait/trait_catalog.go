@@ -67,37 +67,12 @@ func (c *Catalog) AllTraits() []Trait {
 	return append([]Trait(nil), c.traits...)
 }
 
-// Traits may depend on the result of previously executed ones,
-// so care must be taken while changing the lists order.
-func (c *Catalog) traitsFor(environment *Environment) []Trait {
-	profile := environment.DetermineProfile()
-
-	return c.TraitsForProfile(profile)
-}
-
-// TraitsForProfile returns all traits associated with a given profile.
-//
-// Traits may depend on the result of previously executed ones,
-// so care must be taken while changing the lists order.
-//
-//nolint:staticcheck
-func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
-	var res []Trait
-	for _, t := range c.AllTraits() {
-		if t.IsAllowedInProfile(profile) {
-			res = append(res, t)
-		}
-	}
-
-	return res
-}
-
 func (c *Catalog) apply(environment *Environment) ([]*TraitCondition, *v1.Traits, error) {
 	traitsConditions := []*TraitCondition{}
 	if err := c.Configure(environment); err != nil {
 		return traitsConditions, nil, err
 	}
-	traits := c.traitsFor(environment)
+	traits := c.AllTraits()
 	environment.ConfiguredTraits = traits
 
 	for _, trait := range traits {

@@ -389,8 +389,6 @@ func TestServiceWithKnativeServiceEnabled(t *testing.T) {
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
-				//nolint:staticcheck
-				Profile: v1.TraitProfileKnative,
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
@@ -471,7 +469,6 @@ func TestServicesWithKnativeProfile(t *testing.T) {
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKnative,
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
@@ -480,6 +477,11 @@ func TestServicesWithKnativeProfile(t *testing.T) {
 							Compression: true,
 						},
 						Language: v1.LanguageJavaSource,
+					},
+				},
+				Traits: v1.Traits{
+					KnativeService: &traitv1.KnativeServiceTrait{
+						Enabled: ptr.To(true),
 					},
 				},
 			},
@@ -515,78 +517,6 @@ func TestServicesWithKnativeProfile(t *testing.T) {
 	assert.NotNil(t, environment.GetTrait(knativeServiceTraitID))
 }
 
-// When the knative-service is disabled at the IntegrationProfile level, the k8s service is enabled.
-func TestServiceWithKnativeServiceDisabledInIntegrationPlatform(t *testing.T) {
-	catalog, err := camel.DefaultCatalog()
-	require.NoError(t, err)
-
-	client, _ := internal.NewFakeClient()
-	traitCatalog := NewCatalog(nil)
-
-	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
-	require.NoError(t, err)
-
-	environment := Environment{
-		CamelCatalog:   catalog,
-		Catalog:        traitCatalog,
-		Client:         client,
-		IntegrationKit: &v1.IntegrationKit{},
-		Integration: &v1.Integration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      ServiceTestName,
-				Namespace: "ns",
-			},
-			Status: v1.IntegrationStatus{
-				Phase: v1.IntegrationPhaseDeploying,
-			},
-			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKnative,
-				Sources: []v1.SourceSpec{
-					{
-						DataSpec: v1.DataSpec{
-							Name:        "routes.java",
-							Content:     string(compressedRoute),
-							Compression: true,
-						},
-						Language: v1.LanguageJavaSource,
-					},
-				},
-			},
-		},
-		Platform: pl,
-		IntegrationProfile: &v1.IntegrationProfile{
-			Spec: v1.IntegrationProfileSpec{
-				Traits: v1.Traits{
-					KnativeService: &traitv1.KnativeServiceTrait{
-						Trait: traitv1.Trait{
-							Enabled: ptr.To(false),
-						},
-					},
-				},
-			},
-		},
-		EnvVars:        make([]corev1.EnvVar, 0),
-		ExecutedTraits: make([]Trait, 0),
-		Resources:      kubernetes.NewCollection(),
-	}
-
-	expectedCondition := NewIntegrationCondition(
-		"KnativeService",
-		v1.IntegrationConditionKnativeServiceAvailable,
-		corev1.ConditionFalse,
-		"KnativeServiceNotAvailable",
-		"explicitly disabled",
-	)
-	conditions, traits, err := traitCatalog.apply(&environment)
-
-	require.NoError(t, err)
-	assert.Contains(t, conditions, expectedCondition)
-	assert.NotEmpty(t, environment.ExecutedTraits)
-	assert.NotNil(t, environment.GetTrait(serviceTraitID))
-	assert.Nil(t, environment.GetTrait(knativeServiceTraitID))
-	assert.Nil(t, traits.Service)
-}
-
 func TestServiceAutoConfiguration(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
@@ -610,7 +540,6 @@ func TestServiceAutoConfiguration(t *testing.T) {
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKubernetes,
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
@@ -662,7 +591,6 @@ func TestServiceAnnotationsAndLables(t *testing.T) {
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKubernetes,
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
@@ -740,7 +668,6 @@ func TestServicePorts(t *testing.T) {
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKubernetes,
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
@@ -817,12 +744,12 @@ func TestServiceNetworkPolicyDisabledByDefault(t *testing.T) {
 func TestServiceNetworkPolicyUsesCombinedSelectors(t *testing.T) {
 	trait := &serviceTrait{
 		ServiceTrait: traitv1.ServiceTrait{
-			Trait: traitv1.Trait{Enabled: ptr.To(true)},
-			Auto:  ptr.To(false),
+			Trait:                traitv1.Trait{Enabled: ptr.To(true)},
+			Auto:                 ptr.To(false),
 			NetworkPolicyEnabled: ptr.To(true),
 			NetworkPolicyNamespaceSelector: map[string]string{
 				"kubernetes.io/metadata.name": ServiceTestNamespace,
-				"environment":                "backend",
+				"environment":                 "backend",
 			},
 			NetworkPolicyPodSelector: map[string]string{
 				"app":  "client",
@@ -857,8 +784,8 @@ func TestServiceNetworkPolicyUsesCombinedSelectors(t *testing.T) {
 func TestServiceNetworkPolicyRequiresSelector(t *testing.T) {
 	trait := &serviceTrait{
 		ServiceTrait: traitv1.ServiceTrait{
-			Trait: traitv1.Trait{Enabled: ptr.To(true)},
-			Auto:  ptr.To(false),
+			Trait:                traitv1.Trait{Enabled: ptr.To(true)},
+			Auto:                 ptr.To(false),
 			NetworkPolicyEnabled: ptr.To(true),
 		},
 	}
@@ -885,4 +812,3 @@ func findNetworkPolicy(resources *kubernetes.Collection) *networkingv1.NetworkPo
 	})
 	return result
 }
-

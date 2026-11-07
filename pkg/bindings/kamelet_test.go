@@ -101,7 +101,6 @@ func TestBindingConverter(t *testing.T) {
 					Ctx:       ctx,
 					Client:    client,
 					Namespace: "test",
-					Profile:   v1.TraitProfileKubernetes,
 				},
 				EndpointContext{
 					Type:     tc.endpointType,
@@ -279,7 +278,6 @@ func TestBindingConverterWithDataTypes(t *testing.T) {
 					Ctx:       ctx,
 					Client:    client,
 					Namespace: "test",
-					Profile:   v1.TraitProfileKubernetes,
 				},
 				EndpointContext{
 					Type:     tc.endpointType,
@@ -372,7 +370,6 @@ func TestBindingConverterWithDataTypesOverridden(t *testing.T) {
 					Ctx:       ctx,
 					Client:    client,
 					Namespace: "test",
-					Profile:   v1.TraitProfileKubernetes,
 					Metadata: map[string]string{
 						v1.KameletDataTypeLabel: "data-type-action-v2",
 					},
@@ -448,7 +445,6 @@ func TestBindingCrossNamespacedKamelets(t *testing.T) {
 			Ctx:       context.Background(),
 			Client:    client,
 			Namespace: "test",
-			Profile:   v1.TraitProfileKubernetes,
 		},
 		EndpointContext{
 			Type: v1.EndpointTypeSource,
@@ -481,7 +477,6 @@ func TestBindingCrossNamespacedAndVersionedKamelets(t *testing.T) {
 			Ctx:       context.Background(),
 			Client:    client,
 			Namespace: "test",
-			Profile:   v1.TraitProfileKubernetes,
 		},
 		EndpointContext{
 			Type: v1.EndpointTypeSource,

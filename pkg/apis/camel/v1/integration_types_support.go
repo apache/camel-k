@@ -59,13 +59,8 @@ func NewIntegrationList() IntegrationList {
 }
 
 func (in *Integration) Initialize() {
-	profile := in.Status.Profile
-	if in.Spec.Profile != "" {
-		profile = in.Spec.Profile
-	}
 	in.Status = IntegrationStatus{
-		Phase:   IntegrationPhaseInitialization,
-		Profile: profile,
+		Phase: IntegrationPhaseInitialization,
 	}
 }
 

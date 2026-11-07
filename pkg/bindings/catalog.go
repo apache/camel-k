@@ -76,13 +76,6 @@ func validateEndpoint(ctx BindingContext, e v1.Endpoint) error {
 		return errors.New("cannot use both ref and URI to specify an endpoint: only one of them should be used")
 	}
 	if e.Ref != nil && e.Ref.Namespace != "" && e.Ref.Namespace != ctx.Namespace {
-		if ok, err := isKnownKnativeResource(e.Ref); ok {
-			if err != nil {
-				return err
-			}
-
-			return errors.New("cross-namespace Pipe references are not allowed for Knative")
-		}
 		// only check this when there is a cross-namespace access
 		return verifyResourceRBAC(ctx, e)
 	}

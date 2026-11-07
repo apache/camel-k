@@ -160,7 +160,6 @@ func TestProbesOnDeploymentWithCustomScheme(t *testing.T) {
 func TestProbesOnKnativeService(t *testing.T) {
 	integration := &v1.Integration{
 		Spec: v1.IntegrationSpec{
-			Profile: v1.TraitProfileKnative,
 			Traits: v1.Traits{
 				KnativeService: &traitv1.KnativeServiceTrait{
 					Trait: traitv1.Trait{

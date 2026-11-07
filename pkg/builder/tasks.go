@@ -32,53 +32,6 @@ func (b *Builder) Build(build *v1.Build) *Build {
 	}
 }
 
-// Task convert the task in a routine task which can be executed inside operator.
-func (b *Build) Task(task v1.Task) Task {
-	switch {
-	case task.Builder != nil:
-		return &builderTask{
-			c:     b.builder.client,
-			log:   b.builder.log,
-			build: b.build,
-			task:  task.Builder,
-		}
-	// Custom tasks are not supported in routines
-	case task.Custom != nil:
-		return &unsupportedTask{
-			build: b.build,
-			name:  task.Custom.Name,
-		}
-	case task.Package != nil:
-		return &builderTask{
-			c:     b.builder.client,
-			log:   b.builder.log,
-			build: b.build,
-			task:  task.Package,
-		}
-	case task.Jib != nil:
-		return &jibTask{
-			c:     b.builder.client,
-			build: b.build,
-			task:  task.Jib,
-		}
-	}
-
-	return &emptyTask{
-		build: b.build,
-	}
-}
-
-type emptyTask struct {
-	build *v1.Build
-}
-
-func (t *emptyTask) Do(_ context.Context) v1.BuildStatus {
-	return v1.BuildStatus{
-		Phase: v1.BuildPhaseError,
-		Error: fmt.Sprintf("Cannot execute empty task in build [%s/%s]", t.build.Namespace, t.build.Name),
-	}
-}
-
 type missingTask struct {
 	build *v1.Build
 	name  string

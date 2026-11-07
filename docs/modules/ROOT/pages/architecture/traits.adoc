@@ -45,8 +45,6 @@ type Trait interface {
 	InfluencesKit() bool
 	InfluencesBuild(this, prev map[string]interface{}) bool
 	IsPlatformTrait() bool
-	RequiresIntegrationPlatform() bool
-	IsAllowedInProfile(v1.TraitProfile) bool
 	Order() int
 }
 

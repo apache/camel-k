@@ -23,7 +23,7 @@ import (
 	"fmt"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/util/bindings"
+	"github.com/apache/camel-k/v2/pkg/bindings"
 )
 
 const defaultCamelErrorHandler = "defaultErrorHandler"

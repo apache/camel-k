@@ -16,6 +16,6 @@ limitations under the License.
 */
 
 // Package apis contains a partial schema of the Knative API types (knative.dev/pkg)
-// shared by the Knative Serving and Eventing duck types
+// shared by the Knative Serving duck types
 // +kubebuilder:object:generate=true
 package apis

@@ -17,6 +17,8 @@ limitations under the License.
 
 package trait
 
+// WARNING: This trait is no longer in use.
+//
 // The Knative trait automatically discovers addresses of Knative resources and inject them into the
 // running integration.
 //
@@ -28,9 +30,8 @@ package trait
 // The trait is enabled by default when the Knative profile is active.
 //
 // +camel-k:trait=knative.
-//
-// +camel-k:trait=logging.
 // +camel-k:deprecated=2.11.0.
+// +camel-k:internal.
 //
 //nolint:godoclint
 type KnativeTrait struct {

@@ -37,7 +37,7 @@ import (
 )
 
 func TestDefaultPodKubernetesSecurityContextInitializationPhase(t *testing.T) {
-	environment := createPodSettingContextEnvironment(t, v1.TraitProfileKubernetes)
+	environment := createPodSettingContextEnvironment(t)
 	environment.Integration.Status.Phase = v1.IntegrationPhaseInitialization
 	traitCatalog := NewCatalog(nil)
 
@@ -51,7 +51,7 @@ func TestDefaultPodKubernetesSecurityContextInitializationPhase(t *testing.T) {
 }
 
 func TestDefaultPodKubernetesSecurityContext(t *testing.T) {
-	environment := createPodSettingContextEnvironment(t, v1.TraitProfileKubernetes)
+	environment := createPodSettingContextEnvironment(t)
 	traitCatalog := NewCatalog(nil)
 
 	conditions, traits, err := traitCatalog.apply(environment)
@@ -72,7 +72,7 @@ func TestDefaultPodKubernetesSecurityContext(t *testing.T) {
 }
 
 func TestDefaultPodOpenshiftSecurityContext(t *testing.T) {
-	environment := createOpenshiftPodSettingContextEnvironment(t, v1.TraitProfileOpenShift)
+	environment := createOpenshiftPodSettingContextEnvironment(t)
 	traitCatalog := NewCatalog(nil)
 
 	conditions, traits, err := traitCatalog.apply(environment)
@@ -93,7 +93,7 @@ func TestDefaultPodOpenshiftSecurityContext(t *testing.T) {
 }
 
 func TestDefaultPodKnativeSecurityContext(t *testing.T) {
-	environment := createPodSettingContextEnvironment(t, v1.TraitProfileKnative)
+	environment := createPodSettingContextEnvironment(t)
 	environment.Integration.Spec.Traits.KnativeService = &traitv1.KnativeServiceTrait{
 		Trait: traitv1.Trait{
 			Enabled: ptr.To(true),
@@ -120,7 +120,7 @@ func TestDefaultPodKnativeSecurityContext(t *testing.T) {
 }
 
 func TestUserPodSecurityContext(t *testing.T) {
-	environment := createPodSettingContextEnvironment(t, v1.TraitProfileKubernetes)
+	environment := createPodSettingContextEnvironment(t)
 	environment.Integration.Spec.Traits = v1.Traits{
 		SecurityContext: &traitv1.SecurityContextTrait{
 			RunAsNonRoot:       ptr.To(false),
@@ -147,7 +147,7 @@ func TestUserPodSecurityContext(t *testing.T) {
 	assert.Equal(t, corev1.SeccompProfileTypeUnconfined, d.Spec.Template.Spec.SecurityContext.SeccompProfile.Type)
 }
 
-func createPodSettingContextEnvironment(t *testing.T, profile v1.TraitProfile) *Environment {
+func createPodSettingContextEnvironment(t *testing.T) *Environment {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 	client, _ := internal.NewFakeClient()
@@ -164,10 +164,7 @@ func createPodSettingContextEnvironment(t *testing.T, profile v1.TraitProfile) *
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseDeploying,
 			},
-			Spec: v1.IntegrationSpec{
-				//nolint:staticcheck
-				Profile: profile,
-			},
+			Spec: v1.IntegrationSpec{},
 		},
 		IntegrationKit: &v1.IntegrationKit{
 			Status: v1.IntegrationKitStatus{
@@ -183,7 +180,7 @@ func createPodSettingContextEnvironment(t *testing.T, profile v1.TraitProfile) *
 	return &environment
 }
 
-func createOpenshiftPodSettingContextEnvironment(t *testing.T, profile v1.TraitProfile) *Environment {
+func createOpenshiftPodSettingContextEnvironment(t *testing.T) *Environment {
 	// Integration is in another constrained namespace
 	constrainedIntNamespace := &corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{

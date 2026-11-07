@@ -68,10 +68,8 @@ type IntegrationSpec struct {
 	IntegrationKit *corev1.ObjectReference `json:"integrationKit,omitempty"`
 	// the list of Camel or Maven dependencies required by the Integration
 	Dependencies []string `json:"dependencies,omitempty"`
-	// the profile needed to run this Integration
-	//
-	// Deprecated: may be removed in future releases.
-	Profile TraitProfile `json:"profile,omitempty"`
+	// Deprecated: no longer in use.
+	DeprecatedProfile DeprecatedTraitProfile `json:"profile,omitempty"`
 	// the traits needed to run this Integration
 	Traits Traits `json:"traits,omitempty"`
 	// Pod template customization.
@@ -103,10 +101,8 @@ type IntegrationStatus struct {
 	Jar string `json:"jar,omitempty"`
 	// a list of dependencies needed by the application
 	Dependencies []string `json:"dependencies,omitempty"`
-	// the profile needed to run this Integration
-	//
-	// Deprecated: may be removed in future releases.
-	Profile TraitProfile `json:"profile,omitempty"`
+	// Deprecated: no longer in use.
+	DeprecatedProfile DeprecatedTraitProfile `json:"profile,omitempty"`
 	// the traits executed for the Integration
 	Traits *Traits `json:"traits,omitempty"`
 	// the reference of the `IntegrationKit` which is used for this Integration

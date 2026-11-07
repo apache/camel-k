@@ -71,7 +71,8 @@ func (t *mountTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		}
 	}
 
-	return true, nil, nil
+	// only apply if it exists any deployment associated to the integration
+	return e.GetIntegrationPodSpec() != nil, nil, nil
 }
 
 func (t *mountTrait) Apply(e *Environment) error {

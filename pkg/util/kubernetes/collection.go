@@ -27,8 +27,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	eventing "github.com/apache/camel-k/v2/pkg/apis/duck/knative/eventing/v1"
-	messaging "github.com/apache/camel-k/v2/pkg/apis/duck/knative/messaging/v1"
 	serving "github.com/apache/camel-k/v2/pkg/apis/duck/knative/serving/v1"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 )
@@ -282,30 +280,6 @@ func (c *Collection) GetKnativeService(filter func(*serving.Service) bool) *serv
 	return retValue
 }
 
-// GetKnativeTrigger returns a Knative Trigger that matches the given function.
-func (c *Collection) GetKnativeTrigger(filter func(*eventing.Trigger) bool) *eventing.Trigger {
-	var retValue *eventing.Trigger
-	c.VisitKnativeTrigger(func(re *eventing.Trigger) {
-		if filter(re) {
-			retValue = re
-		}
-	})
-
-	return retValue
-}
-
-// GetKnativeSubscription returns a Knative channel Subscription that matches the given function.
-func (c *Collection) GetKnativeSubscription(filter func(subscription *messaging.Subscription) bool) *messaging.Subscription {
-	var retValue *messaging.Subscription
-	c.VisitKnativeSubscription(func(re *messaging.Subscription) {
-		if filter(re) {
-			retValue = re
-		}
-	})
-
-	return retValue
-}
-
 // GetCronJob returns a CronJob that matches the given function.
 func (c *Collection) GetCronJob(filter func(job *batchv1.CronJob) bool) *batchv1.CronJob {
 	var retValue *batchv1.CronJob
@@ -356,37 +330,6 @@ func (c *Collection) VisitKnativeServiceE(visitor func(*serving.Service) error) 
 
 		return nil
 	})
-}
-
-// VisitKnativeTrigger executes the visitor function on all Knative eventing Trigger resources.
-func (c *Collection) VisitKnativeTrigger(visitor func(trigger *eventing.Trigger)) {
-	c.Visit(func(res runtime.Object) {
-		if conv, ok := res.(*eventing.Trigger); ok {
-			visitor(conv)
-		}
-	})
-}
-
-// VisitKnativeSubscription executes the visitor function on all Knative channel Subscription resources.
-func (c *Collection) VisitKnativeSubscription(visitor func(trigger *messaging.Subscription)) {
-	c.Visit(func(res runtime.Object) {
-		if conv, ok := res.(*messaging.Subscription); ok {
-			visitor(conv)
-		}
-	})
-}
-
-// HasKnativeTrigger returns true if a Knative trigger respecting filter is found.
-func (c *Collection) HasKnativeTrigger(filter func(trigger *eventing.Trigger) bool) bool {
-	var retValue *bool
-	c.VisitKnativeTrigger(func(re *eventing.Trigger) {
-		if filter(re) {
-			found := true
-			retValue = &found
-		}
-	})
-
-	return retValue != nil && *retValue
 }
 
 // GetContainer --.

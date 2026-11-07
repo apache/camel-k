@@ -21,7 +21,6 @@ import (
 	"context"
 	"errors"
 	"path/filepath"
-	"reflect"
 	"regexp"
 	"slices"
 	"sort"
@@ -84,16 +83,6 @@ type Trait interface {
 
 	// IsPlatformTrait marks all fundamental traits that allow the platform to work
 	IsPlatformTrait() bool
-
-	// RequiresIntegrationPlatform indicates that the trait cannot work without an integration platform set
-	RequiresIntegrationPlatform() bool
-
-	// IsAllowedInProfile tells if the trait supports the given profile
-	//
-	// NOTE: when removing, we can just remove the call and the upstream calls as well.
-	//
-	// Deprecated: may be removed in future releases.
-	IsAllowedInProfile(traitProfile v1.TraitProfile) bool //nolint:staticcheck
 
 	// Order is the order in which the trait should be executed in the normal flow
 	Order() int
@@ -167,17 +156,6 @@ func (trait *BaseTrait) InfluencesKit() bool {
 // IsPlatformTrait marks all fundamental traits that allow the platform to work.
 func (trait *BaseTrait) IsPlatformTrait() bool {
 	return false
-}
-
-// RequiresIntegrationPlatform indicates that the trait cannot work without an integration platform set.
-func (trait *BaseTrait) RequiresIntegrationPlatform() bool {
-	// All traits require a platform by default
-	return true
-}
-
-// IsAllowedInProfile returns true for any profile by default.
-func (trait *BaseTrait) IsAllowedInProfile(v1.TraitProfile) bool { //nolint:staticcheck
-	return true
 }
 
 // Order contains the order value provided during initialization.
@@ -283,38 +261,6 @@ func (e *Environment) IntegrationKitInPhase(phases ...v1.IntegrationKitPhase) bo
 
 func (e *Environment) InPhase(c v1.IntegrationKitPhase, i v1.IntegrationPhase) bool {
 	return e.IntegrationKitInPhase(c) && e.IntegrationInPhase(i)
-}
-
-// DetermineProfile determines the TraitProfile of the environment.
-// First looking at the Integration.Spec for a Profile,
-// next looking at the IntegrationKit.Spec
-// and lastly the Platform Profile.
-//
-//nolint:staticcheck
-func (e *Environment) DetermineProfile() v1.TraitProfile {
-	if e.Integration != nil {
-		if e.Integration.Status.Profile != "" {
-			return e.Integration.Status.Profile
-		}
-		if e.Integration.Spec.Profile != "" {
-			return e.Integration.Spec.Profile
-		}
-	}
-
-	if e.IntegrationKit != nil && e.IntegrationKit.Spec.Profile != "" {
-		return e.IntegrationKit.Spec.Profile
-	}
-
-	// Watch for the owned Knative Services conditionally
-	ok, err := kubernetes.IsAPIResourceInstalled(e.Client, serving.SchemeGroupVersion.String(), reflect.TypeFor[serving.Service]().Name())
-	if err != nil {
-		return v1.DefaultTraitProfile
-	}
-	if ok {
-		return v1.TraitProfileKnative
-	}
-
-	return v1.DefaultTraitProfile
 }
 
 // DetermineControllerStrategy determines the type of controller that should be used for the integration.

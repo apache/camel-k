@@ -37,32 +37,11 @@ func IsRefKindInstalled(c kubernetes.Interface, ref corev1.ObjectReference) (boo
 	return false, nil
 }
 
-// IsInstalled returns true if we are connected to a cluster with either Knative Serving or Eventing installed.
-func IsInstalled(c kubernetes.Interface) (bool, error) {
-	if ok, err := IsServingInstalled(c); ok {
-		return ok, err
-	} else if ok, err = IsEventingInstalled(c); ok {
-		return ok, err
-	} else if err != nil {
-		return false, err
-	}
-
-	return false, nil
-}
-
 // IsServingInstalled returns true if we are connected to a cluster with Knative Serving installed.
 func IsServingInstalled(c kubernetes.Interface) (bool, error) {
 	return IsRefKindInstalled(c, corev1.ObjectReference{
 		Kind:       "Service",
 		APIVersion: "serving.knative.dev/v1",
-	})
-}
-
-// IsEventingInstalled returns true if we are connected to a cluster with Knative Eventing installed.
-func IsEventingInstalled(c kubernetes.Interface) (bool, error) {
-	return IsRefKindInstalled(c, corev1.ObjectReference{
-		Kind:       "Broker",
-		APIVersion: "eventing.knative.dev/v1",
 	})
 }
 

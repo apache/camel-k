@@ -52,13 +52,6 @@ func newIngressTrait() Trait {
 	}
 }
 
-// IsAllowedInProfile overrides default.
-//
-//nolint:staticcheck
-func (t *ingressTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
-	return profile.Equal(v1.TraitProfileKubernetes)
-}
-
 func (t *ingressTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil {
 		return false, nil, nil

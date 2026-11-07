@@ -32,11 +32,8 @@ import (
 type IntegrationPlatformSpecApplyConfiguration struct {
 	// what kind of cluster you're running (ie, plain Kubernetes or OpenShift)
 	Cluster *camelv1.IntegrationPlatformCluster `json:"cluster,omitempty"`
-	// the profile you wish to use. It will apply certain traits which are required by the specific profile chosen.
-	// It usually relates the Cluster with the optional definition of special profiles (ie, Knative)
-	//
-	// Deprecated: may be removed in future releases.
-	Profile *camelv1.TraitProfile `json:"profile,omitempty"`
+	// Deprecated: no longer in use.
+	Profile *camelv1.DeprecatedTraitProfile `json:"profile,omitempty"`
 	// specify how to build the Integration/IntegrationKits
 	Build *IntegrationPlatformBuildSpecApplyConfiguration `json:"build,omitempty"`
 	// list of traits to be executed for all the Integration/IntegrationKits built from this IntegrationPlatform
@@ -70,7 +67,7 @@ func (b *IntegrationPlatformSpecApplyConfiguration) WithCluster(value camelv1.In
 // WithProfile sets the Profile field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Profile field is set to the value of the last call.
-func (b *IntegrationPlatformSpecApplyConfiguration) WithProfile(value camelv1.TraitProfile) *IntegrationPlatformSpecApplyConfiguration {
+func (b *IntegrationPlatformSpecApplyConfiguration) WithProfile(value camelv1.DeprecatedTraitProfile) *IntegrationPlatformSpecApplyConfiguration {
 	b.Profile = &value
 	return b
 }
