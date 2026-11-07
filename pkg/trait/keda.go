@@ -166,7 +166,7 @@ func (t *kedaTrait) autoDiscoverTriggers(e *Environment) error {
 
 	props := integrationProperties(e)
 	for _, fromURI := range meta.FromURIs {
-		trigger, err := kedamapper.MapToKedaTrigger(fromURI, props)
+		trigger, err := kedamapper.MapToKedaTriggerWithAutoMetadata(fromURI, props, t.AutoMetadata)
 		if err != nil {
 			return err
 		}
