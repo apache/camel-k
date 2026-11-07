@@ -39,10 +39,10 @@ func (a *ActiveMQScaler) Map(pathValue string, params map[string]string, props m
 	metadata := make(map[string]string)
 
 	destination := pathValue
-	if strings.HasPrefix(destination, "queue:") {
-		destination = strings.TrimPrefix(destination, "queue:")
-	} else if strings.HasPrefix(destination, "topic:") {
-		destination = strings.TrimPrefix(destination, "topic:")
+	if d, ok := strings.CutPrefix(destination, "queue:"); ok {
+		destination = d
+	} else if d, ok := strings.CutPrefix(destination, "topic:"); ok {
+		destination = d
 	}
 
 	if destination != "" {
