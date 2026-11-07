@@ -12,8 +12,8 @@ It does not implement a new scaler in the KEDA project.
 When the KEDA trait is enabled, `kedaTrait.Configure` runs automatic discovery unless `keda.auto` is set to `false`.
 Discovery follows this flow:
 
-. `metadata.ExtractAll` inspects all Integration sources and extracts their Camel `from` URIs.
-. Each URI is passed to `MapToKedaTrigger`, together with the Integration properties.
+. `metadata.ExtractAll` inspects all Integration sources and extracts their Camel `from` URIs and statically declared YAML beans.
+. Each URI is passed to `MapToKedaTriggerWithBeans`, together with Integration properties and the extracted bean definitions. Mappers that do not need bean information continue to use the existing `ScaleMapper` interface.
 . `ParseComponentURI` separates the URI into its component name, path value, and query parameters.
 . The component name is used to look up a `ScaleMapper` in the registry.
 . If a mapper is registered, it converts the path and parameters into a KEDA scaler type and metadata, which become a `KedaTrigger`.
@@ -130,6 +130,41 @@ This example shows the two common mapping cases:
 
 The mapper only translates values needed by the scaler.
 It should not add unrelated Camel endpoint parameters to the KEDA metadata.
+
+== Mapping a directly declared YAML bean
+
+A mapper may also implement `BeanAwareScaleMapper` when one of its component options refers to a bean declared in the Integration's YAML DSL.
+This is an optional extension: existing `ScaleMapper` implementations can continue using `Map` without changes.
+
+Camel K extracts top-level YAML `beans` declarations as source metadata and passes them to bean-aware mappers through `MapWithBeans`.
+The mapper is responsible for reading the specific component property that it understands, resolving its simple `#beanName` reference with `keda.ResolveBeanReference`, and selecting only the bean properties that its scaler needs.
+
+For example, an Integration may declare a connection factory and reference it through a component property:
+
+[source,yaml]
+----
+spec:
+  flows:
+  - beans:
+    - name: rabbitConnectionFactory
+      type: org.springframework.amqp.rabbit.connection.CachingConnectionFactory
+      properties:
+        host: my-rabbitmq.my-ns.svc
+        port: 5672
+        username: admin
+        password: admin
+  traits:
+    camel:
+      properties:
+      - camel.component.spring-rabbitmq.connection-factory=#rabbitConnectionFactory
+----
+
+This path is limited to bean declarations and scalar properties that are explicitly present in YAML, plus a direct `#beanName` reference in a component property.
+It does not instantiate beans, inspect the runtime registry, evaluate factory methods, follow nested references, or parse bean definitions from Java or XML.
+
+Do not copy passwords, tokens, private keys, or other credentials into ordinary KEDA trigger metadata.
+Mappers should select the non-sensitive properties they need; authentication should remain configured through KEDA's secret and `TriggerAuthentication` mechanisms.
+Unresolved placeholders and values supplied by environment variables or Kubernetes Secrets are not resolved by this mapping.
 
 == Adding a mapping
 

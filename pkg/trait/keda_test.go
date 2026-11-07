@@ -376,3 +376,68 @@ func autoDiscoveryEnvWithSource(t *testing.T, source string, manualTrigger *trai
 		Resources:      kubernetes.NewCollection(),
 	}
 }
+
+func TestKedaAutoDiscoverySpringRabbitMQConnectionBean(t *testing.T) {
+	environment := autoDiscoveryEnvWithSource(t, "", nil, map[string]map[string]string{
+		"rabbitmq": {
+			"mode":  "QueueLength",
+			"value": "20",
+		},
+	})
+	environment.Integration.Spec.Sources = nil
+	environment.Integration.Spec.Flows = []v1.Flow{
+		{
+			RawMessage: v1.RawMessage([]byte(`{
+				"beans": [{
+					"name": "rabbitConnectionFactory",
+					"type": "org.springframework.amqp.rabbit.connection.CachingConnectionFactory",
+					"properties": {
+						"host": "my-rabbitmq.my-ns.svc",
+						"port": 5672,
+						"username": "admin",
+						"password": "admin"
+					}
+				}]
+			}`)),
+		},
+		{
+			RawMessage: v1.RawMessage([]byte(`{
+				"route": {
+					"from": {
+						"uri": "spring-rabbitmq:my-exchange?queues=my-queue&routingKey=my-key",
+						"steps": [{"to": "log:info"}]
+					}
+				}
+			}`)),
+		},
+	}
+	// The init trait serializes spec.flows as a generated YAML source before
+	// KEDA discovery. Reproduce that step for this focused test.
+	flowSource, err := v1.ToYamlDSL(environment.Integration.Spec.Flows)
+	require.NoError(t, err)
+	environment.Integration.Status.AddOrReplaceGeneratedSources(v1.SourceSpec{
+		Name:    v1.IntegrationFlowEmbeddedSourceName,
+		Content: string(flowSource),
+	})
+	environment.Integration.Spec.Traits.Camel = &traitv1.CamelTrait{
+		Properties: []string{
+			"camel.component.spring-rabbitmq.connection-factory=#rabbitConnectionFactory",
+		},
+	}
+
+	_, _, err := environment.Catalog.apply(&environment)
+	require.NoError(t, err)
+
+	scaledObject := getKedaScaledObject(environment.Resources)
+	require.NotNil(t, scaledObject)
+	require.Len(t, scaledObject.Spec.Triggers, 1)
+	trigger := scaledObject.Spec.Triggers[0]
+	assert.Equal(t, "rabbitmq", trigger.Type)
+	assert.Equal(t, "my-queue", trigger.Metadata["queueName"])
+	assert.Equal(t, "amqp://my-rabbitmq.my-ns.svc:5672/", trigger.Metadata["host"])
+	assert.Equal(t, "amqp", trigger.Metadata["protocol"])
+	assert.Equal(t, "QueueLength", trigger.Metadata["mode"])
+	assert.Equal(t, "20", trigger.Metadata["value"])
+	assert.NotContains(t, trigger.Metadata, "username")
+	assert.NotContains(t, trigger.Metadata, "password")
+}

@@ -22,6 +22,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/apache/camel-k/v2/pkg/util/source"
 )
 
 func TestParseComponentURI(t *testing.T) {
@@ -76,6 +78,32 @@ func TestParseComponentURI(t *testing.T) {
 			assert.Equal(t, tt.scheme, scheme)
 			assert.Equal(t, tt.pathValue, pathValue)
 			assert.Equal(t, tt.params, params)
+		})
+	}
+}
+
+func TestResolveBeanReference(t *testing.T) {
+	bean := source.BeanDefinition{Name: "rabbitConnectionFactory"}
+	tests := []struct {
+		name      string
+		reference string
+		beans     []source.BeanDefinition
+		found     bool
+	}{
+		{name: "direct reference", reference: "#rabbitConnectionFactory", beans: []source.BeanDefinition{bean}, found: true},
+		{name: "missing bean", reference: "#missing", beans: []source.BeanDefinition{bean}},
+		{name: "not a bean reference", reference: "rabbitConnectionFactory", beans: []source.BeanDefinition{bean}},
+		{name: "dynamic reference", reference: "#${BEAN_NAME}", beans: []source.BeanDefinition{bean}},
+		{name: "ambiguous bean name", reference: "#rabbitConnectionFactory", beans: []source.BeanDefinition{bean, bean}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			resolved, found := ResolveBeanReference(tt.reference, tt.beans)
+			assert.Equal(t, tt.found, found)
+			if tt.found {
+				assert.Equal(t, bean, resolved)
+			}
 		})
 	}
 }
