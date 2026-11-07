@@ -23,9 +23,6 @@ package keda
 import (
 	"context"
 	"fmt"
-	"os"
-	"path/filepath"
-	"strings"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -104,30 +101,4 @@ func TestActiveMQKedaAutoDiscovery(t *testing.T) {
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["brokerName"]).To(Equal("localhost"))
 		})
 	})
-}
-
-// cloneAndReplaceNamespace clones and replaces the content marked as %%% with the namespace passed as parameter.
-func cloneAndReplaceNamespace(t *testing.T, srcPath, namespace string) string {
-	t.Helper()
-
-	tempDir := t.TempDir()
-	tempPath := filepath.Join(tempDir, filepath.Base(srcPath))
-
-	dstFile, err := os.Create(tempPath)
-	if err != nil {
-		t.Fatalf("failed to create temp file: %v", err)
-	}
-	defer dstFile.Close()
-
-	content, err := os.ReadFile(srcPath)
-	if err != nil {
-		t.Fatalf("failed to read src file: %v", err)
-	}
-	updated := strings.ReplaceAll(string(content), "%%%", namespace)
-	err = os.WriteFile(tempPath, []byte(updated), 0644)
-	if err != nil {
-		t.Fatalf("failed to write dst file: %v", err)
-	}
-
-	return tempPath
 }
