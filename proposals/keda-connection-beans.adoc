@@ -59,9 +59,9 @@ The existing `ScaleMapper.Map` contract receives the endpoint path and URI param
 
 === Integration/component property mapping: implementable extension
 
-https://github.com/apache/camel-k/pull/6893[PR #6893] demonstrates the next, narrower step for the ArtemisQueue mapping. The proposed `integrationProperties(e)` helper collects Integration configuration entries and properties configured through the Camel trait, then passes that map to `MapToKedaTrigger` and the scaler mapper. The Artemis mapper can use a directly declared property such as `camel.component.amqp.broker-url` to derive the scaler's management endpoint.
+PR #6893 added the Integration-property input for the ArtemisQueue mapping, and that change is now part of upstream `main`. The `integrationProperties(e)` helper collects Integration configuration entries and properties configured through the Camel trait, then passes that map to `MapToKedaTrigger` and the scaler mapper. The Artemis mapper uses a directly declared property such as `camel.component.amqp.broker-url` to derive the scaler's management endpoint.
 
-This approach uses configuration already available to Camel K and avoids querying the broker or constructing a connection factory. It should be generalized only with documented input/precedence rules and tests. The related PR remains open, so the property-map extension must not be described as already merged into upstream `main`.
+This approach uses configuration already available to Camel K and avoids querying the broker or constructing a connection factory. The bean-reference work builds on this map: a bean-aware mapper can use a known component property from the map to identify a separately extracted YAML bean declaration.
 
 === Pipe-derived Integrations: no Kamelet-specific discovery in the first iteration
 
@@ -116,24 +116,25 @@ Limitations:
 
 This remains the fallback for configuration that cannot be resolved safely.
 
-=== Option 2: Map static Integration and component properties in Camel K
+=== Option 2: Map static Integration properties and direct YAML bean references in Camel K
 
-Camel K could extend the mapper input so that the mapper receives endpoint URI information plus a read-only map of statically available Integration/component properties. This is a configuration map, not a resolved Camel registry. The same rules should apply to standalone and Pipe-derived Integrations; no Kamelet-specific lookup or interpretation is proposed for the first iteration.
+Camel K already passes endpoint URI information and a read-only map of statically configured Integration/component properties to each scaler. The narrow bean extension adds the bean declarations extracted from YAML sources only for mappers that opt in. It does not provide a resolved Camel registry.
 
-A future mapping API could accept a context rather than accumulating more positional parameters, conceptually:
+The current implementation keeps the existing `ScaleMapper` interface and adds an optional `BeanAwareScaleMapper` interface:
 
 [source,go]
 ----
-type ScalerMappingContext struct {
-    EndpointURI           string
-    Component             string
-    Path                  string
-    Parameters            map[string]string
-    IntegrationProperties map[string]string
+type BeanAwareScaleMapper interface {
+    ScaleMapper
+    MapWithBeans(pathValue string, params map[string]string,
+        props map[string]string, beans []source.BeanDefinition)
+        (kedaType string, metadata map[string]string)
 }
 ----
 
-This is illustrative only; it is not a proposed committed API. The context should expose only the data actually available to the operator, and each scaler should select the values it understands. It does not include Kamelet identity or Kamelet-specific properties because that would introduce a separate, asymmetric discovery path.
+A bean-aware mapper chooses the known component property it understands, resolves its simple `#beanName` value against the extracted declarations, and maps only the fields required by its scaler. Existing mappers do not need to implement the optional interface. The same static rules apply to standalone and Pipe-derived Integrations; no Kamelet-specific lookup or interpretation is proposed.
+
+This is deliberately a limited extension rather than a general `ScalerMappingContext` or runtime registry API. Each mapper sees only data already modelled by Camel K, and it remains responsible for selecting the values it understands.
 
 Advantages:
 
@@ -144,10 +145,10 @@ Advantages:
 Limitations and risks:
 
 * a property string is not necessarily the final runtime value after placeholder resolution or runtime configuration;
-* Pipe/Kamelet-specific property interpretation is deliberately out of scope; supporting only Apache-catalog Kamelets would treat user-provided Kamelets asymmetrically; and
-* this option does not generically resolve bean references, factories, external registries, arbitrary source-code wiring, or multiple levels of indirection.
+* direct bean-reference support is limited to a simple reference from a known component property to exactly one top-level YAML bean declaration; and
+* this option does not resolve Java/XML bean definitions, factories, nested references, external registries, arbitrary source-code wiring, or multiple levels of indirection.
 
-This is the preferred first implementation boundary: map known, statically available values and leave opaque or dynamic configurations to explicit user settings.
+This is the preferred first implementation boundary: map known, statically available values and direct YAML bean references, while leaving opaque or dynamic configurations to explicit user settings.
 
 === Option 3: Define a Camel Core metadata contract
 
@@ -204,10 +205,9 @@ The design should be validated against representative configurations before sele
 * a Pipe-derived Integration with a `kamelet:` endpoint, verifying the mapper does not infer a hidden inner endpoint or apply catalog-only special handling;
 * an Integration not derived from a Pipe, to preserve the standalone Integration path;
 * Java/XML bean declarations, nested bean references, factory-created beans, and unresolved placeholders, verifying that they are explicitly unsupported rather than evaluated;
-* connection-factory properties containing username/password or secret references, verifying that credentials are not copied into KEDA metadata;
-* multiple endpoints that share a component but use different endpoint-specific settings;
-* explicit `keda.autoMetadata` overriding inferred metadata and manually configured triggers taking precedence; and
-* username/password or token configuration, verifying that credentials remain explicit secret references and are never emitted as plaintext scaler metadata or logs.
+* connection-factory properties containing usernames, passwords, tokens, or secret references, verifying that credential values are never copied into KEDA metadata;
+* multiple endpoints that share a component but use different endpoint-specific settings; and
+* explicit `keda.autoMetadata` overriding inferred metadata and manually configured triggers taking precedence;
 
 Unit tests should cover static property extraction, precedence, and unsupported/dynamic inputs separately from scaler-specific mapping tests. Integration tests should verify the resulting `ScaledObject` and authentication references, but running a live broker should not be required to test static discovery.
 
