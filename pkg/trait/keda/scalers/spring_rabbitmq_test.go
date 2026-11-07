@@ -39,6 +39,7 @@ func TestSpringRabbitMQScalerMap(t *testing.T) {
 		name         string
 		pathValue    string
 		params       map[string]string
+		props        map[string]string
 		expectedType string
 		expectedMeta map[string]string
 	}{
@@ -72,11 +73,101 @@ func TestSpringRabbitMQScalerMap(t *testing.T) {
 			expectedType: "rabbitmq",
 			expectedMeta: map[string]string{},
 		},
+		{
+			name:      "host and port from connection factory bean",
+			pathValue: "orders-exchange",
+			params:    map[string]string{"queues": "orders"},
+			props: map[string]string{
+				"camel.component.spring-rabbitmq.connection-factory": "#rabbitConnectionFactory",
+				"camel.beans.rabbitConnectionFactory":                "#class:org.springframework.amqp.rabbit.connection.CachingConnectionFactory",
+				"camel.beans.rabbitConnectionFactory.host":           "my-rabbitmq.ns.svc",
+				"camel.beans.rabbitConnectionFactory.port":           "5673",
+				"camel.beans.rabbitConnectionFactory.username":       "admin",
+				"camel.beans.rabbitConnectionFactory.password":       "admin",
+			},
+			expectedType: "rabbitmq",
+			expectedMeta: map[string]string{
+				"queueName": "orders",
+				"host":      "amqp://my-rabbitmq.ns.svc:5673/",
+			},
+		},
+		{
+			name:      "default port and virtual host",
+			pathValue: "orders-exchange",
+			params:    map[string]string{"queues": "orders"},
+			props: map[string]string{
+				"camel.component.spring-rabbitmq.connection-factory": "#bean:cf",
+				"camel.beans.cf.host":                                "my-rabbitmq",
+				"camel.beans.cf.virtual-host":                        "/sales",
+			},
+			expectedType: "rabbitmq",
+			expectedMeta: map[string]string{
+				"queueName": "orders",
+				"host":      "amqp://my-rabbitmq:5672/sales",
+			},
+		},
+		{
+			name:      "first of addresses",
+			pathValue: "orders-exchange",
+			params:    map[string]string{"queues": "orders"},
+			props: map[string]string{
+				"camel.component.spring-rabbitmq.connection-factory": "#cf",
+				"camel.beans.cf.addresses":                           "rabbit-0:5674, rabbit-1:5674",
+				"camel.beans.cf.virtualHost":                         "sales",
+			},
+			expectedType: "rabbitmq",
+			expectedMeta: map[string]string{
+				"queueName": "orders",
+				"host":      "amqp://rabbit-0:5674/sales",
+			},
+		},
+		{
+			name:      "uri without credentials",
+			pathValue: "orders-exchange",
+			params:    map[string]string{"queues": "orders"},
+			props: map[string]string{
+				"camel.component.spring-rabbitmq.connection-factory": "#cf",
+				"camel.beans.cf.uri": "amqp://admin:secret@my-rabbitmq:5672/sales",
+			},
+			expectedType: "rabbitmq",
+			expectedMeta: map[string]string{
+				"queueName": "orders",
+				"host":      "amqp://my-rabbitmq:5672/sales",
+			},
+		},
+		{
+			name:      "endpoint connection factory wins over component",
+			pathValue: "orders-exchange",
+			params:    map[string]string{"queues": "orders", "connectionFactory": "#endpointCf"},
+			props: map[string]string{
+				"camel.component.spring-rabbitmq.connection-factory": "#componentCf",
+				"camel.beans.componentCf.host":                       "component-rabbit",
+				"camel.beans.endpointCf.host":                        "endpoint-rabbit",
+			},
+			expectedType: "rabbitmq",
+			expectedMeta: map[string]string{
+				"queueName": "orders",
+				"host":      "amqp://endpoint-rabbit:5672/",
+			},
+		},
+		{
+			name:      "bean without host is not mapped",
+			pathValue: "orders-exchange",
+			params:    map[string]string{"queues": "orders"},
+			props: map[string]string{
+				"camel.component.spring-rabbitmq.connection-factory": "#cf",
+				"camel.beans.cf.username":                            "admin",
+			},
+			expectedType: "rabbitmq",
+			expectedMeta: map[string]string{
+				"queueName": "orders",
+			},
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			kedaType, metadata := scaler.Map(tt.pathValue, tt.params, nil)
+			kedaType, metadata := scaler.Map(tt.pathValue, tt.params, tt.props)
 			assert.Equal(t, tt.expectedType, kedaType)
 			assert.Equal(t, tt.expectedMeta, metadata)
 		})
@@ -90,5 +181,20 @@ func TestMapToKedaTriggerSpringRabbitMQ(t *testing.T) {
 	assert.Equal(t, "rabbitmq", trigger.Type)
 	assert.Equal(t, map[string]string{
 		"queueName": "orders",
+	}, trigger.Metadata)
+}
+
+func TestMapToKedaTriggerSpringRabbitMQWithConnectionFactory(t *testing.T) {
+	props := map[string]string{
+		"camel.component.spring-rabbitmq.connection-factory": "#rabbitConnectionFactory",
+		"camel.beans.rabbitConnectionFactory.host":           "my-rabbitmq.ns.svc",
+		"camel.component.kafka.brokers":                      "broker:9092",
+	}
+	trigger, err := keda.MapToKedaTrigger("spring-rabbitmq:orders-exchange?queues=orders", props)
+	require.NoError(t, err)
+	require.NotNil(t, trigger)
+	assert.Equal(t, map[string]string{
+		"queueName": "orders",
+		"host":      "amqp://my-rabbitmq.ns.svc:5672/",
 	}, trigger.Metadata)
 }

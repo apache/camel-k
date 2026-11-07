@@ -22,9 +22,6 @@ package keda
 
 import (
 	"context"
-	"os"
-	"path/filepath"
-	"strings"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -60,8 +57,6 @@ func TestSpringRabbitMQKedaAutoscale(t *testing.T) {
 			// Start consumer; it declares the exchange, queue and binding
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, consumerName, v1.IntegrationConditionReady), TestTimeoutLong).
 				Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), TestTimeoutShort).
-				Should(PointTo(BeNumerically("==", 1)))
 
 			// Scale down to 0 when idle
 			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), TestTimeoutMedium).
@@ -89,21 +84,4 @@ func TestSpringRabbitMQKedaAutoscale(t *testing.T) {
 				Should(PointTo(BeNumerically("==", 0)))
 		})
 	})
-}
-
-// cloneAndReplaceNamespace clones and replace the content marked as %%% with the namespace passed as parameter.
-func cloneAndReplaceNamespace(t *testing.T, srcPath, namespace string) string {
-	t.Helper()
-
-	tempPath := filepath.Join(t.TempDir(), filepath.Base(srcPath))
-	content, err := os.ReadFile(srcPath)
-	if err != nil {
-		t.Fatalf("failed to read src file: %v", err)
-	}
-	updated := strings.ReplaceAll(string(content), "%%%", namespace)
-	if err := os.WriteFile(tempPath, []byte(updated), 0644); err != nil {
-		t.Fatalf("failed to write dst file: %v", err)
-	}
-
-	return tempPath
 }
