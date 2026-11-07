@@ -18,7 +18,10 @@ limitations under the License.
 package keda
 
 import (
+	"strings"
+
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/source"
 )
 
 // ScaleMapper defines the interface for mapping Camel component URIs to KEDA triggers.
@@ -39,7 +42,49 @@ func GetMapper(component string) (ScaleMapper, bool) {
 	return m, ok
 }
 
+// BeanAwareScaleMapper is an optional extension for mappings that can use
+// directly declared bean configuration. Existing ScaleMapper implementations
+// do not need to change.
+type BeanAwareScaleMapper interface {
+	ScaleMapper
+	MapWithBeans(pathValue string, params map[string]string, props map[string]string, beans []source.BeanDefinition) (kedaType string, metadata map[string]string)
+}
+
+// ResolveBeanReference resolves the simple #beanName form against the bean
+// definitions extracted from the Integration sources. Ambiguous and dynamic
+// references are deliberately left unresolved.
+func ResolveBeanReference(reference string, beans []source.BeanDefinition) (source.BeanDefinition, bool) {
+	if !strings.HasPrefix(reference, "#") {
+		return source.BeanDefinition{}, false
+	}
+	name := strings.TrimPrefix(reference, "#")
+	if name == "" || strings.ContainsAny(name, " \t\r\n#{}$") {
+		return source.BeanDefinition{}, false
+	}
+
+	var resolved source.BeanDefinition
+	found := false
+	for _, bean := range beans {
+		if bean.Name == name {
+			if found {
+				return source.BeanDefinition{}, false
+			}
+			resolved = bean
+			found = true
+		}
+	}
+
+	return resolved, found
+}
+
+// MapToKedaTrigger preserves the original URI/property-only mapping entry point.
 func MapToKedaTrigger(rawURI string, props map[string]string) (*traitv1.KedaTrigger, error) {
+	return MapToKedaTriggerWithBeans(rawURI, props, nil)
+}
+
+// MapToKedaTriggerWithBeans also supplies statically extracted bean definitions
+// to mappings that explicitly opt in through BeanAwareScaleMapper.
+func MapToKedaTriggerWithBeans(rawURI string, props map[string]string, beans []source.BeanDefinition) (*traitv1.KedaTrigger, error) {
 	scheme, pathValue, params, err := ParseComponentURI(rawURI)
 	if err != nil {
 		return nil, err
@@ -51,7 +96,18 @@ func MapToKedaTrigger(rawURI string, props map[string]string) (*traitv1.KedaTrig
 	if !found {
 		return nil, nil
 	}
-	kedaType, metadata := mapper.Map(pathValue, params, props)
+
+	var kedaType string
+	var metadata map[string]string
+	if beanMapper, ok := mapper.(BeanAwareScaleMapper); ok {
+		kedaType, metadata = beanMapper.MapWithBeans(pathValue, params, props, beans)
+	} else {
+		kedaType, metadata = mapper.Map(pathValue, params, props)
+	}
+
+	if kedaType == "" {
+		return nil, nil
+	}
 
 	return &traitv1.KedaTrigger{
 		Type:     kedaType,

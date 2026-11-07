@@ -19,6 +19,7 @@ package source
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 
 	yaml2 "gopkg.in/yaml.v2"
@@ -41,6 +42,9 @@ func (i YAMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 	}
 
 	for _, definition := range definitions {
+		if beans, ok := definition["beans"]; ok {
+			i.parseBeans(beans, meta)
+		}
 		if err := i.parseDefinition(definition, meta); err != nil {
 			return err
 		}
@@ -63,6 +67,88 @@ func (i YAMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 	meta.PassiveEndpoints = i.hasOnlyPassiveEndpoints(meta.FromURIs)
 
 	return nil
+}
+
+// parseBeans retains top-level YAML bean definitions for consumers that can map their
+// statically declared properties. It does not instantiate beans or resolve references.
+func (i YAMLInspector) parseBeans(content any, meta *Metadata) {
+	beans, ok := content.([]any)
+	if !ok {
+		return
+	}
+
+	for _, rawBean := range beans {
+		bean, ok := rawBean.(map[any]any)
+		if !ok {
+			continue
+		}
+
+		name, ok := bean["name"].(string)
+		if !ok || name == "" {
+			continue
+		}
+
+		definition := BeanDefinition{Name: name, Properties: make(map[string]string)}
+		definition.Type, _ = bean["type"].(string)
+
+		if rawProperties, ok := bean["properties"].(map[any]any); ok {
+			for rawKey, rawValue := range rawProperties {
+				key, ok := rawKey.(string)
+				if !ok || key == "" || isSensitiveBeanProperty(key) {
+					continue
+				}
+				if value, ok := scalarBeanProperty(rawValue); ok {
+					definition.Properties[key] = value
+				}
+			}
+		}
+
+		meta.Beans = append(meta.Beans, definition)
+	}
+}
+
+// isSensitiveBeanProperty avoids retaining credentials in source metadata.
+func isSensitiveBeanProperty(key string) bool {
+	normalized := strings.ToLower(strings.NewReplacer("-", "", "_", "", ".", "").Replace(key))
+	for _, sensitive := range []string{"password", "passwd", "username", "user", "secret", "token", "credential", "privatekey", "clientkey", "accesskey"} {
+		if strings.Contains(normalized, sensitive) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// scalarBeanProperty returns only YAML scalar values. Nested objects and sequences
+// are intentionally left unresolved.
+func scalarBeanProperty(value any) (string, bool) {
+	switch value.(type) {
+	case string, bool, int, int64, uint64, float32, float64:
+		valueString := fmt.Sprint(value)
+		if containsSensitiveURLData(valueString) {
+			return "", false
+		}
+		return valueString, true
+	default:
+		return "", false
+	}
+}
+
+func containsSensitiveURLData(value string) bool {
+	parsed, err := url.Parse(value)
+	if err != nil {
+		return false
+	}
+	if parsed.User != nil {
+		return true
+	}
+	for key := range parsed.Query() {
+		if isSensitiveBeanProperty(key) {
+			return true
+		}
+	}
+
+	return false
 }
 
 //nolint:nestif

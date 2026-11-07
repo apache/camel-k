@@ -912,3 +912,36 @@ func TestYAMLErrorHandlerKamelet(t *testing.T) {
 		})
 	})
 }
+
+func TestYAMLBeanDefinitions(t *testing.T) {
+	inspector := newTestYAMLInspector(t)
+	source := `
+- beans:
+    - name: rabbitConnectionFactory
+      type: org.springframework.amqp.rabbit.connection.CachingConnectionFactory
+      properties:
+        host: my-rabbitmq.my-ns.svc
+        port: 5672
+        username: admin
+        password: admin
+        nested:
+          enabled: true
+        brokerUri: amqp://admin:admin@my-rabbitmq.my-ns.svc:5672
+- route:
+    from:
+      uri: spring-rabbitmq:my-exchange?queues=my-queue&routingKey=my-key
+      steps:
+        - to: log:info
+`
+
+	assertExtractYAML(t, inspector, source, func(meta *Metadata) {
+		require.Len(t, meta.Beans, 1)
+		assert.Equal(t, "rabbitConnectionFactory", meta.Beans[0].Name)
+		assert.Equal(t, "org.springframework.amqp.rabbit.connection.CachingConnectionFactory", meta.Beans[0].Type)
+		assert.Equal(t, map[string]string{
+			"host": "my-rabbitmq.my-ns.svc",
+			"port": "5672",
+		}, meta.Beans[0].Properties)
+		assert.Equal(t, []string{"spring-rabbitmq:my-exchange?queues=my-queue&routingKey=my-key"}, meta.FromURIs)
+	})
+}

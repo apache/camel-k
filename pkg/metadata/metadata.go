@@ -57,9 +57,14 @@ func merge(m1 src.Metadata, m2 src.Metadata) src.Metadata {
 	k = append(k, m1.Kamelets...)
 	k = append(k, m2.Kamelets...)
 
+	beans := make([]src.BeanDefinition, 0, len(m1.Beans)+len(m2.Beans))
+	beans = append(beans, m1.Beans...)
+	beans = append(beans, m2.Beans...)
+
 	return src.Metadata{
 		FromURIs:             f,
 		ToURIs:               t,
+		Beans:                beans,
 		Dependencies:         sets.Union(m1.Dependencies, m2.Dependencies),
 		RequiredCapabilities: sets.Union(m1.RequiredCapabilities, m2.RequiredCapabilities),
 		ExposesHTTPServices:  m1.ExposesHTTPServices || m2.ExposesHTTPServices,
