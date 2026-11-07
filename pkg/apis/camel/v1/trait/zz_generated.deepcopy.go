@@ -70,8 +70,8 @@ func (in *BaseTruststore) DeepCopy() *BaseTruststore {
 func (in *BuilderTrait) DeepCopyInto(out *BuilderTrait) {
 	*out = *in
 	in.PlatformBaseTrait.DeepCopyInto(&out.PlatformBaseTrait)
-	if in.Verbose != nil {
-		in, out := &in.Verbose, &out.Verbose
+	if in.DeprecatedVerbose != nil {
+		in, out := &in.DeprecatedVerbose, &out.DeprecatedVerbose
 		*out = new(bool)
 		**out = **in
 	}
@@ -90,8 +90,8 @@ func (in *BuilderTrait) DeepCopyInto(out *BuilderTrait) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
-	if in.Tasks != nil {
-		in, out := &in.Tasks, &out.Tasks
+	if in.DeprecatedTasks != nil {
+		in, out := &in.DeprecatedTasks, &out.DeprecatedTasks
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
@@ -329,8 +329,8 @@ func (in *DependenciesTrait) DeepCopy() *DependenciesTrait {
 func (in *DeployerTrait) DeepCopyInto(out *DeployerTrait) {
 	*out = *in
 	in.PlatformBaseTrait.DeepCopyInto(&out.PlatformBaseTrait)
-	if in.UseSSA != nil {
-		in, out := &in.UseSSA, &out.UseSSA
+	if in.DeprecatedUseSSA != nil {
+		in, out := &in.DeprecatedUseSSA, &out.DeprecatedUseSSA
 		*out = new(bool)
 		**out = **in
 	}
@@ -428,8 +428,8 @@ func (in *ErrorHandlerTrait) DeepCopy() *ErrorHandlerTrait {
 func (in *GCTrait) DeepCopyInto(out *GCTrait) {
 	*out = *in
 	in.Trait.DeepCopyInto(&out.Trait)
-	if in.DiscoveryCache != nil {
-		in, out := &in.DiscoveryCache, &out.DiscoveryCache
+	if in.DeprecatedDiscoveryCache != nil {
+		in, out := &in.DeprecatedDiscoveryCache, &out.DeprecatedDiscoveryCache
 		*out = new(DiscoveryCacheType)
 		**out = **in
 	}
@@ -627,8 +627,8 @@ func (in *JVMTrait) DeepCopyInto(out *JVMTrait) {
 		*out = new(bool)
 		**out = **in
 	}
-	if in.PrintCommand != nil {
-		in, out := &in.PrintCommand, &out.PrintCommand
+	if in.DeprecatedPrintCommand != nil {
+		in, out := &in.DeprecatedPrintCommand, &out.DeprecatedPrintCommand
 		*out = new(bool)
 		**out = **in
 	}
@@ -1107,8 +1107,8 @@ func (in *MountTrait) DeepCopyInto(out *MountTrait) {
 		*out = new(bool)
 		**out = **in
 	}
-	if in.ScanKameletsImplicitLabelSecrets != nil {
-		in, out := &in.ScanKameletsImplicitLabelSecrets, &out.ScanKameletsImplicitLabelSecrets
+	if in.DeprecatedScanKameletsImplicitLabelSecrets != nil {
+		in, out := &in.DeprecatedScanKameletsImplicitLabelSecrets, &out.DeprecatedScanKameletsImplicitLabelSecrets
 		*out = new(bool)
 		**out = **in
 	}
@@ -1289,13 +1289,13 @@ func (in *PrometheusTrait) DeepCopy() *PrometheusTrait {
 func (in *PullSecretTrait) DeepCopyInto(out *PullSecretTrait) {
 	*out = *in
 	in.Trait.DeepCopyInto(&out.Trait)
-	if in.ImagePullerDelegation != nil {
-		in, out := &in.ImagePullerDelegation, &out.ImagePullerDelegation
+	if in.DeprecatedImagePullerDelegation != nil {
+		in, out := &in.DeprecatedImagePullerDelegation, &out.DeprecatedImagePullerDelegation
 		*out = new(bool)
 		**out = **in
 	}
-	if in.Auto != nil {
-		in, out := &in.Auto, &out.Auto
+	if in.DeprecatedAuto != nil {
+		in, out := &in.DeprecatedAuto, &out.DeprecatedAuto
 		*out = new(bool)
 		**out = **in
 	}
@@ -1315,8 +1315,8 @@ func (in *PullSecretTrait) DeepCopy() *PullSecretTrait {
 func (in *QuarkusTrait) DeepCopyInto(out *QuarkusTrait) {
 	*out = *in
 	in.PlatformBaseTrait.DeepCopyInto(&out.PlatformBaseTrait)
-	if in.PackageTypes != nil {
-		in, out := &in.PackageTypes, &out.PackageTypes
+	if in.DeprecatedPackageTypes != nil {
+		in, out := &in.DeprecatedPackageTypes, &out.DeprecatedPackageTypes
 		*out = make([]QuarkusPackageType, len(*in))
 		copy(*out, *in)
 	}
@@ -1451,8 +1451,8 @@ func (in *ServiceTrait) DeepCopyInto(out *ServiceTrait) {
 		*out = new(bool)
 		**out = **in
 	}
-	if in.NodePort != nil {
-		in, out := &in.NodePort, &out.NodePort
+	if in.DeprecatedNodePort != nil {
+		in, out := &in.DeprecatedNodePort, &out.DeprecatedNodePort
 		*out = new(bool)
 		**out = **in
 	}

@@ -6575,28 +6575,28 @@ string
 |
 
 
-Deprecated: use TasksRequestCPU instead with task name `builder`.
+Deprecated: no longer in use.
 
 |`requestMemory` +
 string
 |
 
 
-Deprecated: use TasksRequestCPU instead with task name `builder`.
+Deprecated: no longer in use.
 
 |`limitCPU` +
 string
 |
 
 
-Deprecated: use TasksRequestCPU instead with task name `builder`.
+Deprecated: no longer in use.
 
 |`limitMemory` +
 string
 |
 
 
-Deprecated: use TasksRequestCPU instead with task name `builder`.
+Deprecated: no longer in use.
 
 |`mavenProfiles` +
 []string
@@ -6610,21 +6610,14 @@ Deprecated: no longer in use.
 |
 
 
-A list of tasks to be executed (available only when using `pod` strategy) with format `<name>;<container-image>;<container-command>`.
-
-Deprecated: may be removed in future versions.
+Deprecated: no longer in use.
 
 |`tasksFilter` +
 string
 |
 
 
-A list of tasks sorted by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.
-Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`)
-if you need to execute them. Useful only with `pod` strategy. Disabled by default, you need to enable via
-BUILDER_TASKS_ENABLED=true environment variable on operator Deployment.
-
-Deprecated: may be removed in future versions.
+Deprecated: no longer in use.
 
 |`tasksRequestCPU` +
 []string
@@ -7132,10 +7125,7 @@ string
 |
 
 
-Allows to explicitly select the desired deployment kind between `deployment`, `cron-job` or `knative-service`
-when creating the resources for running the integration.
-
-Deprecated: this feature will be removed in future releases.
+Deprecated: no longer in use.
 
 |`useSSA` +
 bool
@@ -7331,8 +7321,6 @@ The GC Trait garbage-collects all resources that are no longer necessary upon in
 *xref:#_camel_apache_org_v1_trait_DiscoveryCacheType[DiscoveryCacheType]*
 |
 
-
-Discovery client cache to be used, either `disabled`, `disk` or `memory` (default `memory`).
 
 Deprecated: no longer in use.
 
@@ -7771,8 +7759,6 @@ string
 |
 
 
-To configure the path exposed by the ingress (default `/`).
-
 Deprecated: In favor of `paths` - left for backward compatibility.
 
 |`paths` +
@@ -7968,8 +7954,6 @@ bool
 |
 
 
-Prints the command used the start the JVM in the container logs (default `true`).
-
 Deprecated: no longer in use.
 
 |`debugAddress` +
@@ -8040,14 +8024,14 @@ string
 |
 
 
-Deprecated: Use CACertificates instead. Path to a PEM-encoded CA certificate file.
+Deprecated: no longer in use.
 
 |`caCertPassword` +
 string
 |
 
 
-Deprecated: Use CACertificates instead. Path to a file containing the truststore password.
+Deprecated: no longer in use.
 
 
 |===
@@ -8872,7 +8856,7 @@ bool
 |
 
 
-Deprecated: no longer available since version 2.5.
+Deprecated: no longer in use.
 
 
 |===
@@ -9207,17 +9191,14 @@ bool
 |
 
 
-When using a global operator with a shared platform, this enables delegation of the `system:image-puller`
-cluster role on the operator namespace to the integration service account.
-
-Deprecated: may be removed in future releases.
+Deprecated: no longer in use.
 
 |`auto` +
 bool
 |
 
 
-Automatically configures the platform registry secret on the pod if it is of type `kubernetes.io/dockerconfigjson`.
+Deprecated: no longer in use.
 
 
 |===
@@ -9277,13 +9258,6 @@ Compiling to a native executable, i.e. when using `build-mode=native`, requires 
 *xref:#_camel_apache_org_v1_trait_QuarkusPackageType[[\]QuarkusPackageType]*
 |
 
-
-The Quarkus package types, `fast-jar` or `native` (default `fast-jar`).
-In case both `fast-jar` and `native` are specified, two `IntegrationKit` resources are created,
-with the native kit having precedence over the `fast-jar` one once ready.
-The order influences the resolution of the current kit for the integration.
-The kit corresponding to the first package type will be assigned to the
-integration in case no existing kit that matches the integration exists.
 
 Deprecated: use `build-mode` instead.
 
@@ -9619,9 +9593,7 @@ bool
 |
 
 
-Enable Service to be exposed as NodePort (default `false`).
-
-Deprecated: Use service type instead.
+Deprecated: no longer in use.
 
 |`type` +
 *xref:#_camel_apache_org_v1_trait_ServiceType[ServiceType]*

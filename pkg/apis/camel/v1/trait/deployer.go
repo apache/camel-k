@@ -21,17 +21,14 @@ package trait
 // to explicitly select the underlying controller that will manage the integration pods.
 //
 // +camel-k:trait=deployer.
+// +camel-k:internal.
 //
 //nolint:godoclint
 type DeployerTrait struct {
 	PlatformBaseTrait `json:",inline" property:",squash"`
 
-	// Allows to explicitly select the desired deployment kind between `deployment`, `cron-job` or `knative-service`
-	// when creating the resources for running the integration.
-	// +kubebuilder:validation:Enum=deployment;cron-job;knative-service
-	//
-	// Deprecated: this feature will be removed in future releases.
-	Kind string `json:"kind,omitempty" property:"kind"`
 	// Deprecated: no longer in use.
-	UseSSA *bool `json:"useSSA,omitempty" property:"use-ssa"`
+	DeprecatedKind string `json:"kind,omitempty" property:"kind"`
+	// Deprecated: no longer in use.
+	DeprecatedUseSSA *bool `json:"useSSA,omitempty" property:"use-ssa"`
 }

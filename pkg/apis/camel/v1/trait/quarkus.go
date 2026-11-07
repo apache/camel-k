@@ -31,15 +31,8 @@ package trait
 type QuarkusTrait struct {
 	PlatformBaseTrait `json:",inline" property:",squash"`
 
-	// The Quarkus package types, `fast-jar` or `native` (default `fast-jar`).
-	// In case both `fast-jar` and `native` are specified, two `IntegrationKit` resources are created,
-	// with the native kit having precedence over the `fast-jar` one once ready.
-	// The order influences the resolution of the current kit for the integration.
-	// The kit corresponding to the first package type will be assigned to the
-	// integration in case no existing kit that matches the integration exists.
-	//
 	// Deprecated: use `build-mode` instead.
-	PackageTypes []QuarkusPackageType `json:"packageTypes,omitempty" property:"package-type"`
+	DeprecatedPackageTypes []QuarkusPackageType `json:"packageTypes,omitempty" property:"package-type"`
 	// The Quarkus mode to run: either `jvm` or `native` (default `jvm`).
 	// In case both `jvm` and `native` are specified, two `IntegrationKit` resources are created,
 	// with the `native` kit having precedence over the `jvm` one once ready.

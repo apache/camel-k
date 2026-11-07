@@ -104,21 +104,7 @@ func (t *jvmTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		return false, nil, err
 	}
 
-	var condition *TraitCondition
-	//nolint:staticcheck
-	if t.CACert != "" || t.CACertPassword != "" {
-		m := "The ca-cert and ca-cert-password parameters are deprecated and may be removed in future releases. Use ca-certificates instead."
-		t.L.Info(m)
-		condition = NewIntegrationCondition(
-			"JVM",
-			v1.IntegrationConditionTraitInfo,
-			corev1.ConditionTrue,
-			TraitConfigurationReason,
-			m,
-		)
-	}
-
-	return true, condition, nil
+	return true, nil, nil
 }
 
 func (t *jvmTrait) Apply(e *Environment) error {

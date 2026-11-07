@@ -31,8 +31,6 @@ type deployerTrait struct {
 	traitv1.DeployerTrait `property:",squash"`
 }
 
-var _ ControllerStrategySelector = &deployerTrait{}
-
 func newDeployerTrait() Trait {
 	return &deployerTrait{
 		BasePlatformTrait: NewBasePlatformTrait(deployerTraitID, deployerTraitOrder),
@@ -59,24 +57,4 @@ func (t *deployerTrait) Apply(e *Environment) error {
 	})
 
 	return nil
-}
-
-func (t *deployerTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
-	//nolint:staticcheck
-	if t.Kind != "" {
-		strategy := ControllerStrategy(t.Kind)
-
-		return &strategy, nil
-	}
-
-	return nil, nil
-}
-
-func (t *deployerTrait) ControllerStrategySelectorOrder() int {
-	return 0
-}
-
-// RequiresIntegrationPlatform overrides base class method.
-func (t *deployerTrait) RequiresIntegrationPlatform() bool {
-	return false
 }

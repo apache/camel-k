@@ -27,7 +27,7 @@ type BuilderTrait struct {
 	PlatformBaseTrait `json:",inline" property:",squash"`
 
 	// Deprecated: no longer in use
-	Verbose *bool `json:"verbose,omitempty" property:"verbose"`
+	DeprecatedVerbose *bool `json:"verbose,omitempty" property:"verbose"`
 	// A list of properties to be provided to the build task
 	Properties []string `json:"properties,omitempty" property:"properties"`
 	// Deprecated: no longer in use
@@ -39,27 +39,20 @@ type BuilderTrait struct {
 	IncrementalImageBuild *bool `json:"incrementalImageBuild,omitempty" property:"incremental-image-build"`
 	// Deprecated: no longer in use
 	DeprecatedOrderStrategy string `json:"orderStrategy,omitempty" property:"order-strategy"`
-	// Deprecated: use TasksRequestCPU instead with task name `builder`.
-	RequestCPU string `json:"requestCPU,omitempty" property:"request-cpu"`
-	// Deprecated: use TasksRequestCPU instead with task name `builder`.
-	RequestMemory string `json:"requestMemory,omitempty" property:"request-memory"`
-	// Deprecated: use TasksRequestCPU instead with task name `builder`.
-	LimitCPU string `json:"limitCPU,omitempty" property:"limit-cpu"`
-	// Deprecated: use TasksRequestCPU instead with task name `builder`.
-	LimitMemory string `json:"limitMemory,omitempty" property:"limit-memory"`
+	// Deprecated: no longer in use.
+	DeprecatedRequestCPU string `json:"requestCPU,omitempty" property:"request-cpu"`
+	// Deprecated: no longer in use.
+	DeprecatedRequestMemory string `json:"requestMemory,omitempty" property:"request-memory"`
+	// Deprecated: no longer in use.
+	DeprecatedLimitCPU string `json:"limitCPU,omitempty" property:"limit-cpu"`
+	// Deprecated: no longer in use.
+	DeprecatedLimitMemory string `json:"limitMemory,omitempty" property:"limit-memory"`
 	// Deprecated: no longer in use.
 	DeprecatedMavenProfiles []string `json:"mavenProfiles,omitempty" property:"maven-profiles"`
-	// A list of tasks to be executed (available only when using `pod` strategy) with format `<name>;<container-image>;<container-command>`.
-	//
-	// Deprecated: may be removed in future versions.
-	Tasks []string `json:"tasks,omitempty" property:"tasks"`
-	// A list of tasks sorted by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.
-	// Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`)
-	// if you need to execute them. Useful only with `pod` strategy. Disabled by default, you need to enable via
-	// BUILDER_TASKS_ENABLED=true environment variable on operator Deployment.
-	//
-	// Deprecated: may be removed in future versions.
-	TasksFilter string `json:"tasksFilter,omitempty" property:"tasks-filter"`
+	// Deprecated: no longer in use.
+	DeprecatedTasks []string `json:"tasks,omitempty" property:"tasks"`
+	// Deprecated: no longer in use.
+	DeprecatedTasksFilter string `json:"tasksFilter,omitempty" property:"tasks-filter"`
 	// A list of request cpu configuration for the specific task with format `<task-name>:<request-cpu-conf>`.
 	TasksRequestCPU []string `json:"tasksRequestCPU,omitempty" property:"tasks-request-cpu"`
 	// A list of request memory configuration for the specific task with format `<task-name>:<request-memory-conf>`.

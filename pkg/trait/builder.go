@@ -67,13 +67,12 @@ func (t *builderTrait) InfluencesKit() bool {
 	return true
 }
 
-//nolint:staticcheck
 func (t *builderTrait) Matches(trait Trait) bool {
 	otherTrait, ok := trait.(*builderTrait)
 	if !ok {
 		return false
 	}
-	if t.BaseImage != otherTrait.BaseImage || len(t.Properties) != len(otherTrait.Properties) || len(t.Tasks) != len(otherTrait.Tasks) {
+	if t.BaseImage != otherTrait.BaseImage || len(t.Properties) != len(otherTrait.Properties) {
 		return false
 	}
 	// More sofisticated check if len is the same. Sort and compare via slices equal func.
@@ -85,48 +84,39 @@ func (t *builderTrait) Matches(trait Trait) bool {
 	copy(srtOtheProps, otherTrait.Properties)
 	slices.Sort(srtThisProps)
 	slices.Sort(srtOtheProps)
-	if !slices.Equal(srtThisProps, srtOtheProps) {
-		return false
-	}
-	srtThisTasks := make([]string, len(t.Tasks))
-	srtOtheTasks := make([]string, len(otherTrait.Tasks))
-	copy(srtThisTasks, t.Tasks)
-	copy(srtOtheTasks, otherTrait.Tasks)
-	slices.Sort(srtThisTasks)
-	slices.Sort(srtOtheTasks)
 
-	return slices.Equal(srtThisTasks, srtOtheTasks)
+	return slices.Equal(srtThisProps, srtOtheProps)
 }
 
 func (t *builderTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.IntegrationKit != nil || e.IntegrationInPhase(v1.IntegrationPhaseBuildSubmitted) {
-		condition := t.adaptDeprecatedFields()
 		t.setPlatform(e)
 		if e.IntegrationKit != nil && !e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) {
-			return false, condition, nil
+			return false, nil, nil
 		}
 
 		trait := e.Catalog.GetTrait(quarkusTraitID)
 		if trait != nil {
-			condition, err := t.configureForQuarkus(trait, e, condition)
+			condition, err := t.configureForQuarkus(trait, e)
 			if err != nil {
 				return false, condition, err
 			}
 		}
 
-		return true, condition, nil
+		return true, nil, nil
 	}
 
 	return false, nil, nil
 }
 
-func (t *builderTrait) configureForQuarkus(trait Trait, e *Environment, condition *TraitCondition) (*TraitCondition, error) {
+func (t *builderTrait) configureForQuarkus(trait Trait, e *Environment) (*TraitCondition, error) {
+	var condition *TraitCondition
 	quarkus, ok := trait.(*quarkusTrait)
 	isNativeIntegration := quarkus.isNativeIntegration(e)
 
 	isNativeKit, err := quarkus.isNativeKit(e)
 	if err != nil {
-		return condition, err
+		return nil, err
 	}
 
 	if ok && (isNativeIntegration || isNativeKit) {
@@ -145,7 +135,7 @@ func (t *builderTrait) configureForQuarkus(trait Trait, e *Environment, conditio
 		m := "This is a Quarkus native build: setting build configuration with build Pod strategy and native container sensible resources " +
 			"(if not specified by the user). Make sure your cluster can handle it."
 		t.L.Info(m)
-		condition = newOrAppend(condition, m)
+		condition = NewIntegrationCondition("Builder", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, TraitConfigurationReason, m)
 
 		if !existsTaskRequest(t.TasksRequestCPU, quarkusNativeTaskName) {
 			t.TasksRequestCPU = append(t.TasksRequestCPU, quarkusNativeTaskName+":1000m")
@@ -169,50 +159,6 @@ func existsTaskRequest(tasks []string, taskName string) bool {
 	}
 
 	return false
-}
-
-//nolint:staticcheck
-func (t *builderTrait) adaptDeprecatedFields() *TraitCondition {
-	var condition *TraitCondition
-	if t.RequestCPU != "" {
-		m := "The request-cpu parameter is deprecated and may be removed in future releases. Make sure to use tasks-request-cpu parameter instead."
-		t.L.Info(m)
-		condition = newOrAppend(condition, m)
-		t.TasksRequestCPU = append(t.TasksRequestCPU, "builder:"+t.RequestCPU)
-	}
-	if t.LimitCPU != "" {
-		m := "The limit-cpu parameter is deprecated and may be removed in future releases. Make sure to use tasks-limit-cpu parameter instead."
-		t.L.Info(m)
-		condition = newOrAppend(condition, m)
-		t.TasksLimitCPU = append(t.TasksLimitCPU, "builder:"+t.LimitCPU)
-	}
-	if t.RequestMemory != "" {
-		m := "The request-memory parameter is deprecated and may be removed in future releases. Make sure to use tasks-request-memory parameter instead."
-		t.L.Info(m)
-		condition = newOrAppend(condition, m)
-		t.TasksRequestMemory = append(t.TasksRequestMemory, "builder:"+t.RequestMemory)
-	}
-	if t.LimitMemory != "" {
-		m := "The limit-memory parameter is deprecated and may be removed in future releases. Make sure to use tasks-limit-memory parameter instead."
-		t.L.Info(m)
-		if condition == nil {
-			condition = NewIntegrationCondition("Builder", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, TraitConfigurationReason, "")
-		}
-		condition = newOrAppend(condition, m)
-		t.TasksLimitMemory = append(t.TasksLimitMemory, "builder:"+t.LimitMemory)
-	}
-
-	return condition
-}
-
-func newOrAppend(condition *TraitCondition, message string) *TraitCondition {
-	if condition == nil {
-		condition = NewIntegrationCondition("Builder", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, TraitConfigurationReason, message)
-	} else {
-		condition.message += "; " + message
-	}
-
-	return condition
 }
 
 func (t *builderTrait) Apply(e *Environment) error {
@@ -251,26 +197,6 @@ func (t *builderTrait) Apply(e *Environment) error {
 	builderTask.Configuration.Annotations = t.Annotations
 	pipelineTasks = append(pipelineTasks, v1.Task{Builder: builderTask})
 
-	// Custom tasks
-	//nolint:staticcheck,nestif
-	if platform.BuilderTasksEnabled() {
-		if len(t.Tasks) > 0 {
-			ct, err := t.determineCustomTasks(e, tasksConf)
-			if err != nil {
-				return err
-			}
-			if ct == nil {
-				return nil
-			}
-			pipelineTasks = append(pipelineTasks, ct...)
-		}
-	} else {
-		if len(t.Tasks) > 0 {
-			t.L.Info("Custom tasks are disabled by operator configuration: the tasks will be ignored")
-		}
-		// Useful to report in status no custom task was executed
-		t.Tasks = []string{}
-	}
 	if t.quarkusNativeTask != "" {
 		quarkusNativeTask, err := parseTask(t.quarkusNativeTask, tasksConf, imageName)
 		if err != nil {
@@ -300,24 +226,6 @@ func (t *builderTrait) Apply(e *Environment) error {
 	}
 	pipelineTasks = append(pipelineTasks, jibTask)
 
-	// filter only those tasks required by the user
-	//nolint:staticcheck
-	if t.TasksFilter != "" {
-		flt := strings.Split(t.TasksFilter, ",")
-		if pipelineTasks, err = filter(pipelineTasks, flt); err != nil {
-			if err := failIntegrationKit(
-				e,
-				"IntegrationKitTasksValid",
-				corev1.ConditionFalse,
-				"IntegrationKitTasksValid",
-				err.Error(),
-			); err != nil {
-				return err
-			}
-
-			return err
-		}
-	}
 	// add local pipeline tasks to env pipeline
 	e.Pipeline = append(e.Pipeline, pipelineTasks...)
 
@@ -450,33 +358,6 @@ func (t *builderTrait) getBaseImage(e *Environment) string {
 	return baseImage
 }
 
-func (t *builderTrait) determineCustomTasks(e *Environment, tasksConf map[string]*v1.BuildConfiguration) ([]v1.Task, error) {
-	imageName, err := getImageName(e)
-	if err != nil {
-		return nil, err
-	}
-
-	return t.customTasks(tasksConf, imageName)
-}
-
-// the format expected is "<task-name>;<task-image>;<task-container-command>[;<task-container-user-id>]".
-//
-// Deprecated: will be removed in future versions.
-func (t *builderTrait) customTasks(tasksConf map[string]*v1.BuildConfiguration, imageName string) ([]v1.Task, error) {
-	customTasks := make([]v1.Task, len(t.Tasks))
-
-	for i, t := range t.Tasks {
-		parsedTask, err := parseTask(t, tasksConf, imageName)
-		if err != nil {
-			return nil, err
-		}
-
-		customTasks[i] = *parsedTask
-	}
-
-	return customTasks, nil
-}
-
 func parseTask(task string, tasksConf map[string]*v1.BuildConfiguration, imageName string) (*v1.Task, error) {
 	splitted := strings.Split(task, ";")
 	if len(splitted) < 3 {
@@ -583,53 +464,6 @@ func splitContainerCommand(command string) []string {
 	}
 
 	return removeQuotes
-}
-
-func filter(tasks []v1.Task, filterTasks []string) ([]v1.Task, error) {
-	var filteredTasks []v1.Task
-	for _, f := range filterTasks {
-		found := false
-
-		for _, t := range tasks {
-			switch {
-			case t.Builder != nil && t.Builder.Name == f:
-				filteredTasks = append(filteredTasks, t)
-				found = true
-			case t.Custom != nil && t.Custom.Name == f:
-				filteredTasks = append(filteredTasks, t)
-				found = true
-			case t.Package != nil && t.Package.Name == f:
-				filteredTasks = append(filteredTasks, t)
-				found = true
-			case t.Jib != nil && t.Jib.Name == f:
-				filteredTasks = append(filteredTasks, t)
-				found = true
-			}
-		}
-
-		if !found {
-			// If we reach this point it means no tasks exists for the name
-			return nil, fmt.Errorf("no task exist for %s name", f)
-		}
-	}
-	// make sure the last task is either a publishing task or a custom task
-	if len(filteredTasks) == 0 || !publishingOrUserTask(filteredTasks[len(filteredTasks)-1]) {
-		return nil, errors.New("last pipeline task is not a publishing or a user task")
-	}
-
-	return filteredTasks, nil
-}
-
-// return true if the task is either a publishing task or a custom user task.
-func publishingOrUserTask(t v1.Task) bool {
-	switch {
-	case t.Custom != nil:
-		return true
-	case t.Jib != nil:
-		return true
-	}
-
-	return false
 }
 
 // Will set a default platform if either specified in the trait or the platform/profile configuration.

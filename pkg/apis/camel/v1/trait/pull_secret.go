@@ -31,11 +31,8 @@ type PullSecretTrait struct {
 
 	// The pull secret name to set on the Pod.
 	SecretName string `json:"secretName,omitempty" property:"secret-name"`
-	// When using a global operator with a shared platform, this enables delegation of the `system:image-puller`
-	// cluster role on the operator namespace to the integration service account.
-	//
-	// Deprecated: may be removed in future releases.
-	ImagePullerDelegation *bool `json:"imagePullerDelegation,omitempty" property:"image-puller-delegation"`
-	// Automatically configures the platform registry secret on the pod if it is of type `kubernetes.io/dockerconfigjson`.
-	Auto *bool `json:"auto,omitempty" property:"auto"`
+	// Deprecated: no longer in use.
+	DeprecatedImagePullerDelegation *bool `json:"imagePullerDelegation,omitempty" property:"image-puller-delegation"`
+	// Deprecated: no longer in use.
+	DeprecatedAuto *bool `json:"auto,omitempty" property:"auto"`
 }

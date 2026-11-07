@@ -64,7 +64,7 @@ Once configured, the `Apply()` method will be called along the build or initiali
 
 The `Order()` method helps in resolving the order of execution of different traits. As every trait can be expected to be run before or after another trait, or any other controller operation.
 
-The `InfluencesKit()`, `IsPlatformTrait()` and `RequiresIntegrationPlatform()` methods are easy to understand. They are used to determine if a trait has to influence an `IntegrationKit` build/initialization, if it's a platform trait (ie, needed by the platform itself) or are requiring the presence of an `IntegrationPlatform`.
+The `InfluencesKit()` and `IsPlatformTrait()` methods are easy to understand. They are used to determine if a trait has to influence an `IntegrationKit` build/initialization, if it's a platform trait (ie, needed by the platform itself).
 
 For those traits that `InfluencesKit()` you may need to provide a `Matches(trait Trait)` func in order to specify those trait parameters that influences a build. This is required by the platform to decide if it is worth to rebuild an Integration or the trait can reuse the one already provided.
 

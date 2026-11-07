@@ -594,7 +594,6 @@ func createNominalJvmTest(kitType string) (*jvmTrait, *Environment) {
 	catalog, _ := camel.DefaultCatalog()
 	client, _ := internal.NewFakeClient()
 	trait, _ := newJvmTrait().(*jvmTrait)
-	trait.PrintCommand = ptr.To(false)
 	trait.Client = client
 
 	environment := &Environment{
@@ -789,66 +788,6 @@ func TestApplyJvmTraitWithCustomCACertMountPath(t *testing.T) {
 	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Args, "-Djavax.net.ssl.trustStorePassword=$(cat /etc/camel/conf.d/_secrets/truststore-pass/password)")
 }
 
-func TestGetAllCACertEntries(t *testing.T) {
-	trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-
-	trait.CACertificates = []traitv1.CACertConfig{
-		{CertPath: "/path/to/ca1.crt"},
-		{CertPath: "/path/to/ca2.crt"},
-	}
-	trait.CACert = ""
-	trait.CACertPassword = ""
-	entries := trait.getAllCACertEntries()
-	assert.Len(t, entries, 2)
-	assert.Equal(t, "/path/to/ca1.crt", entries[0].CertPath)
-	assert.Equal(t, "/path/to/ca2.crt", entries[1].CertPath)
-
-	trait.CACertificates = nil
-	trait.CACert = "/path/to/legacy.crt"
-	trait.CACertPassword = "/path/to/legacy-pass"
-	entries = trait.getAllCACertEntries()
-	assert.Len(t, entries, 1)
-	assert.Equal(t, "/path/to/legacy.crt", entries[0].CertPath)
-
-	trait.CACertificates = []traitv1.CACertConfig{
-		{CertPath: "/path/to/ca1.crt"},
-	}
-	trait.CACert = "/path/to/ca2.crt"
-	trait.CACertPassword = "/path/to/pass2"
-	entries = trait.getAllCACertEntries()
-	assert.Len(t, entries, 2)
-
-	trait.CACertificates = nil
-	trait.CACert = ""
-	trait.CACertPassword = ""
-	entries = trait.getAllCACertEntries()
-	assert.Len(t, entries, 0)
-}
-
-func TestHasCACerts(t *testing.T) {
-	trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-
-	trait.CACertificates = nil
-	trait.CACert = ""
-	assert.False(t, trait.hasCACerts())
-
-	trait.CACertificates = []traitv1.CACertConfig{
-		{CertPath: "/path/to/ca1.crt"},
-	}
-	trait.CACert = ""
-	assert.True(t, trait.hasCACerts())
-
-	trait.CACertificates = nil
-	trait.CACert = "/path/to/legacy.crt"
-	assert.True(t, trait.hasCACerts())
-
-	trait.CACertificates = []traitv1.CACertConfig{
-		{CertPath: "/path/to/ca1.crt"},
-	}
-	trait.CACert = "/path/to/ca2.crt"
-	assert.True(t, trait.hasCACerts())
-}
-
 func TestHasBaseTruststore(t *testing.T) {
 	trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
 
@@ -875,67 +814,10 @@ func TestHasBaseTruststore(t *testing.T) {
 	assert.True(t, trait.hasBaseTruststore())
 }
 
-func TestGetTruststorePasswordPath(t *testing.T) {
-	trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-
-	trait.TruststorePasswordPath = ""
-	trait.BaseTruststore = nil
-	trait.CACert = ""
-	trait.CACertPassword = ""
-	assert.Equal(t, "", trait.getTruststorePasswordPath())
-
-	trait.TruststorePasswordPath = "/path/to/user-provided-pass"
-	trait.BaseTruststore = &traitv1.BaseTruststore{
-		TruststorePath: "/path/to/cacerts",
-		PasswordPath:   "/path/to/base-pass",
-	}
-	trait.CACert = "/path/to/legacy.crt"
-	trait.CACertPassword = "/path/to/legacy-pass"
-	assert.Equal(t, "/path/to/user-provided-pass", trait.getTruststorePasswordPath())
-
-	trait.TruststorePasswordPath = "/path/to/user-provided-pass"
-	trait.BaseTruststore = nil
-	trait.CACert = "/path/to/legacy.crt"
-	trait.CACertPassword = "/path/to/legacy-pass"
-	assert.Equal(t, "/path/to/user-provided-pass", trait.getTruststorePasswordPath())
-
-	trait.TruststorePasswordPath = ""
-	trait.BaseTruststore = nil
-	trait.CACert = "/path/to/legacy.crt"
-	trait.CACertPassword = "/path/to/legacy-pass"
-	assert.Equal(t, "/path/to/legacy-pass", trait.getTruststorePasswordPath())
-
-	trait.TruststorePasswordPath = "/path/to/user-provided-pass"
-	trait.BaseTruststore = &traitv1.BaseTruststore{
-		TruststorePath: "/path/to/cacerts",
-	}
-	trait.CACert = ""
-	trait.CACertPassword = ""
-	assert.Equal(t, "/path/to/user-provided-pass", trait.getTruststorePasswordPath())
-
-	trait.TruststorePasswordPath = ""
-	trait.BaseTruststore = &traitv1.BaseTruststore{
-		TruststorePath: "/path/to/cacerts",
-	}
-	trait.CACert = "/path/to/legacy.crt"
-	trait.CACertPassword = "/path/to/legacy-pass"
-	assert.Equal(t, "/path/to/legacy-pass", trait.getTruststorePasswordPath())
-
-	trait.TruststorePasswordPath = ""
-	trait.BaseTruststore = &traitv1.BaseTruststore{
-		TruststorePath: "/path/to/cacerts",
-	}
-	trait.CACert = ""
-	trait.CACertPassword = ""
-	assert.Equal(t, "", trait.getTruststorePasswordPath())
-}
-
 func TestValidateCACertConfig(t *testing.T) {
 	trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
 
 	trait.CACertificates = nil
-	trait.CACert = ""
-	trait.CACertPassword = ""
 	trait.BaseTruststore = nil
 	trait.TruststorePasswordPath = ""
 	assert.NoError(t, trait.validateCACertConfig())
@@ -969,39 +851,6 @@ func TestValidateCACertConfig(t *testing.T) {
 	}
 	trait.TruststorePasswordPath = "/path/to/truststore-pass"
 	trait.BaseTruststore = nil
-	assert.NoError(t, trait.validateCACertConfig())
-
-	trait.CACertificates = []traitv1.CACertConfig{
-		{CertPath: "/path/to/ca.crt"},
-	}
-	trait.TruststorePasswordPath = ""
-	trait.BaseTruststore = nil
-	trait.CACert = "/path/to/legacy.crt"
-	trait.CACertPassword = "/path/to/legacy-pass"
-	assert.Error(t, trait.validateCACertConfig())
-	assert.Contains(t, trait.validateCACertConfig().Error(), "truststore-password-path is required")
-
-	trait.CACertificates = nil
-	trait.CACert = "/path/to/ca.crt"
-	trait.CACertPassword = ""
-	trait.TruststorePasswordPath = ""
-	assert.Error(t, trait.validateCACertConfig())
-
-	trait.CACert = "/path/to/ca.crt"
-	trait.CACertPassword = "/path/to/pass"
-	assert.NoError(t, trait.validateCACertConfig())
-
-	trait.CACert = ""
-	trait.CACertPassword = ""
-	trait.BaseTruststore = &traitv1.BaseTruststore{
-		TruststorePath: "/path/to/cacerts",
-	}
-	assert.Error(t, trait.validateCACertConfig())
-
-	trait.BaseTruststore = &traitv1.BaseTruststore{
-		TruststorePath: "/path/to/cacerts",
-		PasswordPath:   "/path/to/pass",
-	}
 	assert.NoError(t, trait.validateCACertConfig())
 }
 
@@ -1011,8 +860,6 @@ func TestAllCACertScenarios(t *testing.T) {
 		trait.CACertificates = nil
 		trait.TruststorePasswordPath = ""
 		trait.BaseTruststore = nil
-		trait.CACert = ""
-		trait.CACertPassword = ""
 
 		assert.False(t, trait.hasCACerts())
 		assert.Equal(t, "", trait.getTruststorePasswordPath())
@@ -1025,8 +872,6 @@ func TestAllCACertScenarios(t *testing.T) {
 		}
 		trait.TruststorePasswordPath = ""
 		trait.BaseTruststore = nil
-		trait.CACert = ""
-		trait.CACertPassword = ""
 
 		assert.True(t, trait.hasCACerts())
 		assert.Equal(t, "", trait.getTruststorePasswordPath())
@@ -1042,8 +887,6 @@ func TestAllCACertScenarios(t *testing.T) {
 		}
 		trait.TruststorePasswordPath = "/path/to/ts-pass"
 		trait.BaseTruststore = nil
-		trait.CACert = ""
-		trait.CACertPassword = ""
 
 		assert.True(t, trait.hasCACerts())
 		assert.Equal(t, "/path/to/ts-pass", trait.getTruststorePasswordPath())
@@ -1060,8 +903,6 @@ func TestAllCACertScenarios(t *testing.T) {
 			TruststorePath: "/path/to/cacerts",
 			PasswordPath:   "/path/to/base-pass",
 		}
-		trait.CACert = ""
-		trait.CACertPassword = ""
 
 		assert.True(t, trait.hasCACerts())
 		assert.True(t, trait.hasBaseTruststore())
@@ -1079,58 +920,11 @@ func TestAllCACertScenarios(t *testing.T) {
 			TruststorePath: "/path/to/cacerts",
 			PasswordPath:   "/path/to/base-pass",
 		}
-		trait.CACert = ""
-		trait.CACertPassword = ""
 
 		assert.True(t, trait.hasCACerts())
 		assert.True(t, trait.hasBaseTruststore())
 		assert.Equal(t, "/path/to/ts-pass", trait.getTruststorePasswordPath())
 		assert.NoError(t, trait.validateCACertConfig())
-	})
-
-	t.Run("Scenario6_CACertificatesWithLegacyNoExplicitPassword", func(t *testing.T) {
-		trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-		trait.CACertificates = []traitv1.CACertConfig{
-			{CertPath: "/path/to/cert"},
-		}
-		trait.TruststorePasswordPath = ""
-		trait.BaseTruststore = nil
-		trait.CACert = "/path/to/legacy-cert"
-		trait.CACertPassword = "/path/to/legacy-pass"
-
-		assert.True(t, trait.hasCACerts())
-		assert.Equal(t, "/path/to/legacy-pass", trait.getTruststorePasswordPath())
-		err := trait.validateCACertConfig()
-		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "truststore-password-path is required")
-	})
-
-	t.Run("Scenario7_LegacyOnly", func(t *testing.T) {
-		trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-		trait.CACertificates = nil
-		trait.TruststorePasswordPath = ""
-		trait.BaseTruststore = nil
-		trait.CACert = "/path/to/legacy-cert"
-		trait.CACertPassword = "/path/to/legacy-pass"
-
-		assert.True(t, trait.hasCACerts())
-		assert.Equal(t, "/path/to/legacy-pass", trait.getTruststorePasswordPath())
-		assert.NoError(t, trait.validateCACertConfig())
-	})
-
-	t.Run("Scenario8_LegacyWithoutPassword", func(t *testing.T) {
-		trait, _ := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-		trait.CACertificates = nil
-		trait.TruststorePasswordPath = ""
-		trait.BaseTruststore = nil
-		trait.CACert = "/path/to/legacy-cert"
-		trait.CACertPassword = ""
-
-		assert.True(t, trait.hasCACerts())
-		assert.Equal(t, "", trait.getTruststorePasswordPath())
-		err := trait.validateCACertConfig()
-		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "ca-cert-password is required")
 	})
 
 	t.Run("Scenario9_BaseTruststoreOnlyNoCerts", func(t *testing.T) {
@@ -1141,8 +935,6 @@ func TestAllCACertScenarios(t *testing.T) {
 			TruststorePath: "/path/to/cacerts",
 			PasswordPath:   "/path/to/base-pass",
 		}
-		trait.CACert = ""
-		trait.CACertPassword = ""
 
 		assert.False(t, trait.hasCACerts())
 		assert.True(t, trait.hasBaseTruststore())
@@ -1160,8 +952,6 @@ func TestAllCACertScenarios(t *testing.T) {
 			TruststorePath: "/path/to/cacerts",
 			PasswordPath:   "",
 		}
-		trait.CACert = ""
-		trait.CACertPassword = ""
 
 		assert.True(t, trait.hasCACerts())
 		assert.False(t, trait.hasBaseTruststore())
@@ -1182,8 +972,6 @@ func TestAllCACertScenarios(t *testing.T) {
 			TruststorePath: "/path/to/cacerts",
 			PasswordPath:   "",
 		}
-		trait.CACert = ""
-		trait.CACertPassword = ""
 
 		assert.True(t, trait.hasCACerts())
 		assert.False(t, trait.hasBaseTruststore())
@@ -1198,8 +986,6 @@ func TestAllCACertScenarios(t *testing.T) {
 		trait.CACertificates = []traitv1.CACertConfig{}
 		trait.TruststorePasswordPath = ""
 		trait.BaseTruststore = nil
-		trait.CACert = ""
-		trait.CACertPassword = ""
 
 		assert.False(t, trait.hasCACerts())
 		assert.Equal(t, "", trait.getTruststorePasswordPath())
@@ -1213,8 +999,6 @@ func TestAllCACertScenarios(t *testing.T) {
 		}
 		trait.TruststorePasswordPath = "/path/to/ts-pass"
 		trait.BaseTruststore = nil
-		trait.CACert = ""
-		trait.CACertPassword = ""
 
 		assert.True(t, trait.hasCACerts())
 		err := trait.validateCACertConfig()

@@ -28,7 +28,6 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	serving "github.com/apache/camel-k/v2/pkg/apis/duck/knative/serving/v1"
-	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 )
 
 // A Collection is a container of Kubernetes resources.
@@ -470,23 +469,4 @@ func (c *Collection) Remove(selector func(runtime.Object) bool) runtime.Object {
 	}
 
 	return nil
-}
-
-func (c *Collection) VisitPodMonitor(visitor func(*monitoringv1.PodMonitor)) {
-	c.Visit(func(res runtime.Object) {
-		if conv, ok := res.(*monitoringv1.PodMonitor); ok {
-			visitor(conv)
-		}
-	})
-}
-
-func (c *Collection) GetPodMonitor(filter func(*monitoringv1.PodMonitor) bool) *monitoringv1.PodMonitor {
-	var retValue *monitoringv1.PodMonitor
-	c.VisitPodMonitor(func(podMonitor *monitoringv1.PodMonitor) {
-		if filter(podMonitor) {
-			retValue = podMonitor
-		}
-	})
-
-	return retValue
 }

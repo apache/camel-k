@@ -391,7 +391,6 @@ func TestConfigureTraits(t *testing.T) {
 	_, err := ExecuteCommand(rootCmd, "run",
 		"--trait", "affinity.pod-affinity=false",
 		"--trait", "environment.container-meta=false",
-		"--trait", "prometheus.pod-monitor=false",
 		"--trait", "health.liveness-probe-enabled=true",
 		"example.js")
 	if err != nil {
@@ -409,10 +408,9 @@ func TestConfigureTraits(t *testing.T) {
 	require.NoError(t, err)
 	traitMap, err := trait.ToTraitMap(traits)
 	require.NoError(t, err)
-	assert.Len(t, traitMap, 4)
+	assert.Len(t, traitMap, 3)
 	assertTraitConfiguration(t, traits.Affinity, &traitv1.AffinityTrait{PodAffinity: ptr.To(false)})
 	assertTraitConfiguration(t, traits.Environment, &traitv1.EnvironmentTrait{ContainerMeta: ptr.To(false)})
-	assertTraitConfiguration(t, traits.Prometheus, &traitv1.PrometheusTrait{PodMonitor: ptr.To(false)})
 	assertTraitConfiguration(t, traits.Health, &traitv1.HealthTrait{LivenessProbeEnabled: ptr.To(true)})
 }
 

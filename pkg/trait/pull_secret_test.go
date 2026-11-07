@@ -26,10 +26,7 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/ptr"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/stretchr/testify/assert"
@@ -58,42 +55,6 @@ func TestPullSecretDoesNothingWhenNotSetOnPlatform(t *testing.T) {
 	require.NoError(t, err)
 	assert.False(t, enabled)
 	assert.Nil(t, condition)
-}
-
-func TestPullSecretAuto(t *testing.T) {
-	e, _ := getEnvironmentAndDeployment(t)
-
-	trait, _ := newPullSecretTrait().(*pullSecretTrait)
-	trait.Auto = ptr.To(false)
-	enabled, condition, err := trait.Configure(e)
-	require.NoError(t, err)
-	assert.False(t, enabled)
-	assert.Nil(t, condition)
-}
-
-func TestPullSecretImagePullerDelegation(t *testing.T) {
-	e, _ := getEnvironmentAndDeployment(t)
-
-	trait, _ := newPullSecretTrait().(*pullSecretTrait)
-	trait.Auto = ptr.To(false)
-	trait.ImagePullerDelegation = ptr.To(true)
-	enabled, condition, err := trait.Configure(e)
-	require.NoError(t, err)
-	assert.True(t, enabled)
-	assert.Nil(t, condition)
-	assert.True(t, *trait.ImagePullerDelegation)
-
-	err = trait.Apply(e)
-	require.NoError(t, err)
-
-	var roleBinding rbacv1.RoleBinding
-	roleBindingKey := client.ObjectKey{
-		Namespace: "test",
-		Name:      "camel-k-puller-test-default",
-	}
-	err = e.Client.Get(e.Ctx, roleBindingKey, &roleBinding)
-	require.NoError(t, err)
-	assert.Len(t, roleBinding.Subjects, 1)
 }
 
 func getEnvironmentAndDeployment(t *testing.T) (*Environment, *appsv1.Deployment) {

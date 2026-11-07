@@ -55,19 +55,19 @@ installed and ready to use on path (ie `/usr/bin/java`).
 
 | builder.requestCPU
 | string
-| Deprecated: use TasksRequestCPU instead with task name `builder`.
+| Deprecated: no longer in use.
 
 | builder.requestMemory
 | string
-| Deprecated: use TasksRequestCPU instead with task name `builder`.
+| Deprecated: no longer in use.
 
 | builder.limitCPU
 | string
-| Deprecated: use TasksRequestCPU instead with task name `builder`.
+| Deprecated: no longer in use.
 
 | builder.limitMemory
 | string
-| Deprecated: use TasksRequestCPU instead with task name `builder`.
+| Deprecated: no longer in use.
 
 | builder.mavenProfiles
 | []string
@@ -75,18 +75,11 @@ installed and ready to use on path (ie `/usr/bin/java`).
 
 | builder.tasks
 | []string
-| A list of tasks to be executed (available only when using `pod` strategy) with format `<name>;<container-image>;<container-command>`.
-
-Deprecated: may be removed in future versions.
+| Deprecated: no longer in use.
 
 | builder.tasksFilter
 | string
-| A list of tasks sorted by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.
-Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`)
-if you need to execute them. Useful only with `pod` strategy. Disabled by default, you need to enable via
-BUILDER_TASKS_ENABLED=true environment variable on operator Deployment.
-
-Deprecated: may be removed in future versions.
+| Deprecated: no longer in use.
 
 | builder.tasksRequestCPU
 | []string

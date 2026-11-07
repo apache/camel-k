@@ -221,21 +221,6 @@ func TestQuarkusMatches(t *testing.T) {
 	assert.False(t, qt.Matches(&qt2))
 }
 
-func TestConfigureQuarkusTraitDeprecatedPackageType(t *testing.T) {
-	quarkusTrait, environment := createNominalQuarkusTest()
-	quarkusTrait.PackageTypes = []traitv1.QuarkusPackageType{
-		traitv1.FastJarPackageType,
-	}
-	environment.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseBuildSubmitted
-	configured, condition, err := quarkusTrait.Configure(environment)
-
-	assert.True(t, configured)
-	require.NoError(t, err)
-	assert.NotNil(t, condition)
-	assert.Equal(t, "The package-type parameter is deprecated and may be removed in future releases. Make sure to use mode parameter instead.", condition.message)
-	assert.Equal(t, traitv1.JvmQuarkusMode, quarkusTrait.QuarkusTrait.Modes[0])
-}
-
 func TestConfigureQuarkusTraitSupportedLanguages(t *testing.T) {
 	quarkusTrait, environment := createNominalQuarkusTest()
 	environment.CamelCatalog.Loaders = map[string]v1.CamelLoader{

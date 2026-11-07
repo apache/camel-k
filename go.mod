@@ -17,7 +17,6 @@ require (
 	github.com/mattn/go-shellwords v1.0.16
 	github.com/onsi/gomega v1.44.0
 	github.com/operator-framework/api v0.45.0
-	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.94.1
 	github.com/prometheus/client_golang v1.25.0
 	github.com/prometheus/client_model v0.6.3
 	github.com/prometheus/common v0.72.1

@@ -28,7 +28,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
@@ -141,135 +140,6 @@ func createNominalBuilderTraitTest() *builderTrait {
 	return builderTrait
 }
 
-func TestCustomTaskBuilderTrait(t *testing.T) {
-	t.Setenv("BUILDER_TASKS_ENABLED", "true")
-	env := createBuilderTestEnv()
-	builderTrait := createNominalBuilderTraitTest()
-	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
-
-	err := builderTrait.Apply(env)
-
-	require.NoError(t, err)
-	builderTask := findCustomTaskByName(env.Pipeline, "builder")
-	customTask := findCustomTaskByName(env.Pipeline, "test")
-	packageTask := findCustomTaskByName(env.Pipeline, "package")
-	publisherTask := findCustomTaskByName(env.Pipeline, "jib")
-
-	assert.NotNil(t, builderTask)
-	assert.NotNil(t, customTask)
-	assert.NotNil(t, packageTask)
-	assert.NotNil(t, publisherTask)
-	assert.Len(t, env.Pipeline, 4)
-	assert.Equal(t, "test", customTask.Custom.Name)
-	assert.Equal(t, "alpine", customTask.Custom.ContainerImage)
-	assert.Equal(t, "ls", customTask.Custom.ContainerCommands[0])
-}
-
-func TestCustomTaskBuilderTraitValidStrategyOverride(t *testing.T) {
-	t.Setenv("BUILDER_TASKS_ENABLED", "true")
-	env := createBuilderTestEnv()
-	builderTrait := createNominalBuilderTraitTest()
-	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
-
-	err := builderTrait.Apply(env)
-
-	require.NoError(t, err)
-
-	customTask := findCustomTaskByName(env.Pipeline, "test")
-
-	assert.Len(t, env.Pipeline, 4)
-	assert.Equal(t, "test", customTask.Custom.Name)
-	assert.Equal(t, "alpine", customTask.Custom.ContainerImage)
-	assert.Equal(t, "ls", customTask.Custom.ContainerCommands[0])
-}
-
-func TestBuilderCustomTasks(t *testing.T) {
-	builderTrait := createNominalBuilderTraitTest()
-	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
-	builderTrait.Tasks = append(builderTrait.Tasks, `test;alpine;mvn test`)
-
-	tasks, err := builderTrait.customTasks(nil, "my-kit-img")
-
-	require.NoError(t, err)
-	assert.Len(t, tasks, 2)
-	assert.Equal(t, "test", tasks[0].Custom.Name)
-	assert.Equal(t, "alpine", tasks[0].Custom.ContainerImage)
-	assert.Equal(t, "ls", tasks[0].Custom.ContainerCommands[0])
-	assert.Equal(t, "test", tasks[1].Custom.Name)
-	assert.Equal(t, "alpine", tasks[1].Custom.ContainerImage)
-	assert.Equal(t, "mvn", tasks[1].Custom.ContainerCommands[0])
-	assert.Equal(t, "test", tasks[1].Custom.ContainerCommands[1])
-
-}
-
-func TestBuilderCustomTasksFailure(t *testing.T) {
-	builderTrait := createNominalBuilderTraitTest()
-	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine")
-
-	_, err := builderTrait.customTasks(nil, "my-kit-img")
-
-	require.Error(t, err)
-	assert.Equal(t, "provide a custom task with at least 3 arguments, ie \"my-task-name;my-image;echo 'hello'\", was test;alpine", err.Error())
-}
-
-func TestBuilderCustomTasksBashScript(t *testing.T) {
-	builderTrait := createNominalBuilderTraitTest()
-	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;/bin/bash -c \"cd test && echo 'helooo'\"")
-
-	tasks, err := builderTrait.customTasks(nil, "my-kit-img")
-
-	require.NoError(t, err)
-	assert.Len(t, tasks, 1)
-	assert.Equal(t, "test", tasks[0].Custom.Name)
-	assert.Equal(t, "alpine", tasks[0].Custom.ContainerImage)
-	assert.Equal(t, "/bin/bash", tasks[0].Custom.ContainerCommands[0])
-	assert.Equal(t, "-c", tasks[0].Custom.ContainerCommands[1])
-	assert.Equal(t, "cd test && echo 'helooo'", tasks[0].Custom.ContainerCommands[2])
-}
-
-func TestBuilderCustomTasksSecurityContextScript(t *testing.T) {
-	builderTrait := createNominalBuilderTraitTest()
-	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;/bin/bash -c \"cd test && echo 'helooo'\";1000")
-
-	tasks, err := builderTrait.customTasks(nil, "my-kit-img")
-
-	require.NoError(t, err)
-	assert.Len(t, tasks, 1)
-	assert.Equal(t, "test", tasks[0].Custom.Name)
-	assert.Equal(t, "alpine", tasks[0].Custom.ContainerImage)
-	assert.Equal(t, "/bin/bash", tasks[0].Custom.ContainerCommands[0])
-	assert.Equal(t, "-c", tasks[0].Custom.ContainerCommands[1])
-	assert.Equal(t, "cd test && echo 'helooo'", tasks[0].Custom.ContainerCommands[2])
-	assert.Equal(t, int64(1000), *tasks[0].Custom.ContainerUserID)
-}
-
-func TestBuilderCustomTasksConfiguration(t *testing.T) {
-	builderTrait := createNominalBuilderTraitTest()
-	builderTrait.TasksRequestCPU = append(builderTrait.TasksRequestCPU, "builder:1000m")
-	builderTrait.TasksLimitCPU = append(builderTrait.TasksLimitCPU, "custom1:500m")
-	builderTrait.TasksRequestMemory = append(builderTrait.TasksRequestMemory, "package:8Gi")
-	builderTrait.TasksLimitMemory = append(builderTrait.TasksLimitMemory, "jib:4Gi")
-
-	tasksConf, err := builderTrait.parseTasksConf(&v1.BuildConfiguration{})
-
-	require.NoError(t, err)
-	assert.Equal(t, 4, len(tasksConf))
-	assert.Equal(t, "1000m", tasksConf["builder"].RequestCPU)
-	assert.Equal(t, "500m", tasksConf["custom1"].LimitCPU)
-	assert.Equal(t, "8Gi", tasksConf["package"].RequestMemory)
-	assert.Equal(t, "4Gi", tasksConf["jib"].LimitMemory)
-}
-
-func TestBuilderCustomTasksConfigurationError(t *testing.T) {
-	builderTrait := createNominalBuilderTraitTest()
-	builderTrait.TasksLimitCPU = append(builderTrait.TasksLimitCPU, "syntax error")
-
-	_, err := builderTrait.parseTasksConf(&v1.BuildConfiguration{})
-
-	require.Error(t, err)
-	assert.Equal(t, "could not parse syntax error, expected format <task-name>:<task-resource>", err.Error())
-}
-
 func TestUserTaskCommands(t *testing.T) {
 	command := `/bin/bash -c "ls && echo 'hello' && $(cat /path/to/a/resource)"`
 	podCommands := splitContainerCommand(command)
@@ -296,33 +166,6 @@ func TestUserTaskMultiCommands(t *testing.T) {
 	assert.Len(t, podCommands, 2)
 	assert.Equal(t, "cat /path/to/a/resource", podCommands[0])
 	assert.Equal(t, "echo ciao", podCommands[1])
-}
-
-func TestBuilderDeprecatedParams(t *testing.T) {
-	env := createBuilderTestEnv()
-	builderTrait := createNominalBuilderTraitTest()
-	builderTrait.LimitCPU = "100m"
-	builderTrait.RequestCPU = "100m"
-	builderTrait.LimitMemory = "100Mi"
-	builderTrait.RequestMemory = "100Mi"
-
-	active, condition, err := builderTrait.Configure(env)
-
-	require.NoError(t, err)
-	assert.True(t, active)
-	assert.NotNil(t, condition)
-	assert.Contains(t, condition.message, "The request-cpu parameter is deprecated and may be removed in future releases")
-	assert.Contains(t, condition.message, "The limit-cpu parameter is deprecated and may be removed in future releases")
-	assert.Contains(t, condition.message, "The request-memory parameter is deprecated and may be removed in future releases")
-	assert.Contains(t, condition.message, "The limit-memory parameter is deprecated and may be removed in future releases")
-	assert.Len(t, builderTrait.TasksLimitCPU, 1)
-	assert.Len(t, builderTrait.TasksRequestCPU, 1)
-	assert.Len(t, builderTrait.TasksLimitMemory, 1)
-	assert.Len(t, builderTrait.TasksRequestMemory, 1)
-	assert.Equal(t, "builder:100m", builderTrait.TasksLimitCPU[0])
-	assert.Equal(t, "builder:100m", builderTrait.TasksRequestCPU[0])
-	assert.Equal(t, "builder:100Mi", builderTrait.TasksLimitMemory[0])
-	assert.Equal(t, "builder:100Mi", builderTrait.TasksRequestMemory[0])
 }
 
 func TestExistsTaskRequest(t *testing.T) {
@@ -400,62 +243,6 @@ func TestBuilderNoTasksFilter(t *testing.T) {
 	assert.Equal(t, []string{"builder", "package", "jib"}, pipelineTasks)
 }
 
-func TestBuilderTasksFilterNotExistingTasks(t *testing.T) {
-	env := createBuilderTestEnv()
-	builderTrait := createNominalBuilderTraitTest()
-	builderTrait.TasksFilter = "builder,missing-task"
-
-	err := builderTrait.Apply(env)
-	require.Error(t, err)
-	assert.Equal(t, "no task exist for missing-task name", err.Error())
-}
-
-func TestBuilderTasksFilterMissingPublishTasks(t *testing.T) {
-	env := createBuilderTestEnv()
-	builderTrait := createNominalBuilderTraitTest()
-	builderTrait.TasksFilter = "builder,package"
-
-	err := builderTrait.Apply(env)
-	require.Error(t, err)
-	assert.Equal(t, "last pipeline task is not a publishing or a user task", err.Error())
-}
-
-func TestBuilderTasksFilterOperatorTasks(t *testing.T) {
-	env := createBuilderTestEnv()
-	builderTrait := createNominalBuilderTraitTest()
-	builderTrait.TasksFilter = "builder,package,jib"
-
-	err := builderTrait.Apply(env)
-	require.NoError(t, err)
-	pipelineTasks := tasksByName(env.Pipeline)
-	assert.Equal(t, []string{"builder", "package", "jib"}, pipelineTasks)
-}
-
-func TestBuilderTasksFilterAndReorderOperatorTasks(t *testing.T) {
-	env := createBuilderTestEnv()
-	builderTrait := createNominalBuilderTraitTest()
-	builderTrait.TasksFilter = "package,builder,jib"
-
-	err := builderTrait.Apply(env)
-	require.NoError(t, err)
-	pipelineTasks := tasksByName(env.Pipeline)
-	assert.Equal(t, []string{"package", "builder", "jib"}, pipelineTasks)
-}
-
-func TestBuilderTasksFilterAndReorderCustomTasks(t *testing.T) {
-	t.Setenv("BUILDER_TASKS_ENABLED", "true")
-	env := createBuilderTestEnv()
-	builderTrait := createNominalBuilderTraitTest()
-	builderTrait.Tasks = append(builderTrait.Tasks, `my-custom-publish;alpine;mvn test`)
-	builderTrait.Tasks = append(builderTrait.Tasks, "my-custom-task;alpine;ls")
-	builderTrait.TasksFilter = "builder,my-custom-task,package,my-custom-publish"
-
-	err := builderTrait.Apply(env)
-	require.NoError(t, err)
-	pipelineTasks := tasksByName(env.Pipeline)
-	assert.Equal(t, []string{"builder", "my-custom-task", "package", "my-custom-publish"}, pipelineTasks)
-}
-
 func TestBuilderTasksNodeSelectorPlatformBuildStrategyPod(t *testing.T) {
 	env := createBuilderTestEnv()
 	builderTrait := createNominalBuilderTraitTest()
@@ -517,27 +304,6 @@ func TestBuilderMatches(t *testing.T) {
 	// should detect swap
 	t2.Properties = []string{"weare=theworld", "hello=world"}
 	assert.True(t, t1.Matches(&t2))
-}
-
-func TestBuilderMatchesTasks(t *testing.T) {
-	t1 := builderTrait{
-		BasePlatformTrait: NewBasePlatformTrait("builder", 600),
-		BuilderTrait:      traitv1.BuilderTrait{},
-	}
-	t2 := builderTrait{
-		BasePlatformTrait: NewBasePlatformTrait("builder", 600),
-		BuilderTrait: traitv1.BuilderTrait{
-			Tasks: []string{"task1;my-task;do-something"},
-		},
-	}
-	t3 := builderTrait{
-		BasePlatformTrait: NewBasePlatformTrait("builder", 600),
-		BuilderTrait: traitv1.BuilderTrait{
-			Tasks: []string{"task1;my-task;do-something-else"},
-		},
-	}
-	assert.False(t, t1.Matches(&t2))
-	assert.False(t, t2.Matches(&t3))
 }
 
 func TestBuilderTraitPlatforms(t *testing.T) {
@@ -654,68 +420,6 @@ func TestBuilderTraitNodeSelectorAppliedWithAllowList(t *testing.T) {
 	assert.Len(t, ns, 1)
 	assert.Equal(t, "node-42", ns["kubernetes.io/hostname"])
 	assert.NotContains(t, ns, "node-role.kubernetes.io/worker")
-}
-
-// TestBuilderTraitTasksDisabledByOperator verifies that when BUILDER_TASKS_ENABLED=false the
-// custom tasks are not added to the pipeline even when the CR author sets builder.tasks.
-func TestBuilderTraitTasksDisabledByOperator(t *testing.T) {
-	t.Setenv("BUILDER_TASKS_ENABLED", "false")
-
-	env := createBuilderTestEnv()
-	bt := createNominalBuilderTraitTest()
-	bt.Tasks = []string{"custom;alpine;echo hello"}
-
-	err := bt.Apply(env)
-	require.NoError(t, err)
-
-	// pipeline must contain only the builder task, no custom task appended
-	for _, task := range env.Pipeline {
-		assert.Nil(t, task.Custom, "custom task must not be present when builder.tasks is disabled")
-	}
-}
-
-// TestBuilderTraitTasksDisabledKeepsQuarkusNative verifies that when BUILDER_TASKS_ENABLED=false
-// the operator-injected quarkus-native task is preserved while user tasks are dropped.
-func TestBuilderTraitTasksDisabledKeepsQuarkusNative(t *testing.T) {
-	t.Setenv("BUILDER_TASKS_ENABLED", "false")
-
-	env := createBuilderTestEnv()
-	bt := createNominalBuilderTraitTest()
-	bt.quarkusNativeTask = "quarkus-native;quarkus-image;/bin/bash -c \"build native\""
-	bt.Tasks = []string{
-		"user-task;alpine;echo hello",
-	}
-
-	err := bt.Apply(env)
-	require.NoError(t, err)
-
-	var customNames []string
-	for _, task := range env.Pipeline {
-		if task.Custom != nil {
-			customNames = append(customNames, task.Custom.Name)
-		}
-	}
-	assert.Contains(t, customNames, "quarkus-native", "quarkus-native task must be preserved when builder.tasks is disabled")
-	assert.NotContains(t, customNames, "user-task", "user task must be dropped when builder.tasks is disabled")
-}
-
-// TestBuilderTraitTasksEnabledByDefault verifies that when BUILDER_TASKS_ENABLED is unset.
-func TestBuilderTraitTasksEnabledByDefault(t *testing.T) {
-	env := createBuilderTestEnv()
-	bt := createNominalBuilderTraitTest()
-	bt.Tasks = []string{"custom;alpine;echo hello"}
-
-	err := bt.Apply(env)
-	require.NoError(t, err)
-
-	found := false
-	for _, task := range env.Pipeline {
-		if task.Custom != nil && task.Custom.Name == "custom" {
-			found = true
-			break
-		}
-	}
-	assert.False(t, found, "custom task must not be present when builder.tasks is disabled (default)")
 }
 
 func TestGetImageNameOk(t *testing.T) {

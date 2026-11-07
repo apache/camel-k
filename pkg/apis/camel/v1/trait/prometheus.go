@@ -34,7 +34,7 @@ package trait
 // The Prometheus trait is disabled by default.
 //
 // +camel-k:trait=prometheus.
-// +camel-k:deprecated=2.11.0.
+// +camel-k:internal.
 //
 //nolint:godoclint
 type PrometheusTrait struct {
