@@ -39,7 +39,7 @@ type JavaSourceInspector struct {
 
 // Extract extracts all metadata from source spec.
 func (i JavaSourceInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
-	i.parseBeanDefinitions(source.Content, meta)
+	parseJavaBeanDefinitions(source.Content, meta)
 
 	from := util.FindAllDistinctStringSubmatch(
 		source.Content,
@@ -64,7 +64,7 @@ func (i JavaSourceInspector) Extract(source v1.SourceSpec, meta *Metadata) error
 
 // parseBeanDefinitions records explicitly named class-level @BindToRegistry
 // declarations. It does not evaluate Java code or infer method or field values.
-func (i JavaSourceInspector) parseBeanDefinitions(content string, meta *Metadata) {
+func parseJavaBeanDefinitions(content string, meta *Metadata) {
 	packageName := ""
 	if match := javaPackageRegexp.FindStringSubmatch(content); len(match) == 2 {
 		packageName = match[1]

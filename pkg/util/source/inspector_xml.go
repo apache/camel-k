@@ -51,7 +51,7 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 
 		if se, ok := t.(xml.StartElement); ok {
 			if se.Name.Local == "bean" {
-				if err := i.parseBeanDefinition(decoder, se, meta); err != nil {
+				if err := parseXMLBeanDefinition(decoder, se, meta); err != nil {
 					return err
 				}
 				continue
@@ -150,7 +150,7 @@ type xmlBeanProperty struct {
 
 // parseBeanDefinition extracts explicitly named Spring XML bean definitions.
 // It does not instantiate beans, follow references, or evaluate factory methods.
-func (i XMLInspector) parseBeanDefinition(decoder *xml.Decoder, element xml.StartElement, meta *Metadata) error {
+func parseXMLBeanDefinition(decoder *xml.Decoder, element xml.StartElement, meta *Metadata) error {
 	var raw xmlBeanDefinition
 	if err := decoder.DecodeElement(&raw, &element); err != nil {
 		return err
