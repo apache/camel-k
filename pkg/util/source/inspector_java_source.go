@@ -28,8 +28,10 @@ import (
 var (
 	replaceURIDoubleQuotedFrom  = regexp.MustCompile(`from\s*\(\s*"(?:timer|cron|quartz)[^"]*"\s*\)`)
 	replaceURIDoubleQuotedFromF = regexp.MustCompile(`fromF\s*\(\s*"(?:timer|cron|quartz)[^"]*"\s*\)`)
-	bindToRegistryClassRegexp   = regexp.MustCompile(`(?s)@BindToRegistry\s*\(\s*(?:"([^"]+)"|[^)]*\bvalue\s*=\s*"([^"]+)")[^)]*\)\s*(?:(?:public|protected|private|abstract|final|static|strictfp)\s+)*class\s+([A-Za-z_$][A-Za-z0-9_$]*)\b`)
-	javaPackageRegexp           = regexp.MustCompile(`(?m)^\s*package\s+([A-Za-z_$][A-Za-z0-9_$.]*)\s*;`)
+	bindToRegistryClassRegexp = regexp.MustCompile(`(?s)@(?:org\.apache\.camel\.)?BindToRegistry\s*(?:\(\s*(?:"([^"]*)"|[^)]*\bvalue\s*=\s*"([^"]*)")?[^)]*\))?\s*(?:(?:public|protected|private|abstract|final|static|strictfp)\s+)*(?:class|interface|enum|record)\s+([A-Za-z_$][A-Za-z0-9_$]*)\b`)
+	bindToRegistryMethodRegexp = regexp.MustCompile(`(?s)@(?:org\.apache\.camel\.)?BindToRegistry\s*(?:\(\s*(?:"([^"]*)"|[^)]*\bvalue\s*=\s*"([^"]*)")?[^)]*\))?\s*(?:(?:public|protected|private|abstract|final|static|strictfp|synchronized|native)\s+)*([A-Za-z_$][A-Za-z0-9_$.<>?,\[\] ]*)\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*\(`)
+	bindToRegistryFieldRegexp = regexp.MustCompile(`(?s)@(?:org\.apache\.camel\.)?BindToRegistry\s*(?:\(\s*(?:"([^"]*)"|[^)]*\bvalue\s*=\s*"([^"]*)")?[^)]*\))?\s*(?:(?:public|protected|private|abstract|final|static|transient|volatile)\s+)*([A-Za-z_$][A-Za-z0-9_$.<>?,\[\] ]*)\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*(?:=|;)`)
+	javaPackageRegexp = regexp.MustCompile(`(?m)^\s*package\s+([A-Za-z_$][A-Za-z0-9_$.]*)\s*;`)
 )
 
 // JavaSourceInspector inspects Java DSL spec.
@@ -62,8 +64,8 @@ func (i JavaSourceInspector) Extract(source v1.SourceSpec, meta *Metadata) error
 	return i.extract(source, meta, from, to, kameletEips, hasRest)
 }
 
-// parseJavaBeanDefinitions records explicitly named class-level @BindToRegistry
-// declarations. It does not evaluate Java code or infer method or field values.
+// parseJavaBeanDefinitions records beans declared with @BindToRegistry.
+// It reads only annotation names and declared Java types; it does not evaluate Java code.
 func parseJavaBeanDefinitions(content string, meta *Metadata) {
 	packageName := ""
 	if match := javaPackageRegexp.FindStringSubmatch(content); len(match) == 2 {
@@ -74,21 +76,73 @@ func parseJavaBeanDefinitions(content string, meta *Metadata) {
 		if len(match) != 4 {
 			continue
 		}
-
-		name := match[1]
-		if name == "" {
-			name = match[2]
-		}
-		beanType := match[3]
-		if packageName != "" {
-			beanType = packageName + "." + beanType
-		}
+		name := bindToRegistryName(match[1], match[2], decapitalizeJavaName(match[3]))
 		meta.Beans = append(meta.Beans, BeanDefinition{
 			Name:       name,
-			Type:       beanType,
+			Type:       qualifyJavaBeanType(match[3], packageName),
 			Properties: make(map[string]string),
 		})
 	}
+
+	for _, match := range bindToRegistryMethodRegexp.FindAllStringSubmatch(content, -1) {
+		if len(match) != 5 {
+			continue
+		}
+		beanType := strings.TrimSpace(match[3])
+		if beanType == "" || beanType == "void" {
+			continue
+		}
+		name := bindToRegistryName(match[1], match[2], match[4])
+		meta.Beans = append(meta.Beans, BeanDefinition{
+			Name:       name,
+			Type:       qualifyJavaBeanType(beanType, packageName),
+			Properties: make(map[string]string),
+		})
+	}
+
+	for _, match := range bindToRegistryFieldRegexp.FindAllStringSubmatch(content, -1) {
+		if len(match) != 5 {
+			continue
+		}
+		beanType := strings.TrimSpace(match[3])
+		name := bindToRegistryName(match[1], match[2], match[4])
+		meta.Beans = append(meta.Beans, BeanDefinition{
+			Name:       name,
+			Type:       qualifyJavaBeanType(beanType, packageName),
+			Properties: make(map[string]string),
+		})
+	}
+}
+
+func bindToRegistryName(positional, named, fallback string) string {
+	name := strings.TrimSpace(positional)
+	if name == "" {
+		name = strings.TrimSpace(named)
+	}
+	if name == "" {
+		return fallback
+	}
+	return name
+}
+
+func qualifyJavaBeanType(beanType, packageName string) string {
+	beanType = strings.TrimSpace(beanType)
+	if packageName == "" || beanType == "" || strings.ContainsAny(beanType, ".<>[], ") {
+		return beanType
+	}
+	return packageName + "." + beanType
+}
+
+func decapitalizeJavaName(name string) string {
+	runes := []rune(name)
+	if len(runes) == 0 {
+		return name
+	}
+	if len(runes) > 1 && unicode.IsUpper(runes[0]) && unicode.IsUpper(runes[1]) {
+		return name
+	}
+	runes[0] = unicode.ToLower(runes[0])
+	return string(runes)
 }
 
 // ReplaceFromURI parses the source content and replace the `from` URI configuration with the a new URI. Returns true if it applies a replacement.
