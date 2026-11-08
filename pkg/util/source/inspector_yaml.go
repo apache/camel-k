@@ -83,17 +83,27 @@ func (i YAMLInspector) parseBeans(content any, meta *Metadata) {
 		}
 
 		name, ok := bean["name"].(string)
-		if !ok || name == "" {
+		if !ok {
+			continue
+		}
+		name = strings.TrimSpace(name)
+		if name == "" {
 			continue
 		}
 
 		definition := BeanDefinition{Name: name, Properties: make(map[string]string)}
-		definition.Type, _ = bean["type"].(string)
+		if beanType, ok := bean["type"].(string); ok {
+			definition.Type = strings.TrimSpace(beanType)
+		}
 
 		if rawProperties, ok := bean["properties"].(map[any]any); ok {
 			for rawKey, rawValue := range rawProperties {
 				key, ok := rawKey.(string)
-				if !ok || key == "" || isSensitiveBeanProperty(key) {
+				if !ok {
+					continue
+				}
+				key = strings.TrimSpace(key)
+				if key == "" || isSensitiveBeanProperty(key) {
 					continue
 				}
 				if value, ok := scalarBeanProperty(rawValue); ok {
