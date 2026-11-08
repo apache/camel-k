@@ -136,13 +136,21 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 }
 
 type xmlBeanDefinition struct {
-	ID         string            `xml:"id,attr"`
-	Class      string            `xml:"class,attr"`
+	ID         string              `xml:"id,attr"`
+	Name       string              `xml:"name,attr"`
+	Class      string              `xml:"class,attr"`
+	Type       string              `xml:"type,attr"`
+	Properties []xmlBeanProperty   `xml:"property"`
+	PropertySet xmlBeanPropertySet `xml:"properties"`
+}
+
+type xmlBeanPropertySet struct {
 	Properties []xmlBeanProperty `xml:"property"`
 }
 
 type xmlBeanProperty struct {
 	Name        string `xml:"name,attr"`
+	Key         string `xml:"key,attr"`
 	Value       string `xml:"value,attr"`
 	NestedValue string `xml:"value"`
 }
@@ -157,16 +165,27 @@ func parseXMLBeanDefinition(decoder *xml.Decoder, element xml.StartElement, meta
 
 	name := strings.TrimSpace(raw.ID)
 	if name == "" {
+		name = strings.TrimSpace(raw.Name)
+	}
+	if name == "" {
 		return nil
 	}
 
+	beanType := strings.TrimSpace(raw.Class)
+	if beanType == "" {
+		beanType = strings.TrimSpace(raw.Type)
+	}
 	definition := BeanDefinition{
 		Name:       name,
-		Type:       strings.TrimSpace(raw.Class),
+		Type:       beanType,
 		Properties: make(map[string]string),
 	}
-	for _, property := range raw.Properties {
+	properties := append(raw.Properties, raw.PropertySet.Properties...)
+	for _, property := range properties {
 		key := strings.TrimSpace(property.Name)
+		if key == "" {
+			key = strings.TrimSpace(property.Key)
+		}
 		if key == "" || isSensitiveBeanProperty(key) {
 			continue
 		}
