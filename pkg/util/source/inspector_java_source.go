@@ -34,6 +34,7 @@ var (
 	bindToRegistryMethodRegexp = regexp.MustCompile(`(?s)@(?:org\.apache\.camel\.)?BindToRegistry\s*(?:\(\s*(?:"([^"]*)"|[^)]*\bvalue\s*=\s*"([^"]*)")?[^)]*\))?\s*(?:(?:public|protected|private|abstract|final|static|strictfp|synchronized|native)\s+)*([A-Za-z_$][A-Za-z0-9_$.<>?,\[\] ]*)\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*\(`)
 	bindToRegistryFieldRegexp = regexp.MustCompile(`(?s)@(?:org\.apache\.camel\.)?BindToRegistry\s*(?:\(\s*(?:"([^"]*)"|[^)]*\bvalue\s*=\s*"([^"]*)")?[^)]*\))?\s*(?:(?:public|protected|private|abstract|final|static|transient|volatile)\s+)*([A-Za-z_$][A-Za-z0-9_$.<>?,\[\] ]*)\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*(?:=|;)`)
 	javaPackageRegexp = regexp.MustCompile(`(?m)^\s*package\s+([A-Za-z_$][A-Za-z0-9_$.]*)\s*;`)
+	javaImportRegexp = regexp.MustCompile(`(?m)^\s*import\s+([A-Za-z_$][A-Za-z0-9_$.]*)\s*;`)
 )
 
 // JavaSourceInspector inspects Java DSL spec.
@@ -73,6 +74,15 @@ func parseJavaBeanDefinitions(content string, meta *Metadata) {
 	if match := javaPackageRegexp.FindStringSubmatch(content); len(match) == 2 {
 		packageName = match[1]
 	}
+	imports := make(map[string]string)
+	for _, match := range javaImportRegexp.FindAllStringSubmatch(content, -1) {
+		if len(match) != 2 {
+			continue
+		}
+		importedType := match[1]
+		parts := strings.Split(importedType, ".")
+		imports[parts[len(parts)-1]] = importedType
+	}
 
 	for _, match := range bindToRegistryClassRegexp.FindAllStringSubmatch(content, -1) {
 		if len(match) != 4 {
@@ -81,7 +91,7 @@ func parseJavaBeanDefinitions(content string, meta *Metadata) {
 		name := bindToRegistryName(match[1], match[2], decapitalizeJavaName(match[3]))
 		meta.Beans = append(meta.Beans, BeanDefinition{
 			Name:       name,
-			Type:       qualifyJavaBeanType(match[3], packageName),
+			Type:       qualifyJavaBeanType(match[3], packageName, imports),
 			Properties: make(map[string]string),
 		})
 	}
@@ -97,7 +107,7 @@ func parseJavaBeanDefinitions(content string, meta *Metadata) {
 		name := bindToRegistryName(match[1], match[2], match[4])
 		meta.Beans = append(meta.Beans, BeanDefinition{
 			Name:       name,
-			Type:       qualifyJavaBeanType(beanType, packageName),
+			Type:       qualifyJavaBeanType(beanType, packageName, imports),
 			Properties: make(map[string]string),
 		})
 	}
@@ -127,12 +137,18 @@ func bindToRegistryName(positional, named, fallback string) string {
 	return name
 }
 
-func qualifyJavaBeanType(beanType, packageName string) string {
+func qualifyJavaBeanType(beanType, packageName string, imports map[string]string) string {
 	beanType = strings.TrimSpace(beanType)
-	if packageName == "" || beanType == "" || strings.ContainsAny(beanType, ".<>[], ") || isJavaLangType(beanType) {
+	if beanType == "" || strings.ContainsAny(beanType, ".<>[], ") || isJavaLangType(beanType) {
 		return beanType
 	}
-	return packageName + "." + beanType
+	if importedType, ok := imports[beanType]; ok {
+		return importedType
+	}
+	if packageName != "" {
+		return packageName + "." + beanType
+	}
+	return beanType
 }
 
 func isJavaLangType(beanType string) bool {
