@@ -62,7 +62,7 @@ func (i JavaSourceInspector) Extract(source v1.SourceSpec, meta *Metadata) error
 	return i.extract(source, meta, from, to, kameletEips, hasRest)
 }
 
-// parseBeanDefinitions records explicitly named class-level @BindToRegistry
+// parseJavaBeanDefinitions records explicitly named class-level @BindToRegistry
 // declarations. It does not evaluate Java code or infer method or field values.
 func parseJavaBeanDefinitions(content string, meta *Metadata) {
 	packageName := ""
