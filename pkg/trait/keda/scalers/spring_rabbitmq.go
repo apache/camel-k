@@ -80,6 +80,11 @@ func (s *SpringRabbitMQScaler) MapWithBeans(pathValue string, params map[string]
 	}).String()
 	metadata["protocol"] = "amqp"
 
+	virtualHost := strings.TrimSpace(bean.Properties["virtualHost"])
+	if isStaticVirtualHost(virtualHost) {
+		metadata["vhostName"] = virtualHost
+	}
+
 	return kedaType, metadata
 }
 
@@ -94,7 +99,15 @@ func isStaticHost(host string) bool {
 	return true
 }
 
+func isStaticVirtualHost(virtualHost string) bool {
+	return virtualHost != "" &&
+		!strings.Contains(virtualHost, "${") &&
+		!strings.Contains(virtualHost, "#{") &&
+		!strings.Contains(virtualHost, "{{")
+}
+
 func isValidPort(port string) bool {
 	value, err := strconv.Atoi(port)
+
 	return err == nil && value > 0 && value <= 65535
 }

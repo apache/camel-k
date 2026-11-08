@@ -128,6 +128,7 @@ func scalarBeanProperty(value any) (string, bool) {
 		if containsSensitiveURLData(valueString) {
 			return "", false
 		}
+
 		return valueString, true
 	default:
 		return "", false

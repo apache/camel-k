@@ -38,10 +38,11 @@ func TestSpringRabbitMQScalerMapWithBean(t *testing.T) {
 		Name: "rabbitConnectionFactory",
 		Type: "org.springframework.amqp.rabbit.connection.CachingConnectionFactory",
 		Properties: map[string]string{
-			"host":     "my-rabbitmq.my-ns.svc",
-			"port":     "5672",
-			"username": "admin",
-			"password": "admin",
+			"host":        "my-rabbitmq.my-ns.svc",
+			"port":        "5672",
+			"virtualHost": "orders",
+			"username":    "admin",
+			"password":    "admin",
 		},
 	}
 	mapper := &SpringRabbitMQScaler{}
@@ -57,6 +58,7 @@ func TestSpringRabbitMQScalerMapWithBean(t *testing.T) {
 		"queueName": "my-queue",
 		"host":      "amqp://my-rabbitmq.my-ns.svc:5672/",
 		"protocol":  "amqp",
+		"vhostName": "orders",
 	}, metadata)
 	assert.NotContains(t, metadata, "username")
 	assert.NotContains(t, metadata, "password")
@@ -104,4 +106,26 @@ func TestSpringRabbitMQScalerDoesNotResolveDynamicBeanProperties(t *testing.T) {
 	assert.Equal(t, "rabbitmq", kedaType)
 	assert.Equal(t, "my-queue", metadata["queueName"])
 	assert.NotContains(t, metadata, "host")
+}
+
+func TestSpringRabbitMQScalerDoesNotResolveDynamicVirtualHost(t *testing.T) {
+	bean := source.BeanDefinition{
+		Name: "rabbitConnectionFactory",
+		Type: springRabbitMQConnectionFactoryType,
+		Properties: map[string]string{
+			"host":        "my-rabbitmq.my-ns.svc",
+			"port":        "5672",
+			"virtualHost": "${RABBITMQ_VHOST}",
+		},
+	}
+	mapper := &SpringRabbitMQScaler{}
+	_, metadata := mapper.MapWithBeans(
+		"my-exchange",
+		map[string]string{"queues": "my-queue"},
+		map[string]string{springRabbitMQConnectionFactoryProperty: "#rabbitConnectionFactory"},
+		[]source.BeanDefinition{bean},
+	)
+
+	assert.Equal(t, "amqp://my-rabbitmq.my-ns.svc:5672/", metadata["host"])
+	assert.NotContains(t, metadata, "vhostName")
 }

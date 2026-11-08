@@ -394,6 +394,7 @@ func TestKedaAutoDiscoverySpringRabbitMQConnectionBean(t *testing.T) {
 					"properties": {
 						"host": "my-rabbitmq.my-ns.svc",
 						"port": 5672,
+						"virtualHost": "orders",
 						"username": "admin",
 						"password": "admin"
 					}
@@ -425,7 +426,7 @@ func TestKedaAutoDiscoverySpringRabbitMQConnectionBean(t *testing.T) {
 		},
 	}
 
-	_, _, err := environment.Catalog.apply(&environment)
+	_, _, err = environment.Catalog.apply(&environment)
 	require.NoError(t, err)
 
 	scaledObject := getKedaScaledObject(environment.Resources)
@@ -436,6 +437,7 @@ func TestKedaAutoDiscoverySpringRabbitMQConnectionBean(t *testing.T) {
 	assert.Equal(t, "my-queue", trigger.Metadata["queueName"])
 	assert.Equal(t, "amqp://my-rabbitmq.my-ns.svc:5672/", trigger.Metadata["host"])
 	assert.Equal(t, "amqp", trigger.Metadata["protocol"])
+	assert.Equal(t, "orders", trigger.Metadata["vhostName"])
 	assert.Equal(t, "QueueLength", trigger.Metadata["mode"])
 	assert.Equal(t, "20", trigger.Metadata["value"])
 	assert.NotContains(t, trigger.Metadata, "username")
