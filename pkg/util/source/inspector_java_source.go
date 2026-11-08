@@ -120,7 +120,7 @@ func parseJavaBeanDefinitions(content string, meta *Metadata) {
 		name := bindToRegistryName(match[1], match[2], match[4])
 		meta.Beans = append(meta.Beans, BeanDefinition{
 			Name:       name,
-			Type:       qualifyJavaBeanType(beanType, packageName),
+			Type:       qualifyJavaBeanType(beanType, packageName, imports),
 			Properties: make(map[string]string),
 		})
 	}
