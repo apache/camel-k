@@ -54,7 +54,6 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 				if err := parseXMLBeanDefinition(decoder, se, meta); err != nil {
 					return err
 				}
-				continue
 			}
 			switch se.Name.Local {
 			case rest, "restConfiguration":
