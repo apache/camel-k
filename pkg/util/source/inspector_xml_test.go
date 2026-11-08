@@ -346,7 +346,7 @@ func TestXMLBeanDefinitions(t *testing.T) {
     <property name="tenant" value="${SERVICE_TENANT}"/>
     <property name="username" value="admin"/>
     <property name="password" value="admin"/>
-    <property name="endpointUri" value="amqp://admin:admin@api.internal:5672"/>
+    <property name="endpointUri" value="https://admin:secret@api.internal:8443"/>
     <property name="nested"><map><entry key="enabled" value="true"/></map></property>
     <property name="factoryReference"><ref bean="anotherBean"/></property>
   </bean>
@@ -384,7 +384,7 @@ func TestCamelXMLBeanDefinitions(t *testing.T) {
       <property key="host" value="api.internal"/>
       <property key="port" value="5672"/>
       <property key="password" value="secret"/>
-      <property key="endpointUri" value="amqp://user:secret@api.internal:5672"/>
+      <property key="endpointUri" value="https://user:secret@api.internal:8443"/>
       <property key="nested">
         <properties>
           <property key="field1" value="nested-value"/>
