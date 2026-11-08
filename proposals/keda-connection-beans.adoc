@@ -84,7 +84,7 @@ Authentication remains separate from ordinary scaler metadata. Sensitive values 
 
 === Camel Core boundary
 
-The design should first use the structured configuration that Camel K can obtain from its Integration sources. If a reusable limitation remains across source types, the Camel community can assess whether a generic configuration-description contract would help. Such a contract should describe configuration without exposing live objects, executing application code, resolving secrets, or depending on KEDA-specific types.
+The design should use the structured configuration that Camel K can obtain from its Integration sources. If a reusable limitation remains across source types, the Camel community can assess whether a generic configuration-description contract would help. Such a contract should describe configuration without exposing live objects, executing application code, resolving secrets, or depending on KEDA-specific types.
 
 == Validation considerations
 
@@ -109,7 +109,7 @@ Use a normalized, source-independent representation for explicitly declared conn
 This tracker records implementation activity related to this design. Each entry should include the date, a brief description of the work or review outcome, and its current status. The dates are progress records, not delivery targets.
 
 * **2026-11-07** — Implementation work is being tracked in [#6942](https://github.com/apache/camel-k/pull/6942), which explores extracting declared connection configuration into Integration source metadata. **Status:** pull request open.
-* **2026-11-08** — Maintainer feedback on [#6942](https://github.com/apache/camel-k/pull/6942) asks to keep the implementation focused on connection-definition retrieval rather than a particular scaler, consider coverage of other source DSLs, and expand unit tests. **Status:** implementation under review; not merged.
+* **2026-11-08** — Maintainer feedback on [#6942](https://github.com/apache/camel-k/pull/6942) asks to keep the implementation focused on connection-definition retrieval rather than a particular scaler, consider coverage of other source DSLs, and expand unit tests. **Status:** PR open; maintainer feedback received; follow-up revision pending.
 
 == Expected outcome
 
