@@ -275,3 +275,42 @@ func TestErrorHandlerDependencies(t *testing.T) {
 		assert.Contains(t, meta.Dependencies.List(), "camel:log")
 	})
 }
+
+func TestJavaBindToRegistryBeanDefinitions(t *testing.T) {
+	inspector := newTestJavaSourceInspector(t)
+	source := `
+package org.example.routes;
+
+import org.apache.camel.BindToRegistry;
+
+@BindToRegistry("rabbitConnectionFactory")
+public class RabbitConnectionFactory {
+}
+
+@BindToRegistry(value = "metricsRegistry")
+final class MetricsRegistry {
+}
+
+class BeanFactory {
+	@BindToRegistry("methodBean")
+	public Object createBean() {
+		return new Object();
+	}
+
+	@BindToRegistry("fieldBean")
+	private Object bean;
+}
+`
+
+	sourceSpec := v1.SourceSpec{DataSpec: v1.DataSpec{Name: "Routes.java", Content: source}}
+	meta := NewMetadata()
+	require.NoError(t, inspector.Extract(sourceSpec, &meta))
+
+	require.Len(t, meta.Beans, 2)
+	assert.Equal(t, "rabbitConnectionFactory", meta.Beans[0].Name)
+	assert.Equal(t, "org.example.routes.RabbitConnectionFactory", meta.Beans[0].Type)
+	assert.Empty(t, meta.Beans[0].Properties)
+	assert.Equal(t, "metricsRegistry", meta.Beans[1].Name)
+	assert.Equal(t, "org.example.routes.MetricsRegistry", meta.Beans[1].Type)
+	assert.Empty(t, meta.Beans[1].Properties)
+}

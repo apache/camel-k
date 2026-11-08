@@ -335,3 +335,41 @@ func TestXMLErrorHandlerDependencies(t *testing.T) {
 		assert.Contains(t, meta.Dependencies.List(), "camel:log")
 	})
 }
+
+func TestXMLBeanDefinitions(t *testing.T) {
+	inspector := newTestXMLInspector(t)
+	source := `
+<beans xmlns="http://www.springframework.org/schema/beans">
+  <bean id="rabbitConnectionFactory" class="org.example.RabbitConnectionFactory">
+    <property name="host" value="rabbitmq.example"/>
+    <property name="port"><value>5672</value></property>
+    <property name="virtualHost" value="${RABBITMQ_VHOST}"/>
+    <property name="username" value="admin"/>
+    <property name="password" value="admin"/>
+    <property name="brokerUri" value="amqp://admin:admin@rabbitmq.example:5672"/>
+    <property name="nested"><map><entry key="enabled" value="true"/></map></property>
+    <property name="factoryReference"><ref bean="anotherBean"/></property>
+  </bean>
+  <bean class="org.example.UnnamedBean"/>
+  <camelContext xmlns="http://camel.apache.org/schema/spring">
+    <route>
+      <from uri="timer:tick"/>
+    </route>
+  </camelContext>
+</beans>
+`
+
+	sourceSpec := v1.SourceSpec{DataSpec: v1.DataSpec{Name: "beans.xml", Content: source}}
+	meta := NewMetadata()
+	require.NoError(t, inspector.Extract(sourceSpec, &meta))
+
+	require.Len(t, meta.Beans, 1)
+	assert.Equal(t, "rabbitConnectionFactory", meta.Beans[0].Name)
+	assert.Equal(t, "org.example.RabbitConnectionFactory", meta.Beans[0].Type)
+	assert.Equal(t, map[string]string{
+		"host":        "rabbitmq.example",
+		"port":        "5672",
+		"virtualHost": "${RABBITMQ_VHOST}",
+	}, meta.Beans[0].Properties)
+	assert.Equal(t, []string{"timer:tick"}, meta.FromURIs)
+}

@@ -912,36 +912,75 @@ func TestYAMLErrorHandlerKamelet(t *testing.T) {
 		})
 	})
 }
-
 func TestYAMLBeanDefinitions(t *testing.T) {
 	inspector := newTestYAMLInspector(t)
 	source := `
 - beans:
     - name: rabbitConnectionFactory
-      type: org.springframework.amqp.rabbit.connection.CachingConnectionFactory
+      type: org.example.RabbitConnectionFactory
       properties:
         host: my-rabbitmq.my-ns.svc
         port: 5672
+        enabled: true
+        virtualHost: "${RABBITMQ_VHOST}"
         username: admin
         password: admin
         nested:
           enabled: true
         brokerUri: amqp://admin:admin@my-rabbitmq.my-ns.svc:5672
+        brokerQuery: amqp://rabbitmq:5672?password=secret
+    - name: metricsRegistry
+      type: org.example.MetricsRegistry
+      properties:
+        name: orders
+        retries: 3
+        labels:
+          - one
+          - two
 - route:
     from:
-      uri: spring-rabbitmq:my-exchange?queues=my-queue&routingKey=my-key
+      uri: timer:tick
       steps:
         - to: log:info
 `
 
 	assertExtractYAML(t, inspector, source, func(meta *Metadata) {
-		require.Len(t, meta.Beans, 1)
+		require.Len(t, meta.Beans, 2)
 		assert.Equal(t, "rabbitConnectionFactory", meta.Beans[0].Name)
-		assert.Equal(t, "org.springframework.amqp.rabbit.connection.CachingConnectionFactory", meta.Beans[0].Type)
+		assert.Equal(t, "org.example.RabbitConnectionFactory", meta.Beans[0].Type)
 		assert.Equal(t, map[string]string{
-			"host": "my-rabbitmq.my-ns.svc",
-			"port": "5672",
+			"host":        "my-rabbitmq.my-ns.svc",
+			"port":        "5672",
+			"enabled":     "true",
+			"virtualHost": "${RABBITMQ_VHOST}",
 		}, meta.Beans[0].Properties)
-		assert.Equal(t, []string{"spring-rabbitmq:my-exchange?queues=my-queue&routingKey=my-key"}, meta.FromURIs)
+		assert.Equal(t, "metricsRegistry", meta.Beans[1].Name)
+		assert.Equal(t, "org.example.MetricsRegistry", meta.Beans[1].Type)
+		assert.Equal(t, map[string]string{
+			"name":    "orders",
+			"retries": "3",
+		}, meta.Beans[1].Properties)
+		assert.Equal(t, []string{"timer:tick"}, meta.FromURIs)
+	})
+}
+
+func TestYAMLBeanDefinitionsIgnoreEntriesWithoutNames(t *testing.T) {
+	inspector := newTestYAMLInspector(t)
+	source := `
+- beans:
+    - type: org.example.MissingName
+      properties:
+        host: ignored.example
+    - name: ""
+      type: org.example.EmptyName
+    - name: usable
+      properties:
+        host: usable.example
+`
+
+	assertExtractYAML(t, inspector, source, func(meta *Metadata) {
+		require.Len(t, meta.Beans, 1)
+		assert.Equal(t, "usable", meta.Beans[0].Name)
+		assert.Equal(t, map[string]string{"host": "usable.example"}, meta.Beans[0].Properties)
 	})
 }

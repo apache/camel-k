@@ -50,6 +50,12 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 		}
 
 		if se, ok := t.(xml.StartElement); ok {
+			if se.Name.Local == "bean" {
+				if err := i.parseBeanDefinition(decoder, se, meta); err != nil {
+					return err
+				}
+				continue
+			}
 			switch se.Name.Local {
 			case rest, "restConfiguration":
 				meta.ExposesHTTPServices = true
@@ -126,6 +132,59 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 
 	meta.ExposesHTTPServices = meta.ExposesHTTPServices || i.containsHTTPURIs(meta.FromURIs)
 	meta.PassiveEndpoints = i.hasOnlyPassiveEndpoints(meta.FromURIs)
+
+	return nil
+}
+
+type xmlBeanDefinition struct {
+	ID         string            `xml:"id,attr"`
+	Class      string            `xml:"class,attr"`
+	Properties []xmlBeanProperty `xml:"property"`
+}
+
+type xmlBeanProperty struct {
+	Name        string `xml:"name,attr"`
+	Value       string `xml:"value,attr"`
+	NestedValue string `xml:"value"`
+}
+
+// parseBeanDefinition extracts explicitly named Spring XML bean definitions.
+// It does not instantiate beans, follow references, or evaluate factory methods.
+func (i XMLInspector) parseBeanDefinition(decoder *xml.Decoder, element xml.StartElement, meta *Metadata) error {
+	var raw xmlBeanDefinition
+	if err := decoder.DecodeElement(&raw, &element); err != nil {
+		return err
+	}
+
+	name := strings.TrimSpace(raw.ID)
+	if name == "" {
+		return nil
+	}
+
+	definition := BeanDefinition{
+		Name:       name,
+		Type:       strings.TrimSpace(raw.Class),
+		Properties: make(map[string]string),
+	}
+	for _, property := range raw.Properties {
+		key := strings.TrimSpace(property.Name)
+		if key == "" || isSensitiveBeanProperty(key) {
+			continue
+		}
+
+		value := property.Value
+		if value == "" {
+			value = property.NestedValue
+		}
+		if value == "" {
+			continue
+		}
+		if scalar, ok := scalarBeanProperty(value); ok {
+			definition.Properties[key] = scalar
+		}
+	}
+
+	meta.Beans = append(meta.Beans, definition)
 
 	return nil
 }

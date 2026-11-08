@@ -28,6 +28,8 @@ import (
 var (
 	replaceURIDoubleQuotedFrom  = regexp.MustCompile(`from\s*\(\s*"(?:timer|cron|quartz)[^"]*"\s*\)`)
 	replaceURIDoubleQuotedFromF = regexp.MustCompile(`fromF\s*\(\s*"(?:timer|cron|quartz)[^"]*"\s*\)`)
+	bindToRegistryClassRegexp   = regexp.MustCompile(`(?s)@BindToRegistry\s*\(\s*(?:value\s*=\s*)?"([^"]+)"\s*\)\s*(?:(?:public|protected|private|abstract|final|static|strictfp)\s+)*class\s+([A-Za-z_$][A-Za-z0-9_$]*)\b`)
+	javaPackageRegexp           = regexp.MustCompile(`(?m)^\s*package\s+([A-Za-z_$][A-Za-z0-9_$.]*)\s*;`)
 )
 
 // JavaSourceInspector inspects Java DSL spec.
@@ -37,6 +39,8 @@ type JavaSourceInspector struct {
 
 // Extract extracts all metadata from source spec.
 func (i JavaSourceInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
+	i.parseBeanDefinitions(source.Content, meta)
+
 	from := util.FindAllDistinctStringSubmatch(
 		source.Content,
 		doubleQuotedFrom,
@@ -56,6 +60,31 @@ func (i JavaSourceInspector) Extract(source v1.SourceSpec, meta *Metadata) error
 	hasRest := restRegexp.MatchString(source.Content)
 
 	return i.extract(source, meta, from, to, kameletEips, hasRest)
+}
+
+// parseBeanDefinitions records explicitly named class-level @BindToRegistry
+// declarations. It does not evaluate Java code or infer method or field values.
+func (i JavaSourceInspector) parseBeanDefinitions(content string, meta *Metadata) {
+	packageName := ""
+	if match := javaPackageRegexp.FindStringSubmatch(content); len(match) == 2 {
+		packageName = match[1]
+	}
+
+	for _, match := range bindToRegistryClassRegexp.FindAllStringSubmatch(content, -1) {
+		if len(match) != 3 {
+			continue
+		}
+
+		beanType := match[2]
+		if packageName != "" {
+			beanType = packageName + "." + beanType
+		}
+		meta.Beans = append(meta.Beans, BeanDefinition{
+			Name:       match[1],
+			Type:       beanType,
+			Properties: make(map[string]string),
+		})
+	}
 }
 
 // ReplaceFromURI parses the source content and replace the `from` URI configuration with the a new URI. Returns true if it applies a replacement.
