@@ -45,7 +45,6 @@ func newCmdPromote(rootCmdOptions *RootCmdOptions) (*cobra.Command, *promoteCmdO
 	}
 
 	cmd.Flags().String("to", "", "The namespace where to promote the Integration/Pipe")
-	cmd.Flags().StringP("to-operator", "x", "", "The operator id which will reconcile the promoted Integration/Pipe")
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
 	cmd.Flags().BoolP("image", "i", false, "Output the container image only")
 	cmd.Flags().String("export-gitops-dir", "", "Export to a Kustomize GitOps overlay structure")
@@ -58,7 +57,6 @@ type promoteCmdOptions struct {
 	*RootCmdOptions
 
 	To           string `mapstructure:"to"                yaml:",omitempty"`
-	ToOperator   string `mapstructure:"to-operator"       yaml:",omitempty"`
 	OutputFormat string `mapstructure:"output"            yaml:",omitempty"`
 	Image        bool   `mapstructure:"image"             yaml:",omitempty"`
 	ToGitOpsDir  string `mapstructure:"export-gitops-dir" yaml:",omitempty"`
@@ -122,7 +120,7 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 	// Pipe promotion
 	if promotePipe {
-		destPipe := util.EditPipe(sourcePipe, sourceIntegration, sourceKit, o.To, o.ToOperator)
+		destPipe := util.EditPipe(sourcePipe, sourceIntegration, sourceKit, o.To)
 		if o.OutputFormat != "" {
 			return showPipeOutput(cmd, destPipe, o.OutputFormat, c.GetScheme())
 		}
@@ -149,7 +147,7 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	// Plain Integration promotion
-	destIntegration := util.EditIntegration(sourceIntegration, sourceKit, o.To, o.ToOperator)
+	destIntegration := util.EditIntegration(sourceIntegration, sourceKit, o.To)
 	if o.OutputFormat != "" {
 		return showIntegrationOutput(cmd, destIntegration, o.OutputFormat)
 	}

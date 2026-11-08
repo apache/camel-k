@@ -30,3 +30,6 @@ spec:
             simple: Hello Camel from my-it
         - log: ${body}
         uri: timer:yaml
+  traits:
+    pull-secret:
+      secretName: ck-dev-registry

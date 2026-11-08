@@ -141,7 +141,7 @@ func TestMavenProxy(t *testing.T) {
 		}
 		noProxy = append(noProxy, svc.Spec.ClusterIPs...)
 
-		InstallOperatorWithConf(t, ctx, g, ns, "", false,
+		InstallOperatorWithConf(t, ctx, g, ns, false,
 			map[string]string{
 				"HTTP_PROXY": fmt.Sprintf("http://%s", hostname),
 				"NO_PROXY":   strings.Join(noProxy, ","),
@@ -201,7 +201,7 @@ func TestMavenProxyNotPresent(t *testing.T) {
 		}
 		noProxy = append(noProxy, svc.Spec.ClusterIPs...)
 
-		InstallOperatorWithConf(t, ctx, g, ns, "", false,
+		InstallOperatorWithConf(t, ctx, g, ns, false,
 			map[string]string{
 				"HTTP_PROXY": fmt.Sprintf("http://%s", hostname),
 				"NO_PROXY":   strings.Join(noProxy, ","),

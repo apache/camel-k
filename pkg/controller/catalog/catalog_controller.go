@@ -143,13 +143,6 @@ func (r *reconcileCatalog) Reconcile(ctx context.Context, request reconcile.Requ
 		return reconcile.Result{}, err
 	}
 
-	// Only process resources assigned to the operator
-	if !platform.IsOperatorHandlerConsideringLock(ctx, r.client, request.Namespace, &instance) {
-		rlog.Info("Ignoring request because resource is not assigned to current operator")
-
-		return reconcile.Result{}, nil
-	}
-
 	var targetPhase v1.CamelCatalogPhase
 
 	target := instance.DeepCopy()

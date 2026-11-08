@@ -54,16 +54,6 @@ func (in *IntegrationKitSpec) Configurations() []ConfigurationSpec {
 	return in.Configuration
 }
 
-// GetOperatorID returns the operator id as an annotation.
-func (in *IntegrationKit) GetOperatorID() string {
-	return GetAnnotation(OperatorIDAnnotation, in)
-}
-
-// SetOperatorID sets the given operator id as an annotation.
-func (in *IntegrationKit) SetOperatorID(operatorID string) {
-	SetAnnotation(&in.ObjectMeta, OperatorIDAnnotation, operatorID)
-}
-
 func (in *IntegrationKit) Configurations() []ConfigurationSpec {
 	if in == nil {
 		return []ConfigurationSpec{}

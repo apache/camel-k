@@ -176,13 +176,6 @@ func (r *ReconcilePipe) Reconcile(ctx context.Context, request reconcile.Request
 		return reconcile.Result{}, err
 	}
 
-	// Only process resources assigned to the operator
-	if !platform.IsOperatorHandlerConsideringLock(ctx, r.client, request.Namespace, &instance) {
-		rlog.Info("Ignoring request because resource is not assigned to current operator")
-
-		return reconcile.Result{}, nil
-	}
-
 	var err error
 
 	target := instance.DeepCopy()

@@ -269,18 +269,9 @@ func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType quarkusPack
 		kubernetes.CamelCreatorLabelNamespace: integration.Namespace,
 		kubernetes.CamelCreatorLabelVersion:   integration.ResourceVersion,
 	}
-
-	if v, ok := integration.Annotations[v1.PlatformSelectorAnnotation]; ok {
-		v1.SetAnnotation(&kit.ObjectMeta, v1.PlatformSelectorAnnotation, v)
-	}
-
 	if v, ok := integration.Annotations[v1.IntegrationProfileAnnotation]; ok {
 		v1.SetAnnotation(&kit.ObjectMeta, v1.IntegrationProfileAnnotation, v)
 		v1.SetAnnotation(&kit.ObjectMeta, v1.IntegrationProfileNamespaceAnnotation, integration.Namespace)
-	}
-	operatorID := defaults.OperatorID()
-	if operatorID != "" {
-		kit.SetOperatorID(operatorID)
 	}
 	kit.Spec = v1.IntegrationKitSpec{
 		Dependencies: e.Integration.Status.Dependencies,

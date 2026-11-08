@@ -55,7 +55,7 @@ func TestHTTPProxy(t *testing.T) {
 		noProxy = append(noProxy, svc.Spec.ClusterIPs...)
 
 		// Install Camel K with the HTTP proxy environment variable
-		InstallOperatorWithConf(t, ctx, g, ns, "", false,
+		InstallOperatorWithConf(t, ctx, g, ns, false,
 			map[string]string{
 				"HTTP_PROXY": httpProxy,
 				"NO_PROXY":   strings.Join(noProxy, ","),

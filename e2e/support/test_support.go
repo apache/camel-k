@@ -62,7 +62,6 @@ import (
 	servingv1 "github.com/apache/camel-k/v2/pkg/apis/duck/knative/serving/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/cmd"
-	"github.com/apache/camel-k/v2/pkg/platform"
 	v2util "github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/log"
@@ -194,41 +193,33 @@ func Kamel(t *testing.T, ctx context.Context, args ...string) *cobra.Command {
 }
 
 func KamelRun(t *testing.T, ctx context.Context, namespace string, args ...string) *cobra.Command {
-	return KamelRunWithID(t, ctx, platform.DefaultPlatformName, namespace, args...)
+	return kamelRunWithContext(t, ctx, namespace, args...)
 }
 
-func KamelRunWithID(t *testing.T, ctx context.Context, operatorID string, namespace string, args ...string) *cobra.Command {
-	return kamelRunWithContext(t, ctx, operatorID, namespace, args...)
-}
-
-func kamelRunWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string, args ...string) *cobra.Command {
+func kamelRunWithContext(t *testing.T, ctx context.Context, namespace string, args ...string) *cobra.Command {
 	if os.Getenv("E2E_TEST_REGISTRY_SECRET_COPY") == "true" {
 		args = append(args, "-t", "pull-secret.secret-name="+registrySecret)
 	}
-	return kamelCommandWithContext(t, ctx, "run", operatorID, namespace, args...)
+	return kamelCommandWithContext(t, ctx, "run", namespace, args...)
 }
 
 func KamelBind(t *testing.T, ctx context.Context, namespace string, args ...string) *cobra.Command {
-	return KamelBindWithID(t, ctx, platform.DefaultPlatformName, namespace, args...)
+	return kamelBindWithContext(t, ctx, namespace, args...)
 }
 
-func KamelBindWithID(t *testing.T, ctx context.Context, operatorID string, namespace string, args ...string) *cobra.Command {
-	return kamelBindWithContext(t, ctx, operatorID, namespace, args...)
+func kamelBindWithContext(t *testing.T, ctx context.Context, namespace string, args ...string) *cobra.Command {
+	if os.Getenv("E2E_TEST_REGISTRY_SECRET_COPY") == "true" {
+		args = append(args, "-t", "pull-secret.secret-name="+registrySecret)
+	}
+	return kamelCommandWithContext(t, ctx, "bind", namespace, args...)
 }
 
-func kamelBindWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string, args ...string) *cobra.Command {
-	return kamelCommandWithContext(t, ctx, "bind", operatorID, namespace, args...)
-}
-
-func kamelCommandWithContext(t *testing.T, ctx context.Context, command string, operatorID string, namespace string, args ...string) *cobra.Command {
+func kamelCommandWithContext(t *testing.T, ctx context.Context, command string, namespace string, args ...string) *cobra.Command {
 	// Avoid concurrent access to the CLI
 	cmdMutex.Lock()
 	defer cmdMutex.Unlock()
 
 	cmdArgs := []string{command, "-n", namespace}
-	if operatorID != platform.DefaultPlatformName {
-		cmdArgs = append(cmdArgs, "--operator-id", operatorID)
-	}
 	cmdArgs = append(cmdArgs, args...)
 	return KamelWithContext(t, ctx, cmdArgs...)
 }
@@ -614,16 +605,6 @@ func IntegrationConditionStatus(t *testing.T, ctx context.Context, ns string, na
 		}
 		return c.Status
 	}
-}
-
-func AssignIntegrationToOperator(t *testing.T, ctx context.Context, ns, name, operator string) error {
-	it := Integration(t, ctx, ns, name)()
-	if it == nil {
-		return fmt.Errorf("cannot assign integration %q to operator: integration not found", name)
-	}
-
-	it.SetOperatorID(operator)
-	return TestClient(t).Update(ctx, it)
 }
 
 func Annotations(object metav1.Object) map[string]string {
@@ -1031,16 +1012,6 @@ func ScalePipe(t *testing.T, ctx context.Context, ns string, name string, replic
 	return UpdatePipe(t, ctx, ns, name, func(klb *v1.Pipe) {
 		klb.Spec.Replicas = &replicas
 	})
-}
-
-func AssignPipeToOperator(t *testing.T, ctx context.Context, ns, name, operator string) error {
-	klb := Pipe(t, ctx, ns, name)()
-	if klb == nil {
-		return fmt.Errorf("cannot assign Pipe %q to operator:Pipe not found", name)
-	}
-
-	klb.SetOperatorID(operator)
-	return TestClient(t).Update(ctx, klb)
 }
 
 type KitFilter interface {
@@ -1771,10 +1742,6 @@ func ScaleOperator(t *testing.T, ctx context.Context, ns string, replicas int32)
 }
 
 func CreateKamelet(t *testing.T, ctx context.Context, ns string, name string, template map[string]interface{}, properties map[string]v1.JSONSchemaProp, labels map[string]string) func() error {
-	return CreateKameletWithID(t, platform.DefaultPlatformName, ctx, ns, name, template, properties, labels)
-}
-
-func CreateKameletWithID(t *testing.T, operatorID string, ctx context.Context, ns string, name string, template map[string]interface{}, properties map[string]v1.JSONSchemaProp, labels map[string]string) func() error {
 	return func() error {
 		kamelet := v1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
@@ -1792,16 +1759,11 @@ func CreateKameletWithID(t *testing.T, operatorID string, ctx context.Context, n
 			},
 		}
 
-		v1.SetAnnotation(&kamelet.ObjectMeta, v1.OperatorIDAnnotation, operatorID)
 		return TestClient(t).Create(ctx, &kamelet)
 	}
 }
 
 func CreateTimerKamelet(t *testing.T, ctx context.Context, ns string, name string) func() error {
-	return CreateTimerKameletWithID(t, ctx, platform.DefaultPlatformName, ns, name)
-}
-
-func CreateTimerKameletWithID(t *testing.T, ctx context.Context, operatorID string, ns string, name string) func() error {
 	props := map[string]v1.JSONSchemaProp{
 		"message": {
 			Type: "string",
@@ -1824,7 +1786,7 @@ func CreateTimerKameletWithID(t *testing.T, ctx context.Context, operatorID stri
 		},
 	}
 
-	return CreateKameletWithID(t, operatorID, ctx, ns, name, flow, props, nil)
+	return CreateKamelet(t, ctx, ns, name, flow, props, nil)
 }
 
 func asTemplate(t *testing.T, source map[string]interface{}) *v1.Template {

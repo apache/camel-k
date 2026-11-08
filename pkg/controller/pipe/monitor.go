@@ -66,9 +66,6 @@ func (action *monitorAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.Pip
 		return nil, fmt.Errorf("could not load integration for Pipe %q: %w", pipe.Name, err)
 	}
 
-	operatorIDChanged := v1.GetOperatorIDAnnotation(pipe) != "" &&
-		(v1.GetOperatorIDAnnotation(pipe) != v1.GetOperatorIDAnnotation(&it))
-
 	integrationProfileChanged := kubernetes.GetIntegrationProfileResource(pipe) != "" &&
 		(kubernetes.GetIntegrationProfileResource(pipe) != kubernetes.GetIntegrationProfileResource(&it))
 
@@ -92,11 +89,10 @@ func (action *monitorAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.Pip
 
 	semanticEquality := equality.Semantic.DeepDerivative(expected.Spec, it.Spec)
 
-	if !semanticEquality || operatorIDChanged || integrationProfileChanged || !sameTraits {
+	if !semanticEquality || integrationProfileChanged || !sameTraits {
 		action.L.Info(
 			"Pipe needs a rebuild",
 			"semantic-equality", !semanticEquality,
-			"operatorid-changed", operatorIDChanged,
 			"integration-profile-changed", integrationProfileChanged,
 			"traits-changed", !sameTraits)
 

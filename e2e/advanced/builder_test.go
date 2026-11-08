@@ -38,7 +38,7 @@ func TestBuilderTimeout(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		InstallOperatorWithConf(t, ctx, g, ns, "", false, map[string]string{"BUILD_TIMEOUT_SECONDS": "10"})
+		InstallOperatorWithConf(t, ctx, g, ns, false, map[string]string{"BUILD_TIMEOUT_SECONDS": "10"})
 
 		operatorPod := OperatorPod(t, ctx, ns)()
 		operatorPodImage := operatorPod.Spec.Containers[0].Image

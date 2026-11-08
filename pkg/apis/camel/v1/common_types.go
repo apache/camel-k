@@ -24,12 +24,6 @@ import (
 )
 
 const (
-	// OperatorIDAnnotation operator id annotation label.
-	//
-	// Deprecated: will be removed in the future.
-	OperatorIDAnnotation = "camel.apache.org/operator.id"
-	// PlatformSelectorAnnotation platform id annotation label.
-	PlatformSelectorAnnotation = "camel.apache.org/platform.id"
 	// IntegrationProfileAnnotation integration profile id annotation label.
 	IntegrationProfileAnnotation = "camel.apache.org/integration-profile.id"
 	// IntegrationProfileNamespaceAnnotation integration profile namespace annotation label.

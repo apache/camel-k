@@ -24,7 +24,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -113,21 +112,12 @@ func (action *buildAction) createBuild(ctx context.Context, kit *v1.IntegrationK
 	labels[v1.IntegrationKitLayoutLabel] = kit.Labels[v1.IntegrationKitLayoutLabel]
 
 	annotations := make(map[string]string)
-	if v, ok := kit.Annotations[v1.PlatformSelectorAnnotation]; ok {
-		annotations[v1.PlatformSelectorAnnotation] = v
-	}
 
 	if v, ok := kit.Annotations[v1.IntegrationProfileAnnotation]; ok {
 		annotations[v1.IntegrationProfileAnnotation] = v
 	}
 	if v, ok := kit.Annotations[v1.IntegrationProfileNamespaceAnnotation]; ok {
 		annotations[v1.IntegrationProfileNamespaceAnnotation] = v
-	}
-
-	operatorID := defaults.OperatorID()
-	if operatorID != "" {
-		//nolint:staticcheck
-		annotations[v1.OperatorIDAnnotation] = operatorID
 	}
 
 	buildConfig := v1.ConfigurationTasksByName(env.Pipeline, "builder")

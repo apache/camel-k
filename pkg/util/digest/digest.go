@@ -52,11 +52,6 @@ func ComputeForIntegration(integration *v1.Integration, configmapVersions []stri
 		return "", err
 	}
 
-	// Integration operator id is relevant
-	if _, err := hash.Write([]byte(v1.GetOperatorIDAnnotation(integration))); err != nil {
-		return "", err
-	}
-
 	// Integration profile is relevant
 	if _, err := hash.Write([]byte(kubernetes.GetIntegrationProfileResource(integration))); err != nil {
 		return "", err

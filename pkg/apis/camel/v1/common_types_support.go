@@ -161,11 +161,6 @@ func (m *RawMessage) String() string {
 var _ json.Marshaler = (*RawMessage)(nil)
 var _ json.Unmarshaler = (*RawMessage)(nil)
 
-// GetOperatorIDAnnotation to safely get the operator id annotation value.
-func GetOperatorIDAnnotation(obj metav1.Object) string {
-	return GetAnnotation(OperatorIDAnnotation, obj)
-}
-
 // GetAnnotation safely get the annotation value.
 func GetAnnotation(name string, obj metav1.Object) string {
 	if obj == nil || obj.GetAnnotations() == nil {

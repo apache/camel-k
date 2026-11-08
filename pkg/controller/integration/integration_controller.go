@@ -421,13 +421,6 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 		return reconcile.Result{}, err
 	}
 
-	// Only process resources assigned to the operator
-	if !platform.IsOperatorHandlerConsideringLock(ctx, r.client, request.Namespace, &instance) {
-		rlog.Info("Ignoring request because resource is not assigned to current operator")
-
-		return reconcile.Result{}, nil
-	}
-
 	target := instance.DeepCopy()
 	targetLog := rlog.ForIntegration(target)
 

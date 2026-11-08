@@ -22,7 +22,6 @@ import (
 	"os"
 	"strings"
 
-	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	coordination "k8s.io/api/coordination/v1"
@@ -119,56 +118,7 @@ func IsOperatorAllowedOnNamespace(ctx context.Context, c ctrl.Reader, namespace 
 	return !alreadyOwned, nil
 }
 
-// IsOperatorHandler checks on resource operator id annotation and this operator instance id.
-// Operators matching the annotation operator id are allowed to reconcile.
-// For legacy resources that are missing a proper operator id annotation the default global operator or the local
-// operator in this namespace are candidates for reconciliation.
-func IsOperatorHandler(object ctrl.Object) bool {
-	if object == nil {
-		return true
-	}
-	resourceID := camelv1.GetOperatorIDAnnotation(object)
-	operatorID := defaults.OperatorID()
-
-	// allow operator with matching id to handle the resource
-	if resourceID == operatorID {
-		return true
-	}
-
-	return resourceID == ""
-}
-
-// IsOperatorHandlerConsideringLock uses normal IsOperatorHandler checks and adds additional check for legacy resources
-// that are missing a proper operator id annotation. In general two kind of operators race for reconcile these legacy resources.
-// The local operator for this namespace and the default global operator instance. Based on the existence of a namespace
-// lock the current local operator has precedence. When no lock exists the default global operator should reconcile.
-func IsOperatorHandlerConsideringLock(ctx context.Context, c ctrl.Reader, namespace string, object ctrl.Object) bool {
-	isHandler := IsOperatorHandler(object)
-	if !isHandler {
-		return false
-	}
-
-	resourceID := camelv1.GetOperatorIDAnnotation(object)
-	// add additional check on resources missing an operator id
-	if resourceID == "" {
-		operatorNamespace := GetOperatorNamespace()
-		if operatorNamespace == namespace {
-			// Global operator is allowed on its own namespace
-			return true
-		}
-
-		if locked, err := IsNamespaceLocked(ctx, c, namespace); err != nil || locked {
-			// namespace is locked so local operators do have precedence
-			return !IsCurrentOperatorGlobal()
-		}
-	}
-
-	return true
-}
-
-// FilteringFuncs do preliminary checks to determine if certain events should be handled by the controller
-// based on labels on the resources (e.g. camel.apache.org/operator.id) and the operator configuration,
-// before handing the computation over to the user code.
+// FilteringFuncs do preliminary checks to determine if certain events should be handled by the controller.
 type FilteringFuncs[T ctrl.Object] struct {
 	// Create returns true if the Create event should be processed
 	CreateFunc func(event.TypedCreateEvent[T]) bool
@@ -184,9 +134,6 @@ type FilteringFuncs[T ctrl.Object] struct {
 }
 
 func (f FilteringFuncs[T]) Create(e event.TypedCreateEvent[T]) bool {
-	if !IsOperatorHandler(e.Object) {
-		return false
-	}
 	if f.CreateFunc != nil {
 		return f.CreateFunc(e)
 	}
@@ -195,9 +142,6 @@ func (f FilteringFuncs[T]) Create(e event.TypedCreateEvent[T]) bool {
 }
 
 func (f FilteringFuncs[T]) Delete(e event.TypedDeleteEvent[T]) bool {
-	if !IsOperatorHandler(e.Object) {
-		return false
-	}
 	if f.DeleteFunc != nil {
 		return f.DeleteFunc(e)
 	}
@@ -206,13 +150,6 @@ func (f FilteringFuncs[T]) Delete(e event.TypedDeleteEvent[T]) bool {
 }
 
 func (f FilteringFuncs[T]) Update(e event.TypedUpdateEvent[T]) bool {
-	if !IsOperatorHandler(e.ObjectNew) {
-		return false
-	}
-	if camelv1.GetOperatorIDAnnotation(e.ObjectOld) != camelv1.GetOperatorIDAnnotation(e.ObjectNew) {
-		// Always force reconciliation when the object becomes managed by the current operator
-		return true
-	}
 	if kubernetes.GetIntegrationProfileResource(e.ObjectOld) != kubernetes.GetIntegrationProfileResource(e.ObjectNew) {
 		// Always force reconciliation when the object gets attached to a new integration profile
 		return true
@@ -225,9 +162,6 @@ func (f FilteringFuncs[T]) Update(e event.TypedUpdateEvent[T]) bool {
 }
 
 func (f FilteringFuncs[T]) Generic(e event.TypedGenericEvent[T]) bool {
-	if !IsOperatorHandler(e.Object) {
-		return false
-	}
 	if f.GenericFunc != nil {
 		return f.GenericFunc(e)
 	}
