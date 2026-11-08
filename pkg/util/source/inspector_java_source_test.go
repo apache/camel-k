@@ -306,11 +306,46 @@ class BeanFactory {
 	meta := NewMetadata()
 	require.NoError(t, inspector.Extract(sourceSpec, &meta))
 
-	require.Len(t, meta.Beans, 2)
+	require.Len(t, meta.Beans, 4)
 	assert.Equal(t, "rabbitConnectionFactory", meta.Beans[0].Name)
 	assert.Equal(t, "org.example.routes.RabbitConnectionFactory", meta.Beans[0].Type)
-	assert.Empty(t, meta.Beans[0].Properties)
 	assert.Equal(t, "metricsRegistry", meta.Beans[1].Name)
 	assert.Equal(t, "org.example.routes.MetricsRegistry", meta.Beans[1].Type)
-	assert.Empty(t, meta.Beans[1].Properties)
+	assert.Equal(t, "methodBean", meta.Beans[2].Name)
+	assert.Equal(t, "Object", meta.Beans[2].Type)
+	assert.Equal(t, "fieldBean", meta.Beans[3].Name)
+	assert.Equal(t, "Object", meta.Beans[3].Type)
+}
+
+func TestJavaBindToRegistryUsesDefaultNames(t *testing.T) {
+	inspector := newTestJavaSourceInspector(t)
+	source := `
+package org.example.routes;
+
+@BindToRegistry
+class DefaultClassBean {
+}
+
+class BeanFactory {
+	@BindToRegistry
+	public MyBean createDefaultMethodBean() {
+		return new MyBean();
+	}
+
+	@BindToRegistry
+	private MyBean defaultFieldBean;
+}
+`
+
+	sourceSpec := v1.SourceSpec{DataSpec: v1.DataSpec{Name: "Routes.java", Content: source}}
+	meta := NewMetadata()
+	require.NoError(t, inspector.Extract(sourceSpec, &meta))
+
+	require.Len(t, meta.Beans, 3)
+	assert.Equal(t, "defaultClassBean", meta.Beans[0].Name)
+	assert.Equal(t, "org.example.routes.DefaultClassBean", meta.Beans[0].Type)
+	assert.Equal(t, "createDefaultMethodBean", meta.Beans[1].Name)
+	assert.Equal(t, "org.example.routes.MyBean", meta.Beans[1].Type)
+	assert.Equal(t, "defaultFieldBean", meta.Beans[2].Name)
+	assert.Equal(t, "org.example.routes.MyBean", meta.Beans[2].Type)
 }
