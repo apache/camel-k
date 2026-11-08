@@ -340,13 +340,13 @@ func TestXMLBeanDefinitions(t *testing.T) {
 	inspector := newTestXMLInspector(t)
 	source := `
 <beans xmlns="http://www.springframework.org/schema/beans">
-  <bean id="rabbitConnectionFactory" class="org.example.RabbitConnectionFactory">
-    <property name="host" value="rabbitmq.example"/>
+  <bean id="serviceClient" class="org.example.ServiceClient">
+    <property name="host" value="api.internal"/>
     <property name="port"><value>5672</value></property>
-    <property name="virtualHost" value="${RABBITMQ_VHOST}"/>
+    <property name="tenant" value="${SERVICE_TENANT}"/>
     <property name="username" value="admin"/>
     <property name="password" value="admin"/>
-    <property name="brokerUri" value="amqp://admin:admin@rabbitmq.example:5672"/>
+    <property name="endpointUri" value="amqp://admin:admin@api.internal:5672"/>
     <property name="nested"><map><entry key="enabled" value="true"/></map></property>
     <property name="factoryReference"><ref bean="anotherBean"/></property>
   </bean>
@@ -364,12 +364,12 @@ func TestXMLBeanDefinitions(t *testing.T) {
 	require.NoError(t, inspector.Extract(sourceSpec, &meta))
 
 	require.Len(t, meta.Beans, 1)
-	assert.Equal(t, "rabbitConnectionFactory", meta.Beans[0].Name)
-	assert.Equal(t, "org.example.RabbitConnectionFactory", meta.Beans[0].Type)
+	assert.Equal(t, "serviceClient", meta.Beans[0].Name)
+	assert.Equal(t, "org.example.ServiceClient", meta.Beans[0].Type)
 	assert.Equal(t, map[string]string{
-		"host":        "rabbitmq.example",
+		"host":        "api.internal",
 		"port":        "5672",
-		"virtualHost": "${RABBITMQ_VHOST}",
+		"tenant": "${SERVICE_TENANT}",
 	}, meta.Beans[0].Properties)
 	assert.Equal(t, []string{"timer:tick"}, meta.FromURIs)
 }
@@ -381,10 +381,10 @@ func TestCamelXMLBeanDefinitions(t *testing.T) {
 <camel>
   <bean name="beanFromMap" type="com.acme.MyBean">
     <properties>
-      <property key="host" value="rabbitmq.example"/>
+      <property key="host" value="api.internal"/>
       <property key="port" value="5672"/>
       <property key="password" value="secret"/>
-      <property key="brokerUri" value="amqp://user:secret@rabbitmq.example:5672"/>
+      <property key="endpointUri" value="amqp://user:secret@api.internal:5672"/>
       <property key="nested">
         <properties>
           <property key="field1" value="nested-value"/>
@@ -407,7 +407,7 @@ func TestCamelXMLBeanDefinitions(t *testing.T) {
 	assert.Equal(t, "beanFromMap", meta.Beans[0].Name)
 	assert.Equal(t, "com.acme.MyBean", meta.Beans[0].Type)
 	assert.Equal(t, map[string]string{
-		"host":         "rabbitmq.example",
+		"host":         "api.internal",
 		"port":         "5672",
 		"nested.field1": "flat-value",
 	}, meta.Beans[0].Properties)
