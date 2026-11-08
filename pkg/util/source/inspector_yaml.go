@@ -19,7 +19,6 @@ package source
 
 import (
 	"fmt"
-	"net/url"
 	"strings"
 
 	yaml2 "gopkg.in/yaml.v2"
@@ -105,51 +104,6 @@ func (i YAMLInspector) parseBeans(content any, meta *Metadata) {
 
 		meta.Beans = append(meta.Beans, definition)
 	}
-}
-
-// isSensitiveBeanProperty avoids retaining credentials in source metadata.
-func isSensitiveBeanProperty(key string) bool {
-	normalized := strings.ToLower(strings.NewReplacer("-", "", "_", "", ".", "").Replace(key))
-	for _, sensitive := range []string{"password", "passwd", "username", "user", "secret", "token", "credential", "privatekey", "clientkey", "accesskey"} {
-		if strings.Contains(normalized, sensitive) {
-			return true
-		}
-	}
-
-	return false
-}
-
-// scalarBeanProperty returns only YAML scalar values. Nested objects and sequences
-// are intentionally left unresolved.
-func scalarBeanProperty(value any) (string, bool) {
-	switch value.(type) {
-	case string, bool, int, int64, uint64, float32, float64:
-		valueString := fmt.Sprint(value)
-		if containsSensitiveURLData(valueString) {
-			return "", false
-		}
-
-		return valueString, true
-	default:
-		return "", false
-	}
-}
-
-func containsSensitiveURLData(value string) bool {
-	parsed, err := url.Parse(value)
-	if err != nil {
-		return false
-	}
-	if parsed.User != nil {
-		return true
-	}
-	for key := range parsed.Query() {
-		if isSensitiveBeanProperty(key) {
-			return true
-		}
-	}
-
-	return false
 }
 
 //nolint:nestif

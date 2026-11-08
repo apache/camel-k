@@ -912,7 +912,6 @@ func TestYAMLErrorHandlerKamelet(t *testing.T) {
 		})
 	})
 }
-
 func TestYAMLBeanDefinitions(t *testing.T) {
 	inspector := newTestYAMLInspector(t)
 	source := `
