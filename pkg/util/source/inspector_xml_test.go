@@ -373,3 +373,43 @@ func TestXMLBeanDefinitions(t *testing.T) {
 	}, meta.Beans[0].Properties)
 	assert.Equal(t, []string{"timer:tick"}, meta.FromURIs)
 }
+
+
+func TestCamelXMLBeanDefinitions(t *testing.T) {
+	inspector := newTestXMLInspector(t)
+	source := `
+<camel>
+  <bean name="beanFromMap" type="com.acme.MyBean">
+    <properties>
+      <property key="host" value="rabbitmq.example"/>
+      <property key="port" value="5672"/>
+      <property key="password" value="secret"/>
+      <property key="brokerUri" value="amqp://user:secret@rabbitmq.example:5672"/>
+      <property key="nested">
+        <properties>
+          <property key="field1" value="nested-value"/>
+        </properties>
+      </property>
+      <property key="nested.field1" value="flat-value"/>
+    </properties>
+  </bean>
+  <route>
+    <from uri="timer:tick"/>
+  </route>
+</camel>
+`
+
+	sourceSpec := v1.SourceSpec{DataSpec: v1.DataSpec{Name: "beans.xml", Content: source}}
+	meta := NewMetadata()
+	require.NoError(t, inspector.Extract(sourceSpec, &meta))
+
+	require.Len(t, meta.Beans, 1)
+	assert.Equal(t, "beanFromMap", meta.Beans[0].Name)
+	assert.Equal(t, "com.acme.MyBean", meta.Beans[0].Type)
+	assert.Equal(t, map[string]string{
+		"host":         "rabbitmq.example",
+		"port":         "5672",
+		"nested.field1": "flat-value",
+	}, meta.Beans[0].Properties)
+	assert.Equal(t, []string{"timer:tick"}, meta.FromURIs)
+}
