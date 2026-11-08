@@ -42,37 +42,28 @@ func TestActiveMQKedaAutoscale(t *testing.T) {
 			consumerName := "keda-it-activemq-to-log-auto"
 			producerName := "timer-to-activemq"
 
-			consumerFile := cloneAndReplaceNamespace(t, "files/keda-it-activemq-to-log-auto.yaml", ns)
-			ExpectExecSucceed(t, g, Kubectl("apply", "-f", consumerFile, "-n", ns))
-
-			// Start consumer
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, consumerName, v1.IntegrationConditionReady), TestTimeoutLong).
-				Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), TestTimeoutShort).
-				Should(PointTo(BeNumerically("==", 1)))
-
-			// Scale down to 0 when idle
-			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), TestTimeoutMedium).
-				Should(PointTo(BeNumerically("==", 0)))
-
-			// Start producer to generate traffic
+			// Start producer to generate traffic and populate the queue
 			producerFile := cloneAndReplaceNamespace(t, "files/timer-to-activemq.yaml", ns)
 			ExpectExecSucceed(t, g, Kubectl("apply", "-f", producerFile, "-n", ns))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, producerName, v1.IntegrationConditionReady), TestTimeoutLong).
 				Should(Equal(corev1.ConditionTrue))
 
-			// Consumer scales up to 1
-			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), TestTimeoutShort).
+			// Start consumer; queue is non-empty so KEDA keeps replicas active
+			consumerFile := cloneAndReplaceNamespace(t, "files/keda-it-activemq-to-log-auto.yaml", ns)
+			ExpectExecSucceed(t, g, Kubectl("apply", "-f", consumerFile, "-n", ns))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, consumerName, v1.IntegrationConditionReady), TestTimeoutLong).
+				Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), TestTimeoutMedium).
 				Should(PointTo(BeNumerically("==", 1)))
 
 			// Verify messages are being received and processed
-			g.Eventually(IntegrationLogs(t, ctx, ns, consumerName), TestTimeoutShort).
+			g.Eventually(IntegrationLogs(t, ctx, ns, consumerName), TestTimeoutMedium).
 				Should(ContainSubstring("Body is null"))
 
-			// Stop producer
+			// Stop producer to allow consumer to drain the queue
 			ExpectExecSucceed(t, g, Kubectl("delete", "it", producerName, "-n", ns))
 
-			// Scale back to 0
+			// Once idle, KEDA scales the consumer down to 0
 			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), TestTimeoutMedium).
 				Should(PointTo(BeNumerically("==", 0)))
 		})

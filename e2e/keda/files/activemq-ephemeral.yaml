@@ -60,6 +60,12 @@ spec:
               cpu: "200m"
             limits:
               memory: "512Mi"
+          readinessProbe:
+            tcpSocket:
+              port: 61616
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 2
 ---
 apiVersion: v1
 kind: Service
