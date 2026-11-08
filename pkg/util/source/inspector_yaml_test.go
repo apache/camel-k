@@ -912,6 +912,7 @@ func TestYAMLErrorHandlerKamelet(t *testing.T) {
 		})
 	})
 }
+
 func TestYAMLBeanDefinitions(t *testing.T) {
 	inspector := newTestYAMLInspector(t)
 	source := `
@@ -925,6 +926,7 @@ func TestYAMLBeanDefinitions(t *testing.T) {
         virtualHost: "${RABBITMQ_VHOST}"
         username: admin
         password: admin
+        apiKey: should-not-be-retained
         nested:
           enabled: true
         brokerUri: amqp://admin:admin@my-rabbitmq.my-ns.svc:5672

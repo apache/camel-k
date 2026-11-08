@@ -26,7 +26,7 @@ import (
 // isSensitiveBeanProperty avoids retaining credentials in source metadata.
 func isSensitiveBeanProperty(key string) bool {
 	normalized := strings.ToLower(strings.NewReplacer("-", "", "_", "", ".", "").Replace(key))
-	for _, sensitive := range []string{"password", "passwd", "username", "user", "secret", "token", "credential", "privatekey", "clientkey", "accesskey"} {
+	for _, sensitive := range []string{"password", "passwd", "username", "user", "secret", "secretkey", "token", "credential", "authorization", "apikey", "privatekey", "clientkey", "accesskey"} {
 		if strings.Contains(normalized, sensitive) {
 			return true
 		}
