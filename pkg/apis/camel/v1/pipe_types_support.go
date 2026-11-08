@@ -66,11 +66,6 @@ func (c *PipeCondition) GetMessage() string {
 	return c.Message
 }
 
-// SetOperatorID sets the given operator id as an annotation.
-func (in *Pipe) SetOperatorID(operatorID string) {
-	SetAnnotation(&in.ObjectMeta, OperatorIDAnnotation, operatorID)
-}
-
 // SetTraits add the Trait specification to the Pipe.
 func (in *Pipe) SetTraits(traits *Traits) {
 	in.Spec.Traits = traits

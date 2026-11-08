@@ -91,7 +91,6 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringArray("maven-repository", nil, "Add a maven repository")
 	cmd.Flags().Bool("logs", false, "Print integration logs")
 	cmd.Flags().Bool("use-flows", true, "Write yaml sources as Flow objects in the integration custom resource")
-	cmd.Flags().StringP("operator-id", "x", "", "Operator id selected to manage this integration.")
 	cmd.Flags().String("profile", "", "Trait profile used for deployment")
 	cmd.Flags().String("integration-profile", "", "Integration profile used for deployment")
 	cmd.Flags().StringArrayP("trait", "t", nil, "Configure a trait. E.g. \"-t service.enabled=false\"")
@@ -137,7 +136,6 @@ type runCmdOptions struct {
 	GitPath            string `mapstructure:"git-path"            yaml:",omitempty"`
 	Profile            string `mapstructure:"profile"             yaml:",omitempty"`
 	IntegrationProfile string `mapstructure:"integration-profile" yaml:",omitempty"`
-	OperatorID         string `mapstructure:"operator-id"         yaml:",omitempty"`
 	OutputFormat       string `mapstructure:"output"              yaml:",omitempty"`
 	// Deprecated: won't be supported in the future
 	PodTemplate    string   `mapstructure:"pod-template"    yaml:",omitempty"`
@@ -597,11 +595,6 @@ func (o *runCmdOptions) applyLabels(it *v1.Integration) {
 func (o *runCmdOptions) applyAnnotations(it *v1.Integration) {
 	if it.Annotations == nil {
 		it.Annotations = make(map[string]string)
-	}
-
-	// --operator-id={id} is a syntax sugar for '--annotation camel.apache.org/operator.id={id}'
-	if o.OperatorID != "" {
-		it.SetOperatorID(strings.TrimSpace(o.OperatorID))
 	}
 
 	// --integration-profile={id} is a syntax sugar for '--annotation camel.apache.org/integration-profile.id={id}'

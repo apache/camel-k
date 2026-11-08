@@ -61,7 +61,6 @@ func newCmdBind(rootCmdOptions *RootCmdOptions) (*cobra.Command, *bindCmdOptions
 	cmd.Flags().Bool("skip-checks", false, "Do not verify the binding for compliance with Kamelets and other Kubernetes resources")
 	cmd.Flags().StringArray("step", nil, `Add binding steps as Kubernetes resources. Endpoints are expected in the format "[[apigroup/]version:]kind:[namespace/]name", plain Camel URIs or Kamelet name.`)
 	cmd.Flags().StringArrayP("trait", "t", nil, `Add a trait to the corresponding Integration.`)
-	cmd.Flags().StringP("operator-id", "x", "", "Deprecated. Operator id selected to manage this Pipe.")
 	cmd.Flags().StringArray("annotation", nil, "Add an annotation to the Pipe. E.g. \"--annotation my.company=hello\"")
 	cmd.Flags().String("service-account", "", "The SA to use to run this binding")
 	cmd.Flags().StringArrayP("dependency", "d", nil, `A dependency that should be included, e.g., "camel:mail" for a Camel component, "mvn:org.my:app:1.0" for a Maven dependency`)
@@ -86,7 +85,6 @@ type bindCmdOptions struct {
 	SkipChecks     bool     `mapstructure:"skip-checks"     yaml:",omitempty"`
 	Steps          []string `mapstructure:"steps"           yaml:",omitempty"`
 	Traits         []string `mapstructure:"traits"          yaml:",omitempty"`
-	OperatorID     string   `mapstructure:"operator-id"     yaml:",omitempty"`
 	Annotations    []string `mapstructure:"annotations"     yaml:",omitempty"`
 	ServiceAccount string   `mapstructure:"service-account" yaml:",omitempty"`
 	Dependencies   []string `mapstructure:"dependencies"    yaml:",omitempty"`
@@ -235,11 +233,6 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 	if o.ServiceAccount != "" {
 		pipe.Spec.ServiceAccountName = o.ServiceAccount
-	}
-
-	// --operator-id={id} is a syntax sugar for '--annotation camel.apache.org/operator.id={id}'
-	if o.OperatorID != "" {
-		pipe.SetOperatorID(strings.TrimSpace(o.OperatorID))
 	}
 
 	if o.Annotations != nil {

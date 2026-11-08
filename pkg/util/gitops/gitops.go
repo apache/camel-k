@@ -45,12 +45,12 @@ resources:
 `
 
 // EditIntegration is in charge to create an Integration with the content required by the GitOps operations.
-func EditIntegration(it *v1.Integration, kit *v1.IntegrationKit, toNamespace, toOperator string) *v1.Integration {
+func EditIntegration(it *v1.Integration, kit *v1.IntegrationKit, toNamespace string) *v1.Integration {
 	contImage := it.Status.Image
 	// Integration
 	dstIt := v1.NewIntegration(toNamespace, it.Name)
 	dstIt.Spec = *it.Spec.DeepCopy()
-	dstIt.Annotations = cloneAnnotations(it.Annotations, toOperator)
+	dstIt.Annotations = cloneAnnotations(it.Annotations)
 	dstIt.Labels = cloneLabels(it.Labels)
 	dstIt.Spec.IntegrationKit = nil
 	if it.Status.Traits != nil {
@@ -115,27 +115,14 @@ func getClasspathSet(cps string) *sets.Set {
 	return s
 }
 
-// Return all annotations overriding the operator Id if provided.
-func cloneAnnotations(ann map[string]string, operatorID string) map[string]string {
-	operatorIDAnnotationSet := false
+// Return all annotations but "kubectl.kubernetes.io/last-applied-configuration".
+func cloneAnnotations(ann map[string]string) map[string]string {
 	newMap := make(map[string]string)
 	for k, v := range ann {
 		if k == "kubectl.kubernetes.io/last-applied-configuration" {
 			continue
 		}
-		//nolint:staticcheck
-		if k == v1.OperatorIDAnnotation {
-			if operatorID != "" {
-				newMap[v1.OperatorIDAnnotation] = operatorID
-				operatorIDAnnotationSet = true
-			}
-		} else {
-			newMap[k] = v
-		}
-	}
-	//nolint:staticcheck
-	if !operatorIDAnnotationSet && operatorID != "" {
-		newMap[v1.OperatorIDAnnotation] = operatorID
+		newMap[k] = v
 	}
 
 	return newMap
@@ -150,12 +137,12 @@ func cloneLabels(lbs map[string]string) map[string]string {
 }
 
 // EditPipe is in charge to create a Pipe with the content required by the GitOps operations.
-func EditPipe(kb *v1.Pipe, it *v1.Integration, kit *v1.IntegrationKit, toNamespace, toOperator string) *v1.Pipe {
+func EditPipe(kb *v1.Pipe, it *v1.Integration, kit *v1.IntegrationKit, toNamespace string) *v1.Pipe {
 	contImage := it.Status.Image
 	// Pipe
 	dst := v1.NewPipe(toNamespace, kb.Name)
 	dst.Spec = *kb.Spec.DeepCopy()
-	dst.Annotations = cloneAnnotations(kb.Annotations, toOperator)
+	dst.Annotations = cloneAnnotations(kb.Annotations)
 	dst.Labels = cloneLabels(kb.Labels)
 	traits := it.Status.Traits
 	if traits == nil {
@@ -214,10 +201,6 @@ func AppendKustomizeIntegration(dstIt *v1.Integration, destinationDir string, ov
 
 	baseIt := dstIt.DeepCopy()
 	baseIt.Namespace = ""
-	if baseIt.Annotations != nil {
-		//nolint:staticcheck
-		delete(baseIt.Annotations, v1.OperatorIDAnnotation)
-	}
 	appFolderName := strings.ToLower(baseIt.Name)
 
 	newpath := filepath.Join(destinationDir, appFolderName, "routes")
@@ -419,10 +402,6 @@ func AppendKustomizePipe(dstPipe *v1.Pipe, destinationDir string, overwrite bool
 
 	basePipe := dstPipe.DeepCopy()
 	basePipe.Namespace = ""
-	if basePipe.Annotations != nil {
-		//nolint:staticcheck
-		delete(basePipe.Annotations, v1.OperatorIDAnnotation)
-	}
 	appFolderName := strings.ToLower(basePipe.Name)
 
 	newpath := filepath.Join(destinationDir, appFolderName, "base")

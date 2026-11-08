@@ -19,14 +19,6 @@ Finally, assuming you've built your application correctly we can run the operato
 ./kamel operator
 ```
 
-Test the local operator by creating a test `Integration`:
-
-```bash
-./kamel run xyz.abc -n operator-test -x camel-k-dev
-```
-
-IMPORTANT: make sure no other Camel K Operators are watching this namespace, neither you have a global Camel K Operator  installed on your cluster. As you may have more than one Camel K operator installed on the cluster, it's important you specify the `-x` (or `--operator-id`) option.
-
 [[local-minikube]]
 == Local operator and local cluster
 

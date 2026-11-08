@@ -175,17 +175,11 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment) error {
 			// provide the same setting to the catalog
 			operatorId := ""
 			if e.Integration != nil {
-				if e.Integration.GetOperatorID() != "" {
-					operatorId = e.Integration.GetOperatorID()
-				}
 				if e.Integration.Spec.Repositories != nil {
 					extraRepositories = append(extraRepositories, e.Integration.Spec.Repositories...)
 				}
 			}
 			if e.IntegrationKit != nil {
-				if e.IntegrationKit.GetOperatorID() != "" {
-					operatorId = e.IntegrationKit.GetOperatorID()
-				}
 				if e.IntegrationKit.Spec.Repositories != nil {
 					extraRepositories = append(extraRepositories, e.IntegrationKit.Spec.Repositories...)
 				}

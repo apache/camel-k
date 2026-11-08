@@ -69,7 +69,7 @@ func TestHelmInstallation(t *testing.T) {
 
 		// Test a simple route
 		t.Run("simple route", func(t *testing.T) {
-			g.Expect(KamelRunWithID(t, ctx, operatorID, operatorNs, "files/yaml.yaml").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, operatorNs, "files/yaml.yaml").Execute()).To(Succeed())
 			g.Eventually(IntegrationConditionStatus(t, ctx, operatorNs, "yaml", v1.IntegrationConditionReady),
 				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationPodPhase(t, ctx, operatorNs, "yaml")).Should(Equal(corev1.PodRunning))

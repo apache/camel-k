@@ -31,3 +31,6 @@ spec:
       path: hello
   sink:
     uri: log:info
+  traits:
+    pull-secret:
+      secretName: ck-dev-registry

@@ -48,7 +48,9 @@ func TestOpenAPIKnativeContractFirst(t *testing.T) {
 		CreatePlainTextConfigmap(t, ctx, ns, "my-openapi", cmDataProps)
 
 		g.Expect(KamelRun(t, ctx, ns,
-			"--name", name, "--resource", "configmap:my-openapi", "files/petstore-cf.yaml").
+			"--name", name, "--resource", "configmap:my-openapi", "files/petstore-cf.yaml",
+			"-t", "knative-service.enabled=true",
+		).
 			Execute()).To(Succeed())
 
 		g.Eventually(KnativeService(t, ctx, ns, name), TestTimeoutLong).

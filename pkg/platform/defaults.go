@@ -23,7 +23,6 @@ import (
 )
 
 const (
-	DefaultPlatformName                    = "camel-k"
 	DefaultBuildTimeout                    = 5 * time.Minute
 	DefaultMavenCLIOptions                 = "-V,--no-transfer-progress,-Dstyle.color=never"
 	DefaultMaxRunningBuildsPodStrategy     = 10

@@ -35,20 +35,18 @@ import (
 	. "github.com/apache/camel-k/v2/e2e/support"
 )
 
-func TestServiceTrait(t *testing.T) {
+func TestTimerToCamelIntegrationBinding(t *testing.T) {
 	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		t.Run("Integration Binding", func(t *testing.T) {
-			// Not supported when running as a Knative Service as
-			// the Knative operator creates an external service with the same name of the Integration
-			g.Expect(KamelRun(t, ctx, ns, "hello.yaml", "-t", "knative-service.enabled=false").Execute()).To(Succeed())
+		t.Run("Camel Integration binding", func(t *testing.T) {
+			g.Expect(KamelRun(t, ctx, ns, "hello.yaml").Execute()).To(Succeed())
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "hello",
-				camelv1.IntegrationConditionReady), TestTimeoutLong).Should(Equal(v1.ConditionTrue))
+				camelv1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(v1.ConditionTrue))
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "hello")).Should(Equal(corev1.PodRunning))
 
 			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "it-binding.yaml", "-n", ns))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "timer-to-hello-it",
-				camelv1.IntegrationConditionReady), TestTimeoutLong).Should(Equal(v1.ConditionTrue))
+				camelv1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(v1.ConditionTrue))
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "timer-to-hello-it")).Should(Equal(corev1.PodRunning))
 
 			g.Eventually(IntegrationLogs(t, ctx, ns, "timer-to-hello-it")).Should(

@@ -22,8 +22,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/apache/camel-k/v2/pkg/util/defaults"
-
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -97,13 +95,6 @@ func (action *buildAction) createBuild(ctx context.Context, it *v1.Integration) 
 
 	labels := kubernetes.FilterCamelCreatorLabels(it.Labels)
 	annotations := make(map[string]string)
-
-	operatorID := defaults.OperatorID()
-	if operatorID != "" {
-		//nolint:staticcheck
-		annotations[v1.OperatorIDAnnotation] = operatorID
-	}
-
 	timeout := env.Platform.BuildTimeout
 
 	// We may need to change certain builder configuration values

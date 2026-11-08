@@ -160,7 +160,7 @@ func (t *gitOpsTrait) pushGitOpsItInGitRepo(ctx context.Context, it *v1.Integrat
 
 	if pipe != nil {
 		for _, overlay := range t.getOverlays() {
-			destPipe := util.EditPipe(pipe, it, kit, overlay, "")
+			destPipe := util.EditPipe(pipe, it, kit, overlay)
 			err = util.AppendKustomizePipe(destPipe, ciCdDir, t.getOverwriteOverlay())
 			if err != nil {
 				return err
@@ -168,7 +168,7 @@ func (t *gitOpsTrait) pushGitOpsItInGitRepo(ctx context.Context, it *v1.Integrat
 		}
 	} else {
 		for _, overlay := range t.getOverlays() {
-			destIntegration := util.EditIntegration(it, kit, overlay, "")
+			destIntegration := util.EditIntegration(it, kit, overlay)
 			err = util.AppendKustomizeIntegration(destIntegration, ciCdDir, t.getOverwriteOverlay())
 			if err != nil {
 				return err

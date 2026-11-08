@@ -240,60 +240,6 @@ func TestPipeImageOnly(t *testing.T) {
 	assert.Equal(t, "my-special-image\n", output)
 }
 
-func TestIntegrationToOperatorId(t *testing.T) {
-	defaultIntegration, defaultKit := nominalIntegration("my-it-test")
-	srcCatalog := createTestCamelCatalog("default", v1.RuntimeProviderQuarkus, defaults.DefaultRuntimeVersion)
-	dstCatalog := createTestCamelCatalog("prod-namespace", v1.RuntimeProviderQuarkus, defaults.DefaultRuntimeVersion)
-
-	// Verify default (missing) operator Id
-	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
-	output, err := ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "-x", "my-prod-operator", "-o", "yaml", "--to", "prod")
-	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
-	require.NoError(t, err)
-	assert.Equal(t, `apiVersion: camel.apache.org/v1
-kind: Integration
-metadata:
-  annotations:
-    camel.apache.org/operator.id: my-prod-operator
-  name: my-it-test
-  namespace: prod
-spec:
-  traits:
-    camel:
-      runtimeVersion: 1.2.3
-    container:
-      image: my-special-image
-    jvm:
-      classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
-status: {}
-`, output)
-	// Verify also when the operator Id is set in the integration
-	defaultIntegration.Annotations = map[string]string{
-		"camel.apache.org/operator.id": "camel-k",
-	}
-	promoteCmdOptions, promoteCmd, _ = initializePromoteCmdOptions(t, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
-	output, err = ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "-x", "my-prod-operator", "-o", "yaml", "--to", "prod")
-	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
-	require.NoError(t, err)
-	assert.Equal(t, `apiVersion: camel.apache.org/v1
-kind: Integration
-metadata:
-  annotations:
-    camel.apache.org/operator.id: my-prod-operator
-  name: my-it-test
-  namespace: prod
-spec:
-  traits:
-    camel:
-      runtimeVersion: 1.2.3
-    container:
-      image: my-special-image
-    jvm:
-      classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
-status: {}
-`, output)
-}
-
 func TestIntegrationWithSavedTraitsDryRun(t *testing.T) {
 	defaultIntegration, defaultKit := nominalIntegration("my-it-test")
 	defaultIntegration.Status.Traits = &v1.Traits{

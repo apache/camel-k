@@ -40,18 +40,6 @@ func TestServiceTrait(t *testing.T) {
 	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		name := "platform-http-server"
-		t.Run("NodePort service", func(t *testing.T) {
-			g.Expect(KamelRun(t, ctx, ns, "files/PlatformHttpServer.java", "-t", "service.enabled=true",
-				"-t", "service.node-port=true").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
-				Should(Equal(corev1.ConditionTrue))
-
-			//
-			// Service names can vary with the ExternalName Service
-			// sometimes being created first and being given the root name
-			//
-			g.Eventually(ServicesByType(t, ctx, ns, corev1.ServiceTypeNodePort), TestTimeoutLong).ShouldNot(BeEmpty())
-		})
 
 		t.Run("Default service (ClusterIP)", func(t *testing.T) {
 			// Service trait is enabled by default

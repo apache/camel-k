@@ -37,7 +37,9 @@ func TestKnativeServiceURL(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 
 		t.Run("Service endpoint url check", func(t *testing.T) {
-			g.Expect(KamelRun(t, ctx, ns, "files/knativeurl1.yaml").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/knativeurl1.yaml",
+				"-t", "knative-service.enabled=true",
+			).Execute()).To(Succeed())
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "knativeurl1", camelv1.IntegrationConditionReady),
 				TestTimeoutMedium).Should(Equal(v1.ConditionTrue))
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "knativeurl1")).Should(Equal(v1.PodRunning))
@@ -47,7 +49,8 @@ func TestKnativeServiceURL(t *testing.T) {
 		})
 
 		t.Run("Service multiple endpoint url check", func(t *testing.T) {
-			g.Expect(KamelRun(t, ctx, ns, "files/knativeurl2.yaml").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/knativeurl2.yaml",
+				"-t", "knative-service.enabled=true").Execute()).To(Succeed())
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "knativeurl2", camelv1.IntegrationConditionReady),
 				TestTimeoutMedium).Should(Equal(v1.ConditionTrue))
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "knativeurl2")).Should(Equal(v1.PodRunning))

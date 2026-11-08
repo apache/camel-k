@@ -53,10 +53,6 @@ func CreateCatalog(
 	cx.Labels[kubernetes.CamelLabelRuntimeProvider] = string(runtime.Provider)
 	cx.Labels["camel.apache.org/catalog.generated"] = "true"
 
-	if operatorId != "" {
-		cx.SetOperatorID(operatorId)
-	}
-
 	if err := client.Create(ctx, &cx); err != nil {
 		if k8serrors.IsAlreadyExists(err) {
 			// It's still possible that catalog wasn't yet found at the time of loading

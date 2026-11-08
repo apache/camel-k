@@ -68,19 +68,15 @@ func GetEnvOrDefault(key string, deflt string) string {
 // InstallOperator is in charge to install a namespaced operator. The func must be
 // executed in a critical section as there may be concurrent access to it.
 func InstallOperator(t *testing.T, ctx context.Context, g *WithT, ns string) {
-	InstallOperatorWithConf(t, ctx, g, ns, "", false, nil)
+	InstallOperatorWithConf(t, ctx, g, ns, false, nil)
 }
 
 // InstallOperatorWithConf is in charge to install a namespaced operator with additional configurations.
-func InstallOperatorWithConf(t *testing.T, ctx context.Context, g *WithT, ns, operatorID string, global bool, envs map[string]string) {
+func InstallOperatorWithConf(t *testing.T, ctx context.Context, g *WithT, ns string, global bool, envs map[string]string) {
 	lock.Lock()
 	defer lock.Unlock()
 	args := []string{fmt.Sprintf("NAMESPACE=%s", ns)}
 
-	if operatorID != "" {
-		fmt.Printf("Setting operator ID property as %s\n", operatorID)
-		args = append(args, fmt.Sprintf("OPERATOR_ID=%s", operatorID))
-	}
 	if envs != nil {
 		envArgs := make([]string, len(envs))
 		for k, v := range envs {

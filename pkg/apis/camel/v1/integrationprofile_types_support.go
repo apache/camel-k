@@ -32,11 +32,6 @@ func NewIntegrationProfile(namespace string, name string) IntegrationProfile {
 	}
 }
 
-// SetOperatorID sets the given operator id as an annotation.
-func (in *IntegrationProfile) SetOperatorID(operatorID string) {
-	SetAnnotation(&in.ObjectMeta, OperatorIDAnnotation, operatorID)
-}
-
 // GetTimeout returns the specified duration or a default one.
 func (b *IntegrationProfileBuildSpec) GetTimeout() metav1.Duration {
 	if b.Timeout == nil {

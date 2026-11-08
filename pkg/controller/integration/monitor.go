@@ -240,13 +240,6 @@ func isIntegrationKitResetRequired(integration *v1.Integration, kit *v1.Integrat
 		return false
 	}
 
-	if v1.GetOperatorIDAnnotation(integration) != "" &&
-		v1.GetOperatorIDAnnotation(integration) != v1.GetOperatorIDAnnotation(kit) {
-		// Operator to reconcile the integration has changed. Reset integration kit
-		// so new operator can handle the kit reference
-		return true
-	}
-
 	if kubernetes.GetIntegrationProfileResource(integration) != "" &&
 		kubernetes.GetIntegrationProfileResource(integration) != kubernetes.GetIntegrationProfileResource(kit) {
 		// Integration profile for the integration has changed. Reset integration kit
