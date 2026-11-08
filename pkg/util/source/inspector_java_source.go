@@ -127,10 +127,22 @@ func bindToRegistryName(positional, named, fallback string) string {
 
 func qualifyJavaBeanType(beanType, packageName string) string {
 	beanType = strings.TrimSpace(beanType)
-	if packageName == "" || beanType == "" || strings.ContainsAny(beanType, ".<>[], ") {
+	if packageName == "" || beanType == "" || strings.ContainsAny(beanType, ".<>[], ") || isJavaLangType(beanType) {
 		return beanType
 	}
 	return packageName + "." + beanType
+}
+
+func isJavaLangType(beanType string) bool {
+	switch beanType {
+	case "Object", "String", "Boolean", "Byte", "Character", "Class",
+		"Double", "Enum", "Exception", "Float", "Integer", "Long",
+		"Math", "Number", "Record", "RuntimeException", "Short",
+		"Throwable", "Void":
+		return true
+	default:
+		return false
+	}
 }
 
 func decapitalizeJavaName(name string) string {
