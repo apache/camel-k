@@ -323,6 +323,8 @@ func TestJavaBindToRegistryUsesDefaultNames(t *testing.T) {
 	source := `
 package org.example.routes;
 
+import org.example.beans.MyBean;
+
 @BindToRegistry
 class DefaultClassBean {
 }
