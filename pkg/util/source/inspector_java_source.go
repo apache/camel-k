@@ -28,7 +28,7 @@ import (
 var (
 	replaceURIDoubleQuotedFrom  = regexp.MustCompile(`from\s*\(\s*"(?:timer|cron|quartz)[^"]*"\s*\)`)
 	replaceURIDoubleQuotedFromF = regexp.MustCompile(`fromF\s*\(\s*"(?:timer|cron|quartz)[^"]*"\s*\)`)
-	bindToRegistryClassRegexp   = regexp.MustCompile(`(?s)@BindToRegistry\s*\(\s*(?:value\s*=\s*)?"([^"]+)"\s*\)\s*(?:(?:public|protected|private|abstract|final|static|strictfp)\s+)*class\s+([A-Za-z_$][A-Za-z0-9_$]*)\b`)
+	bindToRegistryClassRegexp   = regexp.MustCompile(`(?s)@BindToRegistry\s*\(\s*(?:"([^"]+)"|[^)]*\bvalue\s*=\s*"([^"]+)")[^)]*\)\s*(?:(?:public|protected|private|abstract|final|static|strictfp)\s+)*class\s+([A-Za-z_$][A-Za-z0-9_$]*)\b`)
 	javaPackageRegexp           = regexp.MustCompile(`(?m)^\s*package\s+([A-Za-z_$][A-Za-z0-9_$.]*)\s*;`)
 )
 
@@ -71,16 +71,20 @@ func parseJavaBeanDefinitions(content string, meta *Metadata) {
 	}
 
 	for _, match := range bindToRegistryClassRegexp.FindAllStringSubmatch(content, -1) {
-		if len(match) != 3 {
+		if len(match) != 4 {
 			continue
 		}
 
-		beanType := match[2]
+		name := match[1]
+		if name == "" {
+			name = match[2]
+		}
+		beanType := match[3]
 		if packageName != "" {
 			beanType = packageName + "." + beanType
 		}
 		meta.Beans = append(meta.Beans, BeanDefinition{
-			Name:       match[1],
+			Name:       name,
 			Type:       beanType,
 			Properties: make(map[string]string),
 		})

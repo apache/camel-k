@@ -287,7 +287,7 @@ import org.apache.camel.BindToRegistry;
 public class RabbitConnectionFactory {
 }
 
-@BindToRegistry(value = "metricsRegistry")
+@BindToRegistry(lazy = true, value = "metricsRegistry")
 final class MetricsRegistry {
 }
 
