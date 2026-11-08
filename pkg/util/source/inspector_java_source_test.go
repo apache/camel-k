@@ -282,6 +282,7 @@ func TestJavaBindToRegistryBeanDefinitions(t *testing.T) {
 package org.example.routes;
 
 import org.apache.camel.BindToRegistry;
+import org.example.beans.MyBean;
 
 @BindToRegistry("rabbitConnectionFactory")
 public class RabbitConnectionFactory {
@@ -293,12 +294,12 @@ final class MetricsRegistry {
 
 class BeanFactory {
 	@BindToRegistry("methodBean")
-	public Object createBean() {
-		return new Object();
+	public MyBean createBean() {
+		return new MyBean();
 	}
 
 	@BindToRegistry("fieldBean")
-	private Object bean;
+	private MyBean bean;
 }
 `
 
@@ -312,9 +313,9 @@ class BeanFactory {
 	assert.Equal(t, "metricsRegistry", meta.Beans[1].Name)
 	assert.Equal(t, "org.example.routes.MetricsRegistry", meta.Beans[1].Type)
 	assert.Equal(t, "methodBean", meta.Beans[2].Name)
-	assert.Equal(t, "Object", meta.Beans[2].Type)
+	assert.Equal(t, "org.example.beans.MyBean", meta.Beans[2].Type)
 	assert.Equal(t, "fieldBean", meta.Beans[3].Name)
-	assert.Equal(t, "Object", meta.Beans[3].Type)
+	assert.Equal(t, "org.example.beans.MyBean", meta.Beans[3].Type)
 }
 
 func TestJavaBindToRegistryUsesDefaultNames(t *testing.T) {
@@ -345,7 +346,7 @@ class BeanFactory {
 	assert.Equal(t, "defaultClassBean", meta.Beans[0].Name)
 	assert.Equal(t, "org.example.routes.DefaultClassBean", meta.Beans[0].Type)
 	assert.Equal(t, "createDefaultMethodBean", meta.Beans[1].Name)
-	assert.Equal(t, "org.example.routes.MyBean", meta.Beans[1].Type)
+	assert.Equal(t, "org.example.beans.MyBean", meta.Beans[1].Type)
 	assert.Equal(t, "defaultFieldBean", meta.Beans[2].Name)
-	assert.Equal(t, "org.example.routes.MyBean", meta.Beans[2].Type)
+	assert.Equal(t, "org.example.beans.MyBean", meta.Beans[2].Type)
 }
