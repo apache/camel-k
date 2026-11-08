@@ -29,17 +29,17 @@ func TestMergeBeanDefinitions(t *testing.T) {
 	first := src.NewMetadata()
 	first.Beans = []src.BeanDefinition{
 		{
-			Name:       "rabbitConnectionFactory",
-			Type:       "org.springframework.amqp.rabbit.connection.CachingConnectionFactory",
-			Properties: map[string]string{"host": "rabbitmq"},
+			Name:       "inventoryDataSource",
+			Type:       "org.example.InventoryDataSource",
+			Properties: map[string]string{"host": "db.internal"},
 		},
 	}
 	second := src.NewMetadata()
 	second.Beans = []src.BeanDefinition{
 		{
-			Name:       "anotherConnectionFactory",
-			Type:       "com.example.ConnectionFactory",
-			Properties: map[string]string{"host": "another-rabbitmq"},
+			Name:       "metricsRegistry",
+			Type:       "com.example.MetricsRegistry",
+			Properties: map[string]string{"host": "another-db.internal"},
 		},
 	}
 
