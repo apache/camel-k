@@ -917,20 +917,20 @@ func TestYAMLBeanDefinitions(t *testing.T) {
 	inspector := newTestYAMLInspector(t)
 	source := `
 - beans:
-    - name: rabbitConnectionFactory
-      type: org.example.RabbitConnectionFactory
+    - name: apiClient
+      type: org.example.ApiClient
       properties:
-        host: my-rabbitmq.my-ns.svc
+        host: api.internal
         port: 5672
         enabled: true
-        virtualHost: "${RABBITMQ_VHOST}"
+        tenant: "${API_TENANT}"
         username: admin
         password: admin
         apiKey: should-not-be-retained
         nested:
           enabled: true
-        brokerUri: amqp://admin:admin@my-rabbitmq.my-ns.svc:5672
-        brokerQuery: amqp://rabbitmq:5672?password=secret
+        endpointUri: https://admin:secret@api.internal:8443
+        endpointWithToken: https://api.internal?token=secret
     - name: metricsRegistry
       type: org.example.MetricsRegistry
       properties:
@@ -948,13 +948,13 @@ func TestYAMLBeanDefinitions(t *testing.T) {
 
 	assertExtractYAML(t, inspector, source, func(meta *Metadata) {
 		require.Len(t, meta.Beans, 2)
-		assert.Equal(t, "rabbitConnectionFactory", meta.Beans[0].Name)
-		assert.Equal(t, "org.example.RabbitConnectionFactory", meta.Beans[0].Type)
+		assert.Equal(t, "apiClient", meta.Beans[0].Name)
+		assert.Equal(t, "org.example.ApiClient", meta.Beans[0].Type)
 		assert.Equal(t, map[string]string{
-			"host":        "my-rabbitmq.my-ns.svc",
+			"host":        "api.internal",
 			"port":        "5672",
 			"enabled":     "true",
-			"virtualHost": "${RABBITMQ_VHOST}",
+			"tenant": "${API_TENANT}",
 		}, meta.Beans[0].Properties)
 		assert.Equal(t, "metricsRegistry", meta.Beans[1].Name)
 		assert.Equal(t, "org.example.MetricsRegistry", meta.Beans[1].Type)
