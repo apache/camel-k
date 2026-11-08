@@ -975,9 +975,12 @@ func TestYAMLBeanDefinitionsIgnoreEntriesWithoutNames(t *testing.T) {
         host: ignored.example
     - name: ""
       type: org.example.EmptyName
-    - name: usable
+    - name: "   "
       properties:
-        host: usable.example
+        host: ignored.example
+    - name: " usable "
+      properties:
+        " host ": usable.example
 `
 
 	assertExtractYAML(t, inspector, source, func(meta *Metadata) {
