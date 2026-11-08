@@ -284,8 +284,8 @@ package org.example.routes;
 import org.apache.camel.BindToRegistry;
 import org.example.beans.MyBean;
 
-@BindToRegistry("rabbitConnectionFactory")
-public class RabbitConnectionFactory {
+@BindToRegistry("inventoryDataSource")
+public class InventoryDataSource {
 }
 
 @BindToRegistry(lazy = true, value = "metricsRegistry")
@@ -308,8 +308,8 @@ class BeanFactory {
 	require.NoError(t, inspector.Extract(sourceSpec, &meta))
 
 	require.Len(t, meta.Beans, 4)
-	assert.Equal(t, "rabbitConnectionFactory", meta.Beans[0].Name)
-	assert.Equal(t, "org.example.routes.RabbitConnectionFactory", meta.Beans[0].Type)
+	assert.Equal(t, "inventoryDataSource", meta.Beans[0].Name)
+	assert.Equal(t, "org.example.routes.InventoryDataSource", meta.Beans[0].Type)
 	assert.Equal(t, "metricsRegistry", meta.Beans[1].Name)
 	assert.Equal(t, "org.example.routes.MetricsRegistry", meta.Beans[1].Type)
 	assert.Equal(t, "methodBean", meta.Beans[2].Name)
