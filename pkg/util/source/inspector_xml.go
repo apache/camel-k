@@ -155,8 +155,8 @@ type xmlBeanProperty struct {
 	NestedValue string `xml:"value"`
 }
 
-// parseXMLBeanDefinition extracts explicitly named Spring XML bean definitions.
-// It does not instantiate beans, follow references, or evaluate factory methods.
+// parseXMLBeanDefinition extracts named Camel XML and Spring XML bean definitions.
+// It retains direct scalar properties only and does not instantiate beans or follow references.
 func parseXMLBeanDefinition(decoder *xml.Decoder, element xml.StartElement, meta *Metadata) error {
 	var raw xmlBeanDefinition
 	if err := decoder.DecodeElement(&raw, &element); err != nil {
