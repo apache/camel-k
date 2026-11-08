@@ -951,10 +951,10 @@ func TestYAMLBeanDefinitions(t *testing.T) {
 		assert.Equal(t, "apiClient", meta.Beans[0].Name)
 		assert.Equal(t, "org.example.ApiClient", meta.Beans[0].Type)
 		assert.Equal(t, map[string]string{
-			"host":        "api.internal",
-			"port":        "5672",
-			"enabled":     "true",
-			"tenant": "${API_TENANT}",
+			"host":    "api.internal",
+			"port":    "5672",
+			"enabled": "true",
+			"tenant":  "${API_TENANT}",
 		}, meta.Beans[0].Properties)
 		assert.Equal(t, "metricsRegistry", meta.Beans[1].Name)
 		assert.Equal(t, "org.example.MetricsRegistry", meta.Beans[1].Type)

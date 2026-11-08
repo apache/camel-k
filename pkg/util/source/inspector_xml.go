@@ -136,11 +136,11 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 }
 
 type xmlBeanDefinition struct {
-	ID         string              `xml:"id,attr"`
-	Name       string              `xml:"name,attr"`
-	Class      string              `xml:"class,attr"`
-	Type       string              `xml:"type,attr"`
-	Properties []xmlBeanProperty   `xml:"property"`
+	ID          string             `xml:"id,attr"`
+	Name        string             `xml:"name,attr"`
+	Class       string             `xml:"class,attr"`
+	Type        string             `xml:"type,attr"`
+	Properties  []xmlBeanProperty  `xml:"property"`
 	PropertySet xmlBeanPropertySet `xml:"properties"`
 }
 

@@ -30,11 +30,11 @@ import (
 var (
 	replaceURIDoubleQuotedFrom  = regexp.MustCompile(`from\s*\(\s*"(?:timer|cron|quartz)[^"]*"\s*\)`)
 	replaceURIDoubleQuotedFromF = regexp.MustCompile(`fromF\s*\(\s*"(?:timer|cron|quartz)[^"]*"\s*\)`)
-	bindToRegistryClassRegexp = regexp.MustCompile(`(?s)@(?:org\.apache\.camel\.)?BindToRegistry\s*(?:\(\s*(?:"([^"]*)"|[^)]*\bvalue\s*=\s*"([^"]*)")?[^)]*\))?\s*(?:(?:public|protected|private|abstract|final|static|strictfp)\s+)*(?:class|interface|enum|record)\s+([A-Za-z_$][A-Za-z0-9_$]*)\b`)
-	bindToRegistryMethodRegexp = regexp.MustCompile(`(?s)@(?:org\.apache\.camel\.)?BindToRegistry\s*(?:\(\s*(?:"([^"]*)"|[^)]*\bvalue\s*=\s*"([^"]*)")?[^)]*\))?\s*(?:(?:public|protected|private|abstract|final|static|strictfp|synchronized|native)\s+)*([A-Za-z_$][A-Za-z0-9_$.<>?,\[\] ]*)\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*\(`)
-	bindToRegistryFieldRegexp = regexp.MustCompile(`(?s)@(?:org\.apache\.camel\.)?BindToRegistry\s*(?:\(\s*(?:"([^"]*)"|[^)]*\bvalue\s*=\s*"([^"]*)")?[^)]*\))?\s*(?:(?:public|protected|private|abstract|final|static|transient|volatile)\s+)*([A-Za-z_$][A-Za-z0-9_$.<>?,\[\] ]*)\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*(?:=|;)`)
-	javaPackageRegexp = regexp.MustCompile(`(?m)^\s*package\s+([A-Za-z_$][A-Za-z0-9_$.]*)\s*;`)
-	javaImportRegexp = regexp.MustCompile(`(?m)^\s*import\s+([A-Za-z_$][A-Za-z0-9_$.]*)\s*;`)
+	bindToRegistryClassRegexp   = regexp.MustCompile(`(?s)@(?:org\.apache\.camel\.)?BindToRegistry\s*(?:\(\s*(?:"([^"]*)"|[^)]*\bvalue\s*=\s*"([^"]*)")?[^)]*\))?\s*(?:(?:public|protected|private|abstract|final|static|strictfp)\s+)*(?:class|interface|enum|record)\s+([A-Za-z_$][A-Za-z0-9_$]*)\b`)
+	bindToRegistryMethodRegexp  = regexp.MustCompile(`(?s)@(?:org\.apache\.camel\.)?BindToRegistry\s*(?:\(\s*(?:"([^"]*)"|[^)]*\bvalue\s*=\s*"([^"]*)")?[^)]*\))?\s*(?:(?:public|protected|private|abstract|final|static|strictfp|synchronized|native)\s+)*([A-Za-z_$][A-Za-z0-9_$.<>?,\[\] ]*)\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*\(`)
+	bindToRegistryFieldRegexp   = regexp.MustCompile(`(?s)@(?:org\.apache\.camel\.)?BindToRegistry\s*(?:\(\s*(?:"([^"]*)"|[^)]*\bvalue\s*=\s*"([^"]*)")?[^)]*\))?\s*(?:(?:public|protected|private|abstract|final|static|transient|volatile)\s+)*([A-Za-z_$][A-Za-z0-9_$.<>?,\[\] ]*)\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*(?:=|;)`)
+	javaPackageRegexp           = regexp.MustCompile(`(?m)^\s*package\s+([A-Za-z_$][A-Za-z0-9_$.]*)\s*;`)
+	javaImportRegexp            = regexp.MustCompile(`(?m)^\s*import\s+([A-Za-z_$][A-Za-z0-9_$.]*)\s*;`)
 )
 
 // JavaSourceInspector inspects Java DSL spec.
