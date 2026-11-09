@@ -25,7 +25,7 @@ spec:
       from:
         steps:
         - to: log:info
-        uri: aws2-sqs:my-queue?region=us-east-1&accessKey=test&secretKey=test&overrideEndpoint=true&uriEndpointOverride=http://elasticmq:9324&autoCreateQueue=true
+        uri: aws2-sqs:my-queue?region=us-east-1&accessKey=test&secretKey=test&overrideEndpoint=true&uriEndpointOverride=http://elasticmq.%%%.svc:9324&autoCreateQueue=true
   traits:
     keda:
       enabled: true
@@ -39,7 +39,7 @@ spec:
           metadata:
             queueURL: my-queue
             awsRegion: us-east-1
-            awsEndpoint: http://elasticmq:9324
+            awsEndpoint: http://elasticmq.%%%.svc:9324
             queueLength: "1"
           secrets:
             - name: aws-sqs-credentials-secret

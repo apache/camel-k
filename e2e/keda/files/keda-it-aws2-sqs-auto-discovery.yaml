@@ -25,7 +25,7 @@ spec:
       from:
         steps:
         - to: log:info
-        uri: aws2-sqs:my-queue?region=us-east-1&accessKey=test&secretKey=test&overrideEndpoint=true&uriEndpointOverride=http://elasticmq:9324
+        uri: aws2-sqs:my-queue?region=us-east-1&accessKey=test&secretKey=test&overrideEndpoint=true&uriEndpointOverride=http://elasticmq.%%%.svc:9324
   traits:
     keda:
       enabled: true

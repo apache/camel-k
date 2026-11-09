@@ -27,4 +27,4 @@ spec:
         steps:
         - setBody:
             constant: "Body is null"
-        - to: aws2-sqs:my-queue?region=us-east-1&accessKey=test&secretKey=test&overrideEndpoint=true&uriEndpointOverride=http://elasticmq:9324&autoCreateQueue=true
+        - to: aws2-sqs:my-queue?region=us-east-1&accessKey=test&secretKey=test&overrideEndpoint=true&uriEndpointOverride=http://elasticmq.%%%.svc:9324&autoCreateQueue=true

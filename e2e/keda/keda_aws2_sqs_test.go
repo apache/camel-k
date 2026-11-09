@@ -22,6 +22,9 @@ package keda
 
 import (
 	"context"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -33,15 +36,17 @@ import (
 )
 
 func TestAws2SqsKedaAutoscale(t *testing.T) {
-	WithExistingNamedTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/elasticmq-ephemeral.yaml", "-n", ns))
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		elasticmqFile := cloneAndReplaceNamespace(t, "files/elasticmq-ephemeral.yaml", ns)
+		ExpectExecSucceed(t, g, Kubectl("apply", "-f", elasticmqFile, "-n", ns))
 		ExpectExecSucceed(t, g, Kubectl("rollout", "status", "deployment", "elasticmq", "-n", ns, "--timeout=180s"))
 
 		t.Run("Serverless AWS SQS Autoscale", func(t *testing.T) {
 			consumerName := "keda-it-aws2-sqs-to-log-auto"
 			producerName := "timer-to-aws2-sqs"
 
-			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/keda-it-aws2-sqs-to-log-auto.yaml", "-n", ns))
+			consumerFile := cloneAndReplaceNamespace(t, "files/keda-it-aws2-sqs-to-log-auto.yaml", ns)
+			ExpectExecSucceed(t, g, Kubectl("apply", "-f", consumerFile, "-n", ns))
 
 			// Start consumer
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, consumerName, v1.IntegrationConditionReady), TestTimeoutLong).
@@ -54,7 +59,8 @@ func TestAws2SqsKedaAutoscale(t *testing.T) {
 				Should(PointTo(BeNumerically("==", 0)))
 
 			// Start producer to generate traffic
-			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/timer-to-aws2-sqs.yaml", "-n", ns))
+			producerFile := cloneAndReplaceNamespace(t, "files/timer-to-aws2-sqs.yaml", ns)
+			ExpectExecSucceed(t, g, Kubectl("apply", "-f", producerFile, "-n", ns))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, producerName, v1.IntegrationConditionReady), TestTimeoutLong).
 				Should(Equal(corev1.ConditionTrue))
 
@@ -76,16 +82,17 @@ func TestAws2SqsKedaAutoscale(t *testing.T) {
 			ExpectExecSucceed(t, g, Kubectl("delete", "it", "--all", "-n", ns))
 		})
 
-		ExpectExecSucceed(t, g, Kubectl("delete", "-f", "files/elasticmq-ephemeral.yaml", "-n", ns))
-	}, "keda")
+		ExpectExecSucceed(t, g, Kubectl("delete", "-f", elasticmqFile, "-n", ns))
+	})
 }
 
 func TestAws2SqsKedaAutoDiscovery(t *testing.T) {
-	WithExistingNamedTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		t.Run("Auto-discovery AWS SQS", func(t *testing.T) {
 			integrationName := "keda-aws2-sqs-auto-discovery"
 
-			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/keda-it-aws2-sqs-auto-discovery.yaml", "-n", ns))
+			itFile := cloneAndReplaceNamespace(t, "files/keda-it-aws2-sqs-auto-discovery.yaml", ns)
+			ExpectExecSucceed(t, g, Kubectl("apply", "-f", itFile, "-n", ns))
 
 			// Wait for ScaledObject
 			g.Eventually(ScaledObject(t, ctx, ns, integrationName), TestTimeoutMedium).
@@ -98,9 +105,27 @@ func TestAws2SqsKedaAutoDiscovery(t *testing.T) {
 			g.Expect(scaledObj.Spec.Triggers[0].Type).To(Equal("aws-sqs-queue"))
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["queueURL"]).To(Equal("my-queue"))
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["awsRegion"]).To(Equal("us-east-1"))
-			g.Expect(scaledObj.Spec.Triggers[0].Metadata["awsEndpoint"]).To(Equal("http://elasticmq:9324"))
+			g.Expect(scaledObj.Spec.Triggers[0].Metadata["awsEndpoint"]).To(Equal("http://elasticmq." + ns + ".svc:9324"))
 
 			ExpectExecSucceed(t, g, Kubectl("delete", "it", integrationName, "-n", ns))
 		})
-	}, "keda")
+	})
+}
+
+// cloneAndReplaceNamespace clones a fixture and replaces %%% with the test namespace.
+func cloneAndReplaceNamespace(t *testing.T, srcPath, namespace string) string {
+	t.Helper()
+
+	tempDir := t.TempDir()
+	tempPath := filepath.Join(tempDir, filepath.Base(srcPath))
+
+	content, err := os.ReadFile(srcPath)
+	if err != nil {
+		t.Fatalf("failed to read src file: %v", err)
+	}
+	updated := strings.ReplaceAll(string(content), "%%%", namespace)
+	if err := os.WriteFile(tempPath, []byte(updated), 0644); err != nil {
+		t.Fatalf("failed to write dst file: %v", err)
+	}
+	return tempPath
 }
