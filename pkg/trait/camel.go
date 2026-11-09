@@ -142,7 +142,7 @@ func (t *camelTrait) Apply(e *Environment) error {
 	return nil
 }
 
-//nolint:nestif
+//nolint:gocognit,nestif
 func (t *camelTrait) loadOrCreateCatalog(e *Environment) error {
 	catalogNamespace := e.DetermineCatalogNamespace()
 	if catalogNamespace == "" {

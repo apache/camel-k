@@ -406,6 +406,7 @@ func (t *knativeTrait) isSinkBindingAllowed(e *Environment) bool {
 	return true
 }
 
+//nolint:gocognit
 func (t *knativeTrait) configureSinkBinding(e *Environment, env *knativeapi.CamelEnvironment) error {
 	if !ptr.Deref(t.SinkBinding, false) {
 		return nil

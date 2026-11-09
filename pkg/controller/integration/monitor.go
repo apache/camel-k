@@ -496,7 +496,7 @@ func arePodsFailingStatuses(integration *v1.Integration, pendingPods []corev1.Po
 // probeReadiness calls the readiness probes of the non-ready Pods directly to retrieve insights from the Camel runtime.
 // The func return the number of readyPods, the success of the probe and any error may have happened during its execution.
 //
-//nolint:staticcheck
+//nolint:gocognit,staticcheck
 func (action *monitorAction) probeReadiness(ctx context.Context, environment *trait.Environment, integration *v1.Integration, pods []corev1.Pod) (int32, bool, error) {
 	// as a default we assume the Integration is Ready
 	readyCondition := v1.IntegrationCondition{

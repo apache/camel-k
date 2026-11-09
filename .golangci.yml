@@ -21,7 +21,6 @@ run:
 linters:
   default: all
   disable:
-    - cyclop
     - depguard
     - err113
     - exhaustive
@@ -31,8 +30,6 @@ linters:
     - funlen
     - gochecknoglobals
     - gochecknoinits
-    - gocognit
-    - gocyclo
     - godox
     - ireturn
     - lll
@@ -47,11 +44,17 @@ linters:
     - wsl_v5
     - gomodguard
   settings:
+    cyclop:
+      max-complexity: 30
+    gocognit:
+      min-complexity: 30
     goconst:
       min-len: 4
       min-occurrences: 10
       ignore-calls: true
       numbers: false
+    gocyclo:
+      min-complexity: 30
     lll:
       line-length: 170
     mnd:

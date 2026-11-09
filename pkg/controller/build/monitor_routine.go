@@ -98,7 +98,7 @@ func (action *monitorRoutineAction) Handle(ctx context.Context, build *v1.Build)
 	return nil, nil
 }
 
-//nolint:nestif
+//nolint:gocognit,nestif
 func (action *monitorRoutineAction) runBuild(ctx context.Context, build *v1.Build) {
 	defer routines.Delete(build.Name)
 

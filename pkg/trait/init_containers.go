@@ -62,6 +62,7 @@ func newInitContainersTrait() Trait {
 	}
 }
 
+//nolint:gocognit
 func (t *initContainersTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil || !e.IntegrationInRunningPhases() {
 		return false, nil, nil
