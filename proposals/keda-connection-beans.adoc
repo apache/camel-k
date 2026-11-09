@@ -4,7 +4,7 @@ authors:
   - "@knockknock10"
 creation-date: 2026-10-25
 last-updated: 2026-11-08
-status: draft
+status: implementable
 see-also:
   - https://github.com/apache/camel-k/issues/6910
   - https://github.com/apache/camel-k/pull/6893
