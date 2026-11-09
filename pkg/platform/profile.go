@@ -20,11 +20,12 @@ package platform
 import (
 	"context"
 
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-
+	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
 // ApplyIntegrationProfile resolves integration profile from given object.
@@ -38,11 +39,40 @@ func ApplyIntegrationProfile(ctx context.Context, c k8sclient.Reader, o k8sclien
 }
 
 // findIntegrationProfile finds profile from given resource annotations
-// and resolves the profile in given resource namespace.
+// and resolves the profile in given resource namespace, falling back to
+// namespace annotation, "default" profile, or operator defaults.
 func findIntegrationProfile(ctx context.Context, c k8sclient.Reader, o k8sclient.Object) (*v1.IntegrationProfile, error) {
+	// 1. User provided profile (via annotation on the resource)
 	if profileResource := kubernetes.GetIntegrationProfileResource(o); profileResource != "" {
 		return kubernetes.GetIntegrationProfile(ctx, c, profileResource)
 	}
 
+	namespace := o.GetNamespace()
+
+	// 2. Namespace annotated profile (via namespace annotation)
+	if namespace != "" {
+		var ns corev1.Namespace
+		err := c.Get(ctx, k8sclient.ObjectKey{Name: namespace}, &ns)
+		if err == nil {
+			if profileName := v1.GetAnnotation(v1.IntegrationProfileAnnotation, &ns); profileName != "" {
+				return kubernetes.GetIntegrationProfile(ctx, c, namespace+"/"+profileName)
+			}
+		} else if !k8serrors.IsNotFound(err) && !k8serrors.IsForbidden(err) && !k8serrors.IsUnauthorized(err) {
+			return nil, err
+		}
+	}
+
+	// 3. "default" profile in the same namespace
+	if namespace != "" {
+		profile, err := kubernetes.GetIntegrationProfile(ctx, c, namespace+"/"+v1.DefaultIntegrationProfileName)
+		if err == nil {
+			return profile, nil
+		}
+		if !k8serrors.IsNotFound(err) {
+			return nil, err
+		}
+	}
+
+	// 4. Default operator configuration (no profile found)
 	return nil, nil
 }
