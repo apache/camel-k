@@ -229,3 +229,7 @@ func LookupService(ctx context.Context, c client.Client, ns string, name string)
 
 	return &svc, nil
 }
+
+func LookupNamespace(ctx context.Context, c client.Client, name string) (*corev1.Namespace, error) {
+	return c.CoreV1().Namespaces().Get(ctx, name, metav1.GetOptions{})
+}
