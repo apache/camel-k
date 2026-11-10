@@ -367,9 +367,12 @@ func TestXMLBeanDefinitions(t *testing.T) {
 	assert.Equal(t, "serviceClient", meta.Beans[0].Name)
 	assert.Equal(t, "org.example.ServiceClient", meta.Beans[0].Type)
 	assert.Equal(t, map[string]string{
-		"host":   "api.internal",
-		"port":   "5672",
-		"tenant": "${SERVICE_TENANT}",
+		"host":       "api.internal",
+		"port":       "5672",
+		"tenant":     "${SERVICE_TENANT}",
+		"username":   "admin",
+		"password":   "admin",
+		"endpointUri": "https://admin:secret@api.internal:8443",
 	}, meta.Beans[0].Properties)
 	assert.Equal(t, []string{"timer:tick"}, meta.FromURIs)
 }
@@ -408,6 +411,8 @@ func TestCamelXMLBeanDefinitions(t *testing.T) {
 	assert.Equal(t, map[string]string{
 		"host":          "api.internal",
 		"port":          "5672",
+		"password":      "secret",
+		"endpointUri":   "https://user:secret@api.internal:8443",
 		"nested.field1": "flat-value",
 	}, meta.Beans[0].Properties)
 	assert.Equal(t, []string{"timer:tick"}, meta.FromURIs)
