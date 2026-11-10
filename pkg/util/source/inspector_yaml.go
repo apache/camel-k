@@ -103,7 +103,7 @@ func (i YAMLInspector) parseBeans(content any, meta *Metadata) {
 					continue
 				}
 				key = strings.TrimSpace(key)
-				if key == "" || isSensitiveBeanProperty(key) {
+				if key == "" {
 					continue
 				}
 				if value, ok := scalarBeanProperty(rawValue); ok {
