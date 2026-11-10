@@ -180,15 +180,13 @@ func parseXMLBeanDefinition(decoder *xml.Decoder, element xml.StartElement, meta
 		Type:       beanType,
 		Properties: make(map[string]string),
 	}
-	properties := append([]xmlBeanProperty(nil), raw.Properties...)
-	properties = append(properties, raw.PropertySet.Properties...)
-	for _, property := range properties {
+	addProperty := func(property xmlBeanProperty) {
 		key := strings.TrimSpace(property.Name)
 		if key == "" {
 			key = strings.TrimSpace(property.Key)
 		}
 		if key == "" {
-			continue
+			return
 		}
 
 		value := property.Value
@@ -196,11 +194,17 @@ func parseXMLBeanDefinition(decoder *xml.Decoder, element xml.StartElement, meta
 			value = property.NestedValue
 		}
 		if value == "" {
-			continue
+			return
 		}
 		if scalar, ok := scalarBeanProperty(value); ok {
 			definition.Properties[key] = scalar
 		}
+	}
+	for _, property := range raw.Properties {
+		addProperty(property)
+	}
+	for _, property := range raw.PropertySet.Properties {
+		addProperty(property)
 	}
 
 	meta.Beans = append(meta.Beans, definition)
