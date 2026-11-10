@@ -926,7 +926,7 @@ func TestYAMLBeanDefinitions(t *testing.T) {
         tenant: "${API_TENANT}"
         username: admin
         password: admin
-        apiKey: should-not-be-retained
+        apiKey: configured-key
         nested:
           enabled: true
         endpointUri: https://admin:secret@api.internal:8443
@@ -951,10 +951,15 @@ func TestYAMLBeanDefinitions(t *testing.T) {
 		assert.Equal(t, "apiClient", meta.Beans[0].Name)
 		assert.Equal(t, "org.example.ApiClient", meta.Beans[0].Type)
 		assert.Equal(t, map[string]string{
-			"host":    "api.internal",
-			"port":    "5672",
-			"enabled": "true",
-			"tenant":  "${API_TENANT}",
+			"host":              "api.internal",
+			"port":              "5672",
+			"enabled":           "true",
+			"tenant":            "${API_TENANT}",
+			"username":          "admin",
+			"password":          "admin",
+			"apiKey":            "configured-key",
+			"endpointUri":       "https://admin:secret@api.internal:8443",
+			"endpointWithToken": "https://api.internal?token=secret",
 		}, meta.Beans[0].Properties)
 		assert.Equal(t, "metricsRegistry", meta.Beans[1].Name)
 		assert.Equal(t, "org.example.MetricsRegistry", meta.Beans[1].Type)
