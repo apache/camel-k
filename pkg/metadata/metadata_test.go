@@ -21,32 +21,64 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
-	src "github.com/apache/camel-k/v2/pkg/util/source"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
 )
 
-func TestMergeBeanDefinitions(t *testing.T) {
-	first := src.NewMetadata()
-	first.Beans = []src.BeanDefinition{
+func TestExtractAllMergesBeanDefinitionsFromYAMLAndXML(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	sources := []v1.SourceSpec{
 		{
-			Name:       "inventoryDataSource",
-			Type:       "org.example.InventoryDataSource",
-			Properties: map[string]string{"host": "db.internal"},
+			DataSpec: v1.DataSpec{
+				Name: "clients.yaml",
+				Content: `
+- beans:
+    - name: yamlClient
+      type: com.example.YamlClient
+      properties:
+        endpoint: https://yaml.example
+        timeout: 30
+`,
+			},
+			Language: v1.LanguageYaml,
 		},
-	}
-	second := src.NewMetadata()
-	second.Beans = []src.BeanDefinition{
 		{
-			Name:       "metricsRegistry",
-			Type:       "com.example.MetricsRegistry",
-			Properties: map[string]string{"host": "another-db.internal"},
+			DataSpec: v1.DataSpec{
+				Name: "clients.xml",
+				Content: `
+<camel>
+  <bean name="xmlClient" type="com.example.XMLClient">
+    <properties>
+      <property key="endpoint" value="https://xml.example"/>
+      <property key="timeout" value="60"/>
+    </properties>
+  </bean>
+</camel>
+`,
+			},
+			Language: v1.LanguageXML,
 		},
 	}
 
-	merged := merge(first, second)
+	meta, err := ExtractAll(catalog, sources)
+	require.NoError(t, err)
 
-	assert.Equal(t, []src.BeanDefinition{
-		first.Beans[0],
-		second.Beans[0],
-	}, merged.Beans)
+	require.Len(t, meta.Beans, 2)
+	assert.Equal(t, "yamlClient", meta.Beans[0].Name)
+	assert.Equal(t, "com.example.YamlClient", meta.Beans[0].Type)
+	assert.Equal(t, map[string]string{
+		"endpoint": "https://yaml.example",
+		"timeout":  "30",
+	}, meta.Beans[0].Properties)
+
+	assert.Equal(t, "xmlClient", meta.Beans[1].Name)
+	assert.Equal(t, "com.example.XMLClient", meta.Beans[1].Type)
+	assert.Equal(t, map[string]string{
+		"endpoint": "https://xml.example",
+		"timeout":  "60",
+	}, meta.Beans[1].Properties)
 }
