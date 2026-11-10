@@ -180,13 +180,14 @@ func parseXMLBeanDefinition(decoder *xml.Decoder, element xml.StartElement, meta
 		Type:       beanType,
 		Properties: make(map[string]string),
 	}
-	properties := append(raw.Properties, raw.PropertySet.Properties...)
+	properties := append([]xmlBeanProperty(nil), raw.Properties...)
+	properties = append(properties, raw.PropertySet.Properties...)
 	for _, property := range properties {
 		key := strings.TrimSpace(property.Name)
 		if key == "" {
 			key = strings.TrimSpace(property.Key)
 		}
-		if key == "" || isSensitiveBeanProperty(key) {
+		if key == "" {
 			continue
 		}
 
