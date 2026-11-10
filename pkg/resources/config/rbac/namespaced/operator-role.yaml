@@ -204,13 +204,6 @@ rules:
   - get
   - list
   - watch
-- apiGroups:
-  - storage.k8s.io
-  resources:
-  - storageclasses
-  verbs:
-  - get
-  - list
 # Service Accounts (dynamic SA creation)
 - apiGroups:
   - ""
