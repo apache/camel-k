@@ -154,13 +154,6 @@ rules:
   - watch
 # Required by mount trait
 - apiGroups:
-  - storage.k8s.io
-  resources:
-  - storageclasses
-  verbs:
-  - get
-  - list
-- apiGroups:
   - ""
   resources:
   - persistentvolumeclaims

@@ -18,10 +18,13 @@ limitations under the License.
 package resources
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	rbacv1 "k8s.io/api/rbac/v1"
+	"sigs.k8s.io/yaml"
 )
 
 func NoErrorAndNotEmptyBytes(t *testing.T, path string, callable func(path string) ([]byte, error)) {
@@ -127,4 +130,53 @@ func TestCRDResources(t *testing.T) {
 	NoErrorAndNotEmptyBytes(t, "/config/crd/bases/camel.apache.org_integrations.yaml", Resource)
 	NoErrorAndNotEmptyBytes(t, "/config/crd/bases/camel.apache.org_kamelets.yaml", Resource)
 	NoErrorAndNotEmptyBytes(t, "/config/crd/bases/camel.apache.org_pipes.yaml", Resource)
+}
+
+// StorageClass is a cluster scoped resource: a namespaced Role can never grant access to it,
+// so the permission must be granted through a dedicated ClusterRole in every installation mode.
+func TestStorageClassesRBACIsClusterScoped(t *testing.T) {
+	hasStorageClasses := func(rules []rbacv1.PolicyRule) bool {
+		for _, rule := range rules {
+			if slices.Contains(rule.Resources, "storageclasses") {
+				return true
+			}
+		}
+
+		return false
+	}
+
+	var role rbacv1.Role
+	data, err := Resource("config/rbac/namespaced/operator-role.yaml")
+	require.NoError(t, err)
+	require.NoError(t, yaml.Unmarshal(data, &role))
+	assert.False(t, hasStorageClasses(role.Rules), "namespaced operator Role cannot grant access to cluster scoped storageclasses")
+
+	var descopedRole rbacv1.ClusterRole
+	data, err = Resource("config/rbac/descoped/operator-cluster-role.yaml")
+	require.NoError(t, err)
+	require.NoError(t, yaml.Unmarshal(data, &descopedRole))
+	assert.False(t, hasStorageClasses(descopedRole.Rules), "storageclasses must be granted by the common ClusterRole only")
+
+	var clusterRole rbacv1.ClusterRole
+	data, err = Resource("config/rbac/get-storageclasses-cluster-role.yaml")
+	require.NoError(t, err)
+	require.NoError(t, yaml.Unmarshal(data, &clusterRole))
+	require.True(t, hasStorageClasses(clusterRole.Rules))
+	assert.Equal(t, []string{"storage.k8s.io"}, clusterRole.Rules[0].APIGroups)
+	assert.ElementsMatch(t, []string{"get", "list"}, clusterRole.Rules[0].Verbs)
+
+	var binding rbacv1.ClusterRoleBinding
+	data, err = Resource("config/rbac/get-storageclasses-cluster-role-binding.yaml")
+	require.NoError(t, err)
+	require.NoError(t, yaml.Unmarshal(data, &binding))
+	assert.Equal(t, clusterRole.Name, binding.RoleRef.Name)
+	assert.Equal(t, "ClusterRole", binding.RoleRef.Kind)
+	require.Len(t, binding.Subjects, 1)
+	assert.Equal(t, "camel-k-operator", binding.Subjects[0].Name)
+
+	// the common RBAC kustomization must ship them, so they apply to every installation mode
+	kustomization, err := ResourceAsString("config/rbac/kustomization.yaml")
+	require.NoError(t, err)
+	assert.Contains(t, kustomization, "get-storageclasses-cluster-role.yaml")
+	assert.Contains(t, kustomization, "get-storageclasses-cluster-role-binding.yaml")
 }

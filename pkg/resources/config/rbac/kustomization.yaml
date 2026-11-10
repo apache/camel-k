@@ -32,3 +32,5 @@ resources:
 - kamelets-viewer-role-binding.yaml
 - get-namespaces-cluster-role.yaml
 - get-namespaces-cluster-role-binding.yaml
+- get-storageclasses-cluster-role.yaml
+- get-storageclasses-cluster-role-binding.yaml
