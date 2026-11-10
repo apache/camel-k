@@ -29,10 +29,116 @@ import (
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	trait "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 )
+
+// TestIntegrationProfileProperties verifies that a user provided IntegrationProfile
+// (selected through the camel.apache.org/integration-profile.id annotation on the
+// Integration) applies its traits, here the camel.properties trait holding a
+// parameter that we can check on the Integration log.
+// See https://github.com/apache/camel-k/issues/6948
+func TestIntegrationProfileProperties(t *testing.T) {
+	t.Parallel()
+
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		integrationProfile := v1.NewIntegrationProfile(ns, "my-profile")
+		integrationProfile.Spec.Traits = v1.Traits{
+			Camel: &trait.CamelTrait{
+				Properties: []string{"profile.property=profile-annotation-value"},
+			},
+		}
+
+		g.Expect(CreateIntegrationProfile(t, ctx, &integrationProfile)).To(Succeed())
+
+		t.Run("Run sample integration", func(t *testing.T) {
+			name := RandomizedSuffixName("profile")
+			g.Expect(KamelRun(t, ctx, ns,
+				"--name", name,
+				"--annotation", "camel.apache.org/integration-profile.id=my-profile",
+				"files/profile-property.yaml").Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
+				Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).
+				Should(ContainSubstring("The value of profile.property is profile-annotation-value"))
+		})
+	})
+}
+
+// TestIntegrationProfileFromNamespaceAnnotation verifies that an Integration without
+// any explicit profile annotation uses the IntegrationProfile selected by the
+// camel.apache.org/integration-profile.id annotation set on its namespace.
+// See https://github.com/apache/camel-k/issues/6948
+func TestIntegrationProfileFromNamespaceAnnotation(t *testing.T) {
+	t.Parallel()
+
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		integrationProfile := v1.NewIntegrationProfile(ns, "ns-profile")
+		integrationProfile.Spec.Traits = v1.Traits{
+			Camel: &trait.CamelTrait{
+				Properties: []string{"profile.property=namespace-annotation-value"},
+			},
+		}
+
+		g.Expect(CreateIntegrationProfile(t, ctx, &integrationProfile)).To(Succeed())
+
+		namespace := &corev1.Namespace{}
+		g.Expect(TestClient(t).Get(ctx, ctrl.ObjectKey{Name: ns}, namespace)).To(Succeed())
+		if namespace.Annotations == nil {
+			namespace.Annotations = make(map[string]string)
+		}
+		namespace.Annotations[v1.IntegrationProfileAnnotation] = "ns-profile"
+		g.Expect(TestClient(t).Update(ctx, namespace)).To(Succeed())
+
+		t.Run("Run sample integration", func(t *testing.T) {
+			name := RandomizedSuffixName("profile-ns-annotation")
+			g.Expect(KamelRun(t, ctx, ns,
+				"--name", name,
+				"files/profile-property.yaml").Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
+				Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).
+				Should(ContainSubstring("The value of profile.property is namespace-annotation-value"))
+		})
+	})
+}
+
+// TestIntegrationProfileDefault verifies that an Integration without any explicit
+// profile annotation, running in a namespace which is not annotated either, uses
+// the "default" IntegrationProfile when it exists in its own namespace.
+// See https://github.com/apache/camel-k/issues/6776 and
+// https://github.com/apache/camel-k/issues/6948
+func TestIntegrationProfileDefault(t *testing.T) {
+	t.Parallel()
+
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		integrationProfile := v1.NewIntegrationProfile(ns, v1.DefaultIntegrationProfileName)
+		integrationProfile.Spec.Traits = v1.Traits{
+			Camel: &trait.CamelTrait{
+				Properties: []string{"profile.property=default-profile-value"},
+			},
+		}
+
+		g.Expect(CreateIntegrationProfile(t, ctx, &integrationProfile)).To(Succeed())
+
+		t.Run("Run sample integration", func(t *testing.T) {
+			name := RandomizedSuffixName("profile-default")
+			g.Expect(KamelRun(t, ctx, ns,
+				"--name", name,
+				"files/profile-property.yaml").Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
+				Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).
+				Should(ContainSubstring("The value of profile.property is default-profile-value"))
+		})
+	})
+}
 
 func TestIntegrationProfileDependencies(t *testing.T) {
 	t.Parallel()
