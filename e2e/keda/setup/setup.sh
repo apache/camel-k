@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -6,7 +8,7 @@
 # (the "License"); you may not use this file except in compliance with
 # the License.  You may obtain a copy of the License at
 #
-#      http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,28 +16,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ---------------------------------------------------------------------------
-# This integration tests KEDA autoMetadata merge (Case 3):
-# - Kafka trigger is auto-discovered from URI
-# - Additional metadata (lagThreshold) is merged via autoMetadata
 
-apiVersion: camel.apache.org/v1
-kind: Integration
-metadata:
-  name: keda-kafka-auto-metadata
-  namespace: kafka
-spec:
-  sources:
-    - content: |
-        from("kafka:my-topic?brokers=my-cluster-kafka-bootstrap.kafka.svc:9092&groupId=metadata-group")
-          .log("${body}");
-      name: routes.java
-  traits:
-    keda:
-      enabled: true
-      minReplicaCount: 0
-      maxReplicaCount: 1
-      # Extra metadata to merge into auto-discovered kafka trigger
-      autoMetadata:
-        kafka:
-          lagThreshold: "100"
-          activationLagThreshold: "10"
+#### Setup KEDA Operator
+# Installs KEDA operator into 'keda' namespace
+kubectl apply --server-side -f https://github.com/kedacore/keda/releases/download/v2.17.2/keda-2.17.2.yaml
+kubectl rollout status deployment keda-operator -n keda --timeout=180s

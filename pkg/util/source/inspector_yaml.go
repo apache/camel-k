@@ -85,7 +85,7 @@ func (i YAMLInspector) parseDefinition(def map[string]any, meta *Metadata) error
 	return nil
 }
 
-//nolint:nestif
+//nolint:cyclop,gocognit,gocyclo,nestif
 func (i YAMLInspector) parseStep(key string, content any, meta *Metadata) error {
 	switch key {
 	case "bean":

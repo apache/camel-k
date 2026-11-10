@@ -66,20 +66,15 @@ func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
 		return fmt.Errorf("unable to set up field indexer for status.phase: %w", err)
 	}
 
-	r, err := newReconciler(mgr, c)
+	camelMonitorAvailable, err := kubernetes.IsAPIResourceInstalled(c, monitorv1alpha1.SchemeGroupVersion.String(), monitorv1alpha1.AppKind)
 	if err != nil {
 		return err
 	}
 
-	return add(mgr, c, r)
+	return add(mgr, c, newReconciler(mgr, c, camelMonitorAvailable))
 }
 
-func newReconciler(mgr manager.Manager, c client.Client) (reconcile.Reconciler, error) {
-	monitor, err := NewMonitorAction(c)
-	if err != nil {
-		return nil, err
-	}
-
+func newReconciler(mgr manager.Manager, c client.Client, camelMonitorAvailable bool) reconcile.Reconciler {
 	base := []Action{
 		NewPlatformSetupAction(),
 		NewInitializeAction(),
@@ -93,14 +88,14 @@ func newReconciler(mgr manager.Manager, c client.Client) (reconcile.Reconciler, 
 			client:      c,
 			scheme:      mgr.GetScheme(),
 			recorder:    mgr.GetEventRecorder("camel-k-integration-controller"),
-			baseActions: append(append([]Action{}, base...), monitor),
+			baseActions: append(append([]Action{}, base...), NewMonitorAction(camelMonitorAvailable)),
 		},
 		schema.GroupVersionKind{
 			Group:   v1.SchemeGroupVersion.Group,
 			Version: v1.SchemeGroupVersion.Version,
 			Kind:    v1.IntegrationKind,
 		},
-	), nil
+	)
 }
 
 func integrationUpdateFunc(c client.Client, old *v1.Integration, it *v1.Integration) bool {
@@ -459,7 +454,7 @@ func watchCamelMonitorResources(c client.Client, b *builder.Builder) error {
 	}
 	log.Info("CamelMonitor resources installed in the cluster: make sure to assign CamelMonitor RBAC privileges")
 	b.Watches(&monitorv1alpha1.CamelMonitor{}, &handler.EnqueueRequestForObject{},
-		builder.WithPredicates(predicate.Funcs{UpdateFunc: func(event.UpdateEvent) bool { return false }}))
+		builder.WithPredicates(StatusChangedPredicate{}))
 
 	return nil
 }

@@ -32,6 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
@@ -56,6 +57,7 @@ func TestCamelMonitorCondition(t *testing.T) {
 	require.Nil(t, integration.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable))
 
 	monitor := monitorv1alpha1.NewCamelMonitor(integration.Namespace, integration.Name)
+	monitor.Status.Conditions = []metav1.Condition{{Type: "Healthy", Status: metav1.ConditionFalse}}
 	require.NoError(t, c.Create(ctx, &monitor))
 	require.NoError(t, addCamelMonitorCondition(ctx, c, &integration))
 	condition := integration.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable).DeepCopy()
@@ -105,8 +107,7 @@ func TestMonitorActionCachesCamelMonitorAvailability(t *testing.T) {
 			}
 			monitor := monitorv1alpha1.NewCamelMonitor(integration.Namespace, integration.Name)
 			require.NoError(t, c.Create(context.Background(), &monitor))
-			action, err := NewMonitorAction(c)
-			require.NoError(t, err)
+			action := NewMonitorAction(installed)
 			action.InjectClient(c)
 			action.InjectLogger(log.Log)
 			if installed {
@@ -114,6 +115,12 @@ func TestMonitorActionCachesCamelMonitorAvailability(t *testing.T) {
 			} else {
 				enableCamelMonitorDiscovery(t, c)
 			}
+			discoveryRequests := 0
+			c.(*internal.FakeClient).Interface.Discovery().(*fake.FakeDiscovery).PrependReactor("get", "resource", func(k8stesting.Action) (bool, runtime.Object, error) {
+				discoveryRequests++
+
+				return true, nil, errors.New("unexpected discovery during reconciliation")
+			})
 			for range 2 {
 				result, err := action.Handle(context.Background(), integration)
 				require.NoError(t, err)
@@ -126,6 +133,7 @@ func TestMonitorActionCachesCamelMonitorAvailability(t *testing.T) {
 					require.Nil(t, condition)
 				}
 			}
+			require.Zero(t, discoveryRequests)
 		})
 	}
 }
@@ -143,7 +151,7 @@ func TestCamelMonitorOptionalWatch(t *testing.T) {
 	require.ErrorIs(t, watchCamelMonitorResources(c, &builder.Builder{}), lookupErr)
 }
 
-func TestMonitorActionCamelMonitorDiscoveryFailure(t *testing.T) {
+func TestAddCamelMonitorDiscoveryFailure(t *testing.T) {
 	c, err := internal.NewFakeClient()
 	require.NoError(t, err)
 	discovery := enableCamelMonitorDiscovery(t, c)
@@ -151,7 +159,19 @@ func TestMonitorActionCamelMonitorDiscoveryFailure(t *testing.T) {
 	discovery.PrependReactor("get", "resource", func(k8stesting.Action) (bool, runtime.Object, error) {
 		return true, nil, lookupErr
 	})
-	action, err := NewMonitorAction(c)
-	require.ErrorIs(t, err, lookupErr)
-	require.Nil(t, action)
+	require.ErrorIs(t, Add(context.Background(), camelMonitorTestManager{}, c), lookupErr)
+}
+
+type camelMonitorTestManager struct {
+	manager.Manager
+}
+
+func (camelMonitorTestManager) GetFieldIndexer() ctrl.FieldIndexer {
+	return camelMonitorTestFieldIndexer{}
+}
+
+type camelMonitorTestFieldIndexer struct{}
+
+func (camelMonitorTestFieldIndexer) IndexField(context.Context, ctrl.Object, string, ctrl.IndexerFunc) error {
+	return nil
 }

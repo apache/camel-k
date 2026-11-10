@@ -72,16 +72,8 @@ jobs:
     - name: Install Camel Monitor operator
       shell: bash
       run: |
-        go mod download github.com/camel-tooling/camel-monitor-operator
-        monitor_module_dir=$(go list -m -f '{{.Dir}}' github.com/camel-tooling/camel-monitor-operator)
-        monitor_install_dir=$(mktemp -d)
-        trap 'chmod -R u+w "$monitor_install_dir"; rm -rf "$monitor_install_dir"' EXIT
-        cp -r "$monitor_module_dir/install" "$monitor_install_dir/"
-        chmod -R u+w "$monitor_install_dir/install"
-        # Go module archives omit the install/base/config symlink.
-        cp -r "$monitor_module_dir/pkg/resources/config" "$monitor_install_dir/install/base/config"
         kubectl create ns camel
-        kubectl apply -k "$monitor_install_dir/install/overlays/all-namespaces/" --server-side --force-conflicts
+        kubectl apply -k github.com/camel-tooling/camel-monitor-operator/install/overlays/all-namespaces?ref=v1.0.0 --server-side
         kubectl wait --for=condition=Established crd/camelmonitors.camel.apache.org --timeout=60s
         kubectl wait --for=condition=available deployment/camel-monitor-operator -n camel --timeout=60s
 

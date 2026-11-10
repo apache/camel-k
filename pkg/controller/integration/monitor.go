@@ -33,8 +33,6 @@ import (
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/utils/ptr"
 
-	monitorv1alpha1 "github.com/camel-tooling/camel-monitor-operator/pkg/apis/camel/v1alpha1"
-
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -48,13 +46,8 @@ import (
 )
 
 // NewMonitorAction is an action used to monitor manager Integrations.
-func NewMonitorAction(c client.Client) (Action, error) {
-	installed, err := kubernetes.IsAPIResourceInstalled(c, monitorv1alpha1.SchemeGroupVersion.String(), monitorv1alpha1.AppKind)
-	if err != nil {
-		return nil, err
-	}
-
-	return &monitorAction{camelMonitorAvailable: installed}, nil
+func NewMonitorAction(camelMonitorAvailable bool) Action {
+	return &monitorAction{camelMonitorAvailable: camelMonitorAvailable}
 }
 
 type monitorAction struct {
@@ -511,7 +504,7 @@ func arePodsFailingStatuses(integration *v1.Integration, pendingPods []corev1.Po
 // probeReadiness calls the readiness probes of the non-ready Pods directly to retrieve insights from the Camel runtime.
 // The func return the number of readyPods, the success of the probe and any error may have happened during its execution.
 //
-//nolint:staticcheck
+//nolint:gocognit,staticcheck
 func (action *monitorAction) probeReadiness(ctx context.Context, environment *trait.Environment, integration *v1.Integration, pods []corev1.Pod) (int32, bool, error) {
 	// as a default we assume the Integration is Ready
 	readyCondition := v1.IntegrationCondition{

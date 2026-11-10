@@ -14,30 +14,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ---------------------------------------------------------------------------
+
 apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:
-  name: keda-kafkatopic-to-log
-  namespace: kafka
+  name: keda-kafka-auto-discovery
 spec:
   flows:
   - route:
       from:
         steps:
         - to: log:info
-        uri: kafka:my-topic?brokers=my-cluster-kafka-bootstrap.kafka.svc%3A9092&groupId=group-1
+        uri: kafka:my-topic?brokers=my-cluster-kafka-bootstrap.keda.svc:9092&groupId=auto-group
   traits:
     keda:
       enabled: true
       minReplicaCount: 0
       maxReplicaCount: 1
-      cooldownPeriod:  20
+      cooldownPeriod: 20
       pollingInterval: 10
-      triggers:
-        - type: kafka
-          metadata:
-            bootstrapServers: my-cluster-kafka-bootstrap.kafka.svc:9092
-            consumerGroup: group-1
-            topic: my-topic
-            lagThreshold: "10"
-
+      # No triggers specified - auto-discovery should create kafka scaler

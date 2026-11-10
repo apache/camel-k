@@ -14,32 +14,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ---------------------------------------------------------------------------
-# This integration tests KEDA auto-discovery with manual trigger (Case 2):
-# - Manual cron trigger is specified
-# - Kafka trigger should still be auto-discovered (different type)
-# - Result: 2 triggers (cron + kafka)
 
 apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:
-  name: keda-kafka-auto-discovery-with-manual
-  namespace: kafka
+  name: keda-it-pulsar-to-log-auto
 spec:
-  sources:
-    - content: |
-        from("kafka:my-topic?brokers=my-cluster-kafka-bootstrap.kafka.svc:9092&groupId=mixed-group")
-          .log("${body}");
-      name: routes.java
+  flows:
+  - route:
+      from:
+        uri: pulsar:persistent://public/default/my-topic?subscriptionName=my-subscription
+        steps:
+        - to: log:info
   traits:
+    camel:
+      properties:
+        - camel.component.pulsar.service-url=pulsar://pulsar.%%%.svc:6650
     keda:
       enabled: true
       minReplicaCount: 0
-      maxReplicaCount: 2
-      # Manual cron trigger - kafka should still be auto-discovered
-      triggers:
-        - type: cron
-          metadata:
-            timezone: "Etc/UTC"
-            start: "0 * * * *"
-            end: "59 * * * *"
-            desiredReplicas: "1"
+      maxReplicaCount: 1
+      cooldownPeriod: 20
+      pollingInterval: 10

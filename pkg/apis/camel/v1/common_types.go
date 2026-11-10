@@ -36,6 +36,8 @@ const (
 	PlatformSelectorAnnotation = "camel.apache.org/platform.id"
 	// IntegrationProfileAnnotation integration profile id annotation label.
 	IntegrationProfileAnnotation = "camel.apache.org/integration-profile.id"
+	// DefaultIntegrationProfileName is the default name for an IntegrationProfile in a namespace.
+	DefaultIntegrationProfileName = "default"
 	// IntegrationProfileNamespaceAnnotation integration profile namespace annotation label.
 	// NOTE: this is an internal annotation only valid for IntegrationKits and Builds.
 	IntegrationProfileNamespaceAnnotation = "camel.apache.org/integration-profile.namespace"
