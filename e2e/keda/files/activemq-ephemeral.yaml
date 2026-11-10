@@ -41,7 +41,7 @@ spec:
     spec:
       containers:
         - name: activemq
-          image: apache/activemq-classic:latest
+          image: apache/activemq-classic:5.19.2
           env:
             - name: ACTIVEMQ_OPTS
               value: "-Djetty.host=0.0.0.0"
