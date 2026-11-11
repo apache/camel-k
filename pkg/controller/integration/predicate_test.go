@@ -20,6 +20,7 @@ package integration
 import (
 	"testing"
 
+	monitorv1alpha1 "github.com/camel-tooling/camel-monitor-operator/pkg/apis/camel/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -73,4 +74,22 @@ func TestStatusChangedPredicateKnativeService(t *testing.T) {
 
 	assert.False(t, p.Update(event.UpdateEvent{ObjectOld: nil, ObjectNew: same}))
 	assert.False(t, p.Update(event.UpdateEvent{ObjectOld: old, ObjectNew: nil}))
+}
+
+func TestStatusChangedPredicateCamelMonitor(t *testing.T) {
+	p := StatusChangedPredicate{}
+	monitor := monitorv1alpha1.NewCamelMonitor("test", "sample")
+	monitor.Status.Conditions = []metav1.Condition{{Type: "Healthy", Status: metav1.ConditionFalse}}
+
+	assert.True(t, p.Create(event.CreateEvent{Object: &monitor}))
+	assert.True(t, p.Delete(event.DeleteEvent{Object: &monitor}))
+
+	metadataChanged := monitor.DeepCopy()
+	metadataChanged.Labels = map[string]string{"app": "sample"}
+	metadataChanged.Generation++
+	assert.False(t, p.Update(event.UpdateEvent{ObjectOld: &monitor, ObjectNew: metadataChanged}))
+
+	statusChanged := monitor.DeepCopy()
+	statusChanged.Status.Conditions[0].Status = metav1.ConditionTrue
+	assert.True(t, p.Update(event.UpdateEvent{ObjectOld: &monitor, ObjectNew: statusChanged}))
 }

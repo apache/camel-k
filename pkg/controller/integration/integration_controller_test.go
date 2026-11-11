@@ -38,7 +38,7 @@ func TestActions(t *testing.T) {
 		NewBuildCompleteAction(),
 	}
 	reconciler := reconcileIntegration{
-		baseActions: append(append([]Action{}, base...), NewMonitorAction()),
+		baseActions: append(append([]Action{}, base...), NewMonitorAction(false)),
 	}
 
 	actions := reconciler.baseActions

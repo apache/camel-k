@@ -46,12 +46,14 @@ import (
 )
 
 // NewMonitorAction is an action used to monitor manager Integrations.
-func NewMonitorAction() Action {
-	return &monitorAction{}
+func NewMonitorAction(camelMonitorAvailable bool) Action {
+	return &monitorAction{camelMonitorAvailable: camelMonitorAvailable}
 }
 
 type monitorAction struct {
 	baseAction
+
+	camelMonitorAvailable bool
 }
 
 func (action *monitorAction) Name() string {
@@ -138,6 +140,12 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		return integration, err
 	}
 	action.checkTraitAnnotationsDeprecatedNotice(integration)
+
+	if action.camelMonitorAvailable {
+		if err := addCamelMonitorCondition(ctx, action.client, integration); err != nil {
+			return integration, err
+		}
+	}
 
 	return action.monitorPods(ctx, environment, integration)
 }
