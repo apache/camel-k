@@ -34,6 +34,7 @@ This is the list of the groups we are using (please, notice that they can slight
     * advanced (`make test-advanced`)
     * install (`make test-install`)
     * knative (`make test-knative`)
+    * camelmonitor (`make test-camel-monitor`)
     * native (`make test-quarkus-native`)
     * telemetry (`make test-telemetry`)
 
