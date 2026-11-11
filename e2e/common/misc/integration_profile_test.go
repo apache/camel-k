@@ -40,7 +40,6 @@ import (
 // (selected through the camel.apache.org/integration-profile.id annotation on the
 // Integration) applies its traits, here the camel.properties trait holding a
 // parameter that we can check on the Integration log.
-// See https://github.com/apache/camel-k/issues/6948
 func TestIntegrationProfileProperties(t *testing.T) {
 	t.Parallel()
 
@@ -72,7 +71,6 @@ func TestIntegrationProfileProperties(t *testing.T) {
 // TestIntegrationProfileFromNamespaceAnnotation verifies that an Integration without
 // any explicit profile annotation uses the IntegrationProfile selected by the
 // camel.apache.org/integration-profile.id annotation set on its namespace.
-// See https://github.com/apache/camel-k/issues/6948
 func TestIntegrationProfileFromNamespaceAnnotation(t *testing.T) {
 	t.Parallel()
 
@@ -111,8 +109,7 @@ func TestIntegrationProfileFromNamespaceAnnotation(t *testing.T) {
 // TestIntegrationProfileDefault verifies that an Integration without any explicit
 // profile annotation, running in a namespace which is not annotated either, uses
 // the "default" IntegrationProfile when it exists in its own namespace.
-// See https://github.com/apache/camel-k/issues/6776 and
-// https://github.com/apache/camel-k/issues/6948
+// See https://github.com/apache/camel-k/issues/6776
 func TestIntegrationProfileDefault(t *testing.T) {
 	t.Parallel()
 
