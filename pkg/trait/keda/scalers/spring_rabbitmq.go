@@ -43,15 +43,17 @@ func (s *SpringRabbitMQScaler) Component() string {
 }
 
 // Map takes the queue from the `queues` parameter. The URI path is the exchange name, which the
-// scaler does not use. The broker address is read from the connection factory bean when it is
-// declared with camel.beans properties; credentials are left to a TriggerAuthentication.
+// scaler does not use. A `host` parameter is used as the broker address as is; otherwise the address is
+// read from the connection factory bean when it is declared with camel.beans properties.
 func (s *SpringRabbitMQScaler) Map(pathValue string, params map[string]string, props map[string]string) (string, map[string]string) {
 	metadata := make(map[string]string)
 	// A KEDA rabbitmq trigger watches a single queue, so a list of queues is left for the user to choose.
 	if v, ok := params["queues"]; ok && v != "" && !strings.Contains(v, ",") {
 		metadata["queueName"] = v
 	}
-	if host := springRabbitMQHost(params, props); host != "" {
+	if v := params["host"]; v != "" {
+		metadata["host"] = v
+	} else if host := springRabbitMQHost(params, props); host != "" {
 		metadata["host"] = host
 	}
 

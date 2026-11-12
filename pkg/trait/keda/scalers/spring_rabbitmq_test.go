@@ -92,6 +92,20 @@ func TestSpringRabbitMQScalerMap(t *testing.T) {
 			},
 		},
 		{
+			name:      "host parameter wins over connection factory bean",
+			pathValue: "orders-exchange",
+			params:    map[string]string{"queues": "orders", "host": "amqp://user:pass@other-rabbitmq:5672/vh"},
+			props: map[string]string{
+				"camel.component.spring-rabbitmq.connection-factory": "#rabbitConnectionFactory",
+				"camel.beans.rabbitConnectionFactory.host":           "my-rabbitmq.ns.svc",
+			},
+			expectedType: "rabbitmq",
+			expectedMeta: map[string]string{
+				"queueName": "orders",
+				"host":      "amqp://user:pass@other-rabbitmq:5672/vh",
+			},
+		},
+		{
 			name:      "default port and virtual host",
 			pathValue: "orders-exchange",
 			params:    map[string]string{"queues": "orders"},
