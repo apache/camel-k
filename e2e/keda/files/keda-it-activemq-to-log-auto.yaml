@@ -33,6 +33,7 @@ spec:
         - camel.component.activemq.broker-url=tcp://my-activemq-hdls-svc.%%%.svc:61616
         - camel.component.activemq.username=admin
         - camel.component.activemq.password=admin
+        - camel.component.activemq.use-pooled-connection=false
     keda:
       enabled: true
       minReplicaCount: 0
