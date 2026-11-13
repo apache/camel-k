@@ -136,7 +136,7 @@ It should not add unrelated Camel endpoint parameters to the KEDA metadata.
 . Add `pkg/trait/keda/scalers/<component>.go`.
 . Define a type that implements `ScaleMapper`.
 . Return the Camel component name from `Component`.
-. In `Map`, translate only relevant Camel URI path and parameter values to the metadata expected by the existing KEDA scaler, and return its scaler type.
+. In `Map`, translate only relevant Camel URI path and parameter values to the metadata expected by the existing KEDA scaler, and return its scaler type. Return an empty scaler type when the endpoint has nothing the scaler can measure; no trigger is then created for it.
 . Register the mapper with `keda.Register` in an `init` function.
 . Add `pkg/trait/keda/scalers/<component>_test.go`.
 
