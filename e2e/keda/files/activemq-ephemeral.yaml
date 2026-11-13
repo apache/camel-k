@@ -1,0 +1,83 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-activemq-credentials-secret
+type: Opaque
+stringData:
+  ACTIVEMQ_USER: admin
+  ACTIVEMQ_PASSWORD: admin
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-activemq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-activemq
+  template:
+    metadata:
+      labels:
+        app: my-activemq
+    spec:
+      containers:
+        - name: activemq
+          image: apache/activemq-classic:5.19.2
+          env:
+            - name: ACTIVEMQ_OPTS
+              value: "-Djetty.host=0.0.0.0"
+            - name: ACTIVEMQ_USER
+              value: "admin"
+            - name: ACTIVEMQ_PASSWORD
+              value: "admin"
+          ports:
+            - containerPort: 61616
+              name: openwire
+            - containerPort: 8161
+              name: console
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+          readinessProbe:
+            tcpSocket:
+              port: 61616
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-activemq-hdls-svc
+spec:
+  selector:
+    app: my-activemq
+  ports:
+    - name: openwire
+      port: 61616
+      targetPort: 61616
+    - name: console
+      port: 8161
+      targetPort: 8161
