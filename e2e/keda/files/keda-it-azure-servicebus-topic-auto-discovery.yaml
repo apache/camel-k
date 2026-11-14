@@ -1,0 +1,43 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+# Azure Service Bus topic trigger is auto-discovered from the consumer URI, with the namespace taken
+# from the component property. No Service Bus namespace is reachable from the test cluster, so only
+# the generated ScaledObject is checked.
+
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: keda-it-azure-servicebus-topic-auto-discovery
+spec:
+  flows:
+  - route:
+      from:
+        uri: azure-servicebus:my-topic?serviceBusType=topic&subscriptionName=my-subscription
+        steps:
+        - to: log:info
+  traits:
+    camel:
+      properties:
+        - camel.component.azure-servicebus.fully-qualified-namespace=my-namespace.servicebus.windows.net
+    keda:
+      enabled: true
+      minReplicaCount: 0
+      maxReplicaCount: 1
+      cooldownPeriod: 20
+      pollingInterval: 10
+      # No triggers specified - auto-discovery should create the azure-servicebus scaler
