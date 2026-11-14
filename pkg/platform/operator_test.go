@@ -118,3 +118,19 @@ func TestGetClientBurst(t *testing.T) {
 		assert.Equal(t, 200, GetClientBurst())
 	})
 }
+
+func TestGetMetricsCertDir(t *testing.T) {
+	t.Run("default empty value", func(t *testing.T) {
+		assert.Empty(t, GetMetricsCertDir())
+	})
+
+	t.Run("custom cert dir", func(t *testing.T) {
+		t.Setenv(OperatorMetricsCertDirEnvVar, "/etc/camel-k/metrics-certs")
+		assert.Equal(t, "/etc/camel-k/metrics-certs", GetMetricsCertDir())
+	})
+
+	t.Run("trims whitespace", func(t *testing.T) {
+		t.Setenv(OperatorMetricsCertDirEnvVar, "  /etc/camel-k/metrics-certs  ")
+		assert.Equal(t, "/etc/camel-k/metrics-certs", GetMetricsCertDir())
+	})
+}

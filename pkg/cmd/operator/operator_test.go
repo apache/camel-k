@@ -31,6 +31,24 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 )
 
+func TestNewMetricsServerOptions(t *testing.T) {
+	t.Run("defaults to HTTP when certDir is empty", func(t *testing.T) {
+		options := newMetricsServerOptions(8080, "")
+
+		assert.Equal(t, ":8080", options.BindAddress)
+		assert.False(t, options.SecureServing)
+		assert.Empty(t, options.CertDir)
+	})
+
+	t.Run("enables HTTPS when certDir is provided", func(t *testing.T) {
+		options := newMetricsServerOptions(9090, "/etc/camel-k/metrics-certs")
+
+		assert.Equal(t, ":9090", options.BindAddress)
+		assert.True(t, options.SecureServing)
+		assert.Equal(t, "/etc/camel-k/metrics-certs", options.CertDir)
+	})
+}
+
 func TestGetNamespacesSelector(t *testing.T) {
 	tests := []struct {
 		name              string
