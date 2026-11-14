@@ -46,7 +46,7 @@ const (
 // ComputeForIntegration a digest of the fields that are relevant for the deployment
 // Produces a digest that can be used as docker image tag.
 //
-//nolint:cyclop,gocognit,gocyclo
+//nolint:gocognit
 func ComputeForIntegration(integration *v1.Integration, configmapVersions []string, secretVersions []string) (string, error) {
 	hash := sha256.New()
 	// Integration version is relevant
