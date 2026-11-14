@@ -31,6 +31,34 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 )
 
+func TestNewMetricsServerOptions(t *testing.T) {
+	t.Run("HTTPS without authentication", func(t *testing.T) {
+		options := newMetricsServerOptions(8080, true, false, "")
+
+		assert.Equal(t, ":8080", options.BindAddress)
+		assert.True(t, options.SecureServing)
+		assert.Nil(t, options.FilterProvider)
+		assert.Empty(t, options.CertDir)
+	})
+
+	t.Run("HTTPS with authentication", func(t *testing.T) {
+		options := newMetricsServerOptions(9090, true, true, "/etc/camel-k/metrics-certs")
+
+		assert.Equal(t, ":9090", options.BindAddress)
+		assert.True(t, options.SecureServing)
+		assert.NotNil(t, options.FilterProvider)
+		assert.Equal(t, "/etc/camel-k/metrics-certs", options.CertDir)
+	})
+
+	t.Run("legacy HTTP", func(t *testing.T) {
+		options := newMetricsServerOptions(7070, false, false, "")
+
+		assert.Equal(t, ":7070", options.BindAddress)
+		assert.False(t, options.SecureServing)
+		assert.Nil(t, options.FilterProvider)
+	})
+}
+
 func TestGetNamespacesSelector(t *testing.T) {
 	tests := []struct {
 		name              string

@@ -49,10 +49,11 @@ func TestMetrics(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		// Install Camel K with the log debug enabled
+		// Install Camel K with the log debug enabled and HTTP metrics compatibility for kube-apiserver proxy scraping
 		InstallOperatorWithConf(t, ctx, g, ns, "", false,
 			map[string]string{
-				"LOG_LEVEL": "debug",
+				"LOG_LEVEL":                     "debug",
+				"KAMEL_OPERATOR_METRICS_SECURE": "false",
 			},
 		)
 
