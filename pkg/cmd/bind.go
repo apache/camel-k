@@ -172,7 +172,6 @@ func (o *bindCmdOptions) validate(cmd *cobra.Command, args []string) error {
 	return trait.ValidateTraits(catalog, extractTraitNames(o.Traits))
 }
 
-//nolint:gocognit
 func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 	client, err := o.GetCmdClient()
 	if err != nil {

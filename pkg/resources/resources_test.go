@@ -171,8 +171,8 @@ func TestStorageClassesRBACIsClusterScoped(t *testing.T) {
 	assert.Equal(t, "camel-k-operator", binding.Subjects[0].Name)
 
 	// the common RBAC kustomization must ship them, so they apply to every installation mode
-	kustomization, err := ResourceAsString("config/rbac/kustomization.yaml")
+	kustomization, err := Resource("config/rbac/kustomization.yaml")
 	require.NoError(t, err)
-	assert.Contains(t, kustomization, "get-storageclasses-cluster-role.yaml")
-	assert.Contains(t, kustomization, "get-storageclasses-cluster-role-binding.yaml")
+	assert.Contains(t, string(kustomization), "get-storageclasses-cluster-role.yaml")
+	assert.Contains(t, string(kustomization), "get-storageclasses-cluster-role-binding.yaml")
 }
