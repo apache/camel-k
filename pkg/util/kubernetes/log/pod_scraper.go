@@ -35,6 +35,9 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+const waitTime = 5 * time.Second
+const waitTimeAfter = 30 * time.Second
+
 var commonUserContainerNames = map[string]bool{
 	// Convention used in Knative and Istio
 	"user-container": true,
@@ -80,7 +83,7 @@ func (s *PodScraper) Start(ctx context.Context) *bufio.Reader {
 func (s *PodScraper) doScrape(ctx context.Context, out *bufio.Writer, clientCloser func() error) {
 	containerName, err := s.waitForPodRunning(ctx, s.namespace, s.podName, s.defaultContainerName)
 	if err != nil {
-		s.handleAndRestart(ctx, err, 5*time.Second, out, clientCloser)
+		s.handleAndRestart(ctx, err, waitTime, out, clientCloser)
 
 		return
 	}
@@ -91,7 +94,7 @@ func (s *PodScraper) doScrape(ctx context.Context, out *bufio.Writer, clientClos
 	}
 	byteReader, err := s.client.CoreV1().Pods(s.namespace).GetLogs(s.podName, &logOptions).Stream(ctx)
 	if err != nil {
-		s.handleAndRestart(ctx, err, 5*time.Second, out, clientCloser)
+		s.handleAndRestart(ctx, err, waitTime, out, clientCloser)
 
 		return
 	}
@@ -114,7 +117,7 @@ func (s *PodScraper) doScrape(ctx context.Context, out *bufio.Writer, clientClos
 		}
 	}
 
-	s.handleAndRestart(ctx, err, 5*time.Second, out, clientCloser)
+	s.handleAndRestart(ctx, err, waitTime, out, clientCloser)
 }
 
 func (s *PodScraper) handleAndRestart(ctx context.Context, err error, wait time.Duration, out *bufio.Writer, clientCloser func() error) {
@@ -198,7 +201,7 @@ func (s *PodScraper) waitForPodRunning(ctx context.Context, namespace string, po
 			} else if e.Type == watch.Deleted || e.Type == watch.Error {
 				return "", errors.New("unable to watch pod " + s.podName)
 			}
-		case <-time.After(30 * time.Second):
+		case <-time.After(waitTimeAfter):
 			return "", errors.New("no state change after 30 seconds for pod " + s.podName)
 		}
 	}

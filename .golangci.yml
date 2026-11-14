@@ -55,26 +55,15 @@ linters:
     lll:
       line-length: 170
     mnd:
+      ignored-numbers:
+        - '2'
+        - '3'
       checks:
         - argument
         - case
         - operation
         - return
         - assign
-      ignored-files:
-        - pkg/cmd/debug.go
-        - pkg/cmd/dump.go
-        - pkg/cmd/get.go
-        - pkg/cmd/log.go
-        - pkg/cmd/kit_get.go
-        - pkg/cmd/run_support.go
-        - pkg/util/kubernetes/log/pod_scraper.go
-        - pkg/util/indentedwriter/writer.go
-      ignored-functions:
-        - ^len\.
-        - ^strings\.SplitN$
-        - ^matchOrEmpty$
-        - ^make$
   exclusions:
     generated: lax
     presets:
@@ -85,6 +74,7 @@ linters:
     rules:
       - linters:
           - nestif
+          - mnd
         path: pkg/cmd
     paths:
       - test_support.go

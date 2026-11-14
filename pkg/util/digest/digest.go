@@ -28,7 +28,6 @@ import (
 	"io"
 	"path/filepath"
 	"sort"
-	"strconv"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util"
@@ -264,9 +263,6 @@ func ComputeForSource(s v1.SourceSpec) (string, error) {
 		return "", err
 	}
 	if _, err := hash.Write([]byte(s.Loader)); err != nil {
-		return "", err
-	}
-	if _, err := hash.Write([]byte(strconv.FormatBool(s.Compression))); err != nil {
 		return "", err
 	}
 

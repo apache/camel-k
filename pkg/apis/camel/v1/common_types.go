@@ -438,8 +438,8 @@ type DataSpec struct {
 	ContentKey string `json:"contentKey,omitempty"`
 	// the content type (tipically text or binary)
 	ContentType string `json:"contentType,omitempty"`
-	// if the content is compressed (base64 encrypted)
-	Compression bool `json:"compression,omitempty"`
+	// Deprecated: no longer in use.
+	DeprecatedCompression bool `json:"compression,omitempty"`
 }
 
 // Language represents a supported language (Camel DSL).

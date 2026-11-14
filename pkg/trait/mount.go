@@ -418,9 +418,6 @@ func (t *mountTrait) addSourcesProperties(e *Environment) {
 			if s.Loader != "" {
 				e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].loader", idx)] = s.Loader
 			}
-			if s.Compression {
-				e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].compressed", idx)] = boolean.TrueString
-			}
 
 			idx++
 		}

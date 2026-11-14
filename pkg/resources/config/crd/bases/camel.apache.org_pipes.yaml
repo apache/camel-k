@@ -216,7 +216,7 @@ spec:
                         more routes to be executed in a certain Camel DSL language.
                       properties:
                         compression:
-                          description: if the content is compressed (base64 encrypted)
+                          description: 'Deprecated: no longer in use.'
                           type: boolean
                         content:
                           description: the source code (plain text)

@@ -35,7 +35,6 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
-	"github.com/apache/camel-k/v2/pkg/util/gzip"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
@@ -50,9 +49,6 @@ func TestServiceWithDefaults(t *testing.T) {
 
 	client, _ := internal.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
-
-	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello");`))
-	require.NoError(t, err)
 
 	environment := Environment{
 		CamelCatalog: catalog,
@@ -70,9 +66,8 @@ func TestServiceWithDefaults(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:        "routes.java",
-							Content:     string(compressedRoute),
-							Compression: true,
+							Name:    "routes.java",
+							Content: `from("netty-http:test").log("hello");`,
 						},
 						Language: v1.LanguageJavaSource,
 					},
@@ -136,9 +131,6 @@ func TestService(t *testing.T) {
 	client, _ := internal.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
-	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
-	require.NoError(t, err)
-
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
@@ -155,9 +147,8 @@ func TestService(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:        "routes.java",
-							Content:     string(compressedRoute),
-							Compression: true,
+							Name:    "routes.java",
+							Content: `from("netty-http:test").log("hello");`,
 						},
 						Language: v1.LanguageJavaSource,
 					},
@@ -291,9 +282,6 @@ func TestServiceWithNodePort(t *testing.T) {
 	client, _ := internal.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
-	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
-	require.NoError(t, err)
-
 	serviceType := traitv1.ServiceTypeNodePort
 	environment := Environment{
 		CamelCatalog: catalog,
@@ -311,9 +299,8 @@ func TestServiceWithNodePort(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:        "routes.java",
-							Content:     string(compressedRoute),
-							Compression: true,
+							Name:    "routes.java",
+							Content: `from("netty-http:test").log("hello");`,
 						},
 						Language: v1.LanguageJavaSource,
 					},
@@ -372,9 +359,6 @@ func TestServiceWithKnativeServiceEnabled(t *testing.T) {
 	client, _ := internal.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
-	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
-	require.NoError(t, err)
-
 	environment := Environment{
 		CamelCatalog:   catalog,
 		Catalog:        traitCatalog,
@@ -392,9 +376,8 @@ func TestServiceWithKnativeServiceEnabled(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:        "routes.java",
-							Content:     string(compressedRoute),
-							Compression: true,
+							Name:    "routes.java",
+							Content: `from("netty-http:test").log("hello");`,
 						},
 						Language: v1.LanguageJavaSource,
 					},
@@ -452,9 +435,6 @@ func TestServicesWithKnativeProfile(t *testing.T) {
 	client, _ := internal.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
-	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
-	require.NoError(t, err)
-
 	environment := Environment{
 		CamelCatalog:   catalog,
 		Catalog:        traitCatalog,
@@ -472,9 +452,8 @@ func TestServicesWithKnativeProfile(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:        "routes.java",
-							Content:     string(compressedRoute),
-							Compression: true,
+							Name:    "routes.java",
+							Content: `from("netty-http:test").log("hello");`,
 						},
 						Language: v1.LanguageJavaSource,
 					},
@@ -524,9 +503,6 @@ func TestServiceAutoConfiguration(t *testing.T) {
 	client, _ := internal.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
-	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
-	require.NoError(t, err)
-
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
@@ -543,9 +519,8 @@ func TestServiceAutoConfiguration(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:        "routes.java",
-							Content:     string(compressedRoute),
-							Compression: true,
+							Name:    "routes.java",
+							Content: `from("netty-http:test").log("hello");`,
 						},
 						Language: v1.LanguageJavaSource,
 					},
@@ -575,9 +550,6 @@ func TestServiceAnnotationsAndLables(t *testing.T) {
 	client, _ := internal.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
-	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
-	require.NoError(t, err)
-
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
@@ -594,9 +566,8 @@ func TestServiceAnnotationsAndLables(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:        "routes.java",
-							Content:     string(compressedRoute),
-							Compression: true,
+							Name:    "routes.java",
+							Content: `from("netty-http:test").log("hello");`,
 						},
 						Language: v1.LanguageJavaSource,
 					},
@@ -652,9 +623,6 @@ func TestServicePorts(t *testing.T) {
 	client, _ := internal.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
-	compressedRoute, err := gzip.CompressBase64([]byte(`from("timer:test").log("hello")`))
-	require.NoError(t, err)
-
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
@@ -671,9 +639,8 @@ func TestServicePorts(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:        "routes.java",
-							Content:     string(compressedRoute),
-							Compression: true,
+							Name:    "routes.java",
+							Content: `from("netty-http:test").log("hello");`,
 						},
 						Language: v1.LanguageJavaSource,
 					},

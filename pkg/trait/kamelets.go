@@ -23,7 +23,6 @@ import (
 	"net/url"
 	"path/filepath"
 	"sort"
-	"strconv"
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
@@ -456,7 +455,6 @@ func initializeConfigmapKameletSource(source v1.SourceSpec, hash, name, namespac
 		Annotations: map[string]string{
 			sourceLanguageAnnotation:            string(source.Language),
 			sourceNameAnnotation:                name,
-			sourceCompressionAnnotation:         strconv.FormatBool(source.Compression),
 			"camel.apache.org/source.generated": boolean.TrueString,
 			"camel.apache.org/source.type":      string(source.Type),
 			"camel.apache.org/source.digest":    hash,

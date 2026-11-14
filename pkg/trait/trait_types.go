@@ -41,10 +41,9 @@ import (
 )
 
 const (
-	sourceLanguageAnnotation    = "camel.apache.org/source.language"
-	sourceLoaderAnnotation      = "camel.apache.org/source.loader"
-	sourceNameAnnotation        = "camel.apache.org/source.name"
-	sourceCompressionAnnotation = "camel.apache.org/source.compression"
+	sourceLanguageAnnotation = "camel.apache.org/source.language"
+	sourceLoaderAnnotation   = "camel.apache.org/source.loader"
+	sourceNameAnnotation     = "camel.apache.org/source.name"
 
 	defaultContainerPortName = "http"
 	// Knative does not want name=http, it only supports http1 (HTTP/1) and h2c (HTTP/2)

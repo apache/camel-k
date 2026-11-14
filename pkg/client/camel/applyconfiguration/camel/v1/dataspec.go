@@ -38,8 +38,8 @@ type DataSpecApplyConfiguration struct {
 	ContentKey *string `json:"contentKey,omitempty"`
 	// the content type (tipically text or binary)
 	ContentType *string `json:"contentType,omitempty"`
-	// if the content is compressed (base64 encrypted)
-	Compression *bool `json:"compression,omitempty"`
+	// Deprecated: no longer in use.
+	DeprecatedCompression *bool `json:"compression,omitempty"`
 }
 
 // DataSpecApplyConfiguration constructs a declarative configuration of the DataSpec type for use with
@@ -106,10 +106,10 @@ func (b *DataSpecApplyConfiguration) WithContentType(value string) *DataSpecAppl
 	return b
 }
 
-// WithCompression sets the Compression field in the declarative configuration to the given value
+// WithDeprecatedCompression sets the DeprecatedCompression field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Compression field is set to the value of the last call.
-func (b *DataSpecApplyConfiguration) WithCompression(value bool) *DataSpecApplyConfiguration {
-	b.Compression = &value
+// If called multiple times, the DeprecatedCompression field is set to the value of the last call.
+func (b *DataSpecApplyConfiguration) WithDeprecatedCompression(value bool) *DataSpecApplyConfiguration {
+	b.DeprecatedCompression = &value
 	return b
 }

@@ -215,7 +215,7 @@ func TestCronFromURI(t *testing.T) {
 				}
 			}
 
-			res := getCronForURIs(filtered)
+			res, _ := getCronForURIs(filtered)
 			gotCron := ""
 			if res != nil {
 				gotCron = res.schedule

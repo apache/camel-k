@@ -195,7 +195,7 @@ func createKamelWithModelineCommand(ctx context.Context, args []string) (*cobra.
 func extractModelineOptions(ctx context.Context, sources []string, cmd *cobra.Command) ([]modeline.Option, error) {
 	opts := make([]modeline.Option, 0)
 
-	resolvedSources, err := source.Resolve(ctx, sources, false, cmd)
+	resolvedSources, err := source.Resolve(ctx, sources, cmd)
 	if err != nil {
 		return opts, fmt.Errorf("failed to resolve sources: %w", err)
 	}

@@ -39,7 +39,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/envvar"
-	"github.com/apache/camel-k/v2/pkg/util/gzip"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
@@ -55,9 +54,6 @@ func TestKnativeService(t *testing.T) {
 
 	client, _ := internal.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
-
-	compressedRoute, err := gzip.CompressBase64([]byte(`from("platform-http:test").log("hello");`))
-	require.NoError(t, err)
 
 	environment := Environment{
 		CamelCatalog: catalog,
@@ -75,9 +71,8 @@ func TestKnativeService(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:        "routes.java",
-							Content:     string(compressedRoute),
-							Compression: true,
+							Name:    "routes.java",
+							Content: `from("platform-http:test").log("hello");`,
 						},
 						Language: v1.LanguageJavaSource,
 					},
@@ -176,7 +171,6 @@ func TestKnativeService(t *testing.T) {
 
 	assert.Equal(t, "file:/etc/camel/sources/routes.java", environment.ApplicationProperties["camel.k.sources[0].location"])
 	assert.Equal(t, "java", environment.ApplicationProperties["camel.k.sources[0].language"])
-	assert.Equal(t, boolean.TrueString, environment.ApplicationProperties["camel.k.sources[0].compressed"])
 	envVarHasValue(t, spec.Containers[0].Env, "CAMEL_K_CONF", filepath.FromSlash("/etc/camel/application.properties"))
 	envVarHasValue(t, spec.Containers[0].Env, "CAMEL_K_CONF_D", filepath.FromSlash("/etc/camel/conf.d"))
 }
@@ -589,9 +583,6 @@ func TestKnativeServiceAuto(t *testing.T) {
 	client, _ := internal.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
-	compressedRoute, err := gzip.CompressBase64([]byte(`from("platform-http:test").log("hello")`))
-	require.NoError(t, err)
-
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
@@ -608,9 +599,8 @@ func TestKnativeServiceAuto(t *testing.T) {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:        "routes.java",
-							Content:     string(compressedRoute),
-							Compression: true,
+							Name:    "routes.java",
+							Content: `from("platform-http:test").log("hello")`,
 						},
 						Language: v1.LanguageJavaSource,
 					},
