@@ -50,7 +50,6 @@ type projectSteps struct {
 	CommonSteps []Step
 }
 
-//nolint:mnd
 var Project = projectSteps{
 	CleanUpBuildDir:         NewStep(ProjectGenerationPhase-1, cleanUpBuildDir),
 	GenerateJavaKeystore:    NewStep(ProjectGenerationPhase, generateJavaKeystore),

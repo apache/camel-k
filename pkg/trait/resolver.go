@@ -22,7 +22,6 @@ import (
 	"fmt"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/util/gzip"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 
 	corev1 "k8s.io/api/core/v1"
@@ -66,17 +65,6 @@ func resolve(data *v1.DataSpec, mapLookup func(string) (*corev1.ConfigMap, error
 		}
 		data.Content = cm.Data[key]
 		data.ContentRef = ""
-	}
-
-	if data.Compression {
-		cnt := []byte(data.Content)
-		var uncompressed []byte
-		var err error
-		if uncompressed, err = gzip.UncompressBase64(cnt); err != nil {
-			return fmt.Errorf("error while uncompressing data: %w", err)
-		}
-		data.Compression = false
-		data.Content = string(uncompressed)
 	}
 
 	return nil

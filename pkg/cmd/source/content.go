@@ -24,8 +24,6 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
-
-	"github.com/apache/camel-k/v2/pkg/util/gzip"
 )
 
 const (
@@ -34,15 +32,6 @@ const (
 	// Kilobyte represent the related unit.
 	Kilobyte = 1 << 10
 )
-
-func CompressToString(content []byte) (string, error) {
-	bytes, err := gzip.CompressBase64(content)
-	if err != nil {
-		return "", err
-	}
-
-	return string(bytes), nil
-}
 
 func loadContentHTTP(ctx context.Context, u fmt.Stringer) ([]byte, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)

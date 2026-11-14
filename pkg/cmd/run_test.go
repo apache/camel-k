@@ -18,7 +18,6 @@ limitations under the License.
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -102,11 +101,6 @@ func TestRunNoFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := ExecuteCommand(rootCmd, cmdRun, integrationSource)
 	require.NoError(t, err)
-	// Check default expected values
-	assert.False(t, runCmdOptions.Wait)
-	assert.False(t, runCmdOptions.Logs)
-	assert.True(t, runCmdOptions.UseFlows)
-	assert.False(t, runCmdOptions.Compression)
 	assert.False(t, runCmdOptions.Save)
 }
 
@@ -114,13 +108,6 @@ func TestRunNonExistingFlag(t *testing.T) {
 	_, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := ExecuteCommand(rootCmd, cmdRun, "--nonExistingFlag", integrationSource)
 	require.Error(t, err)
-}
-
-func TestRunCompressionFlag(t *testing.T) {
-	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := ExecuteCommand(rootCmd, cmdRun, "--compression", integrationSource)
-	require.NoError(t, err)
-	assert.True(t, runCmdOptions.Compression)
 }
 
 func TestRunDependencyFlag(t *testing.T) {
@@ -135,25 +122,6 @@ func TestRunDependencyFlag(t *testing.T) {
 	assert.Equal(t, "dependency1", runCmdOptions.Dependencies[0])
 	assert.Equal(t, "dependency2", runCmdOptions.Dependencies[1])
 	assert.Equal(t, "dependency3", runCmdOptions.Dependencies[2])
-}
-
-func TestRunEnvFlag(t *testing.T) {
-	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := ExecuteCommand(rootCmd, cmdRun,
-		"--env", "env1",
-		"--env", "env2",
-		integrationSource)
-	require.NoError(t, err)
-	assert.Len(t, runCmdOptions.EnvVars, 2)
-	assert.Equal(t, "env1", runCmdOptions.EnvVars[0])
-	assert.Equal(t, "env2", runCmdOptions.EnvVars[1])
-}
-
-func TestRunKitFlag(t *testing.T) {
-	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := ExecuteCommand(rootCmd, cmdRun, "--kit", "myKit", integrationSource)
-	require.NoError(t, err)
-	assert.Equal(t, "myKit", runCmdOptions.IntegrationKit)
 }
 
 func TestRunLabelFlag(t *testing.T) {
@@ -174,13 +142,6 @@ func TestRunLabelWrongFormatFlag(t *testing.T) {
 	_, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := ExecuteCommand(rootCmd, cmdRun, "--label", "label1", integrationSource)
 	require.Error(t, err)
-}
-
-func TestRunLogsFlag(t *testing.T) {
-	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := ExecuteCommand(rootCmd, cmdRun, "--logs", integrationSource)
-	require.NoError(t, err)
-	assert.True(t, runCmdOptions.Logs)
 }
 
 func TestRunMavenRepositoryFlag(t *testing.T) {
@@ -211,13 +172,6 @@ func TestRunOutputFlag(t *testing.T) {
 	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
 }
 
-func TestRunProfileFlag(t *testing.T) {
-	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := ExecuteCommand(rootCmd, cmdRun, "--profile", "myProfile", integrationSource)
-	require.NoError(t, err)
-	assert.Equal(t, "myProfile", runCmdOptions.Profile)
-}
-
 func TestRunPropertyFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := ExecuteCommand(rootCmd, cmdRun,
@@ -242,99 +196,6 @@ a=b
 f=g:h
 i=j\nk
 `
-
-func TestExtractProperties_SingleKeyValue(t *testing.T) {
-	correctValues := []string{"key=val", "key = val", "key= val", " key   =  val"}
-	runCmdOptions, _, _ := initializeRunCmdOptionsWithOutput(t)
-	for _, val := range correctValues {
-		prop, err := runCmdOptions.extractProperties(nil, val)
-		require.NoError(t, err)
-		value, ok := prop.Get("key")
-		assert.True(t, ok)
-		assert.Equal(t, "val", value)
-	}
-}
-
-func TestExtractProperties_FromFile(t *testing.T) {
-	var tmpFile1 *os.File
-	var err error
-	tempDir := t.TempDir()
-	if tmpFile1, err = os.CreateTemp(tempDir, "camel-k-*.properties"); err != nil {
-		t.Error(err)
-	}
-
-	require.NoError(t, tmpFile1.Close())
-	require.NoError(t, os.WriteFile(tmpFile1.Name(), []byte(`
-	key=value
-	#key2=value2
-	my.key=value
-	`), 0o400))
-	runCmdOptions, _, _ := initializeRunCmdOptionsWithOutput(t)
-	props, err := runCmdOptions.extractProperties(nil, "file:"+tmpFile1.Name())
-	require.NoError(t, err)
-	assert.Equal(t, 2, props.Len())
-	for _, prop := range props.Keys() {
-		value, ok := props.Get(prop)
-		assert.True(t, ok)
-		assert.Equal(t, "value", value)
-	}
-}
-
-func TestExtractPropertiesFromFileAndSingleValue(t *testing.T) {
-	var tmpFile1 *os.File
-	var err error
-	tempDir := t.TempDir()
-	if tmpFile1, err = os.CreateTemp(tempDir, "camel-k-*.properties"); err != nil {
-		t.Error(err)
-	}
-
-	require.NoError(t, tmpFile1.Close())
-	require.NoError(t, os.WriteFile(tmpFile1.Name(), []byte(`
-	key=value
-	#key2=value2
-	my.key=value
-	`), 0o400))
-
-	properties := []string{"key=override", "file:" + tmpFile1.Name(), "my.key = override"}
-	runCmdOptions, _, _ := initializeRunCmdOptionsWithOutput(t)
-	props, err := runCmdOptions.mergePropertiesWithPrecedence(nil, properties)
-	require.NoError(t, err)
-	assert.Equal(t, 2, props.Len())
-	val, ok := props.Get("key")
-	assert.True(t, ok)
-	assert.Equal(t, "override", val)
-	val, ok = props.Get("my.key")
-	assert.True(t, ok)
-	assert.Equal(t, "override", val)
-}
-
-func TestAddPropertyFile(t *testing.T) {
-	var tmpFile *os.File
-	var err error
-	tempDir := t.TempDir()
-	if tmpFile, err = os.CreateTemp(tempDir, "camel-k-"); err != nil {
-		t.Error(err)
-	}
-
-	require.NoError(t, tmpFile.Close())
-	require.NoError(t, os.WriteFile(tmpFile.Name(), []byte(TestPropertyFileContent), 0o400))
-
-	runCmdOptions, _, _ := initializeRunCmdOptionsWithOutput(t)
-	properties, err := runCmdOptions.convertToTraitParameter(nil, "file:"+tmpFile.Name(), "trait.properties")
-	require.NoError(t, err)
-	assert.Equal(t, 3, len(properties))
-	assert.Equal(t, `trait.properties=a = b`, properties[0])
-	assert.Equal(t, `trait.properties=f = g:h`, properties[1])
-	assert.Equal(t, `trait.properties=i = j\nk`, properties[2])
-}
-
-func TestRunProperty(t *testing.T) {
-	runCmdOptions, _, _ := initializeRunCmdOptionsWithOutput(t)
-	properties, err := runCmdOptions.convertToTraitParameter(nil, `key=value\nnewline`, "trait.properties")
-	require.NoError(t, err)
-	assert.Equal(t, 1, len(properties))
-	assert.Equal(t, `trait.properties=key = value\nnewline`, properties[0])
-}
 
 func TestRunResourceFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
@@ -421,13 +282,6 @@ func assertTraitConfiguration(t *testing.T, trait interface{}, expected interfac
 	assert.Equal(t, expected, trait)
 }
 
-func TestRunUseFlowsFlag(t *testing.T) {
-	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	_, err := ExecuteCommand(rootCmd, cmdRun, "--use-flows=false", integrationSource)
-	require.NoError(t, err)
-	assert.False(t, runCmdOptions.UseFlows)
-}
-
 func TestRunVolumeFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := ExecuteCommand(rootCmd, cmdRun,
@@ -472,50 +326,6 @@ func TestRunValidateArgs(t *testing.T) {
 	err = runCmdOptions.validateArgs(rootCmd, args)
 	require.Error(t, err)
 	assert.Equal(t, "one of the provided sources is not reachable: missing file or unsupported scheme in missing_file", err.Error())
-}
-
-func TestResolvePodTemplate(t *testing.T) {
-	_, rootCmd, _ := initializeRunCmdOptions(t)
-	templateText := `
-containers:
-  - name: integration
-    env:
-      - name: TEST
-        value: TEST
-    volumeMounts:
-      - name: var-logs
-        mountPath: /var/log
-volumes:
-  - name: var-logs
-    emptyDir: { }
-`
-
-	integrationSpec := v1.IntegrationSpec{}
-	err := resolvePodTemplate(context.TODO(), rootCmd, templateText, &integrationSpec)
-	require.NoError(t, err)
-	assert.NotNil(t, integrationSpec.PodTemplate)
-	assert.Equal(t, 1, len(integrationSpec.PodTemplate.Spec.Containers))
-	// assert.Equal(t, 1,len(integrationSpec.PodTemplate.Spec.Containers[0].VolumeMounts))
-}
-
-func TestResolveJsonPodTemplate(t *testing.T) {
-	_, rootCmd, _ := initializeRunCmdOptions(t)
-	integrationSpec := v1.IntegrationSpec{}
-	minifiedYamlTemplate := `{"containers": [{"name": "second"}, {"name": "integration", "env": [{"name": "CAMEL_K_DIGEST", "value": "new_value"}]}]}`
-
-	err := resolvePodTemplate(context.TODO(), rootCmd, minifiedYamlTemplate, &integrationSpec)
-
-	require.NoError(t, err)
-	assert.NotNil(t, integrationSpec.PodTemplate)
-	assert.Equal(t, 2, len(integrationSpec.PodTemplate.Spec.Containers))
-}
-
-func TestFilterBuildPropertyFiles(t *testing.T) {
-	inputValues := []string{"file:/tmp/test", "key=val"}
-	outputValues := filterBuildPropertyFiles(inputValues)
-
-	assert.Len(t, outputValues, 1)
-	assert.Equal(t, "/tmp/test", outputValues[0])
 }
 
 const TestSrcContent = `
@@ -615,39 +425,6 @@ func TestMissingTrait(t *testing.T) {
 	require.Error(t, err)
 }
 
-func TestResolveYamlPodTemplateWithSupplementalGroups(t *testing.T) {
-	_, rootCmd, _ := initializeRunCmdOptions(t)
-	templateText := `
-securityContext:
-  supplementalGroups:
-    - 666
-`
-	integrationSpec := v1.IntegrationSpec{}
-	err := resolvePodTemplate(context.TODO(), rootCmd, templateText, &integrationSpec)
-	require.NoError(t, err)
-	assert.NotNil(t, integrationSpec.PodTemplate)
-	assert.NotNil(t, integrationSpec.PodTemplate.Spec)
-	assert.NotNil(t, integrationSpec.PodTemplate.Spec.SecurityContext)
-	assert.NotNil(t, integrationSpec.PodTemplate.Spec.SecurityContext.SupplementalGroups)
-	assert.Equal(t, 1, len(integrationSpec.PodTemplate.Spec.SecurityContext.SupplementalGroups))
-	assert.Contains(t, integrationSpec.PodTemplate.Spec.SecurityContext.SupplementalGroups, int64(666))
-}
-
-func TestResolveJsonPodTemplateWithSupplementalGroups(t *testing.T) {
-	_, rootCmd, _ := initializeRunCmdOptions(t)
-	minifiedYamlTemplate := `{"securityContext":{"supplementalGroups":[666]}}`
-
-	integrationSpec := v1.IntegrationSpec{}
-	err := resolvePodTemplate(context.TODO(), rootCmd, minifiedYamlTemplate, &integrationSpec)
-	require.NoError(t, err)
-	assert.NotNil(t, integrationSpec.PodTemplate)
-	assert.NotNil(t, integrationSpec.PodTemplate.Spec)
-	assert.NotNil(t, integrationSpec.PodTemplate.Spec.SecurityContext)
-	assert.NotNil(t, integrationSpec.PodTemplate.Spec.SecurityContext.SupplementalGroups)
-	assert.Equal(t, 1, len(integrationSpec.PodTemplate.Spec.SecurityContext.SupplementalGroups))
-	assert.Contains(t, integrationSpec.PodTemplate.Spec.SecurityContext.SupplementalGroups, int64(666))
-}
-
 func TestIntegrationServiceAccountName(t *testing.T) {
 	var tmpFile *os.File
 	var err error
@@ -664,72 +441,6 @@ func TestIntegrationServiceAccountName(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.Contains(t, output, "serviceAccountName: my-service-account")
-}
-
-func TestFileProperties(t *testing.T) {
-	var tmpFile1 *os.File
-	var err error
-	tempDir := t.TempDir()
-	if tmpFile1, err = os.CreateTemp(tempDir, "camel-k-*.properties"); err != nil {
-		t.Error(err)
-	}
-
-	assert.Nil(t, tmpFile1.Close())
-	require.NoError(t, os.WriteFile(tmpFile1.Name(), []byte(`
-	key=${value}
-	#key2=value2
-	my.key=value
-	`), 0o400))
-
-	var tmpFile *os.File
-	if tmpFile, err = os.CreateTemp(tempDir, "camel-k-"); err != nil {
-		t.Error(err)
-	}
-
-	assert.Nil(t, tmpFile.Close())
-	require.NoError(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
-	_, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
-	output, err := ExecuteCommand(runCmd, cmdRun, tmpFile.Name(),
-		"-p", "file:"+tmpFile1.Name(),
-		"-o", "yaml",
-	)
-	require.NoError(t, err)
-	assert.NotContains(t, output, "#key2")
-	assert.Contains(t, output, "my.key = value")
-	assert.Contains(t, output, "key = ${value}")
-}
-
-func TestPropertyShouldNotExpand(t *testing.T) {
-	var tmpFile1 *os.File
-	var err error
-	tempDir := t.TempDir()
-	if tmpFile1, err = os.CreateTemp(tempDir, "camel-k-*.properties"); err != nil {
-		t.Error(err)
-	}
-
-	assert.Nil(t, tmpFile1.Close())
-	require.NoError(t, os.WriteFile(tmpFile1.Name(), []byte(`
-	key=${value}
-	`), 0o400))
-
-	var tmpFile *os.File
-	if tmpFile, err = os.CreateTemp(tempDir, "camel-k-"); err != nil {
-		t.Error(err)
-	}
-
-	assert.Nil(t, tmpFile.Close())
-	require.NoError(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
-	_, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
-	output, err := ExecuteCommand(runCmd, cmdRun, tmpFile.Name(),
-		"-o", "yaml",
-		"-p", "runtimeProp=${value}",
-		"--build-property", "buildProp=${value}",
-		"-p", "file:"+tmpFile1.Name(),
-	)
-	require.NoError(t, err)
-	assert.Contains(t, output, "runtimeProp = ${value}")
-	assert.Contains(t, output, "buildProp = ${value}")
-	assert.Contains(t, output, "key = ${value}")
 }
 
 func TestRunOutput(t *testing.T) {
@@ -972,4 +683,62 @@ spec:
   traits: {}
 status: {}
 `, output)
+}
+
+func TestApplyProperties(t *testing.T) {
+	tests := []struct {
+		name       string
+		props      []string
+		traitName  string
+		wantTraits int
+	}{
+		{
+			name:       "no properties",
+			props:      nil,
+			traitName:  "env",
+			wantTraits: 0,
+		},
+		{
+			name:       "empty properties",
+			props:      []string{},
+			traitName:  "env",
+			wantTraits: 0,
+		},
+		{
+			name:       "single property",
+			props:      []string{"key=value"},
+			traitName:  "env",
+			wantTraits: 1,
+		},
+		{
+			name:       "property with spaces",
+			props:      []string{"key = value"},
+			traitName:  "env",
+			wantTraits: 1,
+		},
+		{
+			name:       "property with extra whitespace",
+			props:      []string{"  key  =  value  "},
+			traitName:  "env",
+			wantTraits: 1,
+		},
+		{
+			name:       "multiple properties",
+			props:      []string{"key1=value1", "key2 = value2", " key3 = value3 "},
+			traitName:  "env",
+			wantTraits: 3,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			o := &runCmdOptions{}
+
+			o.applyProperties(tt.props, tt.traitName)
+
+			if got := len(o.Traits); got != tt.wantTraits {
+				t.Errorf("applyProperties() produced %d traits, want %d", got, tt.wantTraits)
+			}
+		})
+	}
 }

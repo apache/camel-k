@@ -66,7 +66,7 @@ type cronInfo struct {
 }
 
 // cronExtractor extracts cron information from a Camel URI.
-type cronExtractor func(string) *cronInfo
+type cronExtractor func(string) (*cronInfo, error)
 
 var (
 	camelTimerPeriodMillis = regexp.MustCompile(`^[0-9]+$`)
@@ -360,9 +360,7 @@ func (t *cronTrait) getGlobalCron(e *Environment) (*cronInfo, error) {
 		}
 	}
 
-	globalCron := getCronForURIs(cron)
-
-	return globalCron, nil
+	return getCronForURIs(cron)
 }
 
 func (t *cronTrait) getSourcesFromURIs(e *Environment) ([]string, error) {
@@ -387,27 +385,30 @@ func (t *cronTrait) getConcurrentPolicy() batchv1.ConcurrencyPolicy {
 	return batchv1.ConcurrencyPolicy(t.ConcurrencyPolicy)
 }
 
-func getCronForURIs(camelURIs []string) *cronInfo {
+func getCronForURIs(camelURIs []string) (*cronInfo, error) {
 	var globalCron *cronInfo
 	for _, camelURI := range camelURIs {
-		cr := getCronForURI(camelURI)
+		cr, err := getCronForURI(camelURI)
+		if err != nil {
+			return nil, err
+		}
 		if cr == nil {
-			return nil
+			return nil, nil
 		}
 		if globalCron == nil {
 			globalCron = cr
 		} else {
 			if !cronEquivalent(globalCron.schedule, cr.schedule) {
-				return nil
+				return nil, nil
 			}
 			globalCron = globalCron.withComponents(cr.components...)
 		}
 	}
 
-	return globalCron
+	return globalCron, nil
 }
 
-func getCronForURI(camelURI string) *cronInfo {
+func getCronForURI(camelURI string) (*cronInfo, error) {
 	comp := uri.GetComponent(camelURI)
 	extractor := supportedCamelComponents[comp]
 
@@ -419,69 +420,73 @@ func getCronForURI(camelURI string) *cronInfo {
 // timerToCronInfo converts a timer endpoint to a Kubernetes cron schedule
 
 //nolint:mnd
-func timerToCronInfo(camelURI string) *cronInfo {
+func timerToCronInfo(camelURI string) (*cronInfo, error) {
 	if uri.GetQueryParameter(camelURI, "delay") != "" ||
 		uri.GetQueryParameter(camelURI, "repeatCount") != "" ||
 		uri.GetQueryParameter(camelURI, "time") != "" {
-		return nil
+		return nil, nil
 	}
 	periodStr := uri.GetQueryParameter(camelURI, "period")
 	var period uint64
+	var err error
 	if camelTimerPeriodMillis.MatchString(periodStr) {
-		period = checkedStringToUint64(periodStr)
+		period, err = checkedStringToUint64(periodStr)
+		if err != nil {
+			return nil, err
+		}
 	} else {
-		return nil
+		return nil, nil
 	}
 
 	if period == 0 || period%1000 != 0 {
-		return nil
+		return nil, nil
 	}
 	seconds := period / 1000
 
 	if seconds%3600 == 0 {
 		hours := seconds / 3600
 		if hours == 24 {
-			return newCronInfo().withComponents("timer").withSchedule("0 0 * * ?")
+			return newCronInfo().withComponents("timer").withSchedule("0 0 * * ?"), nil
 		} else if hours < 24 && 24%hours == 0 {
-			return newCronInfo().withComponents("timer").withSchedule(fmt.Sprintf("0 0/%d * * ?", hours))
+			return newCronInfo().withComponents("timer").withSchedule(fmt.Sprintf("0 0/%d * * ?", hours)), nil
 		}
 	} else if seconds%60 == 0 {
 		minutes := seconds / 60
 		if minutes < 60 && 60%minutes == 0 {
-			return newCronInfo().withComponents("timer").withSchedule(fmt.Sprintf("0/%d * * * ?", minutes))
+			return newCronInfo().withComponents("timer").withSchedule(fmt.Sprintf("0/%d * * * ?", minutes)), nil
 		}
 	}
 
-	return nil
+	return nil, nil
 }
 
 // quartzToCronInfo converts a quartz endpoint to a Kubernetes cron schedule.
-func quartzToCronInfo(camelURI string) *cronInfo {
+func quartzToCronInfo(camelURI string) (*cronInfo, error) {
 	if uri.GetQueryParameter(camelURI, "fireNow") != "" ||
 		uri.GetQueryParameter(camelURI, "customCalendar") != "" ||
 		uri.GetQueryParameter(camelURI, "startDelayedSeconds") != "" {
-		return nil
+		return nil, nil
 	}
 	// Quartz URI has 6 or 7 components instead of the 5 expected by Kubernetes (starts with seconds, ends with year).
 	cron := uri.GetQueryParameter(camelURI, "cron")
 	normalized := toKubernetesCronSchedule(cron)
 	if normalized != "" {
-		return newCronInfo().withComponents("quartz").withSchedule(normalized)
+		return newCronInfo().withComponents("quartz").withSchedule(normalized), nil
 	}
 
-	return nil
+	return nil, nil
 }
 
 // cronToCronInfo converts a cron endpoint to a Kubernetes cron schedule.
-func cronToCronInfo(camelURI string) *cronInfo {
+func cronToCronInfo(camelURI string) (*cronInfo, error) {
 	// Camel cron URIs have 5 to 7 components.
 	schedule := uri.GetQueryParameter(camelURI, "schedule")
 	normalized := toKubernetesCronSchedule(schedule)
 	if normalized != "" {
-		return newCronInfo().withComponents("cron").withSchedule(normalized)
+		return newCronInfo().withComponents("cron").withSchedule(normalized), nil
 	}
 
-	return nil
+	return nil, nil
 }
 
 // Utility
@@ -518,13 +523,8 @@ func toKubernetesCronSchedule(cron string) string {
 	return ""
 }
 
-func checkedStringToUint64(str string) uint64 {
-	res, err := strconv.ParseUint(str, 10, 0)
-	if err != nil {
-		panic(err)
-	}
-
-	return res
+func checkedStringToUint64(str string) (uint64, error) {
+	return strconv.ParseUint(str, 10, 0)
 }
 
 // changeSourcesCronURI is in charge to change the value of the from route with a component that executes

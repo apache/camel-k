@@ -61,7 +61,6 @@ type quarkusSteps struct {
 	CommonSteps []Step
 }
 
-//nolint:mnd
 var Quarkus = quarkusSteps{
 	LoadCamelQuarkusCatalog:    NewStep(InitPhase, loadCamelQuarkusCatalog),
 	GenerateQuarkusProject:     NewStep(ProjectGenerationPhase, generateQuarkusProject),

@@ -40,9 +40,6 @@ func newCmdReset(rootCmdOptions *RootCmdOptions) (*cobra.Command, *resetCmdOptio
 		Run:     options.reset,
 	}
 
-	cmd.Flags().Bool("skip-kits", false, "Do not delete the integration kits")
-	cmd.Flags().Bool("skip-integrations", false, "Do not delete the integrations")
-	cmd.Flags().Bool("skip-bindings", false, "Do not delete the bindings/pipes")
 	cmd.Flags().Bool("force", false, "Force reset without confirmation")
 
 	return &cmd, &options
@@ -51,10 +48,7 @@ func newCmdReset(rootCmdOptions *RootCmdOptions) (*cobra.Command, *resetCmdOptio
 type resetCmdOptions struct {
 	*RootCmdOptions
 
-	SkipKits         bool `mapstructure:"skip-kits"`
-	SkipIntegrations bool `mapstructure:"skip-integrations"`
-	SkipBindings     bool `mapstructure:"skip-bindings"`
-	Force            bool `mapstructure:"force"`
+	Force bool `mapstructure:"force"`
 }
 
 func (o *resetCmdOptions) reset(cmd *cobra.Command, _ []string) {
@@ -83,32 +77,26 @@ func (o *resetCmdOptions) reset(cmd *cobra.Command, _ []string) {
 	}
 
 	var n int
-	if !o.SkipBindings {
-		if n, err = o.deleteAllPipes(c); err != nil {
-			fmt.Fprint(cmd.ErrOrStderr(), err)
+	if n, err = o.deleteAllPipes(c); err != nil {
+		fmt.Fprint(cmd.ErrOrStderr(), err)
 
-			return
-		}
-		fmt.Fprintln(cmd.OutOrStdout(), n, "pipes deleted from namespace", o.Namespace)
+		return
 	}
+	fmt.Fprintln(cmd.OutOrStdout(), n, "pipes deleted from namespace", o.Namespace)
 
-	if !o.SkipIntegrations {
-		if n, err = o.deleteAllIntegrations(c); err != nil {
-			fmt.Fprint(cmd.ErrOrStderr(), err)
+	if n, err = o.deleteAllIntegrations(c); err != nil {
+		fmt.Fprint(cmd.ErrOrStderr(), err)
 
-			return
-		}
-		fmt.Fprintln(cmd.OutOrStdout(), n, "integrations deleted from namespace", o.Namespace)
+		return
 	}
+	fmt.Fprintln(cmd.OutOrStdout(), n, "integrations deleted from namespace", o.Namespace)
 
-	if !o.SkipKits {
-		if n, err = o.deleteAllIntegrationKits(c); err != nil {
-			fmt.Fprint(cmd.ErrOrStderr(), err)
+	if n, err = o.deleteAllIntegrationKits(c); err != nil {
+		fmt.Fprint(cmd.ErrOrStderr(), err)
 
-			return
-		}
-		fmt.Fprintln(cmd.OutOrStdout(), n, "integration kits deleted from namespace", o.Namespace)
+		return
 	}
+	fmt.Fprintln(cmd.OutOrStdout(), n, "integration kits deleted from namespace", o.Namespace)
 }
 
 func (o *resetCmdOptions) deleteAllIntegrations(c client.Client) (int, error) {

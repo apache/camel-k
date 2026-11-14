@@ -20,41 +20,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package advanced
+package common
 
 import (
 	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
-
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 )
 
-func TestKamelCLIDump(t *testing.T) {
+func TestKamelReset(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		t.Run("dump empty namespace", func(t *testing.T) {
-			dump := GetOutputString(Kamel(t, ctx, "dump", "-n", ns))
+		t.Run("Reset the namespace integrations", func(t *testing.T) {
+			name := RandomizedSuffixName("yaml1")
+			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			g.Expect(dump).To(ContainSubstring("Found 0 integrations:"))
-			g.Expect(dump).To(ContainSubstring("Found 0 deployments:"))
-		})
-
-		InstallOperator(t, ctx, g, ns)
-
-		t.Run("dump non-empty namespace", func(t *testing.T) {
-			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "yaml")).Should(ContainSubstring("Magicstring!"))
-
-			dump := GetOutputString(Kamel(t, ctx, "dump", "-n", ns))
-			g.Expect(dump).To(ContainSubstring("Found 1 integrations"))
-			g.Expect(dump).To(ContainSubstring("name: yaml"))
-			g.Expect(dump).To(ContainSubstring("Magicstring!"))
+			g.Expect(Kamel(t, ctx, "reset", "-n", ns, "--force").Execute()).To(Succeed())
+			g.Eventually(Integration(t, ctx, ns, name)).Should(BeNil())
 		})
 	})
 }

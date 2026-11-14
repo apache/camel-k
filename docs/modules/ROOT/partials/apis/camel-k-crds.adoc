@@ -1642,7 +1642,7 @@ bool
 |
 
 
-if the content is compressed (base64 encrypted)
+Deprecated: no longer in use.
 
 
 |===
