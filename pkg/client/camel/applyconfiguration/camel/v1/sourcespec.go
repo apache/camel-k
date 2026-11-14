@@ -112,11 +112,11 @@ func (b *SourceSpecApplyConfiguration) WithContentType(value string) *SourceSpec
 	return b
 }
 
-// WithCompression sets the Compression field in the declarative configuration to the given value
+// WithDeprecatedCompression sets the DeprecatedCompression field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Compression field is set to the value of the last call.
-func (b *SourceSpecApplyConfiguration) WithCompression(value bool) *SourceSpecApplyConfiguration {
-	b.DataSpecApplyConfiguration.Compression = &value
+// If called multiple times, the DeprecatedCompression field is set to the value of the last call.
+func (b *SourceSpecApplyConfiguration) WithDeprecatedCompression(value bool) *SourceSpecApplyConfiguration {
+	b.DataSpecApplyConfiguration.DeprecatedCompression = &value
 	return b
 }
 

@@ -34,7 +34,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
-	"github.com/apache/camel-k/v2/pkg/util/gzip"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
@@ -241,7 +240,6 @@ func getNominalEnv(t *testing.T, traitCatalog *Catalog) *Environment {
 	}
 	fakeClient, _ := internal.NewFakeClient(&pvc)
 	catalog, _ := camel.DefaultCatalog()
-	compressedRoute, _ := gzip.CompressBase64([]byte(`from("platform-http:test").log("hello");`))
 
 	return &Environment{
 		CamelCatalog: catalog,
@@ -260,9 +258,8 @@ func getNominalEnv(t *testing.T, traitCatalog *Catalog) *Environment {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:        "routes.java",
-							Content:     string(compressedRoute),
-							Compression: true,
+							Name:    "routes.java",
+							Content: `from("platform-http:test").log("hello");`,
 						},
 						Language: v1.LanguageJavaSource,
 					},

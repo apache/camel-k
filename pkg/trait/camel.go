@@ -21,7 +21,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -205,7 +204,7 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment) error {
 		if runtime.Provider == v1.RuntimeProviderPlainQuarkus {
 			err = wait.PollUntilContextTimeout(
 				e.Ctx,
-				//nolint:mnd
+
 				2*time.Second,
 				1*time.Minute,
 				true,
@@ -351,10 +350,9 @@ func (t *camelTrait) computeUserProperties(e *Environment) []ctrl.Object {
 				v1.IntegrationLabel: e.Integration.Name,
 			},
 			Annotations: map[string]string{
-				sourceLanguageAnnotation:    string(s.InferLanguage()),
-				sourceLoaderAnnotation:      s.Loader,
-				sourceNameAnnotation:        s.Name,
-				sourceCompressionAnnotation: strconv.FormatBool(s.Compression),
+				sourceLanguageAnnotation: string(s.InferLanguage()),
+				sourceLoaderAnnotation:   s.Loader,
+				sourceNameAnnotation:     s.Name,
 			},
 			Data: map[string]string{
 				"content": s.Content,

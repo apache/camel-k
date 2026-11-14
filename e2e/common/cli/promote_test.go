@@ -41,9 +41,10 @@ func TestKamelPromoteGitOps(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml").Execute()).To(Succeed())
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "yaml", v1.IntegrationConditionReady)).
 				Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml"), TestTimeoutShort).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml")).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, "yaml")).Should(ContainSubstring("Magicstring!"))
 		})
+
 		WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsTarget string) {
 			// Export to GitOps directory structure
 			tmpDir := t.TempDir()

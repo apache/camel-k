@@ -33,7 +33,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/apis/duck/keda/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/internal"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
-	"github.com/apache/camel-k/v2/pkg/util/gzip"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
@@ -256,9 +255,6 @@ func nominalEnv(t *testing.T) Environment {
 	client, _ := internal.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
-	compressedRoute, err := gzip.CompressBase64([]byte(`from("kafka:test").log("hello");`))
-	require.NoError(t, err)
-
 	return Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
@@ -275,9 +271,8 @@ func nominalEnv(t *testing.T) Environment {
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:        "routes.java",
-							Content:     string(compressedRoute),
-							Compression: true,
+							Name:    "routes.java",
+							Content: `from("kafka:test").log("hello");`,
 						},
 						Language: v1.LanguageJavaSource,
 					},
@@ -340,9 +335,8 @@ func autoDiscoveryEnvWithSource(t *testing.T, source string, manualTrigger *trai
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
-							Name:        "routes.java",
-							Content:     source,
-							Compression: false,
+							Name:    "routes.java",
+							Content: source,
 						},
 						Language: v1.LanguageJavaSource,
 					},

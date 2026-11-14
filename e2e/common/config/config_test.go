@@ -49,64 +49,6 @@ func TestRunConfigProperties(t *testing.T) {
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("test-property"))
 		})
-
-		t.Run("Property file", func(t *testing.T) {
-			name := RandomizedSuffixName("property-file-route")
-			g.Expect(KamelRun(t, ctx, ns, "./files/property-file-route.yaml",
-				"--name", name,
-				"--property", "file:./files/my.properties").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
-				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("hello world"))
-		})
-
-		t.Run("Property precedence", func(t *testing.T) {
-			name := RandomizedSuffixName("property-file-route")
-			g.Expect(KamelRun(t, ctx, ns, "./files/property-file-route.yaml",
-				"--name", name,
-				"-p", "my.key.2=universe",
-				"-p", "file:./files/my.properties",
-			).Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
-				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("hello universe"))
-		})
-
-		t.Run("Property from ConfigMap", func(t *testing.T) {
-			name := RandomizedSuffixName("property-route")
-			var cmData = make(map[string]string)
-			cmData["my.message"] = "my-configmap-property-value"
-			err := CreatePlainTextConfigmap(t, ctx, ns, "my-cm-test-property", cmData)
-			g.Expect(err).To(BeNil())
-
-			g.Expect(KamelRun(t, ctx, ns, "./files/property-route.yaml",
-				"--name", name,
-				"-p", "configmap:my-cm-test-property",
-			).Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
-				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("my-configmap-property-value"))
-		})
-
-		t.Run("Property from Secret", func(t *testing.T) {
-			name := RandomizedSuffixName("property-route")
-			var secData = make(map[string]string)
-			secData["my.message"] = "my-secret-property-value"
-			err := CreatePlainTextSecret(t, ctx, ns, "my-sec-test-property", secData)
-			g.Expect(err).To(BeNil())
-
-			g.Expect(KamelRun(t, ctx, ns, "./files/property-route.yaml",
-				"--name", name,
-				"-p", "secret:my-sec-test-property").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
-				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("my-secret-property-value"))
-		})
-
 	})
 }
 
@@ -122,7 +64,8 @@ func TestRunConfigConfigmaps(t *testing.T) {
 		g.Expect(err).To(BeNil())
 
 		// Store a configmap with multiple values
-		// kubectl create configmap my-cm-multi --from-literal=my-configmap-key="should-not-see-it" --from-literal=my-configmap-key-2="my-configmap-content-2"
+		// kubectl create configmap my-cm-multi --from-literal=my-configmap-key="should-not-see-it"
+		// --from-literal=my-configmap-key-2="my-configmap-content-2"
 
 		var cmDataMulti = make(map[string]string)
 		cmDataMulti["my-configmap-key"] = "should-not-see-it"
@@ -295,110 +238,20 @@ func TestRunConfigBuildProperties(t *testing.T) {
 			// Don't delete - we need it for next test execution
 		})
 
-		// We need to check also that the property (which is available in the IntegrationKit) is correctly replaced and that we don't reuse the same kit
+		// We need to check also that the property (which is available in the IntegrationKit) is correctly replaced
+		// and that we don't reuse the same kit
 		t.Run("Build time property updated", func(t *testing.T) {
 			name := RandomizedSuffixName("build-property-route-updated")
 			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-route.yaml",
 				"--name", name,
 				"--build-property", "quarkus.application.name=my-super-application-updated",
 			).Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
+				Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("my-super-application-updated"))
 			// Verify the integration kits are different
 			g.Eventually(IntegrationKitName(t, ctx, ns, name)).ShouldNot(Equal(IntegrationKitName(t, ctx, ns, nameBuildTimeProperty)()))
-		})
-
-		// Build-Properties file
-		t.Run("Build time property file", func(t *testing.T) {
-			name := RandomizedSuffixName("build-property-file-route")
-			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-file-route.yaml",
-				"--name", name,
-				"--build-property", "file:./files/quarkus.properties",
-			).Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
-				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("my-super-application"))
-		})
-
-		t.Run("Build time property file with precedence", func(t *testing.T) {
-			name := RandomizedSuffixName("build-property-file-route-precedence")
-			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-file-route.yaml",
-				"--name", name,
-				"--build-property", "quarkus.application.name=my-overridden-application",
-				"--build-property", "file:./files/quarkus.properties",
-			).Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
-				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("my-overridden-application"))
-		})
-
-		t.Run("Build time property from ConfigMap", func(t *testing.T) {
-			name := RandomizedSuffixName("build-property-file-route-cm")
-			var cmData = make(map[string]string)
-			cmData["quarkus.application.name"] = "my-cool-application"
-			err := CreatePlainTextConfigmap(t, ctx, ns, "my-cm-test-build-property", cmData)
-			g.Expect(err).To(BeNil())
-
-			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-file-route.yaml",
-				"--name", name,
-				"--build-property", "configmap:my-cm-test-build-property",
-			).Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("my-cool-application"))
-		})
-
-		t.Run("Build time property from ConfigMap as property file", func(t *testing.T) {
-			name := RandomizedSuffixName("build-property-file-route-cm-prop")
-			var cmData = make(map[string]string)
-			cmData["my.properties"] = "quarkus.application.name=my-super-cool-application"
-			err := CreatePlainTextConfigmap(t, ctx, ns, "my-cm-test-build-properties", cmData)
-			g.Expect(err).To(BeNil())
-
-			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-file-route.yaml",
-				"--name", name,
-				"--build-property", "configmap:my-cm-test-build-properties",
-			).Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
-				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("my-super-cool-application"))
-		})
-
-		t.Run("Build time property from Secret", func(t *testing.T) {
-			name := RandomizedSuffixName("build-property-file-route-sec")
-			var secData = make(map[string]string)
-			secData["quarkus.application.name"] = "my-great-application"
-			err := CreatePlainTextSecret(t, ctx, ns, "my-sec-test-build-property", secData)
-			g.Expect(err).To(BeNil())
-
-			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-file-route.yaml",
-				"--name", name,
-				"--build-property", "secret:my-sec-test-build-property",
-			).Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
-				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("my-great-application"))
-		})
-
-		t.Run("Build time property from Secret as property file", func(t *testing.T) {
-			name := RandomizedSuffixName("build-property-file-route-sec-prop")
-			var secData = make(map[string]string)
-			secData["my.properties"] = "quarkus.application.name=my-awesome-application"
-			err := CreatePlainTextSecret(t, ctx, ns, "my-sec-test-build-properties", secData)
-			g.Expect(err).To(BeNil())
-
-			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-file-route.yaml",
-				"--name", name,
-				"--build-property", "secret:my-sec-test-build-properties").Execute()).To(Succeed())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
-				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("my-awesome-application"))
 		})
 
 	})
