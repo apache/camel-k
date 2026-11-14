@@ -326,3 +326,51 @@ func TestFromIntegrationProfile_Overrides(t *testing.T) {
 		got.Maven.Repositories,
 	)
 }
+
+func TestGetEnvOrDefaultAsInt(t *testing.T) {
+	t.Run("not set returns default", func(t *testing.T) {
+		assert.Equal(t, 42, GetEnvOrDefaultAsInt("TEST_UNSET_INT_VAR", 42))
+	})
+
+	t.Run("valid int value", func(t *testing.T) {
+		t.Setenv("TEST_INT_VAR", "10")
+		assert.Equal(t, 10, GetEnvOrDefaultAsInt("TEST_INT_VAR", 42))
+	})
+
+	t.Run("invalid non-numeric returns default", func(t *testing.T) {
+		t.Setenv("TEST_INT_VAR", "abc")
+		assert.Equal(t, 42, GetEnvOrDefaultAsInt("TEST_INT_VAR", 42))
+	})
+
+	t.Run("invalid non-positive returns default", func(t *testing.T) {
+		t.Setenv("TEST_INT_VAR", "0")
+		assert.Equal(t, 42, GetEnvOrDefaultAsInt("TEST_INT_VAR", 42))
+
+		t.Setenv("TEST_INT_VAR", "-5")
+		assert.Equal(t, 42, GetEnvOrDefaultAsInt("TEST_INT_VAR", 42))
+	})
+}
+
+func TestGetEnvOrDefaultAsFloat32(t *testing.T) {
+	t.Run("not set returns default", func(t *testing.T) {
+		assert.Equal(t, float32(3.14), GetEnvOrDefaultAsFloat32("TEST_UNSET_FLOAT_VAR", 3.14))
+	})
+
+	t.Run("valid float value", func(t *testing.T) {
+		t.Setenv("TEST_FLOAT_VAR", "2.5")
+		assert.Equal(t, float32(2.5), GetEnvOrDefaultAsFloat32("TEST_FLOAT_VAR", 3.14))
+	})
+
+	t.Run("invalid non-numeric returns default", func(t *testing.T) {
+		t.Setenv("TEST_FLOAT_VAR", "invalid")
+		assert.Equal(t, float32(3.14), GetEnvOrDefaultAsFloat32("TEST_FLOAT_VAR", 3.14))
+	})
+
+	t.Run("invalid non-positive returns default", func(t *testing.T) {
+		t.Setenv("TEST_FLOAT_VAR", "0")
+		assert.Equal(t, float32(3.14), GetEnvOrDefaultAsFloat32("TEST_FLOAT_VAR", 3.14))
+
+		t.Setenv("TEST_FLOAT_VAR", "-1.5")
+		assert.Equal(t, float32(3.14), GetEnvOrDefaultAsFloat32("TEST_FLOAT_VAR", 3.14))
+	})
+}
