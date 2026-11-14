@@ -27,6 +27,14 @@ type ScaleMapper interface {
 	Map(pathValue string, params map[string]string, props map[string]string) (kedaType string, metadata map[string]string)
 }
 
+// AutoMetadataScaleMapper is an optional extension for mappers that need
+// KEDA autoMetadata to decide whether a generic Camel component can be mapped.
+// Existing ScaleMapper implementations do not need to implement this interface.
+type AutoMetadataScaleMapper interface {
+	ScaleMapper
+	MapWithAutoMetadata(pathValue string, params map[string]string, props map[string]string, autoMetadata map[string]map[string]string) (kedaType string, metadata map[string]string)
+}
+
 var registry = map[string]ScaleMapper{}
 
 func Register(m ScaleMapper) {
@@ -40,6 +48,12 @@ func GetMapper(component string) (ScaleMapper, bool) {
 }
 
 func MapToKedaTrigger(rawURI string, props map[string]string) (*traitv1.KedaTrigger, error) {
+	return MapToKedaTriggerWithAutoMetadata(rawURI, props, nil)
+}
+
+// MapToKedaTriggerWithAutoMetadata maps a Camel consumer URI to a KEDA trigger.
+// autoMetadata is passed only to mappers implementing AutoMetadataScaleMapper.
+func MapToKedaTriggerWithAutoMetadata(rawURI string, props map[string]string, autoMetadata map[string]map[string]string) (*traitv1.KedaTrigger, error) {
 	scheme, pathValue, params, err := ParseComponentURI(rawURI)
 	if err != nil {
 		return nil, err
@@ -51,7 +65,19 @@ func MapToKedaTrigger(rawURI string, props map[string]string) (*traitv1.KedaTrig
 	if !found {
 		return nil, nil
 	}
-	kedaType, metadata := mapper.Map(pathValue, params, props)
+
+	var kedaType string
+	var metadata map[string]string
+	if metadataMapper, ok := mapper.(AutoMetadataScaleMapper); ok {
+		kedaType, metadata = metadataMapper.MapWithAutoMetadata(pathValue, params, props, autoMetadata)
+	} else {
+		kedaType, metadata = mapper.Map(pathValue, params, props)
+	}
+	// An empty type means that the mapper deliberately declined discovery
+	// (for example, because an explicit provider discriminator was absent).
+	if kedaType == "" {
+		return nil, nil
+	}
 
 	return &traitv1.KedaTrigger{
 		Type:     kedaType,
