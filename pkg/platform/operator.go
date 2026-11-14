@@ -35,9 +35,18 @@ import (
 )
 
 const (
-	OperatorWatchNamespaceEnvVariable = "WATCH_NAMESPACE"
-	operatorNamespaceEnvVariable      = "NAMESPACE"
-	OperatorBuildStrategyEnvVar       = "BUILD_STRATEGY"
+	OperatorWatchNamespaceEnvVariable                = "WATCH_NAMESPACE"
+	operatorNamespaceEnvVariable                     = "NAMESPACE"
+	OperatorBuildStrategyEnvVar                      = "BUILD_STRATEGY"
+	OperatorIntegrationMaxConcurrentReconcilesEnvVar = "INTEGRATION_MAX_CONCURRENT_RECONCILES"
+	OperatorPipeMaxConcurrentReconcilesEnvVar        = "PIPE_MAX_CONCURRENT_RECONCILES"
+	OperatorClientQPSEnvVar                          = "CLIENT_QPS"
+	OperatorClientBurstEnvVar                        = "CLIENT_BURST"
+
+	defaultIntegrationMaxConcurrentReconciles = 1
+	defaultPipeMaxConcurrentReconciles        = 1
+	defaultClientQPS                          = float32(20)
+	defaultClientBurst                        = 200
 )
 
 const OperatorLockName = "camel-k-lock"
@@ -243,6 +252,26 @@ func (f FilteringFuncs[T]) Generic(e event.TypedGenericEvent[T]) bool {
 	}
 
 	return true
+}
+
+// GetIntegrationMaxConcurrentReconciles returns the configured max concurrent reconciles for the integration controller.
+func GetIntegrationMaxConcurrentReconciles() int {
+	return GetEnvOrDefaultAsInt(OperatorIntegrationMaxConcurrentReconcilesEnvVar, defaultIntegrationMaxConcurrentReconciles)
+}
+
+// GetPipeMaxConcurrentReconciles returns the configured max concurrent reconciles for the pipe controller.
+func GetPipeMaxConcurrentReconciles() int {
+	return GetEnvOrDefaultAsInt(OperatorPipeMaxConcurrentReconcilesEnvVar, defaultPipeMaxConcurrentReconciles)
+}
+
+// GetClientQPS returns the configured QPS for the operator client.
+func GetClientQPS() float32 {
+	return GetEnvOrDefaultAsFloat32(OperatorClientQPSEnvVar, defaultClientQPS)
+}
+
+// GetClientBurst returns the configured Burst for the operator client.
+func GetClientBurst() int {
+	return GetEnvOrDefaultAsInt(OperatorClientBurstEnvVar, defaultClientBurst)
 }
 
 var _ predicate.Predicate = FilteringFuncs[ctrl.Object]{}
