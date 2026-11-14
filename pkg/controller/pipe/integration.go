@@ -41,6 +41,8 @@ var (
 )
 
 // CreateIntegrationFor creates and Integration from a Pipe.
+//
+//nolint:gocognit
 func CreateIntegrationFor(ctx context.Context, c client.Client, pipe *v1.Pipe) (*v1.Integration, error) {
 	controller := true
 	blockOwnerDeletion := true

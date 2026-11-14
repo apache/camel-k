@@ -65,6 +65,10 @@ spec:
       jsonPath: .status.replicas
       name: Replicas
       type: integer
+    - description: Whether an associated CamelMonitor resource is available
+      jsonPath: .status.conditions[?(@.type=="CamelMonitorAvailable")].status
+      name: Camel Monitor
+      type: string
     name: v1
     schema:
       openAPIV3Schema:
@@ -151,6 +155,11 @@ spec:
                     type: string
                   url:
                     description: the URL of the project
+                    type: string
+                  username:
+                    description: |-
+                      the username used to authenticate against the Git server, together with the token stored in `secret` (default `camel-k`).
+                      Some Git servers validate it, for example Bitbucket Cloud access tokens require `x-token-auth`.
                     type: string
                 type: object
               integrationKit:

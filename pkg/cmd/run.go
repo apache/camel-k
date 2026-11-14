@@ -370,7 +370,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 		// Let's add a Wait point, otherwise the script terminates
-		<-o.RootContext.Done()
+		<-o.Context.Done()
 	}
 
 	return nil
@@ -419,6 +419,7 @@ func (o *runCmdOptions) waitForIntegrationPhase(cmd *cobra.Command, c client.Cli
 	return watch.HandleIntegrationStateChanges(o.Context, c, integration, handler)
 }
 
+//nolint:gocognit
 func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.Client, sources []string) (*v1.Integration, error) {
 	namespace := o.Namespace
 	name, err := o.GetIntegrationName(sources)

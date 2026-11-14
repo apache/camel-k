@@ -35,6 +35,8 @@ type XMLInspector struct {
 }
 
 // Extract extracts all metadata from source spec.
+//
+//nolint:cyclop,gocognit,gocyclo
 func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 	content := strings.NewReader(source.Content)
 	decoder := xml.NewDecoder(content)

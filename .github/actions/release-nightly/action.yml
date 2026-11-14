@@ -59,7 +59,7 @@ runs:
 
     - name: Set up QEMU (required by multi platform build)
       uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8
-      
+
     - name: Get nightly version and update date
       shell: bash
       run: |
@@ -222,7 +222,7 @@ runs:
         echo "Release ${{ env.TAG }} created successfully with artifacts."
 
     - name: Login to staging container registry
-      uses: docker/login-action@abd2ef45e78c5afb21d64d4ca52ee8550d9572c7
+      uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6
       with:
         username: ${{ inputs.secretDockerHubUser }}
         password: ${{ inputs.secretDockerHubPassword }}

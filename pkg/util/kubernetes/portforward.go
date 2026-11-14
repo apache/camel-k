@@ -35,6 +35,7 @@ import (
 	"k8s.io/client-go/transport/spdy"
 )
 
+//nolint:gocognit
 func PortForward(ctx context.Context, c client.Client, ns, labelSelector string, localPort, remotePort uint, stdOut, stdErr io.Writer) error {
 	log.InitForCmd()
 	var forwardPod *corev1.Pod
