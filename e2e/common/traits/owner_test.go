@@ -63,15 +63,6 @@ func TestOwnerTrait(t *testing.T) {
 			integration := Integration(t, ctx, ns, name)()
 			g.Expect(integration).NotTo(BeNil())
 
-			g.Eventually(Deployment(t, ctx, ns, name), TestTimeoutMedium).Should(PointTo(And(
-				WithTransform(func(deployment interface{ GetLabels() map[string]string }) map[string]string {
-					return deployment.GetLabels()
-				}, And(
-					HaveKeyWithValue(selectedLabel, "selected"),
-					Not(HaveKey(unselectedLabel)),
-				)),
-			)))
-
 			deployment := Deployment(t, ctx, ns, name)()
 			g.Expect(deployment).NotTo(BeNil())
 			g.Expect(deployment.Labels).To(HaveKeyWithValue(selectedLabel, "selected"))
