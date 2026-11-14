@@ -18,6 +18,8 @@ limitations under the License.
 package metadata
 
 import (
+	"errors"
+
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/sets"
@@ -71,10 +73,7 @@ func merge(m1 src.Metadata, m2 src.Metadata) src.Metadata {
 // extract returns metadata information from the source code.
 func extract(catalog *camel.RuntimeCatalog, source v1.SourceSpec) (IntegrationMetadata, error) {
 	if source.ContentRef != "" {
-		panic("source must be dereferenced before calling this method")
-	}
-	if source.Compression {
-		panic("source must be uncompressed before calling this method")
+		return IntegrationMetadata{}, errors.New("source must be dereferenced before calling this method")
 	}
 
 	language := source.InferLanguage()

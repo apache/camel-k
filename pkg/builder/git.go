@@ -47,7 +47,6 @@ type gitSteps struct {
 	CommonSteps []Step
 }
 
-//nolint:mnd
 var Git = gitSteps{
 	CloneProject:        NewStep(ProjectGenerationPhase, cloneProject),
 	InjectJibProfile:    NewStep(ProjectGenerationPhase+1, injectJibProfile),

@@ -29,29 +29,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// LookupConfigmap will look for any k8s Configmap with a given name in a given namespace.
-//
-// Deprecated: won't be supported in future releases.
-func LookupConfigmap(ctx context.Context, c client.Client, ns string, name string) *corev1.ConfigMap {
-	cm := corev1.ConfigMap{
-		Kind:       "ConfigMap",
-		APIVersion: corev1.SchemeGroupVersion.String(),
-		Namespace:  ns,
-		Name:       name,
-	}
-	key := ctrl.ObjectKey{
-		Namespace: ns,
-		Name:      name,
-	}
-	if err := c.Get(ctx, key, &cm); err != nil && k8serrors.IsNotFound(err) {
-		return nil
-	} else if err != nil {
-		return nil
-	}
-
-	return &cm
-}
-
 // LookupResourceVersion will look for any k8s resource with a given name in a given namespace, returning its resource version only.
 // It makes this safe against any resource that the operator is not allowed to inspect.
 func LookupResourceVersion(ctx context.Context, c client.Client, object ctrl.Object) string {
@@ -60,29 +37,6 @@ func LookupResourceVersion(ctx context.Context, c client.Client, object ctrl.Obj
 	}
 
 	return object.GetResourceVersion()
-}
-
-// LookupSecret will look for any k8s Secret with a given name in a given namespace.
-//
-// Deprecated: won't be supported in future releases.
-func LookupSecret(ctx context.Context, c client.Client, ns string, name string) *corev1.Secret {
-	secret := corev1.Secret{
-		Kind:       "Secret",
-		APIVersion: corev1.SchemeGroupVersion.String(),
-		Namespace:  ns,
-		Name:       name,
-	}
-	key := ctrl.ObjectKey{
-		Namespace: ns,
-		Name:      name,
-	}
-	if err := c.Get(ctx, key, &secret); err != nil && k8serrors.IsNotFound(err) {
-		return nil
-	} else if err != nil {
-		return nil
-	}
-
-	return &secret
 }
 
 // LookupPersistentVolumeClaim will look for any k8s PersistentVolumeClaim with a given name in a given namespace.
