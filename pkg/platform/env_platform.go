@@ -98,6 +98,50 @@ func GetEnvOrDefault(key string, def string) string {
 	return def
 }
 
+// GetEnvOrDefaultAsInt returns the integer value of the environment variable if present and valid (> 0), or def otherwise.
+func GetEnvOrDefaultAsInt(key string, def int) int {
+	valStr := GetEnvOrDefault(key, "")
+	if valStr != "" {
+		val, err := strconv.Atoi(strings.TrimSpace(valStr))
+		if err != nil {
+			log.Errorf(err, "could not parse %s environment variable, fallback to default value", key)
+
+			return def
+		}
+		if val <= 0 {
+			log.Errorf(nil, "%s environment variable must be greater than 0, got %d, fallback to default value", key, val)
+
+			return def
+		}
+
+		return val
+	}
+
+	return def
+}
+
+// GetEnvOrDefaultAsFloat32 returns the float32 value of the environment variable if present and valid (> 0), or def otherwise.
+func GetEnvOrDefaultAsFloat32(key string, def float32) float32 {
+	valStr := GetEnvOrDefault(key, "")
+	if valStr != "" {
+		val, err := strconv.ParseFloat(strings.TrimSpace(valStr), 32)
+		if err != nil {
+			log.Errorf(err, "could not parse %s environment variable, fallback to default value", key)
+
+			return def
+		}
+		if val <= 0 {
+			log.Errorf(nil, "%s environment variable must be greater than 0, got %v, fallback to default value", key, val)
+
+			return def
+		}
+
+		return float32(val)
+	}
+
+	return def
+}
+
 func getEnvOrDefaultSlice(key string, def string) []string {
 	env, exists := os.LookupEnv(key)
 	if !exists {
@@ -108,17 +152,7 @@ func getEnvOrDefaultSlice(key string, def string) []string {
 }
 
 func buildTimeout() time.Duration {
-	buildTimeoutSeconds := GetEnvOrDefault("BUILD_TIMEOUT_SECONDS", "")
-	if buildTimeoutSeconds != "" {
-		seconds, err := strconv.Atoi(buildTimeoutSeconds)
-		if err == nil {
-			return time.Duration(seconds) * time.Second
-		}
-
-		log.Error(err, "could not parse BUILD_TIMEOUT_SECONDS environment variable, fallback to default value")
-	}
-
-	return DefaultBuildTimeout
+	return time.Duration(GetEnvOrDefaultAsInt("BUILD_TIMEOUT_SECONDS", int(DefaultBuildTimeout.Seconds()))) * time.Second
 }
 
 func maxRunningBuilds() int32 {

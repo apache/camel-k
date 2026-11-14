@@ -139,11 +139,10 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 
 	cfg, err := config.GetConfig()
 	exitOnError(err, "cannot get client config")
-	// Increase maximum burst that is used by client-side throttling,
-	// to prevent the requests made to apply the bundled Kamelets
-	// from being throttled.
-	cfg.QPS = 20
-	cfg.Burst = 200
+	// Increase maximum burst and QPS used by client-side throttling,
+	// to prevent API requests from being throttled during startup or high reconciliation loads.
+	cfg.QPS = platform.GetClientQPS()
+	cfg.Burst = platform.GetClientBurst()
 	bootstrapClient, err := client.NewClientWithConfig(false, cfg)
 	exitOnError(err, "cannot initialize client")
 

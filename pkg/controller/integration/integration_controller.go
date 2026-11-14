@@ -31,6 +31,7 @@ import (
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrlcontroller "sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -250,6 +251,9 @@ func enqueueRequestsFromConfigFunc(ctx context.Context, c client.Client, res ctr
 func add(mgr manager.Manager, c client.Client, r reconcile.Reconciler) error {
 	b := builder.ControllerManagedBy(mgr).
 		Named("integration-controller").
+		WithOptions(ctrlcontroller.Options{
+			MaxConcurrentReconciles: platform.GetIntegrationMaxConcurrentReconciles(),
+		}).
 		// Watch for changes to primary resource Integration
 		For(&v1.Integration{}, builder.WithPredicates(
 			platform.FilteringFuncs[ctrl.Object]{

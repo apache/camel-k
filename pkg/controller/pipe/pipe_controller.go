@@ -70,7 +70,10 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 }
 
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
-	ctrl, err := controller.New("pipe-controller", mgr, controller.Options{Reconciler: r})
+	ctrl, err := controller.New("pipe-controller", mgr, controller.Options{
+		Reconciler:              r,
+		MaxConcurrentReconciles: platform.GetPipeMaxConcurrentReconciles(),
+	})
 	if err != nil {
 		return err
 	}
