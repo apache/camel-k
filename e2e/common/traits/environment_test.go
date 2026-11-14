@@ -106,7 +106,7 @@ func TestEnvironmentTrait(t *testing.T) {
 				Value: customValue,
 			}))
 
-			expectedMessage := "custom=" + customValue
+			expectedMessage := "integration=" + name + ";custom=" + customValue
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutMedium).Should(ContainSubstring(expectedMessage))
 		})
 	})
