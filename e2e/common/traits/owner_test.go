@@ -84,8 +84,8 @@ func TestOwnerTrait(t *testing.T) {
 
 			g.Expect(deployment.OwnerReferences).To(HaveLen(1))
 			ownerReference := deployment.OwnerReferences[0]
-			g.Expect(ownerReference.APIVersion).To(Equal(integration.APIVersion))
-			g.Expect(ownerReference.Kind).To(Equal(integration.Kind))
+			g.Expect(ownerReference.APIVersion).To(Equal(v1.SchemeGroupVersion.String()))
+			g.Expect(ownerReference.Kind).To(Equal("Integration"))
 			g.Expect(ownerReference.Name).To(Equal(integration.Name))
 			g.Expect(ownerReference.UID).To(Equal(integration.UID))
 			g.Expect(ownerReference.Controller).To(PointTo(BeTrue()))
