@@ -63,11 +63,14 @@ func TestEnvironmentTrait(t *testing.T) {
 
 			g.Expect(envVars).To(HaveKey("NAMESPACE"))
 			g.Expect(envVars["NAMESPACE"].ValueFrom).NotTo(BeNil())
+			g.Expect(envVars["NAMESPACE"].ValueFrom.FieldRef).NotTo(BeNil())
 			g.Expect(envVars["NAMESPACE"].ValueFrom.FieldRef.FieldPath).To(Equal("metadata.namespace"))
 			g.Expect(envVars).To(HaveKey("POD_NAME"))
 			g.Expect(envVars["POD_NAME"].ValueFrom).NotTo(BeNil())
+			g.Expect(envVars["POD_NAME"].ValueFrom.FieldRef).NotTo(BeNil())
 			g.Expect(envVars["POD_NAME"].ValueFrom.FieldRef.FieldPath).To(Equal("metadata.name"))
-			g.Expect(envVars).To(HaveKeyWithValue("CAMEL_K_TEST_VALUE", HaveField("Value", customValue)))
+			g.Expect(envVars).To(HaveKey("CAMEL_K_TEST_VALUE"))
+			g.Expect(envVars["CAMEL_K_TEST_VALUE"].Value).To(Equal(customValue))
 
 			expectedMessage := "namespace=" + ns + ";pod=" + pod.Name + ";integration=" + name + ";custom=" + customValue
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutMedium).Should(ContainSubstring(expectedMessage))
