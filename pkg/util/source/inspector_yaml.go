@@ -41,6 +41,9 @@ func (i YAMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 	}
 
 	for _, definition := range definitions {
+		if beans, ok := definition["beans"]; ok {
+			i.parseBeans(beans, meta)
+		}
 		if err := i.parseDefinition(definition, meta); err != nil {
 			return err
 		}
@@ -63,6 +66,54 @@ func (i YAMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 	meta.PassiveEndpoints = i.hasOnlyPassiveEndpoints(meta.FromURIs)
 
 	return nil
+}
+
+// parseBeans retains top-level YAML bean definitions for consumers that can map their
+// statically declared properties. It does not instantiate beans or resolve references.
+func (i YAMLInspector) parseBeans(content any, meta *Metadata) {
+	beans, ok := content.([]any)
+	if !ok {
+		return
+	}
+
+	for _, rawBean := range beans {
+		bean, ok := rawBean.(map[any]any)
+		if !ok {
+			continue
+		}
+
+		name, ok := bean["name"].(string)
+		if !ok {
+			continue
+		}
+		name = strings.TrimSpace(name)
+		if name == "" {
+			continue
+		}
+
+		definition := BeanDefinition{Name: name, Properties: make(map[string]string)}
+		if beanType, ok := bean["type"].(string); ok {
+			definition.Type = strings.TrimSpace(beanType)
+		}
+
+		if rawProperties, ok := bean["properties"].(map[any]any); ok {
+			for rawKey, rawValue := range rawProperties {
+				key, ok := rawKey.(string)
+				if !ok {
+					continue
+				}
+				key = strings.TrimSpace(key)
+				if key == "" {
+					continue
+				}
+				if value, ok := scalarBeanProperty(rawValue); ok {
+					definition.Properties[key] = value
+				}
+			}
+		}
+
+		meta.Beans = append(meta.Beans, definition)
+	}
 }
 
 //nolint:nestif

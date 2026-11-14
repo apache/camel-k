@@ -912,3 +912,85 @@ func TestYAMLErrorHandlerKamelet(t *testing.T) {
 		})
 	})
 }
+
+func TestYAMLBeanDefinitions(t *testing.T) {
+	inspector := newTestYAMLInspector(t)
+	source := `
+- beans:
+    - name: apiClient
+      type: org.example.ApiClient
+      properties:
+        host: api.internal
+        port: 5672
+        enabled: true
+        tenant: "${API_TENANT}"
+        username: admin
+        password: admin
+        apiKey: configured-key
+        nested:
+          enabled: true
+        endpointUri: https://admin:secret@api.internal:8443
+        endpointWithToken: https://api.internal?token=secret
+    - name: metricsRegistry
+      type: org.example.MetricsRegistry
+      properties:
+        name: orders
+        retries: 3
+        labels:
+          - one
+          - two
+- route:
+    from:
+      uri: timer:tick
+      steps:
+        - to: log:info
+`
+
+	assertExtractYAML(t, inspector, source, func(meta *Metadata) {
+		require.Len(t, meta.Beans, 2)
+		assert.Equal(t, "apiClient", meta.Beans[0].Name)
+		assert.Equal(t, "org.example.ApiClient", meta.Beans[0].Type)
+		assert.Equal(t, map[string]string{
+			"host":              "api.internal",
+			"port":              "5672",
+			"enabled":           "true",
+			"tenant":            "${API_TENANT}",
+			"username":          "admin",
+			"password":          "admin",
+			"apiKey":            "configured-key",
+			"endpointUri":       "https://admin:secret@api.internal:8443",
+			"endpointWithToken": "https://api.internal?token=secret",
+		}, meta.Beans[0].Properties)
+		assert.Equal(t, "metricsRegistry", meta.Beans[1].Name)
+		assert.Equal(t, "org.example.MetricsRegistry", meta.Beans[1].Type)
+		assert.Equal(t, map[string]string{
+			"name":    "orders",
+			"retries": "3",
+		}, meta.Beans[1].Properties)
+		assert.Equal(t, []string{"timer:tick"}, meta.FromURIs)
+	})
+}
+
+func TestYAMLBeanDefinitionsIgnoreEntriesWithoutNames(t *testing.T) {
+	inspector := newTestYAMLInspector(t)
+	source := `
+- beans:
+    - type: org.example.MissingName
+      properties:
+        host: ignored.example
+    - name: ""
+      type: org.example.EmptyName
+    - name: "   "
+      properties:
+        host: ignored.example
+    - name: " usable "
+      properties:
+        " host ": usable.example
+`
+
+	assertExtractYAML(t, inspector, source, func(meta *Metadata) {
+		require.Len(t, meta.Beans, 1)
+		assert.Equal(t, "usable", meta.Beans[0].Name)
+		assert.Equal(t, map[string]string{"host": "usable.example"}, meta.Beans[0].Properties)
+	})
+}
