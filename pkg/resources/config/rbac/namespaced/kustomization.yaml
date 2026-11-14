@@ -32,6 +32,7 @@ resources:
 - operator-role-podmonitors.yaml
 - operator-role-strimzi.yaml
 - operator-role-arkmq.yaml
+- operator-cluster-role-metrics-auth.yaml
 - operator-role-binding.yaml
 - operator-role-binding-certmanager.yaml
 - operator-role-binding-events.yaml
@@ -42,3 +43,4 @@ resources:
 - operator-role-binding-podmonitors.yaml
 - operator-role-binding-strimzi.yaml
 - operator-role-binding-arkmq.yaml
+- operator-cluster-role-binding-metrics-auth.yaml

@@ -23,3 +23,11 @@ commonLabels:
 
 resources:
 - ../../rbac/namespaced
+
+patches:
+ - target:
+      kind: ClusterRoleBinding
+   patch: |-
+     - op: add
+       path: /subjects/0/namespace
+       value: "{{ .Release.Namespace }}"

@@ -29,3 +29,7 @@ spec:
       camel.apache.org/component: operator
   podMetricsEndpoints:
     - port: metrics
+      scheme: https
+      tlsConfig:
+        # The operator generates a self-signed certificate when no certificate is configured.
+        insecureSkipVerify: true
