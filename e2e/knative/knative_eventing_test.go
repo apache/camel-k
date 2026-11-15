@@ -57,6 +57,10 @@ func TestKnativeEventingChannel(t *testing.T) {
 		).Should(Equal(corev1.ConditionTrue))
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, consumerName), TestTimeoutLong).
 			Should(Equal(corev1.PodRunning))
+		// Ensure Knative has reconciled the subscription before publishing the event.
+		ExpectExecSucceed(t, g, Kubectl(
+			"wait", "--for=condition=Ready", "subscription/"+channelName+"-"+consumerName, "--timeout=120s", "-n", ns,
+		))
 
 		g.Expect(KamelRun(t, ctx, ns, "files/knative-channel-producer.yaml", "--name", producerName).Execute()).To(Succeed())
 		g.Eventually(
