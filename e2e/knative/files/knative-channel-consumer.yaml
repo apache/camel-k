@@ -19,5 +19,7 @@
 - from:
     uri: knative:channel/camel-k-eventing
     steps:
+      - convertBodyTo:
+          type: java.lang.String
       - log:
           message: "Received Knative event: ${body}"
