@@ -144,6 +144,32 @@ func TestCronFromURI(t *testing.T) {
 		{
 			uri: "quartz:trigger?cron=0+0+0/4+*+*+?&fireNow=true", // invalid
 		},
+		{
+			uri:        "quartz:trigger?cron=0+0+9+?+*+2", // Monday in Quartz
+			cron:       "0 9 ? * 1",
+			components: "quartz",
+		},
+		{
+			uri:        "quartz:trigger?cron=0+0+9+?+*+2-6", // MON-FRI in Quartz
+			cron:       "0 9 ? * 1-5",
+			components: "quartz",
+		},
+		{
+			uri:        "quartz:trigger?cron=0+0+9+?+*+1,7", // SUN and SAT in Quartz
+			cron:       "0 9 ? * 0,6",
+			components: "quartz",
+		},
+		{
+			uri:        "quartz:trigger?cron=0+0+9+?+*+1/2",
+			cron:       "0 9 ? * 0/2",
+			components: "quartz",
+		},
+		{
+			uri: "quartz:trigger?cron=0+0+9+?+*+6L", // invalid
+		},
+		{
+			uri: "quartz:trigger?cron=0+0+9+?+*+6%233", // invalid
+		},
 
 		// Cron only
 		{
@@ -167,6 +193,16 @@ func TestCronFromURI(t *testing.T) {
 		{
 			uri:        "cron:tab?schedule=0+0,6+0/4+*+*+MON-THU",
 			cron:       "0,6 0/4 * * MON-THU",
+			components: "cron",
+		},
+		{
+			uri:        "cron:tab?schedule=0+0+9+?+*+2-6",
+			cron:       "0 9 ? * 1-5",
+			components: "cron",
+		},
+		{
+			uri:        "cron:tab?schedule=0 9 * * 1",
+			cron:       "0 9 * * 1",
 			components: "cron",
 		},
 		{

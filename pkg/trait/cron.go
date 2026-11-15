@@ -50,6 +50,10 @@ const (
 	genericCronComponentFallbackScheme = "quartz"
 
 	overriddenFromURI = "timer:camel-k-overridden-cron?delay=0&period=1&repeatCount=1"
+
+	// Quartz numbers the days of the week from 1 (SUN) to 7 (SAT),
+	// while Kubernetes CronJob schedules use 0 (SUN) to 6 (SAT).
+	quartzFirstDayOfWeek = 1
 )
 
 type cronTrait struct {
@@ -70,6 +74,9 @@ type cronExtractor func(string) *cronInfo
 
 var (
 	camelTimerPeriodMillis = regexp.MustCompile(`^[0-9]+$`)
+	cronStep               = regexp.MustCompile(`^[1-9][0-9]*$`)
+	cronDayOfWeekNames     = regexp.MustCompile(`(?i)^(SUN|MON|TUE|WED|THU|FRI|SAT)(-(SUN|MON|TUE|WED|THU|FRI|SAT))?$`)
+	quartzDayOfWeekNumbers = regexp.MustCompile(`^([1-7])(?:-([1-7]))?$`)
 
 	supportedCamelComponents = map[string]cronExtractor{
 		"timer":  timerToCronInfo,
@@ -496,8 +503,11 @@ func cronEquivalent(cron1, cron2 string) bool {
 
 func toKubernetesCronSchedule(cron string) string {
 	parts := strings.Split(cron, " ")
+	quartzFormat := false
 
 	if len(parts) > 5 {
+		// Quartz format, starting with seconds
+		quartzFormat = true
 		// drop seconds if they can be ignored
 		if parts[0] == "0" {
 			parts = parts[1:]
@@ -512,6 +522,14 @@ func toKubernetesCronSchedule(cron string) string {
 	}
 
 	if len(parts) == 5 {
+		if quartzFormat {
+			dayOfWeek, ok := quartzToKubernetesDayOfWeek(parts[4])
+			if !ok {
+				return ""
+			}
+			parts[4] = dayOfWeek
+		}
+
 		return strings.Join(parts, " ")
 	}
 
@@ -545,4 +563,44 @@ func (t *cronTrait) changeSourcesCronURI(e *Environment) (bool, error) {
 	}
 
 	return anyRouteReplaced, nil
+}
+
+// quartzToKubernetesDayOfWeek converts a Quartz day-of-week field (1-7 or SUN-SAT) to the
+// Kubernetes CronJob format (0-6 or SUN-SAT). It returns false if the field cannot be
+// converted, e.g. when it uses Quartz specific characters such as "L" or "#".
+func quartzToKubernetesDayOfWeek(field string) (string, bool) {
+	items := strings.Split(field, ",")
+	for i, item := range items {
+		base, step, hasStep := strings.Cut(item, "/")
+		if hasStep && !cronStep.MatchString(step) {
+			return "", false
+		}
+		if base == "*" || base == "?" || cronDayOfWeekNames.MatchString(base) {
+			continue
+		}
+
+		days := quartzDayOfWeekNumbers.FindStringSubmatch(base)
+		if days == nil {
+			return "", false
+		}
+		converted := quartzToKubernetesDay(days[1])
+		if days[2] != "" {
+			if days[2] < days[1] {
+				return "", false
+			}
+			converted += "-" + quartzToKubernetesDay(days[2])
+		}
+		if hasStep {
+			converted += "/" + step
+		}
+		items[i] = converted
+	}
+
+	return strings.Join(items, ","), true
+}
+
+func quartzToKubernetesDay(day string) string {
+	value, _ := strconv.Atoi(day)
+
+	return strconv.Itoa(value - quartzFirstDayOfWeek)
 }
