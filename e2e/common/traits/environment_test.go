@@ -7,7 +7,7 @@
 Licensed to the Apache Software Foundation (ASF) under one or more
 contributor license agreements.  See the NOTICE file distributed with
 this work for additional information regarding copyright ownership.
-The ASF licenses this file to you under the Apache License, Version 2.0
+The ASF licenses this file to You under the Apache License, Version 2.0
 (the "License"); you may not use this file except in compliance with
 the License.  You may obtain a copy of the License at
 
@@ -55,24 +55,23 @@ func TestEnvironmentTrait(t *testing.T) {
 			g.Expect(pod).NotTo(BeNil())
 			g.Expect(pod.Spec.Containers).To(HaveLen(1))
 
-			env := pod.Spec.Containers[0].Env
-			g.Expect(env).To(ContainElement(corev1.EnvVar{
+			g.Expect(pod.Spec.Containers[0].Env).To(ContainElement(corev1.EnvVar{
 				Name: "NAMESPACE",
 				ValueFrom: &corev1.EnvVarSource{
 					FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"},
 				},
 			}))
-			g.Expect(env).To(ContainElement(corev1.EnvVar{
+			g.Expect(pod.Spec.Containers[0].Env).To(ContainElement(corev1.EnvVar{
 				Name: "POD_NAME",
 				ValueFrom: &corev1.EnvVarSource{
 					FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"},
 				},
 			}))
-			g.Expect(env).To(ContainElement(corev1.EnvVar{
+			g.Expect(pod.Spec.Containers[0].Env).To(ContainElement(corev1.EnvVar{
 				Name:  "CAMEL_K_INTEGRATION",
 				Value: name,
 			}))
-			g.Expect(env).To(ContainElement(corev1.EnvVar{
+			g.Expect(pod.Spec.Containers[0].Env).To(ContainElement(corev1.EnvVar{
 				Name:  "CAMEL_K_TEST_VALUE",
 				Value: customValue,
 			}))
@@ -100,13 +99,12 @@ func TestEnvironmentTrait(t *testing.T) {
 			g.Expect(pod).NotTo(BeNil())
 			g.Expect(pod.Spec.Containers).To(HaveLen(1))
 
-			env := pod.Spec.Containers[0].Env
-			g.Expect(env).NotTo(ContainElement(HaveField("Name", Equal("NAMESPACE"))))
-			g.Expect(env).NotTo(ContainElement(HaveField("Name", Equal("POD_NAME"))))
-			g.Expect(env).NotTo(ContainElement(HaveField("Name", Equal("HTTP_PROXY"))))
-			g.Expect(env).NotTo(ContainElement(HaveField("Name", Equal("HTTPS_PROXY"))))
-			g.Expect(env).NotTo(ContainElement(HaveField("Name", Equal("NO_PROXY"))))
-			g.Expect(env).To(ContainElement(corev1.EnvVar{
+			g.Expect(pod.Spec.Containers[0].Env).NotTo(ContainElement(HaveField("Name", Equal("NAMESPACE"))))
+			g.Expect(pod.Spec.Containers[0].Env).NotTo(ContainElement(HaveField("Name", Equal("POD_NAME"))))
+			g.Expect(pod.Spec.Containers[0].Env).NotTo(ContainElement(HaveField("Name", Equal("HTTP_PROXY"))))
+			g.Expect(pod.Spec.Containers[0].Env).NotTo(ContainElement(HaveField("Name", Equal("HTTPS_PROXY"))))
+			g.Expect(pod.Spec.Containers[0].Env).NotTo(ContainElement(HaveField("Name", Equal("NO_PROXY"))))
+			g.Expect(pod.Spec.Containers[0].Env).To(ContainElement(corev1.EnvVar{
 				Name:  "CAMEL_K_TEST_VALUE",
 				Value: customValue,
 			}))
