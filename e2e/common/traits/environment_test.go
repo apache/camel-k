@@ -58,13 +58,13 @@ func TestEnvironmentTrait(t *testing.T) {
 			g.Expect(pod.Spec.Containers[0].Env).To(ContainElement(corev1.EnvVar{
 				Name: "NAMESPACE",
 				ValueFrom: &corev1.EnvVarSource{
-					FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"},
+					FieldRef: &corev1.ObjectFieldSelector{APIVersion: "v1", FieldPath: "metadata.namespace"},
 				},
 			}))
 			g.Expect(pod.Spec.Containers[0].Env).To(ContainElement(corev1.EnvVar{
 				Name: "POD_NAME",
 				ValueFrom: &corev1.EnvVarSource{
-					FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"},
+					FieldRef: &corev1.ObjectFieldSelector{APIVersion: "v1", FieldPath: "metadata.name"},
 				},
 			}))
 			g.Expect(pod.Spec.Containers[0].Env).To(ContainElement(corev1.EnvVar{
