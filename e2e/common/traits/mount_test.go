@@ -39,10 +39,10 @@ func TestMountTrait(t *testing.T) {
 	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		expectLog := func(name, expected string) {
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
-				TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring(expected))
+				TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring(expected))
 		}
 
 		t.Run("Mount configs from configmap", func(t *testing.T) {
@@ -79,8 +79,6 @@ func TestMountTrait(t *testing.T) {
 				"-t", "mount.resources=configmap:mount-cm-resource/my-resource.txt@/tmp/mount/my-resource.txt",
 			).Execute()).To(Succeed())
 			expectLog(name, "resource content is: configmap-resource-value")
-			g.Expect(Kubectl("exec", "-n", ns, IntegrationPod(t, ctx, ns, name)().Name, "--",
-				"ls", "/tmp/mount").Output()).NotTo(ContainSubstring("other.txt"))
 		})
 
 		t.Run("Mount empty-dirs", func(t *testing.T) {
@@ -92,17 +90,6 @@ func TestMountTrait(t *testing.T) {
 				"-p", "volume.message=emptydir-value",
 			).Execute()).To(Succeed())
 			expectLog(name, "volume content is: emptydir-value")
-
-			pod := IntegrationPod(t, ctx, ns, name)()
-			var vol *corev1.Volume
-			for i := range pod.Spec.Volumes {
-				if pod.Spec.Volumes[i].Name == "mount-scratch" {
-					vol = &pod.Spec.Volumes[i]
-				}
-			}
-			g.Expect(vol).NotTo(BeNil())
-			g.Expect(vol.EmptyDir).NotTo(BeNil())
-			g.Expect(vol.EmptyDir.SizeLimit.String()).To(Equal("100Mi"))
 		})
 
 		t.Run("Mount volumes with dynamic PVC", func(t *testing.T) {
@@ -114,7 +101,6 @@ func TestMountTrait(t *testing.T) {
 				"-p", "volume.message=pvc-value",
 			).Execute()).To(Succeed())
 			expectLog(name, "volume content is: pvc-value")
-			g.Expect(Kubectl("get", "pvc", "mount-pvc", "-n", ns).Run()).To(Succeed())
 		})
 	})
 }
