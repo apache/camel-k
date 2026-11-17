@@ -32,7 +32,8 @@ spec:
         - camel.component.nats.servers=nats://nats.%%%.svc:4222
     keda:
       enabled: true
-      minReplicaCount: 0
+      # Starts with one replica so the consumer creates the stream and the durable consumer; the test then lowers it to 0.
+      minReplicaCount: 1
       maxReplicaCount: 1
       cooldownPeriod: 20
       pollingInterval: 10

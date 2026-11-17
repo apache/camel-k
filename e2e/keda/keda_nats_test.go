@@ -55,9 +55,14 @@ func TestNatsKedaAutoscale(t *testing.T) {
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["consumer"]).To(Equal("keda-durable"))
 			g.Expect(scaledObj.Spec.Triggers[0].Metadata["natsServerMonitoringEndpoint"]).To(Equal("nats." + ns + ".svc:8222"))
 
-			// Start consumer; it creates the stream and the durable consumer
+			// Start consumer; it creates the stream and the durable consumer. Until both exist the scaler has nothing to
+			// read, and a producer publishing to JetStream gets no responder, so the consumer starts with minReplicaCount 1.
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, consumerName, v1.IntegrationConditionReady), TestTimeoutLong).
 				Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, consumerName), TestTimeoutMedium).
+				Should(ContainSubstring("JetStream stream 'ORDERS' created"))
+			ExpectExecSucceed(t, g, Kubectl("patch", "it", consumerName, "-n", ns, "--type=merge",
+				"-p", `{"spec":{"traits":{"keda":{"minReplicaCount":0}}}}`))
 
 			// Scale down to 0 when idle
 			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), TestTimeoutMedium).
