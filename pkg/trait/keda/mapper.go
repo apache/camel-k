@@ -22,6 +22,7 @@ import (
 )
 
 // ScaleMapper defines the interface for mapping Camel component URIs to KEDA triggers.
+// Map returns an empty scaler type when the endpoint has nothing a KEDA scaler can measure.
 type ScaleMapper interface {
 	Component() string
 	Map(pathValue string, params map[string]string, props map[string]string) (kedaType string, metadata map[string]string)
@@ -52,6 +53,10 @@ func MapToKedaTrigger(rawURI string, props map[string]string) (*traitv1.KedaTrig
 		return nil, nil
 	}
 	kedaType, metadata := mapper.Map(pathValue, params, props)
+	if kedaType == "" {
+		// The mapper found nothing to scale on for this endpoint.
+		return nil, nil
+	}
 
 	return &traitv1.KedaTrigger{
 		Type:     kedaType,
