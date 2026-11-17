@@ -57,7 +57,7 @@ func TestOwnerTrait(t *testing.T) {
 				"-t", "owner.target-annotations="+selectedAnnotation+","+defaultContainerAnnotation,
 			).Execute()).To(Succeed())
 
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
 				Should(Equal(corev1.ConditionTrue))
 
 			integration := Integration(t, ctx, ns, name)()
@@ -88,8 +88,10 @@ func TestOwnerTrait(t *testing.T) {
 			g.Expect(ownerReference.Kind).To(Equal("Integration"))
 			g.Expect(ownerReference.Name).To(Equal(integration.Name))
 			g.Expect(ownerReference.UID).To(Equal(integration.UID))
-			g.Expect(ownerReference.Controller).To(PointTo(BeTrue()))
-			g.Expect(ownerReference.BlockOwnerDeletion).To(PointTo(BeTrue()))
+			g.Expect(ownerReference.Controller).NotTo(BeNil())
+			g.Expect(*ownerReference.Controller).To(BeTrue())
+			g.Expect(ownerReference.BlockOwnerDeletion).NotTo(BeNil())
+			g.Expect(*ownerReference.BlockOwnerDeletion).To(BeTrue())
 		})
 
 		t.Run("wildcard propagates all labels and annotations", func(t *testing.T) {
