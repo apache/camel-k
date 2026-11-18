@@ -86,7 +86,7 @@ func TestOwnerTrait(t *testing.T) {
 			g.Expect(*ownerReference.BlockOwnerDeletion).To(BeTrue())
 		})
 
-		t.Run("existing Deployment annotation is not overwritten", func(t *testing.T) {
+		t.Run("existing Pod template annotation is not overwritten", func(t *testing.T) {
 			g := NewWithT(t)
 			name := RandomizedSuffixName("owner-annotation-conflict")
 			defaultContainerAnnotation := "kubectl.kubernetes.io/default-container"
@@ -102,8 +102,7 @@ func TestOwnerTrait(t *testing.T) {
 			g.Eventually(Deployment(t, ctx, ns, name), TestTimeoutMedium).ShouldNot(BeNil())
 
 			deployment := Deployment(t, ctx, ns, name)()
-			g.Expect(deployment.Annotations).To(HaveKey(defaultContainerAnnotation))
-			g.Expect(deployment.Annotations[defaultContainerAnnotation]).NotTo(Equal("must-not-overwrite"))
+			g.Expect(deployment.Spec.Template.Annotations).To(HaveKeyWithValue(defaultContainerAnnotation, "integration"))
 		})
 
 		t.Run("wildcard propagates all labels and annotations", func(t *testing.T) {
