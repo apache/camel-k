@@ -54,9 +54,13 @@ func TestSecurityContextTrait(t *testing.T) {
 			g.Expect(pod.Spec.SecurityContext.SeccompProfile.Type).To(Equal(corev1.SeccompProfileTypeRuntimeDefault))
 		})
 
-		t.Run("run with custom secuirty context", func(t *testing.T) {
+		t.Run("Run with custom security context", func(t *testing.T) {
 			name := RandomizedSuffixName("java-sc-custom")
-			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "security-context.run-as-user=2000", "-t", "security-context.seccomp-profile-type=Unconfined").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name,
+				"-t", "security-context.run-as-user=2000",
+				"-t", "security-context.seccomp-profile-type=Unconfined",
+			).Execute()).To(Succeed())
+
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -67,6 +71,33 @@ func TestSecurityContextTrait(t *testing.T) {
 			g.Expect(pod.Spec.SecurityContext.RunAsNonRoot).To(Equal(ptr.To[bool](true)))
 			g.Expect(pod.Spec.SecurityContext.SeccompProfile).NotTo(BeNil())
 			g.Expect(pod.Spec.SecurityContext.SeccompProfile.Type).To(Equal(corev1.SeccompProfileTypeUnconfined))
+		})
+
+		t.Run("Run as root is blocked when run-as-non-root is true", func(t *testing.T) {
+			name := RandomizedSuffixName("java-sc-root")
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name,
+				"-t", "security-context.run-as-user=0",
+				"-t", "security-context.run-as-non-root=true",
+			).Execute()).To(Succeed())
+
+			// The kubelet must refuse to start a container that would run as root.
+			waitingReason := func() string {
+				pod := IntegrationPod(t, ctx, ns, name)()
+				if pod == nil || len(pod.Status.ContainerStatuses) == 0 {
+					return ""
+				}
+				waiting := pod.Status.ContainerStatuses[0].State.Waiting
+				if waiting == nil {
+					return ""
+				}
+				return waiting.Reason
+			}
+			g.Eventually(waitingReason, TestTimeoutLong).Should(Equal("CreateContainerConfigError"))
+
+			pod := IntegrationPod(t, ctx, ns, name)()
+			g.Expect(pod.Spec.SecurityContext).NotTo(BeNil())
+			g.Expect(pod.Spec.SecurityContext.RunAsUser).To(Equal(ptr.To[int64](0)))
+			g.Expect(pod.Spec.SecurityContext.RunAsNonRoot).To(Equal(ptr.To[bool](true)))
 		})
 	})
 }
