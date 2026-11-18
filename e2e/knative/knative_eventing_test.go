@@ -49,11 +49,15 @@ func TestKnativeEventingChannel(t *testing.T) {
 		))
 
 		// Start the consumer first so it is subscribed before the producer sends its event.
-		// The route uses Camel's Knative component without explicit Knative trait options.
-		g.Expect(KamelRun(t, ctx, ns, "files/knative-channel-consumer.yaml", "--name", consumerName).Execute()).To(Succeed())
+		// Disable the Knative trait to avoid activating its deprecated behavior; the route
+		// uses Camel's Knative component directly.
+		g.Expect(KamelRun(t, ctx, ns, "files/knative-channel-consumer.yaml",
+			"--name", consumerName,
+			"-t", "knative.enabled=false",
+		).Execute()).To(Succeed())
 		g.Eventually(
 			IntegrationConditionStatus(t, ctx, ns, consumerName, v1.IntegrationConditionReady),
-			TestTimeoutLong,
+			TestTimeoutMedium,
 		).Should(Equal(corev1.ConditionTrue))
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, consumerName), TestTimeoutLong).
 			Should(Equal(corev1.PodRunning))
@@ -62,10 +66,12 @@ func TestKnativeEventingChannel(t *testing.T) {
 			"wait", "--for=condition=Ready", "subscription/"+channelName+"-"+consumerName, "--timeout=120s", "-n", ns,
 		))
 
-		g.Expect(KamelRun(t, ctx, ns, "files/knative-channel-producer.yaml", "--name", producerName).Execute()).To(Succeed())
+		g.Expect(KamelRun(t, ctx, ns, "files/knative-channel-producer.yaml",
+			"--name", producerName,
+			"-t", "knative.enabled=false",
+		).Execute()).To(Succeed())
 		g.Eventually(
 			IntegrationConditionStatus(t, ctx, ns, producerName, v1.IntegrationConditionReady),
-			TestTimeoutLong,
 		).Should(Equal(corev1.ConditionTrue))
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, producerName), TestTimeoutLong).
 			Should(Equal(corev1.PodRunning))
