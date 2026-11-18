@@ -93,7 +93,7 @@ func TestKnativeEventingChannel(t *testing.T) {
 		// The Camel Knative component needs its own environment configuration.
 		// This is deliberately supplied directly to the component, not by the deprecated trait.
 		channelURL, err := Kubectl(
-			"get", "channel", channelName, "-n", ns, "-o", "jsonpath={.status.address.url}",
+			"get", "channels.messaging.knative.dev", channelName, "-n", ns, "-o", "jsonpath={.status.address.url}",
 		).Output()
 		g.Expect(err).NotTo(HaveOccurred())
 		g.Expect(strings.TrimSpace(string(channelURL))).NotTo(BeEmpty())
@@ -116,7 +116,7 @@ func TestKnativeEventingChannel(t *testing.T) {
 			Should(Equal(corev1.PodRunning))
 
 		// With the deprecated trait disabled, create the Subscription explicitly.
-		// It targets the Knative Service created for the consumer Integration.
+		// It targets the Kubernetes Service created for the consumer Integration.
 		ExpectExecSucceed(t, g, Kubectl(
 			"apply", "-f", "files/knative-channel-subscription.yaml", "-n", ns,
 		))

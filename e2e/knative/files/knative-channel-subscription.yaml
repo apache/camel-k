@@ -25,7 +25,7 @@ spec:
     name: camel-k-eventing
   subscriber:
     ref:
-      apiVersion: serving.knative.dev/v1
+      apiVersion: v1
       kind: Service
       name: knative-channel-consumer
     uri: /channels/camel-k-eventing
