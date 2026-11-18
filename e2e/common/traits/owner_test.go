@@ -87,6 +87,7 @@ func TestOwnerTrait(t *testing.T) {
 		})
 
 		t.Run("existing Deployment annotation is not overwritten", func(t *testing.T) {
+			g := NewWithT(t)
 			name := RandomizedSuffixName("owner-annotation-conflict")
 			defaultContainerAnnotation := "kubectl.kubernetes.io/default-container"
 
@@ -106,6 +107,7 @@ func TestOwnerTrait(t *testing.T) {
 		})
 
 		t.Run("wildcard propagates all labels and annotations", func(t *testing.T) {
+			g := NewWithT(t)
 			name := RandomizedSuffixName("owner-wildcard")
 			labelOne := "owner-test-wildcard-one"
 			labelTwo := "owner-test-wildcard-two"
@@ -139,6 +141,7 @@ func TestOwnerTrait(t *testing.T) {
 		})
 
 		t.Run("disabled owner trait does not propagate metadata or set owner references", func(t *testing.T) {
+			g := NewWithT(t)
 			name := RandomizedSuffixName("owner-disabled")
 			label := "owner-test-disabled-label"
 			annotation := "kubectl.kubernetes.io/owner-test-disabled"
