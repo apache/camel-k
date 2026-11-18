@@ -97,7 +97,7 @@ func TestOwnerTrait(t *testing.T) {
 				"-t", "owner.target-annotations="+defaultContainerAnnotation,
 			).Execute()).To(Succeed())
 
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
 				Should(Equal(corev1.ConditionTrue))
 			g.Eventually(Deployment(t, ctx, ns, name), TestTimeoutMedium).ShouldNot(BeNil())
 
