@@ -36,15 +36,15 @@ import (
 )
 
 type knativeChannelResource struct {
-	Name            string `json:"name"`
-	Type            string `json:"type"`
-	EndpointKind    string `json:"endpointKind"`
-	URL             string `json:"url,omitempty"`
-	Path            string `json:"path,omitempty"`
+	Name             string `json:"name"`
+	Type             string `json:"type"`
+	EndpointKind     string `json:"endpointKind"`
+	URL              string `json:"url,omitempty"`
+	Path             string `json:"path,omitempty"`
 	ObjectAPIVersion string `json:"objectApiVersion"`
-	ObjectKind      string `json:"objectKind"`
-	ObjectName      string `json:"objectName"`
-	Reply           bool   `json:"reply"`
+	ObjectKind       string `json:"objectKind"`
+	ObjectName       string `json:"objectName"`
+	Reply            bool   `json:"reply"`
 }
 
 func knativeChannelConfiguration(channelName, endpointKind, channelURL string) (string, error) {
@@ -106,7 +106,7 @@ func TestKnativeEventingChannel(t *testing.T) {
 		g.Expect(KamelRun(t, ctx, ns, "files/knative-channel-consumer.yaml",
 			"--name", consumerName,
 			"-t", "knative.enabled=false",
-			"-e", "CAMEL_KNATIVE_CONFIGURATION="+consumerConfiguration,
+			"--env", "CAMEL_KNATIVE_CONFIGURATION="+consumerConfiguration,
 		).Execute()).To(Succeed())
 		g.Eventually(
 			IntegrationConditionStatus(t, ctx, ns, consumerName, v1.IntegrationConditionReady),
@@ -132,7 +132,7 @@ func TestKnativeEventingChannel(t *testing.T) {
 		g.Expect(KamelRun(t, ctx, ns, "files/knative-channel-producer.yaml",
 			"--name", producerName,
 			"-t", "knative.enabled=false",
-			"-e", "CAMEL_KNATIVE_CONFIGURATION="+producerConfiguration,
+			"--env", "CAMEL_KNATIVE_CONFIGURATION="+producerConfiguration,
 		).Execute()).To(Succeed())
 		g.Eventually(
 			IntegrationConditionStatus(t, ctx, ns, producerName, v1.IntegrationConditionReady),
