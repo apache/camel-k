@@ -61,6 +61,7 @@ func TestOwnerTrait(t *testing.T) {
 
 			integration := Integration(t, ctx, ns, name)()
 			g.Expect(integration).NotTo(BeNil())
+			g.Eventually(Deployment(t, ctx, ns, name), TestTimeoutMedium).ShouldNot(BeNil())
 
 			deployment := Deployment(t, ctx, ns, name)()
 			g.Expect(deployment).NotTo(BeNil())
