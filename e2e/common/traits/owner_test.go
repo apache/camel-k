@@ -43,8 +43,8 @@ func TestOwnerTrait(t *testing.T) {
 			name := RandomizedSuffixName("owner-selected")
 			selectedLabel := "owner-test-selected-label"
 			unselectedLabel := "owner-test-unselected-label"
-			selectedAnnotation := "kubectl.kubernetes.io/owner-test-selected"
-			unselectedAnnotation := "kubectl.kubernetes.io/owner-test-unselected"
+			selectedAnnotation := "owner-test.camel.apache.org/selected"
+			unselectedAnnotation := "owner-test.camel.apache.org/unselected"
 
 			g.Expect(KamelRun(t, ctx, ns, "files/PlatformHttpServer.java",
 				"--name", name,
@@ -111,8 +111,8 @@ func TestOwnerTrait(t *testing.T) {
 			name := RandomizedSuffixName("owner-wildcard")
 			labelOne := "owner-test-wildcard-one"
 			labelTwo := "owner-test-wildcard-two"
-			annotationOne := "kubectl.kubernetes.io/owner-test-wildcard-one"
-			annotationTwo := "kubectl.kubernetes.io/owner-test-wildcard-two"
+			annotationOne := "owner-test.camel.apache.org/wildcard-one"
+			annotationTwo := "owner-test.camel.apache.org/wildcard-two"
 
 			g.Expect(KamelRun(t, ctx, ns, "files/PlatformHttpServer.java",
 				"--name", name,
@@ -144,7 +144,7 @@ func TestOwnerTrait(t *testing.T) {
 			g := NewWithT(t)
 			name := RandomizedSuffixName("owner-disabled")
 			label := "owner-test-disabled-label"
-			annotation := "kubectl.kubernetes.io/owner-test-disabled"
+			annotation := "owner-test.camel.apache.org/disabled"
 
 			g.Expect(KamelRun(t, ctx, ns, "files/PlatformHttpServer.java",
 				"--name", name,
