@@ -37,8 +37,9 @@ import (
 func TestOwnerTrait(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, _ *WithT, ns string) {
 		t.Run("selected labels and annotations are propagated to the Deployment", func(t *testing.T) {
+			g := NewWithT(t)
 			name := RandomizedSuffixName("owner-selected")
 			selectedLabel := "owner-test-selected-label"
 			unselectedLabel := "owner-test-unselected-label"
@@ -84,7 +85,6 @@ func TestOwnerTrait(t *testing.T) {
 			g.Expect(ownerReference.BlockOwnerDeletion).NotTo(BeNil())
 			g.Expect(*ownerReference.BlockOwnerDeletion).To(BeTrue())
 		})
-
 
 		t.Run("existing Deployment annotation is not overwritten", func(t *testing.T) {
 			name := RandomizedSuffixName("owner-annotation-conflict")
