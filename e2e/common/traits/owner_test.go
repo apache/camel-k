@@ -44,7 +44,6 @@ func TestOwnerTrait(t *testing.T) {
 			unselectedLabel := "owner-test-unselected-label"
 			selectedAnnotation := "kubectl.kubernetes.io/owner-test-selected"
 			unselectedAnnotation := "kubectl.kubernetes.io/owner-test-unselected"
-			defaultContainerAnnotation := "kubectl.kubernetes.io/default-container"
 
 			g.Expect(KamelRun(t, ctx, ns, "files/PlatformHttpServer.java",
 				"--name", name,
@@ -52,9 +51,8 @@ func TestOwnerTrait(t *testing.T) {
 				"--label", unselectedLabel+"=unselected",
 				"--annotation", selectedAnnotation+"=selected",
 				"--annotation", unselectedAnnotation+"=unselected",
-				"--annotation", defaultContainerAnnotation+"=must-not-overwrite",
 				"-t", "owner.target-labels="+selectedLabel,
-				"-t", "owner.target-annotations="+selectedAnnotation+","+defaultContainerAnnotation,
+				"-t", "owner.target-annotations="+selectedAnnotation,
 			).Execute()).To(Succeed())
 
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
@@ -75,13 +73,6 @@ func TestOwnerTrait(t *testing.T) {
 			g.Expect(deployment.Spec.Template.Annotations).To(HaveKeyWithValue(selectedAnnotation, "selected"))
 			g.Expect(deployment.Spec.Template.Annotations).NotTo(HaveKey(unselectedAnnotation))
 
-			// The Deployment trait sets this annotation before the Owner trait runs.
-			// Owner propagation must not overwrite metadata already present on a resource.
-			g.Expect(deployment.Annotations).To(HaveKey(defaultContainerAnnotation))
-			g.Expect(deployment.Annotations[defaultContainerAnnotation]).NotTo(Equal("must-not-overwrite"))
-			g.Expect(deployment.Spec.Template.Annotations[defaultContainerAnnotation]).
-				NotTo(Equal("must-not-overwrite"))
-
 			g.Expect(deployment.OwnerReferences).To(HaveLen(1))
 			ownerReference := deployment.OwnerReferences[0]
 			g.Expect(ownerReference.APIVersion).To(Equal(v1.SchemeGroupVersion.String()))
@@ -92,6 +83,26 @@ func TestOwnerTrait(t *testing.T) {
 			g.Expect(*ownerReference.Controller).To(BeTrue())
 			g.Expect(ownerReference.BlockOwnerDeletion).NotTo(BeNil())
 			g.Expect(*ownerReference.BlockOwnerDeletion).To(BeTrue())
+		})
+
+
+		t.Run("existing Deployment annotation is not overwritten", func(t *testing.T) {
+			name := RandomizedSuffixName("owner-annotation-conflict")
+			defaultContainerAnnotation := "kubectl.kubernetes.io/default-container"
+
+			g.Expect(KamelRun(t, ctx, ns, "files/PlatformHttpServer.java",
+				"--name", name,
+				"--annotation", defaultContainerAnnotation+"=must-not-overwrite",
+				"-t", "owner.target-annotations="+defaultContainerAnnotation,
+			).Execute()).To(Succeed())
+
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).
+				Should(Equal(corev1.ConditionTrue))
+			g.Eventually(Deployment(t, ctx, ns, name), TestTimeoutMedium).ShouldNot(BeNil())
+
+			deployment := Deployment(t, ctx, ns, name)()
+			g.Expect(deployment.Annotations).To(HaveKey(defaultContainerAnnotation))
+			g.Expect(deployment.Annotations[defaultContainerAnnotation]).NotTo(Equal("must-not-overwrite"))
 		})
 
 		t.Run("wildcard propagates all labels and annotations", func(t *testing.T) {
