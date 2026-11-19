@@ -23,34 +23,6 @@ spec:
   dependencies:
     - camel:jms
     - mvn:com.ibm.mq:com.ibm.mq.jakarta.client:9.4.0.26
-  # KEDA reads the scale target's pod template to resolve scaler credentials.
-  # The Pod trait merges these Secret-backed variables into the Integration
-  # Deployment's "integration" container as well.
-  template:
-    spec:
-      containers:
-        - name: integration
-          env:
-            - name: MQ_ADMIN_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: ibmmq-auth
-                  key: mqAdminUsername
-            - name: MQ_ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: ibmmq-auth
-                  key: mqAdminPassword
-            - name: MQ_APP_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: ibmmq-auth
-                  key: mqAppUsername
-            - name: MQ_APP_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: ibmmq-auth
-                  key: mqAppPassword
   flows:
     - route:
         from:
@@ -58,6 +30,12 @@ spec:
           steps:
             - to: log:ibmmq
   traits:
+    environment:
+      vars:
+        - MQ_ADMIN_USERNAME=secret:ibmmq-auth/mqAdminUsername
+        - MQ_ADMIN_PASSWORD=secret:ibmmq-auth/mqAdminPassword
+        - MQ_APP_USERNAME=secret:ibmmq-auth/mqAppUsername
+        - MQ_APP_PASSWORD=secret:ibmmq-auth/mqAppPassword
     camel:
       properties:
         - camel.beans.mqCF=#class:com.ibm.mq.jakarta.jms.MQConnectionFactory
