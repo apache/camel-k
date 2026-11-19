@@ -22,6 +22,7 @@ package keda
 
 import (
 	"context"
+	"runtime"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -33,6 +34,15 @@ import (
 )
 
 func TestIBMMQKedaAutoDiscoveryAndAutoscale(t *testing.T) {
+	// The IBM MQ developer container image is published only for amd64,
+	// s390x, and ppc64le. Skip rather than failing image pulls on unsupported
+	// architectures such as arm64.
+	switch runtime.GOARCH {
+	case "amd64", "s390x", "ppc64le":
+	default:
+		t.Skipf("IBM MQ developer image does not support %s (supported: amd64, s390x, ppc64le)", runtime.GOARCH)
+	}
+
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		consumerName := "keda-it-ibmmq-to-log-auto"
 		producerName := "timer-to-ibmmq"
