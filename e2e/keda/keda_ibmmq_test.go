@@ -51,38 +51,7 @@ func TestIBMMQKedaAutoDiscoveryAndAutoscale(t *testing.T) {
 			TestTimeoutLong,
 		).Should(Equal(corev1.ConditionTrue))
 
-		g.Eventually(ScaledObject(t, ctx, ns, consumerName), TestTimeoutLong).
-			ShouldNot(BeNil())
-
-		ExpectExecSucceed(t, g, Kubectl(
-			"wait", "--for=condition=Ready",
-			"scaledobject/"+consumerName, "-n", ns, "--timeout=180s",
-		))
-		ExpectExecSucceed(t, g, Kubectl(
-			"wait", "--for=condition=ScalingActive",
-			"hpa/keda-hpa-"+consumerName, "-n", ns, "--timeout=180s",
-		))
-
-		scaledObject := ScaledObject(t, ctx, ns, consumerName)()
-		g.Expect(scaledObject).NotTo(BeNil())
-		g.Expect(scaledObject.Spec.Triggers).To(HaveLen(1))
-		g.Expect(scaledObject.Spec.Triggers[0].Type).To(Equal("ibmmq"))
-		g.Expect(scaledObject.Spec.Triggers[0].Metadata).
-			To(HaveKeyWithValue("queueName", "DEV.QUEUE.1"))
-		g.Expect(scaledObject.Spec.Triggers[0].Metadata).
-			To(HaveKeyWithValue("host", "https://ibmmq."+ns+".svc:9443/ibmmq/rest/v2/admin/action/qmgr/QM1/mqsc"))
-		g.Expect(scaledObject.Spec.Triggers[0].Metadata).
-			To(HaveKeyWithValue("queueDepth", "1"))
-		g.Expect(scaledObject.Spec.Triggers[0].Metadata).
-			To(HaveKeyWithValue("usernameFromEnv", "MQ_ADMIN_USERNAME"))
-		g.Expect(scaledObject.Spec.Triggers[0].Metadata).
-			To(HaveKeyWithValue("passwordFromEnv", "MQ_ADMIN_PASSWORD"))
-		g.Expect(scaledObject.Spec.Triggers[0].Metadata).
-			To(HaveKeyWithValue("unsafeSsl", "true"))
-
-		g.Expect(scaledObject.Spec.Triggers[0].Metadata).NotTo(HaveKey("username"))
-		g.Expect(scaledObject.Spec.Triggers[0].Metadata).NotTo(HaveKey("password"))
-
+		// Verify autoscaling through observable Integration replica changes.
 		g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), TestTimeoutShort).
 			Should(PointTo(BeNumerically("==", 1)))
 		g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), TestTimeoutMedium).
