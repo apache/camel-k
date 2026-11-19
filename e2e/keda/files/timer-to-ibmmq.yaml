@@ -50,7 +50,7 @@ spec:
     camel:
       properties:
         - camel.beans.mqCF=#class:com.ibm.mq.jakarta.jms.MQConnectionFactory
-        - camel.beans.mqCF.hostName=ibmmq.keda.svc
+        - camel.beans.mqCF.hostName=ibmmq.%%%.svc
         - camel.beans.mqCF.port=1414
         - camel.beans.mqCF.channel=DEV.APP.SVRCONN
         - camel.beans.mqCF.queueManager=QM1

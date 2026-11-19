@@ -61,7 +61,7 @@ spec:
     camel:
       properties:
         - camel.beans.mqCF=#class:com.ibm.mq.jakarta.jms.MQConnectionFactory
-        - camel.beans.mqCF.hostName=ibmmq.keda.svc
+        - camel.beans.mqCF.hostName=ibmmq.%%%.svc
         - camel.beans.mqCF.port=1414
         - camel.beans.mqCF.channel=DEV.APP.SVRCONN
         - camel.beans.mqCF.queueManager=QM1
@@ -78,7 +78,7 @@ spec:
       pollingInterval: 5
       autoMetadata:
         ibmmq:
-          host: https://ibmmq.keda.svc:9443/ibmmq/rest/v2/admin/action/qmgr/QM1/mqsc
+          host: https://ibmmq.%%%.svc:9443/ibmmq/rest/v2/admin/action/qmgr/QM1/mqsc
           queueDepth: "1"
           usernameFromEnv: MQ_ADMIN_USERNAME
           passwordFromEnv: MQ_ADMIN_PASSWORD
