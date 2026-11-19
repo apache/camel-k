@@ -42,6 +42,10 @@ spec:
       labels:
         app: ibmmq
     spec:
+      # The broker does not call the Kubernetes API. Avoid mounting the
+      # service-account token under /var/run/secrets, which overlaps the
+      # read-only IBM MQ password Secret mounted at /run/secrets.
+      automountServiceAccountToken: false
       terminationGracePeriodSeconds: 60
       containers:
         - name: ibmmq
