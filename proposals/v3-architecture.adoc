@@ -24,6 +24,8 @@ A new redesign that can introduce certain breaking compatibility change would be
 - Clean the code and make it easier to maintain in the long term.
 - Harden security
 
+NOTE: This redesign affects both the Camel K **operator** and the `kamel` **CLI**. The changes to the CLI (new command set and separation from the operator code) are described in the <<CLI>> section.
+
 == Goals
 
 The goal of this document is to illustrate the new design at a high level view. When the new design is approved, it will serve as a reference for all different developments required to complete a first version 3 of the project.
@@ -70,6 +72,76 @@ The Camel K operator `Pod` will be also much simpler as it won't require it to b
 
 * Kit reusability
 * Managed custom pipeline (external CICD still available)
+
+== CLI
+
+The `kamel` CLI was born when the project's main purpose was to ease the first steps of a user with an integration platform: a single `kamel run` command was able to take care of everything, from the source file to the running application. The project is now moving towards a more enterprise oriented approach, where build and deployment are separate concerns (possibly owned by different actors and tools). The CLI scope must follow the same direction.
+
+=== Command set
+
+The `run` command today concentrates a large amount of logic (modeline parsing, local source/dependency resolution, traits and properties handling, waiting and logging, ...) and mixes build and execution in one single step. The proposal is to remove it entirely, already in the first v3 release, and expose the lifecycle of an `Integration` through three explicit commands, each one mapped to a task performed by the operator:
+
+[cols="1,3,3"]
+|===
+|Command |Responsibility |Operator counterpart
+
+|`kamel build`
+|Create (or update) the `Integration`/`Pipe` and trigger an `IntegrationBuild`. It can optionally wait for the build to complete and stream its logs. It never starts the application.
+|Build and containerization phase, up to `Build Complete`.
+
+|`kamel deploy`
+|Request the deployment of an `Integration`/`Pipe` which has a successful build. It fails if the build is not complete. An explicit build (ie, a previous one, in a rollback scenario) may be selected.
+|Deployment phase (`Deployment` generation and rollout).
+
+|`kamel undeploy`
+|Stop the running workload, keeping the `Integration`/`Pipe` and its builds available for a later `deploy`. Removal of the resources remains a plain `kubectl delete`.
+|Scale-down/removal of the runtime resources only.
+|===
+
+The behaviour is: **an `Integration` is never run unless the user explicitly asks for it, and only once it has been built**. This is the opposite of the current default (build and run), where skipping the run requires `--dont-run-after-build`.
+
+NOTE: `deploy` and `undeploy` already exist in v2 (the former being a thin wrapper that moves an `Integration` from `Build Complete` to `Deploying`). The work is mostly to make them first class, add `build` and drop `run`. Other commands (`bind`, `promote`, `log`, `debug`, ...) are not part of this proposal and will be evaluated separately, based on how much of their logic can be reused unchanged.
+
+=== Planning items
+
+- Extract from `run` the logic that is still relevant and move it to `build`.
+- Align `deploy` and `undeploy` with the new `IntegrationBuild` model (including the selection of a specific build).
+- Update docs, examples and e2e tests to use the new commands (the e2e suites rely heavily on `kamel run`, so this is a significant part of the effort).
+- Document the removal of `run` in the upgrade notes, with the equivalent `build` + `deploy` sequence.
+
+=== Open points
+
+- Which `run` flags survive and on which command (ie, trait/property/profile options belong to `build`, while scaling or replicas options may belong to `deploy`).
+- Whether `modeline` support (source file comments with CLI options) is kept, and for which command.
+- Whether a shortcut such as `kamel build --deploy` is worth keeping, to preserve a one-liner developer experience without reintroducing `run`.
+
+=== Decoupling CLI and operator
+
+At the moment the CLI and the operator live in the same Go module and the same command tree (`pkg/cmd`). The `kamel` binary embeds the operator (`kamel operator`) and the builder (`kamel builder`), and both share the same business logic and utility packages. As a consequence, each artifact carries dependencies it does not need: the CLI pulls in controller, builder and trait related code (and their transitive dependencies), whereas the operator pulls in everything which is only relevant to the client side (ie, CLI frameworks, local file/dependency resolution, modeline handling).
+
+This has several drawbacks:
+
+- larger binaries and container images, with a bigger surface exposed to CVEs which are not exploitable by the given artifact;
+- coupled dependency upgrades: a fix required by the operator forces a CLI release and the other way around;
+- blurred code boundaries, making it harder to reason about which code runs with the cluster privileges of the operator and which one with the privileges of a user;
+- the two artifacts can't evolve (or be released) at their own pace.
+
+The proposal is to separate them into two distinct artifacts:
+
+- **`camel-k-operator`**: the operator (including the controllers, traits and the pieces required to drive the build `Job`). It would have no knowledge of CLI code.
+- **`kamel`**: a thin client which does only what is needed to create/patch the custom resources (`Integration`, `Pipe`, `Kamelet`, ...) and to observe them. It would depend on the `apis` and `client` packages only, and not on controllers, traits or builder logic.
+
+A possible approach, to be validated by a spike before committing to it:
+
+1. **Dependency analysis**: map the packages imported by `cmd/kamel` and by the operator entrypoint and identify the shared ones. Everything shared should be either legitimately common (`pkg/apis`, `pkg/client`, a few `pkg/util`) or moved/duplicated.
+2. **Break the cross dependencies**: for the code used on both sides (ie, `pkg/trait`, which the CLI currently imports from `kamelets_support.go`), expose it from a small and stable package, or leave the validation to the operator (reporting issues in the CR status).
+3. **Split the entrypoints**: create a dedicated operator entrypoint and keep `cmd/kamel`, removing the `operator` and `builder` subcommands from the CLI. The `builder` role becomes the opinionated pipeline of the build `Pod` described above, so it won't need to be a `kamel` subcommand anymore.
+4. **Evaluate the module layout**: either keep a single Go module with two separate entrypoints and dependency graphs (cheaper, enforced by lint/CI checks on allowed imports), or publish the API types in a separate module so they can be consumed by third parties and by the CLI without importing the whole operator. The second option brings more isolation at the price of a heavier release process.
+5. **Build and release**: two separate artifacts, with separate images (operator, build pipeline) and binaries (CLI), and the related changes in `Makefile`, CI workflows, Helm chart/Kustomize and the documentation.
+
+The expected benefits are smaller artifacts, a reduced attack surface and a clearer ownership of what runs in-cluster versus on the user machine. The main risks are the effort of untangling the shared code and the compatibility of the existing installation methods (the operator image is currently also the image where `kamel` is available), which must be listed in the upgrade notes.
+
+This work is independent from the command set changes above, and could start earlier, since moving the code first makes the later removal of `run` simpler.
 
 == Compatibility
 
