@@ -23,21 +23,6 @@ spec:
   dependencies:
     - camel:jms
     - mvn:com.ibm.mq:com.ibm.mq.jakarta.client:9.4.0.26
-  template:
-    spec:
-      containers:
-        - name: integration
-          env:
-            - name: MQ_APP_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: ibmmq-auth
-                  key: mqAppUsername
-            - name: MQ_APP_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: ibmmq-auth
-                  key: mqAppPassword
   flows:
     - route:
         from:
@@ -47,6 +32,10 @@ spec:
                 constant: "IBM MQ scaler E2E message"
             - to: jms:queue:DEV.QUEUE.1
   traits:
+    environment:
+      vars:
+        - MQ_APP_USERNAME=secret:ibmmq-auth/mqAppUsername
+        - MQ_APP_PASSWORD=secret:ibmmq-auth/mqAppPassword
     camel:
       properties:
         - camel.beans.mqCF=#class:com.ibm.mq.jakarta.jms.MQConnectionFactory
