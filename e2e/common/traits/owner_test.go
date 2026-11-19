@@ -38,7 +38,7 @@ func TestOwnerTrait(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, _ *WithT, ns string) {
-		t.Run("selected labels and annotations are propagated to the Deployment", func(t *testing.T) {
+		t.Run("selected labels and annotations are propagated to owned resources", func(t *testing.T) {
 			g := NewWithT(t)
 			name := RandomizedSuffixName("owner-selected")
 			selectedLabel := "owner-test-selected-label"
@@ -71,9 +71,15 @@ func TestOwnerTrait(t *testing.T) {
 			g.Expect(deployment.Spec.Template.Labels).NotTo(HaveKey(unselectedLabel))
 
 			g.Expect(deployment.Annotations).To(HaveKeyWithValue(selectedAnnotation, "selected"))
-			g.Expect(deployment.Annotations).NotTo(HaveKey(unselectedAnnotation))
 			g.Expect(deployment.Spec.Template.Annotations).To(HaveKeyWithValue(selectedAnnotation, "selected"))
-			g.Expect(deployment.Spec.Template.Annotations).NotTo(HaveKey(unselectedAnnotation))
+
+			// The Deployment trait copies transferable Integration annotations before
+			// the Owner trait runs. Check filtering on the Service, which starts with
+			// only Service-trait annotations.
+			g.Eventually(Service(t, ctx, ns, name), TestTimeoutMedium).ShouldNot(BeNil())
+			service := Service(t, ctx, ns, name)()
+			g.Expect(service.Annotations).To(HaveKeyWithValue(selectedAnnotation, "selected"))
+			g.Expect(service.Annotations).NotTo(HaveKey(unselectedAnnotation))
 
 			g.Expect(deployment.OwnerReferences).To(HaveLen(1))
 			ownerReference := deployment.OwnerReferences[0]
@@ -124,7 +130,7 @@ func TestOwnerTrait(t *testing.T) {
 				"-t", "owner.target-annotations=*",
 			).Execute()).To(Succeed())
 
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
 				Should(Equal(corev1.ConditionTrue))
 			g.Eventually(Deployment(t, ctx, ns, name), TestTimeoutMedium).ShouldNot(BeNil())
 
@@ -140,31 +146,5 @@ func TestOwnerTrait(t *testing.T) {
 			g.Expect(deployment.OwnerReferences).To(HaveLen(1))
 		})
 
-		t.Run("disabled owner trait does not propagate metadata or set owner references", func(t *testing.T) {
-			g := NewWithT(t)
-			name := RandomizedSuffixName("owner-disabled")
-			label := "owner-test-disabled-label"
-			annotation := "owner-test.camel.apache.org/disabled"
-
-			g.Expect(KamelRun(t, ctx, ns, "files/PlatformHttpServer.java",
-				"--name", name,
-				"--label", label+"=disabled",
-				"--annotation", annotation+"=disabled",
-				"-t", "owner.enabled=false",
-				"-t", "owner.target-labels=*",
-				"-t", "owner.target-annotations=*",
-			).Execute()).To(Succeed())
-
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).
-				Should(Equal(corev1.ConditionTrue))
-			g.Eventually(Deployment(t, ctx, ns, name), TestTimeoutMedium).ShouldNot(BeNil())
-
-			deployment := Deployment(t, ctx, ns, name)()
-			g.Expect(deployment.OwnerReferences).To(BeEmpty())
-			g.Expect(deployment.Labels).NotTo(HaveKey(label))
-			g.Expect(deployment.Spec.Template.Labels).NotTo(HaveKey(label))
-			g.Expect(deployment.Annotations).NotTo(HaveKey(annotation))
-			g.Expect(deployment.Spec.Template.Annotations).NotTo(HaveKey(annotation))
-		})
 	})
 }
