@@ -102,17 +102,18 @@ func TestKnativeEventingChannel(t *testing.T) {
 		g.Expect(err).NotTo(HaveOccurred())
 
 		// Start the consumer first so it is ready before the producer sends its event.
-		// Disable the deprecated Knative trait explicitly; the route uses Camel's component.
+		// Disable the deprecated Knative traits explicitly; the route uses Camel's component.
 		g.Expect(KamelRun(t, ctx, ns, "files/knative-channel-consumer.yaml",
 			"--name", consumerName,
 			"-t", "knative.enabled=false",
+			"-t", "knative-service.enabled=false",
 			"--env", "CAMEL_KNATIVE_CONFIGURATION="+consumerConfiguration,
 		).Execute()).To(Succeed())
 		g.Eventually(
 			IntegrationConditionStatus(t, ctx, ns, consumerName, v1.IntegrationConditionReady),
 			TestTimeoutMedium,
 		).Should(Equal(corev1.ConditionTrue))
-		g.Eventually(IntegrationPodPhase(t, ctx, ns, consumerName), TestTimeoutLong).
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, consumerName)).
 			Should(Equal(corev1.PodRunning))
 
 		// With the deprecated trait disabled, create the Subscription explicitly.
@@ -132,16 +133,17 @@ func TestKnativeEventingChannel(t *testing.T) {
 		g.Expect(KamelRun(t, ctx, ns, "files/knative-channel-producer.yaml",
 			"--name", producerName,
 			"-t", "knative.enabled=false",
+			"-t", "knative-service.enabled=false",
 			"--env", "CAMEL_KNATIVE_CONFIGURATION="+producerConfiguration,
 		).Execute()).To(Succeed())
 		g.Eventually(
-			IntegrationConditionStatus(t, ctx, ns, producerName, v1.IntegrationConditionReady),
+			IntegrationConditionStatus(t, ctx, ns, producerName, v1.IntegrationConditionReady), TestTimeoutMedium,
 		).Should(Equal(corev1.ConditionTrue))
-		g.Eventually(IntegrationPodPhase(t, ctx, ns, producerName), TestTimeoutLong).
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, producerName)).
 			Should(Equal(corev1.PodRunning))
 
 		// Verify that the event sent to the channel reaches the consumer Integration.
-		g.Eventually(IntegrationLogs(t, ctx, ns, consumerName), TestTimeoutLong).
+		g.Eventually(IntegrationLogs(t, ctx, ns, consumerName)).
 			Should(ContainSubstring(message))
 	})
 }
