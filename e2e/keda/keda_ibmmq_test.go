@@ -24,6 +24,7 @@ import (
 	"context"
 	"runtime"
 	"testing"
+	"time"
 
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
@@ -46,6 +47,7 @@ func TestIBMMQKedaAutoDiscoveryAndAutoscale(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		consumerName := "keda-it-ibmmq-to-log-auto"
 		producerName := "timer-to-ibmmq"
+		scaleToZeroTimeout := 7 * time.Minute
 
 		ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/ibmmq-ephemeral.yaml", "-n", ns))
 		ExpectExecSucceed(t, g, Kubectl("rollout", "status", "deployment/ibmmq", "-n", ns, "--timeout=300s"))
@@ -64,7 +66,7 @@ func TestIBMMQKedaAutoDiscoveryAndAutoscale(t *testing.T) {
 		// Verify autoscaling through observable Integration replica changes.
 		g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), TestTimeoutShort).
 			Should(PointTo(BeNumerically("==", 1)))
-		g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), TestTimeoutMedium).
+		g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), scaleToZeroTimeout).
 			Should(PointTo(BeNumerically("==", 0)))
 
 		ExpectExecSucceed(t, g, Kubectl(
@@ -84,7 +86,7 @@ func TestIBMMQKedaAutoDiscoveryAndAutoscale(t *testing.T) {
 			Should(ContainSubstring("IBM MQ scaler E2E message"))
 
 		ExpectExecSucceed(t, g, Kubectl("delete", "it", producerName, "-n", ns))
-		g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), TestTimeoutMedium).
+		g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), scaleToZeroTimeout).
 			Should(PointTo(BeNumerically("==", 0)))
 	})
 }

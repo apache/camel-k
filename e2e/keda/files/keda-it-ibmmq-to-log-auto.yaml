@@ -50,10 +50,6 @@ spec:
     keda:
       enabled: true
       auto: true
-      minReplicaCount: 0
-      maxReplicaCount: 1
-      cooldownPeriod: 10
-      pollingInterval: 5
       autoMetadata:
         ibmmq:
           host: https://ibmmq.%%%.svc:9443/ibmmq/rest/v2/admin/action/qmgr/QM1/mqsc
