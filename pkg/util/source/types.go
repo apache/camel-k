@@ -21,6 +21,14 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/sets"
 )
 
+// BeanDefinition represents a bean declared directly in an Integration source.
+// Only explicitly configured scalar properties are retained for static configuration mapping.
+type BeanDefinition struct {
+	Name       string
+	Type       string
+	Properties map[string]string
+}
+
 // Metadata represents metadata for Integration source.
 type Metadata struct {
 	// All starting URIs of defined routes
@@ -40,6 +48,8 @@ type Metadata struct {
 	RequiredCapabilities *sets.Set
 	// All kamelets
 	Kamelets []string
+	// Bean definitions declared in the source, when the language inspector supports them.
+	Beans []BeanDefinition
 }
 
 // NewMetadata creates a new metadata.
