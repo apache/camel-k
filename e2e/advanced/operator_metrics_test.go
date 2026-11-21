@@ -47,14 +47,32 @@ import (
 
 func TestMetrics(t *testing.T) {
 	t.Parallel()
+	testMetrics(t, false)
+}
 
+func TestMetricsHTTPS(t *testing.T) {
+	t.Parallel()
+	testMetrics(t, true)
+}
+
+// testMetrics checks the operator /metrics endpoint. When secure is true the
+// operator serves metrics over HTTPS with a self-signed certificate generated
+// by controller-runtime. The API server proxy does not verify the certificate
+// of the backend it connects to, so the endpoint can still be scraped through
+// the pods proxy using the https scheme.
+func testMetrics(t *testing.T, secure bool) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		// Install Camel K with the log debug enabled
-		InstallOperatorWithConf(t, ctx, g, ns, "", false,
-			map[string]string{
-				"LOG_LEVEL": "debug",
-			},
-		)
+		operatorConf := map[string]string{
+			"LOG_LEVEL": "debug",
+		}
+		if secure {
+			// A non-empty METRICS_CERT_DIR enables HTTPS on the metrics endpoint.
+			// controller-runtime generates a self-signed certificate when the
+			// directory does not provide tls.crt and tls.key.
+			operatorConf["METRICS_CERT_DIR"] = "/tmp/metrics-certs"
+		}
+		InstallOperatorWithConf(t, ctx, g, ns, "", false, operatorConf)
 
 		name := RandomizedSuffixName("java")
 		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "prometheus.enabled=true", "-t", "prometheus.pod-monitor=false").Execute()).To(Succeed())
@@ -74,8 +92,14 @@ func TestMetrics(t *testing.T) {
 		g.Expect(err).To(BeNil())
 		g.Expect(logs).NotTo(BeEmpty())
 
+		podTarget := pod.Name
+		if secure {
+			// The pods proxy accepts "scheme:pod:port" targets; port 8080 is the
+			// operator metrics port named "metrics" in the deployment.
+			podTarget = fmt.Sprintf("https:%s:8080", pod.Name)
+		}
 		response, err := TestClient(t).CoreV1().RESTClient().Get().
-			AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/metrics", pod.Namespace, pod.Name)).
+			AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/metrics", pod.Namespace, podTarget)).
 			Timeout(30 * time.Second).
 			DoRaw(ctx)
 		g.Expect(err).To(BeNil())
