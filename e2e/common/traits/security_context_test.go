@@ -75,9 +75,12 @@ func TestSecurityContextTrait(t *testing.T) {
 
 		t.Run("Run as root is blocked when run-as-non-root is true", func(t *testing.T) {
 			name := RandomizedSuffixName("java-sc-root")
+			// TODO: remove the container trait option once defaultContainerRunAsNonRoot
+			// defaults to true. See https://github.com/apache/camel-k/issues/6963
 			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name,
 				"-t", "security-context.run-as-user=0",
 				"-t", "security-context.run-as-non-root=true",
+				"-t", "container.run-as-non-root=true",
 			).Execute()).To(Succeed())
 
 			// The kubelet must refuse to start a container that would run as root.
