@@ -42,6 +42,7 @@ const (
 	OperatorPipeMaxConcurrentReconcilesEnvVar        = "PIPE_MAX_CONCURRENT_RECONCILES"
 	OperatorClientQPSEnvVar                          = "CLIENT_QPS"
 	OperatorClientBurstEnvVar                        = "CLIENT_BURST"
+	OperatorMetricsCertDirEnvVar                     = "METRICS_CERT_DIR"
 
 	defaultIntegrationMaxConcurrentReconciles = 1
 	defaultPipeMaxConcurrentReconciles        = 1
@@ -272,6 +273,11 @@ func GetClientQPS() float32 {
 // GetClientBurst returns the configured Burst for the operator client.
 func GetClientBurst() int {
 	return GetEnvOrDefaultAsInt(OperatorClientBurstEnvVar, defaultClientBurst)
+}
+
+// GetMetricsCertDir returns the configured certificate directory for the operator metrics endpoint.
+func GetMetricsCertDir() string {
+	return strings.TrimSpace(GetEnvOrDefault(OperatorMetricsCertDirEnvVar, ""))
 }
 
 var _ predicate.Predicate = FilteringFuncs[ctrl.Object]{}

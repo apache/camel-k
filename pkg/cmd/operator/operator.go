@@ -223,7 +223,7 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 		LeaderElectionResourceLock:    resourcelock.LeasesResourceLock,
 		LeaderElectionReleaseOnCancel: true,
 		HealthProbeBindAddress:        ":" + strconv.Itoa(int(healthPort)),
-		Metrics:                       metricsserver.Options{BindAddress: ":" + strconv.Itoa(int(monitoringPort))},
+		Metrics:                       newMetricsServerOptions(monitoringPort, platform.GetMetricsCertDir()),
 		Cache:                         options,
 	})
 	exitOnError(err, "")
@@ -249,6 +249,14 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 
 	log.Info("Starting the manager")
 	exitOnError(mgr.Start(ctx), "manager exited non-zero")
+}
+
+func newMetricsServerOptions(monitoringPort int32, certDir string) metricsserver.Options {
+	return metricsserver.Options{
+		BindAddress:   ":" + strconv.Itoa(int(monitoringPort)),
+		SecureServing: certDir != "",
+		CertDir:       certDir,
+	}
 }
 
 func getNamespacesSelector(operatorNamespace string, watchNamespace string) map[string]cache.Config {
