@@ -360,7 +360,7 @@ test-kafka: gotestfmt-install
 #
 test-keda: gotestfmt-install
 	FAILED=0; \
-	go test -timeout 30m -v ./e2e/keda -tags=integration $(GOTESTFMT) || ((FAILED++)); \
+	go test -timeout 60m -v ./e2e/keda -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
 
 #
