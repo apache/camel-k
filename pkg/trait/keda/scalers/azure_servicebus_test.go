@@ -110,6 +110,16 @@ func TestAzureServiceBusScalerMap(t *testing.T) {
 			expectedMeta: map[string]string{"queueName": "orders"},
 		},
 		{
+			name:      "component connection string is not copied",
+			pathValue: "orders",
+			params:    map[string]string{},
+			props: map[string]string{
+				"camel.component.azure-servicebus.connection-string": "Endpoint=sb://ns.servicebus.windows.net/;SharedAccessKey=secret",
+			},
+			expectedType: "azure-servicebus",
+			expectedMeta: map[string]string{"queueName": "orders"},
+		},
+		{
 			name:      "component properties",
 			pathValue: "events",
 			params:    map[string]string{},
