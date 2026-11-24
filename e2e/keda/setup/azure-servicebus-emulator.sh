@@ -30,7 +30,9 @@ trap 'rm -rf "$tmpdir"' EXIT
 openssl req -x509 -newkey rsa:2048 -nodes -days 2 \
   -keyout "$tmpdir/ca.key" \
   -out "$tmpdir/ca.crt" \
-  -subj "/CN=Camel K KEDA emulator test CA"
+  -subj "/CN=Camel K KEDA emulator test CA" \
+  -addext "basicConstraints=critical,CA:TRUE" \
+  -addext "keyUsage=critical,keyCertSign,cRLSign"
 
 openssl req -newkey rsa:2048 -nodes \
   -keyout "$tmpdir/tls.key" \
