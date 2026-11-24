@@ -33,6 +33,9 @@ data:
                 "Properties": {
                   "DeadLetteringOnMessageExpiration": false,
                   "DefaultMessageTimeToLive": "PT1H",
+                  "DuplicateDetectionHistoryTimeWindow": "PT20S",
+                  "ForwardDeadLetteredMessagesTo": "",
+                  "ForwardTo": "",
                   "LockDuration": "PT1M",
                   "MaxDeliveryCount": 3,
                   "RequiresDuplicateDetection": false,
@@ -45,6 +48,7 @@ data:
                 "Name": "my-topic",
                 "Properties": {
                   "DefaultMessageTimeToLive": "PT1H",
+                  "DuplicateDetectionHistoryTimeWindow": "PT20S",
                   "RequiresDuplicateDetection": false
                 },
                 "Subscriptions": [
@@ -55,6 +59,8 @@ data:
                       "DefaultMessageTimeToLive": "PT1H",
                       "LockDuration": "PT1M",
                       "MaxDeliveryCount": 3,
+                      "ForwardDeadLetteredMessagesTo": "",
+                      "ForwardTo": "",
                       "RequiresSession": false
                     }
                   }
@@ -111,14 +117,12 @@ spec:
     spec:
       containers:
         - name: sql
-          image: mcr.microsoft.com/mssql/server:2022-latest
+          image: mcr.microsoft.com/azure-sql-edge:latest
           env:
             - name: ACCEPT_EULA
               value: "Y"
             - name: MSSQL_SA_PASSWORD
               value: "CamelK-Keda-Emulator!2026"
-            - name: MSSQL_PID
-              value: Developer
           ports:
             - name: sql
               containerPort: 1433
