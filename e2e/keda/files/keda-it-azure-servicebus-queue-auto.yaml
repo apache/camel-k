@@ -35,11 +35,20 @@ spec:
         uri: azure-servicebus:my-queue?serviceBusType=queue
         steps:
         - to: log:info
+  template:
+    spec:
+      containers:
+      - name: integration
+        env:
+        - name: SERVICEBUS_ADMIN_CONNECTION
+          valueFrom:
+            secretKeyRef:
+              name: azure-servicebus-connection
+              key: admin-connection
   traits:
     environment:
       vars:
       - CAMEL_COMPONENT_AZURE_SERVICEBUS_CONNECTION_STRING=secret:azure-servicebus-connection/connection
-      - SERVICEBUS_ADMIN_CONNECTION=secret:azure-servicebus-connection/admin-connection
     keda:
       enabled: true
       minReplicaCount: 0
