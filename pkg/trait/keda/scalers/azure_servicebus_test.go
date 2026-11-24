@@ -86,9 +86,9 @@ func TestAzureServiceBusScalerMap(t *testing.T) {
 			expectedMeta: nil,
 		},
 		{
-			name:      "public cloud namespace",
-			pathValue: "orders",
-			params:    map[string]string{"fullyQualifiedNamespace": "My-Namespace.servicebus.windows.net"},
+			name:         "public cloud namespace",
+			pathValue:    "orders",
+			params:       map[string]string{"fullyQualifiedNamespace": "My-Namespace.servicebus.windows.net"},
 			expectedType: "azure-servicebus",
 			expectedMeta: map[string]string{
 				"queueName": "orders",
