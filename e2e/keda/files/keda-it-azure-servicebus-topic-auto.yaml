@@ -34,6 +34,11 @@ spec:
       from:
         uri: azure-servicebus:my-topic?serviceBusType=topic&subscriptionName=my-subscription
         steps:
+        # Keep a small backlog so the KEDA polling loop can observe pending messages.
+        - delay:
+            expression:
+              constant: 500
+            asyncDelayed: false
         - to: log:info
   # KEDA resolves `connectionFromEnv` from the scale target's pod template.
   template:
