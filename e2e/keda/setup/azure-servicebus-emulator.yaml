@@ -1,0 +1,234 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: azure-servicebus-emulator-config
+  namespace: keda
+data:
+  Config.json: |
+    {
+      "UserConfig": {
+        "Namespaces": [
+          {
+            "Name": "sbemulatorns",
+            "Queues": [
+              {
+                "Name": "my-queue",
+                "Properties": {
+                  "DeadLetteringOnMessageExpiration": false,
+                  "DefaultMessageTimeToLive": "PT1H",
+                  "LockDuration": "PT1M",
+                  "MaxDeliveryCount": 3,
+                  "RequiresDuplicateDetection": false,
+                  "RequiresSession": false
+                }
+              }
+            ],
+            "Topics": [
+              {
+                "Name": "my-topic",
+                "Properties": {
+                  "DefaultMessageTimeToLive": "PT1H",
+                  "RequiresDuplicateDetection": false
+                },
+                "Subscriptions": [
+                  {
+                    "Name": "my-subscription",
+                    "Properties": {
+                      "DeadLetteringOnMessageExpiration": false,
+                      "DefaultMessageTimeToLive": "PT1H",
+                      "LockDuration": "PT1M",
+                      "MaxDeliveryCount": 3,
+                      "RequiresSession": false
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "Logging": {
+          "Type": "Console"
+        }
+      }
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: azure-servicebus-emulator-nginx
+  namespace: keda
+data:
+  default.conf: |
+    server {
+        listen 5300 ssl;
+        server_name _;
+
+        ssl_certificate /etc/nginx/tls/tls.crt;
+        ssl_certificate_key /etc/nginx/tls/tls.key;
+        ssl_protocols TLSv1.2 TLSv1.3;
+
+        location / {
+            proxy_pass http://127.0.0.1:5301;
+            proxy_http_version 1.1;
+            proxy_set_header Host $http_host;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: azure-servicebus-emulator
+  namespace: keda
+  labels:
+    app: azure-servicebus-emulator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: azure-servicebus-emulator
+  template:
+    metadata:
+      labels:
+        app: azure-servicebus-emulator
+    spec:
+      containers:
+        - name: sql
+          image: mcr.microsoft.com/mssql/server:2022-latest
+          env:
+            - name: ACCEPT_EULA
+              value: "Y"
+            - name: MSSQL_SA_PASSWORD
+              value: "CamelK-Keda-Emulator!2026"
+            - name: MSSQL_PID
+              value: Developer
+          ports:
+            - name: sql
+              containerPort: 1433
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: "1"
+              memory: 2Gi
+          readinessProbe:
+            tcpSocket:
+              port: 1433
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            failureThreshold: 30
+        - name: emulator
+          image: mcr.microsoft.com/azure-messaging/servicebus-emulator:latest
+          env:
+            - name: SQL_SERVER
+              value: localhost
+            - name: MSSQL_SA_PASSWORD
+              value: "CamelK-Keda-Emulator!2026"
+            - name: ACCEPT_EULA
+              value: "Y"
+            - name: SQL_WAIT_INTERVAL
+              value: "60"
+            - name: EMULATOR_HTTP_PORT
+              value: "5301"
+          ports:
+            - name: amqp
+              containerPort: 5672
+            - name: management-http
+              containerPort: 5301
+          volumeMounts:
+            - name: emulator-config
+              mountPath: /ServiceBus_Emulator/ConfigFiles/Config.json
+              subPath: Config.json
+              readOnly: true
+          resources:
+            requests:
+              cpu: 500m
+              memory: 768Mi
+            limits:
+              cpu: "1"
+              memory: 1536Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5301
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 60
+        - name: management-proxy
+          image: nginx:1.29-alpine
+          ports:
+            - name: management-https
+              containerPort: 5300
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+              readOnly: true
+            - name: tls
+              mountPath: /etc/nginx/tls
+              readOnly: true
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5300
+              scheme: HTTPS
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 30
+      volumes:
+        - name: emulator-config
+          configMap:
+            name: azure-servicebus-emulator-config
+        - name: nginx-config
+          configMap:
+            name: azure-servicebus-emulator-nginx
+        - name: tls
+          secret:
+            secretName: azure-servicebus-emulator-tls
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: azure-servicebus-emulator
+  namespace: keda
+spec:
+  selector:
+    app: azure-servicebus-emulator
+  ports:
+    - name: amqp
+      port: 5672
+      targetPort: amqp
+      protocol: TCP
+    - name: management-https
+      port: 5300
+      targetPort: management-https
+      protocol: TCP
+  type: ClusterIP
