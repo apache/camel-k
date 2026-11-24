@@ -117,7 +117,7 @@ spec:
     spec:
       containers:
         - name: sql
-          image: mcr.microsoft.com/azure-sql-edge:latest
+          image: mcr.microsoft.com/mssql/server:2022-latest
           env:
             - name: ACCEPT_EULA
               value: "Y"
