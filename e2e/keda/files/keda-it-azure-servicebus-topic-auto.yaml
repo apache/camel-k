@@ -35,6 +35,7 @@ spec:
         uri: azure-servicebus:my-topic?serviceBusType=topic&subscriptionName=my-subscription
         steps:
         - to: log:info
+  # KEDA resolves `connectionFromEnv` from the scale target's pod template.
   template:
     spec:
       containers:
