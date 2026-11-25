@@ -72,11 +72,6 @@ jobs:
       run: |
         bash ./e2e/keda/setup/setup.sh
 
-    - name: Setup Azure Service Bus emulator
-      shell: bash
-      run: |
-        bash ./e2e/keda/setup/azure-servicebus-emulator.sh
-
     - name: Install operator
       shell: bash
       run: |
