@@ -181,7 +181,7 @@ spec:
         - name: management-proxy
           image: nginx:1.29-alpine
           ports:
-            - name: management-https
+            - name: mgmt-https
               containerPort: 5300
           volumeMounts:
             - name: nginx-config
@@ -231,8 +231,8 @@ spec:
       port: 5672
       targetPort: amqp
       protocol: TCP
-    - name: management-https
+    - name: mgmt-https
       port: 5300
-      targetPort: management-https
+      targetPort: mgmt-https
       protocol: TCP
   type: ClusterIP
