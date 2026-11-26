@@ -135,7 +135,69 @@ func TestMonitorFailureIntegration(t *testing.T) {
 	assert.Equal(t, v1.IntegrationPhaseError, handledIt.Status.Phase)
 	// Ready condition
 	assert.Equal(t, corev1.ConditionFalse, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
-	assert.Equal(t, v1.IntegrationConditionInitializationFailedReason, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
+	assert.Equal(t, v1.IntegrationConditionDeploymentErrorReason, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
+}
+
+func TestMonitorDeploymentErrorRecovery(t *testing.T) {
+	c, it, err := nominalEnvironment()
+	require.NoError(t, err)
+
+	// simulate a trait execution failure during deployment
+	originalProvider := it.Status.RuntimeProvider
+	originalVersion := it.Status.RuntimeVersion
+	it.Status.RuntimeProvider = v1.RuntimeProviderQuarkus
+	it.Status.RuntimeVersion = "0.0.0"
+
+	a := monitorAction{}
+	a.InjectLogger(log.Log)
+	a.InjectClient(c)
+	require.True(t, a.CanHandle(it))
+
+	handledIt, err := a.Handle(context.TODO(), it)
+	require.Error(t, err)
+	assert.Equal(t, v1.IntegrationPhaseError, handledIt.Status.Phase)
+	assert.Equal(t, corev1.ConditionFalse, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
+	assert.Equal(t, v1.IntegrationConditionDeploymentErrorReason, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
+
+	// simulate fixing the underlying condition and re-reconciling (backoff retry)
+	handledIt.Status.RuntimeProvider = originalProvider
+	handledIt.Status.RuntimeVersion = originalVersion
+	require.True(t, a.CanHandle(handledIt))
+
+	recoveredIt, err := a.Handle(context.TODO(), handledIt)
+	require.NoError(t, err)
+	assert.Equal(t, v1.IntegrationPhaseRunning, recoveredIt.Status.Phase)
+	assert.Equal(t, corev1.ConditionTrue, recoveredIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
+	assert.Equal(t, v1.IntegrationConditionDeploymentReadyReason, recoveredIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
+}
+
+func TestMonitorRuntimeErrorConditionReason(t *testing.T) {
+	it := &v1.Integration{
+		Status: v1.IntegrationStatus{
+			Phase: v1.IntegrationPhaseDeploying,
+		},
+	}
+	pendingPods := []corev1.Pod{
+		{
+			Status: corev1.PodStatus{
+				ContainerStatuses: []corev1.ContainerStatus{
+					{
+						State: corev1.ContainerState{
+							Waiting: &corev1.ContainerStateWaiting{
+								Reason:  "ImagePullBackOff",
+								Message: "Back-off pulling image",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	assert.True(t, arePodsFailingStatuses(it, pendingPods, nil))
+	assert.Equal(t, v1.IntegrationPhaseError, it.Status.Phase)
+	assert.Equal(t, corev1.ConditionFalse, it.Status.GetCondition(v1.IntegrationConditionReady).Status)
+	assert.Equal(t, v1.IntegrationConditionRuntimeErrorReason, it.Status.GetCondition(v1.IntegrationConditionReady).Reason)
 }
 
 func nominalEnvironment() (client.Client, *v1.Integration, error) {

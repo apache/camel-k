@@ -22,7 +22,6 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/trait"
-	corev1 "k8s.io/api/core/v1"
 )
 
 // NewBuildCompleteAction creates a new build complete action.
@@ -50,11 +49,7 @@ func (action *buildCompleteAction) Handle(ctx context.Context, integration *v1.I
 	_, err := trait.Apply(ctx, action.client, integration, nil)
 	if err != nil {
 		integration.Status.Phase = v1.IntegrationPhaseError
-		integration.SetReadyCondition(
-			corev1.ConditionFalse,
-			v1.IntegrationConditionInitializationFailedReason,
-			err.Error(),
-		)
+		integration.SetReadyConditionDeploymentError(err.Error())
 
 		return integration, err
 	}

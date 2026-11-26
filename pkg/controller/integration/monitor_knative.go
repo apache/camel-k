@@ -40,7 +40,7 @@ func (c *knativeServiceController) checkReadyCondition(ctx context.Context) (boo
 	if ready := kubernetes.GetKnativeServiceCondition(*c.obj, servingv1.ServiceConditionReady); ready != nil &&
 		ready.Status == metav1.ConditionFalse && ready.Reason == "RevisionFailed" {
 		c.integration.Status.Phase = v1.IntegrationPhaseError
-		c.integration.SetReadyConditionError(ready.Message)
+		c.integration.SetReadyConditionRuntimeError(ready.Message)
 
 		return true, nil
 	}

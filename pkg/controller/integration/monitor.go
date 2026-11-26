@@ -134,8 +134,7 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 	environment, err := trait.Apply(ctx, action.client, integration, kit)
 	if err != nil {
 		integration.Status.Phase = v1.IntegrationPhaseError
-		integration.SetReadyCondition(corev1.ConditionFalse,
-			v1.IntegrationConditionInitializationFailedReason, err.Error())
+		integration.SetReadyConditionDeploymentError(err.Error())
 
 		return integration, err
 	}
@@ -441,6 +440,9 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(
 
 		return nil
 	}
+	if integration.Status.Phase == v1.IntegrationPhaseError {
+		integration.SetDeployingPhase()
+	}
 
 	return nil
 }
@@ -453,7 +455,7 @@ func arePodsFailingStatuses(integration *v1.Integration, pendingPods []corev1.Po
 			scheduled.Status == corev1.ConditionFalse &&
 			scheduled.Reason == "Unschedulable" {
 			integration.Status.Phase = v1.IntegrationPhaseError
-			integration.SetReadyConditionError(scheduled.Message)
+			integration.SetReadyConditionRuntimeError(scheduled.Message)
 
 			return true
 		}
@@ -467,7 +469,7 @@ func arePodsFailingStatuses(integration *v1.Integration, pendingPods []corev1.Po
 			// Check the images are pulled
 			if waiting := container.State.Waiting; waiting != nil && waiting.Reason == "ImagePullBackOff" {
 				integration.Status.Phase = v1.IntegrationPhaseError
-				integration.SetReadyConditionError(waiting.Message)
+				integration.SetReadyConditionRuntimeError(waiting.Message)
 
 				return true
 			}
@@ -485,13 +487,13 @@ func arePodsFailingStatuses(integration *v1.Integration, pendingPods []corev1.Po
 			// Check the container state
 			if waiting := container.State.Waiting; waiting != nil && waiting.Reason == "CrashLoopBackOff" {
 				integration.Status.Phase = v1.IntegrationPhaseError
-				integration.SetReadyConditionError(waiting.Message)
+				integration.SetReadyConditionRuntimeError(waiting.Message)
 
 				return true
 			}
 			if terminated := container.State.Terminated; terminated != nil && terminated.Reason == "Error" {
 				integration.Status.Phase = v1.IntegrationPhaseError
-				integration.SetReadyConditionError(terminated.Message)
+				integration.SetReadyConditionRuntimeError(terminated.Message)
 
 				return true
 			}
@@ -621,7 +623,7 @@ func (action *monitorAction) probeReadiness(ctx context.Context, environment *tr
 
 	if runtimeFailed {
 		probeReadinessOk = false
-		readyCondition.Reason = v1.IntegrationConditionErrorReason
+		readyCondition.Reason = v1.IntegrationConditionRuntimeErrorReason
 		readyCondition.Status = corev1.ConditionFalse
 		readyCondition.Message = fmt.Sprintf("%d/%d pods are not ready", unreadyPods, unreadyPods+readyPods)
 		integration.Status.SetConditions(readyCondition)

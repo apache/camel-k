@@ -274,6 +274,10 @@ const (
 	IntegrationConditionRuntimeNotReadyReason string = "RuntimeNotReady"
 	// IntegrationConditionErrorReason --.
 	IntegrationConditionErrorReason string = "Error"
+	// IntegrationConditionDeploymentErrorReason --.
+	IntegrationConditionDeploymentErrorReason string = "DeploymentError"
+	// IntegrationConditionRuntimeErrorReason --.
+	IntegrationConditionRuntimeErrorReason string = "RuntimeError"
 	// IntegrationConditionInitializationFailedReason --.
 	IntegrationConditionInitializationFailedReason string = "InitializationFailed"
 	// IntegrationConditionUnsupportedLanguageReason --.

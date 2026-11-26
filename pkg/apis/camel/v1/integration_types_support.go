@@ -346,6 +346,16 @@ func (in *Integration) SetReadyConditionError(err string) {
 	in.SetReadyCondition(corev1.ConditionFalse, IntegrationConditionErrorReason, err)
 }
 
+// SetReadyConditionDeploymentError sets Ready condition to False with DeploymentError reason.
+func (in *Integration) SetReadyConditionDeploymentError(err string) {
+	in.SetReadyCondition(corev1.ConditionFalse, IntegrationConditionDeploymentErrorReason, err)
+}
+
+// SetReadyConditionRuntimeError sets Ready condition to False with RuntimeError reason.
+func (in *Integration) SetReadyConditionRuntimeError(err string) {
+	in.SetReadyCondition(corev1.ConditionFalse, IntegrationConditionRuntimeErrorReason, err)
+}
+
 // SetBuildCompletePhase set the proper building phase and the related timestamps.
 func (in *Integration) SetBuildCompletePhase() {
 	now := metav1.Now().Rfc3339Copy()

@@ -42,14 +42,14 @@ func (c *deploymentController) checkReadyCondition(ctx context.Context) (bool, e
 
 	if replicaFailure != nil && replicaFailure.Status == corev1.ConditionTrue {
 		c.integration.Status.Phase = v1.IntegrationPhaseError
-		c.integration.SetReadyConditionError(replicaFailure.Message)
+		c.integration.SetReadyConditionRuntimeError(replicaFailure.Message)
 
 		return true, nil
 	}
 
 	if progressing != nil && progressing.Status == corev1.ConditionFalse && progressing.Reason == "ProgressDeadlineExceeded" {
 		c.integration.Status.Phase = v1.IntegrationPhaseError
-		c.integration.SetReadyConditionError(progressing.Message)
+		c.integration.SetReadyConditionRuntimeError(progressing.Message)
 
 		return true, nil
 	}
