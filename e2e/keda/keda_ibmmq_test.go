@@ -50,7 +50,14 @@ func TestIBMMQKedaAutoDiscoveryAndAutoscale(t *testing.T) {
 		scaleToZeroTimeout := 7 * time.Minute
 
 		ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/ibmmq-ephemeral.yaml", "-n", ns))
-		ExpectExecSucceed(t, g, Kubectl("rollout", "status", "deployment/ibmmq", "-n", ns, "--timeout=300s"))
+		// The IBM MQ developer image is large and has to be pulled into the
+		// ephemeral CI cluster. ExpectExecSucceed uses the suite's one-minute
+		// default command timeout, which can expire while the pod is still in
+		// ContainerCreating even though kubectl is allowed to wait five minutes.
+		ExpectExecSucceedWithTimeout(t, g,
+			Kubectl("rollout", "status", "deployment/ibmmq", "-n", ns, "--timeout=300s"),
+			"5m",
+		)
 
 		ExpectExecSucceed(t, g, Kubectl(
 			"apply", "-f",
