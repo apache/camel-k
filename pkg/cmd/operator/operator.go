@@ -27,6 +27,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"k8s.io/klog/v2"
@@ -38,9 +39,12 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apimachinery/pkg/types"
+	toolscache "k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -209,7 +213,8 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	}
 
 	options := cache.Options{
-		ByObject: selectors,
+		ByObject:                 selectors,
+		DefaultWatchErrorHandler: newWatchErrorHandler(),
 	}
 
 	if !platform.IsCurrentOperatorGlobal() {
@@ -256,6 +261,41 @@ func newMetricsServerOptions(monitoringPort int32, certDir string) metricsserver
 		BindAddress:   ":" + strconv.Itoa(int(monitoringPort)),
 		SecureServing: certDir != "",
 		CertDir:       certDir,
+	}
+}
+
+func isMissingResourceWatchError(err error) bool {
+	return k8serrors.IsNotFound(err) || meta.IsNoMatchError(err)
+}
+
+func newWatchErrorHandler() toolscache.WatchErrorHandlerWithContext {
+	return newWatchErrorHandlerWithFallback(toolscache.DefaultWatchErrorHandler)
+}
+
+func newWatchErrorHandlerWithFallback(fallback toolscache.WatchErrorHandlerWithContext) toolscache.WatchErrorHandlerWithContext {
+	var seen sync.Map
+
+	return func(ctx context.Context, r *toolscache.Reflector, err error) {
+		if isMissingResourceWatchError(err) {
+			typeDesc := ""
+			reflectorName := ""
+			if r != nil {
+				typeDesc = r.TypeDescription()
+				reflectorName = r.Name()
+			}
+			key := reflectorName + ":" + typeDesc
+			if _, loaded := seen.LoadOrStore(key, struct{}{}); !loaded {
+				log.Infof("Resource type %q is not available on the cluster; the watch keeps retrying with backoff (%v)", typeDesc, err)
+			} else {
+				log.Debugf("Resource type %q is still not available on the cluster (%v)", typeDesc, err)
+			}
+
+			return
+		}
+
+		if fallback != nil {
+			fallback(ctx, r, err)
+		}
 	}
 }
 

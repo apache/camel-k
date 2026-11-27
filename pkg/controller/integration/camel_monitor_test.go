@@ -25,8 +25,10 @@ import (
 	monitorv1alpha1 "github.com/camel-tooling/camel-monitor-operator/pkg/apis/camel/v1alpha1"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/discovery/fake"
 	k8stesting "k8s.io/client-go/testing"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -83,6 +85,22 @@ func TestCamelMonitorLookupFailure(t *testing.T) {
 	}})
 	require.ErrorIs(t, addCamelMonitorCondition(context.Background(), c, &integration), lookupErr)
 	require.Equal(t, previous, &integration.Status)
+}
+
+func TestCamelMonitorNoMatchError(t *testing.T) {
+	integration := v1.NewIntegration("test", "sample")
+	integration.Status.SetCondition(v1.IntegrationConditionCamelMonitorAvailable, corev1.ConditionTrue, "Available", "found")
+	c, err := internal.NewFakeClient()
+	require.NoError(t, err)
+	noMatchErr := &meta.NoKindMatchError{
+		GroupKind:        schema.GroupKind{Group: monitorv1alpha1.SchemeGroupVersion.Group, Kind: monitorv1alpha1.AppKind},
+		SearchedVersions: []string{monitorv1alpha1.SchemeGroupVersion.Version},
+	}
+	c.(*internal.FakeClient).Intercept(&interceptor.Funcs{Get: func(context.Context, ctrl.WithWatch, ctrl.ObjectKey, ctrl.Object, ...ctrl.GetOption) error {
+		return noMatchErr
+	}})
+	require.NoError(t, addCamelMonitorCondition(context.Background(), c, &integration))
+	require.Nil(t, integration.Status.GetCondition(v1.IntegrationConditionCamelMonitorAvailable))
 }
 
 func enableCamelMonitorDiscovery(t *testing.T, c client.Client) *fake.FakeDiscovery {
