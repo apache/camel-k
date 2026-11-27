@@ -108,7 +108,9 @@ Supply it explicitly through `keda.autoMetadata.ibmmq.host`.
 Other entries under `keda.autoMetadata.ibmmq` are passed through as KEDA scaler metadata. For `usernameFromEnv` and `passwordFromEnv`, provide the names of environment variables on the scaled Integration pod, and populate those variables from Kubernetes Secrets.
 
 This mapping does not inspect the JMS `ConnectionFactory` bean or copy its credentials.
-Configure authentication using KEDA's supported IBM MQ options, such as `usernameFromEnv` and `passwordFromEnv`. These metadata values name environment variables that must be present in the scaled Integration's pod template; expose the credentials to the Integration container through Kubernetes Secret references rather than placing their values in ScaledObject metadata.
+Configure authentication using KEDA's supported IBM MQ options, such as `usernameFromEnv` and `passwordFromEnv`. These metadata values name environment variables that KEDA reads from the scale target, which is the Integration resource and not its Deployment.
+Declare them in `spec.template.spec.containers` of the Integration, for the container named `integration`, using Kubernetes Secret references.
+Variables set only through the `environment` trait are not visible to KEDA.
 See the https://keda.sh/docs/latest/scalers/ibm-mq/[KEDA IBM MQ scaler] documentation for the complete trigger and authentication options.
 
 == Complete mapping example

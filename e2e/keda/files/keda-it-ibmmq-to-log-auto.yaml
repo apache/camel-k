@@ -20,6 +20,24 @@ kind: Integration
 metadata:
   name: keda-it-ibmmq-to-log-auto
 spec:
+  # KEDA resolves usernameFromEnv and passwordFromEnv from the pod template of the
+  # scale target. The target is this Integration (not its Deployment), so the admin
+  # credentials must be declared here. The pod trait copies them to the Deployment.
+  template:
+    spec:
+      containers:
+        - name: integration
+          env:
+            - name: MQ_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: ibmmq-auth
+                  key: mqAdminUsername
+            - name: MQ_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ibmmq-auth
+                  key: mqAdminPassword
   dependencies:
     - camel:jms
     - mvn:com.ibm.mq:com.ibm.mq.jakarta.client:9.4.0.26
@@ -32,8 +50,6 @@ spec:
   traits:
     environment:
       vars:
-        - MQ_ADMIN_USERNAME=secret:ibmmq-auth/mqAdminUsername
-        - MQ_ADMIN_PASSWORD=secret:ibmmq-auth/mqAdminPassword
         - MQ_APP_USERNAME=secret:ibmmq-auth/mqAppUsername
         - MQ_APP_PASSWORD=secret:ibmmq-auth/mqAppPassword
     camel:
@@ -50,6 +66,10 @@ spec:
     keda:
       enabled: true
       auto: true
+      minReplicaCount: 0
+      maxReplicaCount: 1
+      cooldownPeriod: 30
+      pollingInterval: 5
       autoMetadata:
         ibmmq:
           host: https://ibmmq.%%%.svc:9443/ibmmq/rest/v2/admin/action/qmgr/QM1/mqsc
