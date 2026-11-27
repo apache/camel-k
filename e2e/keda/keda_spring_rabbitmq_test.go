@@ -45,7 +45,10 @@ func TestSpringRabbitMQKedaAutoscale(t *testing.T) {
 			ExpectExecSucceed(t, g, Kubectl("apply", "-f", consumerFile, "-n", ns))
 
 			// Trigger is auto-discovered from the consumer URI
-			g.Eventually(ScaledObject(t, ctx, ns, consumerName), TestTimeoutMedium).
+			// The ScaledObject is created after the integration reaches a running phase.
+			// Spring RabbitMQ requires an additional dependency build, so allow the
+			// longer integration startup timeout here.
+			g.Eventually(ScaledObject(t, ctx, ns, consumerName), TestTimeoutLong).
 				ShouldNot(BeNil())
 			scaledObj := ScaledObject(t, ctx, ns, consumerName)()
 			g.Expect(scaledObj).NotTo(BeNil())

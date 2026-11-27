@@ -1,0 +1,96 @@
+//go:build integration
+// +build integration
+
+/*
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package keda
+
+import (
+	"context"
+	"runtime"
+	"testing"
+
+	. "github.com/onsi/gomega"
+	. "github.com/onsi/gomega/gstruct"
+	corev1 "k8s.io/api/core/v1"
+
+	. "github.com/apache/camel-k/v2/e2e/support"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+)
+
+func TestIBMMQKedaAutoDiscoveryAndAutoscale(t *testing.T) {
+	// The IBM MQ developer container image is published only for amd64,
+	// s390x, and ppc64le. Skip rather than failing image pulls on unsupported
+	// architectures such as arm64.
+	switch runtime.GOARCH {
+	case "amd64", "s390x", "ppc64le":
+	default:
+		t.Skipf("IBM MQ developer image does not support %s (supported: amd64, s390x, ppc64le)", runtime.GOARCH)
+	}
+
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		consumerName := "keda-it-ibmmq-to-log-auto"
+		producerName := "timer-to-ibmmq"
+
+		ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/ibmmq-ephemeral.yaml", "-n", ns))
+		// The IBM MQ developer image is large and has to be pulled into the
+		// ephemeral CI cluster. ExpectExecSucceed uses the suite's one-minute
+		// default command timeout, which can expire while the pod is still in
+		// ContainerCreating even though kubectl is allowed to wait five minutes.
+		ExpectExecSucceedWithTimeout(t, g,
+			Kubectl("rollout", "status", "deployment/ibmmq", "-n", ns, "--timeout=300s"),
+			"5m",
+		)
+
+		ExpectExecSucceed(t, g, Kubectl(
+			"apply", "-f",
+			cloneAndReplaceNamespace(t, "files/keda-it-ibmmq-to-log-auto.yaml", ns),
+			"-n", ns,
+		))
+
+		g.Eventually(
+			IntegrationConditionStatus(t, ctx, ns, consumerName, v1.IntegrationConditionReady),
+			TestTimeoutLong,
+		).Should(Equal(corev1.ConditionTrue))
+
+		// The queue is empty, so KEDA can scale the consumer to zero as soon as the
+		// ScaledObject is active: do not expect to observe one replica before that.
+		g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), TestTimeoutLong).
+			Should(PointTo(BeNumerically("==", 0)))
+
+		ExpectExecSucceed(t, g, Kubectl(
+			"apply", "-f",
+			cloneAndReplaceNamespace(t, "files/timer-to-ibmmq.yaml", ns),
+			"-n", ns,
+		))
+
+		g.Eventually(
+			IntegrationConditionStatus(t, ctx, ns, producerName, v1.IntegrationConditionReady),
+			TestTimeoutLong,
+		).Should(Equal(corev1.ConditionTrue))
+
+		g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), TestTimeoutMedium).
+			Should(PointTo(BeNumerically("==", 1)))
+		g.Eventually(IntegrationLogs(t, ctx, ns, consumerName), TestTimeoutMedium).
+			Should(ContainSubstring("IBM MQ scaler E2E message"))
+
+		ExpectExecSucceed(t, g, Kubectl("delete", "it", producerName, "-n", ns))
+		g.Eventually(IntegrationStatusReplicas(t, ctx, ns, consumerName), TestTimeoutMedium).
+			Should(PointTo(BeNumerically("==", 0)))
+	})
+}
