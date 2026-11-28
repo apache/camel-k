@@ -335,3 +335,85 @@ func TestXMLErrorHandlerDependencies(t *testing.T) {
 		assert.Contains(t, meta.Dependencies.List(), "camel:log")
 	})
 }
+
+func TestXMLBeanDefinitions(t *testing.T) {
+	inspector := newTestXMLInspector(t)
+	source := `
+<beans xmlns="http://www.springframework.org/schema/beans">
+  <bean id="serviceClient" class="org.example.ServiceClient">
+    <property name="host" value="api.internal"/>
+    <property name="port"><value>5672</value></property>
+    <property name="tenant" value="${SERVICE_TENANT}"/>
+    <property name="username" value="admin"/>
+    <property name="password" value="admin"/>
+    <property name="endpointUri" value="https://admin:secret@api.internal:8443"/>
+    <property name="nested"><map><entry key="enabled" value="true"/></map></property>
+    <property name="factoryReference"><ref bean="anotherBean"/></property>
+  </bean>
+  <bean class="org.example.UnnamedBean"/>
+  <camelContext xmlns="http://camel.apache.org/schema/spring">
+    <route>
+      <from uri="timer:tick"/>
+    </route>
+  </camelContext>
+</beans>
+`
+
+	sourceSpec := v1.SourceSpec{DataSpec: v1.DataSpec{Name: "beans.xml", Content: source}}
+	meta := NewMetadata()
+	require.NoError(t, inspector.Extract(sourceSpec, &meta))
+
+	require.Len(t, meta.Beans, 1)
+	assert.Equal(t, "serviceClient", meta.Beans[0].Name)
+	assert.Equal(t, "org.example.ServiceClient", meta.Beans[0].Type)
+	assert.Equal(t, map[string]string{
+		"host":        "api.internal",
+		"port":        "5672",
+		"tenant":      "${SERVICE_TENANT}",
+		"username":    "admin",
+		"password":    "admin",
+		"endpointUri": "https://admin:secret@api.internal:8443",
+	}, meta.Beans[0].Properties)
+	assert.Equal(t, []string{"timer:tick"}, meta.FromURIs)
+}
+
+func TestCamelXMLBeanDefinitions(t *testing.T) {
+	inspector := newTestXMLInspector(t)
+	source := `
+<camel>
+  <bean name="beanFromMap" type="com.acme.MyBean">
+    <properties>
+      <property key="host" value="api.internal"/>
+      <property key="port" value="5672"/>
+      <property key="password" value="secret"/>
+      <property key="endpointUri" value="https://user:secret@api.internal:8443"/>
+      <property key="nested">
+        <properties>
+          <property key="field1" value="nested-value"/>
+        </properties>
+      </property>
+      <property key="nested.field1" value="flat-value"/>
+    </properties>
+  </bean>
+  <route>
+    <from uri="timer:tick"/>
+  </route>
+</camel>
+`
+
+	sourceSpec := v1.SourceSpec{DataSpec: v1.DataSpec{Name: "beans.xml", Content: source}}
+	meta := NewMetadata()
+	require.NoError(t, inspector.Extract(sourceSpec, &meta))
+
+	require.Len(t, meta.Beans, 1)
+	assert.Equal(t, "beanFromMap", meta.Beans[0].Name)
+	assert.Equal(t, "com.acme.MyBean", meta.Beans[0].Type)
+	assert.Equal(t, map[string]string{
+		"host":          "api.internal",
+		"port":          "5672",
+		"password":      "secret",
+		"endpointUri":   "https://user:secret@api.internal:8443",
+		"nested.field1": "flat-value",
+	}, meta.Beans[0].Properties)
+	assert.Equal(t, []string{"timer:tick"}, meta.FromURIs)
+}
