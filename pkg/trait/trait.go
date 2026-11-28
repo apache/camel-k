@@ -34,6 +34,23 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+// fatalPostActionError marks a post-action failure that must stop subsequent actions.
+type fatalPostActionError struct {
+	err error
+}
+
+func newFatalPostActionError(err error) error {
+	return &fatalPostActionError{err: err}
+}
+
+func (e *fatalPostActionError) Error() string {
+	return e.err.Error()
+}
+
+func (e *fatalPostActionError) Unwrap() error {
+	return e.err
+}
+
 func Apply(ctx context.Context, c client.Client, integration *v1.Integration, kit *v1.IntegrationKit) (*Environment, error) {
 	var ilog log.Logger
 	switch {
@@ -79,17 +96,8 @@ func Apply(ctx context.Context, c client.Client, integration *v1.Integration, ki
 		}
 	}
 
-	postActionErrors := make([]error, 0)
-	// execute post actions registered by traits
-	for _, postAction := range environment.PostActions {
-		err := postAction(environment)
-		if err != nil {
-			postActionErrors = append(postActionErrors, err)
-		}
-	}
-
-	if len(postActionErrors) > 0 {
-		return nil, fmt.Errorf("error executing post actions - %d/%d failed: %s", len(postActionErrors), len(environment.PostActions), postActionErrors)
+	if err := executePostActions(environment); err != nil {
+		return nil, err
 	}
 
 	switch {
@@ -102,6 +110,36 @@ func Apply(ctx context.Context, c client.Client, integration *v1.Integration, ki
 	}
 
 	return environment, nil
+}
+
+// executePostActions runs registered post actions. Fatal failures stop subsequent actions.
+func executePostActions(environment *Environment) error {
+	postActionErrors := make([]error, 0)
+	executedPostActions := 0
+
+	for _, postAction := range environment.PostActions {
+		executedPostActions++
+
+		if err := postAction(environment); err != nil {
+			postActionErrors = append(postActionErrors, err)
+
+			var fatalErr *fatalPostActionError
+			if errors.As(err, &fatalErr) {
+				break
+			}
+		}
+	}
+
+	if len(postActionErrors) > 0 {
+		return fmt.Errorf(
+			"error executing post actions - %d/%d failed: %w",
+			len(postActionErrors),
+			executedPostActions,
+			errors.Join(postActionErrors...),
+		)
+	}
+
+	return nil
 }
 
 // newEnvironment creates a Environment from the given data.
