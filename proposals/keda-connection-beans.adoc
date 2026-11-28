@@ -3,7 +3,7 @@ title: Discovering connection configuration for KEDA scalers
 authors:
   - "@knockknock10"
 creation-date: 2026-10-25
-last-updated: 2026-11-08
+last-updated: 2026-11-28
 status: implementable
 see-also:
   - https://github.com/apache/camel-k/issues/6910
@@ -110,6 +110,7 @@ This tracker records implementation activity related to this design. Each entry 
 
 * **2026-11-07** — Implementation work is being tracked in [#6942](https://github.com/apache/camel-k/pull/6942), which explores extracting declared connection configuration into Integration source metadata. **Status:** pull request open.
 * **2026-11-08** — Maintainer feedback on [#6942](https://github.com/apache/camel-k/pull/6942) requested generic bean retrieval without scaler-specific mapping, additional source DSL coverage, and unit tests. The follow-up revision removes the scaler-specific code and adds bean metadata extraction for YAML, Camel XML, Spring XML, and Java `@BindToRegistry` declarations on classes, methods, and fields. It also adds tests for metadata merging, supported declaration forms, and sensitive-property filtering. Focused Go tests and `go vet` pass locally. **Status:** [#6942](https://github.com/apache/camel-k/pull/6942) is open and ready for review at commit `046d2663d86992548031679fd591a3ec368d33c8`; GitHub Actions workflows currently require action before they run.
+* **2026-11-11** — Following review, [#6942](https://github.com/apache/camel-k/pull/6942) was narrowed to extracting explicitly declared bean metadata from YAML, Camel XML, and Spring XML. Java source and registry discovery and the sensitive-property filtering were removed. The maintainer then put the pull request on hold to assess how it fits the Camel K v3 build flow. The v3 architecture proposal describes generating the project with `camel export` (likely using a Camel JBang image) before building and pushing it. A source-path check of the current v3 branch shows that source-backed Integrations still retain `spec.sources`, while `spec.flows` are materialized as generated sources before the KEDA trait runs. The current KEDA path also passes `AllSources()` directly to `metadata.ExtractAll`; because `ExtractAll` rejects unresolved `ContentRef` sources, ConfigMap-referenced source content is not covered unless it is dereferenced before extraction. The #6942 POC also stops at extraction: it does not yet associate a component reference such as `camel.component.spring-rabbitmq.connection-factory=#rabbitConnectionFactory` with the extracted bean, or pass that associated configuration to a scaler mapper. This does not establish source availability for Git-project or self-managed builds, so the supported discovery boundary still needs maintainer confirmation. **Status:** [#6942](https://github.com/apache/camel-k/pull/6942) is an open draft on hold; the extraction code is not merged.
 
 == Expected outcome
 
