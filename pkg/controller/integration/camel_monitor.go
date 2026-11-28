@@ -23,6 +23,7 @@ import (
 	monitorv1alpha1 "github.com/camel-tooling/camel-monitor-operator/pkg/apis/camel/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -31,7 +32,7 @@ import (
 func addCamelMonitorCondition(ctx context.Context, c ctrl.Reader, integration *v1.Integration) error {
 	monitor := &monitorv1alpha1.CamelMonitor{}
 	if err := c.Get(ctx, ctrl.ObjectKeyFromObject(integration), monitor); err != nil {
-		if k8serrors.IsNotFound(err) {
+		if k8serrors.IsNotFound(err) || meta.IsNoMatchError(err) {
 			integration.Status.RemoveCondition(v1.IntegrationConditionCamelMonitorAvailable)
 
 			return nil

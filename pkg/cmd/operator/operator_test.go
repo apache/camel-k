@@ -19,6 +19,7 @@ package operator
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/apache/camel-k/v2/pkg/internal"
@@ -26,10 +27,56 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	toolscache "k8s.io/client-go/tools/cache"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 )
+
+func TestWatchErrorHandler(t *testing.T) {
+	t.Run("suppresses NotFound watch error without calling fallback", func(t *testing.T) {
+		fallbackCalled := false
+		handler := newWatchErrorHandlerWithFallback(func(context.Context, *toolscache.Reflector, error) {
+			fallbackCalled = true
+		})
+
+		notFoundErr := k8serrors.NewNotFound(schema.GroupResource{Group: "camel.apache.org", Resource: "camelmonitors"}, "")
+		handler(context.Background(), nil, notFoundErr)
+		handler(context.Background(), nil, notFoundErr)
+
+		assert.False(t, fallbackCalled)
+	})
+
+	t.Run("suppresses NoKindMatchError without calling fallback", func(t *testing.T) {
+		fallbackCalled := false
+		handler := newWatchErrorHandlerWithFallback(func(context.Context, *toolscache.Reflector, error) {
+			fallbackCalled = true
+		})
+
+		noMatchErr := &meta.NoKindMatchError{
+			GroupKind:        schema.GroupKind{Group: "camel.apache.org", Kind: "CamelMonitor"},
+			SearchedVersions: []string{"v1alpha1"},
+		}
+		handler(context.Background(), nil, noMatchErr)
+
+		assert.False(t, fallbackCalled)
+	})
+
+	t.Run("delegates other errors to fallback", func(t *testing.T) {
+		var capturedErr error
+		handler := newWatchErrorHandlerWithFallback(func(_ context.Context, _ *toolscache.Reflector, err error) {
+			capturedErr = err
+		})
+
+		otherErr := errors.New("connection refused")
+		handler(context.Background(), nil, otherErr)
+
+		assert.ErrorIs(t, capturedErr, otherErr)
+	})
+}
 
 func TestNewMetricsServerOptions(t *testing.T) {
 	t.Run("defaults to HTTP when certDir is empty", func(t *testing.T) {
