@@ -3,8 +3,8 @@ title: Version 3 redesign
 authors:
   - "@squakez"
 creation-date: 2026-10-22
-last-updated: 2026-10-22
-status: implementable
+last-updated: 2026-11-28
+status: wip
 see-also: []
 replaces: []
 superseded-by: []
@@ -57,14 +57,15 @@ Another interesting feature is that with this approach we will be able to build 
 
 The rest of operations should be maintained exactly as it is right now (gitops, trait configuration, ...). What we expect to remove entirely from the Camel K operator is the monitoring part, delegating it to the presence of Camel Monitor operator (which has to be installed separately).
 
-The Camel K operator `Pod` will be also much simpler as it won't require it to build the Maven project as it used to do previously (via `routine` build feature).
+The Camel K operator application will be also much simpler as it won't require it to build the Maven project as it used to do previously (via `routine` build feature).
 
 === Main features changes
 
-* Track all builds for an `Integration`
+* Track all builds for an `Integration` (with a retention policy configuration)
 * Possibility to rollback to previous `IntegrationBuild` versions
+* Possibility to maintain a clean registry
 * Namespaced only resource access
-* Build will happen in a Pod (namespaced)
+* Build will happen in a Pod (namespaced) controlled by a Job
 * Any Camel runtime support (Quarkus, Spring Boot or Main with Quarkus as default)
 * Monitoring delegated to **Camel Monitor Operator**
 
@@ -72,6 +73,53 @@ The Camel K operator `Pod` will be also much simpler as it won't require it to b
 
 * Kit reusability
 * Managed custom pipeline (external CICD still available)
+
+== Integration and IntegrationBuild relationship
+
+With this new model we may need to rethink the entire build and deploy workflow. Ideally, the operator should be able to trigger a new build if there is a change in build time configuration (source, Camel version, ...). When this happens it creates a new version build, while the old version is still running. We will therefore need to introduce a new set of statuses:
+
+```yaml
+status:
+  build:
+    latest: build-124
+    phase: Running
+
+  deployment:
+    active: build-123
+    phase: Running
+```
+
+This one capture, for instance, a running Integration and a new build ongoing. When the new build is complete we will have the following status:
+
+```yaml
+status:
+  build:
+    latest: build-124
+    phase: Complete
+
+  deployment:
+    active: build-123
+    phase: Running
+
+  conditions:
+    updateAvailable: True
+```
+
+At that point we may have some option in the Integration that automatically rollout to the last available build (ie, Integration Platform use case). However, normally we should expect that the version to run is delegated to the user, via, for example a spec field:
+
+```yaml
+spec:
+  build:
+    ref: build-124
+```
+
+With this mechanism we ensure that the user can specify which version of the build to run, without worrying about the image details and allowing a rollback mechanism, ensuring that the builds are not deleted. We may introduce an option to specify how may IntegrationBuild maintains (retention policy) - and a procedure to do a cleaning before adding any new build. This is required to avoid accumulating too many builds and bloat the namespace.
+
+=== Registry cleaning
+
+With previous version designs we weren't able to provide a consistent cleaning of intermediate container builds, due to the possibility for an operator to reuse container images (via `IntegrationKit`). As we're removing this constraint we should now be able to delete container image consistently when performing an `IntegrationBuild` deletion. Given that each `IntegrationBuild` matches 1 to 1 with a container image, on deletion we can perform also the registry deletion. This would be a new feature that requires proper security measures to ensure that the operator has the rights to perform deletion on the registry (ie, via a mandatory secret configuration).
+
+We can also run a `Job` in order to separate the task responsibility and don't require reading a secret.
 
 == CLI
 
@@ -101,6 +149,8 @@ The `run` command today concentrates a large amount of logic (modeline parsing, 
 The behaviour is: **an `Integration` is never run unless the user explicitly asks for it, and only once it has been built**. This is the opposite of the current default (build and run), where skipping the run requires `--dont-run-after-build`.
 
 NOTE: `deploy` and `undeploy` already exist in v2 (the former being a thin wrapper that moves an `Integration` from `Build Complete` to `Deploying`). The work is mostly to make them first class, add `build` and drop `run`. Other commands (`bind`, `promote`, `log`, `debug`, ...) are not part of this proposal and will be evaluated separately, based on how much of their logic can be reused unchanged.
+
+The presence of `.spec.build.ref` will influence the `deploy` command behavior, as it will require to specify which build version to deploy (default, could be latest).
 
 === Planning items
 
